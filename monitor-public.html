@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server Status</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@700&family=Raleway:wght@400;600&display=swap');
+  :root { --bg:#080a0e; --bg2:#111520; --border:#1e2535; --accent:#c8a84b; --accent2:#5b8dd9; --accent3:#4ecdc4; --text:#d0d4e0; --dim:#6e7a94; --up:#4caf7d; --down:#e05c5c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Raleway',sans-serif; min-height:100vh; padding:32px 20px; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse at 15% 15%, rgba(200,168,75,0.05),transparent 50%), radial-gradient(ellipse at 85% 85%, rgba(91,141,217,0.04),transparent 50%); pointer-events:none; }
+
+  .container { max-width:900px; margin:0 auto; position:relative; }
+
+  header { text-align:center; margin-bottom:32px; }
+  header h1 { font-family:'Cinzel',serif; font-size:1.8rem; color:var(--accent); letter-spacing:.1em; text-shadow:0 0 24px rgba(200,168,75,0.4); }
+  header p { font-family:'Share Tech Mono',monospace; font-size:.7rem; color:var(--dim); margin-top:6px; letter-spacing:.1em; }
+  .clock { font-family:'Share Tech Mono',monospace; font-size:1.1rem; color:var(--accent); margin-top:8px; }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; margin-bottom:28px; }
+
+  .card { background:var(--bg2); border:1px solid var(--border); border-radius:5px; padding:12px 14px; position:relative; overflow:hidden; }
+  .card::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(200,168,75,0.2),transparent); }
+  .card-name { font-size:.78rem; font-weight:600; color:#9098b0; margin-bottom:6px; }
+  .status { display:flex; align-items:center; gap:7px; }
+  .dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+  .dot.up { background:var(--up); box-shadow:0 0 8px var(--up); }
+  .dot.down { background:var(--down); box-shadow:0 0 8px var(--down); }
+  .dot.checking { background:#e0b84b; animation:p 1s infinite; }
+  @keyframes p { 0%,100%{opacity:1}50%{opacity:.3} }
+  .status-text { font-family:'Share Tech Mono',monospace; font-size:.72rem; }
+  .status-text.up-t { color:var(--up); }
+  .status-text.down-t { color:var(--down); }
+
+  .section-title { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--dim); letter-spacing:.15em; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:10px; }
+
+  .dl-item { padding:6px 0; border-bottom:1px solid #141820; font-size:.78rem; }
+  .dl-item:last-child { border:none; }
+  .dl-name { color:var(--text); }
+  .dl-meta { color:var(--dim); font-size:.68rem; margin-top:2px; }
+
+  footer { text-align:center; margin-top:24px; font-family:'Share Tech Mono',monospace; font-size:.62rem; color:var(--dim); letter-spacing:.08em; }
+  .refresh-note { background:rgba(78,205,196,.07); border:1px solid rgba(78,205,196,.2); border-radius:3px; padding:6px 12px; font-size:.65rem; color:var(--accent3); display:inline-block; margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🐉 Server Status</h1>
+    <p>// PUBLIC READ-ONLY STATUS PAGE // AUTO-REFRESHES EVERY 60s //</p>
+    <div class="clock" id="clock">--:--:--</div>
+  </header>
+
+  <div class="section-title">Services</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="section-title">Recent Downloads</div>
+  <div id="downloads"><p style="color:var(--dim);font-size:.78rem">Loading...</p></div>
+
+  <footer>
+    <div>Last checked: <span id="last">—</span></div>
+    <div class="refresh-note">⚠ This is a read-only status page. Controls are not available here.</div>
+  </footer>
+</div>
+
+<script>
+const SERVICES = [
+  { name:'Plex',          url:'http://localhost:32400' },
+  { name:'Calibre-Web',   url:'http://localhost:8083'  },
+  { name:'Audiobookshelf',url:'http://localhost:13378' },
+  { name:'Nextcloud',     url:'http://localhost:80'    },
+  { name:'qBittorrent',   url:'http://localhost:8090'  },
+  { name:'Minecraft',     url:'http://localhost:25565' },
+  { name:'ARK:SE',        url:'http://localhost:27015' },
+  { name:'SS13',          url:'http://localhost:1337'  },
+  { name:'Sonarr',        url:'http://localhost:8989'  },
+  { name:'Jukebox',       url:'http://localhost:5050'  },
+];
+
+function build() {
+  document.getElementById('grid').innerHTML = SERVICES.map((s,i) => `
+    <div class="card" id="card${i}">
+      <div class="card-name">${s.name}</div>
+      <div class="status">
+        <div class="dot checking" id="dot${i}"></div>
+        <span class="status-text" id="st${i}">Checking…</span>
+      </div>
+    </div>`).join('');
+}
+
+async function check(i) {
+  const s = SERVICES[i];
+  try {
+    const c = new AbortController();
+    setTimeout(()=>c.abort(),3000);
+    await fetch(s.url,{mode:'no-cors',signal:c.signal,cache:'no-cache'});
+    document.getElementById('dot'+i).className='dot up';
+    document.getElementById('st'+i).className='status-text up-t';
+    document.getElementById('st'+i).textContent='Online';
+  } catch(e) {
+    document.getElementById('dot'+i).className='dot down';
+    document.getElementById('st'+i).className='status-text down-t';
+    document.getElementById('st'+i).textContent='Offline';
+  }
+}
+
+async function loadDL() {
+  try {
+    const r = await fetch('downloads.json?t='+Date.now());
+    const d = await r.json();
+    const done = d.filter(x=>x.progress>=100).slice(0,10);
+    document.getElementById('downloads').innerHTML = done.length
+      ? done.map(x=>`<div class="dl-item"><div class="dl-name">${x.name}</div><div class="dl-meta">${x.size||''} · ${x.date||''} · ${x.category||''}</div></div>`).join('')
+      : '<p style="color:var(--dim);font-size:.78rem">No recent downloads</p>';
+  } catch(e) {
+    document.getElementById('downloads').innerHTML='<p style="color:var(--dim);font-size:.78rem">downloads.json not available</p>';
+  }
+}
+
+function checkAll() {
+  SERVICES.forEach((_,i)=>check(i));
+  document.getElementById('last').textContent = new Date().toLocaleTimeString();
+}
+
+setInterval(()=>{
+  const now=new Date();
+  document.getElementById('clock').textContent=now.toLocaleTimeString('en-US',{hour12:false});
+},1000);
+
+build(); checkAll(); loadDL();
+setInterval(()=>{ checkAll(); loadDL(); }, 60000);
+</script>
+</body>
+</html>

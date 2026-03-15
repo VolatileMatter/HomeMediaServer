@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Security</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🛡️</div>
+  <div>
+    <h1>Security</h1>
+    <div class="subtitle">// Hardening · Firewall · VPN · Exposure Reduction //</div>
+    <p class="desc">A home server connected to the internet is a real attack surface. This page covers the practical security steps needed to keep it safe without making it unusable.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Priority order: (1) Strong passwords + firewall, (2) Reverse proxy with HTTPS, (3) Fail2ban or similar, (4) Domain + DNS, (5) SSO. Don't skip straight to SSO — the basics matter most.</div>
+
+<div class="section">
+  <div class="section-title">🎯 Threat Model: What Are You Actually Protecting Against?</div>
+  <div class="card">
+    <p>For a home server, your realistic threats are:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li><strong>Automated bots</strong> scanning the internet for exposed admin panels and weak passwords (very common, happens within hours of opening a port)</li>
+      <li><strong>Credential stuffing</strong> — people trying known username/password combos</li>
+      <li><strong>Exposed sensitive services</strong> — Minecraft RCON, qBittorrent WebUI, Plex without auth</li>
+      <li><strong>Accidental data exposure</strong> — misconfigured Nextcloud making files public</li>
+    </ul>
+    <p style="margin-top:8px">You're probably <em>not</em> facing targeted nation-state attacks. Simple, consistent security measures stop 99% of threats.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔥 Step 1: Windows Firewall (Do This First)</div>
+  <div class="card">
+    <div class="card-title">Only Open Ports You Need</div>
+    <p>The Windows Firewall blocks inbound connections by default. Only open ports for services you actively want accessible. This guide has added rules per-service — audit what you've opened:</p>
+    <pre># See all inbound allow rules:
+netsh advfirewall firewall show rule name=all dir=in action=allow | findstr "Rule Name"
+
+# Delete a rule you no longer need:
+netsh advfirewall firewall delete rule name="Rule Name Here"</pre>
+    <table>
+      <tr><th>Service</th><th>Port</th><th>Should be public?</th></tr>
+      <tr><td>Plex</td><td>32400</td><td>Yes (Plex auth handles it)</td></tr>
+      <tr><td>Nextcloud</td><td>80/443</td><td>Yes (with HTTPS)</td></tr>
+      <tr><td>Audiobookshelf</td><td>13378</td><td>Behind reverse proxy only</td></tr>
+      <tr><td>Calibre-Web</td><td>8083</td><td>Behind reverse proxy only</td></tr>
+      <tr><td>Minecraft</td><td>25565</td><td>Yes (if sharing with others)</td></tr>
+      <tr><td>ARK</td><td>27015/7777</td><td>Yes (when active)</td></tr>
+      <tr><td>qBittorrent WebUI</td><td>8090</td><td><strong>NO — local only</strong></td></tr>
+      <tr><td>Dashboard control</td><td>9002</td><td><strong>NO — localhost only</strong></td></tr>
+      <tr><td>Minecraft RCON</td><td>25575</td><td><strong>NO — localhost only</strong></td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔒 Step 2: HTTPS Everywhere via Caddy (Reverse Proxy)</div>
+  <div class="card">
+    <div class="card-title">Why a Reverse Proxy?</div>
+    <p>Instead of exposing each service on its own port, a reverse proxy (Caddy) sits in front of everything. It handles HTTPS certificates automatically, hides internal ports, and gives you one place to add auth rules. Install Caddy from <a href="https://caddyserver.com/download" target="_blank">caddyserver.com</a> — it's a single binary.</p>
+    <pre># Example Caddyfile — serves all your services under subdomains:
+# Place at C:\caddy\Caddyfile, run: caddy run --config Caddyfile
+
+books.yourdomain.com {
+    reverse_proxy localhost:8083
+    # Optional: add basic auth
+    basicauth {
+        admin $2a$14$... # bcrypt hash, generate with: caddy hash-password
+    }
+}
+
+audio.yourdomain.com {
+    reverse_proxy localhost:13378
+}
+
+cloud.yourdomain.com {
+    reverse_proxy localhost:80
+}
+
+status.yourdomain.com {
+    root * D:\Server\Dashboard
+    file_server
+    rewrite * /monitor-public.html
+}
+
+# Internal only — block from internet via your router, not Caddy
+# Or use Tailscale and don't expose these at all
+</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Free TLS certificates:</strong> Caddy automatically gets free HTTPS certificates from Let's Encrypt for any domain you control. No manual certificate management needed.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🚫 Step 3: Fail2Ban Equivalent for Windows</div>
+  <div class="card">
+    <div class="card-title">IPBan (FOSS, Windows Native) <span class="tag tag-native">FOSS</span></div>
+    <p>IPBan monitors Windows Event Log for failed login attempts (RDP, SSH, etc.) and automatically blocks IPs after too many failures. Download from <a href="https://github.com/DigitalRuby/IPBan" target="_blank">github.com/DigitalRuby/IPBan</a>.</p>
+    <pre># Run installer, then start as a service:
+sc start IPBan
+
+# Default: blocks IPs after 5 failed attempts in 10 minutes
+# Config file: C:\Program Files\IPBan\ipban.config.xml</pre>
+    <p>For Caddy/web app brute force protection, Caddy's <code>rate_limit</code> plugin adds request rate limiting per IP on any endpoint.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔑 Step 4: Strong Passwords &amp; SSH Keys</div>
+  <div class="card">
+    <div class="card-title">Password Rules for Every Service</div>
+    <ul style="margin:6px 0 0 18px">
+      <li>Every service gets a <strong>unique, 20+ character password</strong></li>
+      <li>Use <strong>Vaultwarden</strong> (self-hosted Bitwarden) to store them — see below</li>
+      <li>Admin accounts should never be named "admin" — bots guess this first</li>
+      <li>Enable 2FA (TOTP) on every service that supports it (Nextcloud, Authentik)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">Vaultwarden — Self-Hosted Password Manager <span class="tag tag-native">FOSS</span></div>
+    <p>Vaultwarden is a lightweight, self-hosted Bitwarden-compatible server. Run it as a Windows service via NSSM. All your passwords stored on your own hardware, accessible from the Bitwarden browser extension.</p>
+    <pre># Download Vaultwarden Windows binary from:
+# github.com/dani-garcia/vaultwarden/releases
+# Extract to D:\Server\vaultwarden\
+# Run: vaultwarden.exe
+# Access at http://localhost:8082
+# Use NSSM to run as service</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌐 Step 5: Don't Expose Services Directly — Use Tailscale or Cloudflare Tunnel</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Tailscale (Recommended for Private Access)</div>
+      <p>Install on your server and your devices. Access all services over Tailscale's VPN without opening ANY ports to the internet. No port forwarding, no public exposure. Perfect for services you only need for yourself (dashboard, qBittorrent, etc.).</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Cloudflare Tunnel (For Public Services)</div>
+      <p>For services you want publicly accessible (Nextcloud, Calibre-Web), Cloudflare Tunnel creates a secure outbound connection — <em>no inbound ports needed</em>. Cloudflare proxies requests to your server. Includes DDoS protection and hides your home IP. Free tier is generous.</p>
+      <pre>winget install Cloudflare.cloudflared
+cloudflared tunnel create homeserver
+cloudflared tunnel route dns homeserver yourdomain.com
+cloudflared tunnel run homeserver</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 Step 6: Keep Windows Updated</div>
+  <div class="card">
+    <p>Run Windows Update regularly. Most home server compromises happen through unpatched vulnerabilities, not sophisticated attacks. Settings → Windows Update → Advanced → enable "Receive updates for other Microsoft products." Also keep all your service software (Caddy, qBittorrent, Nextcloud, etc.) updated — subscribe to their GitHub release pages for notifications.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📋 Security Checklist</div>
+  <div class="card">
+    <table>
+      <tr><th>Item</th><th>Priority</th><th>Done?</th></tr>
+      <tr><td>Unique strong password on every service</td><td>Critical</td><td>☐</td></tr>
+      <tr><td>Windows Firewall reviewed — only needed ports open</td><td>Critical</td><td>☐</td></tr>
+      <tr><td>qBittorrent WebUI not exposed externally</td><td>Critical</td><td>☐</td></tr>
+      <tr><td>RCON port not exposed externally</td><td>Critical</td><td>☐</td></tr>
+      <tr><td>Caddy reverse proxy with HTTPS</td><td>High</td><td>☐</td></tr>
+      <tr><td>IPBan installed and running</td><td>High</td><td>☐</td></tr>
+      <tr><td>Tailscale on server and personal devices</td><td>High</td><td>☐</td></tr>
+      <tr><td>Vaultwarden for password management</td><td>Medium</td><td>☐</td></tr>
+      <tr><td>2FA on Nextcloud and Authentik</td><td>Medium</td><td>☐</td></tr>
+      <tr><td>Windows Update — automatic updates on</td><td>Medium</td><td>☐</td></tr>
+      <tr><td>Cloudflare Tunnel for public services (hides home IP)</td><td>Medium</td><td>☐</td></tr>
+      <tr><td>Regular backup of critical configs</td><td>Medium</td><td>☐</td></tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

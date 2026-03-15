@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Domain</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🌐</div>
+  <div>
+    <h1>Custom Domain</h1>
+    <div class="subtitle">// yourdomain.com → Your Home Server · Cost · Security Impact //</div>
+    <p class="desc">Everything about getting a domain name, pointing it at your home server, costs, and whether it actually improves security.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Short answer: A domain costs ~$10–15/year. It improves usability and enables free HTTPS certificates. It does <em>not</em> inherently improve security — but combined with Cloudflare (free), it hides your home IP and adds DDoS protection.</div>
+
+<div class="section">
+  <div class="section-title">💰 Cost Breakdown</div>
+  <div class="card">
+    <table>
+      <tr><th>Item</th><th>Cost</th><th>Notes</th></tr>
+      <tr><td>Domain registration (.com)</td><td>$10–15/year</td><td>Namecheap, Cloudflare Registrar (~$9/yr), Porkbun</td></tr>
+      <tr><td>Domain (.dev, .app, .net)</td><td>$12–20/year</td><td>.dev requires HTTPS — actually good for servers</td></tr>
+      <tr><td>DNS hosting</td><td>FREE</td><td>Cloudflare DNS is free and excellent</td></tr>
+      <tr><td>TLS/HTTPS certificates</td><td>FREE</td><td>Let's Encrypt via Caddy — automatic, free forever</td></tr>
+      <tr><td>Cloudflare proxy (hides home IP)</td><td>FREE</td><td>Free tier covers personal use</td></tr>
+      <tr><td>Dynamic DNS (home IP changes)</td><td>FREE</td><td>Cloudflare DDNS script (see below)</td></tr>
+      <tr><td><strong>Total annual cost</strong></td><td><strong>~$10–15/yr</strong></td><td>Just the domain registration</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔒 Does a Domain Improve Security?</div>
+  <div class="card">
+    <div class="card-title">Direct answer: Not by itself — but it enables things that do</div>
+    <p><strong>A domain name alone doesn't make you more secure.</strong> It just gives your home IP a name. Someone scanning the internet would find your server either way.</p>
+    <p><strong>What actually improves security when combined with a domain:</strong></p>
+    <ul style="margin:6px 0 0 18px">
+      <li><strong>Free HTTPS certificates</strong> — Caddy uses your domain to get Let's Encrypt certs. Encrypts all traffic to your services.</li>
+      <li><strong>Cloudflare proxy</strong> — Routes traffic through Cloudflare's network. Your home IP is never exposed. Attackers see Cloudflare's IP, not yours. Includes free DDoS protection.</li>
+      <li><strong>Cloudflare Tunnel</strong> — Completely eliminates the need to open any inbound ports on your router. Zero attack surface from the internet side.</li>
+    </ul>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Recommendation:</strong> Get a domain from Cloudflare Registrar (~$9/yr for .com). Use Cloudflare DNS + Cloudflare proxy on public services. Use Cloudflare Tunnel instead of port forwarding. Your home IP stays completely private.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🛒 Step 1: Register a Domain</div>
+  <div class="card">
+    <p>Best registrars (by price and trustworthiness):</p>
+    <table>
+      <tr><th>Registrar</th><th>.com price</th><th>Why</th></tr>
+      <tr><td><strong>Cloudflare Registrar</strong></td><td>~$9.15/yr</td><td>At-cost pricing, no renewal markup, best DNS integration</td></tr>
+      <tr><td>Porkbun</td><td>~$9.73/yr</td><td>Cheap, includes WhoisGuard free</td></tr>
+      <tr><td>Namecheap</td><td>~$9–13/yr</td><td>Long-standing, reliable</td></tr>
+    </table>
+    <p style="margin-top:8px">Go to <a href="https://dash.cloudflare.com/registrar" target="_blank">dash.cloudflare.com</a> → Registrar → search for your domain. Pick something like <code>myservername.com</code> or <code>dragon-server.net</code> — it doesn't need to be public-facing, just memorable.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌩️ Step 2: Configure Cloudflare DNS</div>
+  <div class="card">
+    <p>After registration (or after transferring an existing domain to Cloudflare), go to your domain's DNS tab and create A records for each subdomain:</p>
+    <table>
+      <tr><th>Name (subdomain)</th><th>Type</th><th>Content</th><th>Proxy?</th></tr>
+      <tr><td>status</td><td>A</td><td>[your home IP]</td><td>✅ Proxied (hides IP)</td></tr>
+      <tr><td>cloud</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
+      <tr><td>books</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
+      <tr><td>audio</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
+      <tr><td>@</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
+    </table>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Don't proxy game server records</strong> (Minecraft, ARK) — Cloudflare proxy only works for HTTP/HTTPS traffic. For game servers, use a raw A record without the proxy (grey cloud in Cloudflare). Your home IP will be visible for those records.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔄 Step 3: Dynamic DNS (Your Home IP Changes)</div>
+  <div class="card">
+    <div class="card-title">Cloudflare DDNS Script</div>
+    <p>Most home internet connections have a dynamic IP that changes occasionally. This script auto-updates your Cloudflare DNS records when your IP changes. Run it as a scheduled task every 5 minutes.</p>
+    <pre># ddns.ps1 — save to D:\Server\ddns.ps1
+$CF_API_TOKEN = "YOUR_CLOUDFLARE_API_TOKEN"
+$ZONE_ID      = "YOUR_ZONE_ID"       # Cloudflare dashboard → Overview → Zone ID
+$RECORD_ID    = "YOUR_A_RECORD_ID"   # Get via Cloudflare API
+$DOMAIN       = "yourdomain.com"
+
+$currentIP = (Invoke-WebRequest -Uri "https://api.ipify.org" -UseBasicParsing).Content.Trim()
+
+$body = @{
+    type    = "A"
+    name    = $DOMAIN
+    content = $currentIP
+    ttl     = 1
+    proxied = $true
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$RECORD_ID" `
+    -Method PUT `
+    -Headers @{ "Authorization" = "Bearer $CF_API_TOKEN"; "Content-Type" = "application/json" } `
+    -Body $body</pre>
+    <p>Create a scheduled task to run this every 5 minutes. Get your API token from Cloudflare → My Profile → API Tokens → Create Token → "Edit zone DNS" template.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🏗️ Step 4: Subdomain Architecture</div>
+  <div class="card">
+    <p>Suggested subdomain layout for <code>yourdomain.com</code>:</p>
+    <pre>status.yourdomain.com   → Public read-only status page
+cloud.yourdomain.com    → Nextcloud
+books.yourdomain.com    → Calibre-Web
+audio.yourdomain.com    → Audiobookshelf
+mc.yourdomain.com       → Minecraft server IP (raw A record, no proxy)
+ark.yourdomain.com      → ARK server IP (raw A record, no proxy)
+
+# These are LAN/Tailscale only — not in public DNS:
+# dashboard.local        → Full control dashboard
+# qbit.local             → qBittorrent</pre>
+  </div>
+</div>
+
+</body>
+</html>

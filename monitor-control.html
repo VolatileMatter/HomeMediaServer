@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Server Dashboard</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── Dashboard-specific overrides ── */
+body { padding: 0; background: #080a0e; }
+
+.dash-outer {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  padding: 20px;
+  gap: 16px;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(200,168,75,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(91,141,217,0.05) 0%, transparent 50%),
+    #080a0e;
+}
+
+/* ── Top bar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+
+.topbar-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 16px rgba(200,168,75,0.4);
+}
+
+.topbar-subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.clock-block {
+  font-family: 'Share Tech Mono', monospace;
+  text-align: right;
+}
+
+.clock-time {
+  font-size: 1.6rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(200,168,75,0.3);
+}
+
+.clock-date {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+/* ── Main grid ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 14px;
+}
+
+@media (max-width: 900px) { .main-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .main-grid { grid-template-columns: 1fr; } }
+
+/* ── Widget cards ── */
+.widget {
+  background: linear-gradient(135deg, #111520 0%, #0e1219 100%);
+  border: 1px solid #1e2535;
+  border-radius: 6px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.widget::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,168,75,0.3), transparent);
+}
+
+.widget-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.widget-title .w-icon { font-size: 0.9rem; }
+
+/* ── Service status grid ── */
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.service-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #1a2030;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.service-item:hover {
+  background: rgba(200,168,75,0.05);
+  border-color: rgba(200,168,75,0.2);
+}
+
+.s-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.5s;
+}
+
+.s-dot.up    { background: #4caf7d; box-shadow: 0 0 6px #4caf7d; }
+.s-dot.down  { background: #e05c5c; box-shadow: 0 0 6px #e05c5c; }
+.s-dot.checking { background: #e0b84b; animation: pulse 1s infinite; }
+.s-dot.off   { background: #3a4050; }
+
+.s-name {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a0a8bc;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.s-toggle {
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  border-radius: 2px;
+  border: 1px solid #2a3040;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  transition: all 0.2s;
+}
+
+.s-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.s-toggle.stop:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ── Downloads widget ── */
+.dl-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #141820;
+}
+.dl-item:last-child { border: none; }
+
+.dl-bar-wrap { flex: 1; }
+.dl-name { font-size: 0.73rem; color: #9098b0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.dl-bar { height: 3px; background: #1a2030; border-radius: 2px; margin-top: 3px; }
+.dl-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 2px; transition: width 1s; }
+.dl-pct { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--accent3); width: 32px; text-align: right; }
+
+/* ── Stats widgets ── */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.stat-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); }
+.stat-val { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text); }
+
+.bar-thin { height: 4px; background: #1a2030; border-radius: 2px; margin-bottom: 8px; }
+.bar-thin-fill { height: 100%; border-radius: 2px; transition: width 1s; }
+.bar-accent  { background: linear-gradient(90deg, var(--accent), #e0c870); }
+.bar-blue    { background: linear-gradient(90deg, var(--accent2), var(--accent3)); }
+.bar-danger  { background: linear-gradient(90deg, #e05c5c, #e08050); }
+
+/* ── Quick launch ── */
+.ql-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+.ql-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #1a2030;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  color: var(--text-dim);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ql-btn:hover { background: rgba(200,168,75,0.07); border-color: rgba(200,168,75,0.2); color: var(--text); }
+.ql-btn .qi { font-size: 1.2rem; }
+
+/* ── Wide widgets ── */
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+
+/* ── Minecraft player count ── */
+.mc-count {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: var(--accent);
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(200,168,75,0.3);
+}
+.mc-label { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--text-dim); margin-top: 2px; }
+
+.server-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+}
+.ssb-up { background: rgba(76,175,125,0.15); color: #4caf7d; border: 1px solid rgba(76,175,125,0.3); }
+.ssb-down { background: rgba(224,92,92,0.12); color: #e05c5c; border: 1px solid rgba(224,92,92,0.2); }
+
+/* ── Bottom bar ── */
+.bottombar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #1a2030;
+  border-radius: 4px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bb-item { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--text-dim); display: flex; align-items: center; gap: 5px; }
+
+.refresh-info { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--text-dim); }
+
+/* ── Control section (local only) ── */
+.local-only-banner {
+  background: rgba(224,184,75,0.07);
+  border: 1px dashed rgba(224,184,75,0.35);
+  border-radius: 3px;
+  padding: 6px 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.63rem;
+  color: var(--warning, #e0b84b);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+</head>
+<body>
+<div class="dash-outer">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span style="font-size:1.8rem;filter:drop-shadow(0 0 10px rgba(200,168,75,0.5))">🐉</span>
+      <div>
+        <div class="topbar-title">HOME SERVER</div>
+        <div class="topbar-subtitle">// STATUS &amp; CONTROL PANEL //</div>
+      </div>
+    </div>
+    <div class="clock-block">
+      <div class="clock-time" id="clock">--:--:--</div>
+      <div class="clock-date" id="date-str">--- -- ----</div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+
+    <!-- SERVICE STATUS -->
+    <div class="widget span-2">
+      <div class="widget-title"><span class="w-icon">📡</span> Service Status
+        <span style="margin-left:auto;cursor:pointer;color:var(--accent2);font-size:0.7rem" onclick="checkAllServices()">⟳ refresh</span>
+      </div>
+      <div class="services-grid" id="services-grid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- SYSTEM STATS -->
+    <div class="widget">
+      <div class="widget-title"><span class="w-icon">📊</span> System</div>
+      <div class="stat-row"><span class="stat-label">CPU</span><span class="stat-val" id="cpu-pct">—</span></div>
+      <div class="bar-thin"><div class="bar-thin-fill bar-accent" id="cpu-bar" style="width:0%"></div></div>
+      <div class="stat-row"><span class="stat-label">RAM</span><span class="stat-val" id="ram-pct">—</span></div>
+      <div class="bar-thin"><div class="bar-thin-fill bar-blue" id="ram-bar" style="width:0%"></div></div>
+      <div class="stat-row"><span class="stat-label">Drive D:\</span><span class="stat-val" id="disk-pct">—</span></div>
+      <div class="bar-thin"><div class="bar-thin-fill bar-danger" id="disk-bar" style="width:0%"></div></div>
+      <div class="stat-row"><span class="stat-label">Uptime</span><span class="stat-val" id="uptime-val">—</span></div>
+      <div style="font-size:0.6rem;color:#3a4456;margin-top:6px;font-family:'Share Tech Mono',monospace">
+        * Live stats require a local stats agent (see below)
+      </div>
+    </div>
+
+    <!-- DOWNLOADS -->
+    <div class="widget span-2">
+      <div class="widget-title"><span class="w-icon">⬇️</span> Active Downloads</div>
+      <div id="downloads-list">
+        <div style="color:var(--text-dim);font-size:0.75rem;font-family:'Share Tech Mono',monospace">
+          Connect qBittorrent WebUI at localhost:8090 · <span style="color:var(--accent2);cursor:pointer" onclick="loadDownloads()">load downloads</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINECRAFT -->
+    <div class="widget">
+      <div class="widget-title"><span class="w-icon">⛏️</span> Minecraft</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px">
+        <div>
+          <div class="mc-count" id="mc-players">?</div>
+          <div class="mc-label">ONLINE PLAYERS</div>
+        </div>
+        <div id="mc-status" class="server-status-badge ssb-down">● CHECKING</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="s-toggle" onclick="serviceAction('minecraft','start')">▶ Start</button>
+        <button class="s-toggle stop" onclick="serviceAction('minecraft','stop')">■ Stop</button>
+        <button class="s-toggle" onclick="serviceAction('minecraft','restart')">⟳ Restart</button>
+      </div>
+    </div>
+
+    <!-- QUICK LAUNCH -->
+    <div class="widget span-3">
+      <div class="widget-title"><span class="w-icon">🚀</span> Quick Launch</div>
+      <div class="ql-grid" id="ql-grid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- RECENT DOWNLOADS LOG -->
+    <div class="widget span-2">
+      <div class="widget-title"><span class="w-icon">📥</span> Recent Completed</div>
+      <div id="recent-log" style="max-height:140px;overflow-y:auto">
+        <div style="color:var(--text-dim);font-size:0.75rem;font-family:'Share Tech Mono',monospace">No downloads.json found · configure qBittorrent to write completed downloads</div>
+      </div>
+    </div>
+
+    <!-- GAME SERVERS -->
+    <div class="widget">
+      <div class="widget-title"><span class="w-icon">🎮</span> Game Servers</div>
+      <div id="game-servers-list" style="display:flex;flex-direction:column;gap:6px">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottombar">
+    <div class="bb-item"><span style="color:var(--success);text-shadow:0 0 6px var(--success)">●</span> DASHBOARD ONLINE</div>
+    <div class="bb-item">AUTO-REFRESH: <span style="color:var(--accent)" id="countdown">60s</span></div>
+    <div class="bb-item">SERVER IP: <span style="color:var(--accent2)" id="server-ip">—</span></div>
+    <div class="bb-item">LAST UPDATE: <span id="last-update">—</span></div>
+    <div class="bb-item">
+      <span style="color:var(--warning,#e0b84b)">⚠</span>
+      Service controls are LOCAL-ONLY (not exposed to internet)
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Documentation section ── -->
+<div style="padding:28px 24px 48px;background:#0e1117;border-top:1px solid #1a2030">
+  <div style="max-width:900px">
+
+    <div class="page-header" style="margin-bottom:20px">
+      <div class="page-icon">📡</div>
+      <div>
+        <h1>Dashboard Setup Guide</h1>
+        <div class="subtitle">// How to Deploy This Dashboard & Make It Publicly Viewable //</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🏗️ Architecture: Two Dashboards</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🌍 Public Status Page (read-only)</div>
+          <p>A stripped-down version of this dashboard — service status lights, recent downloads, player counts. No controls. Served publicly at <code>status.yourdomain.com</code>. File: <code>monitor-public.html</code>.</p>
+          <p>Anyone on the internet can see if your services are up, without being able to touch anything.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">🔒 Private Control Panel (this page)</div>
+          <p>Full controls for starting/stopping services. Only accessible from your local network (or Tailscale). File: <code>monitor-control.html</code> — this page. Caddy rule blocks external access.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">⚙️ Enabling Live System Stats</div>
+      <div class="card">
+        <div class="card-title">Option A: Local Stats Agent (Python script)</div>
+        <p>Create a tiny Python script that serves system stats as JSON, then the dashboard reads it. Install <code>psutil</code>:</p>
+        <pre>pip install psutil flask
+
+# stats_server.py
+from flask import Flask, jsonify
+import psutil, time
+app = Flask(__name__)
+
+@app.route('/stats')
+def stats():
+    d = psutil.disk_usage('D:\\')
+    return jsonify({
+        'cpu': psutil.cpu_percent(interval=1),
+        'ram': psutil.virtual_memory().percent,
+        'disk_used': d.percent,
+        'disk_free_gb': round(d.free / 1e9, 1),
+        'uptime': int(time.time() - psutil.boot_time())
+    })
+
+if __name__ == '__main__':
+    app.run(port=9001)
+</pre>
+        <p>Run this as a startup task. The dashboard will fetch <code>http://localhost:9001/stats</code> every 30 seconds.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎛️ Service Start/Stop Controls</div>
+      <div class="card">
+        <p>The Start/Stop buttons call a local control endpoint. Create <code>control_server.py</code>:</p>
+        <pre>from flask import Flask, request, jsonify
+import subprocess, os
+
+app = Flask(__name__)
+ALLOWED_SERVICES = ['minecraft', 'ark', 'ss13', 'audiobookshelf', 'calibre']
+
+@app.route('/control/&lt;service&gt;/&lt;action&gt;', methods=['POST'])
+def control(service, action):
+    if service not in ALLOWED_SERVICES:
+        return jsonify({'error': 'unknown service'}), 400
+    if action == 'start':
+        subprocess.Popen(f'schtasks /run /tn "{service}-start"', shell=True)
+    elif action == 'stop':
+        subprocess.Popen(f'schtasks /run /tn "{service}-stop"', shell=True)
+    elif action == 'restart':
+        subprocess.Popen(f'schtasks /run /tn "{service}-restart"', shell=True)
+    return jsonify({'status': 'ok', 'service': service, 'action': action})
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=9002)  # localhost only!
+</pre>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Security:</strong> <code>control_server.py</code> binds to <code>127.0.0.1</code> only — not accessible from the network. Caddy should also block <code>/control/</code> routes from external access.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🌐 Serving the Public Status Page</div>
+      <div class="card">
+        <p>In your Caddy config (<code>Caddyfile</code>), serve the public page and block the control endpoints:</p>
+        <pre>status.yourdomain.com {
+    root * D:\Server\Dashboard
+    file_server
+    # Rewrite all requests to the public page
+    rewrite * /monitor-public.html
+    # Block control endpoint from internet
+    @control path /control/*
+    respond @control 403
+}
+
+# Internal dashboard — only via Tailscale or LAN IP
+192.168.1.100, 100.x.x.x {
+    root * D:\Server\Dashboard
+    file_server
+}</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Clock ──
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour12:false});
+  document.getElementById('date-str').textContent = now.toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+}
+tick(); setInterval(tick, 1000);
+
+// ── Service definitions ──
+const SERVICES = [
+  { id:'plex',     name:'Plex',          url:'http://localhost:32400',  port:32400, ctrl:false },
+  { id:'calibre',  name:'Calibre-Web',   url:'http://localhost:8083',   port:8083,  ctrl:false },
+  { id:'abs',      name:'Audiobookshelf',url:'http://localhost:13378',  port:13378, ctrl:false },
+  { id:'nextcloud',name:'Nextcloud',     url:'http://localhost:80',     port:80,    ctrl:false },
+  { id:'qbittorrent',name:'qBittorrent', url:'http://localhost:8090',   port:8090,  ctrl:false },
+  { id:'minecraft',name:'Minecraft',     url:'http://localhost:25565',  port:25565, ctrl:true  },
+  { id:'ark',      name:'ARK:SE',        url:'http://localhost:27015',  port:27015, ctrl:true  },
+  { id:'ss13',     name:'SS13',          url:'http://localhost:1337',   port:1337,  ctrl:true  },
+  { id:'sunshine', name:'Sunshine',      url:'https://localhost:47990', port:47990, ctrl:false },
+  { id:'sonarr',   name:'Sonarr',        url:'http://localhost:8989',   port:8989,  ctrl:false },
+  { id:'jukebox',  name:'Jukebox',       url:'http://localhost:5050',   port:5050,  ctrl:false },
+  { id:'netdata',  name:'System Monitor',url:'http://localhost:19999',  port:19999, ctrl:false },
+];
+
+const GAME_SERVERS = ['minecraft','ark','ss13'];
+
+function buildServicesGrid() {
+  const grid = document.getElementById('services-grid');
+  grid.innerHTML = SERVICES.map(s => `
+    <a class="service-item" href="${s.url}" target="_blank" title="Open ${s.name}">
+      <div class="s-dot checking" id="sdot-${s.id}"></div>
+      <span class="s-name">${s.name}</span>
+      ${s.ctrl ? `<button class="s-toggle" onclick="event.preventDefault();serviceAction('${s.id}','start')" title="Start">▶</button>
+                  <button class="s-toggle stop" onclick="event.preventDefault();serviceAction('${s.id}','stop')" title="Stop">■</button>` : ''}
+    </a>
+  `).join('');
+}
+
+function buildGameServersList() {
+  const el = document.getElementById('game-servers-list');
+  el.innerHTML = GAME_SERVERS.map(id => {
+    const s = SERVICES.find(x => x.id === id);
+    return `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.02);border:1px solid #1a2030;border-radius:3px">
+        <div class="s-dot checking" id="gdot-${id}"></div>
+        <span class="s-name" style="flex:1">${s.name}</span>
+        <button class="s-toggle" onclick="serviceAction('${id}','start')">▶</button>
+        <button class="s-toggle stop" onclick="serviceAction('${id}','stop')">■</button>
+      </div>`;
+  }).join('');
+}
+
+async function checkService(s) {
+  const dot = document.getElementById('sdot-' + s.id);
+  const gdot = document.getElementById('gdot-' + s.id);
+  const setDot = (el, cls) => { if(el) el.className = 's-dot ' + cls; };
+  setDot(dot, 'checking'); setDot(gdot, 'checking');
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3000);
+    await fetch(s.url, { mode:'no-cors', signal:ctrl.signal, cache:'no-cache' });
+    clearTimeout(t);
+    setDot(dot, 'up'); setDot(gdot, 'up');
+    if (s.id === 'minecraft') {
+      document.getElementById('mc-status').className = 'server-status-badge ssb-up';
+      document.getElementById('mc-status').textContent = '● ONLINE';
+    }
+    return true;
+  } catch(e) {
+    const cls = e.name === 'AbortError' ? 'down' : 'down';
+    setDot(dot, cls); setDot(gdot, cls);
+    if (s.id === 'minecraft') {
+      document.getElementById('mc-status').className = 'server-status-badge ssb-down';
+      document.getElementById('mc-status').textContent = '● OFFLINE';
+      document.getElementById('mc-players').textContent = '0';
+    }
+    return false;
+  }
+}
+
+function checkAllServices() {
+  SERVICES.forEach(checkService);
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+}
+
+// ── Quick launch buttons ──
+const QL = [
+  { icon:'📚', label:'Calibre', url:'http://localhost:8083' },
+  { icon:'🎧', label:'Books', url:'http://localhost:13378' },
+  { icon:'☁️', label:'Nextcloud', url:'http://localhost/nextcloud' },
+  { icon:'⬇️', label:'Torrents', url:'http://localhost:8090' },
+  { icon:'📺', label:'Sonarr', url:'http://localhost:8989' },
+  { icon:'🎵', label:'Jukebox', url:'http://localhost:5050' },
+  { icon:'☀️', label:'Sunshine', url:'https://localhost:47990' },
+  { icon:'📊', label:'Netdata', url:'http://localhost:19999' },
+];
+
+function buildQL() {
+  document.getElementById('ql-grid').innerHTML = QL.map(q =>
+    `<a class="ql-btn" href="${q.url}" target="_blank"><span class="qi">${q.icon}</span>${q.label}</a>`
+  ).join('');
+}
+
+// ── Stats polling ──
+async function pollStats() {
+  try {
+    const r = await fetch('http://localhost:9001/stats', { cache:'no-cache' });
+    const d = await r.json();
+    document.getElementById('cpu-pct').textContent = d.cpu + '%';
+    document.getElementById('ram-pct').textContent = d.ram + '%';
+    document.getElementById('disk-pct').textContent = d.disk_used + '% used (' + d.disk_free_gb + 'GB free)';
+    document.getElementById('cpu-bar').style.width = d.cpu + '%';
+    document.getElementById('ram-bar').style.width = d.ram + '%';
+    document.getElementById('disk-bar').style.width = Math.min(d.disk_used, 100) + '%';
+    const u = d.uptime;
+    const h = Math.floor(u/3600), m = Math.floor((u%3600)/60);
+    document.getElementById('uptime-val').textContent = h + 'h ' + m + 'm';
+  } catch(e) { /* stats agent not running */ }
+}
+
+// ── Downloads ──
+async function loadDownloads() {
+  try {
+    const r = await fetch('downloads.json?t=' + Date.now());
+    const data = await r.json();
+    const active = data.filter(d => d.progress < 100);
+    const done   = data.filter(d => d.progress >= 100);
+
+    document.getElementById('downloads-list').innerHTML = active.length ?
+      active.slice(0,5).map(d => `
+        <div class="dl-item">
+          <div class="dl-bar-wrap">
+            <div class="dl-name" title="${d.name}">${d.name}</div>
+            <div class="dl-bar"><div class="dl-bar-fill" style="width:${d.progress||0}%"></div></div>
+          </div>
+          <div class="dl-pct">${d.progress||0}%</div>
+        </div>
+      `).join('') :
+      '<div style="color:var(--text-dim);font-size:0.75rem;font-family:\'Share Tech Mono\',monospace">No active downloads</div>';
+
+    document.getElementById('recent-log').innerHTML = done.length ?
+      done.slice(0,8).map(d => `
+        <div class="dl-item">
+          <div class="s-dot up" style="flex-shrink:0"></div>
+          <div class="dl-name" title="${d.name}" style="flex:1">${d.name}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--text-dim)">${d.date||''}</div>
+        </div>
+      `).join('') :
+      '<div style="color:var(--text-dim);font-size:0.75rem;font-family:\'Share Tech Mono\',monospace">No recent completed downloads</div>';
+  } catch(e) {}
+}
+
+// ── Service control ──
+function serviceAction(service, action) {
+  // Posts to local control server (127.0.0.1:9002) — not exposed to internet
+  fetch(`http://localhost:9002/control/${service}/${action}`, { method:'POST' })
+    .then(r => r.json())
+    .then(d => {
+      console.log('Control:', d);
+      setTimeout(() => checkAllServices(), 3000);
+    })
+    .catch(() => {
+      alert(`Control server not running.\nStart control_server.py on the server.\n\nManual: open PowerShell and run:\nschtasks /run /tn "${service}-${action}"`);
+    });
+}
+
+// ── Countdown timer ──
+let countdown = 60;
+setInterval(() => {
+  countdown--;
+  document.getElementById('countdown').textContent = countdown + 's';
+  if (countdown <= 0) {
+    countdown = 60;
+    checkAllServices();
+    pollStats();
+    loadDownloads();
+  }
+}, 1000);
+
+// ── Server IP display ──
+try {
+  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{
+    document.getElementById('server-ip').textContent = d.ip;
+  }).catch(()=>{});
+} catch(e) {}
+
+// ── Init ──
+buildServicesGrid();
+buildGameServersList();
+buildQL();
+checkAllServices();
+pollStats();
+loadDownloads();
+document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+</script>
+</body>
+</html>

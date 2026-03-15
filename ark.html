@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>ARK Server</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🦕</div>
+  <div>
+    <h1>ARK: Survival Evolved Server</h1>
+    <div class="subtitle">// Off by Default · On-Demand · SteamCMD · Windows Native //</div>
+    <p class="desc">A self-hosted ARK: SE dedicated server that's off by default to save resources, but can be spun up from the dashboard whenever you want to play. Uses SteamCMD for installation and updates.</p>
+  </div>
+</div>
+
+<div class="callout callout-warn">
+  <div class="callout-icon">🦕</div>
+  <div class="callout-body"><strong>ARK is extremely resource-hungry.</strong> The dedicated server uses 6–12GB RAM and pins multiple CPU cores. Don't run it simultaneously with other heavy services. Keep it off by default — which is the V1 plan.</div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: ARK server installable via SteamCMD, runnable with a bat file or from the dashboard Start button, off by default, with saved worlds persisting between sessions.</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Installation via SteamCMD</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install SteamCMD</strong>
+        <p>Download from <a href="https://developer.valvesoftware.com/wiki/SteamCMD#Windows" target="_blank">Valve's SteamCMD page</a>. Extract <code>steamcmd.exe</code> to <code>C:\steamcmd\</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Download the ARK Dedicated Server</strong>
+        <p>Create <code>D:\ARK\</code> for the server files. Open a PowerShell prompt:</p>
+        <pre>C:\steamcmd\steamcmd.exe +force_install_dir D:\ARK +login anonymous +app_update 376030 validate +quit</pre>
+        <p>This downloads ~30GB of ARK server files. Run it again anytime to update.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create a launch script</strong>
+        <p>Create <code>D:\ARK\start_ark.bat</code>:</p>
+        <pre>@echo off
+title ARK: Survival Evolved Server
+cd /d D:\ARK\ShooterGame\Binaries\Win64
+
+start ShooterGameServer.exe ^
+  TheIsland?listen ^
+  ?SessionName="My ARK Server" ^
+  ?ServerPassword=yourpassword ^
+  ?ServerAdminPassword=adminpassword ^
+  ?Port=7777 ^
+  ?QueryPort=27015 ^
+  ?MaxPlayers=10 ^
+  -server ^
+  -log ^
+  -NoBattlEye
+
+echo ARK server started. Check the console window.
+</pre>
+        <div class="callout callout-tip">
+          <div class="callout-icon">🗺️</div>
+          <div class="callout-body"><strong>Map options:</strong> Replace <code>TheIsland</code> with <code>ScorchedEarth_P</code>, <code>Aberration_P</code>, <code>Extinction</code>, <code>Genesis</code>, or <code>CrystalIsles</code>. Each map has its own save directory.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall ports</strong>
+        <pre>netsh advfirewall firewall add rule name="ARK Game" dir=in action=allow protocol=UDP localport=7777
+netsh advfirewall firewall add rule name="ARK Query" dir=in action=allow protocol=UDP localport=27015
+netsh advfirewall firewall add rule name="ARK RCON" dir=in action=allow protocol=TCP localport=27020</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Test it — join via ARK client</strong>
+        <p>In ARK: play → Join ARK → filter by "unofficial" → or direct connect to <code>[your-server-IP]:7777</code>. Enter your <code>ServerPassword</code> when prompted.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎛️ Dashboard Integration (On-Demand Start/Stop)</div>
+
+  <div class="card">
+    <div class="card-title">Create Task Scheduler tasks for Start/Stop</div>
+    <p>The dashboard's control buttons call <code>schtasks /run /tn "ark-start"</code> etc. Create the corresponding tasks:</p>
+    <pre># In PowerShell (admin):
+
+# Start task:
+schtasks /create /tn "ark-start" /sc once /st 00:00 /tr "D:\ARK\start_ark.bat" /ru SYSTEM /f
+
+# Stop task (graceful — saves world first):
+schtasks /create /tn "ark-stop" /sc once /st 00:00 /tr "D:\ARK\stop_ark.bat" /ru SYSTEM /f</pre>
+
+    <p>Create <code>D:\ARK\stop_ark.bat</code>:</p>
+    <pre>@echo off
+rem Send save command via RCON before killing
+echo DoExit | "C:\tools\mcrcon.exe" -H localhost -P 27020 -p adminpassword
+timeout /t 30
+taskkill /IM ShooterGameServer.exe /F
+echo ARK server stopped.</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Server Configuration</div>
+
+  <div class="card">
+    <div class="card-title">Key Config Files</div>
+    <pre>D:\ARK\ShooterGame\Saved\Config\WindowsServer\
+  ├── GameUserSettings.ini   (server settings, player rates, etc.)
+  └── Game.ini               (advanced game settings, taming rates)</pre>
+    <p>Key settings in <code>GameUserSettings.ini</code>:</p>
+    <pre>[ServerSettings]
+ServerPassword=yourpassword
+ServerAdminPassword=adminpassword
+MaxPlayers=10
+XPMultiplier=2.0
+TamingSpeedMultiplier=3.0
+HarvestAmountMultiplier=2.0
+PlayerCharacterWaterDrainMultiplier=0.5
+PlayerCharacterFoodDrainMultiplier=0.5
+DayCycleSpeedScale=1.0
+DayTimeSpeedScale=1.0
+NightTimeSpeedScale=3.0
+RCONEnabled=True
+RCONPort=27020</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Keeping It Updated</div>
+    <p>Create <code>D:\ARK\update_ark.bat</code> and run it periodically (or add a weekly scheduled task):</p>
+    <pre>@echo off
+echo Stopping ARK server...
+call D:\ARK\stop_ark.bat
+timeout /t 30
+echo Updating ARK...
+C:\steamcmd\steamcmd.exe +force_install_dir D:\ARK +login anonymous +app_update 376030 validate +quit
+echo Update complete. Restart ARK manually or via dashboard.</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Access Control</div>
+  <div class="card">
+    <p>ARK uses its own <code>ServerPassword</code> for entry and <code>ServerAdminPassword</code> for admin commands. There's no SSO integration — keep these strong and don't share them widely. The admin password lets players use console commands in-game, including destroying the whole map, so treat it like a root password.</p>
+    <p>For a whitelist (invite-only server), set <code>AllowAnyoneBabyImprintCuddle=False</code> and use the whitelist file:</p>
+    <pre># D:\ARK\ShooterGame\Saved\AllowedCheaterSteamIDs.txt
+# Add one SteamID64 per line for admin users
+
+# For a true whitelist (deny all not on list):
+# In launch params add: ?WhiteListPlayer=1
+# Then: D:\ARK\ShooterGame\Saved\PlayersJoinNoCheck.txt (one SteamID64 per line)</pre>
+  </div>
+</div>
+
+</body>
+</html>

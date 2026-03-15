@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Castlevania</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🧛</div>
+  <div>
+    <h1>Castlevania Game Library</h1>
+    <div class="subtitle">// All Platforms · Browser-Based · Per-User Saves · EmulatorJS //</div>
+    <p class="desc">Play the entire Castlevania series in release order, directly in the browser. Same per-user save architecture as the Pokémon library.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Same backend architecture as the Pokémon library. If you run both, they can share the same Flask server and users.json — just use different game IDs and save paths.</div>
+
+<div class="section">
+  <div class="section-title">🏰 The Full Castlevania Chronology</div>
+  <div class="card">
+    <table>
+      <tr><th>Game</th><th>Year</th><th>Platform</th><th>EmulatorJS Core</th><th>Notes</th></tr>
+      <tr><td>Castlevania</td><td>1986</td><td>NES/FC</td><td>fceumm</td><td>The original</td></tr>
+      <tr><td>Castlevania II: Simon's Quest</td><td>1987</td><td>NES</td><td>fceumm</td><td></td></tr>
+      <tr><td>Castlevania III: Dracula's Curse</td><td>1989</td><td>NES</td><td>fceumm</td><td></td></tr>
+      <tr><td>Super Castlevania IV</td><td>1991</td><td>SNES</td><td>snes9x</td><td></td></tr>
+      <tr><td>Castlevania: Bloodlines</td><td>1994</td><td>Genesis</td><td>genesis_plus_gx</td><td></td></tr>
+      <tr><td>Castlevania: Dracula X</td><td>1995</td><td>SNES</td><td>snes9x</td><td></td></tr>
+      <tr><td>Castlevania: Symphony of the Night</td><td>1997</td><td>PS1</td><td>pcsx_rearmed</td><td>⭐ Best in series</td></tr>
+      <tr><td>Castlevania Legends</td><td>1997</td><td>GB</td><td>gambatte</td><td></td></tr>
+      <tr><td>Castlevania: Circle of the Moon</td><td>2001</td><td>GBA</td><td>mgba</td><td></td></tr>
+      <tr><td>Castlevania: Harmony of Dissonance</td><td>2002</td><td>GBA</td><td>mgba</td><td></td></tr>
+      <tr><td>Castlevania: Aria of Sorrow</td><td>2003</td><td>GBA</td><td>mgba</td><td>⭐ Excellent</td></tr>
+      <tr><td>Castlevania: Dawn of Sorrow</td><td>2005</td><td>NDS</td><td>melonds</td><td></td></tr>
+      <tr><td>Castlevania: Portrait of Ruin</td><td>2006</td><td>NDS</td><td>melonds</td><td></td></tr>
+      <tr><td>Castlevania: Order of Ecclesia</td><td>2008</td><td>NDS</td><td>melonds</td><td>⭐ Excellent</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Recommended playing order for newcomers:</strong> Symphony of the Night → Aria of Sorrow → Order of Ecclesia → Original NES Trilogy → Super Castlevania IV. The DS games are a goldilocks series — not too hard, great stories.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Setup (Shares Architecture with Pokémon Library)</div>
+  <div class="card">
+    <div class="card-title">If you already set up the Pokémon server</div>
+    <p>You can extend the same Flask server to serve Castlevania too. Just add a <code>/castlevania</code> route and point it at a separate ROM folder. The save files are stored per-user, per-game-ID, so there's no conflict.</p>
+    <pre># Extend server.py with Castlevania routes:
+CASTLEVANIA_ROMS = 'D:/Emulation/Castlevania'
+
+@app.route('/cv/roms/&lt;path:filename&gt;')
+def serve_cv_rom(filename):
+    if 'user' not in session: return redirect('/login')
+    return send_from_directory(CASTLEVANIA_ROMS, filename)
+
+# Save/load endpoints use the same /api/save/&lt;game_id&gt; routes
+# — just prefix game IDs with 'cv-' to avoid conflicts:
+# cv-sotn, cv-aria, cv-nes1, etc.</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">ROM Folder Structure</div>
+    <pre>D:\Emulation\Castlevania\
+  ├── nes\
+  │   ├── castlevania.nes
+  │   ├── castlevania2.nes
+  │   └── castlevania3.nes
+  ├── snes\
+  │   ├── super-castlevania-iv.sfc
+  │   └── dracula-x.sfc
+  ├── genesis\
+  │   └── castlevania-bloodlines.md
+  ├── ps1\
+  │   └── castlevania-sotn.bin  (+ .cue file)
+  ├── gba\
+  │   ├── circle-of-the-moon.gba
+  │   ├── harmony-of-dissonance.gba
+  │   └── aria-of-sorrow.gba
+  └── nds\
+      ├── dawn-of-sorrow.nds
+      ├── portrait-of-ruin.nds
+      └── order-of-ecclesia.nds</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>PS1 games</strong> need a BIOS file for the pcsx_rearmed core. Place <code>scph1001.bin</code> (PS1 BIOS) in your EmulatorJS bios directory. You must dump this from a PS1 you own.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎮 UI Notes for Castlevania</div>
+  <div class="card">
+    <p>The game selector UI works identically to the Pokémon library. Sort by release year and label each card with its platform. For Symphony of the Night, note that the PS1 core has slight load times on first boot — this is normal.</p>
+    <p><strong>Controller mapping for Castlevania:</strong> NES games need D-pad + A/B + Start/Select. GBA/DS games need an analog shoulder button for the sub-weapon system. EmulatorJS handles this automatically with a standard Xbox or PlayStation controller, or you can use the on-screen touch controls on mobile.</p>
+  </div>
+</div>
+
+</body>
+</html>

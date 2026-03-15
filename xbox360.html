@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Xbox 360</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🟢</div>
+  <div>
+    <h1>Xbox 360 Emulation</h1>
+    <div class="subtitle">// Xenia · Windows Only · Sunshine Streaming //</div>
+    <p class="desc">Xbox 360 emulation via Xenia — Windows-only, GPU-accelerated. Games are played locally on the server and streamed to remote devices via Sunshine+Moonlight.</p>
+  </div>
+</div>
+
+<div class="callout callout-warn">
+  <div class="callout-icon">🟢</div>
+  <div class="callout-body"><strong>Compatibility note:</strong> Xenia is still maturing. Compatibility varies significantly by game. Many games run well; some have graphical glitches, crashes, or don't boot at all. Check the <a href="https://github.com/xenia-project/game-compatibility/issues" target="_blank" style="color:var(--accent2)">Xenia compatibility tracker</a> before expecting a specific game to work perfectly. Popular titles (Halo 3, Red Dead Redemption, Skyrim, Dark Souls, etc.) generally run well.</div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Xenia running on your Windows server, games loaded from an internal drive, accessible via Sunshine streaming. Each game added as a Sunshine app for easy one-click launch.</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Installation</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Check system requirements</strong>
+        <p>Xenia requires:</p>
+        <ul style="margin:0 0 0 18px">
+          <li>Windows 10 64-bit (or Windows 11)</li>
+          <li>A GPU with <strong>Vulkan support</strong> (most Nvidia GTX 1000+ and AMD RX 400+ series)</li>
+          <li>8GB+ RAM (16GB recommended)</li>
+          <li>A modern multi-core CPU (the 360 had 3 cores with SMT — modern CPUs handle this fine)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Xenia</strong>
+        <p>Get <strong>Xenia Canary</strong> (most up-to-date version) from <a href="https://github.com/xenia-canary/xenia-canary/releases" target="_blank">github.com/xenia-canary/xenia-canary/releases</a>. Download the latest <code>xenia_canary.zip</code>. Extract to <code>D:\Emulators\Xenia\</code>.</p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>Xenia vs Xenia Canary:</strong> Canary is the actively maintained fork with more frequent updates and better compatibility than the original Xenia master branch. Always use Canary.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Organize your game library</strong>
+        <pre>D:\Emulation\Xbox360\
+  ├── Halo3\
+  │   └── default.xex
+  ├── RedDeadRedemption\
+  │   └── default.xex
+  ├── DarkSouls\
+  │   └── default.xex
+  └── ...
+
+# Or use ISO/XISO format:
+D:\Emulation\Xbox360\
+  ├── Halo3.iso
+  ├── RedDead.xex
+  └── ...</pre>
+        <p>Xbox 360 games can be in XEX format (extracted) or ISO/XISO format (disc image). Both work with Xenia. XEX is slightly faster to load.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>First launch and configuration</strong>
+        <p>Run <code>xenia_canary.exe</code>. Go to File → Open → navigate to a game's <code>default.xex</code> or ISO. On first run, Xenia creates a <code>xenia-canary.config.toml</code> config file in the same folder.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure for best performance</strong>
+        <p>Edit <code>xenia-canary.config.toml</code>:</p>
+        <pre>[GPU]
+# Use Vulkan for best compatibility
+gpu = "vulkan"
+
+# Resolution scale (1 = native 720p/1080p, 2 = double res for HD)
+# Higher = better visuals but more GPU load
+resolution_scale = 2
+
+[Storage]
+content_root = "D:/Emulation/Xbox360/Content"  # saves, DLC
+
+[CPU]
+# Leave at default unless experiencing crashes
+threads = 0  # 0 = auto</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Controller setup</strong>
+        <p>Xenia uses XInput automatically — just plug in an Xbox controller (or use DS4Windows/BetterJoy for PS/Switch controllers). When streaming via Sunshine+Moonlight, the remote controller is forwarded as XInput device 0.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">☀️ Sunshine Integration</div>
+
+  <div class="card">
+    <div class="card-title">Add Each Game as a Sunshine App</div>
+    <p>For the cleanest streaming experience, add each Xbox 360 game as its own Sunshine application. This lets you launch directly into a specific game from Moonlight:</p>
+    <pre># In Sunshine Web UI → Applications → Add:
+
+Name:    Halo 3
+Cmd:     "D:\Emulators\Xenia\xenia_canary.exe" "D:\Emulation\Xbox360\Halo3\default.xex"
+
+Name:    Red Dead Redemption
+Cmd:     "D:\Emulators\Xenia\xenia_canary.exe" "D:\Emulation\Xbox360\RedDeadRedemption\default.xex"
+
+# Or add Xenia itself as a launcher:
+Name:    Xenia (Xbox 360)
+Cmd:     "D:\Emulators\Xenia\xenia_canary.exe"</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">For Streaming Quality</div>
+    <p>Xbox 360 games often target 720p or 1080p with complex lighting. Configure Sunshine to stream at 1080p60 for best results. If your GPU is encoding at the same time as rendering the game, reduce the game's resolution scale in Xenia's config to free up GPU headroom.</p>
+    <pre># In Sunshine config or web UI:
+Resolution: 1920x1080
+FPS:        60
+Bitrate:    30–50 Mbps (higher for fast-paced games)
+Encoder:    nvenc (Nvidia) or amf (AMD)</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">💾 Save Files</div>
+  <div class="card">
+    <p>Xenia stores save files in the <code>content_root</code> folder you configure — by default <code>D:\Emulation\Xbox360\Content\</code>. Each save is tied to a virtual "profile" that Xenia manages. Unlike the Pokémon/Castlevania setup, Xenia doesn't have a multi-user save system — all saves are in one location.</p>
+    <p>For per-user saves over Sunshine streaming, the simplest approach is to maintain separate Xenia installation folders per user and configure each Sunshine session to use the appropriate one. This is complex — for V1, one shared save location is fine.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎯 Notable Compatible Games</div>
+  <div class="card">
+    <table>
+      <tr><th>Game</th><th>Compatibility</th><th>Notes</th></tr>
+      <tr><td>Halo 3 / ODST / Reach</td><td>✅ Great</td><td>Run well, multiplayer works in some versions</td></tr>
+      <tr><td>Red Dead Redemption</td><td>✅ Good</td><td>Minor graphical issues, very playable</td></tr>
+      <tr><td>Dark Souls</td><td>✅ Good</td><td>Playable with some stutters on first area loads</td></tr>
+      <tr><td>Skyrim</td><td>✅ Good</td><td>Most content works; some DLC areas have issues</td></tr>
+      <tr><td>Gears of War 1–3</td><td>✅ Good</td><td>Solid, minor glitches</td></tr>
+      <tr><td>Left 4 Dead 1/2</td><td>⚠️ Mixed</td><td>Lobby works, some level-specific crashes</td></tr>
+      <tr><td>Mass Effect 1–3</td><td>✅ Good</td><td>Generally playable with occasional issues</td></tr>
+      <tr><td>Banjo-Kazooie: N&B</td><td>✅ Good</td><td>XBLA classic, runs well</td></tr>
+      <tr><td>Portal 1/2</td><td>⚠️ Mixed</td><td>Better to use PC version via Steam</td></tr>
+    </table>
+    <p style="margin-top:8px">Full compatibility database: <a href="https://github.com/xenia-project/game-compatibility/issues" target="_blank">github.com/xenia-project/game-compatibility</a> — search your game before trying.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🐧 Linux Note</div>
+  <div class="card">
+    <p>Xenia does not run on Linux. The Linux port is experimental and most games don't boot. This is one of the primary reasons to keep a Windows machine — see the Linux tab for the recommended hybrid architecture.</p>
+  </div>
+</div>
+
+</body>
+</html>

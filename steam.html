@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Steam Library</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎮</div>
+  <div>
+    <h1>Steam Library</h1>
+    <div class="subtitle">// Server-Stored Games · Sunshine Streaming · Storage Strategy //</div>
+    <p class="desc">Store your Steam library on the server's large drives and stream games remotely via Sunshine+Moonlight. Also covers Steam Link and in-home streaming options.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Steam installed on the server desktop with the library on an internal SSD/HDD. Remote play via Sunshine streaming. In-home streaming via Steam Link.</div>
+
+<div class="section">
+  <div class="section-title">💾 Storage Strategy for Steam Libraries</div>
+  <div class="card">
+    <div class="card-title">Steam on a Large Internal Drive</div>
+    <p>Steam can store its library on any drive letter. Move it to your large internal drive by going to Steam → Settings → Downloads → Steam Library Folders → Add Drive → select your D:\ (or whichever internal drive has space).</p>
+    <p>When you install a game, select the new library folder. You can also move existing games: right-click game → Manage → Move install folder.</p>
+    <table>
+      <tr><th>Drive Type</th><th>Best for</th><th>Load speed impact</th></tr>
+      <tr><td>NVMe SSD (primary)</td><td>Games you play frequently, multiplayer</td><td>Best — 3–5s load times</td></tr>
+      <tr><td>SATA SSD (secondary)</td><td>Good balance of speed and cost</td><td>Good — 5–10s load times</td></tr>
+      <tr><td>HDD (shucked, 14TB+)</td><td>Bulk storage, games you play occasionally</td><td>Acceptable — 15–30s loads</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Tiered storage strategy:</strong> Keep your 10–20 most-played games on an SSD. Put everything else on a big HDD. Steam lets you have multiple library folders — just install to the appropriate drive per game.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">How Much Space to Budget</div>
+    <table>
+      <tr><th>Games</th><th>Approximate storage</th></tr>
+      <tr><td>100 indie/mid-size games</td><td>~500GB–1TB</td></tr>
+      <tr><td>100 AAA games</td><td>~4–10TB</td></tr>
+      <tr><td>200+ mixed library</td><td>~4–8TB typical</td></tr>
+    </table>
+    <p>Modern AAA games are 50–150GB each. A full AAA library is a serious storage investment. Shucked 14TB drives at $15/TB are the most cost-effective solution.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌐 Remote Play Options</div>
+
+  <div class="card">
+    <div class="card-title">Option 1: Sunshine + Moonlight (Recommended for Best Quality)</div>
+    <p>See the GameCube tab for full Sunshine setup. For Steam games specifically, add each game as a Sunshine application:</p>
+    <pre># In Sunshine → Applications → Add:
+Name:    [Game Name]
+Cmd:     steam://rungameid/[APP_ID]
+# Get APP_ID from the game's Steam store page URL
+
+# Or, add Steam itself to launch the launcher:
+Name:    Steam
+Cmd:     "C:\Program Files (x86)\Steam\Steam.exe"
+# Then navigate from the Steam UI</pre>
+    <p>Moonlight users then see all your Steam games listed as Sunshine apps. Controller input is forwarded automatically.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option 2: Steam Link (Easiest for Same Network)</div>
+    <p>For in-home streaming only, <strong>Steam Link</strong> is built into Steam — no extra software needed. On any other PC/phone/TV on your network: install the Steam Link app and pair it to your server. Full 4K60 streaming over gigabit Ethernet.</p>
+    <p>The Steam Link app is available for Windows, macOS, Android, iOS, Raspberry Pi, and as a dedicated hardware dongle (~$50).</p>
+    <pre># No configuration needed — just:
+# 1. Ensure Steam is running on your server PC
+# 2. Open Steam Link on another device on the same network
+# 3. Pair using the 4-digit code that appears</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option 3: Steam Remote Play (Built-In, Over Internet)</div>
+    <p>Steam has built-in remote play via the Steam client. Any friend on your Steam friends list can be invited to play, or you can access your own library remotely via "Steam Remote Play." No port forwarding needed — uses Steam's relay servers.</p>
+    <p>Quality is lower than Sunshine/Moonlight but requires zero setup. Good fallback when Tailscale/VPN isn't available.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Steam Configuration for a Server</div>
+
+  <div class="card">
+    <div class="card-title">Auto-Start Steam in Big Picture Mode</div>
+    <p>For a server that's primarily accessed via streaming, auto-starting Steam in Big Picture gives a nice gamepad-friendly UI:</p>
+    <pre># Add to startup (shell:startup shortcut or Task Scheduler):
+"C:\Program Files (x86)\Steam\Steam.exe" -bigpicture -start-in-big-picture
+
+# Or run minimized to tray (for background game launching):
+"C:\Program Files (x86)\Steam\Steam.exe" -silent</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Keeping Games Updated</div>
+    <p>Steam auto-updates games by default. For a server, you may want to control when updates happen (not mid-session). In Steam settings → Downloads → uncheck "Allow downloads during gameplay." Consider scheduling update windows (e.g. 3–5am when the Minecraft maintenance window is active).</p>
+    <pre># Force all updates at once from command line:
+"C:\Program Files (x86)\Steam\Steam.exe" -forcesteamupdate</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Game-Specific Performance Tips for Streaming</div>
+    <ul style="margin:0 0 0 18px">
+      <li>Run games in <strong>borderless windowed</strong> mode for best streaming compatibility with Sunshine</li>
+      <li>Set in-game resolution to match your streaming target (1080p60 is usually the sweet spot)</li>
+      <li>Disable VSync in games and use Sunshine's frame pacing instead</li>
+      <li>For CPU-heavy games (strategy, simulation), reduce Sunshine's video encoding quality slightly to free up CPU</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Access Control</div>
+  <div class="card">
+    <p>Steam accounts are personal — only one account can be logged in at a time. For a server used by multiple people:</p>
+    <ul style="margin:0 0 0 18px">
+      <li>Your server runs with your Steam account</li>
+      <li>Remote players stream the games you own (via Sunshine) — they're playing on your account</li>
+      <li>For a friend to play their own Steam account remotely, they'd need their own Sunshine setup on their own machine</li>
+      <li><strong>Steam Family Sharing</strong> lets others use your library on their own accounts, but not simultaneously with you</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

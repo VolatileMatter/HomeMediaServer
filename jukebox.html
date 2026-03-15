@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Infinite Jukebox</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎵</div>
+  <div>
+    <h1>Infinite / Eternal Jukebox</h1>
+    <div class="subtitle">// Self-Hosted · YouTube Input · Endless Remixing //</div>
+    <p class="desc">The Infinite Jukebox analyzes a song's beat structure and loops it endlessly by jumping between similar-sounding points in the track. You paste a YouTube link, it downloads the audio, analyzes it, and plays it forever.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: A local web server at port 5050 where you paste a YouTube URL and get back an infinite, seamlessly looping version of that song.</div>
+
+<div class="section">
+  <div class="section-title">🧠 Background: What the Eternal Jukebox Is</div>
+  <div class="card">
+    <p>The original <strong>Eternal Jukebox</strong> was made by Paul Lamere at The Echo Nest (later Spotify). It used Spotify's audio analysis API to find "branch points" in a song — moments that sound similar enough that you can jump from one to another without it sounding jarring, creating an endless remix.</p>
+    <p>Spotify deprecated the public Echo Nest API, so the original service mostly stopped working. There are several community forks and reimplementations that work locally using open audio analysis libraries.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔧 Option A — infinite-jukebox-web (Recommended) <span class="tag tag-native">FOSS · Node.js</span></div>
+
+  <div class="card">
+    <div class="card-title">What This Uses</div>
+    <p>This implementation uses <strong>librosa</strong> (Python audio analysis) to find beat/segment data locally (no Spotify API needed), combined with a Node.js web server and a browser-based visualizer. You paste a YouTube URL and it downloads, analyzes, and plays.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Python 3.11+ and Node.js 20 LTS</strong>
+        <p>Both from their official sites. Ensure both are on your PATH.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install yt-dlp (YouTube downloader)</strong>
+        <pre># Download the Windows executable:
+# https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+# Place in C:\tools\ and add C:\tools to your system PATH
+
+# Test:
+yt-dlp --version</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install FFmpeg</strong>
+        <pre># Download from https://ffmpeg.org/download.html → Windows builds
+# Extract to C:\ffmpeg\, add C:\ffmpeg\bin to PATH
+
+ffmpeg -version  # should work</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Python audio analysis dependencies</strong>
+        <pre>pip install librosa numpy scipy flask yt-dlp --break-system-packages</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Clone the jukebox server</strong>
+        <pre># Option 1: remixatron (Python + web interface)
+# https://github.com/drensin/Remixatron
+git clone https://github.com/drensin/Remixatron
+cd Remixatron
+pip install -r requirements.txt</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create a YouTube-to-Jukebox wrapper script</strong>
+        <p>Create <code>D:\Server\Jukebox\jukebox_server.py</code>:</p>
+        <pre>from flask import Flask, request, jsonify, send_from_directory
+import subprocess, os, sys, uuid, threading
+from Remixatron import InfiniteJukebox
+
+app = Flask(__name__, static_folder='static')
+AUDIO_DIR = 'D:/Server/Jukebox/audio'
+os.makedirs(AUDIO_DIR, exist_ok=True)
+
+jobs = {}
+
+def process_youtube(job_id, url):
+    jobs[job_id] = {'status': 'downloading', 'progress': 0}
+    # Download audio
+    audio_path = f'{AUDIO_DIR}/{job_id}.mp3'
+    subprocess.run([
+        'yt-dlp', '-x', '--audio-format', 'mp3',
+        '-o', audio_path, url
+    ], check=True)
+    jobs[job_id]['status'] = 'analyzing'
+    # Analyze with Remixatron
+    jukebox = InfiniteJukebox(filename=audio_path, start_beat=1, do_async=False)
+    jobs[job_id] = {
+        'status': 'ready',
+        'audio': f'/audio/{job_id}.mp3',
+        'beats': jukebox.beats,
+        'segments': jukebox.segments
+    }
+
+@app.route('/api/submit', methods=['POST'])
+def submit():
+    data = request.json
+    url = data.get('url')
+    if not url: return jsonify({'error': 'no url'}), 400
+    job_id = str(uuid.uuid4())[:8]
+    t = threading.Thread(target=process_youtube, args=(job_id, url))
+    t.daemon = True
+    t.start()
+    return jsonify({'job_id': job_id})
+
+@app.route('/api/status/&lt;job_id&gt;')
+def status(job_id):
+    return jsonify(jobs.get(job_id, {'status': 'unknown'}))
+
+@app.route('/audio/&lt;filename&gt;')
+def serve_audio(filename):
+    return send_from_directory(AUDIO_DIR, filename)
+
+@app.route('/')
+def index():
+    return send_from_directory('static', 'index.html')
+
+if __name__ == '__main__':
+    app.run(port=5050, host='0.0.0.0')
+</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the frontend UI</strong>
+        <p>Create <code>D:\Server\Jukebox\static\index.html</code> — a minimal page with a YouTube URL input and the Remixatron beat visualizer. The visualizer shows the song's beat graph and animates the playback position jumping between loop points.</p>
+        <p>A complete starter UI is available at the <a href="https://github.com/drensin/Remixatron" target="_blank">Remixatron GitHub page</a> — copy the <code>web/</code> folder into your <code>static/</code> directory.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run as a startup service</strong>
+        <pre># Using NSSM:
+nssm install Jukebox python "D:\Server\Jukebox\jukebox_server.py"
+nssm set Jukebox AppDirectory "D:\Server\Jukebox"
+nssm start Jukebox
+
+# Access at http://localhost:5050</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Audio analysis is slow:</strong> Librosa analyzing a 4-minute song takes 15–60 seconds depending on your CPU. The UI should show a "processing" spinner while it works. Results are cached, so the same song analyzed once is instant next time.</div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔵 Option B — Use a Pre-Built Fork Directly</div>
+  <div class="card">
+    <div class="card-title">infinite-jukebox (oliverbl's fork)</div>
+    <p>There's a maintained fork at <a href="https://github.com/oliverbl/infinite-jukebox" target="_blank">github.com/oliverbl/infinite-jukebox</a> that works with local audio files (not YouTube). Workflow: use yt-dlp to download the audio first, then feed the file to the jukebox.</p>
+    <pre># Download audio from YouTube first:
+yt-dlp -x --audio-format mp3 -o "song.mp3" "https://youtube.com/watch?v=..."
+
+# Then open the jukebox and point it at song.mp3</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Remixatron (Most Feature-Complete)</div>
+    <p><a href="https://github.com/drensin/Remixatron" target="_blank">github.com/drensin/Remixatron</a> is the most actively maintained infinite jukebox engine. It has a web UI and REST API. The YouTube integration is one step of yt-dlp download + one step of Remixatron analysis.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎵 How the Infinite Loop Actually Works</div>
+  <div class="card">
+    <p>The algorithm works in three steps:</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Beat detection</strong>
+          <p>Librosa analyzes the audio file and finds every beat — the timestamp of each "tap" in the music. It also segments the song into sections (intro, verse, chorus, etc.).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Similarity analysis</strong>
+          <p>For each beat, it calculates how similar it is to every other beat using timbre and loudness features. If beat 24 sounds a lot like beat 96 (e.g. both are at the start of a chorus), those become "jump candidates."</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Infinite playback</strong>
+          <p>As the song plays, at each beat the player randomly decides whether to continue to the next beat or jump to a similar beat elsewhere. This creates an endless, coherent-sounding remix that never exactly repeats.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 SSO / Access Control <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>The Flask server can be put behind Caddy with HTTP basic auth or an Authentik forward auth proxy. Since this is a shared jukebox (anyone with access can submit songs), a simple password via Caddy <code>basicauth</code> is sufficient for V1.</p>
+  </div>
+</div>
+
+</body>
+</html>

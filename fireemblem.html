@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Fire Emblem</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">⚔️</div>
+  <div>
+    <h1>Fire Emblem Game Library</h1>
+    <div class="subtitle">// GBA · NDS · Wii · Per-User Saves · EmulatorJS + Dolphin //</div>
+    <p class="desc">The complete Fire Emblem series playable in a browser. Includes the GBA and NDS games natively in-browser, and notes on streaming the Wii/GCN titles via Dolphin+Sunshine.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 GBA and NDS Fire Emblem games run entirely in-browser via EmulatorJS. Radiant Dawn (Wii) requires Dolphin + Sunshine streaming — see the GameCube tab for the streaming setup.</div>
+
+<div class="section">
+  <div class="section-title">📜 The Fire Emblem Series (Western Releases + English Patches)</div>
+  <div class="card">
+    <table>
+      <tr><th>Game</th><th>Year</th><th>Platform</th><th>Core</th><th>Notes</th></tr>
+      <tr><td>Fire Emblem: Shadow Dragon and the Blade of Light</td><td>1990</td><td>NES/FC</td><td>fceumm</td><td>JP only; official English 2020 (use fan patch)</td></tr>
+      <tr><td>Fire Emblem Gaiden</td><td>1992</td><td>NES/FC</td><td>fceumm</td><td>JP only; fan translation exists</td></tr>
+      <tr><td>Fire Emblem: Mystery of the Emblem</td><td>1994</td><td>SNES</td><td>snes9x</td><td>Fan translation exists</td></tr>
+      <tr><td>Fire Emblem: Genealogy of the Holy War</td><td>1996</td><td>SNES</td><td>snes9x</td><td>Fan translation — considered the best in series by many</td></tr>
+      <tr><td>Fire Emblem: Thracia 776</td><td>1999</td><td>SNES</td><td>snes9x</td><td>Fan translation; notoriously hard</td></tr>
+      <tr><td>Fire Emblem: The Binding Blade</td><td>2002</td><td>GBA</td><td>mgba</td><td>Roy's game; fan translation</td></tr>
+      <tr><td><strong>Fire Emblem (Blazing Blade)</strong></td><td>2003</td><td>GBA</td><td>mgba</td><td>⭐ First Western release — great starting point</td></tr>
+      <tr><td><strong>Fire Emblem: The Sacred Stones</strong></td><td>2004</td><td>GBA</td><td>mgba</td><td>⭐ Excellent, more accessible</td></tr>
+      <tr><td>Fire Emblem: Path of Radiance</td><td>2005</td><td>GameCube</td><td>Dolphin</td><td>Requires Dolphin/Sunshine streaming</td></tr>
+      <tr><td>Fire Emblem: Radiant Dawn</td><td>2007</td><td>Wii</td><td>Dolphin</td><td>Requires Dolphin/Sunshine streaming</td></tr>
+      <tr><td>Fire Emblem: Shadow Dragon</td><td>2008</td><td>NDS</td><td>melonds</td><td>DS remake of the NES original</td></tr>
+      <tr><td>Fire Emblem: New Mystery of the Emblem</td><td>2010</td><td>NDS</td><td>melonds</td><td>JP only; fan translation</td></tr>
+      <tr><td>Fire Emblem Awakening</td><td>2012</td><td>3DS</td><td>Citra</td><td>Citra 3DS emulation (see note)</td></tr>
+      <tr><td>Fire Emblem Fates</td><td>2015</td><td>3DS</td><td>Citra</td><td>Three versions (Birthright/Conquest/Revelation)</td></tr>
+    </table>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>3DS games (Awakening, Fates):</strong> Citra 3DS emulator is no longer maintained (Nintendo DMCA'd it in 2024). The community fork <strong>Lime3DS</strong> or <strong>Azahar</strong> continues. These don't run in-browser — they'd need Sunshine streaming too.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Setup for In-Browser Games</div>
+  <div class="card">
+    <div class="card-title">Same architecture as Pokémon and Castlevania libraries</div>
+    <p>The Flask save server, EmulatorJS frontend, and per-user save architecture is identical. Extend the same server.py:</p>
+    <pre>FIRE_EMBLEM_ROMS = 'D:/Emulation/FireEmblem'
+
+@app.route('/fe/roms/&lt;path:filename&gt;')
+def serve_fe_rom(filename):
+    if 'user' not in session: return redirect('/login')
+    return send_from_directory(FIRE_EMBLEM_ROMS, filename)
+
+# Save IDs: fe-blazing, fe-sacred, fe-shadow-dragon, etc.</pre>
+    <p>ROM folder:</p>
+    <pre>D:\Emulation\FireEmblem\
+  ├── nes\    (Shadow Dragon, Gaiden — JP + fan patches)
+  ├── snes\   (Genealogy, Thracia, Mystery — fan patches)
+  ├── gba\
+  │   ├── fe-blazing-blade.gba       (US/EU = English)
+  │   ├── fe-binding-blade-en.gba    (patched)
+  │   └── fe-sacred-stones.gba
+  ├── nds\
+  │   ├── fe-shadow-dragon.nds
+  │   └── fe-new-mystery-en.nds      (patched)
+  └── saves\</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎮 GameCube / Wii Games via Dolphin + Sunshine</div>
+  <div class="card">
+    <div class="card-title">Path of Radiance &amp; Radiant Dawn</div>
+    <p>These run in Dolphin (GameCube/Wii emulator). Use the Sunshine streaming setup from the GameCube tab. Add each game as a Sunshine application:</p>
+    <pre># In Sunshine → Applications → Add:
+Name:    Fire Emblem: Path of Radiance
+Cmd:     "D:\Emulators\Dolphin\Dolphin.exe" -e "D:\Emulation\FireEmblem\gc\path-of-radiance.iso"
+
+Name:    Fire Emblem: Radiant Dawn
+Cmd:     "D:\Emulators\Dolphin\Dolphin.exe" -e "D:\Emulation\FireEmblem\wii\radiant-dawn.iso"</pre>
+    <p>Save files for Dolphin are stored in <code>%USERPROFILE%\Documents\Dolphin Emulator\GC\USA\</code> (GameCube) and <code>\Wii\</code> (Wii) — these are shared by whoever accesses the Dolphin instance. For per-user saves over streaming, you'd need multiple Dolphin profiles, which is complex. Simpler: agree that Path of Radiance and Radiant Dawn are single-player experiences with one save each.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📖 Fan Translation Notes</div>
+  <div class="card">
+    <p>Several excellent Fire Emblem games were never officially localized. The fan translation community has produced high-quality English patches for all of them:</p>
+    <table>
+      <tr><th>Game</th><th>Patch Site</th><th>Quality</th></tr>
+      <tr><td>Genealogy of the Holy War</td><td>fireemblemwiki.org translations page</td><td>⭐ Excellent, nearly official quality</td></tr>
+      <tr><td>Thracia 776</td><td>Multiple versions — use the "lil' manster" patch</td><td>Good</td></tr>
+      <tr><td>Binding Blade</td><td>RHDN (romhacking.net)</td><td>Good</td></tr>
+      <tr><td>New Mystery of the Emblem</td><td>Various — "Serenes Forest" community patch</td><td>Good</td></tr>
+    </table>
+    <p>Apply patches with <strong>Lunar IPS</strong> (Windows) or <strong>Flips</strong> — drag the .ips/.bps patch onto the tool, then onto your clean ROM. The patched ROM replaces the original.</p>
+  </div>
+</div>
+
+</body>
+</html>

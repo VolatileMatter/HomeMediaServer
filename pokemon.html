@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Pokémon</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">⚡</div>
+  <div>
+    <h1>Pokémon Game Library</h1>
+    <div class="subtitle">// All Generations · Browser-Based · Per-User Saves · EmulatorJS //</div>
+    <p class="desc">Play every mainline Pokémon game in order, directly in the browser. Per-user save files so different players keep separate progress. No installation needed on the client side.</p>
+  </div>
+</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>Legal note:</strong> EmulatorJS is open source. You need to own the games you emulate. ROMs are legal to create from cartridges you own; obtaining them from elsewhere is a grey area. This guide assumes you have your own ROMs.</div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: A web page at <code>http://[server-ip]:8085/pokemon</code> where users log in, pick a game, and play — with their save files tied to their username and persisting between sessions.</div>
+
+<div class="section">
+  <div class="section-title">🧱 Architecture Overview</div>
+  <div class="card">
+    <p>The stack is:</p>
+    <ul style="margin:0 0 0 18px">
+      <li><strong>EmulatorJS</strong> — open-source browser emulator supporting GB, GBC, GBA, NDS, N64, and more. Runs entirely in the browser via WebAssembly.</li>
+      <li><strong>Nginx or Caddy</strong> — serves the static HTML/JS files and the ROM files</li>
+      <li><strong>A tiny backend</strong> (Python/Flask) — handles user login, save file upload/download, and per-user save storage</li>
+    </ul>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>EmulatorJS save files:</strong> EmulatorJS stores saves in the browser's IndexedDB by default. For per-user server-side saves, we intercept the save events and POST them to the backend, then restore them on load. This is the key to cross-device, per-user saves.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Setup</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Set up your ROM library folder</strong>
+        <pre>D:\Emulation\Pokemon\
+  ├── gb\
+  │   ├── pokemon-red.gb
+  │   ├── pokemon-blue.gb
+  │   └── pokemon-yellow.gb
+  ├── gbc\
+  │   ├── pokemon-gold.gbc
+  │   ├── pokemon-silver.gbc
+  │   └── pokemon-crystal.gbc
+  ├── gba\
+  │   ├── pokemon-ruby.gba
+  │   ├── pokemon-sapphire.gba
+  │   ├── pokemon-firered.gba
+  │   ├── pokemon-leafgreen.gba
+  │   └── pokemon-emerald.gba
+  ├── nds\
+  │   ├── pokemon-diamond.nds
+  │   ├── pokemon-pearl.nds
+  │   ├── pokemon-platinum.nds
+  │   ├── pokemon-heartgold.nds
+  │   ├── pokemon-soulsilver.nds
+  │   ├── pokemon-black.nds
+  │   ├── pokemon-white.nds
+  │   ├── pokemon-black2.nds
+  │   └── pokemon-white2.nds
+  └── saves\   (server-side save storage, organized by user)
+      ├── alice\
+      └── bob\</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install EmulatorJS</strong>
+        <p>Download the latest EmulatorJS from <a href="https://github.com/EmulatorJS/EmulatorJS" target="_blank">github.com/EmulatorJS/EmulatorJS</a>. You only need the <code>data/</code> folder which contains the emulator cores.</p>
+        <pre>git clone https://github.com/EmulatorJS/EmulatorJS D:\Emulation\emulatorjs
+# Or just download the ZIP and extract it</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install the backend</strong>
+        <pre>pip install flask flask-login werkzeug</pre>
+        <p>Create <code>D:\Emulation\Pokemon\server.py</code>:</p>
+        <pre>from flask import Flask, request, jsonify, send_from_directory, session, redirect
+from werkzeug.security import check_password_hash, generate_password_hash
+import os, json
+
+app = Flask(__name__, static_folder='static')
+app.secret_key = 'change-this-to-a-random-string'
+
+SAVES_DIR = 'D:/Emulation/Pokemon/saves'
+ROMS_DIR  = 'D:/Emulation/Pokemon'
+USERS_FILE = 'D:/Emulation/Pokemon/users.json'
+
+def load_users():
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE) as f: return json.load(f)
+    return {}
+
+def save_users(users):
+    with open(USERS_FILE, 'w') as f: json.dump(users, f)
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    users = load_users()
+    u = users.get(data['username'])
+    if u and check_password_hash(u['password'], data['password']):
+        session['user'] = data['username']
+        return jsonify({'ok': True})
+    return jsonify({'ok': False, 'error': 'Invalid credentials'}), 401
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return jsonify({'ok': True})
+
+@app.route('/api/me')
+def me():
+    return jsonify({'user': session.get('user')})
+
+@app.route('/api/save/&lt;game_id&gt;', methods=['POST'])
+def save(game_id):
+    if 'user' not in session: return jsonify({'error': 'not logged in'}), 401
+    user_dir = os.path.join(SAVES_DIR, session['user'])
+    os.makedirs(user_dir, exist_ok=True)
+    data = request.get_data()
+    with open(os.path.join(user_dir, f'{game_id}.sav'), 'wb') as f:
+        f.write(data)
+    return jsonify({'ok': True})
+
+@app.route('/api/save/&lt;game_id&gt;', methods=['GET'])
+def load_save(game_id):
+    if 'user' not in session: return jsonify({'error': 'not logged in'}), 401
+    path = os.path.join(SAVES_DIR, session['user'], f'{game_id}.sav')
+    if os.path.exists(path):
+        with open(path, 'rb') as f:
+            return f.read(), 200, {'Content-Type': 'application/octet-stream'}
+    return '', 404
+
+@app.route('/roms/&lt;path:filename&gt;')
+def serve_rom(filename):
+    if 'user' not in session: return redirect('/login')
+    return send_from_directory(ROMS_DIR, filename)
+
+@app.route('/')
+@app.route('/login')
+@app.route('/play')
+def serve_static():
+    return send_from_directory('static', 'index.html')
+
+if __name__ == '__main__':
+    app.run(port=8085, host='0.0.0.0')
+</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create user accounts</strong>
+        <p>Run this once in a Python shell to add users:</p>
+        <pre>import json
+from werkzeug.security import generate_password_hash
+
+users = {}
+# Add users:
+users['alice'] = {'password': generate_password_hash('alicepassword')}
+users['bob']   = {'password': generate_password_hash('bobpassword')}
+
+with open('D:/Emulation/Pokemon/users.json', 'w') as f:
+    json.dump(users, f)</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run the server as a Windows service</strong>
+        <pre>nssm install PokemonEmu python "D:\Emulation\Pokemon\server.py"
+nssm set PokemonEmu AppDirectory "D:\Emulation\Pokemon"
+nssm start PokemonEmu</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎮 The Game Selector UI (static/index.html)</div>
+  <div class="card">
+    <div class="card-title">Create static/index.html</div>
+    <p>This page shows the full Pokémon game list in generation order, with per-game artwork, system labels, and a "Play" button that loads EmulatorJS with the correct ROM and save file.</p>
+    <pre>&lt;!-- Simplified example — the full UI shows art + gen labels --&gt;
+&lt;script&gt;
+const GAMES = [
+  // Gen 1
+  { id:'red',       name:'Pokémon Red',        system:'gb',  rom:'/roms/gb/pokemon-red.gb',       gen:1 },
+  { id:'blue',      name:'Pokémon Blue',       system:'gb',  rom:'/roms/gb/pokemon-blue.gb',      gen:1 },
+  { id:'yellow',    name:'Pokémon Yellow',     system:'gb',  rom:'/roms/gb/pokemon-yellow.gb',    gen:1 },
+  // Gen 2
+  { id:'gold',      name:'Pokémon Gold',       system:'gbc', rom:'/roms/gbc/pokemon-gold.gbc',    gen:2 },
+  { id:'silver',    name:'Pokémon Silver',     system:'gbc', rom:'/roms/gbc/pokemon-silver.gbc',  gen:2 },
+  { id:'crystal',   name:'Pokémon Crystal',    system:'gbc', rom:'/roms/gbc/pokemon-crystal.gbc', gen:2 },
+  // Gen 3
+  { id:'ruby',      name:'Pokémon Ruby',       system:'gba', rom:'/roms/gba/pokemon-ruby.gba',    gen:3 },
+  { id:'sapphire',  name:'Pokémon Sapphire',   system:'gba', rom:'/roms/gba/pokemon-sapphire.gba',gen:3 },
+  { id:'firered',   name:'Pokémon FireRed',    system:'gba', rom:'/roms/gba/pokemon-firered.gba', gen:3 },
+  { id:'leafgreen', name:'Pokémon LeafGreen',  system:'gba', rom:'/roms/gba/pokemon-leafgreen.gba',gen:3 },
+  { id:'emerald',   name:'Pokémon Emerald',    system:'gba', rom:'/roms/gba/pokemon-emerald.gba', gen:3 },
+  // Gen 4
+  { id:'diamond',   name:'Pokémon Diamond',    system:'nds', rom:'/roms/nds/pokemon-diamond.nds', gen:4 },
+  { id:'pearl',     name:'Pokémon Pearl',      system:'nds', rom:'/roms/nds/pokemon-pearl.nds',   gen:4 },
+  { id:'platinum',  name:'Pokémon Platinum',   system:'nds', rom:'/roms/nds/pokemon-platinum.nds',gen:4 },
+  { id:'hgss-hg',   name:'HeartGold',          system:'nds', rom:'/roms/nds/pokemon-heartgold.nds',gen:4 },
+  { id:'hgss-ss',   name:'SoulSilver',         system:'nds', rom:'/roms/nds/pokemon-soulsilver.nds',gen:4 },
+  // Gen 5
+  { id:'black',     name:'Pokémon Black',      system:'nds', rom:'/roms/nds/pokemon-black.nds',   gen:5 },
+  { id:'white',     name:'Pokémon White',      system:'nds', rom:'/roms/nds/pokemon-white.nds',   gen:5 },
+  { id:'black2',    name:'Pokémon Black 2',    system:'nds', rom:'/roms/nds/pokemon-black2.nds',  gen:5 },
+  { id:'white2',    name:'Pokémon White 2',    system:'nds', rom:'/roms/nds/pokemon-white2.nds',  gen:5 },
+];
+
+const SYSTEM_CORES = {
+  gb:  { core:'gambatte', name:'Game Boy' },
+  gbc: { core:'gambatte', name:'Game Boy Color' },
+  gba: { core:'mgba',     name:'Game Boy Advance' },
+  nds: { core:'melonds',  name:'Nintendo DS' },
+};
+&lt;/script&gt;</pre>
+    <p>For each game card, clicking "Play" calls a function that:</p>
+    <ol style="margin:6px 0 0 18px">
+      <li>Checks if user is logged in (redirect to login if not)</li>
+      <li>Fetches the save file from <code>/api/save/[game_id]</code></li>
+      <li>Initializes EmulatorJS with the ROM path, core, and the fetched save data</li>
+      <li>Sets up a save callback that POSTs save data to <code>/api/save/[game_id]</code> on every in-game save</li>
+    </ol>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎛️ EmulatorJS Save Integration</div>
+  <div class="card">
+    <pre>&lt;!-- In your play page --&gt;
+&lt;div id="game"&gt;&lt;/div&gt;
+&lt;script src="/emulatorjs/data/loader.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+const gameId = 'emerald'; // from URL param
+const systemCore = 'mgba';
+
+// Load existing save from server
+async function initGame() {
+    let saveData = null;
+    try {
+        const r = await fetch(`/api/save/${gameId}`);
+        if (r.ok) saveData = await r.arrayBuffer();
+    } catch(e) {}
+
+    EJS_player = '#game';
+    EJS_gameUrl = `/roms/gba/pokemon-emerald.gba`;
+    EJS_core = systemCore;
+    EJS_gameID = gameId;
+    EJS_language = 'en-US';
+
+    // Pre-load save file if exists
+    if (saveData) {
+        EJS_saveStateOnExit = false;
+        EJS_onGameStart = function() {
+            EJS_emulator.gameManager.setSaveFile(new Uint8Array(saveData));
+        };
+    }
+
+    // Auto-save every 30 seconds + on manual save
+    EJS_onSaveState = async function(saveData) {
+        await fetch(`/api/save/${gameId}`, {
+            method: 'POST',
+            body: saveData,
+            headers: { 'Content-Type': 'application/octet-stream' }
+        });
+    };
+}
+
+initGame();
+&lt;/script&gt;</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>V1 uses the simple username/password system above. For SSO, the Flask session can be replaced with Authentik forward auth — when a user authenticates via Authentik, the username header is passed to Flask which uses it to look up the correct save directory. The <code>X-authentik-username</code> header replaces the session-based login entirely.</p>
+  </div>
+</div>
+
+</body>
+</html>

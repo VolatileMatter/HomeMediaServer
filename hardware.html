@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Server Hardware</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🖧</div>
+  <div>
+    <h1>Server Hardware</h1>
+    <div class="subtitle">// Build · Storage · Networking · Gaming-Ready Servers //</div>
+    <p class="desc">How to build or repurpose a home server that handles media, gaming (Minecraft, ARK, emulation, Steam), and always-on services — at the lowest possible cost.</p>
+  </div>
+</div>
+
+<!-- Your hardware questions answered first -->
+<div class="section">
+  <div class="section-title">❓ Your Questions Answered</div>
+
+  <div class="card">
+    <div class="card-title">Can I plug more than one hard drive into a single SATA port?</div>
+    <p><strong>No — one device per SATA port, natively.</strong> Unlike USB, SATA was not designed for daisy-chaining. Each drive needs its own dedicated port and cable.</p>
+    <p>However, <strong>SATA Port Multipliers</strong> do exist — they're like SATA "hubs" that let you connect 5 drives to 1 SATA port. The bad news: they're notoriously unreliable, cause performance issues, and many motherboard SATA controllers don't support them. <strong>Don't use them for important data.</strong></p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body"><strong>The right solution for more SATA ports:</strong> A PCIe SATA expansion card (~$18–$30) adds 4–8 independent, full-speed SATA ports. Plug it into any PCIe slot. Each port gets its own bandwidth. Fully reliable. This is what NAS builders use.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">What is a "shucked" external hard drive?</div>
+    <p>External hard drives (like a <strong>WD Elements 8TB</strong> from Best Buy) are sold in a plastic enclosure with a USB bridge board inside. The drive itself is just a standard 3.5" SATA hard drive — identical to drives sold bare.</p>
+    <p>"Shucking" means <strong>opening the plastic enclosure and removing the bare drive</strong> to install it directly into your PC over SATA. The reason to do this: external drives are frequently cheaper than bare drives, especially during sales. A 14TB WD Elements on sale for $180 contains the same drive as a $240 bare WD Red Plus 14TB.</p>
+    <pre>How to shuck a WD Elements:
+1. Slide a thin plastic pry tool (or folded gift card) into the seam on the short end
+2. Pop the clips around all four sides — no screws
+3. Slide out the drive + USB board
+4. Unplug the USB-to-SATA adapter board from the drive's SATA connector
+5. The bare 3.5" SATA drive is ready to install like any other drive
+
+Note: Some WD drives have a "3.3V pin" on the SATA power connector that causes them
+to sleep when powered by modern PSUs. Fix: cover pin 3 of the SATA power connector
+with a small piece of electrical tape before connecting.</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Shucking voids the warranty</strong> on the external drive — but the warranty on a $20 sale item is worth less than the money you save.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">I want to run video games off this server. Does that change the hardware requirements?</div>
+    <p><strong>Yes, significantly.</strong> A pure media server (Plex, Calibre, etc.) can run on nearly anything with 4GB RAM and a slow CPU. But you also want to run:</p>
+    <ul style="margin:8px 0 8px 18px">
+      <li><strong>Minecraft server</strong> — needs 4–8GB RAM dedicated, modern CPU</li>
+      <li><strong>ARK: Survival Evolved server</strong> — needs 8–12GB RAM, strong CPU (ARK is notoriously heavy)</li>
+      <li><strong>Steam library streaming</strong> — actual games running on the GPU, full GPU required</li>
+      <li><strong>Dolphin / XENIA emulation streaming</strong> — needs a real GPU for rendering at 60fps</li>
+      <li><strong>Sunshine game streaming</strong> — needs a GPU with hardware video encoding (NVENC for Nvidia, AMF for AMD)</li>
+    </ul>
+    <p><strong>Bottom line: your server needs to be a real gaming PC, not a NAS or Pi.</strong> Your existing gaming desktop is actually ideal — modern CPU, GPU, plenty of RAM. The main upgrade is just internal storage.</p>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Key insight:</strong> Your current gaming desktop already meets these requirements. The main thing missing is enough internal storage. Add SATA drives (see below) and you're good. A "server upgrade" doesn't have to mean new hardware.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- What you already have -->
+<div class="section">
+  <div class="section-title">🖥️ Your Current Setup (Gaming Desktop as Server)</div>
+  <div class="card">
+    <div class="card-title">Why Your Gaming Desktop is Already Good</div>
+    <p>Most gaming desktops from 2018+ have everything needed for a home server that runs games:</p>
+    <table>
+      <tr><th>Component</th><th>Needed for</th><th>Gaming PC has it?</th></tr>
+      <tr><td>CPU (6+ cores)</td><td>Minecraft, ARK, Sonarr, Plex transcoding</td><td>✅ Yes</td></tr>
+      <tr><td>GPU (Nvidia/AMD)</td><td>Sunshine streaming, Dolphin, Plex hardware transcode</td><td>✅ Yes</td></tr>
+      <tr><td>16–32GB RAM</td><td>ARK (8GB alone) + OS + services</td><td>✅ Likely yes</td></tr>
+      <tr><td>SATA ports (4–6)</td><td>Internal drives for media and games</td><td>✅ Yes</td></tr>
+      <tr><td>PCIe slots free</td><td>More SATA ports if needed</td><td>✅ Probably yes</td></tr>
+    </table>
+    <p style="margin-top:10px"><strong>What you're missing:</strong> Enough internal storage. Your games, media, and server data should all be on internal SATA drives, not USB.</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- Storage section (full content from before) -->
+<div class="section">
+  <div class="section-title">💾 Storage: Getting Cheap, Reliable Internal Storage</div>
+
+  <div class="card">
+    <div class="card-title">The Shucking Math</div>
+    <table>
+      <tr><th>Option</th><th>Drive Inside</th><th>Price/TB (sale)</th><th>Type</th></tr>
+      <tr><td>WD Elements 12TB external</td><td>WD White CMR</td><td>~$15/TB</td><td>CMR — best for servers</td></tr>
+      <tr><td>WD Elements 18TB external</td><td>WD White CMR</td><td>~$14/TB</td><td>CMR</td></tr>
+      <tr><td>Seagate Expansion 8TB</td><td>Seagate Barracuda</td><td>~$13/TB</td><td>CMR</td></tr>
+      <tr><td>WD Red Plus 4TB (bare)</td><td>WD Red CMR</td><td>~$22/TB</td><td>NAS-rated, no shucking</td></tr>
+      <tr><td>Seagate IronWolf 4TB (bare)</td><td>Seagate IronWolf</td><td>~$20/TB</td><td>NAS-rated, no shucking</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Best value strategy:</strong> Buy 14TB+ WD externals on sale (Best Buy, Costco, Amazon). $140–160 for 14TB = ~$10–11/TB. Shuck them and install directly. For a 60TB storage pool, you could spend ~$600–700 total.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">How Many Drives Can I Fit?</div>
+    <p>A typical ATX gaming tower has 2–3 dedicated 3.5" bays. With a 5.25"→3.5" adapter bracket (~$7), you can use old optical drive bays too. Most towers end up with 4–6 drives possible. If you need more:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li>Add a PCIe SATA controller card for more SATA ports</li>
+      <li>An external eSATA enclosure (much better than USB — true SATA over a cable)</li>
+      <li>Or build a separate NAS with a bigger case (Fractal Node 804 = 8 drive bays)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">What Drives to Buy for Games vs Media</div>
+    <table>
+      <tr><th>Use</th><th>Drive Type</th><th>Why</th></tr>
+      <tr><td>OS + Applications</td><td>SSD (500GB–1TB)</td><td>Fast boot, snappy services</td></tr>
+      <tr><td>Steam games library</td><td>SSD or fast HDD</td><td>Games load faster from SSD; a 4TB SSD costs ~$250</td></tr>
+      <tr><td>Emulation ROMs/ISOs</td><td>Any HDD</td><td>ROM files are small, load speed doesn't matter much</td></tr>
+      <tr><td>Media (Plex, 4K video)</td><td>Any HDD (CMR preferred)</td><td>Streaming is sequential reads — any CMR drive works fine</td></tr>
+      <tr><td>ARK world saves</td><td>HDD or SSD</td><td>ARK writes saves frequently — SSD preferred if possible</td></tr>
+      <tr><td>Minecraft worlds</td><td>HDD is fine</td><td>Chunk saves are small and infrequent</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Windows Storage Spaces — Free RAID-like Pooling</div>
+    <p>Windows 10 includes Storage Spaces. Pool multiple drives into one volume with optional redundancy. Access via Start → "Storage Spaces." Choose Simple (no redundancy, most space) or Mirror (2-drive minimum, survives 1 failure). All your apps see it as a single drive letter.</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- Building a second dedicated server -->
+<div class="section">
+  <div class="section-title">🖥️ Building a Separate NAS/Media Server (Optional Upgrade Path)</div>
+
+  <div class="card">
+    <div class="card-title">When Does a Separate Server Make Sense?</div>
+    <p>Your gaming desktop is better kept as a gaming desktop. If you want both running simultaneously, a cheap secondary server handles media + downloads while the gaming PC handles gaming. But this is optional — your desktop can do everything.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Budget Second Server Build (~$200–400 total)</div>
+    <table>
+      <tr><th>Component</th><th>Option</th><th>Price</th></tr>
+      <tr><td>CPU + Mobo</td><td>Used HP ProLiant MicroServer Gen8</td><td>$80–150</td></tr>
+      <tr><td>Or: mini PC</td><td>Intel N100 mini PC (Beelink, GMKtec)</td><td>$100–150</td></tr>
+      <tr><td>RAM</td><td>8–16GB DDR4 (used)</td><td>$20–40</td></tr>
+      <tr><td>Drives</td><td>4x shucked 14TB WD</td><td>~$560 (56TB total)</td></tr>
+      <tr><td>Case (if building)</td><td>Fractal Design Node 804</td><td>$90</td></tr>
+    </table>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>A mini PC / used server cannot stream games or run Sunshine</strong> — no GPU. Keep game streaming on your gaming desktop. Use a second machine only for media/files/downloads.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Networking -->
+<div class="section">
+  <div class="section-title">🌐 Networking for a Home Server</div>
+  <div class="card">
+    <div class="card-title">Ethernet, Not WiFi</div>
+    <p>Your server should be on a wired Ethernet connection. WiFi introduces latency and drops that will affect Minecraft, ARK, game streaming, and Plex 4K streams. If your server is far from your router, a powerline adapter (~$40) runs Ethernet over your house's electrical wiring.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Give Your Server a Static Local IP</div>
+    <p>Log into your router (usually <code>192.168.1.1</code>). Find "DHCP Reservations" or "Static IP assignment." Bind your server's MAC address to a fixed IP like <code>192.168.1.100</code>. This ensures all your port forwards, firewall rules, and bookmarks never break.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📦 Migrating USB Drives to Internal SATA</div>
+  <div class="card">
+    <p>Use robocopy to safely migrate all data:</p>
+    <pre>robocopy "F:\Media" "D:\Media" /E /COPYALL /R:3 /W:5 /LOG:C:\migrate_log.txt</pre>
+    <p>After migration, update all service configs to point to the new path letters. Then disable USB selective suspend to stop Windows sleeping USB drives if you keep any: Control Panel → Power Options → Advanced → USB selective suspend → Disabled.</p>
+  </div>
+</div>
+
+</body>
+</html>

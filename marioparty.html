@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Mario Party</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎲</div>
+  <div>
+    <h1>Mario Party Group Play</h1>
+    <div class="subtitle">// Netplay · 4 Players · Code-Based Sessions · N64 &amp; GCN //</div>
+    <p class="desc">Host a multiplayer Mario Party session where up to 4 players connect using a code, each with their own controller. This requires a netplay-capable emulator setup — not simple browser emulation.</p>
+  </div>
+</div>
+
+<div class="callout callout-warn">
+  <div class="callout-icon">🎲</div>
+  <div class="callout-body"><strong>Honest complexity warning:</strong> True 4-player emulator netplay is technically challenging. Input lag is real. N64 netplay via Mupen64Plus works best on fast internet (low ping between players). This is a best-effort setup, not a turnkey solution.</div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Host an N64 or GameCube Mario Party session where players join via a room code using Parsec or NetPlay, each connecting their own controller. You host on your server, they connect from their PC.</div>
+
+<div class="section">
+  <div class="section-title">🧠 How This Works: Two Approaches</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Option A: Parsec Arcade (Easiest) <span class="tag tag-native">RECOMMENDED</span></div>
+      <p>Parsec is a game streaming app. You run the emulator on your server, share a "game room" link or code, and up to 4 friends connect. Their keyboard/controller input is sent to your machine, and the video is streamed back.</p>
+      <p><strong>How it feels:</strong> Like playing split-screen together — you're all looking at the same screen, same instance, same game. Latency is 30–80ms typically. Perfect for Mario Party since it's turn-based.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Option B: Emulator NetPlay (Harder, Lower Latency)</div>
+      <p>Mupen64Plus/RetroArch supports proper netplay where each player runs their own emulator and they sync game state over the internet. More complex, requires port forwarding, can have sync issues.</p>
+      <p><strong>Best for:</strong> Platformers, fighting games. Mario Party works fine with Parsec.</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎮 Option A: Parsec Arcade Setup (Recommended)</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Parsec on your server</strong>
+        <p>Download from <a href="https://parsec.app/downloads" target="_blank">parsec.app/downloads</a>. Create a free Parsec account. Install on your server — this is the host.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Project64 or RetroArch (N64)</strong>
+        <p>For N64 Mario Party (1, 2, 3): install <strong>Project64 3.0</strong> (free, from <a href="https://project64-emulator.com" target="_blank">project64-emulator.com</a>). Load your Mario Party ROM.</p>
+        <p>For GameCube Mario Party 4–7: use <strong>Dolphin</strong> (already in the GameCube tab).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure controllers in the emulator</strong>
+        <p>In Project64: set up 4 controller slots. With Parsec, each remote player's controller input maps to a separate slot. In Project64 input settings, set each player's controller to use a different XInput device (XInput/0, XInput/1, etc.).</p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">🎮</div>
+          <div class="callout-body"><strong>Virtual controller tip:</strong> Install <strong>ViGEmBus</strong> (free) on Windows — it creates virtual XInput controllers for remote players. Parsec uses it automatically. Each friend who connects gets a virtual controller slot.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Host a Parsec Arcade room</strong>
+        <p>In Parsec → Arcade → Host Game. Set:</p>
+        <pre>Game:        (browse to your emulator EXE, or the already-running window)
+Max guests:  3 (you + 3 friends = 4 players)
+Room link:   Share this code/link with your 3 friends</pre>
+        <p>Guests install Parsec for free and join via the link. They connect their own controller (USB/Bluetooth) to their own PC — Parsec forwards those inputs to your server.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Friends connect via the link</strong>
+        <p>Friends go to the shared Parsec link, install Parsec if they haven't, and join the session. They see your emulator screen. Each person's controller controls the corresponding player in the emulator.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">🏆</div>
+    <div class="callout-body"><strong>Best Mario Party games for this setup:</strong> Mario Party 2 (N64) is widely considered the best of the N64 era. Mario Party 4 (GCN) is the best GameCube entry. Both work great over Parsec since turns take seconds to execute and latency is barely noticeable.</div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎮 Option B: RetroArch NetPlay (N64)</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install RetroArch on all players' PCs</strong>
+        <p>Download from <a href="https://retroarch.com" target="_blank">retroarch.com</a>. Install the <code>Mupen64Plus-Next</code> core from the core downloader.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Host sets up a NetPlay session</strong>
+        <p>On your server: RetroArch → Load Core → Mupen64Plus-Next → Load Content → (your Mario Party ROM) → NetPlay → Start NetPlay Host:</p>
+        <pre>Port:        55435 (default, open in firewall)
+Password:    set a room password
+Server Mode: Server (you host)
+Spectators:  Disabled</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall port</strong>
+        <pre>netsh advfirewall firewall add rule name="RetroArch NetPlay" dir=in action=allow protocol=TCP localport=55435
+netsh advfirewall firewall add rule name="RetroArch NetPlay UDP" dir=in action=allow protocol=UDP localport=55435</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Friends connect</strong>
+        <p>Friends load the same ROM in RetroArch → NetPlay → Connect to NetPlay Host → enter your public IP (or domain) and port 55435. They need the same ROM file (same hash) to join.</p>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>ROM sync:</strong> All players need an identical ROM file (same region, no modifications). If someone has a different dump, they'll get a sync error. Share the exact same file.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Access Control</div>
+  <div class="card">
+    <p>For Parsec: the room link is the password — don't share it publicly. You can also set a PIN in Parsec Arcade settings that guests must enter.</p>
+    <p>For RetroArch NetPlay: set a room password in NetPlay settings. Players must enter it to join.</p>
+    <p>Neither approach requires SSO — the session is controlled by who has the room link/password, which you share directly with your friends.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎲 Mario Party Game List (N64 + GCN)</div>
+  <div class="card">
+    <table>
+      <tr><th>Game</th><th>System</th><th>Players</th><th>Recommended?</th></tr>
+      <tr><td>Mario Party</td><td>N64</td><td>1–4</td><td>Classic, but joystick-spin minigames break controllers</td></tr>
+      <tr><td>Mario Party 2</td><td>N64</td><td>1–4</td><td>⭐ Best N64 entry — great variety of boards and minigames</td></tr>
+      <tr><td>Mario Party 3</td><td>N64</td><td>1–4</td><td>Good, introduces duel boards</td></tr>
+      <tr><td>Mario Party 4</td><td>GCN</td><td>1–4</td><td>⭐ Best GCN entry — fresh minigames, good boards</td></tr>
+      <tr><td>Mario Party 5</td><td>GCN</td><td>1–4</td><td>Solid, introduces capsule system</td></tr>
+      <tr><td>Mario Party 6</td><td>GCN</td><td>1–4</td><td>Day/night mechanic adds variety</td></tr>
+      <tr><td>Mario Party 7</td><td>GCN</td><td>1–8 (with mic)</td><td>Last GCN entry, has 8-player modes</td></tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

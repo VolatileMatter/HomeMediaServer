@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Linux</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🐧</div>
+  <div>
+    <h1>Transitioning to Linux</h1>
+    <div class="subtitle">// Pros &amp; Cons · Best Distros · Per-Service Considerations //</div>
+    <p class="desc">Should you run Linux on your home server? This tab covers the real trade-offs, which distro to pick, how each service fares, and how to make the transition.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Summary: Linux is better for everything <em>except</em> game streaming and Xbox 360 emulation. A hybrid approach (Linux for always-on services, Windows for gaming) is the best long-term architecture.</div>
+
+<div class="section">
+  <div class="section-title">⚖️ Overall Pros &amp; Cons</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">✅ Advantages of Linux for a Home Server</div>
+      <ul style="margin:0 0 0 18px">
+        <li>Better performance — no background Windows Update, telemetry, or GUI overhead</li>
+        <li>All server software designed for Linux first (Docker, Nextcloud, etc.)</li>
+        <li>More stable — Linux servers run for years without rebooting</li>
+        <li>Better security posture — smaller attack surface, no SMB exposed by default</li>
+        <li>Free forever, no licensing issues</li>
+        <li>Cron jobs replace Windows Task Scheduler (simpler, more powerful)</li>
+        <li>Better CLI tools for automation</li>
+        <li>Systemd services > NSSM for service management</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">❌ Disadvantages / Challenges</div>
+      <ul style="margin:0 0 0 18px">
+        <li><strong>Steam and gaming:</strong> Most Windows games work via Proton/Wine but not all, and setup is more complex</li>
+        <li><strong>XENIA (Xbox 360 emulator):</strong> Linux port is incomplete — Xbox 360 emulation basically requires Windows</li>
+        <li><strong>Sunshine game streaming:</strong> Works on Linux, but Nvidia GPU setup is more complex</li>
+        <li><strong>No GUI:</strong> Headless Linux is more efficient but requires CLI comfort</li>
+        <li><strong>Driver quirks:</strong> Some older hardware has better Windows support</li>
+        <li><strong>Learning curve</strong> if you're not already familiar with Linux</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🏆 Recommended Distros</div>
+  <div class="card">
+    <table>
+      <tr><th>Distro</th><th>Best For</th><th>Future-Proof?</th><th>Verdict</th></tr>
+      <tr>
+        <td><strong>Ubuntu Server 24.04 LTS</strong></td>
+        <td>Easiest transition from Windows</td>
+        <td>✅ 5-year LTS support (2029)</td>
+        <td>Best for beginners</td>
+      </tr>
+      <tr>
+        <td><strong>Debian 12 Stable</strong></td>
+        <td>Rock-solid stability, minimal</td>
+        <td>✅ Extremely long support cycles</td>
+        <td>Best for "set it and forget it"</td>
+      </tr>
+      <tr>
+        <td><strong>Fedora Server 40</strong></td>
+        <td>More current packages</td>
+        <td>🟡 13-month release cycles</td>
+        <td>Good if you like newer software</td>
+      </tr>
+      <tr>
+        <td><strong>Unraid</strong></td>
+        <td>NAS + media server focus</td>
+        <td>✅ Commercial product, well-maintained</td>
+        <td>Best GUI for pure media server (not free)</td>
+      </tr>
+      <tr>
+        <td>CasaOS</td>
+        <td>Docker-based home server GUI</td>
+        <td>🟡 Newer project</td>
+        <td>Interesting but less mature</td>
+      </tr>
+    </table>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Recommendation: Ubuntu Server 24.04 LTS</strong> for the primary server. Most documentation is Ubuntu-targeted, package support is excellent, and the 5-year LTS window means you won't need to upgrade constantly.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🗂️ Service-by-Service Linux Compatibility</div>
+  <div class="card">
+    <table>
+      <tr><th>Service</th><th>Linux Support</th><th>Notes</th></tr>
+      <tr><td>Plex Media Server</td><td>✅ Excellent</td><td>Native Linux package; actually better on Linux</td></tr>
+      <tr><td>Calibre-Web</td><td>✅ Excellent</td><td>Python app — identical on Linux; systemd service instead of NSSM</td></tr>
+      <tr><td>Audiobookshelf</td><td>✅ Native Linux</td><td>Linux is the primary platform; .deb package available</td></tr>
+      <tr><td>Nextcloud</td><td>✅ Excellent</td><td>Linux + Apache/Nginx is the recommended setup; XAMPP not needed</td></tr>
+      <tr><td>qBittorrent + Sonarr</td><td>✅ Excellent</td><td>Both have native Linux packages</td></tr>
+      <tr><td>Minecraft Server</td><td>✅ Excellent</td><td>Java runs everywhere; systemd + cron replace Task Scheduler</td></tr>
+      <tr><td>ARK: SE Server</td><td>✅ Good</td><td>Linux dedicated server available via SteamCMD; actually uses less RAM on Linux</td></tr>
+      <tr><td>SS13 (BYOND)</td><td>⚠️ Partial</td><td>BYOND has a Linux server mode but some codebases work better on Windows</td></tr>
+      <tr><td>Sunshine (game streaming)</td><td>✅ Good</td><td>Works well; Nvidia GPU needs proprietary drivers</td></tr>
+      <tr><td>Dolphin (GameCube)</td><td>✅ Excellent</td><td>Native Linux support, Flatpak available</td></tr>
+      <tr><td>XENIA (Xbox 360)</td><td>❌ Poor</td><td>Linux port exists but is incomplete; many games won't run</td></tr>
+      <tr><td>Steam (client)</td><td>✅ Good</td><td>Native Linux client + Proton for Windows games (~80% compatibility)</td></tr>
+      <tr><td>EmulatorJS (Pokemon, etc.)</td><td>✅ Excellent</td><td>Browser-based, runs anywhere</td></tr>
+      <tr><td>Jukebox (infinite-jukebox)</td><td>✅ Excellent</td><td>Node.js/Python — native Linux</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🏗️ The Hybrid Architecture (Recommended)</div>
+  <div class="card">
+    <div class="card-title">Keep Windows for Gaming, Run Linux for Everything Else</div>
+    <p>The ideal long-term setup is two machines (or dual-boot on one):</p>
+    <div class="grid-2">
+      <div class="card" style="border-color:rgba(91,141,217,0.3)">
+        <div class="card-title" style="color:var(--accent2)">🐧 Linux Server (always on)</div>
+        <ul style="margin:0 0 0 18px;font-size:.85rem">
+          <li>Plex, Calibre-Web, Audiobookshelf</li>
+          <li>Nextcloud, qBittorrent, Sonarr</li>
+          <li>Minecraft, ARK servers</li>
+          <li>All emulation (except Xbox 360)</li>
+          <li>Dashboard, Caddy, Vaultwarden</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:rgba(200,168,75,0.3)">
+        <div class="card-title" style="color:var(--accent)">⊞ Windows PC (on-demand)</div>
+        <ul style="margin:0 0 0 18px;font-size:.85rem">
+          <li>Sunshine game streaming</li>
+          <li>Xbox 360 emulation (XENIA)</li>
+          <li>Steam gaming</li>
+          <li>Can be shut down when not gaming</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🚀 How to Transition: Step-by-Step</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Ubuntu Server 24.04 LTS</strong>
+        <p>Download from <a href="https://ubuntu.com/download/server" target="_blank">ubuntu.com</a>. Boot from USB. Choose "Ubuntu Server (minimized)" for a lean install. Set up SSH during install so you can manage it headlessly.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Replace NSSM with systemd service files</strong>
+        <p>Every service you ran with NSSM on Windows gets a <code>.service</code> file in <code>/etc/systemd/system/</code>. Example for Audiobookshelf:</p>
+        <pre>[Unit]
+Description=Audiobookshelf
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+ExecStart=/usr/bin/audiobookshelf
+Restart=always
+
+[Install]
+WantedBy=multi-user.target</pre>
+        <p>Then: <code>sudo systemctl enable --now audiobookshelf</code></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Replace Task Scheduler with cron</strong>
+        <p>Edit cron jobs with <code>crontab -e</code>:</p>
+        <pre># Minecraft 2am shutdown, 3am restart:
+55 1 * * * /home/server/minecraft/shutdown.sh
+0  3 * * * /home/server/minecraft/start.sh
+
+# DDNS update every 5 minutes:
+*/5 * * * * /home/server/ddns.sh</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Nextcloud on Linux (better than XAMPP)</strong>
+        <p>Use the official Nextcloud snap package:</p>
+        <pre>sudo snap install nextcloud
+sudo nextcloud.manual-install admin yourpassword</pre>
+        <p>Runs with its own Apache and PHP — no XAMPP needed.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Migrate your data with rsync</strong>
+        <p>From Windows to Linux (run on Linux, pulling from Windows share):</p>
+        <pre>rsync -avz --progress "//192.168.1.100/Media" /mnt/media/</pre>
+        <p>Or from an external drive connected directly to the Linux box.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

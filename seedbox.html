@@ -1,200 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Seedbox</title>
-<link rel="stylesheet" href="shared.css">
-</head>
+<head><meta charset="UTF-8"><title>Seedbox</title><link rel="stylesheet" href="shared.css"></head>
 <body>
 
 <div class="page-header">
   <div class="page-icon">🌱</div>
   <div>
-    <h1>Seedbox + Automated TV</h1>
-    <div class="subtitle">// Always Behind VPN · Auto TV Downloads · Other Services Unaffected //</div>
-    <p class="desc">A torrent client that routes ALL traffic through a VPN, but only the torrent client — not Plex, Minecraft, or your other services. Plus Sonarr for automated TV episode downloading.</p>
+    <h1>Seedbox + Automated TV/Movies</h1>
+    <div class="subtitle">// Mullvad VPN · qBittorrent · Sonarr · Radarr · Prowlarr //</div>
+    <p class="desc">qBittorrent bound to Mullvad's VPN interface — if the VPN drops, downloads stop. Other services (Plex, Minecraft, etc.) keep using your normal connection. Sonarr and Radarr automate TV and movie downloads.</p>
   </div>
 </div>
 
 <div class="callout callout-dragon">
   <div class="callout-icon">🐉</div>
-  <div class="callout-body"><strong>Legal note:</strong> This guide assumes you're downloading content you have the right to download (Linux ISOs, your own rips, public domain content, or content you've purchased). The VPN-binding technique itself is a legitimate privacy tool.</div>
+  <div class="callout-body"><strong>Legal note:</strong> This guide describes VPN-bound torrenting as a privacy and networking technique. Use it for content you have the right to download. Mullvad is chosen for its strong no-logs policy, cash/crypto payment options, and reliable port forwarding.</div>
 </div>
 
-<div class="v1-banner">
-  🐉 V1 Goal: qBittorrent bound to a VPN interface so if the VPN drops, torrents stop. Sonarr watches RSS feeds for your TV shows and automatically adds them to qBittorrent. Other services unaffected.
-</div>
+<div class="v1-banner">🐉 V1 Goal: Mullvad connected → qBittorrent bound to Mullvad interface → Sonarr+Radarr+Prowlarr automatically populating it. Other services unaffected by VPN.</div>
 
-<!-- The core concept -->
 <div class="section">
-  <div class="section-title">🧠 How VPN Binding Works</div>
-  <div class="card">
-    <p>The trick is <strong>binding qBittorrent to the VPN's network interface</strong>. When the VPN is connected, traffic flows through it. If the VPN disconnects, qBittorrent has no interface to use and stops sending/receiving — it doesn't fall back to your real IP. Other apps (Plex, Minecraft, etc.) keep using your normal internet connection.</p>
-    <div class="callout callout-tip">
-      <div class="callout-icon">💡</div>
-      <div class="callout-body"><strong>Why this is better than a VPN killswitch:</strong> A killswitch blocks ALL internet on VPN drop — including your Plex streams and Minecraft server. Interface binding only isolates the torrent client, so everything else keeps working.</div>
-    </div>
-  </div>
-</div>
-
-<hr>
-
-<!-- VPN Setup -->
-<div class="section">
-  <div class="section-title">🔒 Step 1: Set Up a VPN That Supports Port Forwarding</div>
+  <div class="section-title">🔒 Step 1: Set Up Mullvad VPN</div>
 
   <div class="card">
-    <div class="card-title">Recommended VPN Providers for Torrenting</div>
+    <div class="card-title">Why Mullvad for Torrenting</div>
     <table>
-      <tr><th>Provider</th><th>Port Forwarding</th><th>Price/mo</th><th>Notes</th></tr>
-      <tr><td>Mullvad VPN</td><td>Yes (limited)</td><td>$5</td><td>Best privacy, accepts cash/crypto</td></tr>
-      <tr><td>ProtonVPN</td><td>Yes (paid plans)</td><td>$4–8</td><td>Good reputation, Swiss-based</td></tr>
-      <tr><td>AirVPN</td><td>Yes</td><td>$4</td><td>Technical users, very configurable</td></tr>
-      <tr><td>IVPN</td><td>Limited</td><td>$6</td><td>Strong privacy, no-log verified</td></tr>
+      <tr><th>Feature</th><th>Mullvad</th></tr>
+      <tr><td>Logging policy</td><td>No-logs, independently audited</td></tr>
+      <tr><td>Payment</td><td>Cash, crypto, card — no account name required</td></tr>
+      <tr><td>Port forwarding</td><td>Yes (via WireGuard — needed for seeding)</td></tr>
+      <tr><td>Kill switch</td><td>Yes (but we use interface binding instead)</td></tr>
+      <tr><td>Price</td><td>€5/month flat (no tiers)</td></tr>
+      <tr><td>WireGuard support</td><td>Yes — much faster than OpenVPN</td></tr>
     </table>
   </div>
 
-  <div class="card">
-    <div class="card-title">Install VPN with Dedicated Interface</div>
-    <p>Install your VPN provider's Windows client. Connect to a server. Open <strong>Network &amp; Internet Settings → Change adapter options</strong>. You should see a new network adapter (often named "Mullvad" or "ProtonVPN" or "TAP-Windows Adapter"). Note the name — you'll need it.</p>
-    <div class="callout callout-warn">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>Keep the VPN client running:</strong> Set the VPN client to launch on Windows startup so it's always connected before qBittorrent tries to use it.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Purchase and install Mullvad</strong>
+        <p>Buy at <a href="https://mullvad.net" target="_blank">mullvad.net</a> — you get an account number, no email required. Download the Windows client and install it.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure Mullvad settings for torrenting</strong>
+        <p>Open Mullvad → Settings:</p>
+        <pre>VPN Protocol:       WireGuard (faster, more stable)
+Auto-connect:       ☑ On (connects on Windows startup)
+Launch on startup:  ☑ On
+Kill switch:        ☑ On (belt-and-suspenders, though we also bind qBit)
+LAN access:         ☑ Allow (critical — lets your other services reach the LAN)</pre>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>"Allow LAN" must be ON.</strong> Without it, Plex, Nextcloud, Minecraft etc. won't be reachable on your local network when Mullvad is connected. This setting makes Mullvad tunnel only internet traffic, not LAN traffic.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Enable Port Forwarding in Mullvad</strong>
+        <p>In the Mullvad app → Settings → VPN Settings → Enable port forwarding. Note the port number assigned — you'll enter this in qBittorrent as the listening port. This allows peers to connect to you for better seeding speeds.</p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">Port forwarding is only available on certain Mullvad servers (most but not all). Choose a server that supports it — the Mullvad app shows which ones have a port forward icon.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Find the Mullvad network adapter name</strong>
+        <p>Once connected, open Settings → Network &amp; Internet → Change adapter options. Look for the new adapter — it will be named something like <strong>"Mullvad"</strong> or <strong>"WireGuard Tunnel"</strong>. Note the exact name — needed for qBittorrent binding.</p>
+        <pre># Or via PowerShell:
+Get-NetAdapter | Where-Object {$_.InterfaceDescription -like "*Mullvad*" -or $_.Name -like "*Mullvad*"}</pre>
+      </div>
     </div>
   </div>
 </div>
 
 <hr>
 
-<!-- qBittorrent setup -->
 <div class="section">
   <div class="section-title">⬇️ Step 2: Install &amp; Configure qBittorrent</div>
 
   <div class="steps">
     <div class="step">
       <div class="step-content">
-        <strong>Download qBittorrent</strong>
-        <p>From <a href="https://qbittorrent.org" target="_blank">qbittorrent.org</a>. Free, open source. Install normally.</p>
+        <strong>Download and install qBittorrent</strong>
+        <p>From <a href="https://qbittorrent.org" target="_blank">qbittorrent.org</a> — free, open source, best Windows torrent client. <span class="tag tag-native">FOSS</span></p>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Bind to VPN interface</strong>
-        <p>Tools → Options → Advanced → <strong>"Network interface"</strong> → select your VPN adapter from the dropdown (e.g., "Mullvad" or "ProtonVPN TAP"). This is the kill-switch binding.</p>
-        <p>Also set <strong>"Optional IP address to bind to"</strong> to the VPN's IP if your provider gives you a static VPN LAN IP.</p>
+        <strong>Bind to the Mullvad network interface</strong>
+        <p>Tools → Options → Advanced tab:</p>
+        <pre>Network interface:             [select Mullvad adapter from dropdown]
+Optional IP address to bind:   (leave blank unless you have a static VPN IP)</pre>
+        <p>This is the kill switch: if Mullvad disconnects, that adapter disappears and qBittorrent stops all transfers immediately.</p>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Enable the Web UI</strong>
-        <p>Tools → Options → Web UI → ☑ Enable web user interface. Set port <code>8090</code>. Set a strong username/password. This is how Sonarr communicates with qBittorrent.</p>
-        <pre>URL to access: http://localhost:8090</pre>
+        <strong>Set the listening port to your Mullvad forwarded port</strong>
+        <p>Tools → Options → Connection:</p>
+        <pre>Port used for incoming connections: [your Mullvad forwarded port number]
+☑ Use UPnP / NAT-PMP: UNCHECK this (the port is already forwarded via Mullvad)</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
         <strong>Configure download paths</strong>
-        <pre>Default save path: D:\Downloads\Complete
-Temp path:         D:\Downloads\Incomplete</pre>
-        <p>In the Categories section, add a "tv-sonarr" category pointing to <code>D:\Downloads\Complete\TV</code>.</p>
+        <pre>Default save path:    D:\Downloads\Complete
+Keep incomplete:      ☑ On
+Incomplete directory: D:\Downloads\Incomplete</pre>
+        <p>Add a <strong>Category</strong> for each automated service:</p>
+        <ul style="margin:4px 0 0 18px">
+          <li>Category <code>tv-sonarr</code> → save path <code>D:\Downloads\Complete\TV</code></li>
+          <li>Category <code>radarr</code> → save path <code>D:\Downloads\Complete\Movies</code></li>
+        </ul>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Open firewall for qBittorrent Web UI</strong>
-        <pre>netsh advfirewall firewall add rule name="qBittorrent WebUI" dir=in action=allow protocol=TCP localport=8090</pre>
+        <strong>Enable the Web UI (for Sonarr/Radarr integration)</strong>
+        <pre>Tools → Options → Web UI:
+☑ Enable web user interface
+Port:     8090
+Username: [set a strong username]
+Password: [set a strong password]
+Bind to localhost only: ☑ (don't expose to internet)</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Set qBittorrent to launch on startup</strong>
-        <p>Tools → Options → Behavior → ☑ "Start qBittorrent on Windows startup." It will minimize to tray.</p>
+        <strong>Start qBittorrent with Windows &amp; verify VPN binding</strong>
+        <p>Tools → Options → Behavior → ☑ Start qBittorrent on Windows startup (minimized to tray).</p>
+        <p><strong>Test the binding:</strong> Add a test torrent. Confirm it downloads. Disconnect Mullvad. The torrent should immediately stall. Reconnect — it resumes. ✓</p>
       </div>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Verify VPN Binding Is Working</div>
-    <p>With qBittorrent running and VPN connected, add a test torrent (a Linux ISO). You should see traffic. Now disconnect the VPN — qBittorrent should show all torrents as "Stalled" or "Error" and stop transferring. Reconnect VPN → torrents resume. That's working correctly.</p>
   </div>
 </div>
 
 <hr>
 
-<!-- Sonarr -->
 <div class="section">
-  <div class="section-title">📺 Step 3: Sonarr — Automated TV Show Downloads</div>
+  <div class="section-title">📡 Step 3: Prowlarr — Unified Indexer Manager <span class="tag tag-native">FOSS</span></div>
 
   <div class="card">
-    <div class="card-title">What Sonarr Does</div>
-    <p>Sonarr monitors RSS feeds (indexers) for new episodes of TV shows you've added to its library. When a matching episode appears, it automatically sends it to qBittorrent. After download completes, it moves the file to your Plex media folder and renames it correctly.</p>
+    <div class="card-title">What Prowlarr Does</div>
+    <p>Prowlarr replaces Jackett as the indexer manager. It integrates directly with Sonarr and Radarr — add an indexer once in Prowlarr and it automatically syncs to all your *arr apps. No more configuring Jackett feeds in each app separately.</p>
   </div>
 
   <div class="steps">
     <div class="step">
       <div class="step-content">
-        <strong>Download and install Sonarr for Windows</strong>
-        <p>From <a href="https://sonarr.tv/#downloads-v3-windows" target="_blank">sonarr.tv</a>. The installer sets up Sonarr as a Windows Service. Access at <code>http://localhost:8989</code>.</p>
+        <strong>Download and install Prowlarr for Windows</strong>
+        <p>From <a href="https://github.com/Prowlarr/Prowlarr/releases" target="_blank">github.com/Prowlarr/Prowlarr</a>. Runs as a Windows Service. Access at <code>http://localhost:9696</code>.</p>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Add qBittorrent as a Download Client</strong>
+        <strong>Add indexers in Prowlarr</strong>
+        <p>Indexers → Add Indexer → search for public indexers (EZTV, RARBG mirrors, 1337x, etc.) or your private tracker. Prowlarr handles the RSS feeds automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Connect Prowlarr to Sonarr and Radarr</strong>
+        <p>Prowlarr → Settings → Apps → Add → Sonarr:</p>
+        <pre>Prowlarr Server: http://localhost:9696
+Sonarr Server:   http://localhost:8989
+API Key:         (from Sonarr: Settings → General → API Key)</pre>
+        <p>Repeat for Radarr. All indexers in Prowlarr now appear automatically in both apps.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📺 Step 4: Sonarr — Automated TV Downloads <span class="tag tag-native">FOSS</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Sonarr</strong>
+        <p>From <a href="https://sonarr.tv/#downloads-v3-windows" target="_blank">sonarr.tv</a> — Windows installer, runs as a service. Access at <code>http://localhost:8989</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add qBittorrent as download client</strong>
         <p>Settings → Download Clients → + → qBittorrent:</p>
         <pre>Host:     localhost
 Port:     8090
 Username: [your qbit username]
 Password: [your qbit password]
 Category: tv-sonarr</pre>
-        <p>Click Test — should show a green checkmark.</p>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Add Indexers (RSS feed sources)</strong>
-        <p>Settings → Indexers → + → Add your indexers. Sonarr supports both public indexers (like EZTV, free) and private trackers. For public indexers without Jackett:</p>
-        <pre>EZTV:     https://eztv.re/ezrss.xml
-1337x:    Use Jackett (see below)</pre>
+        <strong>Set root folder to your Plex TV directory</strong>
+        <p>Settings → Media Management → Root Folders → <code>D:\Media\TV</code></p>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>(Optional) Add Jackett for More Indexers</strong>
-        <p>Jackett is a Windows service that translates many torrent sites into Sonarr-compatible RSS feeds. Download from <a href="https://github.com/Jackett/Jackett/releases" target="_blank">github.com/Jackett/Jackett</a>. Install → runs at <code>http://localhost:9117</code>. Add trackers in Jackett, then add them to Sonarr using the Torznab feed URL Jackett provides.</p>
+        <strong>Add TV shows</strong>
+        <p>Series → Add Series → search → select quality profile → Add Series. Sonarr monitors for new episodes and auto-downloads them. After download, it moves to the Plex folder and renames correctly.</p>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Configure Root Folders</strong>
-        <p>Settings → Media Management → Root Folders → Add → <code>D:\Media\TV</code> (your Plex TV folder). Sonarr will move completed downloads here and rename them.</p>
+        <strong>Connect to Plex for auto-refresh</strong>
+        <p>Settings → Connect → + → Plex Media Server → enter localhost:32400 and your Plex token. Now when Sonarr adds an episode, Plex refreshes that section automatically.</p>
       </div>
     </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Add TV Shows</strong>
-        <p>Series → Add Series → Search for your show → select quality profile → Add. Sonarr will immediately search for existing episodes and start monitoring for new ones automatically.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="callout callout-tip">
-    <div class="callout-icon">📺</div>
-    <div class="callout-body"><strong>Radarr for movies:</strong> Radarr is the movie equivalent of Sonarr — same concept, same setup process, just for movies. Both are from the same development team and integrate identically with qBittorrent.</div>
   </div>
 </div>
 
 <hr>
 
-<!-- Plex + Sonarr integration -->
 <div class="section">
-  <div class="section-title">🎬 Step 4: Connect to Plex</div>
+  <div class="section-title">🎬 Step 5: Radarr — Automated Movie Downloads <span class="tag tag-native">FOSS</span></div>
+
   <div class="card">
-    <p>In Sonarr: Settings → Connect → + → Plex Media Server:</p>
-    <pre>Host:     localhost
-Port:     32400
-Auth Token: (get this from Plex: sign in to plex.tv → account → 
-             open dev tools → any API call → copy X-Plex-Token value)</pre>
-    <p>Check "Update Library." Now when Sonarr downloads a new episode and moves it to the Plex folder, it automatically tells Plex to refresh that section — the episode appears in Plex within seconds.</p>
+    <p>Radarr is identical to Sonarr but for movies. Install from <a href="https://radarr.video" target="_blank">radarr.video</a>, access at <code>http://localhost:7878</code>. Setup is identical — point it at qBittorrent (category: <code>radarr</code>) and root folder <code>D:\Media\Movies</code>. Add movies, set quality profiles, done.</p>
+    <p>The <strong>Wanted → Missing</strong> view lets you manually trigger a search for any movie in your list that hasn't been found yet.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌐 The Full *arr Stack</div>
+  <div class="card">
+    <table>
+      <tr><th>App</th><th>Purpose</th><th>Port</th><th>FOSS?</th></tr>
+      <tr><td>Prowlarr</td><td>Indexer management (feeds to all apps)</td><td>9696</td><td>✅</td></tr>
+      <tr><td>Sonarr</td><td>Automated TV episode downloads</td><td>8989</td><td>✅</td></tr>
+      <tr><td>Radarr</td><td>Automated movie downloads</td><td>7878</td><td>✅</td></tr>
+      <tr><td>qBittorrent</td><td>Torrent client (Mullvad-bound)</td><td>8090</td><td>✅</td></tr>
+      <tr><td>Lidarr</td><td>Automated music downloads (optional)</td><td>8686</td><td>✅</td></tr>
+      <tr><td>Readarr</td><td>Automated ebook downloads (optional)</td><td>8787</td><td>✅</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Readarr + Calibre:</strong> Readarr can automatically populate your Calibre library by downloading ebooks and triggering a Calibre-Web library refresh. Set Readarr's root folder to your Calibre library folder and configure the Calibre import script.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 Security Notes</div>
+  <div class="card">
+    <ul style="margin:0 0 0 18px">
+      <li>All *arr apps should be <strong>localhost only</strong> — never expose ports 8989, 7878, 9696, 8090 to the internet</li>
+      <li>Access them via Tailscale when remote, or add them behind Caddy with auth if needed</li>
+      <li>Set API keys on all apps (they generate one by default) — don't share these</li>
+      <li>qBittorrent Web UI: keep "Bypass auth for localhost" unchecked</li>
+    </ul>
   </div>
 </div>
 

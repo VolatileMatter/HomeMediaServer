@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>SS13</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🚀</div>
+  <div>
+    <h1>Space Station 13 Server</h1>
+    <div class="subtitle">// BYOND · Off by Default · /tg/station or Bay12 //</div>
+    <p class="desc">Self-hosted SS13 server using the BYOND engine. Off by default, spun up on demand. Run any open-source codebase — /tg/station13, Baystation, or Paradise Station.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: A BYOND-based SS13 server running on demand, accessible to players who have the BYOND client installed, password-protected. Off by default.</div>
+
+<div class="section">
+  <div class="section-title">🧠 Understanding SS13 / BYOND</div>
+  <div class="card">
+    <p>Space Station 13 runs on the <strong>BYOND engine</strong> — a proprietary game engine by Dantom/BYOND LLC. Players need the free <a href="https://byond.com" target="_blank">BYOND client</a> installed to connect. The server-side BYOND Dream Daemon is free to download and run.</p>
+    <p>All major SS13 codebases are open source (MIT or similar). The most popular:</p>
+    <table>
+      <tr><th>Codebase</th><th>Style</th><th>Complexity</th><th>GitHub</th></tr>
+      <tr><td><strong>/tg/station13</strong></td><td>Chaotic, fast-paced, most features</td><td>High</td><td>github.com/tgstation/tgstation</td></tr>
+      <tr><td><strong>Baystation12</strong></td><td>Sci-fi RP focused, more serious</td><td>Medium</td><td>github.com/baystation12/Baystation12</td></tr>
+      <tr><td><strong>Paradise Station</strong></td><td>Community-friendly, good balance</td><td>Medium</td><td>github.com/ParadiseSS13/Paradise</td></tr>
+      <tr><td><strong>CEV Eris</strong></td><td>Weird, unique setting</td><td>High</td><td>github.com/discardthree/eris</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Installation</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install BYOND</strong>
+        <p>Download from <a href="https://www.byond.com/download" target="_blank">byond.com/download</a>. The installer includes both the client and the Dream Daemon server. Install to default location.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Clone your chosen codebase</strong>
+        <pre># Install Git if needed: https://git-scm.com
+# For /tg/station:
+git clone https://github.com/tgstation/tgstation.git D:\SS13\tgstation
+
+# For Paradise:
+git clone https://github.com/ParadiseSS13/Paradise.git D:\SS13\paradise</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Compile the server code (.dmb file)</strong>
+        <p>Open the BYOND Dream Maker application. File → Open → browse to your codebase folder and open the <code>.dme</code> file (e.g. <code>tgstation.dme</code>). Press <strong>Compile</strong> (or Build → Compile). This creates a <code>.dmb</code> file — the server binary.</p>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">Compilation can take 5–15 minutes for large codebases like /tg/. The first time is slowest. Some codebases have Python/Rust build steps — check their README for prerequisite installations.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure the server</strong>
+        <p>Copy the example config:</p>
+        <pre>cd D:\SS13\tgstation\config
+copy example_config\*.txt .
+# Edit config.txt — set server name, admin ckeys, etc.
+# Edit admins.txt — add your BYOND username as an admin</pre>
+        <p>In <code>config.txt</code>, set:</p>
+        <pre>server_name = My SS13 Server
+port = 1337
+map = boxstation  # or whatever map you want
+hub = 0           # 0 = don't list on BYOND hub (private server)
+</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create a launch script</strong>
+        <p>Create <code>D:\SS13\start_ss13.bat</code>:</p>
+        <pre>@echo off
+title SS13 Server
+cd /d D:\SS13\tgstation
+"C:\Program Files (x86)\BYOND\bin\DreamDaemon.exe" tgstation.dmb 1337 -safe -invisible -logself
+echo Server stopped.</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall port</strong>
+        <pre>netsh advfirewall firewall add rule name="SS13 BYOND" dir=in action=allow protocol=TCP localport=1337
+netsh advfirewall firewall add rule name="SS13 BYOND UDP" dir=in action=allow protocol=UDP localport=1337</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Connect with BYOND client</strong>
+        <p>Open BYOND client → File → Open Location → enter <code>byond://[your-server-IP]:1337</code>. Log in with your BYOND account. You should see the map loading.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎛️ Dashboard Integration</div>
+  <div class="card">
+    <div class="card-title">On-Demand Start/Stop via Scheduled Tasks</div>
+    <pre># Create start task:
+schtasks /create /tn "ss13-start" /sc once /st 00:00 /tr "D:\SS13\start_ss13.bat" /ru SYSTEM /f
+
+# Stop task:
+schtasks /create /tn "ss13-stop" /sc once /st 00:00 /tr "taskkill /IM DreamDaemon.exe /F" /ru SYSTEM /f</pre>
+    <p>The dashboard Start/Stop buttons then call <code>schtasks /run /tn "ss13-start"</code> / <code>ss13-stop"</code>.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔄 Keeping the Server Updated</div>
+  <div class="card">
+    <pre># Update code from GitHub:
+cd D:\SS13\tgstation
+git pull
+
+# Recompile (do while server is stopped):
+"C:\Program Files (x86)\BYOND\bin\dm.exe" tgstation.dme</pre>
+    <p>Most codebases have update notes in their Discord servers or CHANGELOG files. Don't update mid-round — wait for a round end and a server restart.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Access Control</div>
+  <div class="card">
+    <p>SS13 uses BYOND's account system for identity. Access control is done via config files:</p>
+    <pre># config/admins.txt — one BYOND username per line with rank:
+YourBYONDUsername = Headmin
+
+# To make the server invite-only (whitelist):
+# config/whitelist.txt — list of allowed BYOND usernames (if whitelist is enabled in config.txt)
+# Set in config.txt: whitelist = 1</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Setting <code>hub = 0</code> in config.txt prevents your server from appearing on the public BYOND hub. Players can only connect if they know your IP and port directly.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
