@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Restarting Services</title><link rel="stylesheet" href="shared.css">
+<style>
+  .restart-row { display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--bg2); border:1px solid var(--border); border-radius:3px; margin-bottom:5px; }
+  .svc-icon { font-size:1.1rem; flex-shrink:0; width:26px; text-align:center; }
+  .svc-name { font-weight:700; font-size:.85rem; flex:1; }
+  .svc-method { font-family:'Share Tech Mono',monospace; font-size:.65rem; }
+  .auto { color:#4caf7d; }
+  .manual { color:#e0b84b; }
+  .na { color:var(--text-dim); }
+  .status-badge { font-family:'Share Tech Mono',monospace; font-size:.6rem; padding:2px 8px; border-radius:2px; white-space:nowrap; }
+  .badge-auto   { background:rgba(76,175,125,.15); color:#4caf7d; border:1px solid rgba(76,175,125,.25); }
+  .badge-manual { background:rgba(224,184,75,.14); color:#e0b84b; border:1px solid rgba(224,184,75,.24); }
+  .badge-skip   { background:rgba(120,130,160,.1); color:var(--text-dim); border:1px solid rgba(120,130,160,.18); }
+  .checklist { list-style:none; padding:0; margin:0; }
+  .ci { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid rgba(37,45,61,.4); }
+  .ci:last-child { border:none; }
+  .cbox { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); background:var(--bg); flex-shrink:0; margin-top:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.65rem; transition:all .2s; }
+  .cbox:hover { border-color:var(--accent); }
+  .cbox.done { background:rgba(76,175,125,.2); border-color:#4caf7d; color:#4caf7d; }
+  .ci-body { flex:1; }
+  .ci-title { font-size:.84rem; font-weight:600; }
+  .ci-title.done-text { text-decoration:line-through; color:var(--text-dim); }
+  .ci-detail { font-size:.76rem; color:var(--text-dim); margin-top:2px; line-height:1.5; }
+  .section-tag { font-family:'Share Tech Mono',monospace; font-size:.6rem; padding:2px 7px; border-radius:2px; margin-left:8px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔄</div>
+  <div>
+    <h1>Restarting Services</h1>
+    <div class="subtitle">// Post-Reboot Checklist · What's Automatic · What Needs a Hand //</div>
+    <p class="desc">After a Windows update reboot (or any planned restart), most services come back up on their own within a few minutes. A small number require manual action — mostly game servers. This page is your checklist.</p>
+  </div>
+</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>The goal:</strong> All always-on services restart automatically. Game servers (Minecraft, ARK, SS13) are intentionally off by default after a reboot — you turn them on when you want a session. Emulators (Dolphin, Xenia) are on-demand anyway and need no automation. Sunshine starts automatically so remote streaming is always available.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">📋 Quick Reference — What Restarts Automatically</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table style="margin:0">
+      <tr><th>Service</th><th>Restart method</th><th>Boot time</th><th>Status</th></tr>
+
+      <tr style="background:rgba(255,255,255,.01)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);padding:7px 12px;letter-spacing:.1em">ALWAYS AUTOMATIC</td></tr>
+      <tr><td><span class="svc-icon">☁️</span> Authentik (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~3 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🎬</span> Jellyfin</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📚</span> Calibre-Web</td><td class="svc-method auto">NSSM service</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🎧</span> Audiobookshelf</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🎶</span> Navidrome</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">☀️</span> Sunshine</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🌱</span> Mullvad VPN</td><td class="svc-method auto">Mullvad service + auto-connect</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🔽</span> qBittorrent</td><td class="svc-method auto">NSSM service (starts after Mullvad)</td><td class="na">~45 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📺</span> Sonarr / Radarr / Readarr</td><td class="svc-method auto">Windows Service</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🔍</span> Prowlarr</td><td class="svc-method auto">Windows Service</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🔐</span> Vaultwarden</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📡</span> Uptime Kuma</td><td class="svc-method auto">NSSM service (Node.js)</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📷</span> Immich (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~3 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🕹️</span> RomM (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~2 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🍲</span> Mealie (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~2 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">☁️</span> Nextcloud (XAMPP)</td><td class="svc-method auto">XAMPP Apache + MySQL as Windows Services</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📕</span> Kavita (×2)</td><td class="svc-method auto">NSSM service ×2</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">✅</span> Vikunja</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📖</span> Kiwix</td><td class="svc-method auto">NSSM service</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🤖</span> Ollama</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🤖</span> Open WebUI</td><td class="svc-method auto">NSSM service</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🎯</span> Recommendations API</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📊</span> Stats agent (port 9001)</td><td class="svc-method auto">Task Scheduler on login</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🌐</span> Caddy</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🔒</span> IPBan</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🌍</span> LinguaCafe (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~2 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🃏</span> Anki Sync Server</td><td class="svc-method auto">NSSM service</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">🗺️</span> LibreLingo</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+
+      <tr style="background:rgba(255,255,255,.01)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);padding:7px 12px;letter-spacing:.1em">MANUAL — GAME SERVERS (off by default, start when you want a session)</td></tr>
+      <tr><td><span class="svc-icon">⛏️</span> Minecraft Vanilla</td><td class="svc-method manual">Dashboard → Start, or Task Scheduler manual run</td><td class="na">~20 sec</td><td><span class="status-badge badge-manual">MANUAL</span></td></tr>
+      <tr><td><span class="svc-icon">🔧</span> Minecraft Modded</td><td class="svc-method manual">Dashboard → Start</td><td class="na">~60 sec</td><td><span class="status-badge badge-manual">MANUAL</span></td></tr>
+      <tr><td><span class="svc-icon">🦕</span> ARK</td><td class="svc-method manual">Dashboard → Start (needs 2+ GB RAM free)</td><td class="na">~3 min</td><td><span class="status-badge badge-manual">MANUAL</span></td></tr>
+      <tr><td><span class="svc-icon">🚀</span> SS13</td><td class="svc-method manual">Dashboard → Start</td><td class="na">~30 sec</td><td><span class="status-badge badge-manual">MANUAL</span></td></tr>
+
+      <tr style="background:rgba(255,255,255,.01)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);padding:7px 12px;letter-spacing:.1em">ON-DEMAND — ONLY RUNNING WHEN IN USE</td></tr>
+      <tr><td><span class="svc-icon">🟣</span> Dolphin (GameCube)</td><td class="svc-method na">Launched by Sunshine when someone requests it</td><td class="na">~5 sec</td><td><span class="status-badge badge-skip">ON-DEMAND</span></td></tr>
+      <tr><td><span class="svc-icon">🟢</span> Xenia (Xbox 360)</td><td class="svc-method na">Launched by Sunshine when someone requests it</td><td class="na">~5 sec</td><td><span class="status-badge badge-skip">ON-DEMAND</span></td></tr>
+      <tr><td><span class="svc-icon">🎮</span> Steam</td><td class="svc-method na">Manual launch from server desktop</td><td class="na">~30 sec</td><td><span class="status-badge badge-skip">ON-DEMAND</span></td></tr>
+      <tr><td><span class="svc-icon">🎵</span> Jukebox</td><td class="svc-method na">NSSM or manual — only needed when listening</td><td class="na">~10 sec</td><td><span class="status-badge badge-skip">ON-DEMAND</span></td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Setting Up Automatic Restarts</div>
+
+  <div class="card">
+    <div class="card-title">All NSSM services — how to set them to auto-start</div>
+    <p>Any service installed via NSSM (<code>nssm install ServiceName ...</code>) is already configured as a Windows Service. By default NSSM sets startup type to <strong>Automatic</strong> — they start on boot. Verify with:</p>
+    <pre>sc query ServiceName      # shows current state
+sc qc ServiceName         # shows startup type (should say "AUTO_START")</pre>
+    <p>If any service shows <code>DEMAND_START</code>, fix it:</p>
+    <pre>sc config ServiceName start=auto
+nssm set ServiceName Start SERVICE_AUTO_START</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">WSL2 Docker services — Task Scheduler startup task</div>
+    <p>Authentik, Immich, RomM, Mealie, and LinguaCafe all run in Docker inside WSL2. They need a Task Scheduler entry to start on boot:</p>
+    <pre># Create D:\Server\Scripts\start_docker_services.bat:
+wsl -d Ubuntu -- bash -c "cd ~/authentik && docker-compose up -d >> ~/startup.log 2>&1"
+wsl -d Ubuntu -- bash -c "cd ~/immich && docker-compose up -d >> ~/startup.log 2>&1"
+wsl -d Ubuntu -- bash -c "cd ~/romm && docker-compose up -d >> ~/startup.log 2>&1"
+wsl -d Ubuntu -- bash -c "cd ~/mealie && docker-compose up -d >> ~/startup.log 2>&1"
+wsl -d Ubuntu -- bash -c "cd ~/linguacafe && docker-compose up -d >> ~/startup.log 2>&1"</pre>
+    <pre># In Task Scheduler:
+# Name: Start Docker Services
+# Trigger: At startup, delay 2 minutes (WSL2 needs Windows to fully boot first)
+# Action: Run start_docker_services.bat
+# Run whether user is logged on or not: ☑
+# Run with highest privileges: ☑</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">qBittorrent — must start AFTER Mullvad VPN</div>
+    <p>qBittorrent is bound to the Mullvad network interface. If it starts before Mullvad connects, it won't be able to bind and will either fail to start or fall back to your real IP.</p>
+    <pre># Create D:\Server\Scripts\start_qbittorrent.bat:
+@echo off
+:wait_vpn
+REM Wait until Mullvad shows "Connected" before starting qBittorrent
+mullvad status | findstr /C:"Connected" >nul 2>&1
+if errorlevel 1 (
+    timeout /t 5 /nobreak >nul
+    goto wait_vpn
+)
+REM VPN is connected — start qBittorrent
+nssm start qBittorrent
+
+# In Task Scheduler:
+# Name: Start qBittorrent after VPN
+# Trigger: At startup, delay 3 minutes (gives Mullvad time to connect)
+# Action: Run start_qbittorrent.bat</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📋 Post-Reboot Checklist (interactive)</div>
+  <div class="card">
+    <p>Run through this after any server reboot. Check each item off as you verify it.</p>
+    <ul class="checklist">
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Wait 5 minutes after boot before checking anything</div><div class="ci-detail">Windows services, WSL2, and Mullvad all need time to initialize. Checking too early gives false negatives.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Open Uptime Kuma at http://[server]:3001 — verify green across the board</div><div class="ci-detail">This is the fastest way to see what's up vs down. Any red lights need investigation.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Verify Mullvad VPN is connected</div><div class="ci-detail">Open Mullvad app on the server. Must show "Connected" before qBittorrent does anything useful.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Check Authentik is accessible at https://auth.yourdomain.com</div><div class="ci-detail">WSL2 Docker takes 2–3 minutes to start all Authentik containers. If it's still starting, wait another minute.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Verify Jellyfin loads at https://movies.yourdomain.com</div><div class="ci-detail">Try browsing to something. If Authentik isn't up yet, Jellyfin login will fail — check Authentik first.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Check qBittorrent Web UI at http://[tailscale-ip]:8090</div><div class="ci-detail">Should show active torrents resuming automatically. If no connection, check if Mullvad is connected first.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Verify Sunshine is running — try connecting with Moonlight from another device</div><div class="ci-detail">Sunshine starts automatically. If Moonlight can't connect, check that Sunshine shows up in Windows Services.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Start Minecraft servers if a session is planned</div><div class="ci-detail">Use the Dashboard tab → Start buttons, or run the Task Scheduler tasks manually.</div></div></li>
+      <li class="ci"><div class="cbox" onclick="chk(this)"></div><div class="ci-body"><div class="ci-title">Check the Dashboard → Active Sessions for any anomalies</div><div class="ci-detail">Make sure no ghost sessions are shown from before the reboot.</div></div></li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚠️ What Must Always Be Done By Hand</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🎮 Game Servers (Minecraft, ARK, SS13)</div>
+      <p>Intentionally manual. Game servers shouldn't auto-start because they consume significant RAM. You start them when a gaming session is planned, and they shut down at 2am via the scheduled task.</p>
+      <p>Exception: if Minecraft is heavily used and you want it always on, you can make it automatic via NSSM. Just be aware it holds ~2–4GB RAM.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🕹️ Dolphin, Xenia, Steam</div>
+      <p>On-demand emulators and Steam launch only when someone actively wants to play — they're not services. Sunshine launches them when a user connects via Moonlight. No automation needed or desired.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔑 Windows Login Required for Some Services</div>
+      <p>Services that use Task Scheduler with "Run only when user is logged on" require you to be logged into Windows on the server. For headless operation, either switch them to "Run whether logged on or not" in Task Scheduler, or keep auto-login enabled on the server (set a password-protected screensaver for physical security).</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔍 Uptime Kuma Monitoring Itself</div>
+      <p>Uptime Kuma starts automatically, but you need to manually check if any alerts fired during the downtime window. Open it after every reboot and review the incident history.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🕐 Realistic Boot Timeline</div>
+  <div class="card">
+    <table>
+      <tr><th>Time After Boot</th><th>What's Ready</th></tr>
+      <tr><td>0–60 sec</td><td>Windows Services: Caddy, Jellyfin, Audiobookshelf, Sunshine, Mullvad, IPBan, Navidrome, Kavita, Uptime Kuma, Vaultwarden, Ollama, Kiwix, Vikunja all starting</td></tr>
+      <tr><td>60–90 sec</td><td>Most Windows Services are up. Mullvad should be connected. qBittorrent checks VPN and starts.</td></tr>
+      <tr><td>90–120 sec</td><td>WSL2 itself finishes initializing</td></tr>
+      <tr><td>2–3 min</td><td>Authentik containers start inside WSL2 — this is the slowest service</td></tr>
+      <tr><td>3–5 min</td><td>Authentik fully ready. Immich, RomM, Mealie, LinguaCafe all up. Everything accessible.</td></tr>
+      <tr><td>5 min</td><td><strong>All services fully operational.</strong> Safe to check Uptime Kuma for any issues.</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Tell your users:</strong> If they try to access the server right after a reboot, they may get errors for 3–5 minutes. Post a note in the Owner News feed before planned reboots so nobody is surprised.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function chk(el) {
+  el.classList.toggle('done');
+  if (el.classList.contains('done')) el.textContent = '✓';
+  else el.textContent = '';
+  const t = el.parentElement.querySelector('.ci-title');
+  if (t) t.classList.toggle('done-text', el.classList.contains('done'));
+  // Save state
+  const boxes = Array.from(document.querySelectorAll('.cbox')).map(c => c.classList.contains('done'));
+  localStorage.setItem('restart_checklist', JSON.stringify(boxes));
+}
+
+// Load saved state
+const saved = localStorage.getItem('restart_checklist');
+if (saved) {
+  JSON.parse(saved).forEach((done, i) => {
+    const boxes = document.querySelectorAll('.cbox');
+    if (boxes[i] && done) {
+      boxes[i].classList.add('done');
+      boxes[i].textContent = '✓';
+      const t = boxes[i].parentElement.querySelector('.ci-title');
+      if (t) t.classList.add('done-text');
+    }
+  });
+}
+</script>
+</body>
+</html>

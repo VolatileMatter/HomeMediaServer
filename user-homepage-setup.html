@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Homepage Setup</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🏗️</div>
+  <div>
+    <h1>User Homepage — Setup Guide</h1>
+    <div class="subtitle">// How the Homepage Works · Weather API · Activity Feeds · News System //</div>
+    <p class="desc">The simulated homepage in the "User Home" tab shows what the final experience looks like. This tab explains how to wire up each piece so it uses real live data.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 The homepage is a static HTML file served by a simple Python HTTP server on port 9000. It reads live data from the stats agent (9001), the news API (9001/news), and each service's API. Users' app library preferences are synced to their Authentik profile.</div>
+
+<div class="section">
+  <div class="section-title">🏗️ Architecture Overview</div>
+  <div class="card">
+    <pre>User visits https://home.yourdomain.com
+    ↓
+Cloudflare Tunnel → Caddy
+    ↓
+Caddy forward_auth → Authentik (validates Google login)
+    ↓
+homepage.html is served (Python http.server on port 9000)
+    ↓
+Browser JavaScript fetches live data:
+  • http://localhost:9001/stats         → CPU/RAM/Sunshine status
+  • http://localhost:9001/news          → Owner news feed
+  • http://localhost:9001/sessions      → Active user sessions
+  • http://localhost:8096/api/...       → Jellyfin continue watching
+  • http://localhost:13378/api/...      → Audiobookshelf progress
+  • http://localhost:8083/api/...       → Calibre-Web progress
+  • https://wttr.in/[zipcode]?format=j1 → Weather (or local cache)</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Step 1 — Serve the Homepage</div>
+  <div class="card">
+    <p>Copy <code>user-homepage.html</code> to <code>D:\Server\Dashboard\homepage.html</code> and serve it with a simple HTTP server:</p>
+    <pre># serve_homepage.py (add alongside stats_server.py)
+from flask import Flask, send_file, jsonify
+import json, os
+
+app = Flask(__name__)
+
+@app.route('/')
+def homepage():
+    return send_file('D:/Server/Dashboard/homepage.html')
+
+if __name__ == '__main__':
+    app.run(port=9000, host='0.0.0.0')</pre>
+    <pre>nssm install HomePageServer python "D:\Server\Dashboard\serve_homepage.py"
+nssm start HomePageServer
+netsh advfirewall firewall add rule name="Homepage" dir=in action=allow protocol=TCP localport=9000</pre>
+    <p>Add to Cloudflare Tunnel: <code>home.yourdomain.com → http://localhost:9000</code> with Authentik forward_auth in Caddyfile.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌤️ Step 2 — Weather Widget</div>
+  <div class="card">
+    <p>Users enter their ZIP code in User Settings. The homepage fetches weather from wttr.in (free, no API key needed) and caches it on the stats server to avoid hitting rate limits:</p>
+    <pre># Add to stats_server.py:
+import requests as req, time
+
+weather_cache = {}
+
+@app.route('/weather/&lt;zipcode&gt;')
+def weather(zipcode):
+    now = time.time()
+    if zipcode in weather_cache and now - weather_cache[zipcode]['ts'] < 1800:
+        return jsonify(weather_cache[zipcode]['data'])
+    try:
+        r = req.get(f'https://wttr.in/{zipcode}?format=j1', timeout=5)
+        data = r.json()
+        simple = {
+            'temp_f':  data['current_condition'][0]['temp_F'],
+            'desc':    data['current_condition'][0]['weatherDesc'][0]['value'],
+            'icon':    get_weather_icon(data['current_condition'][0]['weatherCode'])
+        }
+        weather_cache[zipcode] = {'ts': now, 'data': simple}
+        return jsonify(simple)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def get_weather_icon(code):
+    code = int(code)
+    if code == 113: return '☀️'
+    if code in (116,119): return '⛅'
+    if code in (122,143): return '🌤️'
+    if code in (176,179,182,185,263,266,281,284,293,296,299,302,305,308): return '🌧️'
+    if code in (200,386,389): return '⛈️'
+    if code in (227,230,323,326,329,332,335,338,350,368,371): return '❄️'
+    return '🌡️'</pre>
+    <p>In the homepage JS, read the user's stored ZIP from their Authentik attributes or localStorage, then call <code>/weather/[zipcode]</code>:</p>
+    <pre>async function loadWeather() {
+  const zip = localStorage.getItem('user_zipcode') || '90210';
+  try {
+    const r = await fetch(`http://localhost:9001/weather/${zip}`);
+    const d = await r.json();
+    document.getElementById('weather-temp').textContent = d.temp_f + '°F';
+    document.getElementById('weather-desc').textContent = d.desc;
+    document.getElementById('weather-icon').textContent = d.icon;
+  } catch(e) { console.log('Weather unavailable'); }
+}</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎬 Step 3 — Jellyfin "Continue Watching" Feed</div>
+  <div class="card">
+    <p>Jellyfin has a full REST API. Fetch the user's in-progress items using their Jellyfin API key (stored in Authentik user attributes or a server-side lookup):</p>
+    <pre>async function loadJellyfinFeed(jellyfinUserId, apiKey) {
+  const base = 'http://localhost:8096';
+  try {
+    // Get items currently in progress:
+    const r = await fetch(
+      `${base}/Users/${jellyfinUserId}/Items/Resume?Limit=4&MediaTypes=Video`,
+      { headers: { 'X-MediaBrowser-Token': apiKey } }
+    );
+    const d = await r.json();
+    return d.Items.map(item => ({
+      title:    item.SeriesName ? `${item.SeriesName} — S${item.ParentIndexNumber}E${item.IndexNumber}` : item.Name,
+      subtitle: item.RunTimeTicks ? formatRemaining(item.RunTimeTicks, item.UserData?.PlaybackPositionTicks) : '',
+      progress: item.UserData?.PlayedPercentage || 0,
+      link:     `${base}/web/index.html#!/details?id=${item.Id}`
+    }));
+  } catch(e) { return []; }
+}
+
+function formatRemaining(total, pos) {
+  const rem = Math.round((total - (pos||0)) / 600000000);
+  if (rem >= 60) return `${Math.floor(rem/60)}h ${rem%60}m remaining`;
+  return `${rem} min remaining`;
+}</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Getting the Jellyfin user ID:</strong> The stats server can maintain a mapping of Authentik username → Jellyfin user ID. When a user first logs in via Authentik OIDC, Jellyfin creates their account. Query <code>GET /Users</code> with the admin API key to get all user IDs and build the map.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📚 Step 4 — Calibre &amp; Audiobookshelf Progress</div>
+  <div class="card">
+    <pre># Audiobookshelf API — get user's in-progress items:
+async function loadABSFeed(absToken) {
+  const r = await fetch('http://localhost:13378/api/me/items-in-progress?limit=3', {
+    headers: { 'Authorization': `Bearer ${absToken}` }
+  });
+  const d = await r.json();
+  return d.libraryItems.map(item => ({
+    title:    item.media?.metadata?.title,
+    author:   item.media?.metadata?.authorName,
+    progress: item.userMediaProgress?.progress * 100 || 0,
+    link:     `http://localhost:13378/item/${item.id}`
+  }));
+}</pre>
+    <pre># Calibre-Web doesn't have a native "continue reading" API, but you can
+# query the reading history via its SQLite database:
+# D:\Books\app.db → table: book_read_link
+
+# Add a proxy endpoint to stats_server.py:
+@app.route('/calibre/inprogress/&lt;username&gt;')
+def calibre_inprogress(username):
+    import sqlite3
+    conn = sqlite3.connect('D:/Books/app.db')
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute('''
+        SELECT b.title, b.author_sort, brl.read_status, brl.last_modified
+        FROM book_read_link brl
+        JOIN books b ON b.id = brl.book_id
+        JOIN user u ON u.id = brl.user_id
+        WHERE u.name = ? AND brl.read_status = 1
+        ORDER BY brl.last_modified DESC LIMIT 3
+    ''', (username,)).fetchall()
+    return jsonify([dict(r) for r in rows])</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📢 Step 5 — Owner News Feed</div>
+  <div class="card">
+    <p>The news feed is a JSON file you edit directly. The homepage fetches it on load. The stats server exposes it as an API:</p>
+    <pre># D:\Server\Dashboard\news.json — edit this to post news:
+[
+  {
+    "id": "1",
+    "title": "ARK Server Up This Weekend",
+    "body": "Spinning up the ARK server Saturday evening. Let me know if you want to join.",
+    "date": "Mar 15, 2025",
+    "pinned": false
+  }
+]
+
+# Endpoint in stats_server.py:
+@app.route('/news')
+def news():
+    try: return jsonify(json.load(open('D:/Server/Dashboard/news.json')))
+    except: return jsonify([])
+
+@app.route('/news', methods=['POST'])
+def post_news():
+    # Admin-only — add Authentik group check before allowing this
+    items = json.load(open('D:/Server/Dashboard/news.json')) if os.path.exists('...') else []
+    items.insert(0, request.json)
+    json.dump(items[:20], open('D:/Server/Dashboard/news.json','w'), indent=2)
+    return jsonify({'ok': True})</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">💾 Step 6 — Syncing App Library Preferences to Authentik</div>
+  <div class="card">
+    <p>Currently the app library choices are saved to <code>localStorage</code>. To sync them across devices (so the user gets the same setup on phone + tablet + desktop), store them in Authentik's user attributes:</p>
+    <pre># When user changes their app library selections, call:
+async function savePrefsToAuthentik(enabledApps) {
+  // This calls your stats server, which then calls the Authentik API:
+  await fetch('http://localhost:9001/user-prefs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apps: [...enabledApps] })
+  });
+}
+
+# In stats_server.py:
+@app.route('/user-prefs', methods=['POST'])
+def save_user_prefs():
+    username = request.headers.get('X-authentik-username')
+    if not username: return jsonify({'error': 'no user'}), 401
+    data = request.json
+    # Store in Authentik user attributes via Authentik API:
+    r = requests.patch(
+        f'{AUTHENTIK_URL}/api/v3/core/users/',
+        headers={'Authorization': f'Bearer {AUTHENTIK_TOKEN}'},
+        params={'username': username},
+        json={'attributes': {'homepage_apps': data['apps']}}
+    )
+    return jsonify({'ok': r.status_code < 300})</pre>
+  </div>
+</div>
+
+</body>
+</html>

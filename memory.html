@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Managing Memory</title><link rel="stylesheet" href="shared.css">
+<style>
+  .mem-bar-wrap { margin-bottom:4px; }
+  .mem-bar { height:18px; background:var(--bg3); border-radius:3px; position:relative; overflow:hidden; }
+  .mem-fill { height:100%; border-radius:3px; transition:width .6s; display:flex; align-items:center; padding-left:6px; }
+  .mem-fill span { font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.5); }
+  .mem-label { display:flex; justify-content:space-between; font-family:'Share Tech Mono',monospace; font-size:.6rem; color:var(--text-dim); margin-top:2px; margin-bottom:8px; }
+  .tier { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px;margin-bottom:10px; }
+  .tier-title { font-family:'Cinzel',serif;font-size:.88rem;font-weight:700;margin-bottom:6px; }
+  .tier-high { color:#e05c5c; }
+  .tier-med  { color:#e0b84b; }
+  .tier-low  { color:#4caf7d; }
+  .tier-idle { color:var(--text-dim); }
+  .rule-row { display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(37,45,61,.35);font-size:.82rem; }
+  .rule-row:last-child { border:none; }
+  .rule-icon { font-size:1rem;flex-shrink:0;width:20px;text-align:center; }
+  .ps-cmd { background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--accent2);cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:6px;transition:all .16s; }
+  .ps-cmd:hover { border-color:rgba(91,141,217,.4);background:rgba(91,141,217,.06); }
+  .copy-btn { margin-left:auto;font-size:.58rem;color:var(--text-dim);border:1px solid var(--border);background:transparent;padding:1px 6px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace; }
+  .copy-btn:hover { border-color:var(--accent2);color:var(--accent2); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🧠</div>
+  <div>
+    <h1>Managing Memory</h1>
+    <div class="subtitle">// RAM Budget · Spinning Up &amp; Down · Avoiding OOM //</div>
+    <p class="desc">A Windows gaming desktop typically has 16–32 GB RAM. Most server services are lightweight — the problems come when you stack emulators, ARK, Minecraft modded, and Ollama all at once. This page teaches you to be intentional about what's running.</p>
+  </div>
+</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>The key insight:</strong> Your server has two distinct modes — "server mode" (serving media, running Minecraft, downloads) and "gaming mode" (Dolphin, Xenia, ARK). These are largely incompatible at the same time on 16 GB RAM. On 32 GB you have more flexibility. Know your RAM budget.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">📊 RAM Budget at a Glance</div>
+  <div class="card">
+    <p style="margin-bottom:16px">Approximate RAM usage per service at idle/light use. Stack these to see how close you are to your limit.</p>
+
+    <div class="tier">
+      <div class="tier-title tier-high">🔴 Heavy Hitters — 1–10+ GB each</div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:70%;background:linear-gradient(90deg,#e05c5c,#e08050)"><span>ARK: Survival Evolved — 6–10 GB</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:50%;background:linear-gradient(90deg,#e05c5c,#e08050)"><span>Ollama (large model, e.g. 13B) — 10–20 GB VRAM/RAM</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:40%;background:linear-gradient(90deg,#e05c5c,#e08050)"><span>Xenia (Xbox 360) — 2–4 GB</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:35%;background:linear-gradient(90deg,#e05c5c,#e08050)"><span>Dolphin (GameCube/Wii) — 1–3 GB</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:30%;background:linear-gradient(90deg,#e0b84b,#e0d050)"><span>Minecraft Modded (Forge/Fabric) — 3–6 GB</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:22%;background:linear-gradient(90deg,#e0b84b,#e0d050)"><span>Minecraft Vanilla — 1–2 GB</span></div></div></div>
+    </div>
+
+    <div class="tier">
+      <div class="tier-title tier-med">🟡 Medium — 200 MB–1 GB each</div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:18%;background:linear-gradient(90deg,#e0b84b,#c8a84b)"><span>Authentik (Docker) — 600 MB–1 GB</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:14%;background:linear-gradient(90deg,#e0b84b,#c8a84b)"><span>Ollama (small model, 7B) — 5–8 GB VRAM (GPU usually, not RAM)</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:12%;background:linear-gradient(90deg,#e0b84b,#c8a84b)"><span>Immich (Docker) — 500 MB–1 GB</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:10%;background:linear-gradient(90deg,#e0b84b,#c8a84b)"><span>Jellyfin (4K transcoding) — 500 MB–2 GB</span></div></div></div>
+      <div class="mem-bar-wrap"><div class="mem-bar"><div class="mem-fill" style="width:8%;background:linear-gradient(90deg,#e0b84b,#c8a84b)"><span>Nextcloud/XAMPP — 300–600 MB</span></div></div></div>
+    </div>
+
+    <div class="tier">
+      <div class="tier-title tier-low">🟢 Lightweight — Under 200 MB each</div>
+      <p style="font-size:.8rem;color:var(--text-dim)">Caddy, Jellyfin (idle/direct-play), Navidrome, Calibre-Web, Audiobookshelf, Kavita, Vaultwarden, Uptime Kuma, qBittorrent (idle), Sonarr/Radarr, Prowlarr, Readarr, Vikunja, Kiwix, Recommendations API, Stats agent — all under 200 MB each, most under 100 MB.</p>
+    </div>
+
+    <div class="tier">
+      <div class="tier-title tier-idle">⚫ Windows overhead (unavoidable)</div>
+      <p style="font-size:.8rem;color:var(--text-dim)">Windows 10 itself uses ~2–3 GB RAM. WSL2 takes ~1 GB reserved for the Linux VM. Total overhead: ~3–4 GB before any services run.</p>
+    </div>
+
+    <div class="callout callout-warn" style="margin-top:14px">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>16 GB scenario:</strong> Windows (3 GB) + always-on services (~3 GB) + Authentik (~1 GB) = ~7 GB baseline. You have ~9 GB free. ARK alone needs 6–8 GB. You cannot run ARK + Minecraft Modded + Dolphin simultaneously on 16 GB. <strong>32 GB is strongly recommended</strong> if you plan to run game servers and emulators regularly.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔄 The Golden Rule: Stop Before You Start</div>
+  <div class="card">
+    <p>Before launching any heavy process, stop something else that's not actively needed. Build a habit:</p>
+    <div class="rule-row"><span class="rule-icon">🦕</span><strong>Before starting ARK:</strong> Stop Minecraft modded (if running) + stop Ollama service + close any emulators</div>
+    <div class="rule-row"><span class="rule-icon">🟣</span><strong>Before launching Dolphin/Xenia:</strong> Stop ARK + Minecraft modded (vanilla is fine) + stop Ollama if using large model</div>
+    <div class="rule-row"><span class="rule-icon">🤖</span><strong>Before running a large Ollama model (13B+):</strong> Stop ARK, stop Minecraft modded, close emulators</div>
+    <div class="rule-row"><span class="rule-icon">⛏️</span><strong>Before starting Minecraft Modded:</strong> Stop ARK, close all emulators, close Ollama if using large model</div>
+    <div class="rule-row"><span class="rule-icon">✅</span><strong>For Minecraft Vanilla + Jellyfin + downloads:</strong> This runs fine on 16 GB with no special preparation</div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚡ Quick Commands — Start &amp; Stop Services</div>
+  <div class="card">
+    <div class="card-title">From PowerShell (run as Administrator):</div>
+    <p>Copy these into a PowerShell window on the server when you need to manage memory quickly.</p>
+
+    <div class="grid-2">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);margin-bottom:8px;letter-spacing:.08em">STOP SERVICES</div>
+        <div class="ps-cmd">Stop-Service Minecraft-Vanilla<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">Stop-Service Minecraft-Modded<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">nssm stop ARKServer<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">Stop-Service OllamaService<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">wsl -d Ubuntu -e bash -c "cd ~/authentik && docker-compose stop worker"<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+      </div>
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);margin-bottom:8px;letter-spacing:.08em">START SERVICES</div>
+        <div class="ps-cmd">Start-Service Minecraft-Vanilla<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">Start-Service Minecraft-Modded<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">nssm start ARKServer<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">Start-Service OllamaService<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+        <div class="ps-cmd">wsl -d Ubuntu -e bash -c "cd ~/authentik && docker-compose start worker"<button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-top:16px">Check current RAM usage in PowerShell:</div>
+    <pre>Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 15 Name, @{N='RAM(MB)';E={[math]::Round($_.WorkingSet/1MB,0)}} | Format-Table -AutoSize</pre>
+    <pre># Or a quick summary:
+$os = Get-CimInstance Win32_OperatingSystem
+$used = [math]::Round(($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) / 1MB, 1)
+$total = [math]::Round($os.TotalVisibleMemorySize / 1MB, 1)
+Write-Host "RAM: $used GB used / $total GB total ($([math]::Round($used/$total*100))% used)"</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🤖 Ollama Memory Management</div>
+  <div class="card">
+    <div class="card-title">The model stays in RAM/VRAM until you explicitly unload it</div>
+    <p>Ollama loads the model into memory on first use and keeps it there for fast responses. On 16 GB with limited VRAM, a 13B model can eat 10–15 GB of unified memory. Control this explicitly:</p>
+    <pre># Check what models are currently loaded and how much VRAM/RAM they use:
+ollama ps
+
+# Unload a model from memory (frees RAM immediately):
+ollama stop llama3.1
+
+# Load a smaller model instead of the large one:
+ollama run llama3.2:1b   # 1B param model — only ~1.5 GB
+ollama run llama3.1:8b   # 8B param model — ~5 GB (good balance)
+
+# Set a timeout so Ollama auto-unloads after inactivity:
+# In Authentik admin → add env var to Ollama service:
+OLLAMA_KEEP_ALIVE=5m     # unload after 5 minutes of inactivity</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Best practice:</strong> Use the 8B model for daily use (good quality, manageable memory). Only load the 13B+ model when you actually need it for complex reasoning — and stop it afterward. Set <code>OLLAMA_KEEP_ALIVE=5m</code> as a safety net.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎮 Emulator Session Management</div>
+  <div class="card">
+    <div class="card-title">Dolphins and Xenia are launched by Sunshine — they close when the session ends</div>
+    <p>When configured as Sunshine apps, Dolphin and Xenia are launched when a user connects via Moonlight and (should be) terminated when they disconnect. Verify this behavior in Sunshine settings:</p>
+    <pre># In Sunshine Admin (https://localhost:47990):
+# Applications → edit each emulator → set "Command Termination" properly
+# The process must fully quit when Moonlight disconnects, not minimize to tray.
+
+# Dolphin: launch with --no-gui flag to avoid tray issues:
+dolphin.exe --no-gui --batch -e "D:\Emulation\GameCube\game.iso"
+
+# After session ends, verify no dolphin.exe process is still running:
+Get-Process dolphin -ErrorAction SilentlyContinue</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Preventing "Orphan" emulator processes that eat RAM forever</div>
+    <p>Sometimes an emulator crashes or is left running without an active Sunshine session. Add a scheduled task that checks for orphaned emulator processes:</p>
+    <pre># check_orphan_emus.ps1 — run every 30 minutes via Task Scheduler
+$emus = @('dolphin', 'xenia', 'xenia_canary')
+
+foreach ($emu in $emus) {
+    $proc = Get-Process $emu -ErrorAction SilentlyContinue
+    if ($proc) {
+        # Check if Sunshine has an active session
+        $sunshine_sessions = Invoke-WebRequest "https://localhost:47990/api/sessions" `
+            -UseBasicParsing -SkipCertificateCheck 2>$null
+        $has_session = $sunshine_sessions.Content -match '"id"'
+
+        if (-not $has_session) {
+            Write-Host "No active Sunshine session — killing orphaned $emu"
+            Stop-Process -Name $emu -Force
+        }
+    }
+}</pre>
+    <pre># Task Scheduler:
+# Name: Kill Orphan Emulators
+# Trigger: Repeat every 30 minutes indefinitely
+# Action: powershell -ExecutionPolicy Bypass -File "D:\Server\Scripts\check_orphan_emus.ps1"</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🚨 When You're Running Out of RAM</div>
+  <div class="card">
+    <div class="card-title">Warning signs to watch for</div>
+    <ul style="margin:0 0 0 18px;font-size:.85rem">
+      <li>Windows starts using the page file (disk) for RAM — everything slows down dramatically</li>
+      <li>Task Manager shows RAM at 90%+ in the Performance tab</li>
+      <li>Services become unresponsive or crash with out-of-memory errors</li>
+      <li>Uptime Kuma starts showing services flipping down/up rapidly</li>
+      <li>The Minecraft server console shows "java.lang.OutOfMemoryError"</li>
+    </ul>
+    <div class="card-title" style="margin-top:14px">Immediate triage — kill the biggest offenders</div>
+    <pre># One-liner to free the most memory fast:
+# Kill ARK (biggest offender), Minecraft modded, and Ollama:
+$killers = @('ShooterGame', 'java', 'ollama_runners')
+foreach ($k in $killers) {
+    $p = Get-Process $k -ErrorAction SilentlyContinue
+    if ($p) { Stop-Process -Name $k -Force; Write-Host "Killed $k" }
+}
+
+# Then check free RAM:
+$os = Get-CimInstance Win32_OperatingSystem
+Write-Host "Free RAM: $([math]::Round($os.FreePhysicalMemory / 1MB, 1)) GB"</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Windows page file — set it correctly</div>
+    <p>The page file is your safety net. If real RAM fills up, Windows spills overflow to disk. It's slow (especially on HDD) but prevents crashes. Set it properly:</p>
+    <pre># In Windows: System → Advanced System Settings → Performance → Settings
+# → Advanced → Virtual Memory → Change
+# Uncheck "Automatically manage"
+# Set CUSTOM SIZE on your SSD (not your HDD):
+#   Initial size: [your RAM in MB]     e.g. 16384 for 16 GB
+#   Maximum size: [2× your RAM in MB]  e.g. 32768 for 16 GB
+# Apply → OK → Reboot</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Put the page file on your NVMe SSD, not your media HDD.</strong> An NVMe SSD page file is ~10× faster than an HDD page file, which means the "disk spill" situation is much less painful. 32 GB on the SSD is fine.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Long-term solution: upgrade to 32 GB RAM</div>
+    <p>DDR4 32 GB kits are inexpensive. This is the single most impactful upgrade for a server that runs game servers alongside emulators:</p>
+    <table>
+      <tr><th>RAM</th><th>What you can run simultaneously</th></tr>
+      <tr><td>16 GB</td><td>Server services + Minecraft Vanilla OR Dolphin — not both heavy ones</td></tr>
+      <tr><td>32 GB</td><td>Server services + Minecraft Modded + Dolphin + Ollama 8B simultaneously</td></tr>
+      <tr><td>64 GB</td><td>Everything at once including ARK + Ollama 13B + all emulators</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📺 The Dashboard Memory Widget</div>
+  <div class="card">
+    <p>The Dashboard tab shows a live RAM usage bar that polls the stats agent every 30 seconds. When RAM is above 80%, a warning banner appears telling users what to avoid. See the <strong>Dashboard Setup</strong> tab for the stats agent configuration, and the <strong>Overview</strong> tab for the full load-warning table.</p>
+    <p>To add custom memory warnings in the stats agent output:</p>
+    <pre># In stats_server.py — enrich the /stats response:
+@app.route('/stats')
+def stats():
+    vm = psutil.virtual_memory()
+    warnings = []
+    if vm.percent > 90:
+        warnings.append('🔴 RAM critical — avoid game servers and emulators')
+    elif vm.percent > 80:
+        warnings.append('🟡 RAM elevated — avoid starting ARK or Minecraft Modded')
+    elif vm.percent > 70:
+        warnings.append('🟡 RAM moderate — Ollama large models not recommended')
+
+    return jsonify({
+        'cpu':       psutil.cpu_percent(interval=1),
+        'ram':       vm.percent,
+        'ram_free_gb': round(vm.available / 1e9, 1),
+        'disk_used': psutil.disk_usage('D:\\').percent,
+        'warnings':  warnings,
+        'uptime':    int(time.time() - psutil.boot_time())
+    })</pre>
+  </div>
+</div>
+
+<script>
+function copyCmd(btn) {
+  const cmd = btn.parentElement.textContent.replace('copy','').trim();
+  navigator.clipboard.writeText(cmd).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+</script>
+</body>
+</html>
