@@ -8,16 +8,44 @@
   <div>
     <h1>Pokémon Game Library</h1>
     <div class="subtitle">// All Generations · Browser-Based · Per-User Saves · EmulatorJS //</div>
-    <p class="desc">Play every mainline Pokémon game in order, directly in the browser. Per-user save files so different players keep separate progress. No installation needed on the client side.</p>
+    <p class="desc">Play every definitive Pokémon experience in recommended order, directly in the browser. Per-user save files so different players keep separate progress. No installation needed on the client side.</p>
   </div>
 </div>
 
 <div class="callout callout-dragon">
   <div class="callout-icon">🐉</div>
-  <div class="callout-body"><strong>Legal note:</strong> EmulatorJS is open source. You need to own the games you emulate. ROMs are legal to create from cartridges you own; obtaining them from elsewhere is a grey area. This guide assumes you have your own ROMs.</div>
+  <div class="callout-body"><strong>Legal note:</strong> EmulatorJS is open source. You need to own the games you emulate. ROMs are legal to create from cartridges you own; obtaining them from elsewhere is a grey area. ROM hacks require a base ROM you own to patch. This guide assumes you have your own ROMs.</div>
 </div>
 
 <div class="v1-banner">🐉 V1 Goal: A web page at <code>http://[server-ip]:8085/pokemon</code> where users log in, pick a game, and play — with their save files tied to their username and persisting between sessions.</div>
+
+<div class="section">
+  <div class="section-title">📖 Definitive Versions Philosophy</div>
+  <div class="card">
+    <p>This library prioritizes <strong>ROM hacks and definitive editions</strong> that consolidate versions or modernize mechanics — making the original baseline games redundant for a modern playthrough. Several originals are intentionally omitted.</p>
+    <table>
+      <tr><th>Original Game(s)</th><th>Replaced By</th><th>Reason</th></tr>
+      <tr><td>Red / Blue / Yellow / FireRed / LeafGreen</td><td><strong>Ultra Violet</strong></td><td>Full 386 Pokédex in one save, GBA engine</td></tr>
+      <tr><td>Gold / Silver / Crystal</td><td><strong>Crystal Clear</strong></td><td>Open-world Johto + Kanto with level scaling</td></tr>
+      <tr><td>Ruby / Sapphire / Emerald</td><td><strong>Emerald Rogue</strong></td><td>Roguelike Hoenn with infinite replayability</td></tr>
+      <tr><td>Diamond / Pearl / Platinum</td><td><strong>Renegade Platinum</strong></td><td>All 493 Pokémon, faster engine, higher difficulty</td></tr>
+      <tr><td>Sun / Moon</td><td><strong>Ultra Sun / Ultra Moon</strong></td><td>Official expanded version supersedes originals</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🗺️ Recommended "Newbie" Play Order</div>
+  <div class="card">
+    <ol style="margin:0 0 0 18px; line-height:2">
+      <li><strong>Step 1 — The Foundation (GBA):</strong> Pokémon Ultra Violet — learn the basics in a colorful, bug-free world covering Gens 1–3.</li>
+      <li><strong>Step 2 — The Gold Standard (DS):</strong> HeartGold / SoulSilver — the most beloved official remake with two full regions (Gens 1–4).</li>
+      <li><strong>Step 3 — The Narrative Peak (DS):</strong> Black &amp; White → Black 2 &amp; White 2 — the best story and only direct sequels in the franchise (Gens 1–5).</li>
+      <li><strong>Step 4 — The Strategic Leap (ROM Hack):</strong> Renegade Platinum — master advanced mechanics and high-difficulty team building (Gens 1–4).</li>
+      <li><strong>Step 5 — The Ultimate Fan Experience (ROM Hack):</strong> Pokémon Unbound — modern Gen 8 mechanics in a fully custom world.</li>
+    </ol>
+  </div>
+</div>
 
 <div class="section">
   <div class="section-title">🧱 Architecture Overview</div>
@@ -45,33 +73,31 @@
       <div class="step-content">
         <strong>Set up your ROM library folder</strong>
         <pre>D:\Emulation\Pokemon\
-  ├── gb\
-  │   ├── pokemon-red.gb
-  │   ├── pokemon-blue.gb
-  │   └── pokemon-yellow.gb
-  ├── gbc\
-  │   ├── pokemon-gold.gbc
-  │   ├── pokemon-silver.gbc
-  │   └── pokemon-crystal.gbc
   ├── gba\
-  │   ├── pokemon-ruby.gba
-  │   ├── pokemon-sapphire.gba
-  │   ├── pokemon-firered.gba
-  │   ├── pokemon-leafgreen.gba
-  │   └── pokemon-emerald.gba
+  │   ├── pokemon-ultra-violet.gba        ← ROM hack (patch FireRed)
+  │   ├── pokemon-crystal-clear.gbc       ← ROM hack (patch Crystal)
+  │   ├── pokemon-emerald-rogue.gba       ← ROM hack (patch Emerald)
+  │   └── pokemon-unbound.gba             ← ROM hack (patch FireRed)
   ├── nds\
-  │   ├── pokemon-diamond.nds
-  │   ├── pokemon-pearl.nds
-  │   ├── pokemon-platinum.nds
+  │   ├── renegade-platinum.nds           ← ROM hack (patch Platinum)
   │   ├── pokemon-heartgold.nds
   │   ├── pokemon-soulsilver.nds
   │   ├── pokemon-black.nds
   │   ├── pokemon-white.nds
   │   ├── pokemon-black2.nds
   │   └── pokemon-white2.nds
+  ├── 3ds\                                ← Note: EmulatorJS does not support 3DS
+  │   ├── pokemon-x.3ds                   ← Play via Citra separately
+  │   ├── pokemon-y.3ds
+  │   ├── pokemon-oras.3ds
+  │   └── pokemon-usum.3ds
   └── saves\   (server-side save storage, organized by user)
       ├── alice\
       └── bob\</pre>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>ROM hacks require patching:</strong> Use <strong>Lunar IPS</strong> or <strong>Delta Patcher</strong> to apply the .ips/.bps patch to a clean base ROM. The patched .gba/.gbc file is what you serve here. 3DS titles (X/Y, ORAS, USUM) are not supported by EmulatorJS — use <strong>Citra</strong> or a 3DS console.</div>
+        </div>
       </div>
     </div>
     <div class="step">
@@ -196,35 +222,35 @@ nssm start PokemonEmu</pre>
   <div class="section-title">🎮 The Game Selector UI (static/index.html)</div>
   <div class="card">
     <div class="card-title">Create static/index.html</div>
-    <p>This page shows the full Pokémon game list in generation order, with per-game artwork, system labels, and a "Play" button that loads EmulatorJS with the correct ROM and save file.</p>
-    <pre>&lt;!-- Simplified example — the full UI shows art + gen labels --&gt;
+    <p>This page shows the definitive Pokémon game list in recommended play order, with per-game labels, system info, and a "Play" button that loads EmulatorJS with the correct ROM and save file.</p>
+    <pre>&lt;!-- Simplified example — the full UI shows art + gen/hack labels --&gt;
 &lt;script&gt;
 const GAMES = [
-  // Gen 1
-  { id:'red',       name:'Pokémon Red',        system:'gb',  rom:'/roms/gb/pokemon-red.gb',       gen:1 },
-  { id:'blue',      name:'Pokémon Blue',       system:'gb',  rom:'/roms/gb/pokemon-blue.gb',      gen:1 },
-  { id:'yellow',    name:'Pokémon Yellow',     system:'gb',  rom:'/roms/gb/pokemon-yellow.gb',    gen:1 },
-  // Gen 2
-  { id:'gold',      name:'Pokémon Gold',       system:'gbc', rom:'/roms/gbc/pokemon-gold.gbc',    gen:2 },
-  { id:'silver',    name:'Pokémon Silver',     system:'gbc', rom:'/roms/gbc/pokemon-silver.gbc',  gen:2 },
-  { id:'crystal',   name:'Pokémon Crystal',    system:'gbc', rom:'/roms/gbc/pokemon-crystal.gbc', gen:2 },
-  // Gen 3
-  { id:'ruby',      name:'Pokémon Ruby',       system:'gba', rom:'/roms/gba/pokemon-ruby.gba',    gen:3 },
-  { id:'sapphire',  name:'Pokémon Sapphire',   system:'gba', rom:'/roms/gba/pokemon-sapphire.gba',gen:3 },
-  { id:'firered',   name:'Pokémon FireRed',    system:'gba', rom:'/roms/gba/pokemon-firered.gba', gen:3 },
-  { id:'leafgreen', name:'Pokémon LeafGreen',  system:'gba', rom:'/roms/gba/pokemon-leafgreen.gba',gen:3 },
-  { id:'emerald',   name:'Pokémon Emerald',    system:'gba', rom:'/roms/gba/pokemon-emerald.gba', gen:3 },
-  // Gen 4
-  { id:'diamond',   name:'Pokémon Diamond',    system:'nds', rom:'/roms/nds/pokemon-diamond.nds', gen:4 },
-  { id:'pearl',     name:'Pokémon Pearl',      system:'nds', rom:'/roms/nds/pokemon-pearl.nds',   gen:4 },
-  { id:'platinum',  name:'Pokémon Platinum',   system:'nds', rom:'/roms/nds/pokemon-platinum.nds',gen:4 },
-  { id:'hgss-hg',   name:'HeartGold',          system:'nds', rom:'/roms/nds/pokemon-heartgold.nds',gen:4 },
-  { id:'hgss-ss',   name:'SoulSilver',         system:'nds', rom:'/roms/nds/pokemon-soulsilver.nds',gen:4 },
-  // Gen 5
-  { id:'black',     name:'Pokémon Black',      system:'nds', rom:'/roms/nds/pokemon-black.nds',   gen:5 },
-  { id:'white',     name:'Pokémon White',      system:'nds', rom:'/roms/nds/pokemon-white.nds',   gen:5 },
-  { id:'black2',    name:'Pokémon Black 2',    system:'nds', rom:'/roms/nds/pokemon-black2.nds',  gen:5 },
-  { id:'white2',    name:'Pokémon White 2',    system:'nds', rom:'/roms/nds/pokemon-white2.nds',  gen:5 },
+  // ── Mainline: Definitive / ROM Hack Versions ──────────────────────────────
+  // Step 1: Foundation
+  { id:'ultra-violet',      name:'Pokémon Ultra Violet',     system:'gba', rom:'/roms/gba/pokemon-ultra-violet.gba',   gen:'1-3', tag:'ROM Hack', replaces:'Red / Blue / Yellow / FR / LG' },
+  // Step 2: Gold Standard
+  { id:'heartgold',         name:'Pokémon HeartGold',        system:'nds', rom:'/roms/nds/pokemon-heartgold.nds',      gen:'1-4', tag:'Official' },
+  { id:'soulsilver',        name:'Pokémon SoulSilver',       system:'nds', rom:'/roms/nds/pokemon-soulsilver.nds',     gen:'1-4', tag:'Official' },
+  // Step 3: Narrative Peak
+  { id:'black',             name:'Pokémon Black',            system:'nds', rom:'/roms/nds/pokemon-black.nds',          gen:'1-5', tag:'Official' },
+  { id:'white',             name:'Pokémon White',            system:'nds', rom:'/roms/nds/pokemon-white.nds',          gen:'1-5', tag:'Official' },
+  { id:'black2',            name:'Pokémon Black 2',          system:'nds', rom:'/roms/nds/pokemon-black2.nds',         gen:'1-5', tag:'Official' },
+  { id:'white2',            name:'Pokémon White 2',          system:'nds', rom:'/roms/nds/pokemon-white2.nds',         gen:'1-5', tag:'Official' },
+  // Step 4: Strategic Leap
+  { id:'renegade-platinum', name:'Renegade Platinum',        system:'nds', rom:'/roms/nds/renegade-platinum.nds',      gen:'1-4', tag:'ROM Hack', replaces:'Diamond / Pearl / Platinum' },
+  // Step 5: Ultimate Fan Experience
+  { id:'unbound',           name:'Pokémon Unbound',          system:'gba', rom:'/roms/gba/pokemon-unbound.gba',        gen:'1-8', tag:'ROM Hack', replaces:'Standalone (FireRed base)' },
+
+  // ── Bonus: Extra ROM Hacks ─────────────────────────────────────────────────
+  { id:'crystal-clear',     name:'Pokémon Crystal Clear',    system:'gbc', rom:'/roms/gba/pokemon-crystal-clear.gbc',  gen:'1-2', tag:'ROM Hack', replaces:'Gold / Silver / Crystal' },
+  { id:'emerald-rogue',     name:'Pokémon Emerald Rogue',    system:'gba', rom:'/roms/gba/pokemon-emerald-rogue.gba',  gen:'1-8', tag:'ROM Hack', replaces:'Ruby / Sapphire / Emerald' },
+
+  // ── 3DS Era (Citra / console only — not supported by EmulatorJS) ──────────
+  // { id:'x',              name:'Pokémon X',                system:'3ds', rom:null, gen:'1-6', tag:'Citra only' },
+  // { id:'y',              name:'Pokémon Y',                system:'3ds', rom:null, gen:'1-6', tag:'Citra only' },
+  // { id:'oras',           name:'Omega Ruby / Alpha Sapphire', system:'3ds', rom:null, gen:'1-6', tag:'Citra only' },
+  // { id:'usum',           name:'Ultra Sun / Ultra Moon',   system:'3ds', rom:null, gen:'1-7', tag:'Citra only' },
 ];
 
 const SYSTEM_CORES = {
@@ -241,6 +267,10 @@ const SYSTEM_CORES = {
       <li>Initializes EmulatorJS with the ROM path, core, and the fetched save data</li>
       <li>Sets up a save callback that POSTs save data to <code>/api/save/[game_id]</code> on every in-game save</li>
     </ol>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>ROM hack labels:</strong> Display the <code>tag</code> and <code>replaces</code> fields on each game card so users understand what they're playing and why the originals aren't listed.</div>
+    </div>
   </div>
 </div>
 
@@ -253,8 +283,8 @@ const SYSTEM_CORES = {
 &lt;div id="game"&gt;&lt;/div&gt;
 &lt;script src="/emulatorjs/data/loader.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-const gameId = 'emerald'; // from URL param
-const systemCore = 'mgba';
+const gameId = 'renegade-platinum'; // from URL param
+const systemCore = 'melonds';
 
 // Load existing save from server
 async function initGame() {
@@ -265,7 +295,7 @@ async function initGame() {
     } catch(e) {}
 
     EJS_player = '#game';
-    EJS_gameUrl = `/roms/gba/pokemon-emerald.gba`;
+    EJS_gameUrl = `/roms/nds/renegade-platinum.nds`;
     EJS_core = systemCore;
     EJS_gameID = gameId;
     EJS_language = 'en-US';
