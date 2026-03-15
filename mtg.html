@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Magic: The Gathering</title><link rel="stylesheet" href="shared.css">
+<style>
+  /* ── Deck Manager Styles ── */
+  .dm-wrap { display:grid; grid-template-columns:260px 1fr; gap:14px; margin-bottom:20px; }
+  @media(max-width:720px){ .dm-wrap{grid-template-columns:1fr;} }
+
+  /* Sidebar filters */
+  .dm-sidebar { display:flex; flex-direction:column; gap:8px; }
+  .dm-search { background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:7px 10px; border-radius:3px; font-family:'Raleway',sans-serif; font-size:.82rem; width:100%; }
+  .dm-search:focus { outline:none; border-color:rgba(200,168,75,.4); }
+  .filter-group { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:10px 12px; }
+  .fg-title { font-family:'Share Tech Mono',monospace; font-size:.6rem; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; margin-bottom:7px; }
+  .format-btn { display:block; width:100%; text-align:left; background:transparent; border:1px solid transparent; color:var(--text-dim); padding:4px 8px; border-radius:2px; cursor:pointer; font-size:.78rem; transition:all .14s; margin-bottom:2px; }
+  .format-btn:hover { color:var(--text); background:var(--bg3); }
+  .format-btn.active { color:var(--accent); background:rgba(200,168,75,.08); border-color:rgba(200,168,75,.2); }
+  .library-toggle { display:flex; gap:0; border:1px solid var(--border); border-radius:3px; overflow:hidden; margin-bottom:8px; }
+  .lt-btn { flex:1; padding:6px 8px; background:transparent; border:none; color:var(--text-dim); cursor:pointer; font-family:'Share Tech Mono',monospace; font-size:.62rem; letter-spacing:.04em; transition:all .14s; }
+  .lt-btn.active { background:rgba(200,168,75,.12); color:var(--accent); }
+
+  /* Deck cards */
+  .deck-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; }
+  .deck-card { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:12px 14px; cursor:pointer; transition:all .16s; position:relative; }
+  .deck-card:hover { border-color:rgba(200,168,75,.3); transform:translateY(-1px); }
+  .deck-card.enemy { border-color:rgba(224,92,92,.2); }
+  .deck-card.enemy:hover { border-color:rgba(224,92,92,.4); }
+  .dc-name { font-weight:700; font-size:.88rem; color:var(--text); margin-bottom:4px; }
+  .dc-format { font-family:'Share Tech Mono',monospace; font-size:.6rem; padding:1px 6px; border-radius:2px; display:inline-block; margin-bottom:6px; }
+  .f-commander { background:rgba(200,168,75,.12); color:var(--accent); border:1px solid rgba(200,168,75,.2); }
+  .f-standard  { background:rgba(91,141,217,.12); color:var(--accent2); border:1px solid rgba(91,141,217,.2); }
+  .f-pioneer   { background:rgba(78,205,196,.1); color:var(--accent3); border:1px solid rgba(78,205,196,.2); }
+  .f-modern    { background:rgba(76,175,125,.1); color:#4caf7d; border:1px solid rgba(76,175,125,.2); }
+  .f-legacy    { background:rgba(224,92,92,.1); color:#e05c5c; border:1px solid rgba(224,92,92,.2); }
+  .f-draft     { background:rgba(180,120,220,.1); color:#b478dc; border:1px solid rgba(180,120,220,.2); }
+  .f-other     { background:rgba(120,130,160,.1); color:var(--text-dim); border:1px solid rgba(120,130,160,.2); }
+  .dc-desc { font-size:.73rem; color:var(--text-dim); line-height:1.4; margin-bottom:6px; }
+  .dc-tags { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:6px; }
+  .dc-tag { font-family:'Share Tech Mono',monospace; font-size:.56rem; padding:1px 5px; background:rgba(37,45,61,.8); border:1px solid var(--border); border-radius:2px; color:var(--text-dim); }
+  .dc-meta { font-family:'Share Tech Mono',monospace; font-size:.58rem; color:var(--text-dim); display:flex; justify-content:space-between; }
+  .dc-actions { display:flex; gap:5px; margin-top:8px; }
+  .dca { font-family:'Share Tech Mono',monospace; font-size:.58rem; padding:3px 7px; border-radius:2px; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text-dim); transition:all .14s; }
+  .dca:hover { border-color:var(--accent2); color:var(--accent2); }
+  .dca.danger:hover { border-color:var(--danger); color:var(--danger); }
+  .enemy-badge { position:absolute; top:8px; right:8px; font-family:'Share Tech Mono',monospace; font-size:.55rem; padding:1px 5px; background:rgba(224,92,92,.12); color:#e05c5c; border:1px solid rgba(224,92,92,.22); border-radius:2px; }
+
+  /* Modal */
+  .mo { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; align-items:center; justify-content:center; }
+  .mo.open { display:flex; }
+  .mc { background:#111520; border:1px solid var(--border); border-radius:6px; padding:22px; width:580px; max-width:96vw; max-height:88vh; overflow-y:auto; }
+  .mc h3 { font-family:'Cinzel',serif; margin-bottom:14px; color:var(--accent); }
+  .field { margin-bottom:12px; }
+  .flabel { font-size:.75rem; font-weight:600; color:var(--text); margin-bottom:4px; display:block; }
+  .fi { width:100%; background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:7px 10px; border-radius:3px; font-family:'Raleway',sans-serif; font-size:.84rem; }
+  .fi:focus { outline:none; border-color:rgba(200,168,75,.4); }
+  textarea.fi { resize:vertical; min-height:80px; }
+  .fi-small { background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:5px 8px; border-radius:3px; font-family:'Share Tech Mono',monospace; font-size:.72rem; }
+  .fi-small:focus { outline:none; border-color:rgba(200,168,75,.4); }
+  .btn-row { display:flex; gap:8px; margin-top:14px; }
+  .btn-primary { background:rgba(200,168,75,.15); border:1px solid rgba(200,168,75,.3); color:var(--accent); padding:8px 18px; border-radius:3px; cursor:pointer; font-family:'Share Tech Mono',monospace; font-size:.7rem; letter-spacing:.05em; }
+  .btn-primary:hover { background:rgba(200,168,75,.25); }
+  .btn-cancel { background:transparent; border:1px solid var(--border); color:var(--text-dim); padding:8px 14px; border-radius:3px; cursor:pointer; font-family:'Share Tech Mono',monospace; font-size:.7rem; }
+  .btn-cancel:hover { border-color:var(--danger); color:var(--danger); }
+  .add-fab { position:fixed; bottom:28px; right:28px; background:rgba(200,168,75,.2); border:2px solid var(--accent); color:var(--accent); width:48px; height:48px; border-radius:50%; font-size:1.4rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; z-index:100; box-shadow:0 4px 18px rgba(200,168,75,.2); }
+  .add-fab:hover { background:rgba(200,168,75,.35); transform:scale(1.08); }
+
+  /* Version history */
+  .version-item { padding:8px 10px; border:1px solid var(--border); border-radius:3px; margin-bottom:5px; background:var(--bg2); }
+  .ver-head { display:flex; align-items:center; gap:8px; }
+  .ver-num { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--accent); font-weight:700; }
+  .ver-date { font-family:'Share Tech Mono',monospace; font-size:.6rem; color:var(--text-dim); }
+  .ver-note { font-size:.76rem; color:var(--text-dim); margin-top:3px; }
+  .ver-diff { font-family:'Share Tech Mono',monospace; font-size:.68rem; margin-top:5px; }
+  .ver-add { color:#4caf7d; } .ver-rem { color:#e05c5c; }
+
+  /* Empty state */
+  .empty-state { text-align:center; padding:40px 20px; color:var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:.75rem; }
+  .empty-state .big { font-size:2.5rem; margin-bottom:10px; }
+
+  /* Tab navigation */
+  .sect-nav { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+  .snav { font-family:'Share Tech Mono',monospace; font-size:.62rem; padding:5px 12px; border-radius:3px; border:1px solid var(--border); background:transparent; color:var(--text-dim); cursor:pointer; transition:all .14s; }
+  .snav:hover { border-color:var(--accent); color:var(--text); }
+  .snav.active { border-color:var(--accent); color:var(--accent); background:rgba(200,168,75,.07); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🃏</div>
+  <div>
+    <h1>Magic: The Gathering</h1>
+    <div class="subtitle">// XMage · Forge · Deck Manager · Version History //</div>
+    <p class="desc">Self-hosted MTG play via XMage and Forge. Manage your deck library and an AI opponent library — with full version history so you can track changes over time.</p>
+  </div>
+</div>
+
+<div class="sect-nav">
+  <button class="snav active" onclick="showSec('decks')">🃏 Deck Manager</button>
+  <button class="snav" onclick="showSec('xmage')">⚔️ XMage Setup</button>
+  <button class="snav" onclick="showSec('forge')">🔥 Forge Setup</button>
+  <button class="snav" onclick="showSec('symlinks')">🔗 Symlinks</button>
+</div>
+
+<!-- ══ DECK MANAGER ══ -->
+<div id="s-decks">
+
+  <!-- Library toggle -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+    <div class="library-toggle" style="width:220px">
+      <button class="lt-btn active" id="lt-mine" onclick="switchLib('mine')">👤 My Decks</button>
+      <button class="lt-btn" id="lt-enemy" onclick="switchLib('enemy')">🤖 Enemy Decks</button>
+    </div>
+    <button onclick="openAdd()" style="background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.28);color:var(--accent);padding:6px 14px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.05em">+ Add Deck</button>
+    <div id="deck-count" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-left:auto"></div>
+  </div>
+
+  <div class="dm-wrap">
+    <!-- Sidebar -->
+    <div class="dm-sidebar">
+      <input class="dm-search" id="search-input" placeholder="Search decks…" oninput="renderDecks()">
+      <div class="filter-group">
+        <div class="fg-title">Format</div>
+        <button class="format-btn active" onclick="setFormat('all',this)">All Formats</button>
+        <button class="format-btn" onclick="setFormat('commander',this)">Commander</button>
+        <button class="format-btn" onclick="setFormat('standard',this)">Standard</button>
+        <button class="format-btn" onclick="setFormat('pioneer',this)">Pioneer</button>
+        <button class="format-btn" onclick="setFormat('modern',this)">Modern</button>
+        <button class="format-btn" onclick="setFormat('legacy',this)">Legacy</button>
+        <button class="format-btn" onclick="setFormat('brawl',this)">Brawl</button>
+        <button class="format-btn" onclick="setFormat('draft',this)">Draft / Sealed</button>
+        <button class="format-btn" onclick="setFormat('pauper',this)">Pauper</button>
+        <button class="format-btn" onclick="setFormat('vintage',this)">Vintage</button>
+        <button class="format-btn" onclick="setFormat('oathbreaker',this)">Oathbreaker</button>
+      </div>
+      <div class="filter-group">
+        <div class="fg-title">Sort</div>
+        <select id="sort-select" onchange="renderDecks()" class="fi-small" style="width:100%">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Name A–Z</option>
+          <option value="format">By format</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Deck grid -->
+    <div>
+      <div class="deck-grid" id="deck-grid"></div>
+      <div class="empty-state" id="empty-state" style="display:none">
+        <div class="big">🃏</div>
+        <div>No decks yet.</div>
+        <div style="margin-top:6px;font-size:.68rem">Click <strong>+ Add Deck</strong> to add your first deck.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ XMAGE SETUP ══ -->
+<div id="s-xmage" style="display:none">
+  <div class="section-title">⚔️ XMage — Full MTG Client with AI Opponents</div>
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>XMage</strong> is a full-featured MTG client. You can play against AI (Mage AI or Monte Carlo) or against other humans on your LAN. It handles rules enforcement automatically — perfect for testing decks without arguing about interactions.</div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="step-content">
+      <strong>Step 1: Install Java 17 LTS</strong>
+      <p>XMage requires Java 17. Download from <a href="https://adoptium.net/temurin/releases/?version=17" target="_blank">Adoptium Temurin 17</a> — the Windows installer, x64. Run it with all defaults.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 2: Download the XMage launcher</strong>
+      <p>From <a href="https://xmage.today" target="_blank">xmage.today</a> → Download → download <code>XMageLauncher.exe</code>. Place it in <code>D:\Games\MTG\XMage\</code>. Run it once — it will download the full client and server automatically.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 3: Configure the server</strong>
+      <p>In XMage Launcher → Config tab:</p>
+      <pre>Server address:   localhost
+Server port:      17171
+Max game threads: 4 (or half your CPU cores)
+Deck folder:      D:\Games\MTG\Decks\mine
+                  D:\Games\MTG\Decks\enemy  ← for AI opponent decks</pre>
+      <p>Check <strong>"Start server automatically"</strong> to launch the server when you open XMage.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 4: Set up AI game</strong>
+      <p>XMage Launcher → Start Server → Start Client → Connect to localhost:17171 → New Game → vs Computer → select your deck from <code>D:\Games\MTG\Decks\mine</code>. The AI picks from <code>D:\Games\MTG\Decks\enemy</code>.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 5: LAN multiplayer (optional)</strong>
+      <p>Others on your network can connect to <code>[server-ip]:17171</code> using their own XMage client. Expose via Tailscale for friends outside the LAN. No account or internet required.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Deck file format (.dck)</div>
+    <p>XMage uses <code>.dck</code> format. Each deck is a text file:</p>
+    <pre># Example Commander deck (commander_dragons.dck):
+NAME:Dragon Tribal
+COMMANDER:Scion of the Ur-Dragon
+1 Scion of the Ur-Dragon
+4 Dragon's Hoard
+3 Dragonspeaker Shaman
+2 Crucible of Fire
+4 Lightning Bolt
+# ... etc</pre>
+    <p>Decks saved from the Deck Manager above are exported in this format automatically to <code>D:\Games\MTG\Decks\mine\</code> or <code>D:\Games\MTG\Decks\enemy\</code>.</p>
+  </div>
+</div>
+
+<!-- ══ FORGE SETUP ══ -->
+<div id="s-forge" style="display:none">
+  <div class="section-title">🔥 Forge — Single-Player AI with Draft and Sealed</div>
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>Forge</strong> is a self-contained single-player MTG client with an excellent AI. Best for: testing decks solo, draft/sealed simulation, quest mode, and playing formats XMage handles less well. Both Forge and XMage read from the same deck folders via symlinks.</div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="step-content">
+      <strong>Step 1: Download Forge</strong>
+      <p>From <a href="https://github.com/Card-Forge/forge/releases" target="_blank">github.com/Card-Forge/forge/releases</a> → latest release → download <code>forge-gui-desktop-[version]-jar-with-dependencies.jar</code> (or the Windows installer if available). Place in <code>D:\Games\MTG\Forge\</code>.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 2: Launch Forge and download card images</strong>
+      <pre>java -jar forge-gui-desktop-*.jar</pre>
+      <p>On first launch: Preferences → Content Management → Download Card Images. This downloads from Scryfall (~3–10 GB). Let it run in the background.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 3: Point Forge's deck folder at the shared deck location</strong>
+      <p>Forge stores decks in <code>%UserProfile%\AppData\Roaming\Forge\decks\</code> by default. After creating the symlink (see Symlinks tab), Forge reads from <code>D:\Games\MTG\Decks\mine</code> automatically. No configuration needed if the symlink is set up first.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 4: Configure AI opponent decks</strong>
+      <p>Forge's built-in AI uses its own prebuilt decks by default. To make it use your enemy library, place decks in Forge's AI deck folder — the symlink handles this:</p>
+      <pre>D:\Games\MTG\Forge\res\decks\constructed\  ← symlink target for enemy decks</pre>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 5: Create a desktop shortcut</strong>
+      <pre># Create D:\Games\MTG\launch_forge.bat:
+@echo off
+cd /d "D:\Games\MTG\Forge"
+java -Xmx2048m -jar forge-gui-desktop-*.jar %*</pre>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Forge deck format (.dck)</div>
+    <p>Forge also uses the <code>.dck</code> format — exactly the same as XMage. This is why one set of deck files works for both programs.</p>
+    <pre>[metadata]
+Name=Dragon Tribal
+
+[main]
+4 Dragon's Hoard
+3 Dragonspeaker Shaman
+2 Crucible of Fire
+4 Lightning Bolt
+
+[sideboard]
+2 Dragon Tempest</pre>
+  </div>
+</div>
+
+<!-- ══ SYMLINKS ══ -->
+<div id="s-symlinks" style="display:none">
+  <div class="section-title">🔗 Shared Deck Folder via Symlinks</div>
+  <div class="callout callout-tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">Both XMage and Forge need to read the same deck files. Instead of copying decks to two places, use a <strong>single shared folder</strong> on your data drive and create Windows symlinks (junction points) pointing each app to that folder. When you export a deck from the Deck Manager, it writes to one place and both apps see it instantly.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Folder structure</div>
+    <pre>D:\Games\MTG\
+  ├── Decks\
+  │   ├── mine\        ← YOUR decks (playable in XMage + Forge as your decks)
+  │   │   ├── dragon_tribal.dck
+  │   │   └── mono_red_burn.dck
+  │   └── enemy\       ← OPPONENT decks (XMage AI + Forge AI pick from here)
+  │       ├── control_blue.dck
+  │       └── aggro_white.dck
+  ├── XMage\           ← XMage installation
+  └── Forge\           ← Forge installation</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Create the symlinks (run PowerShell as Administrator)</div>
+    <pre># First, create the master deck folders if they don't exist:
+New-Item -ItemType Directory -Force -Path "D:\Games\MTG\Decks\mine"
+New-Item -ItemType Directory -Force -Path "D:\Games\MTG\Decks\enemy"
+
+# ── XMage symlinks ──
+# XMage reads player decks from its own deck folder by default.
+# Point XMage's deck folder to our shared mine/ folder:
+$xmage_decks = "$env:LOCALAPPDATA\XMage\Decks"
+if (Test-Path $xmage_decks) { Remove-Item $xmage_decks -Recurse }
+New-Item -ItemType Junction -Path $xmage_decks -Target "D:\Games\MTG\Decks\mine"
+Write-Host "✓ XMage player decks → D:\Games\MTG\Decks\mine"
+
+# XMage AI opponent decks (computer decks folder):
+$xmage_ai = "$env:LOCALAPPDATA\XMage\PlayerDecks\computer"
+if (Test-Path $xmage_ai) { Remove-Item $xmage_ai -Recurse }
+New-Item -ItemType Junction -Path $xmage_ai -Target "D:\Games\MTG\Decks\enemy"
+Write-Host "✓ XMage AI decks → D:\Games\MTG\Decks\enemy"
+
+# ── Forge symlinks ──
+# Forge player decks:
+$forge_decks = "$env:APPDATA\Forge\decks\constructed"
+if (Test-Path $forge_decks) { Remove-Item $forge_decks -Recurse }
+New-Item -ItemType Junction -Path $forge_decks -Target "D:\Games\MTG\Decks\mine"
+Write-Host "✓ Forge player decks → D:\Games\MTG\Decks\mine"
+
+# Forge AI decks (constructed AI opponent pool):
+$forge_ai = "D:\Games\MTG\Forge\res\decks\constructed"
+if (Test-Path $forge_ai) { Move-Item $forge_ai "$forge_ai.bak" }
+New-Item -ItemType Junction -Path $forge_ai -Target "D:\Games\MTG\Decks\enemy"
+Write-Host "✓ Forge AI decks → D:\Games\MTG\Decks\enemy"
+
+Write-Host "`n✓ All symlinks created. Both XMage and Forge now share the same deck files."</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Run this script <strong>after</strong> installing both XMage and Forge (so their default deck folders exist to be replaced). If Forge hasn't been run yet, its AppData folder may not exist — launch it once first, then run this script.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Deck file export from the Deck Manager</div>
+    <p>The Deck Manager above stores decks in browser localStorage. A small Flask server on the server machine handles actual file writes to disk when you click "Export to XMage/Forge":</p>
+    <pre># D:\Server\MTG\deck_server.py
+from flask import Flask, request, jsonify
+import os, json
+
+app = Flask(__name__)
+MINE_DIR  = 'D:/Games/MTG/Decks/mine'
+ENEMY_DIR = 'D:/Games/MTG/Decks/enemy'
+
+@app.route('/export', methods=['POST'])
+def export():
+    data = request.json
+    deck = data['deck']
+    folder = ENEMY_DIR if data.get('enemy') else MINE_DIR
+    os.makedirs(folder, exist_ok=True)
+
+    # Build .dck content
+    safe_name = "".join(c for c in deck['name'] if c.isalnum() or c in ' _-').strip()
+    filename = f"{safe_name}.dck"
+    content = f"NAME:{deck['name']}\n"
+    if deck.get('commander'):
+        content += f"COMMANDER:{deck['commander']}\n"
+    content += deck.get('cards', '# Paste card list here\n')
+
+    with open(os.path.join(folder, filename), 'w') as f:
+        f.write(content)
+    return jsonify({'ok': True, 'file': filename})
+
+if __name__ == '__main__':
+    app.run(port=8099, host='localhost')
+</pre>
+    <pre>nssm install MTGDeckServer python "D:\Server\MTG\deck_server.py"
+nssm start MTGDeckServer</pre>
+  </div>
+</div>
+
+<!-- ── ADD DECK MODAL ── -->
+<div class="mo" id="mo-add" onclick="if(event.target===this)closeAdd()">
+  <div class="mc">
+    <h3 id="modal-title">+ Add New Deck</h3>
+    <div class="field">
+      <label class="flabel">Deck Name *</label>
+      <input class="fi" id="d-name" placeholder="e.g. Dragon Tribal Commander">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field">
+        <label class="flabel">Format *</label>
+        <select class="fi" id="d-format">
+          <option value="commander">Commander</option>
+          <option value="standard">Standard</option>
+          <option value="pioneer">Pioneer</option>
+          <option value="modern">Modern</option>
+          <option value="legacy">Legacy</option>
+          <option value="vintage">Vintage</option>
+          <option value="brawl">Brawl</option>
+          <option value="pauper">Pauper</option>
+          <option value="draft">Draft / Sealed</option>
+          <option value="oathbreaker">Oathbreaker</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="flabel">Library</label>
+        <select class="fi" id="d-library">
+          <option value="mine">My Decks (playable as me)</option>
+          <option value="enemy">Enemy Decks (AI only)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="flabel">Commander (if Commander/Brawl)</label>
+      <input class="fi" id="d-commander" placeholder="e.g. Scion of the Ur-Dragon">
+    </div>
+    <div class="field">
+      <label class="flabel">Description</label>
+      <textarea class="fi" id="d-desc" placeholder="Strategy, win conditions, budget…"></textarea>
+    </div>
+    <div class="field">
+      <label class="flabel">Tags (comma-separated)</label>
+      <input class="fi" id="d-tags" placeholder="e.g. aggro, ramp, dragon, budget">
+    </div>
+    <div class="field">
+      <label class="flabel">Card List (one per line, e.g. "4 Lightning Bolt")</label>
+      <textarea class="fi" id="d-cards" style="min-height:120px;font-family:'Share Tech Mono',monospace;font-size:.78rem" placeholder="4 Lightning Bolt&#10;4 Goblin Guide&#10;2 Eidolon of the Great Revel&#10;..."></textarea>
+    </div>
+    <div class="field">
+      <label class="flabel">Version Note (what changed in this version)</label>
+      <input class="fi" id="d-vernote" placeholder="e.g. Initial build / Swapped 4x Mountain for 4x Sacred Foundry">
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="saveDeck()">💾 Save Deck</button>
+      <button class="btn-cancel" onclick="closeAdd()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── VIEW/EDIT DECK MODAL ── -->
+<div class="mo" id="mo-view" onclick="if(event.target===this)closeView()">
+  <div class="mc" id="mc-view-content">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<script>
+// ── State ──
+let decks = [];
+let currentLib = 'mine';
+let currentFormat = 'all';
+let editId = null;
+
+function loadDecks() {
+  try { decks = JSON.parse(localStorage.getItem('mtg_decks_v2') || '[]'); }
+  catch(e) { decks = []; }
+  // Seed with examples if empty
+  if (decks.length === 0) {
+    decks = [
+      { id:'d1', name:'Dragon Tribal', format:'commander', library:'mine', commander:'Scion of the Ur-Dragon', desc:'Ramp into big dragons, use Scion as a toolbox.', tags:['dragon','tribal','ramp'], cards:'1 Scion of the Ur-Dragon\n4 Dragon\'s Hoard\n3 Dragonspeaker Shaman\n', added: new Date(Date.now()-86400000*3).toISOString(), versions:[{v:1, date:new Date(Date.now()-86400000*3).toISOString(), note:'Initial build', added:[], removed:[]}] },
+      { id:'d2', name:'Mono Red Burn', format:'modern', library:'mine', commander:'', desc:'Fast aggro burn deck targeting face.', tags:['aggro','burn','budget'], cards:'4 Lightning Bolt\n4 Goblin Guide\n4 Monastery Swiftspear\n', added: new Date(Date.now()-86400000*1).toISOString(), versions:[{v:1, date:new Date(Date.now()-86400000*1).toISOString(), note:'Initial build', added:[], removed:[]}] },
+      { id:'d3', name:'Control Tempo', format:'standard', library:'enemy', commander:'', desc:'AI control deck — counters and card draw.', tags:['control','tempo'], cards:'4 Counterspell\n4 Brainstorm\n2 Snapcaster Mage\n', added: new Date(Date.now()-86400000*5).toISOString(), versions:[{v:1, date:new Date(Date.now()-86400000*5).toISOString(), note:'Initial build', added:[], removed:[]}] },
+    ];
+    saveDecks();
+  }
+}
+function saveDecks() { localStorage.setItem('mtg_decks_v2', JSON.stringify(decks)); }
+
+function formatClass(f) {
+  const m = {commander:'f-commander',standard:'f-standard',pioneer:'f-pioneer',modern:'f-modern',legacy:'f-legacy',vintage:'f-legacy',draft:'f-draft',brawl:'f-commander',pauper:'f-modern',oathbreaker:'f-commander'};
+  return m[f] || 'f-other';
+}
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function switchLib(lib) {
+  currentLib = lib;
+  document.getElementById('lt-mine').classList.toggle('active', lib==='mine');
+  document.getElementById('lt-enemy').classList.toggle('active', lib==='enemy');
+  renderDecks();
+}
+function setFormat(f, btn) {
+  currentFormat = f;
+  document.querySelectorAll('.format-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDecks();
+}
+
+function renderDecks() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+  let filtered = decks.filter(d => {
+    if (d.library !== currentLib) return false;
+    if (currentFormat !== 'all' && d.format !== currentFormat) return false;
+    if (q && !d.name.toLowerCase().includes(q) && !d.desc?.toLowerCase().includes(q) && !d.tags?.some(t=>t.includes(q))) return false;
+    return true;
+  });
+  filtered.sort((a,b) => {
+    if (sort==='newest')  return new Date(b.added)-new Date(a.added);
+    if (sort==='oldest')  return new Date(a.added)-new Date(b.added);
+    if (sort==='name')    return a.name.localeCompare(b.name);
+    if (sort==='format')  return a.format.localeCompare(b.format);
+    return 0;
+  });
+  const grid = document.getElementById('deck-grid');
+  const empty = document.getElementById('empty-state');
+  document.getElementById('deck-count').textContent = filtered.length + ' deck' + (filtered.length!==1?'s':'');
+  if (filtered.length === 0) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = filtered.map(d => `
+    <div class="deck-card ${d.library==='enemy'?'enemy':''}" onclick="viewDeck('${d.id}')">
+      ${d.library==='enemy'?'<span class="enemy-badge">🤖 Enemy AI</span>':''}
+      <div class="dc-name">${d.name}</div>
+      <span class="dc-format ${formatClass(d.format)}">${d.format.charAt(0).toUpperCase()+d.format.slice(1)}</span>
+      ${d.commander?`<div style="font-size:.72rem;color:var(--text-dim);margin-bottom:4px">⚔️ ${d.commander}</div>`:''}
+      ${d.desc?`<div class="dc-desc">${d.desc.slice(0,80)}${d.desc.length>80?'…':''}</div>`:''}
+      <div class="dc-tags">${(d.tags||[]).map(t=>`<span class="dc-tag">${t}</span>`).join('')}</div>
+      <div class="dc-meta"><span>v${d.versions?.length||1}</span><span>${fmtDate(d.added)}</span></div>
+      <div class="dc-actions" onclick="event.stopPropagation()">
+        <button class="dca" onclick="editDeck('${d.id}')">✏️ Edit</button>
+        <button class="dca" onclick="addVersion('${d.id}')">+ Version</button>
+        <button class="dca danger" onclick="deleteDeck('${d.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── Add/Edit deck ──
+function openAdd() {
+  editId = null;
+  document.getElementById('modal-title').textContent = '+ Add New Deck';
+  ['d-name','d-commander','d-desc','d-tags','d-cards','d-vernote'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('d-format').value = 'commander';
+  document.getElementById('d-library').value = currentLib;
+  document.getElementById('mo-add').classList.add('open');
+}
+function editDeck(id) {
+  const d = decks.find(x=>x.id===id);
+  if (!d) return;
+  editId = id;
+  document.getElementById('modal-title').textContent = '✏️ Edit Deck — ' + d.name;
+  document.getElementById('d-name').value      = d.name;
+  document.getElementById('d-format').value    = d.format;
+  document.getElementById('d-library').value   = d.library;
+  document.getElementById('d-commander').value = d.commander||'';
+  document.getElementById('d-desc').value      = d.desc||'';
+  document.getElementById('d-tags').value      = (d.tags||[]).join(', ');
+  document.getElementById('d-cards').value     = d.cards||'';
+  document.getElementById('d-vernote').placeholder = 'Describe what changed in this version…';
+  document.getElementById('mo-add').classList.add('open');
+}
+function closeAdd() { document.getElementById('mo-add').classList.remove('open'); editId=null; }
+
+function saveDeck() {
+  const name = document.getElementById('d-name').value.trim();
+  if (!name) { alert('Deck name is required.'); return; }
+  const cards = document.getElementById('d-cards').value.trim();
+  const vernote = document.getElementById('d-vernote').value.trim() || (editId ? 'Updated deck' : 'Initial build');
+  const now = new Date().toISOString();
+
+  if (editId) {
+    const d = decks.find(x=>x.id===editId);
+    const prevCards = d.cards || '';
+    const addedLines = cards.split('\n').filter(l=>l.trim()&&!prevCards.includes(l.trim()));
+    const removedLines = prevCards.split('\n').filter(l=>l.trim()&&!cards.includes(l.trim()));
+    d.name       = name;
+    d.format     = document.getElementById('d-format').value;
+    d.library    = document.getElementById('d-library').value;
+    d.commander  = document.getElementById('d-commander').value.trim();
+    d.desc       = document.getElementById('d-desc').value.trim();
+    d.tags       = document.getElementById('d-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    d.cards      = cards;
+    d.versions   = d.versions || [];
+    d.versions.push({ v: d.versions.length+1, date: now, note: vernote, added: addedLines, removed: removedLines });
+  } else {
+    decks.push({
+      id:        'dk' + Date.now(),
+      name, cards,
+      format:    document.getElementById('d-format').value,
+      library:   document.getElementById('d-library').value,
+      commander: document.getElementById('d-commander').value.trim(),
+      desc:      document.getElementById('d-desc').value.trim(),
+      tags:      document.getElementById('d-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+      added:     now,
+      versions:  [{ v:1, date:now, note:vernote, added:[], removed:[] }]
+    });
+  }
+  saveDecks(); closeAdd(); renderDecks();
+}
+
+function addVersion(id) {
+  editDeck(id);
+  document.getElementById('d-vernote').placeholder = 'Required: describe what changed (e.g. Swapped 4x Mountain for 4x Sacred Foundry)';
+  document.getElementById('d-vernote').focus();
+}
+
+function deleteDeck(id) {
+  if (!confirm('Delete this deck? This cannot be undone.')) return;
+  decks = decks.filter(d=>d.id!==id);
+  saveDecks(); renderDecks();
+}
+
+// ── View deck ──
+function viewDeck(id) {
+  const d = decks.find(x=>x.id===id);
+  if (!d) return;
+  const canEdit = true; // in production, check if user owns the deck or it's in enemy lib
+  const mc = document.getElementById('mc-view-content');
+  mc.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <h3 style="font-family:'Cinzel',serif;color:var(--accent);margin-bottom:4px">${d.name}</h3>
+        <span class="dc-format ${formatClass(d.format)}">${d.format.charAt(0).toUpperCase()+d.format.slice(1)}</span>
+        ${d.library==='enemy'?'<span class="enemy-badge" style="position:static;margin-left:6px">🤖 Enemy AI</span>':''}
+      </div>
+      <button onclick="closeView()" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:3px 10px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.62rem">✕ Close</button>
+    </div>
+    ${d.commander?`<p style="font-size:.8rem;color:var(--text-dim);margin:8px 0 4px">Commander: <strong style="color:var(--text)">${d.commander}</strong></p>`:''}
+    ${d.desc?`<p style="font-size:.82rem;color:var(--text-dim);margin:8px 0">${d.desc}</p>`:''}
+    <div class="dc-tags" style="margin:8px 0">${(d.tags||[]).map(t=>`<span class="dc-tag">${t}</span>`).join('')}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);margin-bottom:14px">Added ${fmtDate(d.added)} · ${d.versions?.length||1} version(s)</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);letter-spacing:.1em;margin-bottom:8px">CARD LIST</div>
+        <pre style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px;font-size:.72rem;max-height:220px;overflow-y:auto;white-space:pre-wrap">${d.cards||'No cards added yet.'}</pre>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="dca" onclick="closeView();editDeck('${d.id}')">✏️ Edit Deck</button>
+          <button class="dca" onclick="exportDeck('${d.id}')">📤 Export .dck</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);letter-spacing:.1em;margin-bottom:8px">VERSION HISTORY</div>
+        <div style="max-height:240px;overflow-y:auto">
+          ${(d.versions||[]).slice().reverse().map(v=>`
+            <div class="version-item">
+              <div class="ver-head">
+                <span class="ver-num">v${v.v}</span>
+                <span class="ver-date">${fmtDate(v.date)}</span>
+              </div>
+              <div class="ver-note">${v.note||'No note'}</div>
+              ${v.added?.length ? `<div class="ver-diff">${v.added.map(l=>`<div class="ver-add">+ ${l}</div>`).join('')}</div>` : ''}
+              ${v.removed?.length ? `<div class="ver-diff">${v.removed.map(l=>`<div class="ver-rem">− ${l}</div>`).join('')}</div>` : ''}
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('mo-view').classList.add('open');
+}
+function closeView() { document.getElementById('mo-view').classList.remove('open'); }
+
+function exportDeck(id) {
+  const d = decks.find(x=>x.id===id);
+  if (!d) return;
+  const content = `NAME:${d.name}\n${d.commander?'COMMANDER:'+d.commander+'\n':''}${d.cards||''}`;
+  const blob = new Blob([content], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = d.name.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '.dck';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Section nav ──
+function showSec(n) {
+  ['decks','xmage','forge','symlinks'].forEach(s => {
+    document.getElementById('s-'+s).style.display = 'none';
+    const b = document.querySelector(`[onclick="showSec('${s}')"]`);
+    if(b) b.classList.remove('active');
+  });
+  document.getElementById('s-'+n).style.display = 'block';
+  const ab = document.querySelector(`[onclick="showSec('${n}')"]`);
+  if(ab) ab.classList.add('active');
+}
+
+loadDecks();
+renderDecks();
+</script>
+</body>
+</html>

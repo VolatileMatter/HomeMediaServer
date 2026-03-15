@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Virtual Tabletop</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎲</div>
+  <div>
+    <h1>Virtual Tabletop</h1>
+    <div class="subtitle">// VirtualTabletop.io · Self-Hosted · TTRPGs Online //</div>
+    <p class="desc">VirtualTabletop.io (VTT) is a self-hostable virtual tabletop for TTRPGs — think Foundry VTT or Roll20, but designed for self-hosting. Run it on your server so your D&amp;D group can play without paying subscription fees.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Two strong options: <strong>Foundry VTT</strong> (one-time $50 license, best in class, most popular) and <strong>Owlbear Rodeo</strong> (free, simpler). This tab covers Foundry VTT as the primary recommendation, with notes on alternatives.</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>Why self-host a VTT?</strong> Roll20 and D&D Beyond require ongoing subscriptions and put your game data in someone else's cloud. A self-hosted Foundry VTT instance gives you: your own persistent world data, no player subscription required, full mod support, and a server your group can access 24/7 from any browser — no app install needed.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚖️ VTT Options Comparison</div>
+  <div class="card">
+    <table>
+      <tr><th>Platform</th><th>Cost</th><th>Self-hostable</th><th>System support</th><th>Map tools</th><th>Best for</th></tr>
+      <tr><td><strong>Foundry VTT</strong></td><td>$50 one-time (server license)</td><td>✅ Native</td><td>500+ systems via modules</td><td>Excellent</td><td>⭐ Best overall</td></tr>
+      <tr><td>Owlbear Rodeo 2</td><td>Free / $10/mo premium</td><td>⚠️ Partial (cloud-based but browser app)</td><td>System-agnostic</td><td>Good</td><td>Quick sessions, no setup</td></tr>
+      <tr><td>Arkenforge</td><td>$30 one-time</td><td>✅</td><td>System-agnostic</td><td>Excellent</td><td>Physical table projection</td></tr>
+      <tr><td>Roll20</td><td>Free / $10/mo</td><td>❌ Cloud only</td><td>Major systems</td><td>Good</td><td>Familiarity</td></tr>
+      <tr><td>Mythic Table</td><td>Free / open source</td><td>✅</td><td>System-agnostic</td><td>Basic</td><td>Budget option</td></tr>
+    </table>
+    <p style="margin-top:8px">This page focuses on <strong>Foundry VTT</strong>. If you want the free route, Owlbear Rodeo 2 works entirely in a browser with no server needed.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Foundry VTT — Installation on Windows</div>
+
+  <div class="card">
+    <div class="card-title">Port: <span class="tag tag-native">30000</span></div>
+    <p>Foundry VTT runs as a Node.js server. Players connect from any browser — no software install needed on their end.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="step-content">
+      <strong>Step 1: Purchase Foundry VTT</strong>
+      <p>From <a href="https://foundryvtt.com" target="_blank">foundryvtt.com</a> → Purchase ($50 USD, one-time). You get a license key and can download the software. The server license allows self-hosting — players connect for free.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 2: Install Node.js 20 LTS</strong>
+      <p>From <a href="https://nodejs.org" target="_blank">nodejs.org</a> → LTS release → Windows installer. Run with all defaults.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 3: Download and extract Foundry VTT</strong>
+      <p>From your Foundry account → My Purchased Licenses → download <strong>Node.js</strong> version (not the Windows app). Extract to <code>D:\Server\FoundryVTT\</code>.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 4: Create a data directory</strong>
+      <pre>mkdir D:\FoundryData</pre>
+      <p>All world data, assets, and modules go here. Keep it on your large media drive, not the OS drive.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 5: First launch and license setup</strong>
+      <pre>cd D:\Server\FoundryVTT
+node resources\app\main.js --dataPath="D:\FoundryData"</pre>
+      <p>Open <code>http://localhost:30000</code>. Enter your license key. Foundry verifies online once, then works offline. Create your admin password.</p>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 6: Install as a Windows service (NSSM)</strong>
+      <pre>nssm install FoundryVTT node "D:\Server\FoundryVTT\resources\app\main.js"
+nssm set FoundryVTT AppParameters "--dataPath=D:\FoundryData"
+nssm set FoundryVTT AppDirectory "D:\Server\FoundryVTT"
+nssm start FoundryVTT
+
+netsh advfirewall firewall add rule name="FoundryVTT" dir=in action=allow protocol=TCP localport=30000</pre>
+    </div></div>
+    <div class="step"><div class="step-content">
+      <strong>Step 7: Expose via Cloudflare Tunnel</strong>
+      <pre># In cloudflared config.yml:
+ingress:
+  - hostname: vtt.yourdomain.com
+    service: http://localhost:30000
+  # ... other services</pre>
+      <p>Players visit <code>https://vtt.yourdomain.com</code> in their browser. No download, no account — they just enter the game password you set.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Foundry + Cloudflare proxy note:</strong> Cloudflare's free tier has a 100 MB file upload limit. If players are uploading large asset files (maps, audio), use <code>cloudflared</code> tunnel with Cloudflare's proxy disabled (grey cloud) for the VTT subdomain to avoid this limit, or use Cloudflare's bypass cache rules.</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 SSO — Authentik Integration</div>
+  <div class="card">
+    <p>Foundry VTT has its own user/password system. For your home server, the simplest approach is to use Caddy <code>forward_auth</code> in front of it to require Authentik login before players can even reach the Foundry login page:</p>
+    <pre># Caddyfile:
+vtt.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:30000
+}</pre>
+    <p>This means players need a Google login (via Authentik) AND then a Foundry game password. This adds a layer that prevents random internet visitors from even seeing your Foundry instance.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📦 Essential Modules</div>
+  <div class="card">
+    <p>Install these from Foundry's built-in Module Manager (Setup → Add-on Modules → Install Module):</p>
+    <table>
+      <tr><th>Module</th><th>What it does</th><th>Why you want it</th></tr>
+      <tr><td><strong>Monk's Active Tile Triggers</strong></td><td>Interactive tiles, doors, traps</td><td>Brings maps to life</td></tr>
+      <tr><td><strong>Perfect Vision</strong></td><td>Enhanced vision/lighting</td><td>Better fog of war</td></tr>
+      <tr><td><strong>Dice So Nice!</strong></td><td>3D dice rolling animation</td><td>Players love it</td></tr>
+      <tr><td><strong>Compendium Folders</strong></td><td>Organize compendium entries</td><td>Essential for large campaigns</td></tr>
+      <tr><td><strong>Token Attacher</strong></td><td>Attach tokens to other tokens</td><td>Vehicle tokens, mounted combat</td></tr>
+      <tr><td><strong>PopOut!</strong></td><td>Pop journal entries into new windows</td><td>Dual-monitor DM setup</td></tr>
+      <tr><td><strong>FXMaster</strong></td><td>Weather, particle effects</td><td>Atmosphere and immersion</td></tr>
+      <tr><td><strong>Simple Calendar</strong></td><td>In-world calendar tracking</td><td>Campaign time management</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🗺️ Map &amp; Asset Storage</div>
+  <div class="card">
+    <p>Map images and tokens can be very large. Store them on your media drive:</p>
+    <pre>D:\FoundryData\
+  ├── worlds\           ← Active game worlds
+  │   └── myworld\
+  │       ├── world.json
+  │       └── scenes\
+  ├── Data\
+  │   ├── maps\         ← Battle maps (100–500 MB each for 4K maps)
+  │   ├── tokens\       ← Token art
+  │   ├── music\        ← Ambient audio
+  │   └── modules\      ← Installed modules</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Free map sources:</strong> <a href="https://www.reddit.com/r/battlemaps/" target="_blank">r/battlemaps</a>, <a href="https://www.dungeondraft.net" target="_blank">Dungeondraft</a> (map making software), and <a href="https://2minutetabletop.com" target="_blank">2minutetabletop.com</a> all have free CC-licensed maps ready for Foundry.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎲 Game Systems</div>
+  <div class="card">
+    <p>Install game systems from Setup → Game Systems → Install System. Popular options:</p>
+    <table>
+      <tr><th>System</th><th>Best for</th></tr>
+      <tr><td>dnd5e (D&amp;D 5th Edition)</td><td>Most players, best module ecosystem</td></tr>
+      <tr><td>pf2e (Pathfinder 2e)</td><td>Extremely well-automated — automation handles almost everything</td></tr>
+      <tr><td>swade (Savage Worlds)</td><td>Multi-genre, fast-play</td></tr>
+      <tr><td>CoC7 (Call of Cthulhu)</td><td>Horror investigative games</td></tr>
+      <tr><td>cyberpunk-red-core</td><td>Cyberpunk Red</td></tr>
+      <tr><td>forbidden-lands</td><td>Year Zero Engine games</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">💾 Backups</div>
+  <div class="card">
+    <p>World data is irreplaceable after months of play. Back it up automatically:</p>
+    <pre># D:\Server\Scripts\backup_foundry.ps1
+# Run weekly via Task Scheduler
+
+$src  = "D:\FoundryData\worlds"
+$dst  = "D:\Backups\FoundryVTT"
+$date = Get-Date -Format "yyyy-MM-dd"
+$dest = "$dst\worlds_$date"
+
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+Copy-Item -Path "$src\*" -Destination $dest -Recurse
+Write-Host "Foundry backup complete: $dest"
+
+# Keep only last 4 backups:
+Get-ChildItem $dst -Directory | Sort-Object CreationTime | Select-Object -SkipLast 4 | Remove-Item -Recurse -Force</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔗 Connection to DnD Rulebooks (Kavita)</div>
+  <div class="card">
+    <p>Your Kavita DnD instance (port 5001) holds all your PDFs. When players need to reference a rulebook mid-session, they can open a browser tab to <code>dnd.yourdomain.com</code> alongside the VTT. A Foundry journal entry can link directly to specific rulebook PDFs stored in Kavita:</p>
+    <pre># In a Foundry Journal Entry (HTML mode):
+&lt;a href="https://dnd.yourdomain.com/book/12" target="_blank"&gt;
+  📖 Players Handbook — Chapter 7: Combat
+&lt;/a&gt;</pre>
+  </div>
+</div>
+
+</body>
+</html>
