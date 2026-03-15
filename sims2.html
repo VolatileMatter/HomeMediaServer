@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>The Sims 2</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🏠</div>
+  <div>
+    <h1>The Sims 2</h1>
+    <div class="subtitle">// Sunshine Streaming · Per-User Saves · Shared + Private Worlds · Port 47990 //</div>
+    <p class="desc">The Sims 2 Ultimate Collection running on the server, streamed via Sunshine to Moonlight. Multiple users each get private save data and optional personal mod folders. One shared communal neighborhood is available to all. One person plays at a time.</p>
+  </div>
+</div>
+
+<div class="v1-banner">⚠️ Single-seat service — Sunshine supports one active stream at a time. Only one person can play at once. This is a hardware/architecture limitation, not a bug.</div>
+
+<div class="section">
+  <div class="section-title">🗺️ Architecture Overview</div>
+  <div class="card">
+    <p>One shared game install. One shared mod collection (you maintain it). Per-user save data and optional personal mod folders. A single <code>Active\</code> symlink is re-pointed at session start to whoever is playing — the game never knows anything unusual is happening.</p>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Core principle:</strong> The game always reads from <code>Documents\EA Games\The Sims 2\</code>. That path is a permanent junction to <code>C:\Sims2\Active\</code>. The launcher script changes what <code>Active\</code> points to before the game opens. The game sees a normal save folder every time.</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🌍 World Types</div>
+      <p><strong>Personal World</strong> — user's private Neighborhoods and Storytelling folders. Only they can see and edit it.</p>
+      <p><strong>Shared World</strong> — a communal neighborhood any user can load. Always uses the shared mod folder. No mod choice is offered when this is selected.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📦 Mod Folder Types</div>
+      <p><strong>Shared Mods</strong> — the server's curated collection in <code>C:\Sims2\Mods\Shared\</code>. Recommended for most users.</p>
+      <p><strong>Personal Mods</strong> — the user's own folder in <code>C:\Sims2\Mods\Users\[name]\</code>. They manage it themselves. Can be seeded from Shared on first use.</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Part 1 — Modern Compatibility Fixes</div>
+  <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:14px">Apply all of these before setting up the multi-user architecture. They are system-wide and benefit every user.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install The Sims 2 Ultimate Collection via EA App</strong>
+        <p>Free from the EA App. Includes all expansions and has the best compatibility with modern fixes. <strong>Do not use a disc-based install.</strong> The executable you'll be patching is <code>Sims2EP9.exe</code> in the install directory.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run Graphics Rules Maker</strong>
+        <p>The most important fix. Sims 2 has a hardcoded GPU allowlist from 2004 and runs in degraded software mode on any modern GPU without this patch. Search for "Graphics Rules Maker" — it's a free tool. Point it at your Sims 2 install directory and run it. It patches <code>Graphics Rules.sgr</code> and <code>Video Cards.sgr</code> automatically, unlocking full texture quality, shadows, and high resolution.</p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">Also set your desired resolution in Graphics Rules Maker. Set it to the server monitor's native resolution — Sunshine streams at whatever resolution the game runs at.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Apply the 4GB Patch to Sims2EP9.exe</strong>
+        <p>Sims 2 is a 32-bit app limited to 2 GB RAM by default. With a large mod folder, this causes crashes. Search for "4GB patch exe tool". Apply it to <code>Sims2EP9.exe</code>. This raises the memory ceiling to 4 GB and dramatically improves stability with heavy mod loads.</p>
+        <pre># Path to patch:
+C:\Sims2\Game\Sims2EP9.exe</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install the Smooth Patch mod</strong>
+        <p>Sims 2 was designed for ~30 fps and behaves incorrectly at high framerates — game time fast-forwards, animations glitch, physics break. The Smooth Patch mod (community-made, available on mod sites) caps and corrects frame pacing. Install it as a .package file into the shared mod folder.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install DXVK (optional but recommended)</strong>
+        <p>Sims 2 uses DirectX 9. DXVK (a DirectX-to-Vulkan translation layer) improves frame consistency and reduces stuttering on modern hardware. Download the latest DXVK release from GitHub. Copy <code>d3d9.dll</code> into the Sims 2 game directory alongside <code>Sims2EP9.exe</code>. The game does not know it is there.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Disable intro movies</strong>
+        <p>Delete or rename all files inside <code>TSData/Res/Movies/Startup</code>. This skips the EA/Maxis splash screens on every launch — important when users are repeatedly launching via the picker UI.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Set Windows compatibility flags on the executable</strong>
+        <p>Right-click <code>Sims2EP9.exe</code> → Properties → Compatibility tab:</p>
+        <pre>☑  Run as Administrator
+☑  Disable fullscreen optimizations
+    Override high DPI scaling behaviour: Application</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📁 Part 2 — Folder Architecture</div>
+
+  <div class="card">
+    <div class="card-title">Full folder structure to create on the server</div>
+    <pre>C:\Sims2\
+  Game\                          ← single shared install, Sims2EP9.exe lives here
+  Mods\
+    Shared\                      ← your curated mod collection, you manage this
+      Packages\
+      Overrides\
+    Users\
+      alice\                     ← personal mod folder (starts empty or seeded from Shared)
+      bob\
+  Worlds\
+    Shared\                      ← communal neighborhood, all users share this
+      Neighborhoods\
+      Storytelling\
+    Users\
+      alice\                     ← private save data per user
+        Neighborhoods\
+        Storytelling\
+        config.json              ← stores their mod choice and lock state
+      bob\
+  Active\                        ← symlink target — always points to the current player
+    Neighborhoods\               ← junction → either Shared or a user's folder
+    Storytelling\
+    Downloads\                   ← junction → either Shared mods or personal mods
+  launch.ps1                     ← launcher script, called by Sunshine</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Create the permanent Documents junction</div>
+    <p>Sims 2 reads user data from <code>Documents\EA Games\The Sims 2\</code> by default. Create a permanent junction from that path to <code>C:\Sims2\Active\</code>. You only ever change what <code>Active\</code> points to at launch time — the game never knows anything unusual is happening.</p>
+    <pre># Run once to create the permanent junction (run as Administrator):
+# First, delete the existing EA Games folder if it exists
+Remove-Item "$env:USERPROFILE\Documents\EA Games\The Sims 2" -Force -Recurse -ErrorAction SilentlyContinue
+
+# Create the permanent junction
+New-Item -ItemType Junction -Path "$env:USERPROFILE\Documents\EA Games\The Sims 2" -Target "C:\Sims2\Active"</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Do this before first launch.</strong> If the game has already run, there will be an existing folder at that path. Back it up first, then delete it and create the junction.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Part 3 — Per-User config.json</div>
+
+  <div class="card">
+    <div class="card-title">Create this file at <code>C:\Sims2\Worlds\Users\[username]\config.json</code></div>
+    <pre>{
+  "mod_folder": "shared",       // "shared" or "personal"
+  "mod_folder_locked": false,   // becomes true after first launch
+  "world_has_saves": false      // becomes true after first launch
+}</pre>
+    <div class="callout callout-danger">
+      <div class="callout-icon">🚨</div>
+      <div class="callout-body"><strong>Why mod_folder_locked matters:</strong> Once a user has played, their save data references objects and Sims that exist in their current mod folder. Switching mod folders after saves exist causes missing content — Sims lose appearance, objects disappear, neighborhoods can corrupt. This flag drives the warning shown in the picker UI when a user attempts to change their mod choice after playing.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🚀 Part 4 — PowerShell Launcher Script</div>
+
+  <div class="card">
+    <div class="card-title">Save as <code>C:\Sims2\launch.ps1</code></div>
+    <p>This script runs before the game launches. It reads the user's config, sets up the correct symlinks for world and mods, locks the config, then starts the game.</p>
+    <pre>param(
+  [string]$User,
+  [string]$WorldType   # "personal" or "shared"
+)
+
+$activeDir  = "C:\Sims2\Active"
+$docsPath   = "$env:USERPROFILE\Documents\EA Games\The Sims 2"
+$userConfig = "C:\Sims2\Worlds\Users\$User\config.json"
+
+# Load user config
+$config = Get-Content $userConfig | ConvertFrom-Json
+
+# Remove existing Active junction
+Remove-Item $activeDir -Force -Recurse -ErrorAction SilentlyContinue
+Remove-Item $docsPath  -Force -Recurse -ErrorAction SilentlyContinue
+
+# Point world junction
+if ($WorldType -eq "shared") {
+  $worldTarget = "C:\Sims2\Worlds\Shared"
+} else {
+  $worldTarget = "C:\Sims2\Worlds\Users\$User"
+}
+New-Item -ItemType Junction -Path $activeDir -Target $worldTarget
+
+# Point docs junction back to Active
+New-Item -ItemType Junction -Path $docsPath -Target $activeDir
+
+# Point mods junction (inside Active\Downloads)
+if ($config.mod_folder -eq "shared") {
+  $modsTarget = "C:\Sims2\Mods\Shared"
+} else {
+  $modsTarget = "C:\Sims2\Mods\Users\$User"
+}
+$activeDownloads = "C:\Sims2\Active\Downloads"
+Remove-Item $activeDownloads -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Junction -Path $activeDownloads -Target $modsTarget
+
+# Lock the config now that they are launching
+$config.mod_folder_locked = $true
+$config.world_has_saves   = $true
+$config | ConvertTo-Json | Set-Content $userConfig
+
+# Launch the game
+Start-Process "C:\Sims2\Game\Sims2EP9.exe"</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌐 Part 5 — Flask Picker UI</div>
+  <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:14px">Add these routes to the existing Flask server. The picker identifies the logged-in user via Authentik SSO, presents the world and mod options, checks whether Sunshine is already in use, then calls the launcher script.</p>
+
+  <div class="card">
+    <div class="card-title">5.1 — World &amp; Mod Picker Flow</div>
+    <p>The UI is a two-step flow for personal world selection. Shared world always uses shared mods — no mod choice is shown for it.</p>
+    <table>
+      <tr><th>Step</th><th>Shown when</th><th>Options</th></tr>
+      <tr><td>1 — World picker</td><td>Always</td><td>My World · Shared World</td></tr>
+      <tr><td>2 — Mod picker</td><td>Only when "My World" selected</td><td>Shared Mod Folder · My Own Mod Folder</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>New user — "My Own Mod Folder" selected for the first time:</strong> Offer a choice to start empty or copy shared mods as their baseline. The copy may take a few minutes — show a progress indicator.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">5.2 — Sunshine Active-Session Check</div>
+    <p>Before showing any launch buttons, poll Sunshine's local API to check whether someone is already streaming. If active, grey out the buttons and show a message — do not name who is playing.</p>
+    <pre>def sunshine_is_active():
+    try:
+        r = requests.get('http://localhost:47990/api/clients', timeout=1)
+        return len(r.json()['clients']) > 0
+    except:
+        return False</pre>
+    <pre><!-- In the picker template: -->
+{% if sunshine_active %}
+  &lt;p class="blocked"&gt;Server is currently in use — check back soon.&lt;/p&gt;
+  &lt;button disabled&gt;My World&lt;/button&gt;
+  &lt;button disabled&gt;Shared World&lt;/button&gt;
+{% else %}
+  &lt;button onclick="pickWorld('personal')"&gt;My World&lt;/button&gt;
+  &lt;button onclick="pickWorld('shared')"&gt;Shared World&lt;/button&gt;
+{% endif %}</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">5.3 — Mod Config Change Warning</div>
+    <p>If a user tries to change their mod folder after <code>mod_folder_locked</code> is <code>true</code>, redirect them to a warning page. Do not allow this change silently.</p>
+    <div class="callout callout-danger">
+      <div class="callout-icon">🚨</div>
+      <div class="callout-body">
+        <strong>The warning page must include all of the following:</strong>
+        <ul style="margin:6px 0 0 16px;font-size:0.83rem">
+          <li>Heading: <strong>WARNING — This May Break Your Game</strong></li>
+          <li>Explanation that saves reference their current mod folder</li>
+          <li>Statement that missing mods cause corrupted Sims, missing objects, broken neighborhoods</li>
+          <li>Statement that this is NOT reversible without a backup, and no backup system exists on this server</li>
+          <li>A text input requiring the user to type <code>CONFIRM</code> exactly before the proceed button activates</li>
+          <li>A clearly visible cancel link that returns them safely to the picker</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">5.4 — Calling the Launcher from Flask</div>
+    <pre>import subprocess, json
+from flask import request, redirect
+
+@app.route('/sims2/launch', methods=['POST'])
+def sims2_launch():
+    username  = request.headers.get('X-authentik-username', '')
+    worldtype = request.form.get('worldtype', 'personal')  # "personal" or "shared"
+
+    if not username:
+        return redirect('/login')
+    if sunshine_is_active():
+        return "Server in use", 409
+
+    subprocess.Popen([
+        'powershell', '-File', r'C:\Sims2\launch.ps1',
+        '-User', username,
+        '-WorldType', worldtype
+    ])
+    return redirect('/sims2/launching')</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">The username comes from the <code>X-authentik-username</code> header injected by Authentik's <code>forward_auth</code> proxy. The picker does not need to ask the user who they are — Authentik already knows.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">☀️ Part 6 — Sunshine Configuration</div>
+
+  <div class="card">
+    <div class="card-title">6.1 — Add The Sims 2 as a Sunshine Application</div>
+    <p>In the Sunshine web UI at <code>https://localhost:47990</code> → Applications → Add New:</p>
+    <table>
+      <tr><th>Setting</th><th>Value</th></tr>
+      <tr><td>Name</td><td>The Sims 2</td></tr>
+      <tr><td>Command</td><td><code>powershell -File C:\Sims2\launch.ps1 -User %%SUNSHINE_CLIENT_NAME%% -WorldType personal</code></td></tr>
+      <tr><td>Working Directory</td><td><code>C:\Sims2</code></td></tr>
+      <tr><td>Image</td><td><code>C:\Sims2\cover.png</code> (any square image)</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong><code>%%SUNSHINE_CLIENT_NAME%%</code></strong> is a Sunshine variable containing the connecting client's paired name. Set the Moonlight client name to match the user's Authentik username when pairing — e.g. pair as <code>alice</code>, not <code>Alice's Laptop</code>. The launcher script uses this to find the right folder. The picker UI approach (Part 5) is preferred because it lets the user choose world type before launching — the direct Sunshine app entry is a fallback.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">6.2 — Recommended Sunshine Stream Settings for Sims 2</div>
+    <table>
+      <tr><th>Setting</th><th>Recommended Value</th><th>Reason</th></tr>
+      <tr><td>Resolution</td><td>Server monitor native</td><td>Graphics Rules Maker matches it automatically</td></tr>
+      <tr><td>FPS cap</td><td>60</td><td>Smooth Patch handles frame pacing; higher offers no benefit</td></tr>
+      <tr><td>Video encoder</td><td>NVENC (if available)</td><td>Lower latency than software encoding</td></tr>
+      <tr><td>Audio</td><td>Stereo</td><td>Sims 2 does not use surround sound</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Sims 2 save data lives entirely within each user's folder under <code>C:\Sims2\Worlds\Users\[username]\</code>. This folder structure is separate from <code>D:\Users\</code> (the standard user data root used by other services) due to Sims 2's specific junction architecture. See the <strong>SSO tab → User Data Storage</strong> for the full cross-service architecture.</p>
+    <pre>C:\Sims2\Worlds\Users\alice\
+  Neighborhoods\        ← all of Alice's Sim families and lots
+  Storytelling\         ← screenshots and story content
+  config.json           ← mod choice and lock state
+
+C:\Sims2\Mods\Users\alice\
+  Packages\             ← Alice's personal .package mod files (if using personal mods)
+  Overrides\</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Backup note:</strong> No automated backup exists for Sims 2 save data. This is noted explicitly in the mod-change warning page. Users should be aware that save data is not recoverable if corrupted by a mod folder switch.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">👋 Part 7 — Adding a New User</div>
+  <div class="card">
+    <pre># Run once per new user (replace "alice" with their Authentik username):
+
+$user = "alice"
+
+# Create world folders
+New-Item -ItemType Directory -Force "C:\Sims2\Worlds\Users\$user\Neighborhoods"
+New-Item -ItemType Directory -Force "C:\Sims2\Worlds\Users\$user\Storytelling"
+
+# Create personal mod folder
+New-Item -ItemType Directory -Force "C:\Sims2\Mods\Users\$user\Packages"
+New-Item -ItemType Directory -Force "C:\Sims2\Mods\Users\$user\Overrides"
+
+# Create config.json
+@{ mod_folder="shared"; mod_folder_locked=$false; world_has_saves=$false } |
+  ConvertTo-Json | Set-Content "C:\Sims2\Worlds\Users\$user\config.json"</pre>
+    <p>Then add the user to Authentik so they can log in via SSO. Their first launch via the picker UI initialises everything else.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">✅ Implementation Checklist</div>
+  <div class="card">
+    <table>
+      <tr><th>#</th><th>Task</th><th>Section</th></tr>
+      <tr><td>1</td><td>Install Sims 2 Ultimate Collection via EA App</td><td>1.1</td></tr>
+      <tr><td>2</td><td>Run Graphics Rules Maker — set native resolution</td><td>1.2</td></tr>
+      <tr><td>3</td><td>Apply 4GB Patch to <code>Sims2EP9.exe</code></td><td>1.3</td></tr>
+      <tr><td>4</td><td>Install Smooth Patch mod into <code>Mods\Shared\Packages\</code></td><td>1.4</td></tr>
+      <tr><td>5</td><td>Drop DXVK <code>d3d9.dll</code> into game directory</td><td>1.5</td></tr>
+      <tr><td>6</td><td>Delete intro movie files</td><td>1.6</td></tr>
+      <tr><td>7</td><td>Set Windows compatibility flags on <code>Sims2EP9.exe</code></td><td>1.7</td></tr>
+      <tr><td>8</td><td>Create full folder structure as described</td><td>2</td></tr>
+      <tr><td>9</td><td>Create permanent Documents junction to <code>C:\Sims2\Active\</code></td><td>2</td></tr>
+      <tr><td>10</td><td>Create <code>config.json</code> for each user</td><td>3</td></tr>
+      <tr><td>11</td><td>Write and test <code>launch.ps1</code> for each user/world combo</td><td>4</td></tr>
+      <tr><td>12</td><td>Add Flask routes for picker UI</td><td>5</td></tr>
+      <tr><td>13</td><td>Implement Sunshine active-session check</td><td>5.2</td></tr>
+      <tr><td>14</td><td>Implement mod-change warning page with CONFIRM input</td><td>5.3</td></tr>
+      <tr><td>15</td><td>Create Sunshine app entry pointing at launcher</td><td>6.1</td></tr>
+      <tr><td>16</td><td>Test full flow end-to-end for each user</td><td>All</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔑 Key Paths Reference</div>
+  <div class="card">
+    <table>
+      <tr><th>Path</th><th>Purpose</th></tr>
+      <tr><td><code>C:\Sims2\Game\Sims2EP9.exe</code></td><td>Game executable — apply 4GB patch here</td></tr>
+      <tr><td><code>C:\Sims2\Mods\Shared\</code></td><td>Shared mod folder — server admin manages this</td></tr>
+      <tr><td><code>C:\Sims2\Mods\Users\[name]\</code></td><td>Per-user personal mod folder</td></tr>
+      <tr><td><code>C:\Sims2\Worlds\Shared\</code></td><td>Communal neighborhood — all users can access</td></tr>
+      <tr><td><code>C:\Sims2\Worlds\Users\[name]\</code></td><td>Per-user private save data</td></tr>
+      <tr><td><code>C:\Sims2\Worlds\Users\[name]\config.json</code></td><td>Per-user mod config and lock state</td></tr>
+      <tr><td><code>C:\Sims2\Active\</code></td><td>Active symlink target — changes per session</td></tr>
+      <tr><td><code>C:\Sims2\launch.ps1</code></td><td>Launcher script — called by Sunshine or Flask</td></tr>
+      <tr><td><code>%USERPROFILE%\Documents\EA Games\The Sims 2\</code></td><td>Permanent junction pointing to <code>C:\Sims2\Active\</code></td></tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>
