@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐉 Home Server Grimoire</title>
+<title>🐉 Home Server</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@400;600;900&family=Raleway:wght@300;400;500;600&display=swap');
 
@@ -21,7 +21,6 @@
     --tab-hover: #161b28;
     --danger: #e05c5c;
     --success: #4caf7d;
-    --glow: rgba(200, 168, 75, 0.15);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +33,6 @@
     overflow-x: hidden;
   }
 
-  /* Subtle noise texture overlay */
   body::before {
     content: '';
     position: fixed;
@@ -47,33 +45,27 @@
   .shell {
     position: relative;
     z-index: 1;
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 24px 20px 40px;
+    padding: 20px 16px 40px;
   }
 
-  /* ── Header ── */
   header {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 20px 28px;
+    padding: 16px 24px;
     background: var(--bg3);
     border: 1px solid var(--border);
     border-bottom: 2px solid var(--accent);
     border-radius: 4px 4px 0 0;
-    margin-bottom: 0;
   }
 
-  .header-dragon {
-    font-size: 2.8rem;
-    line-height: 1;
-    filter: drop-shadow(0 0 12px rgba(200,168,75,0.5));
-  }
+  .header-dragon { font-size: 2.4rem; line-height: 1; filter: drop-shadow(0 0 12px rgba(200,168,75,0.5)); }
 
   .header-text h1 {
     font-family: 'Cinzel', serif;
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-weight: 900;
     color: var(--accent);
     letter-spacing: 0.06em;
@@ -82,48 +74,36 @@
 
   .header-text p {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     color: var(--text-dim);
-    margin-top: 3px;
+    margin-top: 2px;
     letter-spacing: 0.1em;
   }
 
-  .header-badge {
-    margin-left: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-  }
+  .header-badge { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
   .badge {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     padding: 2px 8px;
     border-radius: 2px;
     letter-spacing: 0.08em;
   }
 
   .badge-win { background: rgba(91,141,217,0.2); color: var(--accent2); border: 1px solid rgba(91,141,217,0.3); }
-  .badge-v1 { background: rgba(78,205,196,0.15); color: var(--accent3); border: 1px solid rgba(78,205,196,0.3); }
+  .badge-v1  { background: rgba(78,205,196,0.15); color: var(--accent3); border: 1px solid rgba(78,205,196,0.3); }
+  .badge-foss { background: rgba(76,175,125,0.15); color: #4caf7d; border: 1px solid rgba(76,175,125,0.3); }
 
-  /* ── Binder spine ── */
-  .binder-body {
-    display: flex;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-top: none;
-    min-height: 700px;
-  }
+  .binder-body { display: flex; gap: 0; border: 1px solid var(--border); border-top: none; min-height: 700px; }
 
   .tab-spine {
-    width: 52px;
+    width: 44px;
     background: linear-gradient(180deg, #0d1018 0%, #0a0c0f 100%);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 12px 0;
+    padding: 10px 0;
     gap: 2px;
     flex-shrink: 0;
   }
@@ -131,55 +111,77 @@
   .spine-label {
     writing-mode: vertical-rl;
     font-family: 'Cinzel', serif;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     letter-spacing: 0.2em;
     color: var(--text-dim);
     text-transform: uppercase;
     padding: 8px 4px;
   }
 
-  /* ── Top tab bar ── */
-  .tab-bar {
+  .ring {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+  }
+
+  .tab-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Two-row tab bar */
+  .tab-bar-row {
     display: flex;
     overflow-x: auto;
     background: var(--bg);
-    border-bottom: 2px solid var(--border);
+    border-bottom: 1px solid var(--border);
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
+  .tab-bar-row:last-of-type { border-bottom: 2px solid var(--border); }
+  .tab-bar-row::-webkit-scrollbar { height: 3px; }
+  .tab-bar-row::-webkit-scrollbar-thumb { background: var(--border); }
 
-  .tab-bar::-webkit-scrollbar { height: 3px; }
-  .tab-bar::-webkit-scrollbar-track { background: transparent; }
-  .tab-bar::-webkit-scrollbar-thumb { background: var(--border); }
+  .tab-group-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px 0;
+    white-space: nowrap;
+    align-self: flex-end;
+    opacity: 0.6;
+  }
 
   .tab-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    padding: 10px 16px 8px;
+    gap: 2px;
+    padding: 7px 13px 6px;
     cursor: pointer;
     border: none;
     background: transparent;
     color: var(--text-dim);
     font-family: 'Raleway', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     white-space: nowrap;
-    transition: all 0.2s;
+    transition: all 0.18s;
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
-    position: relative;
   }
 
-  .tab-btn .tab-icon { font-size: 1.1rem; }
+  .tab-btn .tab-icon { font-size: 1rem; }
 
-  .tab-btn:hover {
-    background: var(--tab-hover);
-    color: var(--text);
-  }
+  .tab-btn:hover { background: var(--tab-hover); color: var(--text); }
 
   .tab-btn.active {
     background: var(--tab-active);
@@ -187,56 +189,41 @@
     border-bottom-color: var(--accent);
   }
 
-  .tab-btn.active .tab-icon {
-    filter: drop-shadow(0 0 6px rgba(200,168,75,0.6));
-  }
+  .tab-btn.active .tab-icon { filter: drop-shadow(0 0 5px rgba(200,168,75,0.6)); }
 
-  /* ── Content area ── */
-  .content-area {
-    flex: 1;
-    overflow: hidden;
-  }
+  .content-area { flex: 1; overflow: hidden; }
 
-  .tab-content {
-    display: none;
-    height: 100%;
-    animation: fadeIn 0.25s ease;
-  }
+  .tab-content { display: none; height: 100%; animation: fadeIn 0.2s ease; }
+  .tab-content.active { display: block; }
 
-  .tab-content.active {
-    display: block;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
   .tab-content iframe {
     width: 100%;
-    height: calc(100vh - 220px);
-    min-height: 600px;
+    height: calc(100vh - 200px);
+    min-height: 620px;
     border: none;
-    background: var(--bg2);
+    background: #0e1117;
   }
 
-  /* ── Footer ── */
   footer {
-    margin-top: 16px;
+    margin-top: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 16px;
+    padding: 8px 14px;
     background: var(--bg3);
     border: 1px solid var(--border);
     border-radius: 0 0 4px 4px;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   footer span {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     color: var(--text-dim);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
   }
 
   .status-dot {
@@ -244,26 +231,12 @@
     width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--success);
-    margin-right: 6px;
+    margin-right: 5px;
     box-shadow: 0 0 6px var(--success);
     animation: pulse 2s infinite;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* ── Ring holes on spine ── */
-  .ring {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    background: var(--bg);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-    flex-shrink: 0;
-  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 </style>
 </head>
 <body>
@@ -272,99 +245,100 @@
   <header>
     <div class="header-dragon">🐉</div>
     <div class="header-text">
-      <h1>Home Server Grimoire</h1>
-      <p>// WINDOWS 10 DESKTOP · PLEX · MINECRAFT · AND BEYOND //</p>
+      <h1>Home Server</h1>
+      <p>// WINDOWS 10 · MEDIA · GAMES · AUTOMATION · SELF-HOSTED SERVICES //</p>
     </div>
     <div class="header-badge">
       <span class="badge badge-win">⊞ Windows 10</span>
-      <span class="badge badge-v1">✦ V1 → SSO Roadmap</span>
+      <span class="badge badge-v1">✦ V1 → SSO</span>
+      <span class="badge badge-foss">⊕ FOSS-First</span>
     </div>
   </header>
 
   <div class="binder-body">
 
-    <!-- Spine with ring binders -->
     <div class="tab-spine">
       <div class="ring"></div>
       <div class="ring"></div>
       <div class="ring"></div>
-      <div class="spine-label">Server Grimoire</div>
+      <div class="spine-label">Home Server</div>
       <div class="ring"></div>
       <div class="ring"></div>
       <div class="ring"></div>
     </div>
 
-    <div style="flex:1; display:flex; flex-direction:column;">
+    <div class="tab-bar-wrapper">
 
-      <!-- Tab bar -->
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('storage')" id="tab-storage">
-          <span class="tab-icon">💾</span>Storage
-        </button>
-        <button class="tab-btn" onclick="switchTab('calibre')" id="tab-calibre">
-          <span class="tab-icon">📚</span>Calibre
-        </button>
-        <button class="tab-btn" onclick="switchTab('audiobooks')" id="tab-audiobooks">
-          <span class="tab-icon">🎧</span>Audiobooks
-        </button>
-        <button class="tab-btn" onclick="switchTab('minecraft')" id="tab-minecraft">
-          <span class="tab-icon">⛏️</span>Minecraft
-        </button>
-        <button class="tab-btn" onclick="switchTab('monitor')" id="tab-monitor">
-          <span class="tab-icon">📡</span>Monitor
-        </button>
-        <button class="tab-btn" onclick="switchTab('owncloud')" id="tab-owncloud">
-          <span class="tab-icon">☁️</span>OwnCloud
-        </button>
-        <button class="tab-btn" onclick="switchTab('sso')" id="tab-sso">
-          <span class="tab-icon">🔐</span>SSO
-        </button>
-        <button class="tab-btn" onclick="switchTab('seedbox')" id="tab-seedbox">
-          <span class="tab-icon">🌱</span>Seedbox
-        </button>
-        <button class="tab-btn" onclick="switchTab('gamecube')" id="tab-gamecube">
-          <span class="tab-icon">🎮</span>GameCube
-        </button>
+      <!-- Row 1: Infrastructure & Setup -->
+      <div class="tab-bar-row">
+        <span class="tab-group-label">infra //</span>
+        <button class="tab-btn active" onclick="switchTab('monitor-control')" id="tab-monitor-control"><span class="tab-icon">🖥️</span>Dashboard</button>
+        <button class="tab-btn" onclick="switchTab('hardware')" id="tab-hardware"><span class="tab-icon">🖧</span>Hardware</button>
+        <button class="tab-btn" onclick="switchTab('security')" id="tab-security"><span class="tab-icon">🛡️</span>Security</button>
+        <button class="tab-btn" onclick="switchTab('domain')" id="tab-domain"><span class="tab-icon">🌐</span>Domain</button>
+        <button class="tab-btn" onclick="switchTab('linux')" id="tab-linux"><span class="tab-icon">🐧</span>Linux</button>
+        <button class="tab-btn" onclick="switchTab('sso')" id="tab-sso"><span class="tab-icon">🔐</span>SSO</button>
       </div>
 
-      <!-- Content panes -->
+      <!-- Row 2: Services & Media -->
+      <div class="tab-bar-row">
+        <span class="tab-group-label">services //</span>
+        <button class="tab-btn" onclick="switchTab('calibre')" id="tab-calibre"><span class="tab-icon">📚</span>Calibre</button>
+        <button class="tab-btn" onclick="switchTab('audiobooks')" id="tab-audiobooks"><span class="tab-icon">🎧</span>Audiobooks</button>
+        <button class="tab-btn" onclick="switchTab('owncloud')" id="tab-owncloud"><span class="tab-icon">☁️</span>Nextcloud</button>
+        <button class="tab-btn" onclick="switchTab('seedbox')" id="tab-seedbox"><span class="tab-icon">🌱</span>Seedbox</button>
+        <button class="tab-btn" onclick="switchTab('jukebox')" id="tab-jukebox"><span class="tab-icon">🎵</span>Jukebox</button>
+        <button class="tab-btn" onclick="switchTab('minecraft')" id="tab-minecraft"><span class="tab-icon">⛏️</span>Minecraft</button>
+        <button class="tab-btn" onclick="switchTab('ark')" id="tab-ark"><span class="tab-icon">🦕</span>ARK</button>
+        <button class="tab-btn" onclick="switchTab('ss13')" id="tab-ss13"><span class="tab-icon">🚀</span>SS13</button>
+      </div>
+
+      <!-- Row 3: Emulation & Gaming -->
+      <div class="tab-bar-row">
+        <span class="tab-group-label">gaming //</span>
+        <button class="tab-btn" onclick="switchTab('steam')" id="tab-steam"><span class="tab-icon">🎮</span>Steam</button>
+        <button class="tab-btn" onclick="switchTab('gamecube')" id="tab-gamecube"><span class="tab-icon">🟣</span>GameCube</button>
+        <button class="tab-btn" onclick="switchTab('xbox360')" id="tab-xbox360"><span class="tab-icon">🟢</span>Xbox 360</button>
+        <button class="tab-btn" onclick="switchTab('pokemon')" id="tab-pokemon"><span class="tab-icon">⚡</span>Pokémon</button>
+        <button class="tab-btn" onclick="switchTab('castlevania')" id="tab-castlevania"><span class="tab-icon">🧛</span>Castlevania</button>
+        <button class="tab-btn" onclick="switchTab('fireemblem')" id="tab-fireemblem"><span class="tab-icon">⚔️</span>Fire Emblem</button>
+        <button class="tab-btn" onclick="switchTab('marioparty')" id="tab-marioparty"><span class="tab-icon">🎲</span>Mario Party</button>
+      </div>
+
       <div class="content-area">
-        <div class="tab-content active" id="content-storage">
-          <iframe src="storage.html" title="Storage"></iframe>
-        </div>
-        <div class="tab-content" id="content-calibre">
-          <iframe src="calibre.html" title="Calibre"></iframe>
-        </div>
-        <div class="tab-content" id="content-audiobooks">
-          <iframe src="audiobooks.html" title="Audiobookshelf"></iframe>
-        </div>
-        <div class="tab-content" id="content-minecraft">
-          <iframe src="minecraft.html" title="Minecraft"></iframe>
-        </div>
-        <div class="tab-content" id="content-monitor">
-          <iframe src="monitor.html" title="Monitor"></iframe>
-        </div>
-        <div class="tab-content" id="content-owncloud">
-          <iframe src="owncloud.html" title="OwnCloud"></iframe>
-        </div>
-        <div class="tab-content" id="content-sso">
-          <iframe src="sso.html" title="SSO"></iframe>
-        </div>
-        <div class="tab-content" id="content-seedbox">
-          <iframe src="seedbox.html" title="Seedbox"></iframe>
-        </div>
-        <div class="tab-content" id="content-gamecube">
-          <iframe src="gamecube.html" title="GameCube"></iframe>
-        </div>
+        <!-- Infrastructure -->
+        <div class="tab-content active" id="content-monitor-control"><iframe src="monitor-control.html" title="Dashboard"></iframe></div>
+        <div class="tab-content" id="content-hardware"><iframe src="hardware.html" title="Hardware"></iframe></div>
+        <div class="tab-content" id="content-security"><iframe src="security.html" title="Security"></iframe></div>
+        <div class="tab-content" id="content-domain"><iframe src="domain.html" title="Domain"></iframe></div>
+        <div class="tab-content" id="content-linux"><iframe src="linux.html" title="Linux"></iframe></div>
+        <div class="tab-content" id="content-sso"><iframe src="sso.html" title="SSO"></iframe></div>
+        <!-- Services -->
+        <div class="tab-content" id="content-calibre"><iframe src="calibre.html" title="Calibre"></iframe></div>
+        <div class="tab-content" id="content-audiobooks"><iframe src="audiobooks.html" title="Audiobooks"></iframe></div>
+        <div class="tab-content" id="content-owncloud"><iframe src="owncloud.html" title="Nextcloud"></iframe></div>
+        <div class="tab-content" id="content-seedbox"><iframe src="seedbox.html" title="Seedbox"></iframe></div>
+        <div class="tab-content" id="content-jukebox"><iframe src="jukebox.html" title="Jukebox"></iframe></div>
+        <div class="tab-content" id="content-minecraft"><iframe src="minecraft.html" title="Minecraft"></iframe></div>
+        <div class="tab-content" id="content-ark"><iframe src="ark.html" title="ARK"></iframe></div>
+        <div class="tab-content" id="content-ss13"><iframe src="ss13.html" title="SS13"></iframe></div>
+        <!-- Gaming -->
+        <div class="tab-content" id="content-steam"><iframe src="steam.html" title="Steam"></iframe></div>
+        <div class="tab-content" id="content-gamecube"><iframe src="gamecube.html" title="GameCube"></iframe></div>
+        <div class="tab-content" id="content-xbox360"><iframe src="xbox360.html" title="Xbox 360"></iframe></div>
+        <div class="tab-content" id="content-pokemon"><iframe src="pokemon.html" title="Pokemon"></iframe></div>
+        <div class="tab-content" id="content-castlevania"><iframe src="castlevania.html" title="Castlevania"></iframe></div>
+        <div class="tab-content" id="content-fireemblem"><iframe src="fireemblem.html" title="Fire Emblem"></iframe></div>
+        <div class="tab-content" id="content-marioparty"><iframe src="marioparty.html" title="Mario Party"></iframe></div>
       </div>
 
     </div>
   </div>
 
   <footer>
-    <span><span class="status-dot"></span>GRIMOIRE v1.0 · LOCAL REFERENCE</span>
-    <span>🐉 NO DOCKER REQUIRED · WINDOWS 10 NATIVE PATHS INCLUDED</span>
-    <span>✦ CLICK ANY TAB TO BEGIN</span>
+    <span><span class="status-dot"></span>HOME SERVER · LOCAL REFERENCE</span>
+    <span>🐉 FOSS-FIRST · WINDOWS 10 · NO DOCKER REQUIRED (mostly)</span>
+    <span>✦ THREE-ROW BINDER: INFRA · SERVICES · GAMING</span>
   </footer>
 
 </div>
