@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>All Services</title><link rel="stylesheet" href="shared.css">
+<style>
+  .svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+  .svc-card{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:14px 16px;transition:all .17s;position:relative;}
+  .svc-card:hover{border-color:rgba(200,168,75,.28);transform:translateY(-1px);}
+  .svc-card.pinned{border-color:rgba(76,175,125,.3);background:rgba(76,175,125,.03);}
+  .sc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+  .sc-icon{font-size:1.6rem;flex-shrink:0;line-height:1;}
+  .sc-name{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+  .sc-tagline{font-size:.75rem;color:var(--text-dim);line-height:1.4;}
+  .sc-cat{font-family:'Share Tech Mono',monospace;font-size:.54rem;padding:1px 5px;border-radius:2px;display:inline-block;margin-bottom:6px;}
+  .cat-media{background:rgba(91,141,217,.12);color:var(--accent2);border:1px solid rgba(91,141,217,.2);}
+  .cat-infra{background:rgba(200,168,75,.1);color:var(--accent);border:1px solid rgba(200,168,75,.2);}
+  .cat-apps{background:rgba(78,205,196,.1);color:var(--accent3);border:1px solid rgba(78,205,196,.2);}
+  .cat-gaming{background:rgba(180,120,220,.1);color:#b478dc;border:1px solid rgba(180,120,220,.2);}
+  .cat-download{background:rgba(76,175,125,.1);color:#4caf7d;border:1px solid rgba(76,175,125,.2);}
+  .cat-security{background:rgba(224,92,92,.1);color:#e05c5c;border:1px solid rgba(224,92,92,.2);}
+  .sc-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;}
+  .sc-stat{background:var(--bg3);border-radius:2px;padding:4px 6px;}
+  .sc-stat-label{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;}
+  .sc-stat-val{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text);margin-top:1px;}
+  .sc-footer{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+  .sc-tab-link{font-family:'Share Tech Mono',monospace;font-size:.58rem;padding:2px 7px;background:rgba(91,141,217,.1);color:var(--accent2);border:1px solid rgba(91,141,217,.2);border-radius:2px;cursor:pointer;text-decoration:none;transition:all .14s;}
+  .sc-tab-link:hover{background:rgba(91,141,217,.2);}
+  .docker-badge{font-family:'Share Tech Mono',monospace;font-size:.54rem;padding:1px 5px;border-radius:2px;}
+  .docker-yes{background:rgba(78,205,196,.1);color:var(--accent3);border:1px solid rgba(78,205,196,.2);}
+  .docker-no{background:rgba(120,130,160,.08);color:var(--text-dim);border:1px solid rgba(120,130,160,.18);}
+  .pin-btn{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:.58rem;padding:3px 8px;border-radius:2px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-dim);transition:all .15s;flex-shrink:0;}
+  .pin-btn:hover{border-color:#4caf7d;color:#4caf7d;}
+  .pin-btn.pinned{border-color:rgba(76,175,125,.4);color:#4caf7d;background:rgba(76,175,125,.08);}
+  /* Filters */
+  .filter-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+  .filt{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 10px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .14s;}
+  .filt:hover{border-color:var(--accent);color:var(--text);}
+  .filt.active{border-color:var(--accent);color:var(--accent);background:rgba(200,168,75,.07);}
+  .search-inp{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:3px;font-family:'Raleway',sans-serif;font-size:.8rem;width:180px;}
+  .search-inp:focus{outline:none;border-color:rgba(200,168,75,.4);}
+  .count-lbl{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);margin-left:auto;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🗂️</div>
+  <div>
+    <h1>All Services</h1>
+    <div class="subtitle">// Service Catalogue · Resource Estimates · Pin to Homepage //</div>
+    <p class="desc">Every service running on this server. Click a tab link to read its setup docs. Pin a service to add it to your homepage quick access.</p>
+  </div>
+</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>Resource estimates</strong> are at idle/light use. Heavy concurrent use can spike 2–3×. RAM estimates are per-service; see the Memory tab for total budget planning. Storage estimates cover the program only — not your media library.</div>
+</div>
+
+<div class="filter-bar">
+  <input class="search-inp" id="search" placeholder="Search services…" oninput="render()">
+  <button class="filt active" onclick="setFilter('all',this)">All</button>
+  <button class="filt" onclick="setFilter('media',this)">Media</button>
+  <button class="filt" onclick="setFilter('infra',this)">Infra</button>
+  <button class="filt" onclick="setFilter('apps',this)">Apps</button>
+  <button class="filt" onclick="setFilter('gaming',this)">Gaming</button>
+  <button class="filt" onclick="setFilter('download',this)">Downloads</button>
+  <button class="filt" onclick="setFilter('security',this)">Security</button>
+  <span class="count-lbl" id="count-lbl"></span>
+</div>
+
+<div class="svc-grid" id="svc-grid"></div>
+
+<script>
+const SVCS = [
+  // MEDIA
+  {id:'jellyfin',     icon:'🎬', name:'Jellyfin',          tagline:'Self-hosted media server. Stream movies and TV to any device. Free hardware transcoding, no Plex account required.',
+   cat:'media', port:8096, docker:false, tab:'movies', tab2:null,
+   storage:'~500 MB app + media library', cpu:'Low (direct play) / High (transcoding)', ram:'200–800 MB', gpu:'Yes (transcoding)'},
+  {id:'calibre',      icon:'📚', name:'Calibre-Web',        tagline:'Web-based ebook library browser and reader. EPUB, PDF, MOBI support. Send to Kindle built in.',
+   cat:'media', port:8083, docker:false, tab:'calibre', tab2:null,
+   storage:'~100 MB app + book library', cpu:'Very low', ram:'100–250 MB', gpu:'No'},
+  {id:'abs',          icon:'🎧', name:'Audiobookshelf',      tagline:'Audiobook and podcast server. Per-chapter progress sync. Mobile apps available.',
+   cat:'media', port:13378, docker:false, tab:'audiobooks', tab2:null,
+   storage:'~200 MB app + audio library', cpu:'Low', ram:'150–400 MB', gpu:'No'},
+  {id:'navidrome',    icon:'🎵', name:'Navidrome',           tagline:'Music streaming server. Subsonic API compatible — works with DSub, Ultrasonic, Symfonium. Your personal Spotify.',
+   cat:'media', port:4533, docker:false, tab:'navidrome', tab2:null,
+   storage:'~50 MB app + music library', cpu:'Very low', ram:'50–150 MB', gpu:'No'},
+  {id:'immich',       icon:'📷', name:'Immich',              tagline:'Self-hosted Google Photos alternative. Auto-backup from phone, face recognition, smart search, shared albums.',
+   cat:'media', port:2283, docker:true, tab:'immich', tab2:null,
+   storage:'~1.5 GB app (Docker) + photo library', cpu:'Medium (ML indexing)', ram:'500 MB–1.5 GB', gpu:'Optional (ML)'},
+  {id:'kavita-comics',icon:'📕', name:'Kavita (Comics)',     tagline:'Comic book reader library. CBZ, PDF, EPUB. Port 5000.',
+   cat:'media', port:5000, docker:false, tab:'kavita', tab2:null,
+   storage:'~100 MB app + comic library', cpu:'Very low', ram:'100–200 MB', gpu:'No'},
+  {id:'kavita-dnd',   icon:'⚔️', name:'Kavita (DnD)',        tagline:'DnD rulebook PDF library. Same app as Comics, second instance. Port 5001.',
+   cat:'media', port:5001, docker:false, tab:'kavita', tab2:null,
+   storage:'~100 MB + PDF library', cpu:'Very low', ram:'100–200 MB', gpu:'No'},
+  {id:'nextcloud',    icon:'☁️', name:'Nextcloud',           tagline:'Self-hosted Google Drive. File sync, external storage mounts, per-user quotas that include all app data.',
+   cat:'media', port:80, docker:false, tab:'nextcloud', tab2:'sso',
+   storage:'~500 MB app (XAMPP) + user files', cpu:'Low', ram:'300–600 MB', gpu:'No'},
+  {id:'plex',         icon:'📡', name:'Plex',                tagline:'Media server (legacy, being phased out in favor of Jellyfin). Runs alongside during transition.',
+   cat:'media', port:32400, docker:false, tab:'movies', tab2:null,
+   storage:'~400 MB app', cpu:'Medium', ram:'400 MB–1.5 GB', gpu:'Optional'},
+
+  // DOWNLOADS
+  {id:'mullvad',      icon:'🛡️', name:'Mullvad VPN',         tagline:'VPN service binding qBittorrent to a private tunnel. No activity logs.',
+   cat:'download', port:null, docker:false, tab:'seedbox', tab2:null,
+   storage:'~50 MB', cpu:'Low', ram:'50–100 MB', gpu:'No'},
+  {id:'qbit',         icon:'🔽', name:'qBittorrent',          tagline:'BitTorrent client bound to Mullvad VPN interface. Web UI on port 8090.',
+   cat:'download', port:8090, docker:false, tab:'seedbox', tab2:null,
+   storage:'~100 MB app', cpu:'Low–Medium', ram:'150–400 MB', gpu:'No'},
+  {id:'sonarr',       icon:'📺', name:'Sonarr',               tagline:'TV show auto-downloader. Monitors RSS feeds, sends to qBittorrent, renames and moves files.',
+   cat:'download', port:8989, docker:false, tab:'seedbox', tab2:null,
+   storage:'~150 MB', cpu:'Low', ram:'100–250 MB', gpu:'No'},
+  {id:'radarr',       icon:'🎬', name:'Radarr',               tagline:'Movie auto-downloader. Same as Sonarr but for movies.',
+   cat:'download', port:7878, docker:false, tab:'seedbox', tab2:null,
+   storage:'~150 MB', cpu:'Low', ram:'100–250 MB', gpu:'No'},
+  {id:'readarr',      icon:'📚', name:'Readarr',              tagline:'Book auto-downloader. Authors you follow appear automatically in Calibre.',
+   cat:'download', port:8787, docker:false, tab:'seedbox', tab2:'calibre',
+   storage:'~150 MB', cpu:'Low', ram:'100–250 MB', gpu:'No'},
+  {id:'prowlarr',     icon:'🔍', name:'Prowlarr',             tagline:'Indexer manager. Connects all tracker sources to Sonarr/Radarr/Readarr from one place.',
+   cat:'download', port:9696, docker:false, tab:'seedbox', tab2:null,
+   storage:'~100 MB', cpu:'Very low', ram:'80–150 MB', gpu:'No'},
+
+  // SECURITY / INFRA
+  {id:'authentik',    icon:'🔐', name:'Authentik',            tagline:'Self-hosted SSO/IdP. Google OAuth source. All services authenticate through here. Docker in WSL2.',
+   cat:'security', port:9000, docker:true, tab:'sso', tab2:null,
+   storage:'~500 MB Docker', cpu:'Low', ram:'600 MB–1 GB', gpu:'No'},
+  {id:'caddy',        icon:'🌐', name:'Caddy',                tagline:'Reverse proxy. TLS termination, Authentik forward_auth, subdomain routing. Auto HTTPS.',
+   cat:'security', port:443, docker:false, tab:'domain', tab2:'security',
+   storage:'~50 MB', cpu:'Very low', ram:'30–80 MB', gpu:'No'},
+  {id:'cloudflared',  icon:'☁️', name:'Cloudflare Tunnel',    tagline:'Zero-trust tunnel. Zero open router ports. Hides home IP. WAF + Bot Fight Mode.',
+   cat:'security', port:null, docker:false, tab:'domain', tab2:null,
+   storage:'~30 MB', cpu:'Very low', ram:'30–60 MB', gpu:'No'},
+  {id:'tailscale',    icon:'🔒', name:'Tailscale',            tagline:'Mesh VPN for admin access. Admin tools (qBit, *arr, dashboard) only accessible over Tailscale.',
+   cat:'security', port:null, docker:false, tab:'security', tab2:null,
+   storage:'~20 MB', cpu:'Very low', ram:'20–50 MB', gpu:'No'},
+  {id:'ipban',        icon:'🚫', name:'IPBan',                tagline:'Automatic IP banning on repeated failed auth attempts. Integrates with Windows Firewall.',
+   cat:'security', port:null, docker:false, tab:'security', tab2:null,
+   storage:'~10 MB', cpu:'Very low', ram:'20–50 MB', gpu:'No'},
+  {id:'vaultwarden',  icon:'🔑', name:'Vaultwarden',          tagline:'Self-hosted Bitwarden-compatible password manager. Port 8082.',
+   cat:'security', port:8082, docker:false, tab:'security', tab2:null,
+   storage:'~50 MB', cpu:'Very low', ram:'30–80 MB', gpu:'No'},
+  {id:'uptimekuma',   icon:'📡', name:'Uptime Kuma',          tagline:'Service monitoring dashboard. HTTP and TCP checks, alert on downtime. Port 3001.',
+   cat:'infra', port:3001, docker:false, tab:'dashboard', tab2:null,
+   storage:'~100 MB', cpu:'Very low', ram:'80–150 MB', gpu:'No'},
+  {id:'sunshine',     icon:'☀️', name:'Sunshine',             tagline:'Game streaming host. Streams desktop/emulators to Moonlight clients on LAN and internet.',
+   cat:'infra', port:47990, docker:false, tab:'gamecube', tab2:'steam',
+   storage:'~150 MB', cpu:'High (streaming)', ram:'200–500 MB', gpu:'Yes (encoding)'},
+  {id:'session-mgr',  icon:'🗂️', name:'Session Manager',      tagline:'Custom service (port 9004). Manages per-user symlinks for emulator saves and MTG decks.',
+   cat:'infra', port:9004, docker:false, tab:'sso', tab2:'gamecube',
+   storage:'<5 MB', cpu:'Very low', ram:'30–60 MB', gpu:'No'},
+  {id:'stats-agent',  icon:'📊', name:'Stats Agent',           tagline:'Custom service (port 9001). Exposes CPU/RAM/Sunshine/session data to Dashboard.',
+   cat:'infra', port:9001, docker:false, tab:'dashsetup', tab2:null,
+   storage:'<5 MB', cpu:'Very low', ram:'20–50 MB', gpu:'No'},
+  {id:'ach-server',   icon:'🏆', name:'Achievement Server',    tagline:'Custom service (port 9003). Tracks per-user achievement unlocks, feeds community feed.',
+   cat:'infra', port:9003, docker:false, tab:'achievements', tab2:null,
+   storage:'<10 MB', cpu:'Very low', ram:'20–50 MB', gpu:'No'},
+
+  // APPS
+  {id:'ollama',       icon:'🤖', name:'Ollama',               tagline:'Local LLM engine. Runs Llama, Mistral, etc. Open WebUI front-end. Requires GPU for reasonable speed.',
+   cat:'apps', port:11434, docker:false, tab:'ollama', tab2:null,
+   storage:'~200 MB engine + 4–40 GB per model', cpu:'High (inference)', ram:'200 MB + model VRAM', gpu:'Yes (strongly recommended)'},
+  {id:'openwebui',    icon:'💬', name:'Open WebUI',            tagline:'Chat UI for Ollama. Authenticated via Authentik OIDC. Conversation history per user.',
+   cat:'apps', port:3000, docker:false, tab:'ollama', tab2:null,
+   storage:'~300 MB', cpu:'Very low', ram:'100–200 MB', gpu:'No'},
+  {id:'recs',         icon:'🎯', name:'Recommendations API',   tagline:'Custom service (port 5051). AI-powered book/game recommendations using Ollama. Per-user history.',
+   cat:'apps', port:5051, docker:false, tab:'recommendations', tab2:null,
+   storage:'<10 MB + user histories', cpu:'Low (delegates to Ollama)', ram:'50–100 MB', gpu:'No'},
+  {id:'jukebox',      icon:'🎙️', name:'Jukebox',              tagline:'Infinite music looper with speed/pitch controls, EQ, reverb. Web Audio API. Port 5050.',
+   cat:'apps', port:5050, docker:false, tab:'jukebox', tab2:null,
+   storage:'<5 MB', cpu:'Low', ram:'30–80 MB', gpu:'No'},
+  {id:'kiwix',        icon:'📖', name:'Kiwix',                 tagline:'Offline Wikipedia, WikiHow, and other knowledge bases. Serves ZIM files.',
+   cat:'apps', port:8888, docker:false, tab:'wikipedia', tab2:null,
+   storage:'~50 MB app + ZIM files (Wikipedia ~80 GB)', cpu:'Very low', ram:'100–300 MB', gpu:'No'},
+  {id:'linguacafe',   icon:'🌍', name:'LinguaCafe',            tagline:'Language learning with spaced repetition, reading practice. Docker in WSL2. Port 8093.',
+   cat:'apps', port:8093, docker:true, tab:'languages', tab2:null,
+   storage:'~300 MB Docker', cpu:'Low', ram:'200–400 MB', gpu:'No'},
+  {id:'anki',         icon:'🃏', name:'Anki Sync Server',      tagline:'Self-hosted Anki sync server. Use official Anki apps, sync cards privately. Port 8091.',
+   cat:'apps', port:8091, docker:false, tab:'languages', tab2:null,
+   storage:'~50 MB app + decks', cpu:'Very low', ram:'50–100 MB', gpu:'No'},
+  {id:'vikunja',      icon:'✅', name:'Vikunja',               tagline:'Self-hosted task manager (Todoist alternative). OIDC auth. Port 3456.',
+   cat:'apps', port:3456, docker:false, tab:'utilities', tab2:null,
+   storage:'~150 MB', cpu:'Very low', ram:'80–150 MB', gpu:'No'},
+  {id:'mealie',       icon:'🍲', name:'Mealie',                tagline:'Recipe manager and meal planner. Import from any URL. OIDC auth. Docker in WSL2.',
+   cat:'apps', port:9925, docker:true, tab:'utilities', tab2:null,
+   storage:'~300 MB Docker', cpu:'Very low', ram:'150–300 MB', gpu:'No'},
+
+  // GAMING
+  {id:'romm',         icon:'🕹️', name:'RomM',                  tagline:'ROM library manager and metadata scraper. Browse and download ROMs from the web UI.',
+   cat:'gaming', port:8098, docker:true, tab:'romm', tab2:null,
+   storage:'~500 MB Docker + ROM library', cpu:'Low', ram:'200–400 MB', gpu:'No'},
+  {id:'emulatorjs',   icon:'⚡', name:'EmulatorJS',            tagline:'Browser-based emulation for GBA, NDS, NES, SNES, PS1 and more. Per-user saves via Flask.',
+   cat:'gaming', port:8085, docker:false, tab:'pokemon', tab2:'castlevania',
+   storage:'~200 MB + ROM files', cpu:'Low (server) / Medium (client CPU)', ram:'100–300 MB', gpu:'No'},
+  {id:'dolphin',      icon:'🟣', name:'Dolphin',               tagline:'GameCube and Wii emulator. Streamed via Sunshine. Per-user saves via session manager symlinks.',
+   cat:'gaming', port:null, docker:false, tab:'gamecube', tab2:'fireemblem',
+   storage:'~200 MB + ROM files', cpu:'High', ram:'1–3 GB', gpu:'Yes (required)'},
+  {id:'xenia',        icon:'🟢', name:'Xenia Canary',          tagline:'Xbox 360 emulator. Streamed via Sunshine. Per-user saves via session manager symlinks.',
+   cat:'gaming', port:null, docker:false, tab:'xbox360', tab2:null,
+   storage:'~100 MB + game files', cpu:'Very high', ram:'2–4 GB', gpu:'Yes (required)'},
+  {id:'minecraft-v',  icon:'⛏️', name:'Minecraft (Vanilla)',   tagline:'Vanilla Minecraft Java server. Port 25565. 2am auto-shutdown via Task Scheduler.',
+   cat:'gaming', port:25565, docker:false, tab:'minecraft', tab2:null,
+   storage:'~500 MB + world data', cpu:'Medium', ram:'1–2 GB', gpu:'No'},
+  {id:'minecraft-m',  icon:'🔧', name:'Minecraft (Modded)',    tagline:'Modded Minecraft (Forge/Fabric). Port 25566. Larger RAM footprint.',
+   cat:'gaming', port:25566, docker:false, tab:'minecraft', tab2:null,
+   storage:'~2–4 GB + world + mods', cpu:'High', ram:'3–6 GB', gpu:'No'},
+  {id:'ark',          icon:'🦕', name:'ARK',                   tagline:'ARK: Survival Evolved dedicated server. Manual start only — huge RAM usage.',
+   cat:'gaming', port:null, docker:false, tab:'ark', tab2:null,
+   storage:'~60 GB game files', cpu:'High', ram:'6–10 GB', gpu:'No'},
+  {id:'ss13',         icon:'🚀', name:'SS13 (BYOND)',           tagline:'Space Station 13 game server via BYOND. Port 1337. Niche but beloved.',
+   cat:'gaming', port:1337, docker:false, tab:'ss13', tab2:null,
+   storage:'~1 GB', cpu:'Low', ram:'200–400 MB', gpu:'No'},
+  {id:'foundry',      icon:'🎲', name:'Foundry VTT',           tagline:'Virtual tabletop for TTRPGs. Node.js server. Port 30000. $50 one-time license.',
+   cat:'gaming', port:30000, docker:false, tab:'vtt', tab2:null,
+   storage:'~500 MB app + worlds + assets', cpu:'Low–Medium', ram:'300 MB–1 GB', gpu:'No'},
+  {id:'mtg-server',   icon:'🃏', name:'MTG Deck Server',        tagline:'Custom service (port 8099). Writes .dck files to user deck folders for XMage and Forge.',
+   cat:'gaming', port:8099, docker:false, tab:'mtg', tab2:null,
+   storage:'<5 MB + deck files', cpu:'Very low', ram:'30–60 MB', gpu:'No'},
+];
+
+let currentFilter = 'all';
+let pinned = new Set(JSON.parse(localStorage.getItem('pinned_svcs') || '[]'));
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = SVCS.filter(s => {
+    if (currentFilter !== 'all' && s.cat !== currentFilter) return false;
+    if (q && !s.name.toLowerCase().includes(q) && !s.tagline.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('count-lbl').textContent = filtered.length + ' services';
+  document.getElementById('svc-grid').innerHTML = filtered.map(s => card(s)).join('');
+}
+
+function catLabel(cat) {
+  return { media:'Media', infra:'Infrastructure', apps:'Apps', gaming:'Gaming', download:'Downloads', security:'Security' }[cat] || cat;
+}
+function catClass(cat) {
+  return { media:'cat-media', infra:'cat-infra', apps:'cat-apps', gaming:'cat-gaming', download:'cat-download', security:'cat-security' }[cat] || 'cat-infra';
+}
+
+function card(s) {
+  const isPinned = pinned.has(s.id);
+  const tabs = [s.tab, s.tab2].filter(Boolean);
+  return `<div class="svc-card ${isPinned?'pinned':''}" id="sc-${s.id}">
+    <div class="sc-head">
+      <div style="font-size:1.5rem;flex-shrink:0">${s.icon}</div>
+      <div style="flex:1">
+        <div class="sc-name">${s.name}</div>
+        <span class="sc-cat ${catClass(s.cat)}">${catLabel(s.cat)}</span>
+        ${s.port ? `<span class="sc-cat" style="background:rgba(120,130,160,.08);color:var(--text-dim);border:1px solid rgba(120,130,160,.18);margin-left:3px">:${s.port}</span>` : ''}
+        ${s.docker ? '<span class="docker-badge docker-yes" style="margin-left:3px">🐳 Docker</span>' : '<span class="docker-badge docker-no" style="margin-left:3px">Native</span>'}
+      </div>
+    </div>
+    <div class="sc-tagline" style="margin-bottom:8px">${s.tagline}</div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="sc-stat-label">Storage</div><div class="sc-stat-val">${s.storage}</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">CPU</div><div class="sc-stat-val">${s.cpu}</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">RAM (idle)</div><div class="sc-stat-val">${s.ram}</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">GPU</div><div class="sc-stat-val">${s.gpu}</div></div>
+    </div>
+    <div class="sc-footer">
+      ${tabs.map(t => `<a class="sc-tab-link" onclick="goTab('${t}')">📄 ${t}</a>`).join('')}
+      <button class="pin-btn ${isPinned?'pinned':''}" onclick="togglePin('${s.id}','${s.icon}','${s.name}','${s.port||''}')">
+        ${isPinned ? '📌 Pinned' : '+ Pin to Home'}
+      </button>
+    </div>
+  </div>`;
+}
+
+function goTab(tabName) {
+  if (window.parent && window.parent.go) window.parent.go(tabName);
+}
+
+function togglePin(id, icon, name, port) {
+  if (pinned.has(id)) {
+    pinned.delete(id);
+  } else {
+    pinned.add(id);
+    // Also notify user homepage if it's loaded
+    try {
+      const hp = window.parent?.document?.querySelector('#pane-userhomepage iframe')?.contentWindow;
+      if (hp?.pinService) {
+        const url = port ? `http://localhost:${port}` : '#';
+        hp.pinService(id, icon, name, url, `${icon} ${name}`);
+      }
+    } catch(e) {}
+  }
+  localStorage.setItem('pinned_svcs', JSON.stringify([...pinned]));
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Best Practices</title><link rel="stylesheet" href="shared.css">
+<style>
+  .rule{counter-increment:rule;}
+  .rules{counter-reset:rule;}
+  .rule-num{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--accent);font-weight:900;min-width:36px;flex-shrink:0;text-align:right;padding-right:12px;border-right:2px solid rgba(200,168,75,.2);}
+  .rule-block{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid rgba(37,45,61,.5);}
+  .rule-block:last-child{border:none;}
+  .rule-title{font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:4px;}
+  .rule-body{font-size:.82rem;color:var(--text-dim);line-height:1.6;}
+  .rule-body code{background:var(--bg3);padding:1px 5px;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--accent2);}
+  .checklist-box{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px;margin-bottom:14px;}
+  .cl-item{display:flex;align-items:flex-start;gap:10px;padding:5px 0;font-size:.83rem;}
+  .cl-check{width:16px;height:16px;border-radius:3px;border:1px solid var(--border);background:var(--bg);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:.65rem;cursor:pointer;transition:all .15s;}
+  .cl-check.done{background:rgba(76,175,125,.25);border-color:#4caf7d;color:#4caf7d;}
+  .philosophy-box{background:linear-gradient(135deg,rgba(200,168,75,.06),rgba(91,141,217,.04));border:1px solid rgba(200,168,75,.25);border-radius:6px;padding:20px 22px;margin-bottom:22px;}
+  .philosophy-box h2{font-family:'Cinzel',serif;color:var(--accent);margin-bottom:10px;font-size:1.1rem;}
+  .philosophy-body{font-size:.85rem;color:var(--text);line-height:1.8;}
+  .philosophy-body strong{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📐</div>
+  <div>
+    <h1>Best Practices</h1>
+    <div class="subtitle">// Adding a New Service · Integration Standards · The Rules //</div>
+    <p class="desc">A reference document — for yourself or any AI assistant — describing exactly how any new service must be configured to fit this server's architecture. Print or share this when adding something new.</p>
+  </div>
+</div>
+
+<!-- Philosophy -->
+<div class="philosophy-box">
+  <h2>🐉 The Philosophy of This Server</h2>
+  <div class="philosophy-body">
+    <p>This server exists for one reason: <strong>I control everything. I preserve everything.</strong> The server is a bulwark against predatory corporate practices — companies removing content we paid for, shutting down services, region-locking media, or simply going out of business. Everything here is self-hosted, self-owned, and self-controlled.</p>
+    <p style="margin-top:10px">My family has <strong>indefinite access</strong> to the books, movies, music, and games we love — regardless of what any company decides to do with "their" platform. No subscriptions required. No accounts with third parties. No data leaving this building except through channels we control.</p>
+    <p style="margin-top:10px">Every service added must serve this philosophy. If it <em>requires</em> a cloud account, sends data home, or can be remotely disabled by a corporation — it does not belong here.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📋 New Service Integration Checklist</div>
+  <div class="callout callout-tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">Use this checklist every time you add a service. Every item must be addressed — either implemented or explicitly decided against with a reason documented.</div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">1 · Philosophy Alignment</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Service runs entirely on-premises — no cloud dependency required to function</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Data is stored locally and I own it completely (not locked to a proprietary format)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Service cannot be remotely disabled or "bricked" by its vendor</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Preferably open-source or at minimum has been audited for telemetry / data exfiltration</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If telemetry exists, it is disabled in configuration before the service goes live</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">2 · Port Assignment</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Check <strong>Ports tab</strong> — confirm the default port does not collide with any existing service</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If collision: assign a non-conflicting port and document it in the Ports tab with a ⚠️ MOVED note</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add the new port to <code>ports.html</code> with: port, service name, protocol, public/Tailscale/localhost access level, and which tab documents it</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Open Windows Firewall for the port if LAN access needed: <code>netsh advfirewall firewall add rule...</code></div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">3 · Authentik SSO Integration</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>Option A (preferred): Native OIDC</strong> — if the service supports OIDC/OAuth2, create an Authentik Application + OIDC Provider. Set the redirect URI. Paste Client ID/Secret into the service config.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>Option B: Caddy forward_auth</strong> — if no native OIDC support, add a Caddyfile block with <code>forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy }</code>. The service is protected even without knowing about Authentik.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Assign the new Authentik Application to the correct groups (Admins / Family / Friends) based on who should have access</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Test login with each group level before declaring done</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Confirm the nuke procedure works: deactivating the user in Authentik removes access to this service</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">4 · Cloudflare Tunnel &amp; Domain</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Decide access tier: <strong>Public</strong> (via Cloudflare Tunnel), <strong>LAN+Tailscale</strong>, or <strong>localhost-only</strong></div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If public: add entry to <code>cloudflared config.yml</code> — <code>hostname: service.yourdomain.com → service: http://localhost:[PORT]</code></div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If public: add Cloudflare Access policy restricting to known Gmail addresses (double-layer with Authentik)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Admin/download services (qBittorrent, *arr stack, control dashboard) must be Tailscale-only — never exposed publicly</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If public: add the subdomain to the Caddy subdomain routing table in the Ports tab</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">5 · Per-User Data Storage</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Determine: does this service store <strong>per-user data</strong> (saves, progress, preferences, files)? If no shared library is involved, per-user storage is almost always needed.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Per-user data goes in <code>D:\Users\[username]\[service-name]\</code> — not anywhere else</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>For browser-based services:</strong> use the <code>X-authentik-username</code> header to resolve the save path directly. No symlink needed.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>For Sunshine-streamed apps:</strong> add a <code>pre-launch</code> curl call to the Session Manager (port 9004) and add the app's save folder to <code>SYMLINK_MAP</code> in <code>session_manager.py</code></div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add the new subfolder to <code>USER_SUBDIRS</code> in session_manager.py so <code>ensure_user_dirs()</code> creates it for new users</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Verify that <code>D:\Users\[username]\[service-name]\</code> appears under the user's <strong>App Data</strong> folder in Nextcloud and counts toward their quota</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Update <strong>SSO tab → User Data Storage → Per-App Data Locations Reference</strong> table with the new service row</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">6 · Auto-Start on Boot</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>Native Windows service:</strong> configure as Automatic startup — <code>sc config ServiceName start=auto</code></div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>Python/Node/other process:</strong> install via NSSM — <code>nssm install ServiceName [executable]</code>. NSSM sets Automatic by default.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>Docker in WSL2:</strong> add to <code>D:\Server\Scripts\start_docker_services.bat</code> and confirm it's in Task Scheduler (At Startup, delay 2 min)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add a row to the <strong>Restarting tab</strong> table: service name, restart method, boot time, AUTO/MANUAL badge</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add a monitor to <strong>Uptime Kuma</strong> (port 3001) — HTTP or TCP check, 1-minute interval</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">7 · User Homepage &amp; Opt-In</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add the service to the <strong>App Library</strong> in <code>user-homepage.html</code> — new services are <strong>off by default</strong>. Users enable them individually.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Define: <code>{ id, icon, name, desc, url, blk (feed block ID or null), locked:false, def:false, ql }</code></div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If the service shows activity (recently played, continue watching, etc.): add a hidden <code>blk-[id]</code> feed block to the homepage that shows when the user enables the service</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add to the <strong>All Services</strong> tab: create a service card with all required fields (see All Services tab for the template)</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">8 · Achievements (Optional)</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Does this service have natural milestones worth celebrating? (first book read, 10 hours played, etc.) If yes, define achievements.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add achievements to the achievement server's <code>definitions.json</code> (see Achievements tab)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add a webhook or API call from the service to <code>POST http://localhost:9003/api/achievement/trigger</code> when the milestone is hit</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>For games: consider enabling RetroAchievements if the emulator supports it (see Achievements tab)</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">9 · Documentation</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Create a new tab in this binder: <code>[service].html</code> using <code>shared.css</code></div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add the tab to <code>index.html</code>: entry in <code>FILES</code> dict, nav-item button in sidebar, and a pane div</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Tab must include: install steps, port, Authentik config method, user data storage path, Cloudflare/access tier, and backup notes</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Tab must include a "💾 User Data Storage → SSO TAB" section if any per-user data is involved</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Reference the service from the <strong>Roadmap</strong> (home.html) with a clickable link to the new tab</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📜 The Non-Negotiable Rules</div>
+  <div class="card">
+    <div class="rules">
+      <div class="rule rule-block">
+        <div class="rule-num">I</div>
+        <div><div class="rule-title">Everything behind Authentik</div><div class="rule-body">No service is accessible without first passing through Authentik authentication. Either native OIDC or Caddy <code>forward_auth</code>. No exceptions. Not even "just temporarily."</div></div>
+      </div>
+      <div class="rule rule-block">
+        <div class="rule-num">II</div>
+        <div><div class="rule-title">All user data in D:\Users\[username]\</div><div class="rule-body">Per-user data — saves, progress, preferences, files — lives in the user's personal folder and nowhere else. It counts toward their Nextcloud quota. It is backed up as part of their profile. It is deleted when they are nuked.</div></div>
+      </div>
+      <div class="rule rule-block">
+        <div class="rule-num">III</div>
+        <div><div class="rule-title">New services are opt-in, not opt-out</div><div class="rule-body">When a new service is added, it does not appear on users' homepages automatically. Users must go to the App Library and enable it. Only Jellyfin is on by default.</div></div>
+      </div>
+      <div class="rule rule-block">
+        <div class="rule-num">IV</div>
+        <div><div class="rule-title">Ports are documented before services go live</div><div class="rule-body">Every port must be recorded in the Ports tab before the service is deployed. Collision checking is mandatory. No service runs on an undocumented port.</div></div>
+      </div>
+      <div class="rule rule-block">
+        <div class="rule-num">V</div>
+        <div><div class="rule-title">Admin/download tools are Tailscale-only</div><div class="rule-body">qBittorrent, the *arr stack, the control dashboard, and any service that could be used to exfiltrate data or damage the server's operation must not be exposed publicly — not even behind Authentik. Tailscale only.</div></div>
+      </div>
+      <div class="rule rule-block">
+        <div class="rule-num">VI</div>
+        <div><div class="rule-title">Services must auto-restart after reboot</div><div class="rule-body">Every always-on service must be configured to restart automatically after a Windows reboot. NSSM for processes, Windows Service for native installs, Task Scheduler for WSL2/Docker. The Restarting tab must be updated.</div></div>
+      </div>
+      <div class="rule rule-block">
+        <div class="rule-num">VII</div>
+        <div><div class="rule-title">I preserve everything — backups are mandatory</div><div class="rule-body">Every service with meaningful data (worlds, libraries, configurations) must have a documented backup strategy. Weekly automated backups to a secondary location minimum. Data that cannot be recovered is data that doesn't exist.</div></div>
+      </div>
+      <div class="rule rule-block">
+        <div class="rule-num">VIII</div>
+        <div><div class="rule-title">No cloud lock-in</div><div class="rule-body">A service that requires an active cloud account or internet connection to function has no place here. If the vendor's servers go dark tomorrow, the service must continue to work. Check the data format — it must be open or exportable.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔧 Quick Config Templates</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Caddyfile — new service with Authentik forward_auth</div>
+      <pre>service.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username
+                     X-authentik-groups
+                     X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:[PORT]
+}</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Session Manager — add new symlink entry</div>
+      <pre># In session_manager.py, add to SYMLINK_MAP:
+{
+  'link':   'D:/[App]/active_data',
+  'subdir': '[service-name]',
+},
+
+# Add to USER_SUBDIRS:
+'[service-name]',
+
+# Restart session manager:
+nssm restart SessionManager</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Cloudflare Tunnel — new public entry</div>
+      <pre># In cloudflared config.yml:
+ingress:
+  - hostname: service.yourdomain.com
+    service: http://localhost:[PORT]
+    originRequest:
+      noTLSVerify: false
+  # ... existing entries
+  - service: http_status:404
+
+# Restart tunnel:
+cloudflared service restart</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Homepage App Library — new entry</div>
+      <pre>// In user-homepage.html APPS array:
+{
+  id:      'myservice',
+  icon:    '🔧',
+  name:    'My Service',
+  desc:    'What it does in 5 words',
+  url:     'http://localhost:[PORT]',
+  blk:     'blk-myservice', // or null
+  locked:  false,
+  def:     false,    // never true (opt-in)
+  ql:      '🔧 Service'
+},</pre>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

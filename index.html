@@ -6,308 +6,207 @@
 <title>🐉 Home Server</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@400;600;900&family=Raleway:wght@300;400;500;600&display=swap');
-  :root {
-    --bg:#0a0c0f;--bg2:#111318;--bg3:#181c24;--border:#2a3040;
-    --accent:#c8a84b;--accent2:#5b8dd9;--accent3:#4ecdc4;
-    --text:#d4d8e2;--text-dim:#7a8299;--tab-active:#1a2035;
-    --tab-hover:#161b28;--danger:#e05c5c;--success:#4caf7d;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{--bg:#0a0c0f;--bg2:#111318;--bg3:#181c24;--border:#2a3040;--accent:#c8a84b;--accent2:#5b8dd9;--accent3:#4ecdc4;--text:#d4d8e2;--text-dim:#7a8299;--danger:#e05c5c;--success:#4caf7d;--sw:210px;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overflow:hidden;}
-  body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;overflow:hidden;}
-  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
-  .shell{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:12px 16px;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-  header{display:flex;align-items:center;gap:20px;padding:12px 20px;background:var(--bg3);border:1px solid var(--border);border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;flex-shrink:0;}
-  .header-dragon{font-size:2.4rem;line-height:1;filter:drop-shadow(0 0 12px rgba(200,168,75,0.5));}
-  .header-text h1{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;color:var(--accent);letter-spacing:.06em;text-shadow:0 0 20px rgba(200,168,75,0.3);}
-  .header-text p{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim);margin-top:2px;letter-spacing:.1em;}
-  .header-badge{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
-  .badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:2px 8px;border-radius:2px;letter-spacing:.08em;}
-  .badge-win{background:rgba(91,141,217,.2);color:var(--accent2);border:1px solid rgba(91,141,217,.3);}
-  .badge-v1{background:rgba(78,205,196,.15);color:var(--accent3);border:1px solid rgba(78,205,196,.3);}
-  .badge-foss{background:rgba(76,175,125,.15);color:#4caf7d;border:1px solid rgba(76,175,125,.3);}
-  .binder-body{display:flex;border:1px solid var(--border);border-top:none;flex:1;overflow:hidden;min-height:0;}
-  .tab-spine{width:44px;background:linear-gradient(180deg,#0d1018,#0a0c0f);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:2px;flex-shrink:0;}
-  .spine-label{writing-mode:vertical-rl;font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;padding:8px 4px;}
-  .ring{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--bg);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);flex-shrink:0;}
-  .tab-bar-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;}
-  .tab-bar-row{display:flex;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--border);scrollbar-width:thin;scrollbar-color:var(--border) transparent;flex-shrink:0;}
-  .tab-bar-row::-webkit-scrollbar{height:3px;}.tab-bar-row::-webkit-scrollbar-thumb{background:var(--border);}
-  .tab-group-label{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;padding:4px 10px 0;white-space:nowrap;align-self:flex-end;opacity:.6;}
-  .tab-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 13px 6px;cursor:pointer;border:none;background:transparent;color:var(--text-dim);font-family:'Raleway',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;transition:all .18s;border-bottom:2px solid transparent;margin-bottom:-2px;position:relative;}
-  .tab-btn .ti{font-size:1rem;}
-  .tab-btn:hover{background:var(--tab-hover);color:var(--text);}
-  .tab-btn.active{background:var(--tab-active);color:var(--accent);border-bottom-color:var(--accent);}
-  .tab-btn.active .ti{filter:drop-shadow(0 0 5px rgba(200,168,75,.6));}
-  .notif{position:absolute;top:4px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 5px var(--danger);display:none;}
-  .has-notif .notif{display:block;}
+  body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;display:flex;flex-direction:column;}
+  header{display:flex;align-items:center;gap:12px;padding:9px 14px;background:var(--bg3);border-bottom:2px solid var(--accent);flex-shrink:0;z-index:10;}
+  .hdr-dragon{font-size:1.7rem;filter:drop-shadow(0 0 10px rgba(200,168,75,.5));}
+  .hdr-title{font-family:'Cinzel',serif;font-size:1.05rem;font-weight:900;color:var(--accent);letter-spacing:.06em;}
+  .hdr-sub{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--text-dim);letter-spacing:.1em;}
+  .hdr-badges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
+  .badge{font-family:'Share Tech Mono',monospace;font-size:.52rem;padding:2px 6px;border-radius:2px;}
+  .bw{background:rgba(91,141,217,.18);color:var(--accent2);border:1px solid rgba(91,141,217,.28);}
+  .bv{background:rgba(78,205,196,.12);color:var(--accent3);border:1px solid rgba(78,205,196,.28);}
+  .bf{background:rgba(76,175,125,.12);color:#4caf7d;border:1px solid rgba(76,175,125,.28);}
+  .layout{display:flex;flex:1;overflow:hidden;min-height:0;}
+  .sidebar{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:width .2s ease;overflow:hidden;}
+  .sidebar.collapsed{width:0;border-right:none;}
+  .collapse-btn{width:28px;background:var(--bg3);border:none;border-right:1px solid var(--border);color:var(--text-dim);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px 0;flex-shrink:0;transition:background .15s;gap:5px;}
+  .collapse-btn:hover{color:var(--accent);}
+  .collapse-btn .cba{font-size:.85rem;transition:transform .2s;line-height:1;}
+  .collapse-btn.cs .cba{transform:rotate(180deg);}
+  .collapse-btn .cbl{font-family:'Share Tech Mono',monospace;font-size:.44rem;letter-spacing:.1em;writing-mode:vertical-rl;text-transform:uppercase;color:var(--text-dim);opacity:.55;white-space:nowrap;margin-top:3px;}
+  .sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent;padding:4px 0 20px;}
+  .sidebar-scroll::-webkit-scrollbar{width:3px;}.sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border);}
+  .nav-group{margin-bottom:1px;}
+  .nav-group-label{font-family:'Share Tech Mono',monospace;font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);opacity:.6;padding:9px 10px 3px;white-space:nowrap;overflow:hidden;cursor:pointer;display:flex;align-items:center;gap:5px;user-select:none;transition:opacity .15s;}
+  .nav-group-label:hover{opacity:1;}
+  .nav-group-label .ga{font-size:.58rem;transition:transform .15s;flex-shrink:0;}
+  .nav-group-label.cg .ga{transform:rotate(-90deg);}
+  .nav-group-items{overflow:hidden;}
+  .nav-group-items.hi{display:none;}
+  .nav-item{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 13px;cursor:pointer;border:none;background:transparent;color:var(--text-dim);font-family:'Raleway',sans-serif;font-size:.71rem;font-weight:600;text-align:left;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .12s;border-left:2px solid transparent;}
+  .nav-item:hover{background:rgba(255,255,255,.03);color:var(--text);border-left-color:var(--border);}
+  .nav-item.active{background:rgba(200,168,75,.1);color:var(--accent);border-left-color:var(--accent);font-weight:700;}
+  .nav-item .ni{font-size:.85rem;width:15px;flex-shrink:0;text-align:center;}
+  .nd{width:5px;height:5px;border-radius:50%;background:var(--danger);box-shadow:0 0 4px var(--danger);flex-shrink:0;margin-left:auto;}
+  .content-wrap{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
   .content-area{flex:1;overflow:hidden;min-height:0;}
   .tab-content{display:none;height:100%;}
-  .tab-content.active{display:block;animation:fadeIn .2s ease;height:100%;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+  .tab-content.active{display:block;height:100%;animation:fi .15s ease;}
   .tab-content iframe{width:100%;height:100%;border:none;background:#0e1117;display:block;}
-  .tab-loading{display:flex;align-items:center;justify-content:center;height:100%;background:#0e1117;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em;flex-direction:column;gap:10px;}
-  .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  footer{padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;flex-wrap:wrap;gap:4px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
-  footer span{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);letter-spacing:.08em;}
-  .sdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:5px;box-shadow:0 0 6px var(--success);animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .tab-loading{display:flex;align-items:center;justify-content:center;height:100%;background:#0e1117;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.1em;flex-direction:column;gap:10px;}
+  .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}@keyframes fi{from{opacity:0}to{opacity:1}}
+  footer{padding:5px 14px;background:var(--bg3);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;flex-shrink:0;}
+  footer span{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--text-dim);}
+  .sdot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--success);margin-right:4px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </head>
 <body>
-<div class="shell">
-
 <header>
-  <div class="header-dragon">🐉</div>
-  <div class="header-text">
-    <h1>Home Server</h1>
-    <p>// WINDOWS 10 · MEDIA · GAMES · AUTOMATION · SELF-HOSTED SERVICES //</p>
-  </div>
-  <div class="header-badge">
-    <span class="badge badge-win">⊞ Windows 10</span>
-    <span class="badge badge-v1">✦ V1 → SSO</span>
-    <span class="badge badge-foss">⊕ FOSS-First</span>
-  </div>
+  <div class="hdr-dragon">🐉</div>
+  <div><div class="hdr-title">Home Server</div><div class="hdr-sub">// PRIVATE · AUTHENTIK · CLOUDFLARE · D:\Users\[you]\ //</div></div>
+  <div class="hdr-badges"><span class="badge bw">⊞ Win10</span><span class="badge bv">✦ Authentik</span><span class="badge bf">⊕ FOSS</span></div>
 </header>
-
-<div class="binder-body">
-  <div class="tab-spine">
-    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
-    <div class="spine-label">Home Server</div>
-    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
-  </div>
-
-  <div class="tab-bar-wrapper">
-
-    <!-- Row 1: Setup & Server Docs -->
-    <div class="tab-bar-row">
-      <span class="tab-group-label">setup //</span>
-      <button class="tab-btn" id="tab-home"          onclick="go('home')"><span class="ti">🏠</span>Roadmap</button>
-      <button class="tab-btn" id="tab-overview"      onclick="go('overview')"><span class="ti">📋</span>Overview</button>
-      <button class="tab-btn" id="tab-hardware"      onclick="go('hardware')"><span class="ti">🖧</span>Hardware</button>
-      <button class="tab-btn" id="tab-ports"         onclick="go('ports')"><span class="ti">🔌</span>Ports</button>
-      <button class="tab-btn" id="tab-restarting"    onclick="go('restarting')"><span class="ti">🔄</span>Restarting</button>
-      <button class="tab-btn" id="tab-memory"        onclick="go('memory')"><span class="ti">🧠</span>Memory</button>
-    </div>
-
-    <!-- Row 2: Security & Access -->
-    <div class="tab-bar-row">
-      <span class="tab-group-label">security //</span>
-      <button class="tab-btn" id="tab-sso"           onclick="go('sso')"><span class="ti">🔐</span>Authentik SSO</button>
-      <button class="tab-btn" id="tab-security"      onclick="go('security')"><span class="ti">🛡️</span>Security</button>
-      <button class="tab-btn" id="tab-domain"        onclick="go('domain')"><span class="ti">🌐</span>Cloudflare</button>
-      <button class="tab-btn" id="tab-linux"         onclick="go('linux')"><span class="ti">🐧</span>Linux Fallback</button>
-    </div>
-
-    <!-- Row 3: User Experience -->
-    <div class="tab-bar-row">
-      <span class="tab-group-label">user //</span>
-      <button class="tab-btn active" id="tab-dashboard"     onclick="go('dashboard')"><span class="ti">🖥️</span>Dashboard<span class="notif"></span></button>
-      <button class="tab-btn" id="tab-dashsetup"     onclick="go('dashsetup')"><span class="ti">📐</span>Dash Setup</button>
-      <button class="tab-btn" id="tab-userhomepage"  onclick="go('userhomepage')"><span class="ti">🧑</span>User Home</button>
-      <button class="tab-btn" id="tab-homepagesetup" onclick="go('homepagesetup')"><span class="ti">🏗️</span>Home Setup</button>
-      <button class="tab-btn" id="tab-usersettings"  onclick="go('usersettings')"><span class="ti">⚙️</span>User Settings</button>
-      <button class="tab-btn has-notif" id="tab-feedback" onclick="go('feedback')"><span class="ti">💬</span>Feedback<span class="notif"></span></button>
-    </div>
-
-    <!-- Row 4: Media -->
-    <div class="tab-bar-row">
-      <span class="tab-group-label">media //</span>
-      <button class="tab-btn" id="tab-movies"        onclick="go('movies')"><span class="ti">🎬</span>Movies &amp; TV</button>
-      <button class="tab-btn" id="tab-calibre"       onclick="go('calibre')"><span class="ti">📚</span>Books</button>
-      <button class="tab-btn" id="tab-audiobooks"    onclick="go('audiobooks')"><span class="ti">🎧</span>Audiobooks</button>
-      <button class="tab-btn" id="tab-navidrome"     onclick="go('navidrome')"><span class="ti">🎵</span>Music</button>
-      <button class="tab-btn" id="tab-immich"        onclick="go('immich')"><span class="ti">📷</span>Photos</button>
-      <button class="tab-btn" id="tab-kavita"        onclick="go('kavita')"><span class="ti">📕</span>Comics &amp; DnD</button>
-      <button class="tab-btn" id="tab-nextcloud"     onclick="go('nextcloud')"><span class="ti">☁️</span>Files</button>
-      <button class="tab-btn" id="tab-seedbox"       onclick="go('seedbox')"><span class="ti">🌱</span>Seedbox</button>
-    </div>
-
-    <!-- Row 5: Apps & Tools -->
-    <div class="tab-bar-row">
-      <span class="tab-group-label">apps //</span>
-      <button class="tab-btn" id="tab-ollama"        onclick="go('ollama')"><span class="ti">🤖</span>Private AI</button>
-      <button class="tab-btn" id="tab-recommendations" onclick="go('recommendations')"><span class="ti">🎯</span>Recommendations</button>
-      <button class="tab-btn" id="tab-jukebox"       onclick="go('jukebox')"><span class="ti">🎙️</span>Jukebox</button>
-      <button class="tab-btn" id="tab-wikipedia"     onclick="go('wikipedia')"><span class="ti">📖</span>Offline Wiki</button>
-      <button class="tab-btn" id="tab-languages"     onclick="go('languages')"><span class="ti">🌍</span>Languages</button>
-      <button class="tab-btn" id="tab-utilities"     onclick="go('utilities')"><span class="ti">🛠️</span>Utilities</button>
-    </div>
-
-    <!-- Row 6: Game Servers & Tabletop -->
-    <div class="tab-bar-row">
-      <span class="tab-group-label">game servers //</span>
-      <button class="tab-btn" id="tab-minecraft"     onclick="go('minecraft')"><span class="ti">⛏️</span>Minecraft</button>
-      <button class="tab-btn" id="tab-ark"           onclick="go('ark')"><span class="ti">🦕</span>ARK</button>
-      <button class="tab-btn" id="tab-ss13"          onclick="go('ss13')"><span class="ti">🚀</span>SS13</button>
-      <button class="tab-btn" id="tab-mtg"           onclick="go('mtg')"><span class="ti">🃏</span>MTG</button>
-      <button class="tab-btn" id="tab-vtt"           onclick="go('vtt')"><span class="ti">🎲</span>VTT</button>
-    </div>
-
-    <!-- Row 7: Gaming & Emulation -->
-    <div class="tab-bar-row">
-      <span class="tab-group-label">gaming //</span>
-      <button class="tab-btn" id="tab-steam"         onclick="go('steam')"><span class="ti">🎮</span>Steam Streaming</button>
-      <button class="tab-btn" id="tab-gamecube"      onclick="go('gamecube')"><span class="ti">🟣</span>GameCube / Wii</button>
-      <button class="tab-btn" id="tab-xbox360"       onclick="go('xbox360')"><span class="ti">🟢</span>Xbox 360</button>
-      <button class="tab-btn" id="tab-romm"          onclick="go('romm')"><span class="ti">🕹️</span>ROM Library</button>
-      <button class="tab-btn" id="tab-pokemon"       onclick="go('pokemon')"><span class="ti">⚡</span>Pokémon</button>
-      <button class="tab-btn" id="tab-castlevania"   onclick="go('castlevania')"><span class="ti">🧛</span>Castlevania</button>
-      <button class="tab-btn" id="tab-fireemblem"    onclick="go('fireemblem')"><span class="ti">⚔️</span>Fire Emblem</button>
-      <button class="tab-btn" id="tab-marioparty"    onclick="go('marioparty')"><span class="ti">🎲</span>Mario Party</button>
-    </div>
-
-    <!-- Content panes — lazy-loaded iframes, one per tab -->
-    <div class="content-area">
-      <!-- setup -->
-      <div class="tab-content active" id="pane-home">           <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-overview">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-hardware">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-ports">          <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-restarting">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-memory">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <!-- security -->
-      <div class="tab-content"        id="pane-sso">            <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-security">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-domain">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-linux">          <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <!-- user -->
-      <div class="tab-content"        id="pane-dashboard">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-dashsetup">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-userhomepage">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-homepagesetup">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-usersettings">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-feedback">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <!-- media -->
-      <div class="tab-content"        id="pane-movies">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-calibre">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-audiobooks">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-navidrome">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-immich">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-kavita">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-nextcloud">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-seedbox">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <!-- apps -->
-      <div class="tab-content"        id="pane-ollama">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-recommendations"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-jukebox">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-wikipedia">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-languages">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-utilities">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <!-- game servers -->
-      <div class="tab-content"        id="pane-minecraft">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-ark">            <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-ss13">           <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-mtg">            <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-vtt">            <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <!-- gaming -->
-      <div class="tab-content"        id="pane-steam">          <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-gamecube">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-xbox360">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-romm">           <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-pokemon">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-castlevania">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-fireemblem">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-marioparty">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-    </div>
-
-  </div><!-- end tab-bar-wrapper -->
-</div><!-- end binder-body -->
-
+<div class="layout">
+<nav class="sidebar" id="sidebar"><div class="sidebar-scroll">
+  <div class="nav-group" id="g-setup"><div class="nav-group-label" onclick="tg('setup')"><span class="ga">▾</span>Setup</div><div class="nav-group-items" id="gi-setup">
+    <button class="nav-item" id="nav-home"          onclick="go('home')"><span class="ni">🏠</span>Roadmap</button>
+    <button class="nav-item" id="nav-overview"      onclick="go('overview')"><span class="ni">📋</span>Overview</button>
+    <button class="nav-item" id="nav-hardware"      onclick="go('hardware')"><span class="ni">🖧</span>Hardware</button>
+    <button class="nav-item" id="nav-ports"         onclick="go('ports')"><span class="ni">🔌</span>Ports</button>
+    <button class="nav-item" id="nav-restarting"    onclick="go('restarting')"><span class="ni">🔄</span>Restarting</button>
+    <button class="nav-item" id="nav-memory"        onclick="go('memory')"><span class="ni">🧠</span>Memory</button>
+  </div></div>
+  <div class="nav-group" id="g-security"><div class="nav-group-label" onclick="tg('security')"><span class="ga">▾</span>Security</div><div class="nav-group-items" id="gi-security">
+    <button class="nav-item" id="nav-sso"           onclick="go('sso')"><span class="ni">🔐</span>Authentik SSO</button>
+    <button class="nav-item" id="nav-security"      onclick="go('security')"><span class="ni">🛡️</span>Security</button>
+    <button class="nav-item" id="nav-domain"        onclick="go('domain')"><span class="ni">🌐</span>Cloudflare</button>
+    <button class="nav-item" id="nav-linux"         onclick="go('linux')"><span class="ni">🐧</span>Linux Fallback</button>
+  </div></div>
+  <div class="nav-group" id="g-standards"><div class="nav-group-label" onclick="tg('standards')"><span class="ga">▾</span>Standards</div><div class="nav-group-items" id="gi-standards">
+    <button class="nav-item" id="nav-bestpractices" onclick="go('bestpractices')"><span class="ni">📐</span>Best Practices</button>
+    <button class="nav-item" id="nav-services"      onclick="go('services')"><span class="ni">🗂️</span>All Services</button>
+    <button class="nav-item" id="nav-achievements"  onclick="go('achievements')"><span class="ni">🏆</span>Achievements</button>
+    <button class="nav-item" id="nav-newuser"       onclick="go('newuser')"><span class="ni">👋</span>New User Guide</button>
+  </div></div>
+  <div class="nav-group" id="g-user"><div class="nav-group-label" onclick="tg('user')"><span class="ga">▾</span>User</div><div class="nav-group-items" id="gi-user">
+    <button class="nav-item" id="nav-dashboard"     onclick="go('dashboard')"><span class="ni">🖥️</span>Dashboard<span class="nd"></span></button>
+    <button class="nav-item" id="nav-dashsetup"     onclick="go('dashsetup')"><span class="ni">📐</span>Dash Setup</button>
+    <button class="nav-item" id="nav-userhomepage"  onclick="go('userhomepage')"><span class="ni">🧑</span>User Home</button>
+    <button class="nav-item" id="nav-homepagesetup" onclick="go('homepagesetup')"><span class="ni">🏗️</span>Home Setup</button>
+    <button class="nav-item" id="nav-usersettings"  onclick="go('usersettings')"><span class="ni">⚙️</span>User Settings</button>
+    <button class="nav-item" id="nav-feedback"      onclick="go('feedback')"><span class="ni">💬</span>Feedback<span class="nd"></span></button>
+  </div></div>
+  <div class="nav-group" id="g-media"><div class="nav-group-label" onclick="tg('media')"><span class="ga">▾</span>Media</div><div class="nav-group-items" id="gi-media">
+    <button class="nav-item" id="nav-movies"        onclick="go('movies')"><span class="ni">🎬</span>Movies &amp; TV</button>
+    <button class="nav-item" id="nav-calibre"       onclick="go('calibre')"><span class="ni">📚</span>Books</button>
+    <button class="nav-item" id="nav-audiobooks"    onclick="go('audiobooks')"><span class="ni">🎧</span>Audiobooks</button>
+    <button class="nav-item" id="nav-navidrome"     onclick="go('navidrome')"><span class="ni">🎵</span>Music</button>
+    <button class="nav-item" id="nav-immich"        onclick="go('immich')"><span class="ni">📷</span>Photos</button>
+    <button class="nav-item" id="nav-kavita"        onclick="go('kavita')"><span class="ni">📕</span>Comics &amp; DnD</button>
+    <button class="nav-item" id="nav-nextcloud"     onclick="go('nextcloud')"><span class="ni">☁️</span>Files</button>
+    <button class="nav-item" id="nav-seedbox"       onclick="go('seedbox')"><span class="ni">🌱</span>Seedbox</button>
+  </div></div>
+  <div class="nav-group" id="g-apps"><div class="nav-group-label" onclick="tg('apps')"><span class="ga">▾</span>Apps</div><div class="nav-group-items" id="gi-apps">
+    <button class="nav-item" id="nav-ollama"           onclick="go('ollama')"><span class="ni">🤖</span>Private AI</button>
+    <button class="nav-item" id="nav-recommendations"  onclick="go('recommendations')"><span class="ni">🎯</span>Recommendations</button>
+    <button class="nav-item" id="nav-jukebox"          onclick="go('jukebox')"><span class="ni">🎙️</span>Jukebox</button>
+    <button class="nav-item" id="nav-wikipedia"        onclick="go('wikipedia')"><span class="ni">📖</span>Offline Wiki</button>
+    <button class="nav-item" id="nav-languages"        onclick="go('languages')"><span class="ni">🌍</span>Languages</button>
+    <button class="nav-item" id="nav-utilities"        onclick="go('utilities')"><span class="ni">🛠️</span>Utilities</button>
+  </div></div>
+  <div class="nav-group" id="g-servers"><div class="nav-group-label" onclick="tg('servers')"><span class="ga">▾</span>Game Servers</div><div class="nav-group-items" id="gi-servers">
+    <button class="nav-item" id="nav-minecraft"     onclick="go('minecraft')"><span class="ni">⛏️</span>Minecraft</button>
+    <button class="nav-item" id="nav-ark"           onclick="go('ark')"><span class="ni">🦕</span>ARK</button>
+    <button class="nav-item" id="nav-ss13"          onclick="go('ss13')"><span class="ni">🚀</span>SS13</button>
+    <button class="nav-item" id="nav-mtg"           onclick="go('mtg')"><span class="ni">🃏</span>MTG</button>
+    <button class="nav-item" id="nav-vtt"           onclick="go('vtt')"><span class="ni">🎲</span>VTT</button>
+  </div></div>
+  <div class="nav-group" id="g-gaming"><div class="nav-group-label" onclick="tg('gaming')"><span class="ga">▾</span>Gaming</div><div class="nav-group-items" id="gi-gaming">
+    <button class="nav-item" id="nav-steam"         onclick="go('steam')"><span class="ni">🎮</span>Steam Streaming</button>
+    <button class="nav-item" id="nav-gamecube"      onclick="go('gamecube')"><span class="ni">🟣</span>GameCube / Wii</button>
+    <button class="nav-item" id="nav-xbox360"       onclick="go('xbox360')"><span class="ni">🟢</span>Xbox 360</button>
+    <button class="nav-item" id="nav-romm"          onclick="go('romm')"><span class="ni">🕹️</span>ROM Library</button>
+    <button class="nav-item" id="nav-pokemon"       onclick="go('pokemon')"><span class="ni">⚡</span>Pokémon</button>
+    <button class="nav-item" id="nav-castlevania"   onclick="go('castlevania')"><span class="ni">🧛</span>Castlevania</button>
+    <button class="nav-item" id="nav-fireemblem"    onclick="go('fireemblem')"><span class="ni">⚔️</span>Fire Emblem</button>
+    <button class="nav-item" id="nav-marioparty"    onclick="go('marioparty')"><span class="ni">🎲</span>Mario Party</button>
+  </div></div>
+</div></nav>
+<button class="collapse-btn" id="cbtn" onclick="ts()" title="Toggle sidebar ([ key)"><span class="cba" id="cba">◀</span><span class="cbl">MENU</span></button>
+<div class="content-wrap"><div class="content-area">
+  <div class="tab-content active" id="pane-home"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-overview"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-hardware"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-ports"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-restarting"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-memory"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-sso"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-security"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-domain"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-linux"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-bestpractices"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-services"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-achievements"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-newuser"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-dashboard"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-dashsetup"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-userhomepage"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-homepagesetup"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-usersettings"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-feedback"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-movies"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-calibre"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-audiobooks"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-navidrome"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-immich"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-kavita"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-nextcloud"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-seedbox"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-ollama"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-recommendations"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-jukebox"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-wikipedia"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-languages"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-utilities"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-minecraft"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-ark"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-ss13"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-mtg"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-vtt"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-steam"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-gamecube"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-xbox360"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-romm"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-pokemon"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-castlevania"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-fireemblem"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-marioparty"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+</div></div>
+</div>
 <footer>
   <span><span class="sdot"></span>HOME SERVER · LOCAL REFERENCE</span>
-  <span>🐉 AUTHENTIK SSO · CLOUDFLARE · FOSS-FIRST</span>
-  <span>✦ 7 ROWS: SETUP · SECURITY · USER · MEDIA · APPS · SERVERS · GAMING</span>
+  <span>🐉 AUTHENTIK SSO · CLOUDFLARE · D:\Users\[you]\</span>
+  <span>47 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
 </footer>
-
-</div><!-- end shell -->
-
 <script>
-const FILES = {
-  /* ── setup ── */
-  home:            'home.html',
-  overview:        'overview.html',
-  hardware:        'hardware.html',
-  ports:           'ports.html',
-  restarting:      'restarting.html',
-  memory:          'memory.html',
-  /* ── security ── */
-  sso:             'sso.html',
-  security:        'security.html',
-  domain:          'domain.html',
-  linux:           'linux.html',
-  /* ── user ── */
-  dashboard:       'monitor-control.html',
-  dashsetup:       'dashboard-setup.html',
-  userhomepage:    'user-homepage.html',
-  homepagesetup:   'user-homepage-setup.html',
-  usersettings:    'user-settings.html',
-  feedback:        'feedback.html',
-  /* ── media ── */
-  movies:          'movies.html',
-  calibre:         'calibre.html',
-  audiobooks:      'audiobooks.html',
-  navidrome:       'navidrome.html',
-  immich:          'immich.html',
-  kavita:          'kavita.html',
-  nextcloud:       'owncloud.html',
-  seedbox:         'seedbox.html',
-  /* ── apps ── */
-  ollama:          'ollama.html',
-  recommendations: 'recommendations.html',
-  jukebox:         'jukebox.html',
-  wikipedia:       'wikipedia.html',
-  languages:       'languages.html',
-  utilities:       'utilities.html',
-  /* ── game servers ── */
-  minecraft:       'minecraft.html',
-  ark:             'ark.html',
-  ss13:            'ss13.html',
-  mtg:             'mtg.html',
-  vtt:             'vtt.html',
-  /* ── gaming ── */
-  steam:           'steam.html',
-  gamecube:        'gamecube.html',
-  xbox360:         'xbox360.html',
-  romm:            'romm.html',
-  pokemon:         'pokemon.html',
-  castlevania:     'castlevania.html',
-  fireemblem:      'fireemblem.html',
-  marioparty:      'marioparty.html',
-};
-
-const loaded = new Set();
-
-function go(name) {
-  if (!FILES[name]) { console.warn('No file for tab:', name); return; }
-
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('tab-' + name);
-  if (btn) btn.classList.add('active');
-
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  const pane = document.getElementById('pane-' + name);
-  if (!pane) { console.warn('No pane for:', name); return; }
+const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',gamecube:'gamecube.html',xbox360:'xbox360.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html'};
+const loaded=new Set();
+let open=localStorage.getItem('sb_open')!=='false';
+function go(n){
+  if(!FILES[n])return;
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+n);
+  if(nb){nb.classList.add('active');const grp=nb.closest('.nav-group');if(grp){const it=grp.querySelector('.nav-group-items');const lb=grp.querySelector('.nav-group-label');if(it&&it.classList.contains('hi')){it.classList.remove('hi');if(lb)lb.classList.remove('cg');}}nb.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  const pane=document.getElementById('pane-'+n);
+  if(!pane)return;
   pane.classList.add('active');
-
-  if (!loaded.has(name)) {
-    loaded.add(name);
-    const iframe = document.createElement('iframe');
-    iframe.src   = FILES[name];
-    iframe.title = name;
-    iframe.style.cssText = 'width:100%;height:100%;border:none;background:#0e1117;display:block;';
-    pane.innerHTML = '';
-    pane.appendChild(iframe);
-  }
-
-  if (history.replaceState) history.replaceState(null, '', '#' + name);
+  if(!loaded.has(n)){loaded.add(n);const fr=document.createElement('iframe');fr.src=FILES[n];fr.title=n;fr.style.cssText='width:100%;height:100%;border:none;background:#0e1117;display:block;';pane.innerHTML='';pane.appendChild(fr);}
+  if(history.replaceState)history.replaceState(null,'','#'+n);
 }
-
-(function() {
-  const hash = (location.hash || '').replace('#', '');
-  go((hash && FILES[hash]) ? hash : 'home');
-})();
+function ts(){open=!open;localStorage.setItem('sb_open',open);applyState();}
+function applyState(){const s=document.getElementById('sidebar'),b=document.getElementById('cbtn'),a=document.getElementById('cba');if(open){s.classList.remove('collapsed');b.classList.remove('cs');a.textContent='◀';}else{s.classList.add('collapsed');b.classList.add('cs');a.textContent='▶';}}
+function tg(id){const it=document.getElementById('gi-'+id),lb=document.querySelector('#g-'+id+' .nav-group-label');if(!it)return;const h=it.classList.toggle('hi');if(lb)lb.classList.toggle('cg',h);const st=JSON.parse(localStorage.getItem('gs')||'{}');st[id]=h;localStorage.setItem('gs',JSON.stringify(st));}
+function restoreGroups(){const st=JSON.parse(localStorage.getItem('gs')||'{}');Object.entries(st).forEach(([id,h])=>{if(!h)return;const it=document.getElementById('gi-'+id),lb=document.querySelector('#g-'+id+' .nav-group-label');if(it){it.classList.add('hi');if(lb)lb.classList.add('cg');}});}
+document.addEventListener('keydown',e=>{if(e.key==='['&&!e.ctrlKey&&!e.metaKey)ts();});
+window.go=go;
+applyState();restoreGroups();
+(function(){const h=(location.hash||'').replace('#','');go((h&&FILES[h])?h:'home');})();
 </script>
 </body>
 </html>
