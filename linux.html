@@ -1,200 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Linux</title><link rel="stylesheet" href="shared.css"></head>
+<head><meta charset="UTF-8"><title>Linux Contingency</title><link rel="stylesheet" href="shared.css"></head>
 <body>
 
 <div class="page-header">
   <div class="page-icon">🐧</div>
   <div>
-    <h1>Transitioning to Linux</h1>
-    <div class="subtitle">// Pros &amp; Cons · Best Distros · Per-Service Considerations //</div>
-    <p class="desc">Should you run Linux on your home server? This tab covers the real trade-offs, which distro to pick, how each service fares, and how to make the transition.</p>
+    <h1>Linux Contingency Plan</h1>
+    <div class="subtitle">// If Windows 10 Support Dies · What to Do · What Gets Lost //</div>
+    <p class="desc">Windows 10 mainstream support ends October 2025. Extended security updates run until October 2028. This page is for the worst-case scenario: you <em>can't or won't</em> upgrade to Windows 11, and you need to migrate everything to Linux.</p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 Summary: Linux is better for everything <em>except</em> game streaming and Xbox 360 emulation. A hybrid approach (Linux for always-on services, Windows for gaming) is the best long-term architecture.</div>
-
-<div class="section">
-  <div class="section-title">⚖️ Overall Pros &amp; Cons</div>
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">✅ Advantages of Linux for a Home Server</div>
-      <ul style="margin:0 0 0 18px">
-        <li>Better performance — no background Windows Update, telemetry, or GUI overhead</li>
-        <li>All server software designed for Linux first (Docker, Nextcloud, etc.)</li>
-        <li>More stable — Linux servers run for years without rebooting</li>
-        <li>Better security posture — smaller attack surface, no SMB exposed by default</li>
-        <li>Free forever, no licensing issues</li>
-        <li>Cron jobs replace Windows Task Scheduler (simpler, more powerful)</li>
-        <li>Better CLI tools for automation</li>
-        <li>Systemd services > NSSM for service management</li>
-      </ul>
-    </div>
-    <div class="card">
-      <div class="card-title">❌ Disadvantages / Challenges</div>
-      <ul style="margin:0 0 0 18px">
-        <li><strong>Steam and gaming:</strong> Most Windows games work via Proton/Wine but not all, and setup is more complex</li>
-        <li><strong>XENIA (Xbox 360 emulator):</strong> Linux port is incomplete — Xbox 360 emulation basically requires Windows</li>
-        <li><strong>Sunshine game streaming:</strong> Works on Linux, but Nvidia GPU setup is more complex</li>
-        <li><strong>No GUI:</strong> Headless Linux is more efficient but requires CLI comfort</li>
-        <li><strong>Driver quirks:</strong> Some older hardware has better Windows support</li>
-        <li><strong>Learning curve</strong> if you're not already familiar with Linux</li>
-      </ul>
-    </div>
-  </div>
+<div class="callout callout-warn">
+  <div class="callout-icon">⚠️</div>
+  <div class="callout-body"><strong>This is a contingency page — not the current plan.</strong> Right now, run Windows 10. Extended security updates cover you until 2028. This is the playbook if that changes and you need an exit strategy.</div>
 </div>
 
 <div class="section">
-  <div class="section-title">🏆 Recommended Distros</div>
+  <div class="section-title">📅 Windows 10 Timeline Reality Check</div>
   <div class="card">
     <table>
-      <tr><th>Distro</th><th>Best For</th><th>Future-Proof?</th><th>Verdict</th></tr>
-      <tr>
-        <td><strong>Ubuntu Server 24.04 LTS</strong></td>
-        <td>Easiest transition from Windows</td>
-        <td>✅ 5-year LTS support (2029)</td>
-        <td>Best for beginners</td>
-      </tr>
-      <tr>
-        <td><strong>Debian 12 Stable</strong></td>
-        <td>Rock-solid stability, minimal</td>
-        <td>✅ Extremely long support cycles</td>
-        <td>Best for "set it and forget it"</td>
-      </tr>
-      <tr>
-        <td><strong>Fedora Server 40</strong></td>
-        <td>More current packages</td>
-        <td>🟡 13-month release cycles</td>
-        <td>Good if you like newer software</td>
-      </tr>
-      <tr>
-        <td><strong>Unraid</strong></td>
-        <td>NAS + media server focus</td>
-        <td>✅ Commercial product, well-maintained</td>
-        <td>Best GUI for pure media server (not free)</td>
-      </tr>
-      <tr>
-        <td>CasaOS</td>
-        <td>Docker-based home server GUI</td>
-        <td>🟡 Newer project</td>
-        <td>Interesting but less mature</td>
-      </tr>
+      <tr><th>Date</th><th>Event</th><th>Impact</th></tr>
+      <tr><td>October 2025</td><td>Windows 10 mainstream support ends</td><td>No new features, but security patches continue</td></tr>
+      <tr><td>October 2028</td><td>Windows 10 security updates end</td><td>The actual cliff — unpatched vulnerabilities start accumulating</td></tr>
+      <tr><td>After 2028</td><td>Paid Extended Security Updates (ESU)</td><td>Microsoft may offer paid patches for businesses — likely expensive</td></tr>
     </table>
-    <div class="callout callout-dragon">
+    <div class="callout callout-tip">
       <div class="callout-icon">🐉</div>
-      <div class="callout-body"><strong>Recommendation: Ubuntu Server 24.04 LTS</strong> for the primary server. Most documentation is Ubuntu-targeted, package support is excellent, and the 5-year LTS window means you won't need to upgrade constantly.</div>
+      <div class="callout-body"><strong>Real timeline:</strong> You have until at least 2028, likely longer. Windows 7 "officially" ended in 2020 and millions of machines still run it. The actual risk is unpatched security vulnerabilities — for a home server behind Cloudflare Tunnel and Authentik, this risk is substantially mitigated compared to a direct-internet machine. You have time.</div>
     </div>
   </div>
 </div>
 
+<hr>
+
 <div class="section">
-  <div class="section-title">🗂️ Service-by-Service Linux Compatibility</div>
+  <div class="section-title">🏆 Best Linux Distro for This Server's Compatibility</div>
   <div class="card">
     <table>
-      <tr><th>Service</th><th>Linux Support</th><th>Notes</th></tr>
-      <tr><td>Plex Media Server</td><td>✅ Excellent</td><td>Native Linux package; actually better on Linux</td></tr>
-      <tr><td>Calibre-Web</td><td>✅ Excellent</td><td>Python app — identical on Linux; systemd service instead of NSSM</td></tr>
-      <tr><td>Audiobookshelf</td><td>✅ Native Linux</td><td>Linux is the primary platform; .deb package available</td></tr>
-      <tr><td>Nextcloud</td><td>✅ Excellent</td><td>Linux + Apache/Nginx is the recommended setup; XAMPP not needed</td></tr>
-      <tr><td>qBittorrent + Sonarr</td><td>✅ Excellent</td><td>Both have native Linux packages</td></tr>
-      <tr><td>Minecraft Server</td><td>✅ Excellent</td><td>Java runs everywhere; systemd + cron replace Task Scheduler</td></tr>
-      <tr><td>ARK: SE Server</td><td>✅ Good</td><td>Linux dedicated server available via SteamCMD; actually uses less RAM on Linux</td></tr>
-      <tr><td>SS13 (BYOND)</td><td>⚠️ Partial</td><td>BYOND has a Linux server mode but some codebases work better on Windows</td></tr>
-      <tr><td>Sunshine (game streaming)</td><td>✅ Good</td><td>Works well; Nvidia GPU needs proprietary drivers</td></tr>
-      <tr><td>Dolphin (GameCube)</td><td>✅ Excellent</td><td>Native Linux support, Flatpak available</td></tr>
-      <tr><td>XENIA (Xbox 360)</td><td>❌ Poor</td><td>Linux port exists but is incomplete; many games won't run</td></tr>
-      <tr><td>Steam (client)</td><td>✅ Good</td><td>Native Linux client + Proton for Windows games (~80% compatibility)</td></tr>
-      <tr><td>EmulatorJS (Pokemon, etc.)</td><td>✅ Excellent</td><td>Browser-based, runs anywhere</td></tr>
-      <tr><td>Jukebox (infinite-jukebox)</td><td>✅ Excellent</td><td>Node.js/Python — native Linux</td></tr>
+      <tr><th>Distro</th><th>Why it fits</th><th>Long-term support</th><th>Recommendation</th></tr>
+      <tr><td><strong>Ubuntu Server 24.04 LTS</strong></td><td>Best documentation coverage, most tutorials target it, all server software packaged for it</td><td>5-year LTS (2029), 10-year with ESM</td><td>⭐ Primary choice</td></tr>
+      <tr><td><strong>Debian 12 Stable</strong></td><td>Rock-solid, minimal, the base Ubuntu is built on</td><td>~5 years per release, very conservative</td><td>Best "set and forget" option</td></tr>
+      <tr><td>Fedora Server 40</td><td>More current packages</td><td>13-month release cycles (shorter)</td><td>Good if you want cutting-edge</td></tr>
+      <tr><td>Unraid</td><td>Purpose-built NAS/server OS with GUI</td><td>Commercial, well maintained</td><td>Good if you dislike CLI (paid)</td></tr>
+    </table>
+    <p style="margin-top:10px"><strong>Choose Ubuntu Server 24.04 LTS.</strong> Every guide, every Stack Overflow answer, every software's official documentation targets it. When something breaks at 2am, being on the most-documented platform saves you.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">✅ What Migrates to Linux With Zero Problems</div>
+  <div class="card">
+    <table>
+      <tr><th>Service</th><th>Linux support</th><th>Notes</th></tr>
+      <tr><td>Authentik (all SSO)</td><td>✅ Native — Linux/Docker is the official platform</td><td>Actually better on Linux — no WSL2 wrapper</td></tr>
+      <tr><td>Jellyfin</td><td>✅ Native</td><td>Linux is the primary platform; .deb package</td></tr>
+      <tr><td>Calibre-Web</td><td>✅ Native</td><td>Python app, identical on Linux</td></tr>
+      <tr><td>Audiobookshelf</td><td>✅ Native</td><td>Linux is the primary platform</td></tr>
+      <tr><td>Nextcloud</td><td>✅ Better on Linux</td><td>XAMPP not needed; use the Snap package</td></tr>
+      <tr><td>Navidrome</td><td>✅ Native</td><td>Single binary, systemd service</td></tr>
+      <tr><td>qBittorrent + *arr stack</td><td>✅ Native</td><td>All have native Linux packages</td></tr>
+      <tr><td>Immich, RomM, Mealie, LinguaCafe</td><td>✅ Native (Docker)</td><td>Docker is first-class on Linux</td></tr>
+      <tr><td>Minecraft server</td><td>✅ Java runs everywhere</td><td>systemd + cron replaces Task Scheduler</td></tr>
+      <tr><td>ARK server</td><td>✅ Good</td><td>SteamCMD works on Linux; actually uses less RAM</td></tr>
+      <tr><td>Dolphin (GameCube/Wii)</td><td>✅ Native</td><td>Flatpak available</td></tr>
+      <tr><td>Sunshine + Moonlight</td><td>✅ Good</td><td>Works well; Nvidia GPU setup more complex</td></tr>
+      <tr><td>EmulatorJS save server</td><td>✅ Python Flask</td><td>Identical code</td></tr>
+      <tr><td>Vaultwarden, Uptime Kuma</td><td>✅ Native Docker</td><td>Both officially Linux-first</td></tr>
+      <tr><td>Kavita, Vikunja</td><td>✅ Native</td><td>Both have Linux binaries</td></tr>
     </table>
   </div>
 </div>
 
+<hr>
+
 <div class="section">
-  <div class="section-title">🏗️ The Hybrid Architecture (Recommended)</div>
+  <div class="section-title">💀 What Is Doomed Without Windows</div>
   <div class="card">
-    <div class="card-title">Keep Windows for Gaming, Run Linux for Everything Else</div>
-    <p>The ideal long-term setup is two machines (or dual-boot on one):</p>
-    <div class="grid-2">
-      <div class="card" style="border-color:rgba(91,141,217,0.3)">
-        <div class="card-title" style="color:var(--accent2)">🐧 Linux Server (always on)</div>
-        <ul style="margin:0 0 0 18px;font-size:.85rem">
-          <li>Plex, Calibre-Web, Audiobookshelf</li>
-          <li>Nextcloud, qBittorrent, Sonarr</li>
-          <li>Minecraft, ARK servers</li>
-          <li>All emulation (except Xbox 360)</li>
-          <li>Dashboard, Caddy, Vaultwarden</li>
-        </ul>
-      </div>
-      <div class="card" style="border-color:rgba(200,168,75,0.3)">
-        <div class="card-title" style="color:var(--accent)">⊞ Windows PC (on-demand)</div>
-        <ul style="margin:0 0 0 18px;font-size:.85rem">
-          <li>Sunshine game streaming</li>
-          <li>Xbox 360 emulation (XENIA)</li>
-          <li>Steam gaming</li>
-          <li>Can be shut down when not gaming</li>
-        </ul>
-      </div>
+    <table>
+      <tr><th>Service</th><th>Linux status</th><th>How bad is it</th></tr>
+      <tr><td><strong>Xenia (Xbox 360 emulator)</strong></td><td>❌ Linux port is experimental and broken</td><td>Most games don't boot. This is a genuine dealbreaker for Xbox 360 emulation.</td></tr>
+      <tr><td><strong>XAMPP (for Nextcloud)</strong></td><td>❌ Don't use on Linux</td><td>Not actually a problem — Nextcloud has better Linux options (Snap, Docker)</td></tr>
+      <tr><td>NSSM (service manager)</td><td>❌ Windows-only</td><td>Not a problem — Linux uses systemd, which is far superior</td></tr>
+      <tr><td>Task Scheduler</td><td>❌ Windows-only</td><td>Not a problem — Linux uses cron, which is more powerful</td></tr>
+      <tr><td>Some Steam games via Proton</td><td>⚠️ ~80% compatibility</td><td>Most games work via Proton. Some don't. Anti-cheat is the main issue.</td></tr>
+    </table>
+    <div class="callout callout-danger">
+      <div class="callout-icon">💀</div>
+      <div class="callout-body"><strong>Xenia is the biggest casualty.</strong> Xbox 360 emulation without Windows means losing Halo 3, Red Dead Redemption, Gears of War — the crown jewels of the 360 library. This is the #1 reason to keep a Windows machine running if possible.</div>
     </div>
   </div>
 </div>
 
+<hr>
+
 <div class="section">
-  <div class="section-title">🚀 How to Transition: Step-by-Step</div>
+  <div class="section-title">🖥️ Virtual Machine Option for Xenia</div>
+  <div class="card">
+    <div class="card-title">Run Windows in a KVM/QEMU VM with GPU Passthrough</div>
+    <p>This is the gold standard solution for keeping Windows-dependent software running on a Linux host. Your Linux server runs Xenia in a Windows VM that has <strong>direct access to your GPU</strong> (GPU passthrough), so gaming performance is near-native.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Requirements</strong>
+          <p>CPU must support AMD-Vi or Intel VT-d (most modern CPUs do). You need <strong>two GPUs</strong> — one for the Linux host and one to pass through to the Windows VM. A cheap second-hand GPU (~$50 for a GT 1030) handles the Linux desktop; your gaming GPU passes through to Windows.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Install KVM/QEMU + VFIO on Ubuntu</strong>
+          <pre>sudo apt install -y qemu-kvm libvirt-daemon-system virt-manager ovmf
+sudo systemctl enable libvirtd
+
+# Verify CPU supports virtualization:
+egrep -c '(vmx|svm)' /proc/cpuinfo  # should be > 0</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure GPU passthrough (VFIO)</strong>
+          <p>Add your gaming GPU's PCI IDs to VFIO. This binds the GPU to the VFIO driver on boot, making it available for the Windows VM:</p>
+          <pre># Find GPU PCI IDs:
+lspci -nn | grep -i nvidia  # example: 10de:2484
+
+# Add to /etc/modprobe.d/vfio.conf:
+options vfio-pci ids=10de:2484,10de:228b
+
+# Update initramfs:
+sudo update-initramfs -u
+sudo reboot</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create Windows VM in virt-manager</strong>
+          <p>Create a new VM using a Windows 10/11 ISO. During setup, add the GPU PCI device to the VM. Windows sees the real GPU and installs proper Nvidia/AMD drivers. Xenia runs in this VM with near-native performance.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Access the Windows VM via Sunshine</strong>
+          <p>Install Sunshine inside the Windows VM. It sees the passed-through GPU and can stream games. Moonlight clients connect to the VM's IP (or the host's Tailscale IP with port forwarding) exactly as they do today.</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Complexity level:</strong> GPU passthrough is advanced. It works extremely well once configured, but the setup is finicky and documentation is scattered. Budget a full weekend to get it working. The Arch Wiki has the best GPU passthrough guide in existence, even for Ubuntu users.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Simpler Alternative: Windows VM Without GPU Passthrough</div>
+    <p>If you only have one GPU, run a Windows VM without GPU passthrough. Xenia won't run well (GPU emulation is too slow), but other Windows-only software (like specific games that work on software rendering) may be usable.</p>
+    <p>For Xenia specifically, if no GPU passthrough: <strong>accept the loss</strong> and use the Xbox Game Pass / cloud streaming as a replacement for Xbox 360 gaming. It's not self-hosted, but it's better than nothing.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🚀 Migration Guide: Windows → Ubuntu Server</div>
   <div class="steps">
     <div class="step">
       <div class="step-content">
         <strong>Install Ubuntu Server 24.04 LTS</strong>
-        <p>Download from <a href="https://ubuntu.com/download/server" target="_blank">ubuntu.com</a>. Boot from USB. Choose "Ubuntu Server (minimized)" for a lean install. Set up SSH during install so you can manage it headlessly.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Replace NSSM with systemd service files</strong>
-        <p>Every service you ran with NSSM on Windows gets a <code>.service</code> file in <code>/etc/systemd/system/</code>. Example for Audiobookshelf:</p>
-        <pre>[Unit]
-Description=Audiobookshelf
-After=network.target
-
-[Service]
-Type=simple
-User=www-data
-ExecStart=/usr/bin/audiobookshelf
-Restart=always
-
-[Install]
-WantedBy=multi-user.target</pre>
-        <p>Then: <code>sudo systemctl enable --now audiobookshelf</code></p>
+        <p>Download from ubuntu.com. Boot from USB. Choose "Ubuntu Server (minimized)". Enable SSH during install. Choose static IP matching your current Windows static IP.</p>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
         <strong>Replace Task Scheduler with cron</strong>
-        <p>Edit cron jobs with <code>crontab -e</code>:</p>
-        <pre># Minecraft 2am shutdown, 3am restart:
-55 1 * * * /home/server/minecraft/shutdown.sh
-0  3 * * * /home/server/minecraft/start.sh
+        <pre>crontab -e
 
-# DDNS update every 5 minutes:
+# Minecraft 2am shutdown, 3am restart:
+55 1 * * * /home/server/minecraft/shutdown_all.sh
+0  3 * * * /home/server/minecraft/start_all.sh
+
+# DDNS every 5 minutes:
 */5 * * * * /home/server/ddns.sh</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Nextcloud on Linux (better than XAMPP)</strong>
-        <p>Use the official Nextcloud snap package:</p>
-        <pre>sudo snap install nextcloud
-sudo nextcloud.manual-install admin yourpassword</pre>
-        <p>Runs with its own Apache and PHP — no XAMPP needed.</p>
+        <strong>Replace NSSM services with systemd</strong>
+        <pre># Example for Navidrome:
+sudo nano /etc/systemd/system/navidrome.service
+
+[Unit]
+Description=Navidrome
+After=network.target
+
+[Service]
+Type=simple
+User=navidrome
+ExecStart=/opt/navidrome/navidrome
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl enable --now navidrome</pre>
       </div>
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Migrate your data with rsync</strong>
-        <p>From Windows to Linux (run on Linux, pulling from Windows share):</p>
-        <pre>rsync -avz --progress "//192.168.1.100/Media" /mnt/media/</pre>
-        <p>Or from an external drive connected directly to the Linux box.</p>
+        <strong>Nextcloud: use Snap (much simpler than XAMPP)</strong>
+        <pre>sudo snap install nextcloud
+sudo nextcloud.manual-install admin yourpassword
+# Everything configured automatically</pre>
       </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Docker services (Authentik, Immich, etc.) become first-class</strong>
+        <p>All the services currently running in WSL2 (Authentik, Immich, RomM, Mealie) move to native Docker on Linux. Remove the WSL2 wrapper — everything is cleaner, faster, and uses less memory.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Data migration</strong>
+        <pre># Mount Windows NTFS drives in Ubuntu:
+sudo apt install ntfs-3g
+sudo mount -t ntfs-3g /dev/sdX /mnt/media
+
+# Or migrate with rsync over network:
+rsync -avz --progress "//192.168.1.100/Media" /srv/media/</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📊 Long-Term Sustainability Assessment</div>
+  <div class="card">
+    <table>
+      <tr><th>Factor</th><th>Windows 10 (current)</th><th>Ubuntu Linux (contingency)</th></tr>
+      <tr><td>Security support</td><td>Until 2028</td><td>Indefinite (LTS releases every 2 years)</td></tr>
+      <tr><td>Xenia (Xbox 360)</td><td>✅ Works</td><td>❌ Needs GPU passthrough VM</td></tr>
+      <tr><td>Everything else</td><td>✅ Works (some via WSL2)</td><td>✅ Works (often better, no WSL2 needed)</td></tr>
+      <tr><td>Server stability</td><td>Windows reboots for updates</td><td>Linux can run years without rebooting</td></tr>
+      <tr><td>Resource usage</td><td>Higher (Windows overhead)</td><td>Lower (more RAM/CPU for services)</td></tr>
+      <tr><td>Maintenance complexity</td><td>Low (GUI for everything)</td><td>Medium (CLI comfort needed)</td></tr>
+      <tr><td>Gaming compatibility</td><td>Full</td><td>~80% via Proton, GPU passthrough for rest</td></tr>
+    </table>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Bottom line:</strong> Stay on Windows 10 until 2028 at minimum. The security risk behind Cloudflare Tunnel + Authentik is very low. If you're forced to switch, Ubuntu Server 24.04 LTS handles everything except Xenia, which needs a GPU passthrough VM. The migration is feasible but requires a day of work — treat this page as your emergency playbook.</div>
     </div>
   </div>
 </div>

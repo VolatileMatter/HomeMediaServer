@@ -1,18 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Immich</title><link rel="stylesheet" href="shared.css"></head>
+<head><meta charset="UTF-8"><title>Photos</title><link rel="stylesheet" href="shared.css"></head>
 <body>
 
 <div class="page-header">
   <div class="page-icon">📷</div>
   <div>
-    <h1>Immich — Photo &amp; Video Backup</h1>
-    <div class="subtitle">// Self-Hosted Google Photos · Port 2283 · WSL2 //</div>
-    <p class="desc">Immich is the best self-hosted alternative to Google Photos. Automatic mobile backup, face recognition, album sharing, and a gorgeous web/mobile UI. Runs via Docker in WSL2 on Windows.</p>
+    <h1>Photos</h1>
+    <div class="subtitle">// Immich vs Nextcloud Photos · Self-Hosted Google Photos //</div>
+    <p class="desc">Two options for self-hosted photo storage: Immich (dedicated photo app, closest to Google Photos) or Nextcloud's built-in Photos app. Here's how they compare and why Immich wins for most use cases.</p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 V1 Goal: Immich running on port 2283 via WSL2/Docker, mobile apps on all devices auto-backing up to your server. Each user has private photos with optional sharing.</div>
+<div class="section">
+  <div class="section-title">⚖️ Immich vs Nextcloud Photos — Full Comparison</div>
+  <div class="card">
+    <table>
+      <tr><th>Feature</th><th>Immich</th><th>Nextcloud Photos</th></tr>
+      <tr><td>Purpose-built for photos</td><td>✅ Yes — photos is its only job</td><td>❌ Photos is an add-on to a file sync tool</td></tr>
+      <tr><td>Mobile auto-backup</td><td>✅ Excellent dedicated app (iOS + Android)</td><td>⚠️ OK — uses the Nextcloud mobile app's camera upload feature</td></tr>
+      <tr><td>Google Photos similarity</td><td>⭐⭐⭐⭐⭐ Closest of anything self-hosted</td><td>⭐⭐ Different paradigm (file browser, not a photo viewer)</td></tr>
+      <tr><td>Face recognition</td><td>✅ Yes, runs locally on CPU/GPU</td><td>⚠️ Via "Recognize" plugin — works but slower to configure</td></tr>
+      <tr><td>AI smart search ("beach 2023")</td><td>✅ CLIP model, runs locally</td><td>⚠️ Basic — relies on EXIF metadata, not image content</td></tr>
+      <tr><td>Duplicate detection</td><td>✅ Built-in</td><td>❌ No</td></tr>
+      <tr><td>Map view (photos on a map)</td><td>✅ Built-in with GPS data</td><td>⚠️ Via plugin</td></tr>
+      <tr><td>Album sharing (public links)</td><td>✅ Built-in</td><td>✅ Via Nextcloud sharing</td></tr>
+      <tr><td>Video support</td><td>✅ Excellent — auto-transcodes for web</td><td>⚠️ OK — streams files as-is</td></tr>
+      <tr><td>Photo editing</td><td>❌ View only</td><td>⚠️ Basic filters via web client</td></tr>
+      <tr><td>File access / WebDAV</td><td>❌ Not a file manager</td><td>✅ Full file access to any synced folder</td></tr>
+      <tr><td>Storage location</td><td>Dedicated /photos folder</td><td>Shared with all Nextcloud files</td></tr>
+      <tr><td>Resource usage</td><td>Higher (ML models for face/search)</td><td>Lower (shares Nextcloud's Apache/MySQL)</td></tr>
+      <tr><td>SSO (Authentik OIDC)</td><td>✅ Native OIDC support</td><td>✅ Via user_oidc app</td></tr>
+      <tr><td>Setup complexity</td><td>Medium (Docker in WSL2)</td><td>Low (already installed with Nextcloud)</td></tr>
+    </table>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Recommendation: Use Immich.</strong> If you want an experience that feels like Google Photos — beautiful timeline, face albums, "On This Day", map view, smart search — Immich is the only self-hosted option that genuinely delivers it. Nextcloud Photos is functional but it's a photo viewer bolted onto a file sync tool. The setup complexity difference is minor.<br><br>That said, if you only need "a place to store and browse photos" and you already have Nextcloud running, the built-in Photos app might be enough. Use Immich if you want to actually replace Google Photos.</div>
+    </div>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Recommendation: Run Immich. Install after Nextcloud is up. They serve different purposes — Nextcloud for files/documents, Immich for photos/videos.</div>
+
 
 <div class="callout callout-warn">
   <div class="callout-icon">⚠️</div>

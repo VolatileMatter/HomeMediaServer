@@ -1,40 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"><title>SSO & Users</title><link rel="stylesheet" href="shared.css">
+<head><meta charset="UTF-8"><title>SSO & Users</title><link rel="stylesheet" href="shared.css">
 <style>
-.user-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:6px;flex-wrap:wrap;}
-.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;}
-.user-name{font-weight:700;font-size:.9rem;flex:1;min-width:100px;}
-.user-meta{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);}
-.ustatus{font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:2px 7px;border-radius:2px;}
-.u-active{background:rgba(76,175,125,.15);color:#4caf7d;border:1px solid rgba(76,175,125,.25);}
-.u-blocked{background:rgba(224,92,92,.12);color:var(--danger);border:1px solid rgba(224,92,92,.2);}
-.ab{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:3px 8px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.ab:hover{border-color:var(--accent);color:var(--accent);}
-.ab.warn:hover{border-color:#e0b84b;color:#e0b84b;}
-.ab.nuke-btn{border-color:rgba(224,92,92,.3);color:var(--danger);}
-.ab.nuke-btn:hover{background:rgba(224,92,92,.1);}
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;}
-.mo.open{display:flex;}
-.mc{background:#141820;border:1px solid var(--border);border-radius:6px;padding:24px;max-width:480px;width:95%;max-height:85vh;overflow-y:auto;}
-.mc h3{font-family:'Cinzel',serif;margin-bottom:14px;}
-.mclose{float:right;background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.65rem;}
-.mclose:hover{border-color:var(--danger);color:var(--danger);}
-.nuke-box{background:rgba(224,92,92,.07);border:1px solid rgba(224,92,92,.3);border-radius:4px;padding:14px;margin-bottom:12px;}
-.nuke-box h4{color:var(--danger);font-family:'Cinzel',serif;margin-bottom:8px;}
-.ipr{display:flex;gap:8px;align-items:center;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:6px;}
-.ipa{font-family:'Share Tech Mono',monospace;font-size:.78rem;flex:1;}
-.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
-.ach{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px;text-align:center;}
-.ach.earned{border-color:rgba(200,168,75,.4);background:rgba(200,168,75,.05);}
-.ach-ic{font-size:1.8rem;margin-bottom:5px;}
-.ach-n{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:2px;}
-.ach-d{font-size:.66rem;color:var(--text-dim);}
-.finput{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:.78rem;}
-.sect-nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
-.snav{font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
-.snav.active{border-color:var(--accent);color:var(--accent);}
+  .user-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:6px;flex-wrap:wrap;}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-name{font-weight:700;font-size:.88rem;flex:1;min-width:100px;}
+  .user-meta{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);}
+  .ustatus{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:2px;}
+  .u-active{background:rgba(76,175,125,.15);color:#4caf7d;border:1px solid rgba(76,175,125,.25);}
+  .u-blocked{background:rgba(224,92,92,.12);color:var(--danger);border:1px solid rgba(224,92,92,.2);}
+  .ab{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:3px 8px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .ab:hover{border-color:var(--accent);color:var(--accent);}
+  .ab.warn:hover{border-color:#e0b84b;color:#e0b84b;}
+  .ab.nuke-btn{border-color:rgba(224,92,92,.3);color:var(--danger);}
+  .ab.nuke-btn:hover{background:rgba(224,92,92,.1);}
+  .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;}
+  .mo.open{display:flex;}
+  .mc{background:#141820;border:1px solid var(--border);border-radius:6px;padding:24px;max-width:500px;width:95%;max-height:85vh;overflow-y:auto;}
+  .mc h3{font-family:'Cinzel',serif;margin-bottom:14px;}
+  .mclose{float:right;background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.65rem;}
+  .mclose:hover{border-color:var(--danger);color:var(--danger);}
+  .nuke-box{background:rgba(224,92,92,.07);border:1px solid rgba(224,92,92,.3);border-radius:4px;padding:14px;margin-bottom:12px;}
+  .nuke-box h4{color:var(--danger);font-family:'Cinzel',serif;margin-bottom:8px;}
+  .finput{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:.78rem;}
+  .sect-nav{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .snav{font-family:'Share Tech Mono',monospace;font-size:.63rem;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
+  .snav.active{border-color:var(--accent);color:var(--accent);}
+  .group-tag{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:1px 6px;border-radius:2px;margin-left:4px;}
+  .gt-admin{background:rgba(200,168,75,.15);color:var(--accent);border:1px solid rgba(200,168,75,.2);}
+  .gt-family{background:rgba(91,141,217,.12);color:var(--accent2);border:1px solid rgba(91,141,217,.2);}
+  .gt-friends{background:rgba(78,205,196,.1);color:var(--accent3);border:1px solid rgba(78,205,196,.2);}
 </style>
 </head>
 <body>
@@ -43,149 +38,510 @@
   <div class="page-icon">🔐</div>
   <div>
     <h1>SSO &amp; User Management</h1>
-    <div class="subtitle">// Users · IP Blocking · Nuke · Achievements · Google OAuth //</div>
-    <p class="desc">Manage all users, block or ban bad actors, nuke accounts, and track reading/gaming achievements across all services.</p>
+    <div class="subtitle">// Authentik · Google Login · All Services · Nuke System //</div>
+    <p class="desc">Authentik is the single login system for every service on this server. Users log in with their Google (Gmail) account — no new passwords to remember. You manage who has access to what, all in one place.</p>
   </div>
 </div>
 
 <div class="sect-nav">
-  <button class="snav active" onclick="showSec('users')">👥 Users</button>
-  <button class="snav" onclick="showSec('ipblocks')">🚫 IP Blocks</button>
+  <button class="snav active" onclick="showSec('setup')">⚙️ Authentik Setup</button>
+  <button class="snav" onclick="showSec('users')">👥 Users</button>
+  <button class="snav" onclick="showSec('groups')">🏷️ Groups &amp; Quotas</button>
+  <button class="snav" onclick="showSec('services')">🔗 Per-Service Config</button>
+  <button class="snav" onclick="showSec('savemigration')">💾 Save Migration</button>
+  <button class="snav" onclick="showSec('nuke')">💣 Block &amp; Nuke</button>
   <button class="snav" onclick="showSec('achievements')">🏆 Achievements</button>
-  <button class="snav" onclick="showSec('setup')">⚙️ SSO Setup</button>
 </div>
 
-<!-- ── USERS ── -->
-<div id="s-users">
-  <div class="section-title">👥 User Roster</div>
+<!-- ══ AUTHENTIK SETUP ══ -->
+<div id="s-setup">
+  <div class="section-title">⚙️ Authentik Installation (WSL2 + Docker)</div>
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>Architecture:</strong> Authentik runs in Docker inside WSL2. It exposes port 9000 to Windows. Caddy (running natively on Windows) uses Authentik's forward_auth endpoint to protect every service. Cloudflare Tunnel routes external traffic to Caddy.</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 1: Install WSL2 + Docker (if not done)</strong>
+        <pre>wsl --install
+# Reboot, then open Ubuntu terminal:
+sudo apt update && sudo apt install -y docker.io docker-compose
+sudo usermod -aG docker $USER
+newgrp docker</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 2: Deploy Authentik</strong>
+        <pre>mkdir ~/authentik && cd ~/authentik
+
+# Download official compose file:
+wget https://goauthentik.io/docker-compose.yml
+
+# Create .env file:
+cat > .env << 'EOF'
+POSTGRES_PASSWORD=change-this-strong-password
+AUTHENTIK_SECRET_KEY=change-this-to-50-random-chars
+AUTHENTIK_ERROR_REPORTING__ENABLED=false
+EOF
+
+docker-compose pull
+docker-compose up -d
+
+# Access at http://localhost:9000/if/flow/initial-setup/</pre>
+        <p>Create your admin account on first access. This takes ~2 minutes to fully start.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 3: Auto-start Authentik on Windows boot</strong>
+        <pre># Task Scheduler → Create Task:
+# Name: Authentik
+# Action: wsl -d Ubuntu -- bash -c "cd ~/authentik && docker-compose up -d"
+# Trigger: At startup, delay 2 minutes
+# Run whether logged on or not: ☑</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 4: Add Google as a Social Login Source</strong>
+        <p>In Google Cloud Console (<a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>):</p>
+        <ul style="margin:6px 0 0 18px;font-size:.85rem">
+          <li>New project → "Home Server SSO"</li>
+          <li>APIs &amp; Services → OAuth Consent Screen → External → add your Gmail + all allowed user emails as Test Users</li>
+          <li>Create Credentials → OAuth Client ID → Web application</li>
+          <li>Authorized redirect URI: <code>https://auth.yourdomain.com/source/oauth/callback/google/</code></li>
+          <li>Save Client ID and Client Secret</li>
+        </ul>
+        <p style="margin-top:8px">In Authentik admin → Directory → Sources → Create → OAuth2/OpenID Source:</p>
+        <pre>Name:             Google
+Slug:             google
+Consumer Key:     [your Google Client ID]
+Consumer Secret:  [your Google Client Secret]
+OIDC Well-Known:  https://accounts.google.com/.well-known/openid-configuration
+User matching:    Match by email (preferred)
+☑ Allow users to change username</pre>
+        <p>Now users see "Sign in with Google" on the Authentik login page. They click it, authenticate with Google, and land in Authentik.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 5: Expose Authentik via Cloudflare Tunnel</strong>
+        <pre># In your cloudflared config.yml, add:
+ingress:
+  - hostname: auth.yourdomain.com
+    service: http://localhost:9000
+  # ... other services
+  - service: http_status:404</pre>
+        <p>Then in Cloudflare Zero Trust → Access → Applications → Add Application for <code>auth.yourdomain.com</code>. Set a policy that only allows specific Gmail addresses. This is a second layer of protection before anyone even reaches Authentik.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 6: Configure Caddy forward_auth for all services</strong>
+        <p>This is the magic that protects services that don't natively support OIDC. Every request to a service first hits Authentik for validation:</p>
+        <pre># In your Caddyfile — template for any protected service:
+movies.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:8096  # Jellyfin
+}
+
+# The X-authentik-username header is passed to the service
+# so each service knows WHO is logged in.
+# Services can use this header to route saves, history, etc.</pre>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>Services with native OIDC</strong> (Jellyfin, Open WebUI, Immich, Nextcloud, Vikunja) can use direct OIDC integration — this is slightly better UX. Services without native OIDC support (Navidrome, EmulatorJS save server, Kiwix) use Caddy forward_auth instead. Both approaches result in users being authenticated through Authentik.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ USERS ══ -->
+<div id="s-users" style="display:none">
+  <div class="section-title">👥 Current Users</div>
+  <div class="callout callout-tip">
+    <div class="callout-icon">🔐</div>
+    <div class="callout-body">User accounts are managed in <strong>Authentik admin</strong> at <code>https://auth.yourdomain.com/if/admin/</code>. This panel is a simplified view. To add a user, invite them via email and have them log in with Google — Authentik creates their account automatically on first login.</div>
+  </div>
   <div id="user-list">
     <div class="user-row">
       <div class="user-avatar">A</div>
-      <div style="flex:1"><div class="user-name">alice</div><div class="user-meta">alice@gmail.com · Last seen 2025-03-15 · Saves: Pokémon Emerald, SotN</div></div>
+      <div style="flex:1"><div class="user-name">alice <span class="group-tag gt-admin">Admin</span></div><div class="user-meta">alice@gmail.com · Last seen: today · All services</div></div>
       <span class="ustatus u-active">ACTIVE</span>
       <button class="ab warn" onclick="openBlock('alice')">🚫 Block</button>
       <button class="ab nuke-btn" onclick="openNuke('alice')">💣 Nuke</button>
     </div>
     <div class="user-row">
       <div class="user-avatar">B</div>
-      <div style="flex:1"><div class="user-name">bob</div><div class="user-meta">bob@gmail.com · Last seen 2025-03-14</div></div>
+      <div style="flex:1"><div class="user-name">bob <span class="group-tag gt-family">Family</span></div><div class="user-meta">bob@gmail.com · Last seen: yesterday · Jellyfin, Calibre, Games</div></div>
       <span class="ustatus u-active">ACTIVE</span>
       <button class="ab warn" onclick="openBlock('bob')">🚫 Block</button>
       <button class="ab nuke-btn" onclick="openNuke('bob')">💣 Nuke</button>
     </div>
     <div class="user-row">
       <div class="user-avatar" style="background:linear-gradient(135deg,#555,#333)">C</div>
-      <div style="flex:1"><div class="user-name">charlie</div><div class="user-meta">Blocked until 2025-03-22 · Reason: spam in feedback</div></div>
+      <div style="flex:1"><div class="user-name">charlie <span class="group-tag gt-friends">Friends</span></div><div class="user-meta">charlie@gmail.com · Blocked until 2025-03-22</div></div>
       <span class="ustatus u-blocked">BLOCKED</span>
-      <button class="ab" onclick="alert('Unblock charlie: set status=active in users.json')">✓ Unblock</button>
+      <button class="ab" onclick="unblock('charlie')">✓ Unblock</button>
       <button class="ab nuke-btn" onclick="openNuke('charlie')">💣 Nuke</button>
     </div>
   </div>
-  <div class="callout callout-dragon" style="margin-top:14px">
-    <div class="callout-icon">🐉</div>
-    <div class="callout-body"><strong>In production</strong> this reads from <code>users.json</code>. Block/nuke buttons call the local control server (<code>localhost:9002</code>). Plex removal can't be fully automated — a ticket is created in the Feedback tab instead.</div>
-  </div>
-</div>
-
-<!-- ── IP BLOCKS ── -->
-<div id="s-ipblocks" style="display:none">
-  <div class="section-title">🚫 IP Block List</div>
-  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-    <input id="new-ip" class="finput" placeholder="IP address" style="flex:1;min-width:150px">
-    <input id="new-ip-reason" class="finput" placeholder="Reason" style="flex:1;min-width:120px;font-family:'Raleway',sans-serif">
-    <select id="new-ip-dur" class="finput">
-      <option value="1h">1 hour</option><option value="24h">24 hours</option>
-      <option value="7d">7 days</option><option value="30d">30 days</option>
-      <option value="permanent">Permanent</option>
-    </select>
-    <button onclick="addIPBlock()" style="background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);color:var(--danger);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.7rem">Block IP</button>
-  </div>
-  <div id="ip-list">
-    <div class="ipr"><div class="ipa">203.0.113.45</div><div style="flex:2;font-size:.75rem;color:var(--text-dim)">Brute force attempts</div><div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--accent)">Expires 2025-03-22</div><button class="ab" onclick="this.closest('.ipr').remove()">✕</button></div>
-    <div class="ipr"><div class="ipa">198.51.100.22</div><div style="flex:2;font-size:.75rem;color:var(--text-dim)">Account nuked</div><div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--danger)">PERMANENT</div><button class="ab" onclick="this.closest('.ipr').remove()">✕</button></div>
-  </div>
-  <div class="card" style="margin-top:16px">
-    <div class="card-title">How blocks are enforced</div>
-    <p>The control server writes to Windows Firewall via <code>netsh</code> and appends to a Caddy blocklist file. Add this to your <code>Caddyfile</code>:</p>
-    <pre>@blocked remote_ip 203.0.113.45 198.51.100.22
-respond @blocked "Access Denied" 403</pre>
-    <p>For dynamic updates without restarting Caddy, use the Caddy admin API:</p>
-    <pre>curl -X POST http://localhost:2019/config/apps/http/servers/srv0/routes \
-  -H "Content-Type: application/json" \
-  -d '{"match":[{"remote_ip":{"ranges":["1.2.3.4"]}}],"handle":[{"handler":"static_response","status_code":403}]}'</pre>
-  </div>
-</div>
-
-<!-- ── ACHIEVEMENTS ── -->
-<div id="s-achievements" style="display:none">
-  <div class="section-title">🏆 Achievements</div>
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">🎮 RetroAchievements (retro games)</div>
-      <p>EmulatorJS supports RetroAchievements natively. Each user enters their own RA username and API token in the game UI. Achievements are tracked on retroachievements.org per user account.</p>
-      <pre>// In your game launcher page:
-EJS_retroArchCheevos = true;
-EJS_cheevosUsername = userRAName;  // from user profile
-EJS_cheevosToken = userRAToken;    // from RA settings page</pre>
-      <p>Users create free accounts at <a href="https://retroachievements.org" target="_blank">retroachievements.org</a> and enter their credentials once.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">📚 Reading &amp; Listening Achievements</div>
-      <p><strong>Audiobookshelf</strong> → Settings → Notifications → add webhook on "Audiobook Finished" → POST to <code>http://localhost:9003/api/achievement/book</code>.</p>
-      <p><strong>Calibre-Web</strong> → when user marks a book "read," fires to the same endpoint.</p>
-      <pre>@app.route('/api/achievement/book', methods=['POST'])
-def book_ach():
-    d = request.json
-    grant(d['user'], 'BOOK_FINISH', d.get('title',''))
-    return jsonify({'ok':True})</pre>
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">How to add a new user</div>
+    <div class="steps">
+      <div class="step"><div class="step-content"><strong>Method A: Invite link</strong><p>Authentik admin → Directory → Users → Create → set their email → send them an invite link. They complete signup by clicking "Sign in with Google."</p></div></div>
+      <div class="step"><div class="step-content"><strong>Method B: Self-registration (if enabled)</strong><p>Send them directly to <code>https://auth.yourdomain.com</code>. They click "Sign in with Google" — if their Gmail is in the Cloudflare Access allowlist and/or Authentik's enrollment flow, their account is created automatically.</p></div></div>
     </div>
   </div>
-  <div class="section-title" style="margin-top:20px">🏅 Achievement Catalog</div>
-  <div class="ach-grid">
-    <div class="ach earned"><div class="ach-ic">📖</div><div class="ach-n">Bookworm</div><div class="ach-d">Finish first Calibre book</div></div>
-    <div class="ach earned"><div class="ach-ic">🎧</div><div class="ach-n">Listener</div><div class="ach-d">Finish first audiobook</div></div>
-    <div class="ach"><div class="ach-ic">📚</div><div class="ach-n">Bibliophile</div><div class="ach-d">Finish 10 books</div></div>
-    <div class="ach"><div class="ach-ic">⚡</div><div class="ach-n">Pokémon Master</div><div class="ach-d">Complete any Pokédex</div></div>
-    <div class="ach"><div class="ach-ic">🧛</div><div class="ach-n">Belmont</div><div class="ach-d">Beat any Castlevania</div></div>
-    <div class="ach"><div class="ach-ic">🌍</div><div class="ach-n">Polyglot</div><div class="ach-d">3 LinguaCafe lessons in 3 languages</div></div>
-    <div class="ach"><div class="ach-ic">🎵</div><div class="ach-n">DJ</div><div class="ach-d">50 songs in Navidrome</div></div>
-    <div class="ach"><div class="ach-ic">🤖</div><div class="ach-n">AI Whisperer</div><div class="ach-d">100 messages to Private AI</div></div>
-    <div class="ach"><div class="ach-ic">⚔️</div><div class="ach-n">Tactician</div><div class="ach-d">Beat any Fire Emblem</div></div>
-    <div class="ach"><div class="ach-ic">🎲</div><div class="ach-n">Party Animal</div><div class="ach-d">Play Mario Party with 4 people</div></div>
-  </div>
 </div>
 
-<!-- ── SETUP ── -->
-<div id="s-setup" style="display:none">
-  <div class="section-title">⚙️ SSO Tier 1 — Per-App Passwords</div>
+<!-- ══ GROUPS & QUOTAS ══ -->
+<div id="s-groups" style="display:none">
+  <div class="section-title">🏷️ Groups &amp; Service Access</div>
+
   <div class="card">
+    <div class="card-title">Authentik Groups → Service Access Matrix</div>
     <table>
-      <tr><th>App</th><th>Where to add users</th><th>Per-user saves?</th></tr>
-      <tr><td>Calibre-Web</td><td>Admin → User Management</td><td>✅ Reading progress</td></tr>
-      <tr><td>Audiobookshelf</td><td>Settings → Users</td><td>✅ Listen position</td></tr>
-      <tr><td>Nextcloud</td><td>Admin → Users</td><td>✅ Files, calendar</td></tr>
-      <tr><td>Emulation server</td><td>Edit users.json</td><td>✅ Game saves</td></tr>
-      <tr><td>Navidrome</td><td>Admin UI → Users</td><td>✅ Playlists, history</td></tr>
-      <tr><td>Open WebUI (Ollama)</td><td>Admin → Users</td><td>✅ Chat history</td></tr>
+      <tr><th>Group</th><th>Jellyfin</th><th>Calibre</th><th>ABS</th><th>Nextcloud</th><th>Games</th><th>AI</th><th>Admin Tools</th><th>NC Quota</th></tr>
+      <tr><td><span class="group-tag gt-admin">Admins</span></td><td>✅</td><td>✅+upload</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>Unlimited</td></tr>
+      <tr><td><span class="group-tag gt-family">Family</span></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>50 GB</td></tr>
+      <tr><td><span class="group-tag gt-friends">Friends</span></td><td>✅</td><td>✅ read-only</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>5 GB</td></tr>
     </table>
   </div>
-  <div class="section-title">⚙️ SSO Tier 2 — Google OAuth</div>
-  <div class="card">
-    <p>Get Client ID + Secret from <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>. Configure per app:</p>
-    <ul style="margin:6px 0 0 18px">
-      <li><strong>Calibre-Web:</strong> Admin → config → ☑ Enable Google OAuth</li>
-      <li><strong>Audiobookshelf:</strong> Settings → Auth → OpenID Connect (Issuer: accounts.google.com)</li>
-      <li><strong>Nextcloud:</strong> Apps → Social Login → Custom OIDC</li>
-      <li><strong>Emulation server:</strong> Add <code>authlib</code> Google flow</li>
-    </ul>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Setting up Groups in Authentik</div>
+    <div class="steps">
+      <div class="step"><div class="step-content"><strong>Create groups in Authentik admin</strong><p>Directory → Groups → Create group for each: "authentik-admins", "authentik-family", "authentik-friends". Assign users to groups.</p></div></div>
+      <div class="step"><div class="step-content"><strong>Pass group membership to services via OIDC claims</strong><p>In Authentik → Applications → [each app] → Property Mappings → add a scope mapping that includes groups in the ID token:</p>
+      <pre># In Authentik: Customization → Property Mappings → Create
+# Type: Scope Mapping
+Name: groups
+Scope Name: groups
+Expression:
+return [group.name for group in request.user.ak_groups.all()]</pre></div></div>
+      <div class="step"><div class="step-content"><strong>Nextcloud: map groups to storage quotas</strong><p>When a user authenticates via Authentik OIDC, Nextcloud receives their group. Use the Nextcloud "User LDAP/OpenID Connect" app to map Authentik groups to Nextcloud storage quotas:</p>
+      <pre># In Nextcloud config.php (add via occ command):
+php occ config:app:set user_oidc group_quota_mapping \
+  --value '{"authentik-family":"50 GB","authentik-friends":"5 GB","authentik-admins":"0 B"}'
+# "0 B" = unlimited in Nextcloud's quota system</pre>
+      <div class="callout callout-tip"><div class="callout-icon">💡</div><div class="callout-body"><strong>Individual overrides:</strong> In Nextcloud admin → Users → find the user → set a custom storage quota. This overrides the group default. So John can get 5GB while Dave gets 1GB, even if both are in the same Authentik group.</div></div>
+      </div></div>
+    </div>
   </div>
-  <div class="section-title">⚙️ SSO Tier 3 — Authentik (One Page for All)</div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Per-User Nextcloud Storage Quotas (Individual Overrides)</div>
+    <pre># Set quota for specific users via occ CLI:
+cd C:\xampp\htdocs\nextcloud
+php occ user:setting john files quota "5 GB"
+php occ user:setting dave files quota "1 GB"
+php occ user:setting alice files quota "none"    # unlimited
+
+# Or via Nextcloud admin web UI:
+# Admin → Users → click on user → set quota field</pre>
+  </div>
+</div>
+
+<!-- ══ PER-SERVICE CONFIG ══ -->
+<div id="s-services" style="display:none">
+  <div class="section-title">🔗 Connecting Each Service to Authentik</div>
+
   <div class="card">
-    <pre>cd ~/authentik  # (in WSL2)
-wget https://goauthentik.io/docker-compose.yml
-docker-compose up -d
-# Admin: http://localhost:9000/if/admin/</pre>
-    <p>All apps redirect to Authentik's login page. Configure Google as a social login source in Authentik. All users log in with Google once and access everything.</p>
+    <div class="card-title">Services with Native OIDC Support (direct integration)</div>
+    <table>
+      <tr><th>Service</th><th>Integration Type</th><th>Config Location</th></tr>
+      <tr><td>Jellyfin</td><td>OIDC via SSO-Auth plugin</td><td>Dashboard → Plugins → SSO-Auth → Configure</td></tr>
+      <tr><td>Open WebUI (Ollama)</td><td>OIDC</td><td>Settings → Auth → OAuth2</td></tr>
+      <tr><td>Immich</td><td>OIDC</td><td>Administration → Authentication → OAuth</td></tr>
+      <tr><td>Nextcloud</td><td>OIDC via user_oidc app</td><td>Apps → User Auth → OpenID Connect</td></tr>
+      <tr><td>Vikunja</td><td>OIDC in config.yml</td><td>See Utilities tab</td></tr>
+      <tr><td>Mealie</td><td>OIDC via env variables</td><td>See Utilities tab</td></tr>
+      <tr><td>Vaultwarden</td><td>SSO via env variable</td><td>DOMAIN env + Authentik app config</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Services Using Caddy forward_auth (no native OIDC)</div>
+    <p>These services don't support OIDC natively. Caddy intercepts all requests, validates the Authentik session, and either passes through or redirects to the login page. The authenticated username is available as a request header.</p>
+    <table>
+      <tr><th>Service</th><th>Username header used for</th></tr>
+      <tr><td>Navidrome</td><td>Auto-create/login user by name</td></tr>
+      <tr><td>EmulatorJS save server</td><td>Route saves to saves/[username]/ directory</td></tr>
+      <tr><td>Kiwix</td><td>Just authentication gate (no per-user data)</td></tr>
+      <tr><td>Kavita</td><td>Just authentication gate (Kavita has own user mapping)</td></tr>
+      <tr><td>Jukebox</td><td>Just authentication gate</td></tr>
+      <tr><td>Dashboard</td><td>Admin group check before allowing access</td></tr>
+    </table>
+    <pre># Caddyfile template for forward_auth services:
+service.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:[PORT]
+}
+
+# For admin-only services, add group restriction:
+@notadmin not header X-authentik-groups *authentik-admins*
+respond @notadmin "Forbidden" 403</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Authentik Application Setup (one per service)</div>
+    <p>For each service, create an Application in Authentik admin → Applications → Create:</p>
+    <pre># Jellyfin example:
+Name:         Jellyfin
+Slug:         jellyfin
+Launch URL:   https://movies.yourdomain.com
+Provider:     Create new OAuth2/OIDC Provider
+  - Redirect URI: https://movies.yourdomain.com/sso/OID/redirect
+  - Access: restrict to authentik-family and authentik-admins groups
+
+# Each app gets:
+# - Client ID (paste into the service's OIDC config)
+# - Client Secret (paste into the service's OIDC config)
+# - OIDC config URL: https://auth.yourdomain.com/application/o/[slug]/.well-known/openid-configuration</pre>
+  </div>
+</div>
+
+<!-- ══ SAVE MIGRATION ══ -->
+<div id="s-savemigration" style="display:none">
+  <div class="section-title">💾 Save File Migration Scripts</div>
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>The problem:</strong> Before Authentik, services created user accounts with local usernames. After Authentik, the "username" passed to services comes from the Google account's email prefix (e.g. <code>alice</code> from <code>alice@gmail.com</code>). These migration scripts rename existing save/data directories to match the new Authentik-derived usernames.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎮 Emulation Save Files Migration</div>
+    <p>Old saves are in <code>D:\Emulation\saves\[old-username]\</code>. New saves go in <code>D:\Emulation\saves\[gmail-prefix]\</code>.</p>
+    <pre># migrate_emu_saves.py
+import os, shutil, json
+
+# Map old local usernames → new Gmail prefixes
+USERNAME_MAP = {
+    'alice_local':  'alice',    # alice_local → alice@gmail.com prefix
+    'bob123':       'bob',
+    'charlie_mc':   'charlie',
+}
+
+SAVE_BASE = 'D:/Emulation/saves'
+for old_name, new_name in USERNAME_MAP.items():
+    old_path = os.path.join(SAVE_BASE, old_name)
+    new_path = os.path.join(SAVE_BASE, new_name)
+    if os.path.exists(old_path) and not os.path.exists(new_path):
+        shutil.copytree(old_path, new_path)
+        print(f'Migrated: {old_name} -> {new_name}')
+    elif os.path.exists(old_path) and os.path.exists(new_path):
+        print(f'CONFLICT: both {old_name} and {new_name} exist — merge manually')
+
+print('Done. Verify saves work before deleting old directories.')</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">📚 Calibre-Web: Link Existing Users to Google Accounts</div>
+    <p>Calibre-Web stores reading progress per user. When Authentik logs a user in via OIDC, Calibre-Web creates a new account if one doesn't exist with that email. To preserve existing progress:</p>
+    <pre># In Calibre-Web admin → Users → edit existing user:
+# Change "Email" to match their Gmail address exactly.
+# When they next log in via Google through Authentik,
+# Calibre-Web matches on email and uses the existing account.
+
+# If they have a different username format, also update via SQLite:
+import sqlite3
+db = sqlite3.connect('D:/Books/app.db')
+db.execute("UPDATE user SET email=? WHERE name=?", ('alice@gmail.com', 'alice_old'))
+db.commit()
+print('Done')</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">🎧 Audiobookshelf: Preserve Listening Progress</div>
+    <p>ABS stores progress in JSON files per user ID. When Authentik OIDC is enabled and a user logs in, ABS creates a new user if the email doesn't match an existing account.</p>
+    <pre># Step 1: Before enabling Authentik OIDC in ABS,
+# note each user's email in ABS admin → Users.
+# Make sure those emails EXACTLY match their Gmail addresses.
+
+# Step 2: Enable OIDC in ABS (Settings → Authentication → OpenID Connect)
+# When users log in with Google, ABS matches on email → preserves all progress.
+
+# Step 3: If email mismatch, edit via ABS's user management API:
+curl -X PATCH http://localhost:13378/api/users/[user-id] \
+  -H "Authorization: Bearer [admin-token]" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "alice@gmail.com"}'</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">📷 Immich: User Account Migration</div>
+    <p>Immich accounts are tied to email. When OIDC is enabled, Immich matches on email and preserves all photos/albums.</p>
+    <pre># In Immich admin → Administration → Users:
+# Update each user's email to match their Gmail address before enabling OIDC.
+# After enabling OIDC, their first Google login links to the existing account.</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">General Migration Principle</div>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>For every service:</strong> Before enabling Authentik OIDC, update all existing user accounts to use the user's exact Gmail address as their email/username. Most services match on email during OIDC login, so existing data is automatically preserved. For save-file-based systems (emulators), use the rename script above.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NUKE / BLOCK ══ -->
+<div id="s-nuke" style="display:none">
+  <div class="section-title">💣 Block &amp; Nuke System</div>
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>The power of Authentik:</strong> Because every service authenticates through Authentik, blocking or nuking a user in Authentik instantly removes their access from ALL services simultaneously — no need to log into each app individually.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🚫 Temporary Block (from Authentik admin)</div>
+    <p>Authentik admin → Directory → Users → click user → <strong>Deactivate</strong> toggle. The user's session tokens are revoked immediately. They can't log into any service. Re-activate whenever you want.</p>
+    <pre># Or via Authentik API (for automation):
+curl -X PATCH https://auth.yourdomain.com/api/v3/core/users/[user-pk]/ \
+  -H "Authorization: Bearer [authentik-api-token]" \
+  -H "Content-Type: application/json" \
+  -d '{"is_active": false}'</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">⏰ Timed Block (expires automatically)</div>
+    <p>Authentik doesn't have native timed blocks, but you can combine Authentik deactivation with a scheduled Task Scheduler re-activation:</p>
+    <pre># Block now:
+# Authentik admin → deactivate user
+
+# Schedule re-activation (Task Scheduler, one-time):
+# Action: PowerShell script that calls Authentik API to re-activate
+$headers = @{ "Authorization" = "Bearer YOUR_TOKEN"; "Content-Type" = "application/json" }
+Invoke-RestMethod -Uri "https://auth.yourdomain.com/api/v3/core/users/[user-pk]/" `
+  -Method Patch -Headers $headers -Body '{"is_active": true}'</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">💣 Full Nuke (permanent ban + save deletion)</div>
+    <div class="nuke-box">
+      <h4>⚠️ This is irreversible</h4>
+      <p style="font-size:.82rem;color:var(--text-dim)">A nuke does ALL of the following:</p>
+      <ul style="font-size:.8rem;color:var(--text-dim);margin-top:6px 0 0 18px">
+        <li>Delete user from Authentik (kills all service access instantly)</li>
+        <li>Block their IP in Windows Firewall</li>
+        <li>Delete <code>D:\Emulation\saves\[username]\</code> (all game saves)</li>
+        <li>Delete their Nextcloud files (<code>D:\NextcloudData\[username]\</code>)</li>
+        <li>Create a Feedback ticket: "Remove [user] from Jellyfin and any manual accounts"</li>
+        <li>Services with Authentik OIDC automatically lose the user when the Authentik account is deleted</li>
+      </ul>
+    </div>
+    <pre># nuke_user.py — run from server terminal
+import subprocess, shutil, os, json, requests
+from datetime import datetime
+
+def nuke_user(username, gmail, authentik_token, authentik_base_url, user_pk):
+    print(f"NUKING: {username} ({gmail})")
+
+    # 1. Delete from Authentik (kills ALL service access immediately)
+    r = requests.delete(
+        f"{authentik_base_url}/api/v3/core/users/{user_pk}/",
+        headers={"Authorization": f"Bearer {authentik_token}"}
+    )
+    print(f"  Authentik delete: {r.status_code}")
+
+    # 2. Block IP in Windows Firewall (if you know their IP)
+    # (IP is in the Authentik audit log: Directory → Audit Log → filter by user)
+    # subprocess.run(['netsh','advfirewall','firewall','add','rule',
+    #                f'name=NUKE_{username}','dir=in','action=block',f'remoteip={ip}'])
+
+    # 3. Delete game saves
+    save_path = f'D:/Emulation/saves/{username}'
+    if os.path.exists(save_path):
+        shutil.rmtree(save_path)
+        print(f"  Deleted saves: {save_path}")
+
+    # 4. Delete Nextcloud files
+    nc_path = f'D:/NextcloudData/{username}'
+    if os.path.exists(nc_path):
+        shutil.rmtree(nc_path)
+        print(f"  Deleted Nextcloud: {nc_path}")
+
+    # 5. Create reminder ticket
+    tickets = []
+    try: tickets = json.load(open('D:/Server/Dashboard/tickets.json'))
+    except: pass
+    tickets.insert(0, {
+        'id': f'TKT-{len(tickets)+1:04d}',
+        'user': 'system',
+        'subject': f'[NUKE] Remove {username} from manual accounts',
+        'body': f'User {username} ({gmail}) was nuked on {datetime.now().strftime("%Y-%m-%d %H:%M")}.\n\nManual steps needed:\n- Remove from Jellyfin if local account exists\n- Remove from Calibre-Web if local account exists\n- Check Audiobookshelf for orphaned data',
+        'status': 'unread',
+        'date': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'ip': 'system'
+    })
+    json.dump(tickets, open('D:/Server/Dashboard/tickets.json','w'), indent=2)
+    print(f"  Created reminder ticket")
+    print(f"NUKE COMPLETE for {username}")
+
+# Usage:
+# nuke_user('bob', 'bob@gmail.com', 'YOUR_TOKEN', 'https://auth.yourdomain.com', 42)</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">IP Block via Windows Firewall</div>
+    <p>Find the user's IP in Authentik: Directory → Audit Log → filter by username → look at login events for "Client IP".</p>
+    <pre># Block an IP permanently:
+netsh advfirewall firewall add rule name="BLOCK_1.2.3.4" dir=in action=block remoteip=1.2.3.4
+
+# Unblock:
+netsh advfirewall firewall delete rule name="BLOCK_1.2.3.4"</pre>
+    <p>Also add the IP to your Cloudflare Security → WAF → IP Access Rules → Block for a double-layer block at the CDN level before traffic even reaches your server.</p>
+  </div>
+</div>
+
+<!-- ══ ACHIEVEMENTS ══ -->
+<div id="s-achievements" style="display:none">
+  <div class="section-title">🏆 Achievement System</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🎮 RetroAchievements (emulated games)</div>
+      <p>Users connect their RetroAchievements.org account in their User Settings. EmulatorJS sends their RA credentials to retroachievements.org to unlock achievements during gameplay. Authentik provides the username — no separate RA login in the game UI needed if RA credentials are stored per-user in Authentik's user attributes.</p>
+      <pre># Store RA credentials in Authentik user attributes:
+# Authentik admin → Directory → Users → [user] → Attributes:
+{
+  "ra_username": "AliceRetro",
+  "ra_token": "abc123def456"
+}
+
+# EmulatorJS server reads these from the X-authentik-username header,
+# then fetches user attributes via Authentik API:
+GET /api/v3/core/users/?username=[username]
+→ returns user.attributes including ra_username and ra_token</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">📚 Book/Audiobook Achievements</div>
+      <p>Audiobookshelf webhook fires on "Audiobook Finished" → posts to achievement server (port 9003) → server grants achievement for that Authentik user. Calibre-Web fires a webhook when user marks a book "Read."</p>
+      <pre># In ABS: Settings → Notifications → Webhooks
+# Event: Audiobook Finished
+# URL: http://localhost:9003/api/achievement/book
+# Body:
+{
+  "user": "{{username}}",
+  "title": "{{bookTitle}}",
+  "type": "audiobook"
+}</pre>
+    </div>
   </div>
 </div>
 
@@ -194,15 +550,19 @@ docker-compose up -d
   <div class="mc">
     <button class="mclose" onclick="document.getElementById('mo-block').classList.remove('open')">✕</button>
     <h3 style="color:#e0b84b">🚫 Block: <span id="bl-user"></span></h3>
-    <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:12px">User will be denied access on all services for the selected duration.</p>
+    <p style="font-size:.83rem;color:var(--text-dim);margin-bottom:12px">Deactivating in Authentik instantly removes access to ALL services.</p>
     <select id="bl-dur" class="finput" style="width:100%;margin-bottom:8px">
       <option value="1h">1 hour</option><option value="24h">24 hours</option>
       <option value="7d">7 days</option><option value="30d">30 days</option>
-      <option value="permanent">Permanent</option>
+      <option value="permanent">Permanent (until manually re-activated)</option>
     </select>
     <input id="bl-reason" class="finput" placeholder="Reason (optional)" style="width:100%;font-family:'Raleway',sans-serif;margin-bottom:12px">
+    <div class="callout callout-tip" style="margin-bottom:12px">
+      <div class="callout-icon">🔐</div>
+      <div class="callout-body"><strong>Action:</strong> Go to <a href="https://auth.yourdomain.com/if/admin/" target="_blank" style="color:var(--accent2)">Authentik admin</a> → Directory → Users → find user → Deactivate toggle.</div>
+    </div>
     <div style="display:flex;gap:8px">
-      <button onclick="doBlock()" style="background:rgba(224,184,75,.12);border:1px solid rgba(224,184,75,.3);color:#e0b84b;padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.72rem">Confirm Block</button>
+      <button onclick="document.getElementById('mo-block').classList.remove('open');alert('Go to Authentik admin to complete the block.')" style="background:rgba(224,184,75,.12);border:1px solid rgba(224,184,75,.3);color:#e0b84b;padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.72rem">Open Authentik Admin ↗</button>
       <button class="ab" onclick="document.getElementById('mo-block').classList.remove('open')">Cancel</button>
     </div>
   </div>
@@ -216,15 +576,14 @@ docker-compose up -d
     <div class="nuke-box">
       <h4>⚠️ This cannot be undone</h4>
       <ul style="font-size:.82rem;color:var(--text-dim);margin-top:6px 0 0 18px">
-        <li>Permanently blocks account + IP</li>
-        <li>Deletes ALL save files from all games</li>
-        <li>Removes Calibre reading history</li>
-        <li>Removes Audiobookshelf progress</li>
-        <li>Removes Nextcloud files</li>
-        <li>Creates a Feedback ticket: "Remove [user] from Plex"</li>
+        <li>Delete from Authentik → instant access removal everywhere</li>
+        <li>Block IP in Windows Firewall + Cloudflare WAF</li>
+        <li>Delete all game save files</li>
+        <li>Delete Nextcloud personal storage</li>
+        <li>Creates a reminder ticket for manual cleanup steps</li>
       </ul>
     </div>
-    <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:8px">Type the exact username to confirm:</p>
+    <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:8px">Type the username to confirm:</p>
     <input id="nk-confirm" class="finput" placeholder="Username…" style="width:100%;margin-bottom:12px">
     <div style="display:flex;gap:8px">
       <button onclick="doNuke()" style="background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.4);color:var(--danger);padding:8px 18px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.75rem">💣 NUKE</button>
@@ -236,7 +595,7 @@ docker-compose up -d
 <script>
 let CU = null;
 function showSec(n){
-  ['users','ipblocks','achievements','setup'].forEach(s=>{
+  ['setup','users','groups','services','savemigration','nuke','achievements'].forEach(s=>{
     document.getElementById('s-'+s).style.display='none';
     const b=document.querySelector(`[onclick="showSec('${s}')"]`);
     if(b)b.classList.remove('active');
@@ -245,39 +604,14 @@ function showSec(n){
   const ab=document.querySelector(`[onclick="showSec('${n}')"]`);
   if(ab)ab.classList.add('active');
 }
-
 function openBlock(u){CU=u;document.getElementById('bl-user').textContent=u;document.getElementById('mo-block').classList.add('open');}
-function doBlock(){
-  const dur=document.getElementById('bl-dur').value;
-  const reason=document.getElementById('bl-reason').value;
-  fetch('http://localhost:9002/control/user/block',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:CU,duration:dur,reason})})
-  .catch(()=>alert(`Manual: set status=blocked for user ${CU} in users.json\nDuration: ${dur}`));
-  alert(`${CU} blocked for ${dur}.`);
-  document.getElementById('mo-block').classList.remove('open');
-}
-
 function openNuke(u){CU=u;document.getElementById('nk-user').textContent=u;document.getElementById('nk-confirm').value='';document.getElementById('mo-nuke').classList.add('open');}
+function unblock(u){window.open('https://auth.yourdomain.com/if/admin/','_blank');}
 function doNuke(){
   if(document.getElementById('nk-confirm').value.trim()!==CU){alert('Username mismatch.');return;}
-  fetch('http://localhost:9002/control/user/nuke',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:CU})})
-  .catch(()=>alert(`Manual nuke of ${CU}:\n1. Delete saves/${CU}/ in all emulation folders\n2. Remove from users.json\n3. Block their IP in Windows Firewall\n4. Remove from Plex web UI\n5. Delete their Nextcloud account`));
-  alert(`${CU} nuked. A Plex-removal ticket has been created.`);
+  alert(`Nuke procedure for ${CU}:\n\n1. Open Authentik admin → Delete user\n2. Run nuke_user.py\n3. Block IP in Windows Firewall\n4. Add IP to Cloudflare WAF blocklist\n\nA reminder ticket will be created automatically by the nuke script.`);
   document.getElementById('mo-nuke').classList.remove('open');
 }
-
-function addIPBlock(){
-  const ip=document.getElementById('new-ip').value.trim();
-  const reason=document.getElementById('new-ip-reason').value.trim()||'(no reason)';
-  const dur=document.getElementById('new-ip-dur').value;
-  if(!ip)return;
-  fetch('http://localhost:9002/control/ip/block',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip,reason,duration:dur})})
-  .catch(()=>alert(`Block ${ip}:\nnetsh advfirewall firewall add rule name="BLOCK_${ip}" dir=in action=block remoteip=${ip}`));
-  const r=document.createElement('div');r.className='ipr';
-  r.innerHTML=`<div class="ipa">${ip}</div><div style="flex:2;font-size:.75rem;color:var(--text-dim)">${reason}</div><div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:${dur==='permanent'?'var(--danger)':'var(--accent)'}">${dur==='permanent'?'PERMANENT':dur}</div><button class="ab" onclick="this.closest('.ipr').remove()">✕</button>`;
-  document.getElementById('ip-list').prepend(r);
-  document.getElementById('new-ip').value='';document.getElementById('new-ip-reason').value='';
-}
-
 document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 </script>
 </body>

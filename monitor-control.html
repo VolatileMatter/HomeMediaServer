@@ -349,20 +349,37 @@ body { padding: 0; background: #080a0e; }
       </div>
     </div>
 
-    <!-- MINECRAFT -->
+    <!-- MINECRAFT VANILLA -->
     <div class="widget">
-      <div class="widget-title"><span class="w-icon">⛏️</span> Minecraft</div>
+      <div class="widget-title"><span class="w-icon">⛏️</span> Minecraft — Vanilla <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);margin-left:auto">:25565</span></div>
       <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px">
         <div>
-          <div class="mc-count" id="mc-players">?</div>
+          <div class="mc-count" id="mc-vanilla-players">?</div>
           <div class="mc-label">ONLINE PLAYERS</div>
         </div>
-        <div id="mc-status" class="server-status-badge ssb-down">● CHECKING</div>
+        <div id="mc-vanilla-status" class="server-status-badge ssb-down">● CHECKING</div>
       </div>
       <div style="display:flex;gap:6px">
-        <button class="s-toggle" onclick="serviceAction('minecraft','start')">▶ Start</button>
-        <button class="s-toggle stop" onclick="serviceAction('minecraft','stop')">■ Stop</button>
-        <button class="s-toggle" onclick="serviceAction('minecraft','restart')">⟳ Restart</button>
+        <button class="s-toggle" onclick="serviceAction('minecraft-vanilla','start')">▶ Start</button>
+        <button class="s-toggle stop" onclick="serviceAction('minecraft-vanilla','stop')">■ Stop</button>
+        <button class="s-toggle" onclick="serviceAction('minecraft-vanilla','restart')">⟳ Restart</button>
+      </div>
+    </div>
+
+    <!-- MINECRAFT MODDED -->
+    <div class="widget">
+      <div class="widget-title"><span class="w-icon">🔧</span> Minecraft — Modded <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);margin-left:auto">:25566</span></div>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px">
+        <div>
+          <div class="mc-count" id="mc-modded-players">?</div>
+          <div class="mc-label">ONLINE PLAYERS</div>
+        </div>
+        <div id="mc-modded-status" class="server-status-badge ssb-down">● CHECKING</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="s-toggle" onclick="serviceAction('minecraft-modded','start')">▶ Start</button>
+        <button class="s-toggle stop" onclick="serviceAction('minecraft-modded','stop')">■ Stop</button>
+        <button class="s-toggle" onclick="serviceAction('minecraft-modded','restart')">⟳ Restart</button>
       </div>
     </div>
 
@@ -536,7 +553,8 @@ const SERVICES = [
   { id:'abs',      name:'Audiobookshelf',url:'http://localhost:13378',  port:13378, ctrl:false },
   { id:'nextcloud',name:'Nextcloud',     url:'http://localhost:80',     port:80,    ctrl:false },
   { id:'qbittorrent',name:'qBittorrent', url:'http://localhost:8090',   port:8090,  ctrl:false },
-  { id:'minecraft',name:'Minecraft',     url:'http://localhost:25565',  port:25565, ctrl:true  },
+  { id:'minecraft-vanilla',name:'MC Vanilla',   url:'http://localhost:25565',  port:25565, ctrl:true  },
+  { id:'minecraft-modded', name:'MC Modded',    url:'http://localhost:25566',  port:25566, ctrl:true  },
   { id:'ark',      name:'ARK:SE',        url:'http://localhost:27015',  port:27015, ctrl:true  },
   { id:'ss13',     name:'SS13',          url:'http://localhost:1337',   port:1337,  ctrl:true  },
   { id:'sunshine', name:'Sunshine',      url:'https://localhost:47990', port:47990, ctrl:false },
@@ -545,7 +563,7 @@ const SERVICES = [
   { id:'netdata',  name:'System Monitor',url:'http://localhost:19999',  port:19999, ctrl:false },
 ];
 
-const GAME_SERVERS = ['minecraft','ark','ss13'];
+const GAME_SERVERS = ['minecraft-vanilla','minecraft-modded','ark','ss13'];
 
 function buildServicesGrid() {
   const grid = document.getElementById('services-grid');
@@ -584,18 +602,29 @@ async function checkService(s) {
     await fetch(s.url, { mode:'no-cors', signal:ctrl.signal, cache:'no-cache' });
     clearTimeout(t);
     setDot(dot, 'up'); setDot(gdot, 'up');
-    if (s.id === 'minecraft') {
-      document.getElementById('mc-status').className = 'server-status-badge ssb-up';
-      document.getElementById('mc-status').textContent = '● ONLINE';
+    if (s.id === 'minecraft-vanilla') {
+      document.getElementById('mc-vanilla-status').className = 'server-status-badge ssb-up';
+      document.getElementById('mc-vanilla-status').textContent = '● ONLINE';
+      document.getElementById('mc-vanilla-players').textContent = '?';
+    }
+    if (s.id === 'minecraft-modded') {
+      document.getElementById('mc-modded-status').className = 'server-status-badge ssb-up';
+      document.getElementById('mc-modded-status').textContent = '● ONLINE';
+      document.getElementById('mc-modded-players').textContent = '?';
     }
     return true;
   } catch(e) {
     const cls = e.name === 'AbortError' ? 'down' : 'down';
     setDot(dot, cls); setDot(gdot, cls);
-    if (s.id === 'minecraft') {
-      document.getElementById('mc-status').className = 'server-status-badge ssb-down';
-      document.getElementById('mc-status').textContent = '● OFFLINE';
-      document.getElementById('mc-players').textContent = '0';
+    if (s.id === 'minecraft-vanilla') {
+      document.getElementById('mc-vanilla-status').className = 'server-status-badge ssb-down';
+      document.getElementById('mc-vanilla-status').textContent = '● OFFLINE';
+      document.getElementById('mc-vanilla-players').textContent = '0';
+    }
+    if (s.id === 'minecraft-modded') {
+      document.getElementById('mc-modded-status').className = 'server-status-badge ssb-down';
+      document.getElementById('mc-modded-status').textContent = '● OFFLINE';
+      document.getElementById('mc-modded-players').textContent = '0';
     }
     return false;
   }

@@ -121,20 +121,118 @@ nssm start Navidrome</pre>
 </div>
 
 <div class="section">
-  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="section-title">🔐 Authentik SSO via Caddy Forward Auth</div>
   <div class="card">
-    <p>Navidrome doesn't natively support Google OAuth or OIDC (yet). For V1, use Navidrome's own username/password system. For Tier 3 SSO, put Navidrome behind Authentik's forward auth proxy — Authentik handles the login and passes the username header to Navidrome.</p>
+    <div class="card-title">Navidrome + Authentik (via Caddy, no native OIDC needed)</div>
+    <p>Navidrome doesn't support OIDC natively, but Caddy's <code>forward_auth</code> directive protects it transparently. When a user visits <code>music.yourdomain.com</code>, Caddy first validates their Authentik session. If valid, it passes their username as the <code>X-authentik-username</code> header to Navidrome.</p>
+    <pre># Caddyfile entry for Navidrome:
+music.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:4533
+}
+
+# After this, unauthenticated visitors are redirected to auth.yourdomain.com
+# Authenticated visitors reach Navidrome directly with their username in a header.</pre>
+
+    <div class="card-title" style="margin-top:16px">Auto-create Navidrome users from Authentik header</div>
+    <p>Navidrome can auto-create users from the header with this config in <code>navidrome.toml</code>:</p>
+    <pre># navidrome.toml additions for Authentik forward auth:
+ReverseProxyUserHeader = "X-authentik-username"
+ReverseProxyWhitelist  = "127.0.0.1/8"
+
+# This means: when Navidrome receives a request with X-authentik-username header
+# from localhost (Caddy), it automatically creates or logs in that user.
+# No separate Navidrome password needed — Authentik handles all auth.</pre>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">🎶</div>
+      <div class="callout-body"><strong>Result:</strong> Users visit music.yourdomain.com, are redirected to sign in with Google (if not already signed in to Authentik), then land directly in Navidrome with their own playlists, history, and favorites — no second login.</div>
+    </div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">🌍 Remote Access</div>
+  <div class="section-title">🎵 "Open in Jukebox" Button Integration</div>
   <div class="card">
-    <pre># Caddyfile:
+    <div class="card-title">Add an "Open in Jukebox" button to Navidrome via Caddy JS injection</div>
+    <p>Caddy can inject a small JavaScript snippet into every Navidrome page response. This snippet detects when a track is playing and adds a button that sends it to your Infinite Jukebox.</p>
+    <pre># In Caddyfile, add response modification:
 music.yourdomain.com {
-    reverse_proxy localhost:4533
+    forward_auth localhost:9000 { ... }  # as above
+
+    reverse_proxy localhost:4533 {
+        # Inject JS snippet into HTML responses:
+        @html header Content-Type text/html*
+        header_up Accept-Encoding ""  # disable compression so we can modify HTML
+    }
+
+    # Inject the button script before </body>:
+    @html_resp header Content-Type *text/html*
+    route @html_resp {
+        reverse_proxy localhost:4533 {
+            header_up Accept-Encoding ""
+        }
+    }
 }</pre>
-    <p>Or via Tailscale. Once accessible remotely, mobile apps will stream your music over mobile data — even in your car.</p>
+
+    <p>Since Caddy's response modification is limited, the simpler approach is a <strong>browser extension</strong> or a <strong>bookmarklet</strong> that users install once:</p>
+    <pre>// Navidrome → Jukebox bookmarklet
+// Drag this to your bookmark bar:
+javascript:(function(){
+  const titleEl = document.querySelector('[class*="song-title"],[class*="songTitle"]');
+  const artistEl = document.querySelector('[class*="artist"]');
+  if (!titleEl) { alert('No track detected — make sure a song is playing'); return; }
+  const query = encodeURIComponent((artistEl?.textContent||'') + ' ' + titleEl.textContent);
+  const jukeboxUrl = 'http://localhost:5050/?yt_query=' + query;
+  window.open(jukeboxUrl, '_blank');
+})();</pre>
+
+    <p>Alternatively, add a button via a <strong>userscript</strong> (Tampermonkey/Greasemonkey) that all your users install:</p>
+    <pre>// ==UserScript==
+// @name         Navidrome → Jukebox
+// @match        https://music.yourdomain.com/*
+// ==/UserScript==
+(function() {
+  'use strict';
+  // Wait for player to appear
+  const observer = new MutationObserver(() => {
+    const player = document.querySelector('.player-bar, [class*="playerBar"]');
+    if (player && !document.getElementById('jukebox-btn')) {
+      const btn = document.createElement('button');
+      btn.id = 'jukebox-btn';
+      btn.textContent = '🎵 Jukebox';
+      btn.title = 'Open current track in Infinite Jukebox';
+      btn.style.cssText = 'margin-left:8px;background:rgba(200,168,75,.2);border:1px solid rgba(200,168,75,.4);color:#c8a84b;padding:4px 10px;border-radius:3px;cursor:pointer;font-size:.8rem';
+      btn.onclick = () => {
+        const title = document.querySelector('[class*="songTitle"],[class*="song-title"]')?.textContent || '';
+        const artist = document.querySelector('[class*="artistName"],[class*="artist-name"]')?.textContent || '';
+        window.open(`http://localhost:5050/?query=${encodeURIComponent(artist + ' ' + title)}`, '_blank');
+      };
+      player.appendChild(btn);
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+})();</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">On the Jukebox side, add a <code>?query</code> URL parameter handler that auto-submits the YouTube search query when the page loads — so clicking the button in Navidrome instantly starts loading that song in the Jukebox.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌍 Remote Access via Cloudflare Tunnel</div>
+  <div class="card">
+    <pre># cloudflared config.yml — add entry:
+ingress:
+  - hostname: music.yourdomain.com
+    service: http://localhost:443  # Caddy handles SSL and auth
+  # ...other services</pre>
+    <p>Navidrome → Caddy (with Authentik forward_auth) → Cloudflare Tunnel → internet. Unauthenticated visitors get redirected to Google login automatically.</p>
   </div>
 </div>
 
