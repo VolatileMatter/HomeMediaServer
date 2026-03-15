@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Upscayl</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔍</div>
+  <div>
+    <h1>Upscayl — AI Image Upscaler</h1>
+    <div class="subtitle">// Docker · WSL2 · Port 8094 · Authentik forward_auth · GPU Recommended //</div>
+    <p class="desc">Upscayl Web is a browser-based AI image upscaler. Upload an image, pick a scale factor and AI model, and get back a high-resolution version — all processed locally on the server. No images are stored permanently; everything stays in the browser session.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🖼️ Upscayl processes images entirely in the browser/server — nothing is uploaded to external services. Images are not stored on disk after processing; they exist only in your browser session. There is no per-user data folder for this service.</div>
+
+<div class="section">
+  <div class="section-title">📁 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Upscayl Web is stateless. Images are processed in-memory and delivered back to the browser. Nothing is written to <code>D:\Users\</code>. If users want to keep upscaled images, they download them directly from the browser.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">No backup, quota, or symlink setup needed for this service. The only persistent data is the Docker image itself.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ GPU Requirement Note</div>
+  <div class="card">
+    <p>Upscayl Web uses AI upscaling models (Real-ESRGAN, etc.) which run significantly faster on a GPU. On CPU only, upscaling a single image can take 30–120 seconds depending on size and scale factor. The Docker image supports GPU acceleration via NVIDIA Container Toolkit.</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">With NVIDIA GPU</div>
+        <p>Install the NVIDIA Container Toolkit in WSL2. Add the <code>deploy</code> section to the compose file (see below). Upscaling a 4× image takes 3–10 seconds.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">CPU-only (default)</div>
+        <p>Works without any GPU setup. Slower but functional. Fine for occasional use. Remove or skip the <code>deploy</code> section.</p>
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Upscayl uses the same GPU as Sunshine.</strong> If someone is currently game-streaming via Sunshine, upscaling will compete for GPU resources and may cause stream stuttering. Communicate with family members before running heavy upscale jobs.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🐳 Deployment — Docker in WSL2</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the compose file</strong>
+        <pre>mkdir -p ~/services/upscayl && cd ~/services/upscayl
+
+cat > docker-compose.yml << 'EOF'
+services:
+  upscayl:
+    image: ghcr.io/upscayl/upscayl-web:latest
+    container_name: upscayl
+    restart: unless-stopped
+    ports:
+      - "8094:80"
+    # No volumes needed — images are not persisted
+    # Uncomment below for NVIDIA GPU acceleration:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+EOF</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start the container</strong>
+        <pre>docker compose up -d
+docker compose logs upscayl   # confirm started</pre>
+        <p>Upscayl Web is now running at <code>http://localhost:8094</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall for port 8094</strong>
+        <pre>netsh advfirewall firewall add rule name="Upscayl" dir=in action=allow protocol=TCP localport=8094</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <p>Task Scheduler → Create Task → Action:</p>
+        <pre>wsl -d Ubuntu -- bash -c "cd ~/services/upscayl && docker compose up -d"</pre>
+        <p>Trigger: At startup, delay 2 minutes. Run whether logged on or not: ☑</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Authentik — forward_auth Gate</div>
+  <div class="card">
+    <div class="card-title">Caddy configuration</div>
+    <p>Upscayl has no built-in auth. Protect it with Caddy forward_auth. Note that Upscayl requires specific security headers for the browser-side processing to work correctly:</p>
+    <pre># Add to your Caddyfile:
+upscayl.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:8094
+
+    # Required headers for Upscayl's browser-side WASM/SharedArrayBuffer:
+    header {
+        Cross-Origin-Embedder-Policy "require-corp"
+        Cross-Origin-Opener-Policy "same-origin"
+    }
+}</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>The COOP/COEP headers are required.</strong> Without <code>Cross-Origin-Embedder-Policy: require-corp</code> and <code>Cross-Origin-Opener-Policy: same-origin</code>, the browser-side AI processing will fail with a SharedArrayBuffer error.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Authentik Application entry</div>
+    <pre># Authentik admin → Applications → Create:
+Name:       Upscayl
+Slug:       upscayl
+Launch URL: https://upscayl.yourdomain.com
+Provider:   Proxy Provider (forward_auth single application)
+  External host: https://upscayl.yourdomain.com
+Access:     authentik-family + authentik-admins groups</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Updating</div>
+  <div class="card">
+    <pre>cd ~/services/upscayl
+docker compose pull
+docker compose up -d</pre>
+  </div>
+</div>
+
+</body>
+</html>

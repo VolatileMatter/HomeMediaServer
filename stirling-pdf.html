@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Stirling-PDF</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📄</div>
+  <div>
+    <h1>Stirling-PDF — PDF Toolkit</h1>
+    <div class="subtitle">// Docker · WSL2 · Port 8090 · Built-in Auth · Authentik OIDC //</div>
+    <p class="desc">Stirling-PDF is a self-hosted web app with 50+ PDF operations: merge, split, compress, convert, OCR, rotate, watermark, sign, redact, and more. No data is sent to external services — all processing happens on your server.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Stirling-PDF has its own built-in login system. Use it in front of Authentik OIDC so users sign in with their Google account like everything else. The built-in admin account is only for initial setup.</div>
+
+<div class="section">
+  <div class="section-title">📁 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Stirling-PDF processes files on-the-fly — no input files are stored permanently. Persistent data is configuration and OCR training data only:</p>
+    <pre>D:\Users\common\stirling\
+  trainingData\    ← Tesseract OCR language data (tessdata)
+  extraConfigs\    ← app settings, user DB
+  logs\            ← troubleshooting logs</pre>
+    <p>This is shared infrastructure data, not per-user content. No per-user folder is needed. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Files uploaded for processing are held in memory/temp only. They are never written to disk permanently. Stirling-PDF is safe to use for sensitive documents.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🐳 Deployment — Docker in WSL2</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create data directories (Windows)</strong>
+        <pre>New-Item -ItemType Directory -Force "D:\Users\common\stirling\trainingData"
+New-Item -ItemType Directory -Force "D:\Users\common\stirling\extraConfigs"
+New-Item -ItemType Directory -Force "D:\Users\common\stirling\logs"</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the compose file</strong>
+        <pre>mkdir -p ~/services/stirling-pdf && cd ~/services/stirling-pdf
+
+cat > docker-compose.yml << 'EOF'
+services:
+  stirling-pdf:
+    image: frooodle/s-pdf:latest
+    container_name: stirling-pdf
+    restart: always
+    ports:
+      - "8090:8080"
+    volumes:
+      - /mnt/d/Users/common/stirling/trainingData:/usr/share/tessdata
+      - /mnt/d/Users/common/stirling/extraConfigs:/configs
+      - /mnt/d/Users/common/stirling/logs:/logs
+    environment:
+      # Security
+      - DOCKER_ENABLE_SECURITY=true
+      - SECURITY_ENABLELOGIN=true
+      - SECURITY_INITIALLOGIN_USERNAME=admin
+      - SECURITY_INITIALLOGIN_PASSWORD=changeme   # CHANGE ON FIRST LOGIN
+
+      # Features
+      - LANGS=en_US,en_GB
+      - SYSTEM_DEFAULTLOCALE=en-US
+      - INSTALL_BOOK_AND_ADVANCED_HTML_OPS=true
+
+      # Performance
+      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx2g
+EOF</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start the container</strong>
+        <pre>docker compose up -d
+docker compose logs -f stirling-pdf   # wait for "Started" message (30–60 sec)</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>First login — change admin password immediately</strong>
+        <p>Open <code>http://localhost:8090</code>. Log in as <code>admin / changeme</code>. Go to <strong>Settings → Account → Change Password</strong>. Store the new password in Vaultwarden.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall for port 8090</strong>
+        <pre>netsh advfirewall firewall add rule name="Stirling-PDF" dir=in action=allow protocol=TCP localport=8090</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <p>Task Scheduler → Create Task → Action:</p>
+        <pre>wsl -d Ubuntu -- bash -c "cd ~/services/stirling-pdf && docker compose up -d"</pre>
+        <p>Trigger: At startup, delay 2 minutes. Run whether logged on or not: ☑</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Authentik — OIDC Login</div>
+  <div class="card">
+    <div class="card-title">Configure Stirling-PDF to use Authentik OIDC</div>
+    <p>Stirling-PDF supports OpenID Connect natively. This replaces its internal login with Authentik SSO so users log in with Google like everything else.</p>
+    <pre># In Stirling-PDF Settings → Single Sign-On:
+# (Or add to docker-compose environment:)
+- SECURITY_OAUTH2_ENABLED=true
+- SECURITY_OAUTH2_ISSUER=https://auth.yourdomain.com/application/o/stirling-pdf/
+- SECURITY_OAUTH2_CLIENTID=[client-id-from-authentik]
+- SECURITY_OAUTH2_CLIENTSECRET=[client-secret-from-authentik]
+- SECURITY_OAUTH2_SCOPES=openid,profile,email
+- SECURITY_OAUTH2_USERASROLE=true    # map Authentik groups to Stirling roles</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Authentik Application entry</div>
+    <pre># Authentik admin → Applications → Create:
+Name:           Stirling-PDF
+Slug:           stirling-pdf
+Launch URL:     https://pdf.yourdomain.com
+Provider:       OAuth2/OIDC Provider
+  Redirect URI: https://pdf.yourdomain.com/login/oauth2/code/oidc
+  Scopes:       openid, profile, email
+  Signing Key:  [your Authentik signing key]
+Access:         authentik-family + authentik-admins groups</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Caddy configuration</div>
+    <pre># Add to your Caddyfile:
+# Note: forward_auth is NOT needed here — Stirling handles login via OIDC itself.
+# Caddy just terminates TLS and proxies.
+pdf.yourdomain.com {
+    reverse_proxy localhost:8090 {
+        header_up X-Forwarded-Proto https
+    }
+}
+
+# Important: set client_max_body_size equivalent in Caddy:
+pdf.yourdomain.com {
+    request_body {
+        max_size 100MB    # essential for large PDFs
+    }
+    reverse_proxy localhost:8090
+}</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔠 OCR Language Support</div>
+  <div class="card">
+    <div class="card-title">Adding additional OCR languages (Tesseract)</div>
+    <p>English OCR data is included. To add other languages, download <code>.traineddata</code> files and place them in the tessdata folder:</p>
+    <pre># In WSL2 terminal:
+# Download from: https://github.com/tesseract-ocr/tessdata
+wget https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata \
+  -O /mnt/d/Users/common/stirling/trainingData/fra.traineddata
+
+# No container restart needed — Tesseract reads the folder at OCR time.</pre>
+    <table>
+      <tr><th>File</th><th>Language</th></tr>
+      <tr><td>eng.traineddata</td><td>English (included)</td></tr>
+      <tr><td>fra.traineddata</td><td>French</td></tr>
+      <tr><td>deu.traineddata</td><td>German</td></tr>
+      <tr><td>spa.traineddata</td><td>Spanish</td></tr>
+      <tr><td>jpn.traineddata</td><td>Japanese</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Updating</div>
+  <div class="card">
+    <pre>cd ~/services/stirling-pdf
+docker compose pull
+docker compose up -d</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Check the Stirling-PDF release notes before updating — environment variable names occasionally change between major versions. The <code>extraConfigs</code> volume preserves your settings across updates.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

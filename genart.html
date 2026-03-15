@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Generative Art</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🌀</div>
+  <div>
+    <h1>Generative Art Toys</h1>
+    <div class="subtitle">// Static Files · Port 5052 · Python http.server · Authentik forward_auth //</div>
+    <p class="desc">A curated collection of open-source generative art, interactive simulations, and creative coding toys — all self-hosted, all running in the browser. No accounts, no tracking, no external calls. Served as static files behind Authentik.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🎲 All toys are client-side only — they run entirely in the browser with no server communication after the initial page load. Nothing is stored per-user. The server just serves the files.</div>
+
+<div class="section">
+  <div class="section-title">📁 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>No user data is stored. These are stateless browser toys. No <code>D:\Users\</code> folder needed for this service.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🗂️ Folder Structure &amp; Setup</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the toys folder</strong>
+        <pre>mkdir -p "D:\Server\GenArt"
+# Each toy gets its own subfolder:
+# D:\Server\GenArt\
+#   index.html          ← launcher page (create this — see below)
+#   sandspiel\
+#   particle-life\
+#   tiny-islands\
+#   town-builder\
+#   ... etc</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Clone each toy from GitHub</strong>
+        <p>In a terminal (Git for Windows or WSL2):</p>
+        <pre>cd D:\Server\GenArt
+
+# Sand simulation
+git clone https://github.com/maxbittker/sandspiel.git
+
+# Particle life simulation
+git clone https://github.com/hunar4321/particle-life.git
+
+# Tiny islands generator
+git clone https://github.com/marian42/tiny-islands.git
+
+# Town builder
+git clone https://github.com/oskarstahlberg/town-builder.git
+
+# Generative waves
+git clone https://github.com/klevron/waves.git
+
+# Generative trees (p5.js)
+git clone https://github.com/p5js-templates/generative-trees.git
+
+# Bird generator
+git clone https://github.com/michaelkolesidis/bird-generator.git
+
+# Emoji Adventure
+git clone https://github.com/QC20/EmojiAdventure.git
+
+# Flow Mirror
+git clone https://github.com/QC20/Flow-Mirror.git
+
+# Blob Mixer
+git clone https://github.com/100daysofcode-visual-toys/blobmixer.git
+
+# Zen Garden
+git clone https://github.com/science-art/zen-garden.git
+
+# Powder Toy (web version)
+git clone https://github.com/ThePowderToy/The-Powder-Toy.git</pre>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">Not all toys need to be cloned — some only need their <code>dist/</code> or built output. Check each project's README. Most will work by opening their <code>index.html</code> directly.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the launcher index.html</strong>
+        <p>Save this as <code>D:\Server\GenArt\index.html</code> — a simple grid of links to each toy:</p>
+        <pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Generative Art Toys&lt;/title&gt;
+  &lt;link rel="stylesheet" href="/shared-art.css"&gt;  &lt;!-- optional styling --&gt;
+  &lt;style&gt;
+    body { font-family: sans-serif; background: #0e1117; color: #c8c8d0;
+           display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+           gap: 16px; padding: 24px; }
+    a.toy { display: block; background: #151c2c; border: 1px solid #252d3d;
+            border-radius: 6px; padding: 16px; text-decoration: none; color: inherit;
+            transition: border-color .15s; }
+    a.toy:hover { border-color: #c8a84b; }
+    .toy-icon { font-size: 2rem; }
+    .toy-name { font-weight: 700; margin-top: 6px; }
+    .toy-desc { font-size: .78rem; color: #6e7a94; margin-top: 4px; }
+    h1 { grid-column: 1/-1; font-size: 1.2rem; color: #c8a84b; margin: 0 0 8px; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;🌀 Generative Art Toys&lt;/h1&gt;
+  &lt;a class="toy" href="/sandspiel/"&gt;
+    &lt;div class="toy-icon"&gt;🏖️&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Sandspiel&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Falling sand physics simulation&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/particle-life/"&gt;
+    &lt;div class="toy-icon"&gt;🔮&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Particle Life&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Emergent particle behaviour&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/tiny-islands/"&gt;
+    &lt;div class="toy-icon"&gt;🏝️&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Tiny Islands&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Procedural island generator&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/town-builder/"&gt;
+    &lt;div class="toy-icon"&gt;🏘️&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Town Builder&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Generative medieval town maps&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/waves/"&gt;
+    &lt;div class="toy-icon"&gt;🌊&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Waves&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Animated wave patterns&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/generative-trees/"&gt;
+    &lt;div class="toy-icon"&gt;🌳&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Generative Trees&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;p5.js fractal tree generator&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/bird-generator/"&gt;
+    &lt;div class="toy-icon"&gt;🐦&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Bird Generator&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Procedural bird illustrations&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/EmojiAdventure/"&gt;
+    &lt;div class="toy-icon"&gt;😀&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Emoji Adventure&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Interactive emoji world&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/Flow-Mirror/"&gt;
+    &lt;div class="toy-icon"&gt;🪞&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Flow Mirror&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Symmetric flow field drawing&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/blobmixer/"&gt;
+    &lt;div class="toy-icon"&gt;🫧&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Blob Mixer&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Morphing blob shapes&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/zen-garden/"&gt;
+    &lt;div class="toy-icon"&gt;☯️&lt;/div&gt;
+    &lt;div class="toy-name"&gt;Zen Garden&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Interactive sand garden&lt;/div&gt;
+  &lt;/a&gt;
+  &lt;a class="toy" href="/The-Powder-Toy/"&gt;
+    &lt;div class="toy-icon"&gt;⚗️&lt;/div&gt;
+    &lt;div class="toy-name"&gt;The Powder Toy&lt;/div&gt;
+    &lt;div class="toy-desc"&gt;Physics sandbox simulation&lt;/div&gt;
+  &lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install as a Windows service via NSSM</strong>
+        <pre># Run as Administrator:
+nssm install GenArt python
+nssm set GenArt AppParameters "-m http.server 5052"
+nssm set GenArt AppDirectory "D:\Server\GenArt"
+nssm start GenArt
+
+netsh advfirewall firewall add rule name="GenArt" dir=in action=allow protocol=TCP localport=5052</pre>
+        <p>GenArt is now serving at <code>http://localhost:5052</code>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Authentik — forward_auth Gate</div>
+  <div class="card">
+    <div class="card-title">Caddy configuration</div>
+    <pre># Add to your Caddyfile:
+art.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:5052
+}</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Authentik Application entry</div>
+    <pre># Authentik admin → Applications → Create:
+Name:       Generative Art
+Slug:       genart
+Launch URL: https://art.yourdomain.com
+Provider:   Proxy Provider (forward_auth single application)
+  External host: https://art.yourdomain.com
+Access:     authentik-family + authentik-admins groups</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🧩 Toy Reference</div>
+  <div class="card">
+    <table>
+      <tr><th>Toy</th><th>GitHub</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>🏖️ Sandspiel</td><td>maxbittker/sandspiel</td><td>Canvas simulation</td><td>Falling sand physics</td></tr>
+      <tr><td>🔮 Particle Life</td><td>hunar4321/particle-life</td><td>Canvas simulation</td><td>Emergent behaviour from rules</td></tr>
+      <tr><td>🏝️ Tiny Islands</td><td>marian42/tiny-islands</td><td>Procedural generator</td><td>Click to regenerate</td></tr>
+      <tr><td>🏘️ Town Builder</td><td>OskarStalberg/town-builder</td><td>Procedural generator</td><td>Medieval town maps</td></tr>
+      <tr><td>🌊 Waves</td><td>klevron/waves</td><td>Animation</td><td>Parametric wave art</td></tr>
+      <tr><td>🌳 Generative Trees</td><td>p5js-templates/generative-trees</td><td>p5.js sketch</td><td>Fractal branching</td></tr>
+      <tr><td>🐦 Bird Generator</td><td>michaelkolesidis/bird-generator</td><td>Procedural generator</td><td>Illustrated birds</td></tr>
+      <tr><td>😀 Emoji Adventure</td><td>QC20/EmojiAdventure</td><td>Interactive</td><td>Emoji world exploration</td></tr>
+      <tr><td>🪞 Flow Mirror</td><td>QC20/Flow-Mirror</td><td>Interactive drawing</td><td>Symmetric flow fields</td></tr>
+      <tr><td>🫧 Blob Mixer</td><td>100daysofcode-visual-toys/blobmixer</td><td>Animation</td><td>Morphing blob shapes</td></tr>
+      <tr><td>☯️ Zen Garden</td><td>science-art/zen-garden</td><td>Interactive</td><td>Sand raking simulation</td></tr>
+      <tr><td>⚗️ The Powder Toy</td><td>ThePowderToy/The-Powder-Toy</td><td>Physics sandbox</td><td>Full physics simulation</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">➕ Adding More Toys</div>
+  <div class="card">
+    <p>Clone or copy the toy's built output into a new subfolder under <code>D:\Server\GenArt\</code>. Add a link card to <code>index.html</code>. No restart needed — Python's http.server serves files live.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Some toys need to be built from source (<code>npm run build</code>) before serving. Check each project's README. The simplest ones are pure HTML+JS and work immediately without a build step.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

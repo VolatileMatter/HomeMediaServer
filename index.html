@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Home Server</title><link rel="stylesheet" href="shared.css">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐉 Home Server</title>
 <style>
-  html,body{height:100%;margin:0;overflow:hidden;}
-  .layout{display:flex;height:calc(100vh - 44px - 26px);overflow:hidden;}
-  header{display:flex;align-items:center;gap:12px;padding:0 16px;height:44px;background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0;}
-  .hdr-dragon{font-size:1.3rem;}
-  .hdr-title{font-family:'Cinzel',serif;font-size:.95rem;font-weight:700;color:var(--accent);letter-spacing:.06em;}
-  .hdr-sub{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--text-dim);letter-spacing:.1em;}
-  .hdr-badges{display:flex;gap:6px;margin-left:auto;}
-  .badge{font-family:'Share Tech Mono',monospace;font-size:.52rem;padding:2px 7px;border-radius:2px;}
-  .bw{background:rgba(200,168,75,.1);color:var(--accent);border:1px solid rgba(200,168,75,.2);}
-  .bv{background:rgba(91,141,217,.1);color:var(--accent2);border:1px solid rgba(91,141,217,.2);}
-  .bf{background:rgba(78,205,196,.1);color:var(--accent3);border:1px solid rgba(78,205,196,.2);}
-  nav.sidebar{width:190px;min-width:190px;background:var(--bg3);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .2s,min-width .2s;overflow:hidden;position:relative;}
-  nav.sidebar.collapsed{width:22px;min-width:22px;}
-  .sidebar-label{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(0deg);font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:.1em;writing-mode:vertical-rl;text-transform:uppercase;color:var(--text-dim);opacity:.55;white-space:nowrap;margin-top:3px;}
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@400;600;900&family=Raleway:wght@300;400;500;600&display=swap');
+  :root{--bg:#0a0c0f;--bg2:#111318;--bg3:#181c24;--border:#2a3040;--accent:#c8a84b;--accent2:#5b8dd9;--accent3:#4ecdc4;--text:#d4d8e2;--text-dim:#7a8299;--danger:#e05c5c;--success:#4caf7d;--sw:210px;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;display:flex;flex-direction:column;}
+  header{display:flex;align-items:center;gap:12px;padding:9px 14px;background:var(--bg3);border-bottom:2px solid var(--accent);flex-shrink:0;z-index:10;}
+  .hdr-dragon{font-size:1.7rem;filter:drop-shadow(0 0 10px rgba(200,168,75,.5));}
+  .hdr-title{font-family:'Cinzel',serif;font-size:1.05rem;font-weight:900;color:var(--accent);letter-spacing:.06em;}
+  .hdr-sub{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--text-dim);letter-spacing:.1em;}
+  .hdr-badges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
+  .badge{font-family:'Share Tech Mono',monospace;font-size:.52rem;padding:2px 6px;border-radius:2px;}
+  .bw{background:rgba(91,141,217,.18);color:var(--accent2);border:1px solid rgba(91,141,217,.28);}
+  .bv{background:rgba(78,205,196,.12);color:var(--accent3);border:1px solid rgba(78,205,196,.28);}
+  .bf{background:rgba(76,175,125,.12);color:#4caf7d;border:1px solid rgba(76,175,125,.28);}
+  .layout{display:flex;flex:1;overflow:hidden;min-height:0;}
+  .sidebar{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:width .2s ease;overflow:hidden;}
+  .sidebar.collapsed{width:0;border-right:none;}
+  .collapse-btn{width:28px;background:var(--bg3);border:none;border-right:1px solid var(--border);color:var(--text-dim);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px 0;flex-shrink:0;transition:background .15s;gap:5px;}
+  .collapse-btn:hover{color:var(--accent);}
+  .collapse-btn .cba{font-size:.85rem;transition:transform .2s;line-height:1;}
+  .collapse-btn.cs .cba{transform:rotate(180deg);}
+  .collapse-btn .cbl{font-family:'Share Tech Mono',monospace;font-size:.44rem;letter-spacing:.1em;writing-mode:vertical-rl;text-transform:uppercase;color:var(--text-dim);opacity:.55;white-space:nowrap;margin-top:3px;}
   .sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent;padding:4px 0 20px;}
   .sidebar-scroll::-webkit-scrollbar{width:3px;}.sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border);}
   .nav-group{margin-bottom:1px;}
@@ -42,10 +53,6 @@
   footer span{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--text-dim);}
   .sdot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--success);margin-right:4px;animation:pulse 2s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .collapse-btn{position:fixed;left:190px;top:50%;transform:translateY(-50%);z-index:100;background:var(--bg3);border:1px solid var(--border);border-left:none;padding:6px 3px;cursor:pointer;transition:left .2s;border-radius:0 3px 3px 0;}
-  .collapse-btn.cs{left:22px;}
-  .cba{font-size:.65rem;color:var(--text-dim);display:block;}
-  .cbl{display:none;}
 </style>
 </head>
 <body>
@@ -102,6 +109,15 @@
     <button class="nav-item" id="nav-languages"        onclick="go('languages')"><span class="ni">🌍</span>Languages</button>
     <button class="nav-item" id="nav-utilities"        onclick="go('utilities')"><span class="ni">🛠️</span>Utilities</button>
   </div></div>
+  <div class="nav-group" id="g-tools"><div class="nav-group-label" onclick="tg('tools')"><span class="ga">▾</span>Tools &amp; Creative</div><div class="nav-group-items" id="gi-tools">
+    <button class="nav-item" id="nav-excalidraw"    onclick="go('excalidraw')"><span class="ni">✏️</span>Whiteboard</button>
+    <button class="nav-item" id="nav-readeck"       onclick="go('readeck')"><span class="ni">🔖</span>Read-Later</button>
+    <button class="nav-item" id="nav-privatebin"    onclick="go('privatebin')"><span class="ni">📋</span>PrivateBin</button>
+    <button class="nav-item" id="nav-stirling"      onclick="go('stirling')"><span class="ni">📄</span>PDF Tools</button>
+    <button class="nav-item" id="nav-upscayl"       onclick="go('upscayl')"><span class="ni">🔍</span>Upscayl</button>
+    <button class="nav-item" id="nav-pxls"          onclick="go('pxls')"><span class="ni">🎨</span>Pxls Canvas</button>
+    <button class="nav-item" id="nav-genart"        onclick="go('genart')"><span class="ni">🌀</span>Generative Art</button>
+  </div></div>
   <div class="nav-group" id="g-servers"><div class="nav-group-label" onclick="tg('servers')"><span class="ga">▾</span>Game Servers</div><div class="nav-group-items" id="gi-servers">
     <button class="nav-item" id="nav-minecraft"     onclick="go('minecraft')"><span class="ni">⛏️</span>Minecraft</button>
     <button class="nav-item" id="nav-ark"           onclick="go('ark')"><span class="ni">🦕</span>ARK</button>
@@ -157,6 +173,13 @@
   <div class="tab-content" id="pane-wikipedia"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-languages"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-utilities"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-excalidraw"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-readeck"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-privatebin"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-stirling"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-upscayl"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-pxls"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-genart"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-minecraft"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-ark"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-ss13"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
@@ -176,10 +199,10 @@
 <footer>
   <span><span class="sdot"></span>HOME SERVER · LOCAL REFERENCE</span>
   <span>🐉 AUTHENTIK SSO · CLOUDFLARE · D:\Users\[you]\</span>
-  <span>48 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
+  <span>55 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
 </footer>
 <script>
-const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html'};
+const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',excalidraw:'excalidraw.html',readeck:'readeck.html',privatebin:'privatebin.html',stirling:'stirling-pdf.html',upscayl:'upscayl.html',pxls:'pxls.html',genart:'genart.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html'};
 const loaded=new Set();
 let open=localStorage.getItem('sb_open')!=='false';
 function go(n){

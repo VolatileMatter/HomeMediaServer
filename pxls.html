@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Pxls</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎨</div>
+  <div>
+    <h1>Pxls — Collaborative Pixel Canvas</h1>
+    <div class="subtitle">// Docker · WSL2 · Port 8095 · PostgreSQL + Redis · Authentik OAuth2 //</div>
+    <p class="desc">Pxls is a collaborative pixel art canvas — think r/place but private, just for your family. Each authenticated user gets a cooldown-limited pixel placement. The canvas persists indefinitely. Supports OAuth2 login so users sign in with their Authentik (Google) account.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🎨 Pxls uses native OAuth2 — users log in with their Authentik Google account directly. No Caddy forward_auth proxy needed. Pxls handles authentication itself.</div>
+
+<div class="section">
+  <div class="section-title">📁 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Pxls is a shared communal service — all users collaborate on the same canvas. Data is stored in the <code>common</code> folder rather than per-user:</p>
+    <pre>D:\Users\common\pxls\
+  config\      ← pxls.conf configuration file
+  backups\     ← automatic canvas backups
+  db\          ← PostgreSQL data
+  redis\       ← Redis session data</pre>
+    <p>See the <strong>SSO tab → User Data Storage</strong> for the full architecture. The <code>common</code> folder is not per-user quota-tracked.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Authentik — Native OAuth2 Setup (do this first)</div>
+  <div class="card">
+    <div class="card-title">Step 1 — Create the Authentik OAuth2 Application</div>
+    <pre># Authentik admin → Applications → Create:
+Name:       Pxls
+Slug:       pxls
+Launch URL: https://pxls.yourdomain.com
+
+# Create an OAuth2/OIDC Provider:
+Name:                Pxls Provider
+Authorization flow:  default-provider-authorization-explicit-consent
+Client type:         Confidential
+Redirect URI:        https://pxls.yourdomain.com/auth/authentik/callback
+Scopes:              openid, profile, email
+# Save the Client ID and Client Secret — you'll need them below</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🐳 Deployment — Docker in WSL2</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create data directories (Windows)</strong>
+        <pre>New-Item -ItemType Directory -Force "D:\Users\common\pxls\config"
+New-Item -ItemType Directory -Force "D:\Users\common\pxls\backups"
+New-Item -ItemType Directory -Force "D:\Users\common\pxls\db"
+New-Item -ItemType Directory -Force "D:\Users\common\pxls\redis"</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create pxls.conf</strong>
+        <p>Save as <code>D:\Users\common\pxls\config\pxls.conf</code>:</p>
+        <pre>server {
+  host: "0.0.0.0"
+  port: 4567
+}
+
+oauth {
+  # Authentik OAuth2 credentials from Authentik Application above
+  useOauth: true
+
+  authentik {
+    id: "CLIENT_ID_FROM_AUTHENTIK"
+    secret: "CLIENT_SECRET_FROM_AUTHENTIK"
+    # Your Authentik server's OpenID config URL:
+    wellKnown: "https://auth.yourdomain.com/application/o/pxls/.well-known/openid-configuration"
+  }
+}
+
+# Canvas settings
+canvasCode: "family"
+width: 1000
+height: 1000
+# Cooldown in seconds between pixel placements
+cooldown: 300
+
+# Board backup
+backup {
+  enabled: true
+  interval: "1h"
+  maxBackups: 24
+}</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the compose file</strong>
+        <pre>mkdir -p ~/services/pxls && cd ~/services/pxls
+
+# Create .env file with the database password:
+echo "DB_PASSWORD=$(openssl rand -hex 24)" > .env
+
+cat > docker-compose.yml << 'EOF'
+services:
+  pxls:
+    image: ghcr.io/pxlsspace/pxls:latest
+    container_name: pxls
+    restart: unless-stopped
+    ports:
+      - "8095:4567"
+    volumes:
+      - /mnt/d/Users/common/pxls/config:/app/config
+      - /mnt/d/Users/common/pxls/backups:/app/backups
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/pxls
+      - DB_USER=pxls
+      - DB_PASS=${DB_PASSWORD}
+      - REDIS_HOST=redis
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    volumes:
+      - /mnt/d/Users/common/pxls/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=pxls
+      - POSTGRES_USER=pxls
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - /mnt/d/Users/common/pxls/redis:/data
+EOF</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start the stack</strong>
+        <pre>docker compose up -d
+docker compose logs -f pxls   # wait for startup</pre>
+        <p>Pxls is now running at <code>http://localhost:8095</code>. Open it and verify the OAuth2 login button appears.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall for port 8095</strong>
+        <pre>netsh advfirewall firewall add rule name="Pxls" dir=in action=allow protocol=TCP localport=8095</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <p>Task Scheduler → Create Task → Action:</p>
+        <pre>wsl -d Ubuntu -- bash -c "cd ~/services/pxls && docker compose up -d"</pre>
+        <p>Trigger: At startup, delay 2 minutes. Run whether logged on or not: ☑</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌐 Caddy Configuration</div>
+  <div class="card">
+    <p>Pxls authenticates via OAuth2 itself — Caddy just does TLS and proxying, no forward_auth needed:</p>
+    <pre># Add to your Caddyfile:
+pxls.yourdomain.com {
+    reverse_proxy localhost:8095
+}</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Pxls uses WebSockets for real-time canvas updates. Caddy handles WebSocket proxying automatically — no extra configuration needed.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Canvas Administration</div>
+  <div class="card">
+    <div class="card-title">Making a user an admin</div>
+    <p>The first user to log in via OAuth2 is not automatically an admin. Grant admin rights via the database:</p>
+    <pre># In WSL2, connect to the PostgreSQL container:
+docker exec -it pxls-db-1 psql -U pxls -d pxls
+
+# Grant admin to a user (replace 'alice' with Authentik username):
+UPDATE users SET role = 'admin' WHERE username = 'alice';
+\q</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Adjusting cooldown and canvas size</div>
+    <p>Edit <code>D:\Users\common\pxls\config\pxls.conf</code> and restart the container:</p>
+    <pre>docker compose restart pxls</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Updating</div>
+  <div class="card">
+    <pre>cd ~/services/pxls
+docker compose pull
+docker compose up -d</pre>
+  </div>
+</div>
+
+</body>
+</html>

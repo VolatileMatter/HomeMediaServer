@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>PrivateBin</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📋</div>
+  <div>
+    <h1>PrivateBin — Zero-Knowledge Pastebin</h1>
+    <div class="subtitle">// Docker · WSL2 · Port 8089 · Per-User Data · Authentik forward_auth //</div>
+    <p class="desc">PrivateBin is a self-hosted pastebin where the server never sees the paste content. Everything is AES-256 encrypted in the browser before being sent — the decryption key is only ever in the URL fragment, which is never transmitted to the server. Safe for sharing passwords, keys, and private notes within the family.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🔒 Zero-knowledge design: PrivateBin's server stores only encrypted blobs. It mathematically cannot read what you paste. The key lives in the URL after the <code>#</code> — share the full link only with the intended recipient.</div>
+
+<div class="section">
+  <div class="section-title">📁 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>PrivateBin is a shared family service — all users share one instance. Paste data is stored encrypted at rest:</p>
+    <pre>D:\Users\common\privatebin\data\   ← encrypted paste blobs (server can't read these)
+D:\Users\common\privatebin\cfg\    ← conf.php configuration file</pre>
+    <p>There is no meaningful per-user data here (the server only stores ciphertext). The <code>common</code> folder is not user-quota-tracked. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>WSL2 path mapping:</strong> Create <code>D:\Users\common\privatebin\</code> on Windows first, then reference it as <code>/mnt/d/Users/common/privatebin/</code> in the Docker compose file.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🐳 Deployment — Docker in WSL2</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create data directories (Windows)</strong>
+        <pre>New-Item -ItemType Directory -Force "D:\Users\common\privatebin\data"
+New-Item -ItemType Directory -Force "D:\Users\common\privatebin\cfg"
+
+# Set permissions so the container user (1000:1000) can write:
+# In WSL2 terminal:
+chmod 755 /mnt/d/Users/common/privatebin/data</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create conf.php</strong>
+        <p>Save as <code>D:\Users\common\privatebin\cfg\conf.php</code>:</p>
+        <pre>&lt;?php
+; PrivateBin configuration
+[main]
+; Allow users to create pastes
+discussion = true
+opendiscussion = false
+password = true
+fileupload = false
+burnafterreadingselected = false
+defaultformatter = "plaintext"
+syntaxhighlightingtheme = "sons-of-obsidian"
+sizelimit = 10485760
+template = "bootstrap5"
+languageselection = false
+languagedefault = "en"
+
+[expire]
+default = "1week"
+
+[expire_options]
+5min = 300
+10min = 600
+1hour = 3600
+1day = 86400
+1week = 604800
+1month = 2592000
+1year = 31536000
+never = 0
+
+[formatter_options]
+plaintext = "Plain Text"
+syntaxhighlighting = "Source Code"
+markdown = "Markdown"
+
+[traffic]
+limit = 10
+header = "X-Forwarded-For"
+
+[purge]
+limit = 300
+batchsize = 10
+
+[model]
+class = Filesystem
+
+[model_options]
+dir = PATH "srv/data"
+?&gt;</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the compose file</strong>
+        <pre>mkdir -p ~/services/privatebin && cd ~/services/privatebin
+
+cat > docker-compose.yml << 'EOF'
+services:
+  privatebin:
+    image: privatebin/nginx-fpm-alpine:latest
+    container_name: privatebin
+    restart: always
+    read_only: true
+    user: "1000:1000"
+    volumes:
+      - /mnt/d/Users/common/privatebin/data:/srv/data
+      - /mnt/d/Users/common/privatebin/cfg/conf.php:/srv/cfg/conf.php:ro
+    ports:
+      - "8089:8080"
+    tmpfs:
+      - /tmp
+      - /run
+      - /var/run/nginx
+EOF</pre>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><code>read_only: true</code> mounts the container filesystem as read-only for security. The <code>tmpfs</code> entries give nginx and PHP-FPM the writable temp space they need without compromising the read-only stance.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start the container</strong>
+        <pre>docker compose up -d
+docker compose logs privatebin   # confirm started</pre>
+        <p>PrivateBin is now running at <code>http://localhost:8089</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall for port 8089</strong>
+        <pre>netsh advfirewall firewall add rule name="PrivateBin" dir=in action=allow protocol=TCP localport=8089</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <p>Task Scheduler → Create Task → Action:</p>
+        <pre>wsl -d Ubuntu -- bash -c "cd ~/services/privatebin && docker compose up -d"</pre>
+        <p>Trigger: At startup, delay 2 minutes. Run whether logged on or not: ☑</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Authentik — forward_auth Gate</div>
+  <div class="card">
+    <div class="card-title">Caddy configuration</div>
+    <pre># Add to your Caddyfile:
+paste.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:8089
+}</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Authentik Application entry</div>
+    <pre># Authentik admin → Applications → Create:
+Name:       PrivateBin
+Slug:       privatebin
+Launch URL: https://paste.yourdomain.com
+Provider:   Proxy Provider (forward_auth single application)
+  External host: https://paste.yourdomain.com
+Access:     authentik-family + authentik-admins groups</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔒 How Zero-Knowledge Works</div>
+  <div class="card">
+    <p>When you create a paste, the browser generates a random encryption key. Your text is encrypted <em>locally in the browser</em> using AES-256-GCM before any data is sent to the server. The server receives and stores only the ciphertext. The decryption key is appended to the URL after a <code>#</code> — browsers never include URL fragments in HTTP requests, so the server never sees it.</p>
+    <pre>Example paste URL:
+https://paste.yourdomain.com/?abc123#DECRYPTIONKEY
+
+The server stores:  abc123 → [encrypted blob]
+The server never sees: DECRYPTIONKEY
+
+Share the full URL with your recipient.
+Share just the base URL (without the #) and it's useless.</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Burn after reading:</strong> Enable "Burn after reading" when sharing a password or secret. The paste is deleted from the server the moment it's opened for the first time.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Updating</div>
+  <div class="card">
+    <pre>cd ~/services/privatebin
+docker compose pull
+docker compose up -d</pre>
+  </div>
+</div>
+
+</body>
+</html>

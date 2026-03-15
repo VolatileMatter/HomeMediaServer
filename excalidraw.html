@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Excalidraw</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">✏️</div>
+  <div>
+    <h1>Excalidraw — Collaborative Whiteboard</h1>
+    <div class="subtitle">// Docker · WSL2 · Port 8086 · Authentik forward_auth //</div>
+    <p class="desc">Excalidraw is a virtual whiteboard for sketching diagrams, flowcharts, and freehand drawings. The official image is stateless — drawings are saved as <code>.excalidraw</code> files to each user's folder in <code>D:\Users\[username]\diagrams\</code>. Real-time collaboration rooms are ephemeral (in-memory only).</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Excalidraw is stateless by design. Persistence is handled by exporting <code>.excalidraw</code> files and saving them to the user's Nextcloud-synced folder. There is no server-side auto-save.</div>
+
+<div class="section">
+  <div class="section-title">📁 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Excalidraw itself stores nothing on the server. Users export their work as <code>.excalidraw</code> files and save them to:</p>
+    <pre>D:\Users\[username]\diagrams\     ← per-user diagram files
+D:\Users\[username]\obsidian\     ← if using Obsidian integration</pre>
+    <p>These folders are visible in Nextcloud and count toward each user's storage quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Tip:</strong> Teach users to use <strong>File → Save to disk</strong> to export their diagram as a <code>.excalidraw</code> file, then drag it into their Nextcloud folder. They can reload it later with <strong>File → Open</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🐳 Deployment — Docker in WSL2</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the compose file</strong>
+        <p>In your WSL2 Ubuntu terminal:</p>
+        <pre>mkdir -p ~/services/excalidraw && cd ~/services/excalidraw
+
+cat > docker-compose.yml << 'EOF'
+services:
+  excalidraw:
+    image: excalidraw/excalidraw:latest
+    container_name: excalidraw
+    ports:
+      - "8086:80"
+    restart: unless-stopped
+EOF</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start the container</strong>
+        <pre>docker compose up -d
+docker compose logs excalidraw   # confirm started</pre>
+        <p>Excalidraw is now running at <code>http://localhost:8086</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall for port 8086</strong>
+        <pre>netsh advfirewall firewall add rule name="Excalidraw" dir=in action=allow protocol=TCP localport=8086</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <p>Task Scheduler → Create Task → Action:</p>
+        <pre>wsl -d Ubuntu -- bash -c "cd ~/services/excalidraw && docker compose up -d"</pre>
+        <p>Trigger: At startup, delay 2 minutes. Run whether logged on or not: ☑</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Authentik — forward_auth Gate</div>
+  <div class="card">
+    <div class="card-title">Caddy configuration</div>
+    <p>Excalidraw has no built-in authentication. Protect it entirely via Caddy <code>forward_auth</code>:</p>
+    <pre># Add to your Caddyfile:
+draw.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:8086
+}</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Collaboration rooms</strong> use URL fragments like <code>/#room=...</code>. These work fine behind forward_auth — the room ID is never sent to the server, so Authentik does not interfere with the real-time sync.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Authentik Application entry</div>
+    <pre># Authentik admin → Applications → Create:
+Name:       Excalidraw
+Slug:       excalidraw
+Launch URL: https://draw.yourdomain.com
+Provider:   Proxy Provider (forward_auth single application)
+  External host: https://draw.yourdomain.com
+Access:     authentik-family + authentik-admins groups</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">💾 Saving &amp; Loading Diagrams</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📤 Saving a diagram</div>
+      <ol style="margin:6px 0 0 18px;font-size:.85rem">
+        <li>Draw your diagram in Excalidraw</li>
+        <li><strong>File → Save to disk</strong> (or Ctrl+S)</li>
+        <li>Save the <code>.excalidraw</code> file to <code>D:\Users\[you]\diagrams\</code></li>
+        <li>Nextcloud picks it up automatically and syncs it</li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="card-title">📥 Loading a diagram</div>
+      <ol style="margin:6px 0 0 18px;font-size:.85rem">
+        <li>Open Excalidraw in the browser</li>
+        <li><strong>File → Open</strong></li>
+        <li>Select your <code>.excalidraw</code> file</li>
+        <li>Or drag the file directly onto the canvas</li>
+      </ol>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🤝 Real-time Collaboration</div>
+    <p>Click the <strong>Live collaboration</strong> button in the top bar. Share the generated room URL (contains a <code>#room=...</code> fragment) with anyone who has access to the server. All participants must be authenticated through Authentik first. Rooms are in-memory only — they vanish when all participants leave. Save your diagram before closing.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Room data is not persisted on the server.</strong> If the last person leaves a room, all unsaved changes are lost. Everyone should export before closing.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Updating</div>
+  <div class="card">
+    <pre># Pull latest image and restart:
+cd ~/services/excalidraw
+docker compose pull
+docker compose up -d</pre>
+  </div>
+</div>
+
+</body>
+</html>

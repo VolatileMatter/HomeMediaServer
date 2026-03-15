@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Readeck</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔖</div>
+  <div>
+    <h1>Readeck — Bookmark &amp; Read-Later</h1>
+    <div class="subtitle">// Docker · WSL2 · Per-User Instances · Port Range 8087–8096 · Authentik forward_auth //</div>
+    <p class="desc">Readeck is a self-hosted read-later and bookmark service. It fetches and stores a clean, readable copy of any article you save — no paywalls, no tracking, no ads. Each user gets their own isolated container and data folder.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Each user gets their own Readeck container on a dedicated port. This gives full data isolation — one user's bookmarks are completely invisible to all others. The trade-off is one container per user rather than a single multi-user app.</div>
+
+<div class="section">
+  <div class="section-title">📁 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <pre>D:\Users\[username]\readeck\    ← all bookmarks, article snapshots, metadata
+  articles\                     ← fetched article content
+  db.sqlite3                    ← bookmark database</pre>
+    <p>Each user's Readeck data lives in their own folder and counts toward their Nextcloud quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>WSL2 path mapping:</strong> The Docker volume mount uses the WSL2 path. Map <code>D:\Users\alice\readeck</code> as <code>/mnt/d/Users/alice/readeck</code> in the compose file. See the pattern below.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🐳 Deployment — Per-User Docker Containers</div>
+
+  <div class="card">
+    <div class="card-title">Port Assignment — one port per user</div>
+    <table>
+      <tr><th>User</th><th>Port</th><th>Subdomain</th></tr>
+      <tr><td>alice</td><td>8087</td><td>read-alice.yourdomain.com</td></tr>
+      <tr><td>bob</td><td>8088</td><td>read-bob.yourdomain.com</td></tr>
+      <tr><td>Add more users in sequence</td><td>8089, 8090…</td><td>read-[name].yourdomain.com</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Alternatively, run a single shared Readeck instance on port 8087 if your family is comfortable sharing bookmarks. Readeck has its own internal user accounts — Authentik then acts as a gate in front of the whole instance.</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create user data directories (Windows)</strong>
+        <pre># Run once per user:
+New-Item -ItemType Directory -Force "D:\Users\alice\readeck"
+New-Item -ItemType Directory -Force "D:\Users\bob\readeck"</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create the compose file</strong>
+        <pre>mkdir -p ~/services/readeck && cd ~/services/readeck
+
+cat > docker-compose.yml << 'EOF'
+services:
+  readeck-alice:
+    image: codeberg.org/readeck/readeck:latest
+    container_name: readeck-alice
+    environment:
+      - READECK_ALLOWED_HOSTS=read-alice.yourdomain.com
+      - READECK_LOG_LEVEL=info
+    volumes:
+      - /mnt/d/Users/alice/readeck:/data
+    ports:
+      - "8087:8000"
+    restart: unless-stopped
+
+  readeck-bob:
+    image: codeberg.org/readeck/readeck:latest
+    container_name: readeck-bob
+    environment:
+      - READECK_ALLOWED_HOSTS=read-bob.yourdomain.com
+      - READECK_LOG_LEVEL=info
+    volumes:
+      - /mnt/d/Users/bob/readeck:/data
+    ports:
+      - "8088:8000"
+    restart: unless-stopped
+EOF</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start containers</strong>
+        <pre>docker compose up -d
+docker compose logs   # confirm both started</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall ports</strong>
+        <pre>netsh advfirewall firewall add rule name="Readeck-Alice" dir=in action=allow protocol=TCP localport=8087
+netsh advfirewall firewall add rule name="Readeck-Bob"  dir=in action=allow protocol=TCP localport=8088</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <p>Task Scheduler → Create Task → Action:</p>
+        <pre>wsl -d Ubuntu -- bash -c "cd ~/services/readeck && docker compose up -d"</pre>
+        <p>Trigger: At startup, delay 2 minutes. Run whether logged on or not: ☑</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔐 Authentik — Per-User forward_auth</div>
+  <div class="card">
+    <div class="card-title">Caddy configuration — one block per user</div>
+    <pre># Add to your Caddyfile:
+read-alice.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    # Only allow alice through — block all other authenticated users
+    @notAlice not header X-authentik-username alice
+    respond @notAlice "Forbidden" 403
+    reverse_proxy localhost:8087
+}
+
+read-bob.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    @notBob not header X-authentik-username bob
+    respond @notBob "Forbidden" 403
+    reverse_proxy localhost:8088
+}</pre>
+    <p>This ensures even a logged-in family member cannot reach another user's bookmarks.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Authentik Application entries</div>
+    <pre># Create one Application per user in Authentik admin → Applications:
+Name:       Readeck (Alice)
+Slug:       readeck-alice
+Launch URL: https://read-alice.yourdomain.com
+Provider:   Proxy Provider (forward_auth single application)
+Access:     alice only (create a user-specific policy binding)
+
+# Repeat for each user</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📱 Mobile — Share Sheet Integration</div>
+  <div class="card">
+    <div class="card-title">Saving articles from a phone</div>
+    <p>Readeck exposes a simple bookmark API. You can save any URL from a mobile share sheet using a Shortcut (iOS) or intent (Android).</p>
+    <pre># iOS Shortcut — "Save to Readeck" action:
+# URL: POST https://read-alice.yourdomain.com/api/bookmarks
+# Body (JSON): {"url": "[Shortcut Input]"}
+# Headers:
+#   Content-Type: application/json
+#   Authorization: Bearer [YOUR_API_TOKEN]
+
+# Get your API token from Readeck → Settings → API Tokens</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Generate the API token from within your Readeck instance after first login. Go to <strong>Settings → API Tokens → Create token</strong>. Each user generates their own token from their own instance.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">➕ Adding a New User</div>
+  <div class="card">
+    <pre># 1. Create their data folder (Windows):
+New-Item -ItemType Directory -Force "D:\Users\[name]\readeck"
+
+# 2. Add a new service block to docker-compose.yml:
+#    - Pick the next available port (8089, 8090, etc.)
+#    - Set READECK_ALLOWED_HOSTS to their subdomain
+#    - Map their /mnt/d/Users/[name]/readeck volume
+
+# 3. Restart compose:
+docker compose up -d
+
+# 4. Add the new port to Windows Firewall
+
+# 5. Add a new Caddy block for their subdomain
+
+# 6. Create the Authentik Application entry for them</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔧 Updating</div>
+  <div class="card">
+    <pre>cd ~/services/readeck
+docker compose pull
+docker compose up -d</pre>
+  </div>
+</div>
+
+</body>
+</html>
