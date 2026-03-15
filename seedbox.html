@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Seedbox</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🌱</div>
+  <div>
+    <h1>Seedbox + Automated TV</h1>
+    <div class="subtitle">// Always Behind VPN · Auto TV Downloads · Other Services Unaffected //</div>
+    <p class="desc">A torrent client that routes ALL traffic through a VPN, but only the torrent client — not Plex, Minecraft, or your other services. Plus Sonarr for automated TV episode downloading.</p>
+  </div>
+</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>Legal note:</strong> This guide assumes you're downloading content you have the right to download (Linux ISOs, your own rips, public domain content, or content you've purchased). The VPN-binding technique itself is a legitimate privacy tool.</div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Goal: qBittorrent bound to a VPN interface so if the VPN drops, torrents stop. Sonarr watches RSS feeds for your TV shows and automatically adds them to qBittorrent. Other services unaffected.
+</div>
+
+<!-- The core concept -->
+<div class="section">
+  <div class="section-title">🧠 How VPN Binding Works</div>
+  <div class="card">
+    <p>The trick is <strong>binding qBittorrent to the VPN's network interface</strong>. When the VPN is connected, traffic flows through it. If the VPN disconnects, qBittorrent has no interface to use and stops sending/receiving — it doesn't fall back to your real IP. Other apps (Plex, Minecraft, etc.) keep using your normal internet connection.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Why this is better than a VPN killswitch:</strong> A killswitch blocks ALL internet on VPN drop — including your Plex streams and Minecraft server. Interface binding only isolates the torrent client, so everything else keeps working.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- VPN Setup -->
+<div class="section">
+  <div class="section-title">🔒 Step 1: Set Up a VPN That Supports Port Forwarding</div>
+
+  <div class="card">
+    <div class="card-title">Recommended VPN Providers for Torrenting</div>
+    <table>
+      <tr><th>Provider</th><th>Port Forwarding</th><th>Price/mo</th><th>Notes</th></tr>
+      <tr><td>Mullvad VPN</td><td>Yes (limited)</td><td>$5</td><td>Best privacy, accepts cash/crypto</td></tr>
+      <tr><td>ProtonVPN</td><td>Yes (paid plans)</td><td>$4–8</td><td>Good reputation, Swiss-based</td></tr>
+      <tr><td>AirVPN</td><td>Yes</td><td>$4</td><td>Technical users, very configurable</td></tr>
+      <tr><td>IVPN</td><td>Limited</td><td>$6</td><td>Strong privacy, no-log verified</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Install VPN with Dedicated Interface</div>
+    <p>Install your VPN provider's Windows client. Connect to a server. Open <strong>Network &amp; Internet Settings → Change adapter options</strong>. You should see a new network adapter (often named "Mullvad" or "ProtonVPN" or "TAP-Windows Adapter"). Note the name — you'll need it.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Keep the VPN client running:</strong> Set the VPN client to launch on Windows startup so it's always connected before qBittorrent tries to use it.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- qBittorrent setup -->
+<div class="section">
+  <div class="section-title">⬇️ Step 2: Install &amp; Configure qBittorrent</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download qBittorrent</strong>
+        <p>From <a href="https://qbittorrent.org" target="_blank">qbittorrent.org</a>. Free, open source. Install normally.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Bind to VPN interface</strong>
+        <p>Tools → Options → Advanced → <strong>"Network interface"</strong> → select your VPN adapter from the dropdown (e.g., "Mullvad" or "ProtonVPN TAP"). This is the kill-switch binding.</p>
+        <p>Also set <strong>"Optional IP address to bind to"</strong> to the VPN's IP if your provider gives you a static VPN LAN IP.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Enable the Web UI</strong>
+        <p>Tools → Options → Web UI → ☑ Enable web user interface. Set port <code>8090</code>. Set a strong username/password. This is how Sonarr communicates with qBittorrent.</p>
+        <pre>URL to access: http://localhost:8090</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure download paths</strong>
+        <pre>Default save path: D:\Downloads\Complete
+Temp path:         D:\Downloads\Incomplete</pre>
+        <p>In the Categories section, add a "tv-sonarr" category pointing to <code>D:\Downloads\Complete\TV</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall for qBittorrent Web UI</strong>
+        <pre>netsh advfirewall firewall add rule name="qBittorrent WebUI" dir=in action=allow protocol=TCP localport=8090</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Set qBittorrent to launch on startup</strong>
+        <p>Tools → Options → Behavior → ☑ "Start qBittorrent on Windows startup." It will minimize to tray.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Verify VPN Binding Is Working</div>
+    <p>With qBittorrent running and VPN connected, add a test torrent (a Linux ISO). You should see traffic. Now disconnect the VPN — qBittorrent should show all torrents as "Stalled" or "Error" and stop transferring. Reconnect VPN → torrents resume. That's working correctly.</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- Sonarr -->
+<div class="section">
+  <div class="section-title">📺 Step 3: Sonarr — Automated TV Show Downloads</div>
+
+  <div class="card">
+    <div class="card-title">What Sonarr Does</div>
+    <p>Sonarr monitors RSS feeds (indexers) for new episodes of TV shows you've added to its library. When a matching episode appears, it automatically sends it to qBittorrent. After download completes, it moves the file to your Plex media folder and renames it correctly.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download and install Sonarr for Windows</strong>
+        <p>From <a href="https://sonarr.tv/#downloads-v3-windows" target="_blank">sonarr.tv</a>. The installer sets up Sonarr as a Windows Service. Access at <code>http://localhost:8989</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add qBittorrent as a Download Client</strong>
+        <p>Settings → Download Clients → + → qBittorrent:</p>
+        <pre>Host:     localhost
+Port:     8090
+Username: [your qbit username]
+Password: [your qbit password]
+Category: tv-sonarr</pre>
+        <p>Click Test — should show a green checkmark.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add Indexers (RSS feed sources)</strong>
+        <p>Settings → Indexers → + → Add your indexers. Sonarr supports both public indexers (like EZTV, free) and private trackers. For public indexers without Jackett:</p>
+        <pre>EZTV:     https://eztv.re/ezrss.xml
+1337x:    Use Jackett (see below)</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>(Optional) Add Jackett for More Indexers</strong>
+        <p>Jackett is a Windows service that translates many torrent sites into Sonarr-compatible RSS feeds. Download from <a href="https://github.com/Jackett/Jackett/releases" target="_blank">github.com/Jackett/Jackett</a>. Install → runs at <code>http://localhost:9117</code>. Add trackers in Jackett, then add them to Sonarr using the Torznab feed URL Jackett provides.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure Root Folders</strong>
+        <p>Settings → Media Management → Root Folders → Add → <code>D:\Media\TV</code> (your Plex TV folder). Sonarr will move completed downloads here and rename them.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add TV Shows</strong>
+        <p>Series → Add Series → Search for your show → select quality profile → Add. Sonarr will immediately search for existing episodes and start monitoring for new ones automatically.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">📺</div>
+    <div class="callout-body"><strong>Radarr for movies:</strong> Radarr is the movie equivalent of Sonarr — same concept, same setup process, just for movies. Both are from the same development team and integrate identically with qBittorrent.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Plex + Sonarr integration -->
+<div class="section">
+  <div class="section-title">🎬 Step 4: Connect to Plex</div>
+  <div class="card">
+    <p>In Sonarr: Settings → Connect → + → Plex Media Server:</p>
+    <pre>Host:     localhost
+Port:     32400
+Auth Token: (get this from Plex: sign in to plex.tv → account → 
+             open dev tools → any API call → copy X-Plex-Token value)</pre>
+    <p>Check "Update Library." Now when Sonarr downloads a new episode and moves it to the Plex folder, it automatically tells Plex to refresh that section — the episode appears in Plex within seconds.</p>
+  </div>
+</div>
+
+</body>
+</html>

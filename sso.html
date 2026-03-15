@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SSO</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔐</div>
+  <div>
+    <h1>Single Sign-On (SSO)</h1>
+    <div class="subtitle">// Google OAuth · UN/PW · Authentik Self-Hosted SSO //</div>
+    <p class="desc">Three tiers: per-app usernames/passwords (simplest), Google OAuth per-app (easy, uses existing Gmail), or a self-hosted SSO like Authentik for one login to rule them all.</p>
+  </div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Strategy: Start with per-app username/password (already built into each service). Then upgrade to Google OAuth per service. Then optionally centralize with Authentik.
+</div>
+
+<!-- Overview -->
+<div class="section">
+  <div class="section-title">🗺️ The Three Tiers</div>
+  <div class="card">
+    <table>
+      <tr><th>Tier</th><th>Effort</th><th>What It Means</th><th>Best For</th></tr>
+      <tr><td><strong>1 — Local UN/PW</strong></td><td>None extra</td><td>Each app has its own username/password</td><td>V1 starting point</td></tr>
+      <tr><td><strong>2 — Google OAuth per app</strong></td><td>Low (30 min/app)</td><td>"Sign in with Google" button on each app</td><td>Family sharing, no password to remember</td></tr>
+      <tr><td><strong>3 — Authentik SSO</strong></td><td>Medium (1–2 hrs)</td><td>One login screen, all apps trust it</td><td>Multiple users, enterprise feel</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<!-- Tier 1 -->
+<div class="section">
+  <div class="section-title">1️⃣ Tier 1 — Per-App Username &amp; Password (V1, Do This First)</div>
+  <div class="card">
+    <div class="card-title">Setup per service</div>
+    <table>
+      <tr><th>Service</th><th>Where to Create Users</th><th>Notes</th></tr>
+      <tr><td>Plex</td><td>plex.tv → Manage → Managed Users</td><td>Plex accounts are cloud-based; share your server with other plex.tv accounts</td></tr>
+      <tr><td>Calibre-Web</td><td>Admin panel → User Management → Add new user</td><td>Set read/upload permissions per user</td></tr>
+      <tr><td>Audiobookshelf</td><td>Settings → Users → Add User</td><td>Per-user library access control</td></tr>
+      <tr><td>Nextcloud</td><td>Admin → Users → New user</td><td>Set storage quota per user</td></tr>
+      <tr><td>qBittorrent</td><td>Tools → Options → Web UI → set username/password</td><td>Single admin user only</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🔑</div>
+      <div class="callout-body"><strong>Password manager tip:</strong> Use Bitwarden (free, self-hostable) to keep track of each service's passwords. There's a Bitwarden browser extension that autofills everything.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Tier 2: Google OAuth -->
+<div class="section">
+  <div class="section-title">2️⃣ Tier 2 — Google OAuth Per App ("Sign in with Google")</div>
+
+  <div class="card">
+    <div class="card-title">Step 0: Set Up Google OAuth Credentials (One-Time)</div>
+    <p>All apps share the same Google API credential setup process.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Go to Google Cloud Console</strong>
+          <p><a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Create a new project (name it "Home Server SSO" or similar).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure OAuth Consent Screen</strong>
+          <p>APIs &amp; Services → OAuth consent screen → External → Fill in app name ("Home Server"), your email, no logo needed. Add your Gmail address under "Test users" (required for external apps).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create OAuth Client ID</strong>
+          <p>APIs &amp; Services → Credentials → Create Credentials → OAuth Client ID → Web application. You'll add redirect URIs per app (see below). Save your <strong>Client ID</strong> and <strong>Client Secret</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📚 Calibre-Web + Google OAuth</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add redirect URI in Google Console</strong>
+          <pre>http://[your-server-IP]:8083/google/authorized</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>In Calibre-Web Admin → Edit app configuration</strong>
+          <pre>☑ Enable Google OAuth
+Google Client ID:     [your-client-id]
+Google Client Secret: [your-client-secret]</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Link existing users to Google accounts</strong>
+          <p>Admin → Users → Edit user → "Link Google account" — they click this while signed into Google to link their account. After that they can use "Sign in with Google."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎧 Audiobookshelf + OpenID Connect (Google)</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add redirect URI in Google Console</strong>
+          <pre>http://[your-server-IP]:13378/auth/openid/callback</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>In ABS Admin → Settings → Authentication</strong>
+          <pre>☑ OpenID Connect Authentication
+Issuer URL:     https://accounts.google.com
+Client ID:      [your-client-id]
+Client Secret:  [your-client-secret]
+Auto Launch:    off (shows button on login page)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">☁️ Nextcloud + Google Login App</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install the "Social Login" app</strong>
+          <p>Admin → Apps → search "Social Login" → Install.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add redirect URI in Google Console</strong>
+          <pre>http://[your-server-IP]/nextcloud/index.php/apps/sociallogin/custom_oidc/google</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure Social Login in Nextcloud</strong>
+          <p>Admin → Social Login → Add "Custom OpenID Connect" provider:</p>
+          <pre>Name:          google
+Title:         Sign in with Google
+Authorize URL: https://accounts.google.com/o/oauth2/auth
+Token URL:     https://oauth2.googleapis.com/token
+Display Name:  name
+Username:      email
+Client ID:     [your-client-id]
+Client Secret: [your-client-secret]
+Scope:         openid email profile</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Tier 3: Authentik -->
+<div class="section">
+  <div class="section-title">3️⃣ Tier 3 — Authentik Self-Hosted SSO (Advanced)</div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚡</div>
+    <div class="callout-body"><strong>Note:</strong> Authentik officially only supports Linux/Docker. On Windows 10 natively, you'd run it under WSL2 (Windows Subsystem for Linux). If you've had Docker issues in the past, WSL2 alone is often more reliable — it's just a lightweight Linux VM built into Windows.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">What Authentik Gives You</div>
+    <p>A single login page at (e.g.) <code>http://auth.homeserver.local</code>. All your apps redirect here for authentication. Users log in once, and all apps trust the Authentik session. Supports MFA, app-level access control, audit logs.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Installing Authentik via WSL2 (No Full Docker Required)</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Enable WSL2</strong>
+          <pre>wsl --install
+# Reboot when prompted
+# This installs Ubuntu as the default WSL distro</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Inside WSL2 Ubuntu, install Authentik</strong>
+          <pre>sudo apt update && sudo apt install -y docker.io docker-compose
+mkdir ~/authentik && cd ~/authentik
+wget https://goauthentik.io/docker-compose.yml
+# Edit .env with your settings
+docker-compose up -d</pre>
+          <p>Authentik will be accessible at <code>http://localhost:9000</code> from Windows.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure each app to use Authentik as OIDC provider</strong>
+          <p>In Authentik, create an Application + Provider for each service (Calibre-Web, ABS, Nextcloud). Each gets a client ID and secret. Configure each app exactly as in Tier 2, but using your Authentik URL instead of Google's.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 Alternative: Authelia (Lighter Weight)</div>
+    <p>Authelia is simpler than Authentik. It works as a middleware in front of your apps (via Caddy/Nginx) and adds a login gate with optional MFA. It doesn't replace app-level auth but adds a unified front door. Also runs under WSL2.</p>
+    <pre># In WSL2:
+sudo apt install authelia
+# Configure /etc/authelia/configuration.yml
+# Point Caddy to proxy through authelia</pre>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Calibre</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📚</div>
+  <div>
+    <h1>Calibre Book Library Server</h1>
+    <div class="subtitle">// Calibre-Web · Content Server · No Docker Required //</div>
+    <p class="desc">Set up a self-hosted ebook library accessible from any device on your network (and beyond). Supports EPUB, MOBI, PDF, and syncs with Kindle.</p>
+  </div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Goal: Calibre running as a background service, accessible from your browser at <code>http://[your-PC-IP]:8083</code>. SSO integration documented in the SSO tab.
+</div>
+
+<!-- Option 1: Calibre Desktop + Content Server (simplest) -->
+<div class="section">
+  <div class="section-title">📖 Option 1 — Calibre Desktop Built-in Content Server <span class="tag tag-native">NATIVE · EASIEST</span></div>
+
+  <div class="card">
+    <div class="card-title">What This Is</div>
+    <p>Calibre's desktop app includes a built-in content server that works in any browser. It's the simplest option — no extra software needed. The downside is that the Calibre GUI needs to stay open (or you set it to minimize to tray).</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Calibre</strong>
+        <p>Download from <a href="https://calibre-ebook.com/download_windows" target="_blank">calibre-ebook.com</a>. Install normally. When it asks, point your library to your new internal drive, e.g. <code>D:\Books</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Enable the content server</strong>
+        <p>In Calibre: <strong>Preferences → Sharing → Sharing over the net</strong>. Check "Start the content server when Calibre starts." Set port to <code>8083</code>. Optionally set a username/password here.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall for port 8083</strong>
+        <pre>netsh advfirewall firewall add rule name="Calibre Server" dir=in action=allow protocol=TCP localport=8083</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Access from any device</strong>
+        <p>Open a browser on your phone/laptop/TV and go to <code>http://[your-server-IP]:8083</code>. You'll see your full library.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-launch Calibre on Windows startup</strong>
+        <p>Press <code>Win + R</code> → type <code>shell:startup</code> → drag a shortcut to Calibre into that folder. Calibre can be configured to start minimized: right-click the desktop shortcut → Properties → add <code>--hide-windowed</code> to the target.</p>
+        <pre>Target example:
+"C:\Program Files\Calibre2\calibredb.exe" --with-library "D:\Books"</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Option 2: Calibre-Web -->
+<div class="section">
+  <div class="section-title">🌐 Option 2 — Calibre-Web (Better UI, More Features) <span class="tag tag-native">NATIVE · RECOMMENDED</span></div>
+
+  <div class="card">
+    <div class="card-title">What Calibre-Web Adds</div>
+    <p>Calibre-Web is a separate web application that reads your Calibre library folder directly and provides a much nicer UI with user accounts, reading progress sync, Kindle send-to-email, and OPDS catalog support. It does NOT require Docker.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Python 3.11+ (if not already)</strong>
+        <p>Download from <a href="https://python.org" target="_blank">python.org</a>. During install, check <strong>"Add Python to PATH."</strong></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Calibre-Web via pip</strong>
+        <pre>pip install calibreweb</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run it for the first time</strong>
+        <pre>cps</pre>
+        <p>This starts Calibre-Web. Open <code>http://localhost:8083</code> in your browser. You'll see first-time setup.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Point it at your Calibre library</strong>
+        <p>In setup, enter the path to your Calibre library folder (the folder that contains <code>metadata.db</code>), e.g.: <code>D:\Books</code>. Set an admin username/password.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run Calibre-Web as a Windows Service (auto-start)</strong>
+        <p>Use <strong>NSSM</strong> (Non-Sucking Service Manager) — a free tool that turns any EXE into a Windows service.</p>
+        <pre># Download nssm from nssm.cc/download
+# Extract to C:\tools\nssm\
+
+# Run in admin PowerShell:
+C:\tools\nssm\win64\nssm.exe install CalibreWeb
+
+# In the dialog:
+# Path: C:\Users\[you]\AppData\Local\Programs\Python\Python311\Scripts\cps.exe
+# Start Type: Automatic
+# Then: nssm start CalibreWeb</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open the firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Calibre-Web" dir=in action=allow protocol=TCP localport=8083</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">📱</div>
+    <div class="callout-body">
+      <strong>OPDS for e-readers</strong>
+      Calibre-Web exposes an OPDS catalog at <code>http://[IP]:8083/opds</code>. Apps like Moon+ Reader, KyBook, or Kyōbō can subscribe to this and browse/download books directly.
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Kindle integration -->
+<div class="section">
+  <div class="section-title">📬 Kindle Send-to-Email Setup</div>
+  <div class="card">
+    <div class="card-title">Send Books Wirelessly to Kindle</div>
+    <p>In Calibre-Web: <strong>Admin → Edit E-Mail settings</strong>. Enter your Gmail SMTP settings, then enable "Send to Kindle" per user. Each user sets their <code>@kindle.com</code> address in their profile. You'll also need to whitelist your Gmail address in your Amazon account's "Approved Personal Document E-mail List."</p>
+    <pre>SMTP Server: smtp.gmail.com
+SMTP Port:   587
+From:        your-gmail@gmail.com
+(use a Gmail App Password, not your main password)</pre>
+  </div>
+</div>
+
+<!-- SSO teaser -->
+<div class="section">
+  <div class="section-title">🔐 SSO Integration (See SSO Tab) <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Calibre-Web supports <strong>OAuth via Google</strong> natively. You can enable "Login with Google" in Admin settings and restrict access to specific Gmail accounts. Full walkthrough is in the <strong>SSO tab</strong>.</p>
+    <p>It also supports <strong>LDAP/Active Directory</strong> and <strong>reverse proxy header auth</strong> (for Authentik/Authelia integration).</p>
+  </div>
+</div>
+
+</body>
+</html>

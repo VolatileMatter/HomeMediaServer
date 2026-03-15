@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Service Monitor</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📡</div>
+  <div>
+    <h1>Service Monitor</h1>
+    <div class="subtitle">// Status Dashboard · No Extra Software Needed //</div>
+    <p class="desc">A self-contained local HTML dashboard that checks the status of all your services and shows recent downloads. Two options: a static bookmark page, or a live-checking dashboard.</p>
+  </div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Goal: A single <code>dashboard.html</code> file you can open locally (or serve from Nginx/Caddy) that shows all your services at a glance with live ping checks.
+</div>
+
+<!-- Overview of options -->
+<div class="section">
+  <div class="section-title">🗂️ Two Approaches</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🟢 Option A — Pure HTML Dashboard (No Server)</div>
+      <p>A single <code>dashboard.html</code> file that uses JavaScript's <code>fetch()</code> to ping each service URL. Works entirely from a local file or any web server. No extra software.</p>
+      <p><strong>Best for:</strong> Quick status checks, bookmarking, simple setup.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔵 Option B — Homarr or Dashdot (Dedicated Dashboard App)</div>
+      <p>Installable Windows apps that provide richer dashboards with widgets, weather, Plex library stats, Minecraft player counts, etc.</p>
+      <p><strong>Best for:</strong> A polished always-on display.</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Option A: Build your own -->
+<div class="section">
+  <div class="section-title">🛠️ Option A — Build Your Own Dashboard.html</div>
+
+  <div class="card">
+    <div class="card-title">How the Status Checking Works</div>
+    <p>Each service check sends a <code>fetch()</code> request to the service URL with a short timeout. If it resolves, the service is up. If it times out or returns an error, it's down. This works for any HTTP service on your network.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>CORS limitation:</strong> Browsers block cross-origin fetch from <code>file://</code> URLs. For the cleanest experience, serve dashboard.html through a local web server (even just Python's built-in server: <code>python -m http.server 9000</code> in the folder). Or use it within the index.html binder where it loads in an iframe from a file server.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📄 The Dashboard File (save as <code>dashboard.html</code>)</div>
+    <p>Copy the file below — it includes all your current services plus a recent downloads section (reads a JSON file that your torrent client writes).</p>
+    <pre>&lt;!-- Full code is in dashboard.html — see below --&gt;</pre>
+    <p>The full <code>dashboard.html</code> file is generated separately (see below) since it's a complete standalone app.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Save dashboard.html to your server folder</strong>
+        <p>Put it somewhere like <code>D:\Server\Dashboard\dashboard.html</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Serve it with Python's built-in server (optional but recommended)</strong>
+        <pre># One-liner to serve the folder:
+python -m http.server 9000 --directory "D:\Server\Dashboard"</pre>
+        <p>Access at <code>http://localhost:9000/dashboard.html</code>. Make this a startup task (see below).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create a startup task for the Python server</strong>
+        <p>Create <code>D:\Server\Dashboard\serve.bat</code>:</p>
+        <pre>@echo off
+python -m http.server 9000 --directory "D:\Server\Dashboard"</pre>
+        <p>Add this as a Task Scheduler startup task (same process as Minecraft startup task).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Bookmark it</strong>
+        <p>Add <code>http://[your-server-IP]:9000/dashboard.html</code> to your browser's bookmark bar on every device.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- The actual dashboard code -->
+<div class="section">
+  <div class="section-title">💻 Complete Dashboard.html Code</div>
+  <div class="card">
+    <div class="card-title">Copy this entire block into a file named <code>dashboard.html</code></div>
+    <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;title&gt;🐉 Server Dashboard&lt;/title&gt;
+&lt;style&gt;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0c0f; color: #d0d4e0;
+         font-family: 'Segoe UI', sans-serif; padding: 24px; }
+  h1 { color: #c8a84b; margin-bottom: 6px; }
+  .subtitle { color: #6e7a94; font-size: .8rem; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; margin-bottom: 28px; }
+  .card { background: #141820; border: 1px solid #252d3d; border-radius: 4px; padding: 14px 16px; }
+  .card-title { font-size: .78rem; color: #8894aa; margin-bottom: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: .9rem; font-weight: 600; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .up { background: #4caf7d; box-shadow: 0 0 8px #4caf7d; }
+  .down { background: #e05c5c; box-shadow: 0 0 8px #e05c5c; }
+  .checking { background: #e0b84b; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .service-link { color: #5b8dd9; font-size: .75rem; margin-top: 4px; text-decoration: none; display: block; }
+  .service-link:hover { color: #4ecdc4; }
+  .section-title { font-size: .85rem; color: #c8a84b; letter-spacing: .1em; text-transform: uppercase;
+                   border-bottom: 1px solid #252d3d; padding-bottom: 6px; margin-bottom: 12px; }
+  .download-item { padding: 8px 0; border-bottom: 1px solid #1a1f2e; font-size: .83rem; }
+  .download-item:last-child { border: none; }
+  .dl-name { color: #d0d4e0; }
+  .dl-meta { color: #6e7a94; font-size: .72rem; margin-top: 2px; }
+  .refresh-btn { background: #1a1f2e; border: 1px solid #252d3d; color: #c8a84b;
+                 padding: 6px 14px; border-radius: 3px; cursor: pointer; font-size: .78rem;
+                 margin-bottom: 16px; letter-spacing: .08em; }
+  .refresh-btn:hover { background: #252d3d; }
+  .last-updated { color: #6e7a94; font-size: .72rem; margin-left: 10px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;🐉 Server Dashboard&lt;/h1&gt;
+&lt;p class="subtitle"&gt;// Home Media Server · Status Monitor //&lt;/p&gt;
+
+&lt;button class="refresh-btn" onclick="checkAll()"&gt;⟳ Refresh All&lt;/button&gt;
+&lt;span class="last-updated" id="last-updated"&gt;&lt;/span&gt;
+
+&lt;div class="section-title"&gt;Service Status&lt;/div&gt;
+&lt;div class="grid" id="services"&gt;&lt;/div&gt;
+
+&lt;div class="section-title"&gt;Recent Downloads&lt;/div&gt;
+&lt;div id="downloads"&gt;&lt;p style="color:#6e7a94;font-size:.83rem"&gt;
+  Configure your torrent client to write completed downloads to
+  &lt;code style="background:#0a0d14;padding:1px 5px;color:#4ecdc4"&gt;D:\Server\Dashboard\downloads.json&lt;/code&gt;
+  — or use qBittorrent's "Run external program on completion" to append to this file.
+&lt;/p&gt;&lt;/div&gt;
+
+&lt;script&gt;
+const SERVICES = [
+  { name: "Plex",            url: "http://localhost:32400/web", label: "Open Plex" },
+  { name: "Calibre-Web",     url: "http://localhost:8083",      label: "Open Calibre" },
+  { name: "Audiobookshelf",  url: "http://localhost:13378",     label: "Open ABS" },
+  { name: "Minecraft",       url: "http://localhost:25565",     label: "Port 25565", tcp: true },
+  { name: "OwnCloud / NC",   url: "http://localhost:8080",      label: "Open Cloud" },
+  { name: "Seedbox (qBit)",  url: "http://localhost:8090",      label: "Open qBit" },
+  { name: "Moonlight/Stream",url: "http://localhost:47990",     label: "Open Sunshine" },
+  { name: "Dashboard",       url: "http://localhost:9000",      label: "This page" },
+];
+
+function buildCards() {
+  const grid = document.getElementById('services');
+  grid.innerHTML = SERVICES.map((s,i) =&gt; `
+    &lt;div class="card" id="card-${i}"&gt;
+      &lt;div class="card-title"&gt;${s.name}&lt;/div&gt;
+      &lt;div class="status"&gt;
+        &lt;div class="dot checking" id="dot-${i}"&gt;&lt;/div&gt;
+        &lt;span id="status-${i}"&gt;Checking...&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;a href="${s.url}" target="_blank" class="service-link"&gt;${s.label} ↗&lt;/a&gt;
+    &lt;/div&gt;
+  `).join('');
+}
+
+async function checkService(i) {
+  const s = SERVICES[i];
+  const dot = document.getElementById('dot-'+i);
+  const stat = document.getElementById('status-'+i);
+  dot.className = 'dot checking';
+  stat.textContent = 'Checking...';
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() =&gt; ctrl.abort(), 3000);
+    await fetch(s.url, { mode: 'no-cors', signal: ctrl.signal, cache: 'no-cache' });
+    clearTimeout(timer);
+    dot.className = 'dot up';
+    stat.textContent = 'Online';
+  } catch(e) {
+    dot.className = 'dot down';
+    stat.textContent = e.name === 'AbortError' ? 'Timeout' : 'Offline';
+  }
+}
+
+function checkAll() {
+  SERVICES.forEach((_,i) =&gt; checkService(i));
+  document.getElementById('last-updated').textContent =
+    'Last checked: ' + new Date().toLocaleTimeString();
+}
+
+async function loadDownloads() {
+  try {
+    const r = await fetch('downloads.json?t=' + Date.now());
+    const data = await r.json();
+    const el = document.getElementById('downloads');
+    if (!data.length) { el.innerHTML = '&lt;p style="color:#6e7a94;font-size:.83rem"&gt;No recent downloads.&lt;/p&gt;'; return; }
+    el.innerHTML = data.slice(0,20).map(d =&gt; `
+      &lt;div class="download-item"&gt;
+        &lt;div class="dl-name"&gt;${d.name}&lt;/div&gt;
+        &lt;div class="dl-meta"&gt;${d.size || ''} · ${d.date || ''} · ${d.category || ''}&lt;/div&gt;
+      &lt;/div&gt;
+    `).join('');
+  } catch(e) {
+    document.getElementById('downloads').innerHTML =
+      '&lt;p style="color:#6e7a94;font-size:.83rem"&gt;downloads.json not found — see instructions above.&lt;/p&gt;';
+  }
+}
+
+buildCards();
+checkAll();
+loadDownloads();
+setInterval(checkAll, 60000); // auto-refresh every 60s
+setInterval(loadDownloads, 30000);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+  </div>
+</div>
+
+<hr>
+
+<!-- Option B: Homarr -->
+<div class="section">
+  <div class="section-title">🔵 Option B — Homarr (Prettier Dashboard App)</div>
+  <div class="card">
+    <div class="card-title">What Homarr Is <span class="tag tag-native">NATIVE WINDOWS (via Node.js)</span></div>
+    <p>Homarr is a polished home server dashboard with widgets for Plex, qBittorrent, Minecraft player counts, weather, and more. It has an official Windows installer.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install Node.js 20 LTS</strong>
+          <p>From <a href="https://nodejs.org" target="_blank">nodejs.org</a>. This is required to run Homarr on Windows without Docker.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Download and run Homarr</strong>
+          <pre>npm install -g homarr-cli
+homarr start</pre>
+          <p>Access at <code>http://localhost:7575</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add as a startup service with NSSM</strong>
+          <pre>nssm install Homarr "node" "C:\Users\[you]\AppData\Roaming\npm\node_modules\homarr-cli\..."
+nssm start Homarr</pre>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Homarr integrations:</strong> After setup, add integrations for qBittorrent (shows active downloads), Plex (shows what's playing), and Minecraft (shows online player count) from the widget configuration panel.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Downloads JSON format -->
+<div class="section">
+  <div class="section-title">📥 Wiring Up Recent Downloads</div>
+  <div class="card">
+    <div class="card-title">qBittorrent → downloads.json</div>
+    <p>In qBittorrent: Tools → Options → Downloads → "Run external program on torrent completion":</p>
+    <pre>powershell -Command "
+  $f='D:\Server\Dashboard\downloads.json';
+  $existing = if (Test-Path $f) { Get-Content $f | ConvertFrom-Json } else { @() };
+  $new = @{ name='%N'; size='%Z'; date=(Get-Date -f 'yyyy-MM-dd HH:mm'); category='%L' };
+  ($new + $existing) | Select-Object -First 50 | ConvertTo-Json | Set-Content $f
+"</pre>
+    <p>This appends each completed download to a JSON file (keeping the last 50) that the dashboard reads automatically.</p>
+  </div>
+</div>
+
+</body>
+</html>

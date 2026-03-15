@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Storage</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">💾</div>
+  <div>
+    <h1>Storage &amp; Hard Drives</h1>
+    <div class="subtitle">// Cheap Storage · Internal Migration · No More USB ///</div>
+    <p class="desc">Moving from USB-attached drives to proper internal storage, adding server-grade HDDs affordably, and configuring Windows 10 to use them cleanly.</p>
+  </div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Goal: Get your media off USB and onto internal/SATA drives Windows 10 can reliably wake up with. Then expand cheaply with shucked drives.
+</div>
+
+<!-- Why USB is bad for media servers -->
+<div class="section">
+  <div class="section-title">⚠️ Why USB Drives Fail You</div>
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚡</div>
+    <div class="callout-body">
+      <strong>USB Drives Are Not Made for Always-On Servers</strong>
+      USB enclosures spin down aggressively, disconnect during Windows sleep, lose mount letters on reboot, and add latency. For Plex, Minecraft world saves, and seedboxes — they cause corruption and "drive missing" errors.
+    </div>
+  </div>
+</div>
+
+<!-- Option A: Transition existing PC -->
+<div class="section">
+  <div class="section-title">🖥️ Option A — Transition Your Existing Desktop</div>
+
+  <div class="card">
+    <div class="card-title">🔍 Step 1: Assess What You Have Inside</div>
+    <p>Open your case and count free SATA ports on the motherboard and free power connectors from the PSU. Most gaming desktops have 4–6 SATA ports. You need one SATA data cable + one SATA power connector per drive.</p>
+    <pre>Device Manager → Disk Drives  (to see currently attached drives)
+Disk Management (diskmgmt.msc) → shows all volumes + free slots</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💿 Step 2: Buy Cheap Internal SATA Drives</div>
+    <p>The best bang-for-buck in 2024–2025 is <strong>shucked external drives</strong>. WD/Seagate externals often contain full enterprise-grade CMR drives and are frequently cheaper than bare drives.</p>
+    <table>
+      <tr><th>Option</th><th>Drive Inside</th><th>Price/TB (approx)</th><th>Notes</th></tr>
+      <tr><td>WD Elements 8TB–14TB</td><td>WD White/Red CMR</td><td>~$15–20/TB</td><td>Best value, CMR = good for NAS</td></tr>
+      <tr><td>Seagate Expansion 8TB+</td><td>Seagate IronWolf or Barracuda</td><td>~$15/TB</td><td>Wait for Best Buy sales</td></tr>
+      <tr><td>WD Red Plus (bare)</td><td>WD Red CMR</td><td>~$22/TB</td><td>Officially NAS-rated, no shucking needed</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Shucking tip</strong> Use a plastic pry tool or a folded piece of thin cardboard around the seams of the enclosure. The drive inside is a standard 3.5" SATA drive — just pop it out and install it normally.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔧 Step 3: Physical Installation</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Power down completely — unplug from wall</strong>
+          <p>Don't just shut down. Fully unplug to discharge capacitors before handling drives.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Seat the drive in a 3.5" bay</strong>
+          <p>Most gaming towers have 2–4 bays. Secure with 4 screws (don't overtighten). If all bays are full, a <strong>5.25" to 3.5" adapter bracket</strong> (~$5 on Amazon) lets you use old optical drive bays.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Connect SATA data cable to motherboard + SATA power from PSU</strong>
+          <p>SATA data = flat ribbon cable to any open SATA port on the board. Power = the wider 5-pin SATA power from a PSU cable run.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Boot Windows, open Disk Management (diskmgmt.msc)</strong>
+          <p>New drive appears as "Unknown / Unallocated." Right-click → Initialize (choose MBR for &lt;2TB, GPT for 2TB+). Then right-click unallocated space → New Simple Volume → Format NTFS.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Assign a permanent drive letter</strong>
+          <p>Right-click the volume → Change Drive Letter → pick a high letter like <code>D:</code> or <code>E:</code>. This persists across reboots, unlike USB.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📂 Step 4: Migrate Data Off USB</div>
+    <p>Use <strong>robocopy</strong> — Windows' built-in robust file copier that handles permissions and large files correctly:</p>
+    <pre>robocopy "F:\Media" "D:\Media" /E /COPYALL /R:3 /W:5 /LOG:migrate_log.txt</pre>
+    <p><code>/E</code> = copy all subdirs including empty ones. <code>/COPYALL</code> = preserve timestamps &amp; permissions. <code>/R:3 /W:5</code> = retry 3 times, wait 5 sec. This is safe to run while files are in use.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>After migration:</strong> Update your Plex library folder paths in Settings → Libraries → Edit → change path from USB letter to new internal letter. Plex will re-match metadata but won't re-download it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Option B: New dedicated server build -->
+<div class="section">
+  <div class="section-title">🖧 Option B — Build a Dedicated Cheap Server</div>
+
+  <div class="card">
+    <div class="card-title">💡 Used Server Hardware (Best $/TB Ratio)</div>
+    <p>Purpose-built home servers can be had for very little. A used <strong>Dell PowerEdge T30</strong> or <strong>HP ProLiant MicroServer Gen8</strong> gives you 4+ SATA bays, ECC RAM, and server-grade NICs for $80–$200 used.</p>
+    <table>
+      <tr><th>Option</th><th>Drive Bays</th><th>Used Price</th><th>Notes</th></tr>
+      <tr><td>HP MicroServer Gen8</td><td>4x 3.5" + 1x ODD</td><td>$80–$150</td><td>Quiet, tiny, great for a closet server</td></tr>
+      <tr><td>Dell PowerEdge T30</td><td>4x 3.5" internal</td><td>$100–$200</td><td>Tower form factor, ECC RAM</td></tr>
+      <tr><td>Repurposed ATX PC</td><td>Depends on case</td><td>$0–$50</td><td>Add a PCIe SATA card for more ports</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔌 Adding More SATA Ports (PCIe Expansion Card)</div>
+    <p>If you've run out of motherboard SATA ports, a PCIe SATA controller adds 4–8 more ports for ~$20:</p>
+    <pre>Search: "PCIe SATA 6Gb controller card 4-port" on Amazon
+Recommended: IO Crest SI-PEX40064 (4-port, $18)
+Install: Slot into any open PCIe x1 slot, connect SATA cables, done.</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗂️ Windows Storage Spaces — Free RAID-like Pooling</div>
+    <p>Windows 10 includes <strong>Storage Spaces</strong>, which lets you pool multiple drives into one volume with optional redundancy — no third-party software required.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Open Storage Spaces</strong>
+          <p>Start → Search "Storage Spaces" → "Create a new pool and storage space"</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Select drives to pool</strong>
+          <p>Pick 2+ drives. These will be wiped. Do NOT include your OS drive.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Choose resiliency type</strong>
+          <p><strong>Simple (no redundancy)</strong> = most space, no protection. <strong>Mirror</strong> = 2x copies, needs 2+ drives. <strong>Parity</strong> = tolerates 1 drive failure, needs 3+ drives. For pure media storage, Simple is fine with backups.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Assign a drive letter and format NTFS</strong>
+          <p>Windows presents the pool as a single large drive. Plex, Minecraft, everything just sees <code>E:\</code>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Storage Spaces ≠ backup.</strong> It protects against a single drive dying, but not against ransomware, accidental deletion, or two drives failing at once. Keep a real backup of critical data.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Preventing USB sleep issues if you must keep USB -->
+<div class="section">
+  <div class="section-title">🔧 If You Must Keep USB Drives (Interim Fix)</div>
+  <div class="card">
+    <div class="card-title">Disable USB Selective Suspend</div>
+    <p>Go to <strong>Control Panel → Power Options → Change plan settings → Change advanced power settings → USB settings → USB selective suspend setting</strong> → set to <strong>Disabled</strong>.</p>
+    <p>Also set "Turn off hard disk after" to <strong>0 (Never)</strong> in the same advanced settings.</p>
+    <pre>PowerShell (run as admin):
+powercfg /change disk-timeout-ac 0
+powercfg /change disk-timeout-dc 0</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Assign Permanent Drive Letters via Registry</div>
+    <p>USB drives sometimes reassign letters. Fix by opening Disk Management → right-click each USB volume → "Change Drive Letter and Paths" → Assign a high letter like <code>X:</code> or <code>Z:</code> that won't be taken by other devices. This is stored in the registry and persists across reboots.</p>
+  </div>
+</div>
+
+</body>
+</html>

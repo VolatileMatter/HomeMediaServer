@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Audiobookshelf</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎧</div>
+  <div>
+    <h1>Audiobookshelf Server</h1>
+    <div class="subtitle">// Self-Hosted Audiobooks &amp; Podcasts · No Docker Required //</div>
+    <p class="desc">Audiobookshelf is the gold standard for self-hosted audiobook and podcast management. It streams to mobile apps, tracks listening progress, and syncs across devices.</p>
+  </div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Goal: Audiobookshelf running as a Windows Service on port 13378, serving your audiobook collection from an internal drive. Mobile apps connecting over local network (and Tailscale/VPN for remote).
+</div>
+
+<!-- Installation -->
+<div class="section">
+  <div class="section-title">⚙️ Installation — Windows Native <span class="tag tag-native">NATIVE · NO DOCKER</span></div>
+
+  <div class="card">
+    <div class="card-title">What You Need</div>
+    <ul>
+      <li>Windows 10 64-bit</li>
+      <li>Your audiobooks on an internal drive (e.g. <code>D:\Audiobooks</code>)</li>
+      <li>A free port — default is <code>13378</code></li>
+    </ul>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download the Windows installer</strong>
+        <p>Go to <a href="https://github.com/advplyr/audiobookshelf/releases" target="_blank">github.com/advplyr/audiobookshelf/releases</a> and download the latest <code>.exe</code> installer (e.g. <code>audiobookshelf-win-x64-installer.exe</code>).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run the installer as Administrator</strong>
+        <p>Right-click → Run as administrator. The installer sets up Audiobookshelf as a <strong>Windows Service</strong> automatically — it will start on boot without any extra configuration.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Verify the service is running</strong>
+        <pre># In PowerShell (admin):
+Get-Service -Name "AudioBookshelf"
+
+# Or in Task Manager → Services tab → look for "AudioBookshelf"</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open the web interface</strong>
+        <p>Navigate to <code>http://localhost:13378</code>. On first launch you'll be prompted to create an admin account.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open Windows Firewall for port 13378</strong>
+        <pre>netsh advfirewall firewall add rule name="Audiobookshelf" dir=in action=allow protocol=TCP localport=13378</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add your library</strong>
+        <p>In the web UI: <strong>Settings → Libraries → Add Library</strong>. Set type to "Audiobooks" and point it at your folder, e.g. <code>D:\Audiobooks</code>. Do the same for Podcasts if you have a podcast folder.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Folder structure -->
+<div class="section">
+  <div class="section-title">📁 Recommended Folder Structure</div>
+  <div class="card">
+    <p>Audiobookshelf works best when each audiobook is in its own folder, named <code>Author - Title</code> or just <code>Title</code>.</p>
+    <pre>D:\Audiobooks\
+  ├── Fiction\
+  │   ├── Brandon Sanderson - The Way of Kings\
+  │   │   ├── part1.mp3
+  │   │   ├── part2.mp3
+  │   │   └── cover.jpg
+  │   └── Terry Pratchett - Guards! Guards!\
+  │       └── guards_guards.m4b
+  └── Non-Fiction\
+      └── Matthew Walker - Why We Sleep\
+          └── why_we_sleep.mp3
+
+D:\Podcasts\
+  └── My Favorite Murder\
+      ├── episode_001.mp3
+      └── episode_002.mp3</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>.m4b files</strong> (audiobook format) store chapters, cover art, and metadata internally. Audiobookshelf reads all of this automatically. For multi-file audiobooks, add a <code>cover.jpg</code> in the folder.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile apps -->
+<div class="section">
+  <div class="section-title">📱 Mobile Apps</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📱 Official Audiobookshelf App</div>
+      <p>Available on iOS and Android. Free. Connect it by entering your server URL: <code>http://[server-IP]:13378</code>. It tracks progress across devices and supports background playback, sleep timers, and variable speed.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🎙️ Podcast Management</div>
+      <p>Audiobookshelf also acts as a full podcast manager. It can <strong>auto-download new episodes</strong> of any RSS feed you subscribe to. Configure under Settings → Podcasts → add RSS feed URL.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Metadata -->
+<div class="section">
+  <div class="section-title">🔎 Metadata &amp; Cover Art</div>
+  <div class="card">
+    <div class="card-title">Auto-fetching Metadata</div>
+    <p>Audiobookshelf can fetch metadata from Audible, Google Books, Open Library, and others. Go to <strong>Settings → Item Metadata Utils → Match Library Items</strong> to batch-update everything. You can also right-click individual books → "Match" to manually search.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">✨</div>
+      <div class="callout-body"><strong>Tone2 / Tonal integration:</strong> If you use <code>tone</code> (a free CLI tool for audiobook tagging), you can pre-tag all your files before adding them to Audiobookshelf for perfect metadata from the start.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Remote access -->
+<div class="section">
+  <div class="section-title">🌍 Remote Access (Outside Your Home)</div>
+  <div class="card">
+    <div class="card-title">Option A: Tailscale (Easiest, Free) <span class="tag tag-native">RECOMMENDED</span></div>
+    <p>Install Tailscale on your server and your phone. Your server gets a permanent private IP like <code>100.x.x.x</code>. The mobile app connects to <code>http://100.x.x.x:13378</code> from anywhere, securely, without opening ports.</p>
+    <p>Download: <a href="https://tailscale.com" target="_blank">tailscale.com</a> — free for personal use, up to 100 devices.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Option B: Port Forward (Router Config Required)</div>
+    <p>Log into your router (usually <code>192.168.1.1</code>), find "Port Forwarding," and forward external port <code>13378</code> to your server's local IP on port <code>13378</code>. Then access via your public IP. <strong>Recommend adding a username/password</strong> in Audiobookshelf admin settings before doing this.</p>
+  </div>
+</div>
+
+<!-- Backup -->
+<div class="section">
+  <div class="section-title">💾 Backups</div>
+  <div class="card">
+    <p>Audiobookshelf stores its database and metadata in <code>C:\ProgramData\audiobookshelf</code> (the default config path). Back this up regularly — it contains all your listening progress, user accounts, and podcast subscriptions. Your actual audio files are stored wherever you pointed the library (e.g. <code>D:\Audiobooks</code>).</p>
+    <pre># Simple robocopy backup to another drive:
+robocopy "C:\ProgramData\audiobookshelf" "E:\Backups\abs-config" /E /MIR</pre>
+  </div>
+</div>
+
+<!-- SSO teaser -->
+<div class="section">
+  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Audiobookshelf supports <strong>OpenID Connect (OIDC)</strong> authentication. This means you can integrate it with Google OAuth or a self-hosted SSO like Authentik. See the <strong>SSO tab</strong> for full setup. Once configured, users click "Sign in with Google" on the Audiobookshelf login page.</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GameCube Remote</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎮</div>
+  <div>
+    <h1>Remote GameCube Emulation</h1>
+    <div class="subtitle">// Dolphin · Sunshine/Moonlight · Play From Anywhere //</div>
+    <p class="desc">Stream Dolphin GameCube/Wii emulation from your desktop to any device anywhere in the world, using a controller connected to the remote device. Not browser-native — uses low-latency game streaming (like GeForce Now, but yours).</p>
+  </div>
+</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>The right architecture:</strong> GameCube games need ~60fps with low latency — pure browser streaming (like Parsec-in-browser) has too much delay for fast games. The best approach is <strong>Sunshine + Moonlight</strong>: Sunshine runs on your server and streams Dolphin, Moonlight is a native client app on the remote device. It's designed exactly for this and works over LAN and internet.</div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Goal: Sunshine streaming server on your desktop, Moonlight client on remote devices. Connect a controller to the remote device — it transmits inputs back. Single PIN or SSO-protected.
+</div>
+
+<!-- Architecture overview -->
+<div class="section">
+  <div class="section-title">🏗️ Architecture Overview</div>
+  <div class="card">
+    <table>
+      <tr><th>Component</th><th>Where It Runs</th><th>What It Does</th></tr>
+      <tr><td><strong>Dolphin</strong></td><td>Your desktop server</td><td>Emulates GameCube/Wii games. Runs headless or windowed.</td></tr>
+      <tr><td><strong>Sunshine</strong></td><td>Your desktop server</td><td>Game streaming host. Captures Dolphin's output, encodes it with GPU acceleration, streams to clients.</td></tr>
+      <tr><td><strong>Moonlight</strong></td><td>Remote device (PC, Mac, Android, iOS, TV)</td><td>Receives the stream, displays it, forwards controller input back to Sunshine.</td></tr>
+      <tr><td><strong>Controller</strong></td><td>Remote device</td><td>USB or Bluetooth gamepad connected to the remote device — inputs are forwarded as if connected to your server.</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🎮</div>
+      <div class="callout-body"><strong>Controller compatibility:</strong> Any XInput controller works over Moonlight — Xbox controllers, PS4/PS5 (via DS4Windows), Switch Pro Controller (via BetterJoy). The controller connects to the remote device, and Moonlight forwards inputs to your server exactly as if the controller was physically plugged in.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Dolphin setup -->
+<div class="section">
+  <div class="section-title">🐬 Step 1: Set Up Dolphin</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Dolphin</strong>
+        <p>From <a href="https://dolphin-emu.org/download" target="_blank">dolphin-emu.org/download</a>. Get the latest stable version. Extract to <code>D:\Emulators\Dolphin</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add your game ISOs/ROMs</strong>
+        <p>In Dolphin: Config → Paths → Add → point to your GameCube ISO folder (e.g. <code>D:\Games\GameCube</code>). You must own the games you dump.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure for streaming performance</strong>
+        <p>Graphics Settings → set Backend to <strong>Direct3D 12</strong> (best performance on Windows). V-Sync: ON. These settings ensure Dolphin renders at a consistent 60fps for clean streaming.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure controller input for Moonlight</strong>
+        <p>Dolphin → Controllers → Gamecube Port 1 → Standard Controller. Click Configure → for each button, select "XInput/0/Gamepad" (the virtual XInput device that Moonlight creates when a remote controller connects). Map all buttons.</p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>Pre-made Dolphin GameCube profiles:</strong> Search "Dolphin XInput GameCube profile" — there are community-made profiles that handle the button mapping automatically for Xbox-style controllers.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Test Dolphin locally first</strong>
+        <p>Launch a game, make sure it runs at 60fps, and that a locally-connected controller works. Resolve any performance issues before adding the streaming layer.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Sunshine setup -->
+<div class="section">
+  <div class="section-title">☀️ Step 2: Install &amp; Configure Sunshine</div>
+
+  <div class="card">
+    <div class="card-title">What Sunshine Is</div>
+    <p>Sunshine is an open-source, self-hosted game streaming server. It's the server-side replacement for Nvidia GameStream. Works with any GPU (AMD, Intel, or Nvidia). Streams via the RTSP protocol at up to 120fps in 4K.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download and install Sunshine</strong>
+        <p>From <a href="https://github.com/LizardByte/Sunshine/releases" target="_blank">github.com/LizardByte/Sunshine</a>. Download the <code>.exe</code> installer for Windows. Install — it creates a system tray icon and a web admin UI.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Access the Sunshine admin UI</strong>
+        <p>Open <code>https://localhost:47990</code> (note: HTTPS, self-signed cert — accept the browser warning). Set up your admin username and password on first launch.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add Dolphin as a streaming app</strong>
+        <p>In Sunshine web UI → Applications → Add:</p>
+        <pre>Name:         GameCube (or name of specific game)
+Cmd:          "D:\Emulators\Dolphin\Dolphin.exe"
+Working Dir:  D:\Emulators\Dolphin
+Image:        (optional: drag a cover art image)
+
+# For launching a specific game directly:
+Cmd: "D:\Emulators\Dolphin\Dolphin.exe" -e "D:\Games\GameCube\WindWaker.iso"</pre>
+        <p>You can add one entry per game, or just add Dolphin itself and let the user pick from the game list.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure streaming quality</strong>
+        <p>Configuration → Encoder settings:</p>
+        <pre>Resolution:  1920x1080 (or your monitor res)
+FPS:         60
+Bitrate:     20–50 Mbps (higher = better quality, more bandwidth)
+Encoder:     nvenc (Nvidia), AMF (AMD), or software (any GPU)</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open required firewall ports</strong>
+        <pre>netsh advfirewall firewall add rule name="Sunshine HTTP" dir=in action=allow protocol=TCP localport=47989
+netsh advfirewall firewall add rule name="Sunshine HTTPS" dir=in action=allow protocol=TCP localport=47990
+netsh advfirewall firewall add rule name="Sunshine Video" dir=in action=allow protocol=UDP localport=47998-48000
+netsh advfirewall firewall add rule name="Sunshine Control" dir=in action=allow protocol=TCP localport=47998-48010</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Set Sunshine to start on Windows boot</strong>
+        <p>Sunshine installs as a Windows Service by default. Verify in Services (services.msc) → "Sunshine" should be set to Automatic.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Moonlight setup -->
+<div class="section">
+  <div class="section-title">🌙 Step 3: Install Moonlight on Remote Devices</div>
+
+  <div class="card">
+    <div class="card-title">Available Platforms</div>
+    <table>
+      <tr><th>Platform</th><th>Download</th><th>Notes</th></tr>
+      <tr><td>Windows PC/Laptop</td><td><a href="https://moonlight-stream.org" target="_blank">moonlight-stream.org</a></td><td>Best experience, native app</td></tr>
+      <tr><td>macOS</td><td>App Store: "Moonlight Game Streaming"</td><td>Works great</td></tr>
+      <tr><td>Android</td><td>Play Store: "Moonlight Game Streaming"</td><td>Free, works with any Bluetooth controller</td></tr>
+      <tr><td>iOS/iPadOS</td><td>App Store: "Moonlight Game Streaming"</td><td>Free</td></tr>
+      <tr><td>Raspberry Pi / TV</td><td>moonlight-qt package</td><td>Put it on a Pi connected to any TV</td></tr>
+    </table>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Pair Moonlight with your server (LAN)</strong>
+        <p>Open Moonlight → Add Host → enter your server's local IP (e.g. <code>192.168.1.100</code>). Moonlight will show a 4-digit PIN. Enter this PIN in the Sunshine admin UI under "PIN Pair." Done — they're paired.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Connect a controller to the remote device</strong>
+        <p>Plug in a USB controller, or pair a Bluetooth gamepad to the phone/PC/TV. Moonlight forwards all controller input to Sunshine, which injects it into Windows as a virtual XInput device that Dolphin sees.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Launch a game</strong>
+        <p>In Moonlight, click your server → you'll see your Dolphin app(s). Click one → the stream starts. Full 1080p60 gameplay, controller working, from anywhere.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Remote access over internet -->
+<div class="section">
+  <div class="section-title">🌍 Remote Access Over the Internet</div>
+
+  <div class="card">
+    <div class="card-title">Option A: Tailscale (Recommended — Easiest) <span class="tag tag-native">RECOMMENDED</span></div>
+    <p>Install Tailscale on both your server and the remote device. In Moonlight, add the server's Tailscale IP (e.g. <code>100.x.x.x</code>) as the host instead of the local IP. Works instantly, no port forwarding, works through NAT and firewalls.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚡</div>
+      <div class="callout-body"><strong>Bandwidth requirement:</strong> Game streaming needs a good internet connection on both ends. At 20 Mbps bitrate, you need ~25 Mbps upload on your home connection and ~25 Mbps download on the remote device. For best results, the remote device should be on WiFi 5GHz or Ethernet.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option B: Port Forward</div>
+    <p>Forward the Sunshine ports (47989, 47990, 47998–48010) in your router to your server IP. Then add your home's public IP as a host in Moonlight. Pair with the PIN as normal. This works but exposes ports to the internet — change the Sunshine admin password to something very strong.</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- Authentication -->
+<div class="section">
+  <div class="section-title">🔐 Authentication &amp; Access Control</div>
+
+  <div class="card">
+    <div class="card-title">Single PIN (V1 — Simplest)</div>
+    <p>Moonlight pairing uses a one-time PIN. Once a device is paired, it connects without a PIN. To unpair a device: Sunshine admin UI → Clients → revoke the device. This is suitable for personal use.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SSO / Reverse Proxy Authentication (Advanced)</div>
+    <p>Sunshine's admin UI (port 47990) can be put behind a reverse proxy with authentication. Add a Caddy rule:</p>
+    <pre>sunshine.yourdomain.com {
+  forward_auth http://authentik:9000/outpost.goauthentik.io/...
+  reverse_proxy https://localhost:47990 {
+    transport http { tls_insecure_skip_verify }
+  }
+}</pre>
+    <p>This puts Authentik (from the SSO tab) in front of the Sunshine admin UI. The actual streaming protocol (Moonlight) handles its own authentication via device pairing and doesn't go through the proxy.</p>
+  </div>
+</div>
+
+<!-- Troubleshooting -->
+<div class="section">
+  <div class="section-title">🔧 Common Issues</div>
+  <div class="card">
+    <table>
+      <tr><th>Issue</th><th>Fix</th></tr>
+      <tr><td>Controller inputs not working in Dolphin</td><td>Make sure Dolphin controller profile is set to XInput, not "Background Input" only. In Sunshine: enable "Virtual Gamepad."</td></tr>
+      <tr><td>High latency over internet</td><td>Lower bitrate to 10–15 Mbps. Enable "Optimize game settings" in Moonlight. Use 720p if needed.</td></tr>
+      <tr><td>Black screen / stream won't start</td><td>Sunshine needs to run as the logged-in user's session, not a service account. Ensure a user is logged into Windows (not just at the lock screen).</td></tr>
+      <tr><td>Audio not transmitting</td><td>Sunshine → Audio → select your main audio output device. In Dolphin, ensure audio output isn't set to a virtual device.</td></tr>
+      <tr><td>Dolphin drops frames during stream</td><td>Pin Dolphin to high-performance cores in Task Manager → right-click → Set Affinity. Lower game's resolution multiplier in Dolphin graphics settings.</td></tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

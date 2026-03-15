@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OwnCloud</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">☁️</div>
+  <div>
+    <h1>Self-Hosted Cloud Storage</h1>
+    <div class="subtitle">// Nextcloud · Your Own Google Drive · No Docker Needed //</div>
+    <p class="desc">Run your own Google Drive / iCloud replacement on Windows 10. Nextcloud is the recommended choice — more active development than OwnCloud, free, and has Windows desktop and mobile apps.</p>
+  </div>
+</div>
+
+<div class="v1-banner">
+  🐉 V1 Goal: Nextcloud running natively on Windows using XAMPP, accessible on your local network with desktop sync clients on all your devices. SSO via Google OAuth documented in the SSO tab.
+</div>
+
+<!-- Nextcloud vs OwnCloud -->
+<div class="section">
+  <div class="section-title">⚖️ Nextcloud vs OwnCloud</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">✅ Nextcloud (Recommended)</div>
+      <p>Community fork of OwnCloud. More active development, more apps (Calendar, Contacts, Notes, Talk), better mobile apps, and free community edition. Desktop sync client available for Windows, Mac, Linux.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">OwnCloud</div>
+      <p>The original. Solid, enterprise-focused. Slightly simpler setup. The free "Community" edition is good but has fewer apps and slower updates than Nextcloud. Either works fine for personal use.</p>
+    </div>
+  </div>
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>Recommendation:</strong> Go with Nextcloud. Same concept, better apps, more community support. The setup process below applies to Nextcloud.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- XAMPP installation -->
+<div class="section">
+  <div class="section-title">⚙️ Installation via XAMPP (No Docker) <span class="tag tag-native">NATIVE WINDOWS</span></div>
+
+  <div class="card">
+    <div class="card-title">What XAMPP Is</div>
+    <p>XAMPP is a free Apache + MySQL + PHP bundle for Windows. Nextcloud is a PHP application, so XAMPP gives it everything it needs to run natively. No containers, no Linux subsystem.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install XAMPP</strong>
+        <p>Download from <a href="https://apachefriends.org" target="_blank">apachefriends.org</a>. Install to default location <code>C:\xampp</code>. During install, keep at minimum: <strong>Apache, MySQL, PHP, phpMyAdmin</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start Apache and MySQL in XAMPP Control Panel</strong>
+        <p>Open XAMPP Control Panel → click "Start" next to Apache and MySQL. Both should show green "Running."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create a Nextcloud database</strong>
+        <p>Open <code>http://localhost/phpmyadmin</code>. Click "New" in the left panel. Database name: <code>nextcloud</code>. Collation: <code>utf8mb4_general_ci</code>. Click Create.</p>
+        <p>Then go to User accounts → Add user account → Username: <code>nextcloud</code>, Host: <code>localhost</code>, set a strong password, check "Grant all privileges on database nextcloud." → Go.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Nextcloud</strong>
+        <p>Get the latest zip from <a href="https://nextcloud.com/install/#instructions-server" target="_blank">nextcloud.com/install</a>. Extract it. You'll get a folder called <code>nextcloud</code>. Move this entire folder to <code>C:\xampp\htdocs\nextcloud</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure PHP for Nextcloud</strong>
+        <p>Edit <code>C:\xampp\php\php.ini</code>. Find and change these values:</p>
+        <pre>memory_limit = 512M
+upload_max_filesize = 16G
+post_max_size = 16G
+max_execution_time = 3600
+date.timezone = America/Los_Angeles  ; (or your timezone)</pre>
+        <p>Also enable these extensions (remove the semicolon at the start of the line):</p>
+        <pre>extension=intl
+extension=gd
+extension=exif</pre>
+        <p>Restart Apache in XAMPP Control Panel after saving.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run the Nextcloud web installer</strong>
+        <p>Navigate to <code>http://localhost/nextcloud</code>. Fill in:</p>
+        <pre>Admin username:   your-admin-name
+Admin password:   strong password
+Data folder:      D:\NextcloudData   (on your internal drive!)
+Database:         MySQL
+DB user:          nextcloud
+DB password:      (the one you set)
+DB name:          nextcloud
+DB host:          localhost</pre>
+        <p>Click "Install" — this takes 1–2 minutes.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run XAMPP Services on Windows Startup</strong>
+        <p>In XAMPP Control Panel → click the checkbox in the "Svc" column next to Apache and MySQL. This registers them as Windows Services that start automatically on boot.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall for port 80</strong>
+        <pre>netsh advfirewall firewall add rule name="Nextcloud HTTP" dir=in action=allow protocol=TCP localport=80</pre>
+        <p>Access from other devices: <code>http://[your-server-IP]/nextcloud</code></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Desktop and mobile clients -->
+<div class="section">
+  <div class="section-title">💻 Desktop &amp; Mobile Sync Clients</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">💻 Windows Desktop Client</div>
+      <p>Download from <a href="https://nextcloud.com/install/#install-clients" target="_blank">nextcloud.com/install</a>. After install, enter your server URL (<code>http://[IP]/nextcloud</code>) and credentials. It creates a local sync folder that mirrors your cloud storage — just like Google Drive on your desktop.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📱 Mobile Apps</div>
+      <p>Nextcloud has official iOS and Android apps (free). Connect to your server URL. Enable "Auto Upload" for photos to have your phone's camera roll automatically backed up to your server.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Storage location -->
+<div class="section">
+  <div class="section-title">📁 Data Storage Location</div>
+  <div class="card">
+    <p>During setup you set the data folder to <code>D:\NextcloudData</code>. This is where all uploaded files actually live on disk. The MySQL database just stores metadata. To increase storage, just add more space to that drive (or point to a larger drive — change the path in <code>C:\xampp\htdocs\nextcloud\config\config.php</code>, key <code>datadirectory</code>).</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>External storage:</strong> Nextcloud has an "External Storage" app that lets you mount a local Windows folder as a Nextcloud share — great for exposing your Plex media library through Nextcloud without duplicating files.</div>
+    </div>
+  </div>
+</div>
+
+<!-- HTTPS -->
+<div class="section">
+  <div class="section-title">🔒 Adding HTTPS (When Ready)</div>
+  <div class="card">
+    <p>For LAN-only use, HTTP is fine. For remote access, you'll want HTTPS. The easiest path is to put <strong>Caddy</strong> (a lightweight reverse proxy) in front of XAMPP. Caddy handles free TLS certificates automatically.</p>
+    <pre># Install Caddy from caddyserver.com
+# Create C:\caddy\Caddyfile:
+
+cloud.yourdomain.com {
+  reverse_proxy localhost:80
+}
+
+# Or for local HTTPS (self-signed):
+http://192.168.1.100 {
+  tls internal
+  reverse_proxy localhost:80
+}</pre>
+  </div>
+</div>
+
+<!-- SSO teaser -->
+<div class="section">
+  <div class="section-title">🔐 SSO / Google Login <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Nextcloud supports <strong>Google OAuth login</strong> via the "Social Login" app (install from Nextcloud app store). Users can log in with their Google account. Also supports OIDC, SAML, and LDAP. Full setup walkthrough in the <strong>SSO tab</strong>.</p>
+  </div>
+</div>
+
+</body>
+</html>
