@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Utilities</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🛠️</div>
+  <div>
+    <h1>Utilities</h1>
+    <div class="subtitle">// Vikunja · Mealie · Uptime Kuma //</div>
+    <p class="desc">Three useful self-hosted utilities: Vikunja for task management, Mealie for recipe storage, and Uptime Kuma for service monitoring. All FOSS.</p>
+  </div>
+</div>
+
+<!-- ══ UPTIME KUMA ══ -->
+<div class="section">
+  <div class="section-title">📡 Uptime Kuma — Service Monitor <span class="tag tag-native">FOSS · Node.js</span></div>
+
+  <div class="card">
+    <div class="card-title">Port: <span class="tag tag-native">3001</span> · Is it a good addition?</div>
+    <p><strong>Yes — highly recommended.</strong> Uptime Kuma is a polished, actively maintained status monitoring dashboard. It goes beyond the basic ping checks in the custom dashboard by:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li>Monitoring HTTP/HTTPS endpoints, TCP ports, DNS records, databases</li>
+      <li>Sending alerts via email, Telegram, Discord, Pushover, ntfy, and 90+ other integrations</li>
+      <li>Tracking uptime history over time (99.9% vs 97% uptime charts)</li>
+      <li>Providing a public status page you can share with users</li>
+      <li>Monitoring response times with graphs</li>
+    </ul>
+    <p>It complements (not replaces) the custom dashboard — Uptime Kuma is for historical monitoring and alerts; the custom dashboard is for real-time control.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Node.js 20 LTS (if not already)</strong>
+        <p>From <a href="https://nodejs.org" target="_blank">nodejs.org</a>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Uptime Kuma</strong>
+        <pre>npm install -g uptime-kuma
+uptime-kuma --port 3001 --data-dir D:\Server\UptimeKuma</pre>
+        <p>Access at <code>http://localhost:3001</code>. Create admin account on first visit.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run as a Windows Service (NSSM)</strong>
+        <pre>nssm install UptimeKuma node "%AppData%\npm\node_modules\uptime-kuma\server\server.js"
+nssm set UptimeKuma AppParameters "--port 3001 --data-dir D:\Server\UptimeKuma"
+nssm start UptimeKuma</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add monitors for every service</strong>
+        <p>In Uptime Kuma → Add New Monitor → HTTP(s):</p>
+        <pre>Plex:           http://localhost:32400/web    (HTTP)
+Calibre-Web:    http://localhost:8083          (HTTP)
+Audiobookshelf: http://localhost:13378         (HTTP)
+Navidrome:      http://localhost:4533          (HTTP)
+Nextcloud:      http://localhost/nextcloud     (HTTP)
+Jellyfin:       http://localhost:8096          (HTTP)
+qBittorrent:    TCP localhost:8090             (TCP port)
+Minecraft Van:  TCP localhost:25565            (TCP port)
+Minecraft Mod:  TCP localhost:25566            (TCP port)
+Kavita Comics:  http://localhost:5000          (HTTP)
+RomM:           http://localhost:8098          (HTTP)</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure notification alerts</strong>
+        <p>Settings → Notifications → Add. Recommended: <strong>ntfy</strong> (push notifications, free, self-hostable) or <strong>Discord webhook</strong> (if you have a server Discord). You'll get a push notification on your phone when any service goes down.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Uptime Kuma" dir=in action=allow protocol=TCP localport=3001</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">📡</div>
+    <div class="callout-body"><strong>Public status page:</strong> Uptime Kuma can generate a public status page (like statuspage.io but free) at a custom URL. Configure it at Settings → Status Pages → Add Status Page. Expose at <code>status.yourdomain.com</code> alongside or instead of the custom monitor-public.html.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ══ VIKUNJA ══ -->
+<div class="section">
+  <div class="section-title">✅ Vikunja — Task Manager <span class="tag tag-native">FOSS · Windows Binary</span></div>
+
+  <div class="card">
+    <div class="card-title">Port: <span class="tag tag-native">3456</span> · What Vikunja Is</div>
+    <p>Vikunja is a self-hosted Todoist/Notion-style task manager. It supports projects, tasks with subtasks, due dates, priorities, labels, and team sharing. Great for managing server projects, D&D campaign notes, or anything that needs organized task tracking. Single binary, runs natively on Windows.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Vikunja</strong>
+        <p>From <a href="https://vikunja.io/docs/installing/" target="_blank">vikunja.io/docs/installing</a> → Windows binary. Extract <code>vikunja.exe</code> to <code>D:\Server\Vikunja\</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create config file</strong>
+        <p>Create <code>D:\Server\Vikunja\config.yml</code>:</p>
+        <pre>service:
+  jwtsecret: "change-this-to-a-long-random-string"
+  frontendurl: "http://[your-server-ip]:3456/"
+  interface: ":3456"
+
+database:
+  type: "sqlite"
+  path: "D:/Server/Vikunja/vikunja.db"
+
+files:
+  basepath: "D:/Server/Vikunja/files/"</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run and install as service</strong>
+        <pre>cd D:\Server\Vikunja
+vikunja.exe  # test run first
+
+# Then install via NSSM:
+nssm install Vikunja "D:\Server\Vikunja\vikunja.exe"
+nssm set Vikunja AppDirectory "D:\Server\Vikunja"
+nssm start Vikunja
+
+netsh advfirewall firewall add rule name="Vikunja" dir=in action=allow protocol=TCP localport=3456</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Access and create account</strong>
+        <p>Open <code>http://localhost:3456</code>. Register your admin account. You can enable or disable public registration in config.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SSO Integration</div>
+    <p>Vikunja supports OpenID Connect. In <code>config.yml</code>:</p>
+    <pre>auth:
+  openidconnect:
+    enabled: true
+    redirecturl: "http://[server]:3456/auth/openid/"
+    providers:
+      - name: "Google"
+        authurl: "https://accounts.google.com"
+        clientid: "your-client-id"
+        clientsecret: "your-client-secret"</pre>
+  </div>
+</div>
+
+<hr>
+
+<!-- ══ MEALIE ══ -->
+<div class="section">
+  <div class="section-title">🍲 Mealie — Recipe Manager <span class="tag tag-docker">WSL2</span></div>
+
+  <div class="card">
+    <div class="card-title">Port: <span class="tag tag-native">9925</span> · What Mealie Is</div>
+    <p>Mealie is a self-hosted recipe manager and meal planner. Import recipes from any URL (it scrapes the recipe from cooking sites automatically), organize them into collections, plan weekly meals, and generate shopping lists. Runs via Docker in WSL2.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Create Mealie directory in WSL2</strong>
+        <pre>mkdir ~/mealie && cd ~/mealie</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create docker-compose.yml</strong>
+        <pre>cat > docker-compose.yml << 'EOF'
+version: "3.7"
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    ports:
+      - "9925:9000"
+    environment:
+      - ALLOW_SIGNUP=false
+      - DEFAULT_EMAIL=admin@yourdomain.com
+      - DEFAULT_PASSWORD=changeme
+      - BASE_URL=http://[server-ip]:9925
+      - DB_ENGINE=sqlite
+    volumes:
+      - ~/mealie/data:/app/data
+    restart: unless-stopped
+EOF
+docker-compose up -d</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Access and set up</strong>
+        <p>Open <code>http://localhost:9925</code>. Log in with the default credentials you set → change the password → create user accounts for your household.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Import your first recipe</strong>
+        <p>Click "Create Recipe" → "Scrape a Website" → paste any recipe URL from AllRecipes, NYT Cooking, Serious Eats, etc. Mealie extracts ingredients, steps, and photos automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <pre># Add to Task Scheduler (At startup, delay 3 minutes):
+wsl -d Ubuntu -- bash -c "cd ~/mealie && docker-compose up -d"
+
+# Open firewall:
+netsh advfirewall firewall add rule name="Mealie" dir=in action=allow protocol=TCP localport=9925</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">🍲</div>
+    <div class="callout-body"><strong>Meal planning + shopping list:</strong> Mealie's meal planner lets you drag recipes into a weekly calendar. It automatically generates a consolidated shopping list from all planned meals. Export as PDF or share with household members via the app.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SSO Integration</div>
+    <p>Mealie supports OpenID Connect in newer versions. Set via environment variables:</p>
+    <pre>environment:
+  - OIDC_AUTH_ENABLED=true
+  - OIDC_SIGNUP_ENABLED=false
+  - OIDC_CONFIGURATION_URL=https://accounts.google.com/.well-known/openid-configuration
+  - OIDC_CLIENT_ID=your-client-id
+  - OIDC_CLIENT_SECRET=your-client-secret</pre>
+  </div>
+</div>
+
+</body>
+</html>

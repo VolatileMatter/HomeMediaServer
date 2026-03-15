@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>RomM</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🕹️</div>
+  <div>
+    <h1>RomM — ROM Library Manager</h1>
+    <div class="subtitle">// Browse &amp; Download ROMs · Web Interface · Port 8098 //</div>
+    <p class="desc">RomM (ROM Manager) is a self-hosted web application that organizes your ROM collection with cover art, metadata, and a beautiful browser interface. Users can browse your collection and download ROMs to play locally.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: RomM running on port 8098 via WSL2/Docker, serving your ROM library at romm.yourdomain.com with per-user access and download capability.</div>
+
+<div class="callout callout-dragon">
+  <div class="callout-icon">🐉</div>
+  <div class="callout-body"><strong>Legal note:</strong> Distributing ROMs is legally grey even if you own the originals. RomM is designed for personal use — serving your own collection to yourself across devices, or to a closed group of trusted people. Don't make it publicly accessible on the internet.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">🏗️ Architecture</div>
+  <div class="card">
+    <p>RomM is Docker-only officially, but runs cleanly in WSL2. It provides:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li>Web gallery with cover art fetched from IGDB/MobyGames/Screenscraper</li>
+      <li>Filter by platform (GBA, N64, PS1, etc.), genre, year</li>
+      <li>Download individual ROMs from the browser</li>
+      <li>Multi-user accounts with per-user download history</li>
+      <li>REST API (for integration with EmulatorJS later)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Installation via WSL2 <span class="tag tag-docker">WSL2 + Docker</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Enable WSL2 and install Ubuntu (if not already done)</strong>
+        <pre>wsl --install
+# Reboot, then open Ubuntu from Start Menu</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Docker inside WSL2</strong>
+        <pre>sudo apt update && sudo apt install -y docker.io docker-compose
+sudo usermod -aG docker $USER
+newgrp docker</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create RomM config directory</strong>
+        <pre>mkdir -p ~/romm/{config,resources,redis-data}
+cd ~/romm</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create docker-compose.yml</strong>
+        <pre>cat > docker-compose.yml << 'EOF'
+version: "3"
+services:
+  romm:
+    image: rommapp/romm:latest
+    container_name: romm
+    environment:
+      - DB_PASSWD=strongpassword
+      - ROMM_AUTH_SECRET_KEY=change-this-to-a-long-random-string
+      - IGDB_CLIENT_ID=your-igdb-client-id
+      - IGDB_CLIENT_SECRET=your-igdb-client-secret
+    volumes:
+      # Point at your Windows ROM folder via WSL2 path:
+      - /mnt/d/Emulation:/romm/library
+      - ~/romm/resources:/romm/resources
+      - ~/romm/config:/romm/config
+    ports:
+      - "8098:8080"
+    depends_on:
+      - romm-db
+    restart: unless-stopped
+
+  romm-db:
+    image: mariadb:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=strongrootpassword
+      - MYSQL_DATABASE=romm
+      - MYSQL_USER=romm
+      - MYSQL_PASSWORD=strongpassword
+    volumes:
+      - ~/romm/mysql-data:/var/lib/mysql
+    restart: unless-stopped
+EOF</pre>
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>Windows path in WSL2:</strong> Your <code>D:\Emulation</code> folder is accessible at <code>/mnt/d/Emulation</code> inside WSL2. RomM reads directly from this path — no copying needed.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Get IGDB API credentials (free, for cover art)</strong>
+        <p>Go to <a href="https://dev.twitch.tv/console" target="_blank">dev.twitch.tv/console</a> → create a free app → get Client ID and Client Secret. These let RomM fetch cover art and metadata from IGDB.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start RomM</strong>
+        <pre>docker-compose up -d
+# Access at http://localhost:8098
+# First-time setup: create admin account</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot via Task Scheduler</strong>
+        <pre># Create startup task:
+# Action: wsl -d Ubuntu -u [your-wsl-username] -e bash -c "cd ~/romm && docker-compose up -d"
+# Trigger: At startup, delay 2 minutes
+
+# Or create a startup bat file:
+# wsl -d Ubuntu -- bash -c "cd ~/romm && docker-compose up -d >> ~/romm/startup.log 2>&1"</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall for port 8098</strong>
+        <pre>netsh advfirewall firewall add rule name="RomM" dir=in action=allow protocol=TCP localport=8098</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📁 ROM Library Structure</div>
+  <div class="card">
+    <p>RomM expects a specific folder structure — platform folders named by their platform ID:</p>
+    <pre>D:\Emulation\
+  ├── gba\          ← Game Boy Advance
+  │   ├── Pokemon Emerald.gba
+  │   └── Fire Emblem.gba
+  ├── n64\          ← Nintendo 64
+  │   └── Mario Party 2.z64
+  ├── nds\          ← Nintendo DS
+  ├── gc\           ← GameCube
+  ├── wii\          ← Wii
+  ├── xbox360\      ← Xbox 360
+  ├── psx\          ← PlayStation 1
+  └── snes\         ← Super Nintendo</pre>
+    <p>After starting RomM and pointing it at this folder, go to the admin panel → Scan Library. It will automatically fetch cover art, descriptions, genres, and release years for every ROM.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">👥 Users &amp; Downloads</div>
+  <div class="card">
+    <p>RomM has built-in user management. Admin panel → Users → create accounts for your users. Each user can:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li>Browse the full ROM library with cover art</li>
+      <li>Download ROMs to their device (plays in their local emulator or EmulatorJS)</li>
+      <li>See their download history</li>
+    </ul>
+    <p>You can restrict download access per user, or set the server to require login before browsing. Keep this behind Tailscale or Caddy with auth — don't expose publicly.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔗 Integration with EmulatorJS</div>
+  <div class="card">
+    <p>RomM has a REST API. The EmulatorJS game picker can optionally call RomM's API to list available ROMs instead of hardcoding them. This means you manage your ROM library in one place (RomM) and the web emulator automatically stays up to date.</p>
+    <pre># RomM API example — list all GBA ROMs:
+GET http://localhost:8098/api/roms?platform=gba
+
+# Response includes download URLs, metadata, cover art URLs, etc.</pre>
+  </div>
+</div>
+
+</body>
+</html>

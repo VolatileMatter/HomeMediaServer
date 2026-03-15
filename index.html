@@ -13,10 +13,11 @@
     --tab-hover:#161b28;--danger:#e05c5c;--success:#4caf7d;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;min-height:100vh;overflow-x:hidden;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;overflow:hidden;}
   body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
-  .shell{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 16px 40px;}
-  header{display:flex;align-items:center;gap:20px;padding:16px 24px;background:var(--bg3);border:1px solid var(--border);border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;}
+  .shell{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:12px 16px;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+  header{display:flex;align-items:center;gap:20px;padding:12px 20px;background:var(--bg3);border:1px solid var(--border);border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;flex-shrink:0;}
   .header-dragon{font-size:2.4rem;line-height:1;filter:drop-shadow(0 0 12px rgba(200,168,75,0.5));}
   .header-text h1{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;color:var(--accent);letter-spacing:.06em;text-shadow:0 0 20px rgba(200,168,75,0.3);}
   .header-text p{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim);margin-top:2px;letter-spacing:.1em;}
@@ -25,11 +26,11 @@
   .badge-win{background:rgba(91,141,217,.2);color:var(--accent2);border:1px solid rgba(91,141,217,.3);}
   .badge-v1{background:rgba(78,205,196,.15);color:var(--accent3);border:1px solid rgba(78,205,196,.3);}
   .badge-foss{background:rgba(76,175,125,.15);color:#4caf7d;border:1px solid rgba(76,175,125,.3);}
-  .binder-body{display:flex;border:1px solid var(--border);border-top:none;min-height:700px;}
+  .binder-body{display:flex;border:1px solid var(--border);border-top:none;flex:1;overflow:hidden;min-height:0;}
   .tab-spine{width:44px;background:linear-gradient(180deg,#0d1018,#0a0c0f);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:2px;flex-shrink:0;}
   .spine-label{writing-mode:vertical-rl;font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;padding:8px 4px;}
   .ring{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:var(--bg);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);flex-shrink:0;}
-  .tab-bar-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .tab-bar-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;}
   .tab-bar-row{display:flex;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--border);scrollbar-width:thin;scrollbar-color:var(--border) transparent;flex-shrink:0;}
   .tab-bar-row::-webkit-scrollbar{height:3px;}.tab-bar-row::-webkit-scrollbar-thumb{background:var(--border);}
   .tab-group-label{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;padding:4px 10px 0;white-space:nowrap;align-self:flex-end;opacity:.6;}
@@ -40,16 +41,16 @@
   .tab-btn.active .ti{filter:drop-shadow(0 0 5px rgba(200,168,75,.6));}
   .notif{position:absolute;top:4px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 5px var(--danger);display:none;}
   .has-notif .notif{display:block;}
-  .content-area{flex:1;overflow:hidden;min-height:620px;}
+  .content-area{flex:1;overflow:hidden;min-height:0;}
   .tab-content{display:none;height:100%;}
-  .tab-content.active{display:block;animation:fadeIn .2s ease;}
+  .tab-content.active{display:block;animation:fadeIn .2s ease;height:100%;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
-  .tab-content iframe{width:100%;height:calc(100vh - 210px);min-height:620px;border:none;background:#0e1117;display:block;}
-  .tab-loading{display:flex;align-items:center;justify-content:center;height:calc(100vh - 210px);min-height:620px;background:#0e1117;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em;flex-direction:column;gap:10px;}
+  .tab-content iframe{width:100%;height:100%;border:none;background:#0e1117;display:block;}
+  .tab-loading{display:flex;align-items:center;justify-content:center;height:100%;background:#0e1117;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em;flex-direction:column;gap:10px;}
   .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg)}}
-  footer{margin-top:12px;display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:0 0 4px 4px;flex-wrap:wrap;gap:6px;}
-  footer span{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);letter-spacing:.08em;}
+  footer{padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;flex-wrap:wrap;gap:4px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+  footer span{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);letter-spacing:.08em;}
   .sdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:5px;box-shadow:0 0 6px var(--success);animation:pulse 2s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 </style>
@@ -79,86 +80,104 @@
 
   <div class="tab-bar-wrapper">
 
-    <!-- Row 1: Infra -->
+    <!-- Row 1: Infra & Admin -->
     <div class="tab-bar-row">
       <span class="tab-group-label">infra //</span>
       <button class="tab-btn" id="tab-home"           onclick="go('home')"><span class="ti">🏠</span>Home</button>
       <button class="tab-btn active" id="tab-dashboard"   onclick="go('dashboard')"><span class="ti">🖥️</span>Dashboard<span class="notif"></span></button>
-      <button class="tab-btn" id="tab-overview"           onclick="go('overview')"><span class="ti">📋</span>Overview</button>
-      <button class="tab-btn" id="tab-hardware"           onclick="go('hardware')"><span class="ti">🖧</span>Hardware</button>
-      <button class="tab-btn" id="tab-security"           onclick="go('security')"><span class="ti">🛡️</span>Security</button>
-      <button class="tab-btn" id="tab-domain"             onclick="go('domain')"><span class="ti">🌐</span>Domain</button>
-      <button class="tab-btn" id="tab-linux"              onclick="go('linux')"><span class="ti">🐧</span>Linux</button>
-      <button class="tab-btn" id="tab-sso"                onclick="go('sso')"><span class="ti">🔐</span>SSO &amp; Users</button>
+      <button class="tab-btn" id="tab-dashsetup"      onclick="go('dashsetup')"><span class="ti">📐</span>Dash Setup</button>
+      <button class="tab-btn" id="tab-overview"       onclick="go('overview')"><span class="ti">📋</span>Overview</button>
+      <button class="tab-btn" id="tab-ports"          onclick="go('ports')"><span class="ti">🔌</span>Ports</button>
+      <button class="tab-btn" id="tab-hardware"       onclick="go('hardware')"><span class="ti">🖧</span>Hardware</button>
+      <button class="tab-btn" id="tab-security"       onclick="go('security')"><span class="ti">🛡️</span>Security</button>
+      <button class="tab-btn" id="tab-domain"         onclick="go('domain')"><span class="ti">🌐</span>Domain</button>
+      <button class="tab-btn" id="tab-linux"          onclick="go('linux')"><span class="ti">🐧</span>Linux</button>
+      <button class="tab-btn" id="tab-sso"            onclick="go('sso')"><span class="ti">🔐</span>SSO</button>
       <button class="tab-btn has-notif" id="tab-feedback" onclick="go('feedback')"><span class="ti">💬</span>Feedback<span class="notif"></span></button>
+      <button class="tab-btn" id="tab-userhomepage"   onclick="go('userhomepage')"><span class="ti">🧑</span>User Home</button>
+      <button class="tab-btn" id="tab-usersettings"   onclick="go('usersettings')"><span class="ti">⚙️</span>User Settings</button>
     </div>
 
-    <!-- Row 2: Services -->
+    <!-- Row 2: Media & Services -->
     <div class="tab-bar-row">
-      <span class="tab-group-label">services //</span>
-      <button class="tab-btn" id="tab-calibre"    onclick="go('calibre')"><span class="ti">📚</span>Calibre</button>
-      <button class="tab-btn" id="tab-audiobooks" onclick="go('audiobooks')"><span class="ti">🎧</span>Audiobooks</button>
-      <button class="tab-btn" id="tab-navidrome"  onclick="go('navidrome')"><span class="ti">🎶</span>Navidrome</button>
-      <button class="tab-btn" id="tab-nextcloud"  onclick="go('nextcloud')"><span class="ti">☁️</span>Nextcloud</button>
-      <button class="tab-btn" id="tab-seedbox"    onclick="go('seedbox')"><span class="ti">🌱</span>Seedbox</button>
-      <button class="tab-btn" id="tab-jukebox"    onclick="go('jukebox')"><span class="ti">🎵</span>Jukebox</button>
-      <button class="tab-btn" id="tab-ollama"     onclick="go('ollama')"><span class="ti">🤖</span>Private AI</button>
+      <span class="tab-group-label">media //</span>
+      <button class="tab-btn" id="tab-movies"        onclick="go('movies')"><span class="ti">🎬</span>Movies</button>
+      <button class="tab-btn" id="tab-calibre"       onclick="go('calibre')"><span class="ti">📚</span>Calibre</button>
+      <button class="tab-btn" id="tab-audiobooks"    onclick="go('audiobooks')"><span class="ti">🎧</span>Audiobooks</button>
+      <button class="tab-btn" id="tab-navidrome"     onclick="go('navidrome')"><span class="ti">🎶</span>Navidrome</button>
+      <button class="tab-btn" id="tab-kavita"        onclick="go('kavita')"><span class="ti">📕</span>Kavita</button>
+      <button class="tab-btn" id="tab-immich"        onclick="go('immich')"><span class="ti">📷</span>Immich</button>
+      <button class="tab-btn" id="tab-nextcloud"     onclick="go('nextcloud')"><span class="ti">☁️</span>Nextcloud</button>
+      <button class="tab-btn" id="tab-seedbox"       onclick="go('seedbox')"><span class="ti">🌱</span>Seedbox</button>
+      <button class="tab-btn" id="tab-jukebox"       onclick="go('jukebox')"><span class="ti">🎵</span>Jukebox</button>
+      <button class="tab-btn" id="tab-ollama"        onclick="go('ollama')"><span class="ti">🤖</span>Private AI</button>
       <button class="tab-btn" id="tab-recommendations" onclick="go('recommendations')"><span class="ti">🎯</span>Recs</button>
-      <button class="tab-btn" id="tab-wikipedia"  onclick="go('wikipedia')"><span class="ti">📖</span>Offline Wiki</button>
-      <button class="tab-btn" id="tab-languages"  onclick="go('languages')"><span class="ti">🌍</span>Languages</button>
+      <button class="tab-btn" id="tab-wikipedia"     onclick="go('wikipedia')"><span class="ti">📖</span>Offline Wiki</button>
+      <button class="tab-btn" id="tab-languages"     onclick="go('languages')"><span class="ti">🌍</span>Languages</button>
+      <button class="tab-btn" id="tab-utilities"     onclick="go('utilities')"><span class="ti">🛠️</span>Utilities</button>
     </div>
 
     <!-- Row 3: Game Servers -->
     <div class="tab-bar-row">
       <span class="tab-group-label">servers //</span>
-      <button class="tab-btn" id="tab-minecraft"  onclick="go('minecraft')"><span class="ti">⛏️</span>Minecraft</button>
-      <button class="tab-btn" id="tab-ark"        onclick="go('ark')"><span class="ti">🦕</span>ARK</button>
-      <button class="tab-btn" id="tab-ss13"       onclick="go('ss13')"><span class="ti">🚀</span>SS13</button>
+      <button class="tab-btn" id="tab-minecraft"     onclick="go('minecraft')"><span class="ti">⛏️</span>Minecraft</button>
+      <button class="tab-btn" id="tab-ark"           onclick="go('ark')"><span class="ti">🦕</span>ARK</button>
+      <button class="tab-btn" id="tab-ss13"          onclick="go('ss13')"><span class="ti">🚀</span>SS13</button>
     </div>
 
-    <!-- Row 4: Gaming -->
+    <!-- Row 4: Gaming & Emulation -->
     <div class="tab-bar-row">
       <span class="tab-group-label">gaming //</span>
-      <button class="tab-btn" id="tab-steam"       onclick="go('steam')"><span class="ti">🎮</span>Steam</button>
-      <button class="tab-btn" id="tab-gamecube"    onclick="go('gamecube')"><span class="ti">🟣</span>GameCube</button>
-      <button class="tab-btn" id="tab-xbox360"     onclick="go('xbox360')"><span class="ti">🟢</span>Xbox 360</button>
-      <button class="tab-btn" id="tab-pokemon"     onclick="go('pokemon')"><span class="ti">⚡</span>Pokémon</button>
-      <button class="tab-btn" id="tab-castlevania" onclick="go('castlevania')"><span class="ti">🧛</span>Castlevania</button>
-      <button class="tab-btn" id="tab-fireemblem"  onclick="go('fireemblem')"><span class="ti">⚔️</span>Fire Emblem</button>
-      <button class="tab-btn" id="tab-marioparty"  onclick="go('marioparty')"><span class="ti">🎲</span>Mario Party</button>
+      <button class="tab-btn" id="tab-steam"         onclick="go('steam')"><span class="ti">🎮</span>Steam</button>
+      <button class="tab-btn" id="tab-gamecube"      onclick="go('gamecube')"><span class="ti">🟣</span>GameCube</button>
+      <button class="tab-btn" id="tab-xbox360"       onclick="go('xbox360')"><span class="ti">🟢</span>Xbox 360</button>
+      <button class="tab-btn" id="tab-romm"          onclick="go('romm')"><span class="ti">🕹️</span>RomM</button>
+      <button class="tab-btn" id="tab-pokemon"       onclick="go('pokemon')"><span class="ti">⚡</span>Pokémon</button>
+      <button class="tab-btn" id="tab-castlevania"   onclick="go('castlevania')"><span class="ti">🧛</span>Castlevania</button>
+      <button class="tab-btn" id="tab-fireemblem"    onclick="go('fireemblem')"><span class="ti">⚔️</span>Fire Emblem</button>
+      <button class="tab-btn" id="tab-marioparty"    onclick="go('marioparty')"><span class="ti">🎲</span>Mario Party</button>
     </div>
 
-    <!-- Content panes — all start as loading placeholders; iframes injected lazily -->
+    <!-- Content panes — iframes injected lazily on first click -->
     <div class="content-area">
-      <div class="tab-content active" id="pane-home">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-dashboard">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-overview">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-hardware">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-security">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-domain">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-linux">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-sso">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-feedback">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-calibre">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-audiobooks"> <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-navidrome">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-nextcloud">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-seedbox">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-jukebox">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-ollama">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content active" id="pane-home">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-dashboard">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-dashsetup">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-overview">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-ports">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-hardware">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-security">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-domain">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-linux">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-sso">          <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-feedback">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-userhomepage"> <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-usersettings"> <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-movies">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-calibre">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-audiobooks">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-navidrome">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-kavita">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-immich">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-nextcloud">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-seedbox">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-jukebox">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-ollama">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-recommendations"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-wikipedia">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-languages">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-minecraft">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-ark">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-ss13">       <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-steam">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-gamecube">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-xbox360">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-pokemon">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-castlevania"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-fireemblem"> <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
-      <div class="tab-content"        id="pane-marioparty"> <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-wikipedia">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-languages">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-utilities">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-romm">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-minecraft">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-ark">          <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-ss13">         <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-steam">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-gamecube">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-xbox360">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-pokemon">      <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-castlevania">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-fireemblem">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-marioparty">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
     </div>
 
   </div><!-- end tab-bar-wrapper -->
@@ -175,35 +194,44 @@
 <script>
 // ── Single source of truth: tab name → filename ──
 const FILES = {
-  home:          'home.html',
-  dashboard:   'monitor-control.html',
-  overview:    'overview.html',
-  hardware:    'hardware.html',
-  security:    'security.html',
-  domain:      'domain.html',
-  linux:       'linux.html',
-  sso:         'sso.html',
-  feedback:    'feedback.html',
-  calibre:     'calibre.html',
-  audiobooks:  'audiobooks.html',
-  navidrome:   'navidrome.html',
-  nextcloud:   'owncloud.html',
-  seedbox:     'seedbox.html',
-  jukebox:     'jukebox.html',
-  ollama:      'ollama.html',
+  home:            'home.html',
+  dashboard:       'monitor-control.html',
+  dashsetup:       'dashboard-setup.html',
+  overview:        'overview.html',
+  hardware:        'hardware.html',
+  ports:           'ports.html',
+  security:        'security.html',
+  domain:          'domain.html',
+  linux:           'linux.html',
+  sso:             'sso.html',
+  feedback:        'feedback.html',
+  userhomepage:    'user-homepage.html',
+  usersettings:    'user-settings.html',
+  movies:          'movies.html',
+  calibre:         'calibre.html',
+  audiobooks:      'audiobooks.html',
+  navidrome:       'navidrome.html',
+  nextcloud:       'owncloud.html',
+  kavita:          'kavita.html',
+  immich:          'immich.html',
+  seedbox:         'seedbox.html',
+  jukebox:         'jukebox.html',
+  ollama:          'ollama.html',
   recommendations: 'recommendations.html',
-  wikipedia:   'wikipedia.html',
-  languages:   'languages.html',
-  minecraft:   'minecraft.html',
-  ark:         'ark.html',
-  ss13:        'ss13.html',
-  steam:       'steam.html',
-  gamecube:    'gamecube.html',
-  xbox360:     'xbox360.html',
-  pokemon:     'pokemon.html',
-  castlevania: 'castlevania.html',
-  fireemblem:  'fireemblem.html',
-  marioparty:  'marioparty.html',
+  wikipedia:       'wikipedia.html',
+  languages:       'languages.html',
+  utilities:       'utilities.html',
+  romm:            'romm.html',
+  minecraft:       'minecraft.html',
+  ark:             'ark.html',
+  ss13:            'ss13.html',
+  steam:           'steam.html',
+  gamecube:        'gamecube.html',
+  xbox360:         'xbox360.html',
+  pokemon:         'pokemon.html',
+  castlevania:     'castlevania.html',
+  fireemblem:      'fireemblem.html',
+  marioparty:      'marioparty.html',
 };
 
 const loaded = new Set();
@@ -228,7 +256,7 @@ function go(name) {
     const iframe = document.createElement('iframe');
     iframe.src   = FILES[name];
     iframe.title = name;
-    iframe.setAttribute('style', 'width:100%;height:calc(100vh - 210px);min-height:620px;border:none;background:#0e1117;display:block;');
+    iframe.setAttribute('style', 'width:100%;height:100%;border:none;background:#0e1117;display:block;');
     pane.innerHTML = '';   // clear the loading spinner
     pane.appendChild(iframe);
   }

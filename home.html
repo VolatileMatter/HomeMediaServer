@@ -115,6 +115,31 @@
 </div>
 
 <!-- Overall progress -->
+<!-- ── Sunshine busy warning (polls stats server) ── -->
+<div id="sunshine-warning" style="display:none;background:rgba(224,184,75,.08);border:1px solid rgba(224,184,75,.3);border-radius:4px;padding:12px 16px;margin-bottom:16px;display:none">
+  <div style="font-family:'Cinzel',serif;font-size:.85rem;color:#e0b84b;margin-bottom:6px">☀️ Game Streaming In Use</div>
+  <div style="font-size:.82rem;color:var(--text-dim)">
+    Someone is currently streaming a game via Sunshine. <strong style="color:#e0b84b">Dolphin (GameCube), Xenia (Xbox 360), and Steam Remote Play are unavailable</strong> until the current session ends.
+    <br><br>
+    In the meantime, these games still work in your browser (no streaming needed):
+    <a href="http://localhost:8085/pokemon" style="color:var(--accent2)">⚡ Pokémon</a> ·
+    <a href="http://localhost:8085/castlevania" style="color:var(--accent2)">🧛 Castlevania</a> ·
+    <a href="http://localhost:8085/fireemblem" style="color:var(--accent2)">⚔️ Fire Emblem</a>
+  </div>
+</div>
+
+<!-- ── Live achievements feed ── -->
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:20px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <span style="font-size:1rem">🏆</span>
+    <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase">Community Achievements</span>
+    <span style="margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim)" id="ach-last-update"></span>
+  </div>
+  <div id="ach-feed" style="display:flex;flex-wrap:wrap;gap:8px">
+    <div style="font-size:.75rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace">Loading achievements…</div>
+  </div>
+</div>
+
 <div class="progress-bar-wrap">
   <div class="progress-label">
     <span>Overall Progress</span>
@@ -704,6 +729,63 @@ function updateProgress() {
 
 loadProgress();
 updateProgress();
+
+// Poll stats server for Sunshine status
+async function pollServerStatus() {
+  try {
+    const r = await fetch('http://localhost:9001/stats', { cache: 'no-cache' });
+    const d = await r.json();
+    const warn = document.getElementById('sunshine-warning');
+    if (d.sunshine_active) {
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+  } catch(e) {
+    // Stats server not running — don't show warning
+  }
+}
+
+// Load achievements feed
+async function loadAchievements() {
+  try {
+    const r = await fetch('http://localhost:9003/achievements/recent', { cache: 'no-cache' });
+    const data = await r.json();
+    const feed = document.getElementById('ach-feed');
+    if (data && data.length > 0) {
+      // Filter to only public achievements
+      const public_achs = data.filter(a => a.public !== false).slice(0, 12);
+      feed.innerHTML = public_achs.map(a => `
+        <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;padding:6px 10px;font-size:.75rem">
+          <span style="font-size:1rem">${a.icon || '🏅'}</span>
+          <span style="font-weight:700;color:#9098b0">${a.user}</span>
+          <span style="color:#6e7a94">earned</span>
+          <span style="color:var(--accent)">${a.name}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#3a4555;margin-left:4px">${a.date || ''}</span>
+        </div>
+      `).join('');
+    } else {
+      feed.innerHTML = '<div style="font-size:.75rem;color:var(--text-dim)">No achievements yet — start reading and playing to earn some!</div>';
+    }
+    document.getElementById('ach-last-update').textContent = new Date().toLocaleTimeString();
+  } catch(e) {
+    // Achievement server not running — show placeholder
+    document.getElementById('ach-feed').innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;padding:6px 10px;font-size:.75rem">
+        <span>📖</span><span style="font-weight:700;color:#9098b0">Bob</span><span style="color:#6e7a94">earned</span><span style="color:var(--accent)">Bookworm</span><span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#3a4555;margin-left:4px">2h ago</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;padding:6px 10px;font-size:.75rem">
+        <span>🧛</span><span style="font-weight:700;color:#9098b0">Alice</span><span style="color:#6e7a94">earned</span><span style="color:var(--accent)">Belmont</span><span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#3a4555;margin-left:4px">5h ago</span>
+      </div>
+      <div style="font-size:.65rem;color:#3a4555;font-family:'Share Tech Mono',monospace;padding:4px 0">(demo data — achievement server not running)</div>
+    `;
+  }
+}
+
+pollServerStatus();
+loadAchievements();
+setInterval(pollServerStatus, 30000);
+setInterval(loadAchievements, 60000);
 </script>
 </body>
 </html>

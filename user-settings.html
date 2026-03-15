@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><title>User Settings</title><link rel="stylesheet" href="shared.css">
+<style>
+  .settings-layout { display: grid; grid-template-columns: 200px 1fr; gap: 20px; }
+  @media(max-width:650px){ .settings-layout { grid-template-columns: 1fr; } }
+  .settings-nav { display: flex; flex-direction: column; gap: 2px; }
+  .snav-item { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 3px; cursor: pointer; font-size: .83rem; color: var(--text-dim); transition: all .15s; border: none; background: transparent; text-align: left; width: 100%; }
+  .snav-item:hover { background: var(--bg3); color: var(--text); }
+  .snav-item.active { background: rgba(200,168,75,.1); color: var(--accent); }
+  .snav-icon { font-size: 1rem; width: 18px; }
+  .settings-pane { display: none; }
+  .settings-pane.active { display: block; }
+  .field-group { margin-bottom: 20px; }
+  .field-label { font-size: .78rem; font-weight: 600; color: var(--text); margin-bottom: 6px; display: block; }
+  .field-hint { font-size: .72rem; color: var(--text-dim); margin-top: 3px; }
+  .field-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 3px; font-family: 'Raleway', sans-serif; font-size: .85rem; }
+  .field-input:focus { outline: none; border-color: rgba(200,168,75,.4); }
+  .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(37,45,61,.5); }
+  .toggle-row:last-child { border: none; }
+  .toggle-label { font-size: .85rem; color: var(--text); }
+  .toggle-sub { font-size: .74rem; color: var(--text-dim); margin-top: 2px; }
+  .toggle { width: 38px; height: 20px; background: #1a2030; border-radius: 10px; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+  .toggle.on { background: rgba(76,175,125,.6); }
+  .toggle::after { content:''; width:14px; height:14px; background:#fff; border-radius:50%; position:absolute; top:3px; left:3px; transition:left .2s; }
+  .toggle.on::after { left:21px; }
+  .save-btn { background: rgba(200,168,75,.15); border: 1px solid rgba(200,168,75,.3); color: var(--accent); padding: 9px 20px; border-radius: 3px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: .72rem; letter-spacing: .06em; margin-top: 10px; }
+  .save-btn:hover { background: rgba(200,168,75,.25); }
+  .avatar-preview { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--accent2), var(--accent3)); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #fff; margin-bottom: 10px; }
+  .ach-toggle-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(37,45,61,.4); }
+  .ach-toggle-row:last-child { border: none; }
+  .ach-icon-s { font-size: 1.1rem; }
+  .ach-name-s { font-size: .83rem; color: var(--text); flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">⚙️</div>
+  <div>
+    <h1>User Settings</h1>
+    <div class="subtitle">// Profile · Privacy · Notifications · Connected Services //</div>
+    <p class="desc">Simulated user settings page. In production, changes here save to the user's profile in the SSO system and propagate to all connected services.</p>
+  </div>
+</div>
+
+<div class="settings-layout">
+
+  <!-- Nav -->
+  <div class="settings-nav">
+    <button class="snav-item active" onclick="showPane('profile')"><span class="snav-icon">👤</span>Profile</button>
+    <button class="snav-item" onclick="showPane('homepage')"><span class="snav-icon">🏠</span>Homepage</button>
+    <button class="snav-item" onclick="showPane('privacy')"><span class="snav-icon">🔒</span>Privacy</button>
+    <button class="snav-item" onclick="showPane('notifications')"><span class="snav-icon">🔔</span>Notifications</button>
+    <button class="snav-item" onclick="showPane('connections')"><span class="snav-icon">🔗</span>Connections</button>
+    <button class="snav-item" onclick="showPane('retroachievements')"><span class="snav-icon">🏆</span>RetroAchievements</button>
+    <button class="snav-item" onclick="showPane('danger')"><span class="snav-icon">⚠️</span>Account</button>
+  </div>
+
+  <!-- Panes -->
+  <div>
+
+    <!-- Profile -->
+    <div class="settings-pane active" id="pane-profile">
+      <div class="section-title">👤 Profile</div>
+      <div class="card">
+        <div class="avatar-preview">A</div>
+        <div class="field-group">
+          <label class="field-label">Display Name</label>
+          <input class="field-input" value="Alice" type="text">
+          <div class="field-hint">Shown on the homepage and achievement feed</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Username</label>
+          <input class="field-input" value="alice" type="text" readonly style="opacity:.6">
+          <div class="field-hint">Cannot be changed. Contact the server admin.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Password</label>
+          <input class="field-input" placeholder="New password…" type="password">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Confirm Password</label>
+          <input class="field-input" placeholder="Confirm new password…" type="password">
+        </div>
+        <button class="save-btn" onclick="saved()">Save Profile</button>
+      </div>
+    </div>
+
+    <!-- Homepage preferences -->
+    <div class="settings-pane" id="pane-homepage">
+      <div class="section-title">🏠 Homepage Preferences</div>
+      <div class="card">
+        <div class="field-group">
+          <label class="field-label">📍 Location (for weather)</label>
+          <input class="field-input" placeholder="Enter ZIP code (e.g. 92101)" type="text" value="92101">
+          <div class="field-hint">Used to show local weather on your homepage. Never shared externally.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Temperature Units</label>
+          <select class="field-input">
+            <option value="F" selected>Fahrenheit (°F)</option>
+            <option value="C">Celsius (°C)</option>
+          </select>
+        </div>
+        <div style="margin-top:16px">
+          <div class="field-label" style="margin-bottom:10px">Homepage Sections (toggle visibility)</div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Continue Watching</div><div class="toggle-sub">Recent Jellyfin activity</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Continue Reading</div><div class="toggle-sub">Calibre &amp; Audiobookshelf progress</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Continue Playing</div><div class="toggle-sub">Emulator save activity</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Community Achievements</div><div class="toggle-sub">See what others have earned</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Owner News</div><div class="toggle-sub">Announcements from the server admin</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Service Warnings</div><div class="toggle-sub">Show when services are unavailable</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <button class="save-btn" onclick="saved()">Save Homepage Settings</button>
+      </div>
+    </div>
+
+    <!-- Privacy -->
+    <div class="settings-pane" id="pane-privacy">
+      <div class="section-title">🔒 Privacy Settings</div>
+      <div class="card">
+        <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:16px">Control what other users on the server can see about your activity.</div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Show my achievements publicly</div><div class="toggle-sub">Other users see your earned achievements in the community feed</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Show "Now Playing" status</div><div class="toggle-sub">Others can see when you're actively streaming or playing</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Show reading progress publicly</div><div class="toggle-sub">What book you're currently reading</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Share achievement details</div><div class="toggle-sub">If off, only the achievement icon is shown (not which game/book)</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+
+        <div style="margin-top:20px">
+          <div class="field-label" style="margin-bottom:10px">Per-Achievement Privacy</div>
+          <div class="field-hint" style="margin-bottom:12px">Override privacy for individual achievements:</div>
+          <div class="ach-toggle-row">
+            <div class="ach-icon-s">📖</div><div class="ach-name-s">Bookworm</div>
+            <select class="field-input" style="width:auto;padding:3px 6px;font-size:.7rem"><option>Public</option><option>Private</option></select>
+          </div>
+          <div class="ach-toggle-row">
+            <div class="ach-icon-s">🧛</div><div class="ach-name-s">Belmont</div>
+            <select class="field-input" style="width:auto;padding:3px 6px;font-size:.7rem"><option>Public</option><option>Private</option></select>
+          </div>
+          <div class="ach-toggle-row">
+            <div class="ach-icon-s">🎧</div><div class="ach-name-s">Listener</div>
+            <select class="field-input" style="width:auto;padding:3px 6px;font-size:.7rem"><option selected>Private</option><option>Public</option></select>
+          </div>
+        </div>
+        <button class="save-btn" onclick="saved()">Save Privacy Settings</button>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-pane" id="pane-notifications">
+      <div class="section-title">🔔 Notifications</div>
+      <div class="card">
+        <div class="toggle-row">
+          <div><div class="toggle-label">New owner announcements</div><div class="toggle-sub">Get notified when the owner posts news</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Service downtime alerts</div><div class="toggle-sub">Notify when a service you use goes offline</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Achievement unlocks</div><div class="toggle-sub">When you earn a new achievement</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="field-label">Notification Method</div>
+          <select class="field-input">
+            <option>Browser notifications only</option>
+            <option>Email</option>
+            <option>Discord DM (via webhook)</option>
+            <option>None</option>
+          </select>
+        </div>
+        <div class="field-group" style="margin-top:12px">
+          <label class="field-label">Notification Email (optional)</label>
+          <input class="field-input" type="email" placeholder="alice@gmail.com">
+        </div>
+        <button class="save-btn" onclick="saved()">Save Notification Settings</button>
+      </div>
+    </div>
+
+    <!-- Connections -->
+    <div class="settings-pane" id="pane-connections">
+      <div class="section-title">🔗 Connected Services</div>
+      <div class="card">
+        <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:16px">Services linked to your account. SSO means one login works across all of these.</p>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Jellyfin</div><div class="toggle-sub" style="color:#4caf7d">✓ Connected · alice</div></div>
+          <button class="save-btn" style="padding:4px 10px;margin-top:0;font-size:.62rem">Manage</button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Calibre-Web</div><div class="toggle-sub" style="color:#4caf7d">✓ Connected · alice</div></div>
+          <button class="save-btn" style="padding:4px 10px;margin-top:0;font-size:.62rem">Manage</button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Audiobookshelf</div><div class="toggle-sub" style="color:#4caf7d">✓ Connected · alice</div></div>
+          <button class="save-btn" style="padding:4px 10px;margin-top:0;font-size:.62rem">Manage</button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Navidrome</div><div class="toggle-sub" style="color:#e05c5c">✗ Not connected</div></div>
+          <button style="background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3);color:#4ecdc4;padding:4px 10px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.62rem">Connect</button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Google Account (OAuth)</div><div class="toggle-sub" style="color:#4caf7d">✓ alice@gmail.com</div></div>
+          <button class="save-btn" style="padding:4px 10px;margin-top:0;font-size:.62rem">Unlink</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RetroAchievements -->
+    <div class="settings-pane" id="pane-retroachievements">
+      <div class="section-title">🏆 RetroAchievements</div>
+      <div class="card">
+        <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:16px">Link your RetroAchievements.org account to track achievements in emulated games. Your RA username and token are used client-side only — they're passed to EmulatorJS and never stored on the server.</p>
+        <div class="field-group">
+          <label class="field-label">RetroAchievements Username</label>
+          <input class="field-input" placeholder="Your RA username" type="text" value="AliceRetro">
+        </div>
+        <div class="field-group">
+          <label class="field-label">RetroAchievements API Key</label>
+          <input class="field-input" placeholder="Your RA API key (from RA Settings page)" type="password">
+          <div class="field-hint">Get your key at <a href="https://retroachievements.org/settings" target="_blank" style="color:var(--accent2)">retroachievements.org/settings</a> → Web API Key. This is stored encrypted and only sent to the game emulator.</div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Enable RetroAchievements in all games</div><div class="toggle-sub">Unlocks show on RA.org under your account</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Hardcore mode</div><div class="toggle-sub">Disables save states and rewind for achievement validity</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <button class="save-btn" onclick="saved()">Save RA Settings</button>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="settings-pane" id="pane-danger">
+      <div class="section-title">⚠️ Account</div>
+      <div class="card">
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>These actions are irreversible.</strong> Contact the server owner before proceeding.</div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="card-title" style="color:var(--danger)">Delete My Save Data</div>
+          <p style="font-size:.83rem;color:var(--text-dim);margin:8px 0">Permanently delete all game save files associated with your account. This cannot be undone.</p>
+          <button onclick="confirm('Are you sure? This deletes ALL your game saves permanently.') && alert('Submitted. Admin will process within 24 hours.')" style="background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);color:var(--danger);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.7rem">Delete All Save Data</button>
+        </div>
+        <hr style="margin:16px 0">
+        <div>
+          <div class="card-title" style="color:var(--danger)">Delete My Account</div>
+          <p style="font-size:.83rem;color:var(--text-dim);margin:8px 0">Removes your account, all save data, history, and preferences. Sends a deletion request to the server owner.</p>
+          <button onclick="confirm('Delete your account? This is permanent.') && alert('Deletion request submitted.')" style="background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);color:var(--danger);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.7rem">Request Account Deletion</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showPane(name) {
+  document.querySelectorAll('.settings-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+function saved() {
+  const btn = event.currentTarget;
+  const orig = btn.textContent;
+  btn.textContent = '✓ Saved!';
+  btn.style.color = '#4caf7d';
+  setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+}
+</script>
+</body>
+</html>

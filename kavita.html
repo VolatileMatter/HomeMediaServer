@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Kavita</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📕</div>
+  <div>
+    <h1>Kavita — Comics &amp; DnD Books</h1>
+    <div class="subtitle">// Two Separate Instances · Comics (5000) · DnD (5001) · FOSS //</div>
+    <p class="desc">Kavita is a self-hosted reading server for comics (CBZ/CBR), manga, PDFs, and ebooks. Running two separate instances keeps your DnD rulebooks completely separate from your comics library.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 Best practice: Two Kavita instances on separate ports with separate data folders. Each has its own users, shelves, and reading progress. They share the same executable but nothing else.</div>
+
+<div class="section">
+  <div class="section-title">🤔 Why Two Instances?</div>
+  <div class="card">
+    <p>Kavita supports multiple "Libraries" within one instance, but they share users, settings, and the admin panel. Two separate instances means:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li>Completely separate user accounts (your DnD group doesn't see comics)</li>
+      <li>Separate reading history and progress</li>
+      <li>Independent appearance and metadata settings</li>
+      <li>One can be updated/restarted without affecting the other</li>
+    </ul>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Alternatively:</strong> If your user base is the same people for both, use one instance with two Libraries (Comics + DnD Books). Libraries in Kavita are fully separate with per-library access permissions. But if you want different people to have access to different content, two instances is cleaner.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📁 Folder Structure</div>
+  <div class="card">
+    <pre>D:\Comics\
+  ├── Marvel\
+  │   ├── The Amazing Spider-Man\
+  │   │   ├── The Amazing Spider-Man 001.cbz
+  │   │   └── The Amazing Spider-Man 002.cbz
+  │   └── X-Men\
+  └── DC\
+      └── Batman\
+
+D:\DnD\
+  ├── Core Rules\
+  │   ├── Players Handbook 5e.pdf
+  │   ├── Dungeon Masters Guide 5e.pdf
+  │   └── Monster Manual 5e.pdf
+  ├── Supplements\
+  └── Adventures\</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">📖</div>
+      <div class="callout-body"><strong>CBZ/CBR for comics:</strong> These are just zip/rar archives of images. If you have comics in other formats, use <strong>ComicTagger</strong> (free) to convert and tag them. Kavita reads CBZ natively and gives a proper manga/comic reader experience.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Instance 1 — Comics (Port 5000) <span class="tag tag-native">FOSS · Windows Native</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Kavita</strong>
+        <p>From <a href="https://github.com/Kareadita/Kavita/releases" target="_blank">github.com/Kareadita/Kavita/releases</a> — download the latest <code>kavita-win-x64.tar.gz</code>. Extract to <code>D:\Server\Kavita-Comics\</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure the Comics instance port</strong>
+        <p>Open <code>D:\Server\Kavita-Comics\appsettings.json</code> and set the port:</p>
+        <pre>{
+  "Port": 5000,
+  "IpAddresses": "",
+  "LoggingLevel": "Information",
+  "AllowStatCollection": false
+}</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run Kavita Comics for the first time</strong>
+        <pre>D:\Server\Kavita-Comics\Kavita.exe</pre>
+        <p>Open <code>http://localhost:5000</code> — create admin account. Add a Library → type "Comics" → folder <code>D:\Comics</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install as Windows Service (NSSM)</strong>
+        <pre>nssm install KavitaComics "D:\Server\Kavita-Comics\Kavita.exe"
+nssm set KavitaComics AppDirectory "D:\Server\Kavita-Comics"
+nssm start KavitaComics</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Kavita Comics" dir=in action=allow protocol=TCP localport=5000</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Instance 2 — DnD Rulebooks (Port 5001)</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Extract a second copy to a separate folder</strong>
+        <p>Extract the same Kavita release zip to <code>D:\Server\Kavita-DnD\</code> — completely separate from the comics instance.</p>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">Do NOT share the same Kavita folder for two instances. Each instance needs its own copy of the Kavita executable and its own <code>config/</code> folder so their databases don't conflict.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Set the DnD instance to port 5001</strong>
+        <p>Edit <code>D:\Server\Kavita-DnD\appsettings.json</code>:</p>
+        <pre>{
+  "Port": 5001,
+  "IpAddresses": "",
+  "LoggingLevel": "Information",
+  "AllowStatCollection": false
+}</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>First-time setup at http://localhost:5001</strong>
+        <p>Create a separate admin account. Add a Library → type "Book" → folder <code>D:\DnD</code>. Kavita's "Book" library type supports PDF with a nice reader interface.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install as a second Windows Service</strong>
+        <pre>nssm install KavitaDnD "D:\Server\Kavita-DnD\Kavita.exe"
+nssm set KavitaDnD AppDirectory "D:\Server\Kavita-DnD"
+nssm start KavitaDnD
+
+netsh advfirewall firewall add rule name="Kavita DnD" dir=in action=allow protocol=TCP localport=5001</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌍 Remote Access &amp; Reverse Proxy</div>
+  <div class="card">
+    <pre># Caddyfile entries:
+comics.yourdomain.com {
+    reverse_proxy localhost:5000
+}
+
+dnd.yourdomain.com {
+    reverse_proxy localhost:5001
+}</pre>
+    <p>Or access both via Tailscale: <code>http://[tailscale-ip]:5000</code> and <code>http://[tailscale-ip]:5001</code>.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Kavita does not yet support OAuth/OIDC natively. Put each instance behind Caddy with Authentik forward auth for a unified login experience. Alternatively, Kavita's own user system (username/password per instance) is sufficient for V1.</p>
+  </div>
+</div>
+
+</body>
+</html>

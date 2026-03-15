@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Homepage</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 0; background: #080a0e; }
+
+  /* ── Login gate ── */
+  .login-gate {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; background: #080a0e;
+    flex-direction: column; gap: 16px;
+  }
+  .login-btn {
+    background: rgba(200,168,75,.15); border: 1px solid rgba(200,168,75,.4);
+    color: var(--accent, #c8a84b); padding: 14px 40px; border-radius: 4px;
+    font-family: 'Cinzel', serif; font-size: 1rem; letter-spacing: .1em;
+    cursor: pointer; transition: all .2s;
+  }
+  .login-btn:hover { background: rgba(200,168,75,.3); }
+
+  /* ── Main layout ── */
+  .hp-outer { display: none; min-height: 100vh; background: radial-gradient(ellipse at 20% 10%, rgba(200,168,75,.05),transparent 50%), #080a0e; padding: 20px; }
+
+  /* ── Header strip ── */
+  .hp-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .hp-greeting { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--accent, #c8a84b); }
+  .hp-subtext { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: #6e7a94; margin-top: 2px; }
+  .hp-clock { font-family: 'Share Tech Mono', monospace; font-size: 1.6rem; color: var(--accent, #c8a84b); margin-left: auto; text-shadow: 0 0 16px rgba(200,168,75,.3); }
+  .hp-date  { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: #6e7a94; text-align: right; margin-top: 2px; }
+
+  /* ── Weather widget ── */
+  .weather-widget { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.02); border: 1px solid #1e2535; border-radius: 4px; padding: 10px 14px; }
+  .weather-icon { font-size: 1.8rem; }
+  .weather-temp { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; color: #d0d4e0; }
+  .weather-desc { font-size: .75rem; color: #6e7a94; }
+
+  /* ── Service warning ── */
+  .svc-warning { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(224,92,92,.08); border: 1px solid rgba(224,92,92,.25); border-radius: 3px; margin-bottom: 12px; font-size: .82rem; color: #e05c5c; }
+
+  /* ── Main grid ── */
+  .hp-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+  @media(max-width:850px){ .hp-grid { grid-template-columns: 1fr; } }
+
+  /* ── Activity feed ── */
+  .feed-section { display: flex; flex-direction: column; gap: 12px; }
+  .feed-group-title { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: #6e7a94; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+
+  .media-card {
+    display: flex; gap: 12px; align-items: center;
+    background: rgba(255,255,255,.02); border: 1px solid #1e2535; border-radius: 4px;
+    padding: 10px 12px; cursor: pointer; transition: all .18s; text-decoration: none;
+    color: inherit;
+  }
+  .media-card:hover { border-color: rgba(200,168,75,.3); background: rgba(200,168,75,.04); }
+
+  .media-thumb {
+    width: 48px; height: 68px; object-fit: cover; border-radius: 2px;
+    background: #1a2030; flex-shrink: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 1.4rem; color: #3a4555;
+  }
+
+  .media-title { font-weight: 700; font-size: .88rem; color: #d0d4e0; margin-bottom: 2px; }
+  .media-sub   { font-size: .75rem; color: #6e7a94; }
+  .media-prog  { height: 3px; background: #1a2030; border-radius: 2px; margin-top: 6px; }
+  .media-prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent, #c8a84b), #4ecdc4); border-radius: 2px; }
+  .media-app-badge { font-family: 'Share Tech Mono', monospace; font-size: .58rem; padding: 1px 5px; border-radius: 2px; }
+
+  /* ── Sidebar ── */
+  .sidebar-col { display: flex; flex-direction: column; gap: 12px; }
+  .sw { background: rgba(255,255,255,.02); border: 1px solid #1e2535; border-radius: 4px; padding: 14px; }
+  .sw-title { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: #6e7a94; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+
+  /* achievements */
+  .ach-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #141820; font-size: .78rem; }
+  .ach-item:last-child { border: none; }
+  .ach-icon-sm { font-size: 1rem; }
+  .ach-user { font-weight: 700; color: #9098b0; }
+  .ach-name { color: #6e7a94; }
+  .ach-time { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: #3a4555; margin-left: auto; }
+
+  /* news */
+  .news-item { padding: 8px 0; border-bottom: 1px solid #141820; }
+  .news-item:last-child { border: none; }
+  .news-title { font-size: .82rem; font-weight: 600; color: #c8a84b; margin-bottom: 2px; }
+  .news-body { font-size: .75rem; color: #6e7a94; line-height: 1.5; }
+  .news-date { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: #3a4555; margin-top: 3px; }
+
+  /* sunshine busy banner */
+  .sunshine-busy {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    background: rgba(224,184,75,.07); border: 1px solid rgba(224,184,75,.3);
+    border-radius: 3px; margin-bottom: 8px; font-size: .82rem; color: #e0b84b;
+  }
+
+  /* demo controls */
+  .demo-bar { background: rgba(91,141,217,.07); border: 1px solid rgba(91,141,217,.2); border-radius: 3px; padding: 8px 12px; margin-bottom: 16px; font-size: .75rem; color: #5b8dd9; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .demo-btn { background: transparent; border: 1px solid rgba(91,141,217,.3); color: #5b8dd9; padding: 3px 8px; border-radius: 2px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: .62rem; }
+  .demo-btn:hover { background: rgba(91,141,217,.1); }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN GATE ── -->
+<div class="login-gate" id="login-gate">
+  <div style="font-size:2.5rem;filter:drop-shadow(0 0 16px rgba(200,168,75,.5))">🐉</div>
+  <div style="font-family:'Cinzel',serif;font-size:1.4rem;color:#c8a84b;letter-spacing:.1em">Home Server</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#6e7a94;letter-spacing:.1em">PRIVATE — AUTHORIZED ACCESS ONLY</div>
+  <button class="login-btn" onclick="simulateLogin()">Sign In</button>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#3a4555">(Demo: click to simulate login)</div>
+</div>
+
+<!-- ── MAIN HOMEPAGE (shown after login) ── -->
+<div class="hp-outer" id="hp-main">
+
+  <!-- Demo controls -->
+  <div class="demo-bar">
+    🔧 DEMO MODE — simulating user "alice" &nbsp;|&nbsp;
+    <button class="demo-btn" onclick="toggleSunshine()">Toggle Sunshine Busy</button>
+    <button class="demo-btn" onclick="toggleServiceDown()">Toggle Service Down</button>
+    <button class="demo-btn" onclick="document.getElementById('login-gate').style.display='flex';document.getElementById('hp-main').style.display='none'">Log Out</button>
+  </div>
+
+  <!-- Header -->
+  <div class="hp-header">
+    <div>
+      <div class="hp-greeting">Good evening, Alice 🐉</div>
+      <div class="hp-subtext">// HOME SERVER · YOUR PERSONAL PORTAL //</div>
+    </div>
+    <div class="weather-widget" id="weather-widget">
+      <div class="weather-icon">🌤️</div>
+      <div>
+        <div class="weather-temp" id="weather-temp">72°F</div>
+        <div class="weather-desc" id="weather-desc">Partly cloudy · San Diego</div>
+      </div>
+    </div>
+    <div style="margin-left:auto;text-align:right">
+      <div class="hp-clock" id="hp-clock">--:--</div>
+      <div class="hp-date" id="hp-date">---</div>
+    </div>
+  </div>
+
+  <!-- Sunshine busy warning (shown conditionally) -->
+  <div class="sunshine-busy" id="sunshine-busy" style="display:none">
+    ⚡ <strong>Game streaming is currently in use.</strong> Dolphin/Xbox 360 emulation isn't available right now.
+    Instead, try: <a href="http://localhost:8085" style="color:#e0b84b">Browser Games ↗</a> (Pokémon, Castlevania, Fire Emblem — no streaming needed)
+  </div>
+
+  <!-- Service down warning -->
+  <div class="svc-warning" id="svc-warning" style="display:none">
+    ⚠️ <strong>Calibre-Web is currently unavailable.</strong> The owner has been notified. Try again later.
+  </div>
+
+  <!-- Main 2-column grid -->
+  <div class="hp-grid">
+
+    <!-- Left: activity feed -->
+    <div class="feed-section">
+
+      <div>
+        <div class="feed-group-title">Continue Watching</div>
+        <a class="media-card" href="http://localhost:8096" target="_blank">
+          <div class="media-thumb">📺</div>
+          <div style="flex:1">
+            <div class="media-title">Severance — S2E5</div>
+            <div class="media-sub">47 min remaining · Jellyfin</div>
+            <div class="media-prog"><div class="media-prog-fill" style="width:35%"></div></div>
+          </div>
+          <span class="media-app-badge" style="background:rgba(91,141,217,.15);color:#5b8dd9;border:1px solid rgba(91,141,217,.25)">Jellyfin</span>
+        </a>
+        <a class="media-card" href="http://localhost:8096" target="_blank">
+          <div class="media-thumb">🎬</div>
+          <div style="flex:1">
+            <div class="media-title">Dune: Part Two</div>
+            <div class="media-sub">1h 12m remaining · Jellyfin</div>
+            <div class="media-prog"><div class="media-prog-fill" style="width:28%"></div></div>
+          </div>
+          <span class="media-app-badge" style="background:rgba(91,141,217,.15);color:#5b8dd9;border:1px solid rgba(91,141,217,.25)">Jellyfin</span>
+        </a>
+      </div>
+
+      <div>
+        <div class="feed-group-title">Continue Reading</div>
+        <a class="media-card" href="http://localhost:8083" target="_blank">
+          <div class="media-thumb">📖</div>
+          <div style="flex:1">
+            <div class="media-title">The Way of Kings</div>
+            <div class="media-sub">Brandon Sanderson · Ch. 34 of 75 · Calibre</div>
+            <div class="media-prog"><div class="media-prog-fill" style="width:45%"></div></div>
+          </div>
+          <span class="media-app-badge" style="background:rgba(200,168,75,.12);color:#c8a84b;border:1px solid rgba(200,168,75,.25)">Calibre</span>
+        </a>
+        <a class="media-card" href="http://localhost:13378" target="_blank">
+          <div class="media-thumb">🎧</div>
+          <div style="flex:1">
+            <div class="media-title">Project Hail Mary</div>
+            <div class="media-sub">Andy Weir · Chapter 12 · Audiobookshelf</div>
+            <div class="media-prog"><div class="media-prog-fill" style="width:60%"></div></div>
+          </div>
+          <span class="media-app-badge" style="background:rgba(78,205,196,.12);color:#4ecdc4;border:1px solid rgba(78,205,196,.25)">ABS</span>
+        </a>
+      </div>
+
+      <div>
+        <div class="feed-group-title">Continue Playing</div>
+        <a class="media-card" href="http://localhost:8085/play?game=emerald" target="_blank">
+          <div class="media-thumb">⚡</div>
+          <div style="flex:1">
+            <div class="media-title">Pokémon Emerald</div>
+            <div class="media-sub">GBA · 12h 34m played · Last save: Mauville City</div>
+          </div>
+          <span class="media-app-badge" style="background:rgba(78,205,196,.12);color:#4ecdc4;border:1px solid rgba(78,205,196,.25)">Emulator</span>
+        </a>
+        <a class="media-card" href="http://localhost:8085/play?game=cv-sotn" target="_blank">
+          <div class="media-thumb">🧛</div>
+          <div style="flex:1">
+            <div class="media-title">Castlevania: Symphony of the Night</div>
+            <div class="media-sub">PS1 · 6h 15m played · Inverted Castle</div>
+          </div>
+          <span class="media-app-badge" style="background:rgba(78,205,196,.12);color:#4ecdc4;border:1px solid rgba(78,205,196,.25)">Emulator</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Right: sidebar -->
+    <div class="sidebar-col">
+
+      <!-- Owner News -->
+      <div class="sw">
+        <div class="sw-title">📢 From the Owner</div>
+        <div id="news-feed">
+          <div class="news-item">
+            <div class="news-title">ARK Server Up This Weekend</div>
+            <div class="news-body">Spinning up the ARK server Saturday evening. Let me know if you want to join — I'll send the password.</div>
+            <div class="news-date">Mar 15, 2025</div>
+          </div>
+          <div class="news-item">
+            <div class="news-title">Jellyfin now running alongside Plex</div>
+            <div class="news-body">Testing Jellyfin as a Plex replacement. Try it at :8096 — free hardware transcoding!</div>
+            <div class="news-date">Mar 12, 2025</div>
+          </div>
+          <div class="news-item">
+            <div class="news-title">New Pokémon games added</div>
+            <div class="news-body">Gen 4 and Gen 5 DS games are now available in the Pokémon tab. Per-user saves supported.</div>
+            <div class="news-date">Mar 8, 2025</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Community Achievements -->
+      <div class="sw">
+        <div class="sw-title">🏆 Recent Achievements</div>
+        <div id="ach-feed">
+          <div class="ach-item">
+            <div class="ach-icon-sm">📚</div>
+            <div>
+              <span class="ach-user">Bob</span> earned
+              <span class="ach-name">Bookworm</span>
+            </div>
+            <div class="ach-time">2h ago</div>
+          </div>
+          <div class="ach-item">
+            <div class="ach-icon-sm">🧛</div>
+            <div>
+              <span class="ach-user">Alice</span> earned
+              <span class="ach-name">Belmont</span>
+            </div>
+            <div class="ach-time">5h ago</div>
+          </div>
+          <div class="ach-item">
+            <div class="ach-icon-sm">⚡</div>
+            <div>
+              <span class="ach-user">Charlie</span> earned
+              <span class="ach-name">Pokémon Master</span>
+            </div>
+            <div class="ach-time">Yesterday</div>
+          </div>
+          <div class="ach-item">
+            <div class="ach-icon-sm">🎧</div>
+            <div>
+              <span class="ach-user">Alice</span> earned
+              <span class="ach-name">Listener</span>
+            </div>
+            <div class="ach-time">2 days ago</div>
+          </div>
+        </div>
+        <div style="font-size:.7rem;color:#3a4555;margin-top:8px;font-family:'Share Tech Mono',monospace">
+          Privacy: users can hide achievements in their settings
+        </div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="sw">
+        <div class="sw-title">⚡ Quick Access</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <a href="http://localhost:8096" target="_blank" style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;text-decoration:none;font-size:.74rem;color:#9098b0;transition:all .15s" onmouseover="this.style.borderColor='rgba(200,168,75,.3)'" onmouseout="this.style.borderColor='#1e2535'">🎬 Movies</a>
+          <a href="http://localhost:8083" target="_blank" style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;text-decoration:none;font-size:.74rem;color:#9098b0;transition:all .15s" onmouseover="this.style.borderColor='rgba(200,168,75,.3)'" onmouseout="this.style.borderColor='#1e2535'">📚 Books</a>
+          <a href="http://localhost:13378" target="_blank" style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;text-decoration:none;font-size:.74rem;color:#9098b0;transition:all .15s" onmouseover="this.style.borderColor='rgba(200,168,75,.3)'" onmouseout="this.style.borderColor='#1e2535'">🎧 Audio</a>
+          <a href="http://localhost:4533" target="_blank" style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;text-decoration:none;font-size:.74rem;color:#9098b0;transition:all .15s" onmouseover="this.style.borderColor='rgba(200,168,75,.3)'" onmouseout="this.style.borderColor='#1e2535'">🎵 Music</a>
+          <a href="http://localhost:8085" target="_blank" style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;text-decoration:none;font-size:.74rem;color:#9098b0;transition:all .15s" onmouseover="this.style.borderColor='rgba(200,168,75,.3)'" onmouseout="this.style.borderColor='#1e2535'">🎮 Games</a>
+          <a href="http://localhost:2283" target="_blank" style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;text-decoration:none;font-size:.74rem;color:#9098b0;transition:all .15s" onmouseover="this.style.borderColor='rgba(200,168,75,.3)'" onmouseout="this.style.borderColor='#1e2535'">📷 Photos</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function simulateLogin() {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('hp-main').style.display = 'block';
+}
+
+// Clock
+setInterval(() => {
+  const now = new Date();
+  document.getElementById('hp-clock').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+  document.getElementById('hp-date').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+}, 1000);
+
+// Demo toggles
+let sunshineBusy = false, svcDown = false;
+function toggleSunshine() {
+  sunshineBusy = !sunshineBusy;
+  document.getElementById('sunshine-busy').style.display = sunshineBusy ? 'flex' : 'none';
+}
+function toggleServiceDown() {
+  svcDown = !svcDown;
+  document.getElementById('svc-warning').style.display = svcDown ? 'flex' : 'none';
+}
+
+// Weather (would use real API with user's zip code from settings)
+// In production: fetch(`https://wttr.in/${zipCode}?format=j1`)
+// For demo, static:
+document.getElementById('hp-clock').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+</script>
+</body>
+</html>

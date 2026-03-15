@@ -213,5 +213,255 @@ yt-dlp -x --audio-format mp3 -o "song.mp3" "https://youtube.com/watch?v=..."
   </div>
 </div>
 
+<hr>
+
+<div class="section">
+  <div class="section-title">🎛️ Audio Filters &amp; Effects (Browser-Side DSP)</div>
+
+  <div class="card">
+    <div class="card-title">Architecture: Web Audio API</div>
+    <p>All filters run in the browser using the <strong>Web Audio API</strong> — no server changes needed. The jukebox plays audio through a chain of AudioNode processors that you can enable, disable, and tweak in real time. The filter chain sits between the audio source and the speakers.</p>
+    <pre>AudioSource → GainNode → [Filters] → AnalyserNode → AudioContext.destination
+                          ↑
+              BiquadFilterNode (highpass/lowpass/EQ)
+              ConvolverNode (reverb)
+              StereoPannerNode
+              DynamicsCompressorNode</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Filter Controls UI — Add to Your Jukebox Frontend</div>
+    <p>Add this controls section to your <code>static/index.html</code>. It creates a live filter panel that slots into any jukebox UI:</p>
+    <pre>&lt;div id="fx-panel" style="background:#111520;border:1px solid #252d3d;border-radius:4px;padding:14px;margin:12px 0"&gt;
+  &lt;div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#6e7a94;letter-spacing:.12em;margin-bottom:10px"&gt;FX CHAIN&lt;/div&gt;
+
+  &lt;div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px"&gt;
+
+    &lt;!-- Speed --&gt;
+    &lt;label&gt;Speed &lt;span id="speed-val"&gt;1.0x&lt;/span&gt;
+      &lt;input type="range" id="speed" min="0.25" max="2.0" step="0.05" value="1.0"&gt;&lt;/label&gt;
+
+    &lt;!-- Pitch (independent of speed) --&gt;
+    &lt;label&gt;Pitch shift: &lt;span id="pitch-val"&gt;0 st&lt;/span&gt;
+      &lt;input type="range" id="pitch" min="-12" max="12" step="1" value="0"&gt;&lt;/label&gt;
+
+    &lt;!-- Low Pass --&gt;
+    &lt;label&gt;Low Pass: &lt;span id="lp-val"&gt;20kHz&lt;/span&gt;
+      &lt;input type="range" id="lowpass" min="200" max="20000" step="100" value="20000"&gt;&lt;/label&gt;
+
+    &lt;!-- High Pass --&gt;
+    &lt;label&gt;High Pass: &lt;span id="hp-val"&gt;20Hz&lt;/span&gt;
+      &lt;input type="range" id="highpass" min="20" max="5000" step="20" value="20"&gt;&lt;/label&gt;
+
+    &lt;!-- Reverb --&gt;
+    &lt;label&gt;Reverb: &lt;span id="reverb-val"&gt;0%&lt;/span&gt;
+      &lt;input type="range" id="reverb" min="0" max="1" step="0.05" value="0"&gt;&lt;/label&gt;
+
+    &lt;!-- Volume --&gt;
+    &lt;label&gt;Volume: &lt;span id="vol-val"&gt;100%&lt;/span&gt;
+      &lt;input type="range" id="volume" min="0" max="2" step="0.05" value="1"&gt;&lt;/label&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Custom EQ --&gt;
+  &lt;div style="margin-top:10px"&gt;
+    &lt;div style="font-size:.7rem;color:#6e7a94;margin-bottom:6px"&gt;EQ (dB) — 60Hz · 250Hz · 1kHz · 4kHz · 16kHz&lt;/div&gt;
+    &lt;div style="display:flex;gap:8px"&gt;
+      &lt;input type="range" id="eq60"   min="-12" max="12" value="0" orient="vertical" style="height:60px"&gt;
+      &lt;input type="range" id="eq250"  min="-12" max="12" value="0" orient="vertical" style="height:60px"&gt;
+      &lt;input type="range" id="eq1k"   min="-12" max="12" value="0" orient="vertical" style="height:60px"&gt;
+      &lt;input type="range" id="eq4k"   min="-12" max="12" value="0" orient="vertical" style="height:60px"&gt;
+      &lt;input type="range" id="eq16k"  min="-12" max="12" value="0" orient="vertical" style="height:60px"&gt;
+    &lt;/div&gt;
+    &lt;button onclick="resetEQ()"&gt;Reset EQ&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// Web Audio API filter chain
+const ctx = new AudioContext();
+const gainNode = ctx.createGain();
+const lpFilter = ctx.createBiquadFilter(); lpFilter.type = 'lowpass';  lpFilter.frequency.value = 20000;
+const hpFilter = ctx.createBiquadFilter(); hpFilter.type = 'highpass'; hpFilter.frequency.value = 20;
+const convolver = ctx.createConvolver();
+const dryGain  = ctx.createGain(); dryGain.gain.value = 1;
+const wetGain  = ctx.createGain(); wetGain.gain.value = 0;
+
+// 5-band EQ nodes
+const eqBands = [60,250,1000,4000,16000].map(freq => {
+  const f = ctx.createBiquadFilter();
+  f.type = 'peaking'; f.frequency.value = freq; f.Q.value = 1; f.gain.value = 0;
+  return f;
+});
+
+// Chain: source → gain → HP → LP → EQ[0..4] → split → dry/wet → destination
+// Connect EQ bands in series:
+function buildChain(source) {
+  let node = gainNode;
+  source.connect(node);
+  node.connect(hpFilter);
+  hpFilter.connect(lpFilter);
+  let prev = lpFilter;
+  eqBands.forEach(eq => { prev.connect(eq); prev = eq; });
+  prev.connect(ctx.destination);
+  // Reverb parallel path:
+  prev.connect(convolver); convolver.connect(wetGain); wetGain.connect(ctx.destination);
+}
+
+// Generate simple impulse response for reverb
+function makeReverb(seconds=2.5) {
+  const rate = ctx.sampleRate;
+  const len  = rate * seconds;
+  const buf  = ctx.createBuffer(2, len, rate);
+  for (let c=0; c<2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i=0; i<len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 3);
+  }
+  convolver.buffer = buf;
+}
+makeReverb();
+
+// Control listeners
+document.getElementById('speed').oninput   = e => { /* set on audio element */ };
+document.getElementById('lowpass').oninput  = e => { lpFilter.frequency.value = +e.target.value; document.getElementById('lp-val').textContent = e.target.value+'Hz'; };
+document.getElementById('highpass').oninput = e => { hpFilter.frequency.value = +e.target.value; document.getElementById('hp-val').textContent = e.target.value+'Hz'; };
+document.getElementById('reverb').oninput   = e => { wetGain.gain.value = +e.target.value; dryGain.gain.value = 1-+e.target.value; document.getElementById('reverb-val').textContent = Math.round(e.target.value*100)+'%'; };
+document.getElementById('volume').oninput   = e => { gainNode.gain.value = +e.target.value; document.getElementById('vol-val').textContent = Math.round(e.target.value*100)+'%'; };
+['60','250','1k','4k','16k'].forEach((label,i) => {
+  document.getElementById('eq'+label).oninput = e => { eqBands[i].gain.value = +e.target.value; };
+});
+function resetEQ() { eqBands.forEach(b => { b.gain.value=0; }); ['60','250','1k','4k','16k'].forEach(l => document.getElementById('eq'+l).value=0); }
+&lt;/script&gt;</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🎸 VST2 / VST3 Support — Feasibility Assessment</div>
+
+  <div class="card">
+    <div class="card-title">Can browser-based audio use VST plugins?</div>
+    <p><strong>Not directly</strong> — browsers can't load native VST2/VST3 DLLs. However, there are two paths forward:</p>
+    <div class="grid-2">
+      <div class="card" style="border-color:rgba(78,205,196,.3)">
+        <div class="card-title" style="color:var(--accent3)">Path A: Server-Side VST Processing (Recommended)</div>
+        <p>The jukebox's infinite-loop audio is processed server-side through a VST host (like <strong>JUCE</strong> or <strong>Carla</strong>), then streamed to the browser as a modified audio stream. Users pick their VST preset from the UI; the server applies the DSP.</p>
+        <p><strong>How:</strong> Use <strong>Carla</strong> (free, FOSS VST host for Windows/Linux) as a subprocess in the Flask server. Route jukebox audio through Carla's FX rack before serving it.</p>
+        <pre># Carla on Windows (carla.kx.studio):
+# 1. Load your VST2/VST3 plugin in Carla's rack
+# 2. Route jukebox audio output through Carla
+# 3. Capture Carla's output with sounddevice/pyaudio
+# 4. Re-encode and serve as audio stream</pre>
+      </div>
+      <div class="card">
+        <div class="card-title">Path B: Web-Based VST Ports</div>
+        <p>Some popular VST effects have been ported to WebAssembly and run directly in the browser — no server needed. Projects like <strong>wam-community</strong> and <strong>Web Audio Modules (WAM)</strong> offer browser-native audio plugins.</p>
+        <p>Quality and selection are improving but still limited vs real VST libraries. Better for simple effects (reverb, chorus, delay) than complex synths.</p>
+        <p>Check: <a href="https://www.webaudiomodules.com" target="_blank">webaudiomodules.com</a></p>
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>This is an advanced feature.</strong> Server-side VST routing requires audio I/O configuration on Windows (ASIO drivers or WASAPI loopback), which is complex. The Web Audio API filters above cover 80% of use cases without any of this complexity. Implement VST support after the basic jukebox is working well.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⏺️ Record Clip — Download What You're Hearing</div>
+
+  <div class="card">
+    <div class="card-title">Browser-side recording via MediaRecorder API</div>
+    <p>The browser's <code>MediaRecorder</code> API can capture the Web Audio output directly — no server storage needed. The recording happens entirely in the browser, and when the user stops, it downloads as a WebM/MP3 file immediately.</p>
+    <pre>&lt;!-- Add to your jukebox UI --&gt;
+&lt;div id="recorder-panel" style="border:1px solid #252d3d;border-radius:3px;padding:12px;margin:10px 0"&gt;
+  &lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"&gt;
+    &lt;button id="rec-btn" onclick="toggleRecording()"
+      style="background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.3);color:#e05c5c;
+             padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.72rem"&gt;
+      ⏺ Start Recording
+    &lt;/button&gt;
+    &lt;span id="rec-status" style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#6e7a94"&gt;&lt;/span&gt;
+    &lt;span id="rec-timer" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:#c8a84b"&gt;&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div style="font-size:.72rem;color:#6e7a94;margin-top:6px"&gt;
+    Max 1 hour. File downloads to your computer — nothing stored on the server.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+let mediaRecorder = null;
+let recordedChunks = [];
+let recInterval = null;
+let recSeconds = 0;
+const MAX_SECONDS = 3600; // 1 hour
+
+function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+async function startRecording() {
+  // Capture the Web Audio output as a media stream
+  // (requires connecting a MediaStreamDestination to the audio chain)
+  const dest = ctx.createMediaStreamDestination();
+  // Connect your last audio node to dest instead of (or in addition to) ctx.destination:
+  // lastAudioNode.connect(dest);
+
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm;codecs=opus' });
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = downloadRecording;
+  mediaRecorder.start(1000); // collect data every second
+
+  recSeconds = 0;
+  document.getElementById('rec-btn').textContent = '⏹ Stop Recording';
+  document.getElementById('rec-btn').style.color = '#4caf7d';
+  document.getElementById('rec-status').textContent = 'Recording…';
+
+  recInterval = setInterval(() => {
+    recSeconds++;
+    const h = Math.floor(recSeconds/3600), m = Math.floor((recSeconds%3600)/60), s = recSeconds%60;
+    document.getElementById('rec-timer').textContent =
+      [h,m,s].map(x=>String(x).padStart(2,'0')).join(':');
+    if (recSeconds >= MAX_SECONDS) stopRecording();
+  }, 1000);
+}
+
+function stopRecording() {
+  if (mediaRecorder) mediaRecorder.stop();
+  clearInterval(recInterval);
+  document.getElementById('rec-btn').textContent = '⏺ Start Recording';
+  document.getElementById('rec-btn').style.color = '#e05c5c';
+  document.getElementById('rec-status').textContent = 'Processing…';
+  document.getElementById('rec-timer').textContent = '';
+}
+
+function downloadRecording() {
+  const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');
+  a.href     = url;
+  a.download = `jukebox-recording-${date}.webm`;
+  a.click();
+  URL.revokeObjectURL(url);
+  recordedChunks = [];
+  document.getElementById('rec-status').textContent = 'Download started!';
+  setTimeout(() => { document.getElementById('rec-status').textContent = ''; }, 3000);
+}
+&lt;/script&gt;</pre>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>WebM → MP3 conversion:</strong> The recording downloads as .webm (Opus codec). Most modern media players open this natively. If you need MP3, convert with FFmpeg: <code>ffmpeg -i recording.webm recording.mp3</code></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

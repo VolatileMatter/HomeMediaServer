@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Immich</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📷</div>
+  <div>
+    <h1>Immich — Photo &amp; Video Backup</h1>
+    <div class="subtitle">// Self-Hosted Google Photos · Port 2283 · WSL2 //</div>
+    <p class="desc">Immich is the best self-hosted alternative to Google Photos. Automatic mobile backup, face recognition, album sharing, and a gorgeous web/mobile UI. Runs via Docker in WSL2 on Windows.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Immich running on port 2283 via WSL2/Docker, mobile apps on all devices auto-backing up to your server. Each user has private photos with optional sharing.</div>
+
+<div class="callout callout-warn">
+  <div class="callout-icon">⚠️</div>
+  <div class="callout-body"><strong>WSL2 / Docker required.</strong> Immich is officially Linux/Docker only. On Windows, the cleanest path is WSL2 + Docker Compose. This also means Immich won't interfere with your Windows services at all — it's isolated in WSL2.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Installation via WSL2 + Docker <span class="tag tag-docker">WSL2</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Ensure WSL2 + Docker are installed</strong>
+        <p>See the RomM tab for WSL2 + Docker install steps. If you set up RomM first, this is already done.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create Immich directory and download official compose file</strong>
+        <pre>mkdir ~/immich && cd ~/immich
+wget -O docker-compose.yml https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
+wget -O .env https://github.com/immich-app/immich/releases/latest/download/example.env</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Edit the .env file</strong>
+        <pre># Key settings in .env:
+UPLOAD_LOCATION=/mnt/d/Photos/Immich    # Windows D:\Photos\Immich
+DB_PASSWORD=strongpassword
+IMMICH_VERSION=release</pre>
+        <p>The <code>UPLOAD_LOCATION</code> points to your Windows storage drive via the WSL2 mount. Photos uploaded to Immich land here.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start Immich</strong>
+        <pre>docker-compose up -d
+
+# First startup takes 2-3 minutes while it initializes the database.
+# Access at http://localhost:2283</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create admin account at http://localhost:2283</strong>
+        <p>First visit shows a signup page. Create your admin account. Then add users via Administration → Users → Create User.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Auto-start on Windows boot</strong>
+        <pre># Add to Task Scheduler (At startup, delay 3 minutes):
+# Action: wsl -d Ubuntu -- bash -c "cd ~/immich && docker-compose up -d"</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Immich" dir=in action=allow protocol=TCP localport=2283</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📱 Mobile Apps</div>
+  <div class="card">
+    <table>
+      <tr><th>Platform</th><th>Download</th><th>Auto-backup?</th></tr>
+      <tr><td>iOS</td><td>App Store: "Immich"</td><td>✅ Background auto-backup</td></tr>
+      <tr><td>Android</td><td>Play Store or F-Droid: "Immich"</td><td>✅ Background auto-backup</td></tr>
+    </table>
+    <p style="margin-top:10px">In the mobile app: Settings → Server URL → enter <code>http://[server-ip]:2283</code>. Log in with your Immich account. Enable "Background Backup" — the app will automatically upload new photos as they're taken.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">✨ Key Features</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Face Recognition &amp; People Albums</div>
+      <p>Immich automatically groups photos by faces. After initial processing (can take hours on a large library), you'll see "People" in the UI — tap a face to name the person and see all their photos. Processing uses the CPU and runs in the background.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Smart Search</div>
+      <p>Type "beach sunset 2023" and Immich finds matching photos using CLIP (AI image understanding). No need to tag photos manually. Runs locally — no data leaves your server.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Album Sharing</div>
+      <p>Create albums and share them with other Immich users on your server, or generate a public share link (read-only, no account needed) for external guests.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">External Library</div>
+      <p>Point Immich at an existing folder of photos without moving them. Administration → External Libraries → add your D:\Photos folder. Immich indexes and displays them without copying.</p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">💾 Storage Estimates</div>
+  <div class="card">
+    <table>
+      <tr><th>Library Size</th><th>Storage</th><th>Notes</th></tr>
+      <tr><td>10,000 photos</td><td>~30–80 GB</td><td>Depends on phone camera resolution</td></tr>
+      <tr><td>50,000 photos</td><td>~150–400 GB</td><td>Average family/friends library</td></tr>
+      <tr><td>Photos + 4K video</td><td>Add 1–5 GB per video</td><td>Video is the space killer</td></tr>
+    </table>
+    <p style="margin-top:8px">Store photos on your large media HDD (e.g. <code>D:\Photos\Immich</code>). The Immich database (metadata, thumbnails, ML models) is ~5GB and stays in WSL2's home directory.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Immich supports OAuth2/OIDC natively. Administration → OAuth → enable → set your Google OAuth or Authentik OIDC endpoint. Users then see "Sign in with Google" on the login page.</p>
+  </div>
+</div>
+
+</body>
+</html>

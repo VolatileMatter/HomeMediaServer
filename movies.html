@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Movies & TV</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎬</div>
+  <div>
+    <h1>Movies &amp; TV Streaming</h1>
+    <div class="subtitle">// Plex vs Jellyfin · Migration Guide · Port 32400 / 8096 //</div>
+    <p class="desc">You currently run Plex. This tab covers getting it stable on proper storage, and — if you ever want to switch — a full comparison with Jellyfin and a step-by-step migration guide.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1: Keep Plex running on internal storage. Jellyfin migration is optional — read the comparison first. Both can run simultaneously during a transition period.</div>
+
+<div class="section">
+  <div class="section-title">🟡 Plex — Current Setup</div>
+  <div class="card">
+    <div class="card-title">Getting Plex Stable on Internal Storage</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Update library paths after storage migration</strong>
+          <p>Settings → Libraries → edit each library → change the folder path from the old USB letter (e.g. <code>F:\Media\TV</code>) to the new internal path (e.g. <code>D:\Media\TV</code>). Plex re-matches metadata without re-downloading it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Confirm Plex Media Server auto-starts</strong>
+          <p>Services (<code>services.msc</code>) → "Plex Media Server" → set to <strong>Automatic</strong>. Test by rebooting.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Invite users via plex.tv</strong>
+          <p>Settings → Manage Library Access → Invite by email. Each user gets their own watch history, continue watching, and recommendations. No SSO needed — Plex accounts handle this natively.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Plex Hardware Transcoding (Optional)</div>
+    <p>Plex Free only software-transcodes, which is CPU-heavy. Plex Pass ($40/yr or $120 lifetime) unlocks hardware transcoding via your GPU — dramatically reduces CPU load when multiple people stream different resolutions. If you have a modern GPU (GTX 1000+ or RX 400+), this is worth it.</p>
+    <pre>Settings → Troubleshooting → Generate Support Bundle
+(to verify hardware transcoding is working after enabling Plex Pass)</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚖️ Plex vs Jellyfin — Full Comparison</div>
+
+  <div class="card">
+    <table>
+      <tr><th>Feature</th><th>Plex</th><th>Jellyfin</th></tr>
+      <tr><td>Cost</td><td>Free basic; Plex Pass $40/yr for hw transcode</td><td><strong>100% free, forever</strong></td></tr>
+      <tr><td>License</td><td>Proprietary (closed source)</td><td><strong>GPL-2.0 (fully open source)</strong></td></tr>
+      <tr><td>Cloud dependency</td><td>Requires plex.tv account for remote access</td><td><strong>No cloud — purely self-hosted</strong></td></tr>
+      <tr><td>Hardware transcoding</td><td>Plex Pass required ($$$)</td><td><strong>Free, built-in</strong></td></tr>
+      <tr><td>Mobile apps</td><td>Excellent (iOS/Android)</td><td>Good, improving fast</td></tr>
+      <tr><td>Smart TV apps</td><td>Excellent (Roku, FireTV, Apple TV, etc.)</td><td>Good (some platforms need web browser)</td></tr>
+      <tr><td>UI polish</td><td>Very polished, Netflix-like</td><td>Good, more functional than beautiful</td></tr>
+      <tr><td>Live TV / DVR</td><td>Plex Pass required</td><td>Free (with HDHomeRun tuner)</td></tr>
+      <tr><td>Sync (offline download)</td><td>Plex Pass required</td><td>Free</td></tr>
+      <tr><td>Multi-user watch history</td><td>Excellent (managed users)</td><td>Good (separate accounts)</td></tr>
+      <tr><td>SSO / OAuth integration</td><td>plex.tv only (can't integrate with Authentik)</td><td><strong>Supports LDAP, SSO, Authentik</strong></td></tr>
+      <tr><td>Plugin/addon ecosystem</td><td>Limited (plugins removed in 2020)</td><td>Active plugin ecosystem</td></tr>
+      <tr><td>Metadata agents</td><td>Very good (built-in)</td><td>Good (uses local agents)</td></tr>
+      <tr><td>Chapters / skip intro</td><td>Plex Pass required</td><td><strong>Free</strong></td></tr>
+      <tr><td>Privacy</td><td>Plex collects viewing data; opt-out buried</td><td><strong>Zero telemetry by default</strong></td></tr>
+    </table>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Recommendation:</strong> If you're happy with Plex and don't mind the cost, keep it — the app experience is still better on some smart TVs. If you want zero ongoing costs, full hardware transcoding free, true self-hosting (no plex.tv dependency), and proper SSO integration, migrate to Jellyfin. The migration is easy and reversible.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🟢 Jellyfin Setup — Windows Native <span class="tag tag-native">FOSS · No Docker</span></div>
+
+  <div class="card">
+    <div class="card-title">Port: <span class="tag tag-native">8096</span></div>
+    <p>Jellyfin runs natively on Windows with its own installer. No XAMPP, no dependencies. It installs as a Windows Service.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Jellyfin installer</strong>
+        <p>From <a href="https://jellyfin.org/downloads/server" target="_blank">jellyfin.org/downloads/server</a> — choose Windows. Run the installer as admin. It registers as a Windows Service automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>First-time setup at http://localhost:8096</strong>
+        <p>Create admin account → select language → add media libraries (point to your existing D:\Media\Movies, D:\Media\TV folders — the same ones Plex uses). Jellyfin can run alongside Plex on different ports without conflicts.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Jellyfin" dir=in action=allow protocol=TCP localport=8096</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Enable hardware transcoding (free!)</strong>
+        <p>Dashboard → Playback → Transcoding → enable "Intel QuickSync / Nvidia NVENC / AMD AMF" depending on your GPU. This is free in Jellyfin — no subscription required.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add users</strong>
+        <p>Dashboard → Users → Add User. Each user gets separate watch history, "Continue Watching," and playback progress. Unlike Plex, users don't need a cloud account — just a username and password on your server.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Jellyfin + SSO (Authentik / Google OAuth)</div>
+    <p>Install the <strong>SSO Authentication Plugin</strong> from the Jellyfin plugin catalog. This adds OpenID Connect support, letting users log into Jellyfin with Google or via your Authentik instance. See the SSO tab for Authentik setup.</p>
+    <pre># In Jellyfin: Dashboard → Plugins → Catalog → search "SSO"
+# Install "SSO-Auth" plugin → restart → configure OIDC provider</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔄 Migrating from Plex to Jellyfin</div>
+
+  <div class="card">
+    <div class="card-title">What transfers and what doesn't</div>
+    <table>
+      <tr><th>Data</th><th>Migrates?</th><th>How</th></tr>
+      <tr><td>Media files (movies, TV)</td><td>✅ Automatically</td><td>Just point Jellyfin at same folders as Plex</td></tr>
+      <tr><td>Watch history / progress</td><td>⚠️ Via tool</td><td>Use <strong>Plex2Jellyfin</strong> (see below)</td></tr>
+      <tr><td>Ratings / favorites</td><td>⚠️ Partial</td><td>Plex2Jellyfin handles some</td></tr>
+      <tr><td>Custom artwork/posters</td><td>❌</td><td>Re-download via Jellyfin metadata refresh</td></tr>
+      <tr><td>Playlists</td><td>⚠️ Manual</td><td>Recreate manually in Jellyfin</td></tr>
+      <tr><td>User accounts</td><td>❌</td><td>Recreate users in Jellyfin (no plex.tv dependency)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Plex2Jellyfin migration tool</div>
+    <pre># Install Python tool:
+pip install plex2jellyfin
+
+# Run migration (exports Plex watch history and imports to Jellyfin):
+plex2jellyfin --plex-url http://localhost:32400 \
+              --plex-token YOUR_PLEX_TOKEN \
+              --jellyfin-url http://localhost:8096 \
+              --jellyfin-api-key YOUR_JELLYFIN_KEY \
+              --migrate watched</pre>
+    <p>Get your Plex token: open Plex web → F12 → Network tab → any API request → look for <code>X-Plex-Token</code> header.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Run both simultaneously during transition.</strong> Plex and Jellyfin can run at the same time pointing at the same media folders — neither modifies the files. Run Jellyfin in parallel for a few weeks until you're confident, then shut down Plex.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

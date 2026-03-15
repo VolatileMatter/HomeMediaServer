@@ -12,7 +12,7 @@
   </div>
 </div>
 
-<div class="v1-banner">🐉 V1 Goal: LinguaCafe on port 8090 serving English, Spanish, Russian. Anki-web on port 8091 with per-user progress. LibreLingo on port 8092.</div>
+<div class="v1-banner">🐉 V1 Goal: LinguaCafe on port 8093 serving English, Spanish, Russian. Anki-web on port 8091 with per-user progress. LibreLingo on port 8092.</div>
 
 <div class="section">
   <div class="section-title">🗣️ LinguaCafe — Reading-Based Vocab <span class="tag tag-native">FOSS</span></div>
@@ -59,13 +59,13 @@ docker-compose up -d</pre>
       <div class="step">
         <div class="step-content">
           <strong>Enable Spanish and Russian language packs</strong>
-          <p>Access LinguaCafe at <code>http://localhost:8090</code>. Go to Settings → Languages → enable Español and Русский. Each language requires downloading a model from within the UI (NLP models for tokenization, ~200–500MB each).</p>
+          <p>Access LinguaCafe at <code>http://localhost:8093</code>. Go to Settings → Languages → enable Español and Русский. Each language requires downloading a model from within the UI (NLP models for tokenization, ~200–500MB each).</p>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
           <strong>Open firewall and auto-start</strong>
-          <pre>netsh advfirewall firewall add rule name="LinguaCafe" dir=in action=allow protocol=TCP localport=8090
+          <pre>netsh advfirewall firewall add rule name="LinguaCafe" dir=in action=allow protocol=TCP localport=8093
 
 # Auto-start WSL2 + Docker on Windows boot:
 # Create a Task Scheduler task:
@@ -219,7 +219,7 @@ netsh advfirewall firewall add rule name="LibreLingo" dir=in action=allow protoc
   <div class="card">
     <p>All three are web apps. Add them to your Caddyfile:</p>
     <pre>languages.yourdomain.com {
-    reverse_proxy localhost:8090  # LinguaCafe
+    reverse_proxy localhost:8093  # LinguaCafe
 }
 anki.yourdomain.com {
     reverse_proxy localhost:8091  # Anki sync

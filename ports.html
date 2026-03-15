@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Port Registry</title><link rel="stylesheet" href="shared.css">
+<style>
+  .collision-note { background: rgba(224,92,92,.07); border:1px solid rgba(224,92,92,.25); border-radius:3px; padding:10px 14px; margin-bottom:8px; font-size:.83rem; }
+  .collision-note strong { color: var(--danger); }
+  .fixed-note { background: rgba(78,205,196,.07); border:1px solid rgba(78,205,196,.2); border-radius:3px; padding:10px 14px; margin-bottom:8px; font-size:.83rem; }
+  .fixed-note strong { color: var(--accent3); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔌</div>
+  <div>
+    <h1>Port Registry</h1>
+    <div class="subtitle">// All Services · Assigned Ports · Collision Notes //</div>
+    <p class="desc">Complete reference of every port used across all services. Collisions were audited and resolved. Use this to configure your router port forwards and Caddy reverse proxy.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚠️ Resolved Port Collisions</div>
+
+  <div class="collision-note">
+    <strong>COLLISION FOUND &amp; FIXED:</strong> LinguaCafe was originally documented on port <strong>8090</strong> — the same as qBittorrent WebUI. LinguaCafe has been moved to <strong>8093</strong> throughout this documentation. If you already installed LinguaCafe on 8090, change its port in the Docker Compose file and restart.
+  </div>
+
+  <div class="fixed-note">
+    <strong>FIXED:</strong> LinguaCafe → now port <strong>8093</strong>. Update your <code>docker-compose.yml</code>: change <code>"8090:8090"</code> to <code>"8093:8090"</code> and restart the container.
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📋 Complete Port Registry</div>
+  <div class="card" style="padding:0;overflow-x:auto">
+    <table style="margin:0">
+      <tr><th>Port</th><th>Service</th><th>Protocol</th><th>Public?</th><th>Tab</th></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">ALWAYS-ON CORE</td></tr>
+      <tr><td><strong>80</strong></td><td>XAMPP / Nextcloud (HTTP)</td><td>TCP</td><td>Yes (Caddy proxies it)</td><td>Nextcloud</td></tr>
+      <tr><td><strong>443</strong></td><td>Caddy HTTPS</td><td>TCP</td><td>Yes</td><td>Security</td></tr>
+      <tr><td><strong>3001</strong></td><td>Uptime Kuma</td><td>TCP</td><td>Tailscale only</td><td>Utilities</td></tr>
+      <tr><td><strong>9000</strong></td><td>Dashboard HTTP server (Python)</td><td>TCP</td><td>LAN only</td><td>Dashboard</td></tr>
+      <tr><td><strong>9001</strong></td><td>Stats agent (Python)</td><td>TCP</td><td>LAN only</td><td>Dashboard</td></tr>
+      <tr><td><strong>9002</strong></td><td>Control server (Python) — localhost only</td><td>TCP</td><td>NO — localhost only</td><td>Dashboard</td></tr>
+      <tr><td><strong>9003</strong></td><td>Achievement server</td><td>TCP</td><td>LAN only</td><td>SSO</td></tr>
+      <tr><td><strong>19999</strong></td><td>Netdata system monitor</td><td>TCP</td><td>Tailscale only</td><td>Dashboard</td></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">MEDIA SERVICES</td></tr>
+      <tr><td><strong>32400</strong></td><td>Plex Media Server</td><td>TCP</td><td>Yes (Plex handles auth)</td><td>Movies</td></tr>
+      <tr><td><strong>8096</strong></td><td>Jellyfin</td><td>TCP</td><td>Yes (via Caddy)</td><td>Movies</td></tr>
+      <tr><td><strong>8083</strong></td><td>Calibre-Web</td><td>TCP</td><td>Via Caddy with auth</td><td>Calibre</td></tr>
+      <tr><td><strong>13378</strong></td><td>Audiobookshelf</td><td>TCP</td><td>Via Caddy</td><td>Audiobooks</td></tr>
+      <tr><td><strong>4533</strong></td><td>Navidrome</td><td>TCP</td><td>Via Caddy</td><td>Navidrome</td></tr>
+      <tr><td><strong>5000</strong></td><td>Kavita — Comics</td><td>TCP</td><td>Via Caddy with auth</td><td>Kavita</td></tr>
+      <tr><td><strong>5001</strong></td><td>Kavita — DnD Books</td><td>TCP</td><td>Via Caddy with auth</td><td>Kavita</td></tr>
+      <tr><td><strong>2283</strong></td><td>Immich (photos)</td><td>TCP</td><td>Via Caddy</td><td>Immich</td></tr>
+      <tr><td><strong>8888</strong></td><td>Kiwix (offline Wikipedia)</td><td>TCP</td><td>Via Caddy (optional)</td><td>Offline Wiki</td></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">DOWNLOADS &amp; AUTOMATION</td></tr>
+      <tr><td><strong>8090</strong></td><td>qBittorrent WebUI</td><td>TCP</td><td>NO — LAN/Tailscale only</td><td>Seedbox</td></tr>
+      <tr><td><strong>8989</strong></td><td>Sonarr</td><td>TCP</td><td>NO — LAN only</td><td>Seedbox</td></tr>
+      <tr><td><strong>7878</strong></td><td>Radarr</td><td>TCP</td><td>NO — LAN only</td><td>Seedbox</td></tr>
+      <tr><td><strong>8787</strong></td><td>Readarr</td><td>TCP</td><td>NO — LAN only</td><td>Seedbox</td></tr>
+      <tr><td><strong>9696</strong></td><td>Prowlarr</td><td>TCP</td><td>NO — LAN only</td><td>Seedbox</td></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">AI &amp; RECOMMENDATIONS</td></tr>
+      <tr><td><strong>11434</strong></td><td>Ollama (LLM engine)</td><td>TCP</td><td>LAN only (no auth)</td><td>Private AI</td></tr>
+      <tr><td><strong>3000</strong></td><td>Open WebUI (Ollama chat)</td><td>TCP</td><td>Via Caddy with auth</td><td>Private AI</td></tr>
+      <tr><td><strong>5051</strong></td><td>Recommendations API</td><td>TCP</td><td>LAN only</td><td>Recs</td></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">APPS &amp; UTILITIES</td></tr>
+      <tr><td><strong>8082</strong></td><td>Vaultwarden (passwords)</td><td>TCP</td><td>Via Caddy with auth</td><td>Security</td></tr>
+      <tr><td><strong>5050</strong></td><td>Jukebox</td><td>TCP</td><td>Via Caddy with auth</td><td>Jukebox</td></tr>
+      <tr><td><strong>3456</strong></td><td>Vikunja (tasks)</td><td>TCP</td><td>Via Caddy with auth</td><td>Utilities</td></tr>
+      <tr><td><strong>9925</strong></td><td>Mealie (recipes)</td><td>TCP</td><td>Via Caddy with auth</td><td>Utilities</td></tr>
+      <tr><td><strong>8098</strong></td><td>RomM (ROM manager)</td><td>TCP</td><td>LAN/Tailscale only</td><td>RomM</td></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">LANGUAGE LEARNING</td></tr>
+      <tr><td><strong>8093</strong></td><td>LinguaCafe ⚠️ MOVED from 8090</td><td>TCP</td><td>Via Caddy with auth</td><td>Languages</td></tr>
+      <tr><td><strong>8091</strong></td><td>Anki Sync Server</td><td>TCP</td><td>Via Caddy with auth</td><td>Languages</td></tr>
+      <tr><td><strong>8092</strong></td><td>LibreLingo</td><td>TCP</td><td>Via Caddy with auth</td><td>Languages</td></tr>
+      <tr><td><strong>8085</strong></td><td>EmulatorJS server</td><td>TCP</td><td>Via Caddy with auth</td><td>Pokémon etc.</td></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">GAME SERVERS</td></tr>
+      <tr><td><strong>25565</strong></td><td>Minecraft Vanilla</td><td>TCP+UDP</td><td>Yes (port forward)</td><td>Minecraft</td></tr>
+      <tr><td><strong>25566</strong></td><td>Minecraft Modded</td><td>TCP+UDP</td><td>Yes (port forward)</td><td>Minecraft</td></tr>
+      <tr><td><strong>25575</strong></td><td>Minecraft Vanilla RCON</td><td>TCP</td><td>NO — localhost only</td><td>Minecraft</td></tr>
+      <tr><td><strong>25576</strong></td><td>Minecraft Modded RCON</td><td>TCP</td><td>NO — localhost only</td><td>Minecraft</td></tr>
+      <tr><td><strong>7777</strong></td><td>ARK game port</td><td>UDP</td><td>Yes (when active)</td><td>ARK</td></tr>
+      <tr><td><strong>27015</strong></td><td>ARK query port</td><td>UDP</td><td>Yes (when active)</td><td>ARK</td></tr>
+      <tr><td><strong>27020</strong></td><td>ARK RCON</td><td>TCP</td><td>NO — localhost only</td><td>ARK</td></tr>
+      <tr><td><strong>1337</strong></td><td>SS13 / BYOND</td><td>TCP+UDP</td><td>Yes (when active)</td><td>SS13</td></tr>
+
+      <tr style="background:rgba(255,255,255,.02)"><td colspan="5" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);padding:8px 12px;letter-spacing:.1em">GAME STREAMING</td></tr>
+      <tr><td><strong>47990</strong></td><td>Sunshine admin UI (HTTPS)</td><td>TCP</td><td>LAN only</td><td>GameCube</td></tr>
+      <tr><td><strong>47998–48010</strong></td><td>Sunshine streaming ports</td><td>TCP+UDP</td><td>Yes (for Moonlight)</td><td>GameCube</td></tr>
+      <tr><td><strong>55435</strong></td><td>RetroArch NetPlay</td><td>TCP+UDP</td><td>Yes (when gaming)</td><td>Mario Party</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌐 Suggested Caddy Subdomain Routing</div>
+  <div class="card">
+    <pre># Caddyfile — map subdomains to local ports:
+movies.yourdomain.com    → localhost:8096  (Jellyfin)
+books.yourdomain.com     → localhost:8083  (Calibre-Web)
+audio.yourdomain.com     → localhost:13378 (Audiobookshelf)
+music.yourdomain.com     → localhost:4533  (Navidrome)
+cloud.yourdomain.com     → localhost:80    (Nextcloud)
+photos.yourdomain.com    → localhost:2283  (Immich)
+comics.yourdomain.com    → localhost:5000  (Kavita Comics)
+dnd.yourdomain.com       → localhost:5001  (Kavita DnD)
+ai.yourdomain.com        → localhost:3000  (Open WebUI)
+status.yourdomain.com    → localhost:3001  (Uptime Kuma public page)
+wiki.yourdomain.com      → localhost:8888  (Kiwix)
+tasks.yourdomain.com     → localhost:3456  (Vikunja)
+recipes.yourdomain.com   → localhost:9925  (Mealie)
+roms.yourdomain.com      → localhost:8098  (RomM) ← keep behind auth!
+jukebox.yourdomain.com   → localhost:5050  (Jukebox)</pre>
+  </div>
+</div>
+
+</body>
+</html>

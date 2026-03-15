@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Dashboard Setup</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📐</div>
+  <div>
+    <h1>Dashboard Setup Guide</h1>
+    <div class="subtitle">// How to Deploy · Stats Agent · Control Server · Public Page //</div>
+    <p class="desc">Everything needed to get the live dashboard running: the Python stats agent, the control server for start/stop buttons, the public read-only status page, and Caddy routing.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 The Dashboard tab shows a simulation of what the dashboard looks like. This tab explains how to make it actually work with live data from your server.</div>
+
+<div class="section">
+  <div class="section-title">🏗️ Architecture: Two Dashboards</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🌍 Public Status Page (read-only)</div>
+      <p>A stripped-down version — service status lights, recent downloads, player counts. No controls. Served publicly at <code>status.yourdomain.com</code>. File: <code>monitor-public.html</code>.</p>
+      <p>Anyone on the internet can see if your services are up, without being able to touch anything.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔒 Private Control Panel</div>
+      <p>Full controls for starting/stopping services. Only accessible from your local network (or Tailscale). File: <code>monitor-control.html</code>. Caddy rule blocks external access to this page.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📊 Step 1 — Stats Agent (Port 9001)</div>
+  <div class="card">
+    <div class="card-title">stats_server.py — serves live CPU/RAM/disk/uptime data</div>
+    <p>Create <code>D:\Server\Dashboard\stats_server.py</code>:</p>
+    <pre>from flask import Flask, jsonify
+import psutil, time, json, os
+
+app = Flask(__name__)
+
+@app.route('/stats')
+def stats():
+    d = psutil.disk_usage('D:\\')
+    return jsonify({
+        'cpu':          psutil.cpu_percent(interval=1),
+        'ram':          psutil.virtual_memory().percent,
+        'disk_used':    d.percent,
+        'disk_free_gb': round(d.free / 1e9, 1),
+        'uptime':       int(time.time() - psutil.boot_time()),
+        'active_sessions': load_sessions()
+    })
+
+def load_sessions():
+    """Load active sessions from a JSON file that services write to."""
+    path = 'D:/Server/Dashboard/sessions.json'
+    try:
+        if os.path.exists(path):
+            return json.load(open(path))
+    except: pass
+    return []
+
+if __name__ == '__main__':
+    app.run(port=9001, host='0.0.0.0')
+</pre>
+    <pre>pip install psutil flask
+nssm install StatsAgent python "D:\Server\Dashboard\stats_server.py"
+nssm set StatsAgent AppDirectory "D:\Server\Dashboard"
+nssm start StatsAgent</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎛️ Step 2 — Control Server (Port 9002, localhost only)</div>
+  <div class="card">
+    <div class="card-title">control_server.py — handles start/stop/restart commands</div>
+    <p>Create <code>D:\Server\Dashboard\control_server.py</code>:</p>
+    <pre>from flask import Flask, request, jsonify
+import subprocess
+
+app = Flask(__name__)
+ALLOWED = ['minecraft-vanilla','minecraft-modded','ark','ss13','audiobookshelf','calibre']
+
+@app.route('/control/&lt;service&gt;/&lt;action&gt;', methods=['POST'])
+def control(service, action):
+    if service not in ALLOWED:
+        return jsonify({'error': 'unknown service'}), 400
+    if action in ('start','stop','restart'):
+        subprocess.Popen(f'schtasks /run /tn "{service}-{action}"', shell=True)
+        return jsonify({'ok': True, 'service': service, 'action': action})
+    return jsonify({'error': 'unknown action'}), 400
+
+@app.route('/control/user/block', methods=['POST'])
+def block_user():
+    data = request.json
+    # Write to users.json and Windows Firewall
+    return jsonify({'ok': True})
+
+@app.route('/control/ip/block', methods=['POST'])
+def block_ip():
+    data = request.json
+    ip = data['ip']
+    subprocess.run(['netsh','advfirewall','firewall','add','rule',
+                    f'name=BLOCK_{ip}','dir=in','action=block',f'remoteip={ip}'])
+    return jsonify({'ok': True})
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=9002)  # localhost ONLY — never expose this
+</pre>
+    <pre>nssm install ControlServer python "D:\Server\Dashboard\control_server.py"
+nssm set ControlServer AppDirectory "D:\Server\Dashboard"
+nssm start ControlServer</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Binds to 127.0.0.1 only.</strong> The control server is intentionally not accessible from the network. The dashboard page calls it from the browser, which only works when you're on the server itself (or via Tailscale where Caddy forwards to localhost).</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">👥 Step 3 — Active Sessions Tracking</div>
+  <div class="card">
+    <div class="card-title">sessions.json — track who is using what service</div>
+    <p>Each service that supports webhooks can write to this file when a user starts/stops a session. The dashboard reads it to show "Alice is watching Jellyfin."</p>
+    <pre># Example sessions.json:
+[
+  {"user": "alice",   "service": "Jellyfin",       "since": "8:42 PM"},
+  {"user": "bob",     "service": "Minecraft",       "since": "7:15 PM"},
+  {"user": "charlie", "service": "Audiobookshelf",  "since": "9:00 PM"}
+]
+
+# Jellyfin webhook setup (Settings → Webhooks → Add):
+# Event: PlaybackStart / PlaybackStop
+# URL: http://localhost:9001/session/update
+# Body template: {"user":"{{NotificationUsername}}","service":"Jellyfin","action":"{{Event}}"}
+
+# Add to stats_server.py:
+@app.route('/session/update', methods=['POST'])
+def session_update():
+    data = request.json
+    sessions = load_sessions()
+    user = data.get('user')
+    if data.get('action') == 'PlaybackStart':
+        sessions = [s for s in sessions if s['user'] != user]
+        sessions.append({'user': user, 'service': data.get('service','?'), 'since': time.strftime('%I:%M %p')})
+    elif data.get('action') == 'PlaybackStop':
+        sessions = [s for s in sessions if s['user'] != user]
+    with open('D:/Server/Dashboard/sessions.json', 'w') as f:
+        json.dump(sessions, f)
+    return jsonify({'ok': True})</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌐 Step 4 — Caddy Config</div>
+  <div class="card">
+    <pre># Caddyfile entries for dashboard:
+
+# Public read-only status page:
+status.yourdomain.com {
+    root * D:\Server\Dashboard
+    file_server
+    rewrite * /monitor-public.html
+    @control path /control/*
+    respond @control 403
+}
+
+# Private control dashboard — LAN + Tailscale only:
+# Add to your 192.168.1.100 / Tailscale IP server block:
+# (no public DNS record for this)
+handle /dashboard* {
+    root * D:\Server\Dashboard
+    file_server
+}</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔄 Step 5 — Downloads Feed (qBittorrent)</div>
+  <div class="card">
+    <p>In qBittorrent → Tools → Options → Downloads → Run external program on torrent completion:</p>
+    <pre>powershell -Command "
+  $f='D:\Server\Dashboard\downloads.json';
+  $ex = if (Test-Path $f) { Get-Content $f | ConvertFrom-Json } else { @() };
+  $new = @{name='%N';size='%Z';date=(Get-Date -f 'yyyy-MM-dd HH:mm');category='%L';progress=100};
+  ($new + $ex) | Select-Object -First 50 | ConvertTo-Json | Set-Content $f
+"</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">☀️ Step 6 — Sunshine Session Detection</div>
+  <div class="card">
+    <p>Sunshine logs active connections. Poll the Sunshine API to detect when streaming is active and surface a warning on the home page and user homepage:</p>
+    <pre># In stats_server.py, add to the /stats endpoint:
+import requests as req
+
+def sunshine_active():
+    try:
+        r = req.get('https://localhost:47990/api/sessions',
+                    verify=False, timeout=2,
+                    auth=('admin', 'your-sunshine-password'))
+        sessions = r.json()
+        return len(sessions) > 0, sessions
+    except:
+        return False, []
+
+# Add to stats response:
+# 'sunshine_active': sunshine_active()[0]</pre>
+    <p>The home tab and user homepage both poll <code>http://localhost:9001/stats</code> and check <code>sunshine_active</code> to show/hide the streaming-in-use warning banner.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎛️ Step 7 — Owner News Feed</div>
+  <div class="card">
+    <p>The user homepage pulls owner news from a simple JSON file you edit directly:</p>
+    <pre># D:\Server\Dashboard\news.json
+[
+  {
+    "title": "ARK Server Up This Weekend",
+    "body": "Spinning up the ARK server Saturday evening. Let me know if you want to join.",
+    "date": "Mar 15, 2025",
+    "pinned": false
+  }
+]
+
+# Add new items at the top of the array — the homepage shows the most recent 3-5.
+# The user homepage fetches: GET http://localhost:9001/news</pre>
+    <pre># Add to stats_server.py:
+@app.route('/news')
+def news():
+    try:
+        return jsonify(json.load(open('D:/Server/Dashboard/news.json')))
+    except:
+        return jsonify([])
+
+@app.route('/news', methods=['POST'])  # admin-only post
+def post_news():
+    items = json.load(open('D:/Server/Dashboard/news.json')) if os.path.exists('D:/Server/Dashboard/news.json') else []
+    items.insert(0, request.json)
+    json.dump(items[:20], open('D:/Server/Dashboard/news.json','w'), indent=2)
+    return jsonify({'ok': True})</pre>
+  </div>
+</div>
+
+</body>
+</html>
