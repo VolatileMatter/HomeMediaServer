@@ -82,6 +82,7 @@
     <!-- Row 1: Infra -->
     <div class="tab-bar-row">
       <span class="tab-group-label">infra //</span>
+      <button class="tab-btn" id="tab-home"           onclick="go('home')"><span class="ti">🏠</span>Home</button>
       <button class="tab-btn active" id="tab-dashboard"   onclick="go('dashboard')"><span class="ti">🖥️</span>Dashboard<span class="notif"></span></button>
       <button class="tab-btn" id="tab-overview"           onclick="go('overview')"><span class="ti">📋</span>Overview</button>
       <button class="tab-btn" id="tab-hardware"           onclick="go('hardware')"><span class="ti">🖧</span>Hardware</button>
@@ -102,6 +103,7 @@
       <button class="tab-btn" id="tab-seedbox"    onclick="go('seedbox')"><span class="ti">🌱</span>Seedbox</button>
       <button class="tab-btn" id="tab-jukebox"    onclick="go('jukebox')"><span class="ti">🎵</span>Jukebox</button>
       <button class="tab-btn" id="tab-ollama"     onclick="go('ollama')"><span class="ti">🤖</span>Private AI</button>
+      <button class="tab-btn" id="tab-recommendations" onclick="go('recommendations')"><span class="ti">🎯</span>Recs</button>
       <button class="tab-btn" id="tab-wikipedia"  onclick="go('wikipedia')"><span class="ti">📖</span>Offline Wiki</button>
       <button class="tab-btn" id="tab-languages"  onclick="go('languages')"><span class="ti">🌍</span>Languages</button>
     </div>
@@ -128,7 +130,8 @@
 
     <!-- Content panes — all start as loading placeholders; iframes injected lazily -->
     <div class="content-area">
-      <div class="tab-content active" id="pane-dashboard">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content active" id="pane-home">        <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-dashboard">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-overview">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-hardware">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-security">   <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
@@ -143,6 +146,7 @@
       <div class="tab-content"        id="pane-seedbox">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-jukebox">    <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-ollama">     <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+      <div class="tab-content"        id="pane-recommendations"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-wikipedia">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-languages">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
       <div class="tab-content"        id="pane-minecraft">  <div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
@@ -171,6 +175,7 @@
 <script>
 // ── Single source of truth: tab name → filename ──
 const FILES = {
+  home:          'home.html',
   dashboard:   'monitor-control.html',
   overview:    'overview.html',
   hardware:    'hardware.html',
@@ -186,6 +191,7 @@ const FILES = {
   seedbox:     'seedbox.html',
   jukebox:     'jukebox.html',
   ollama:      'ollama.html',
+  recommendations: 'recommendations.html',
   wikipedia:   'wikipedia.html',
   languages:   'languages.html',
   minecraft:   'minecraft.html',
@@ -234,7 +240,7 @@ function go(name) {
 // ── On load: honour hash or default to dashboard ──
 (function() {
   const hash = (location.hash || '').replace('#', '');
-  go((hash && FILES[hash]) ? hash : 'dashboard');
+  go((hash && FILES[hash]) ? hash : 'home');
 })();
 </script>
 </body>

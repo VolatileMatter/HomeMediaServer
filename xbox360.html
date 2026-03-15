@@ -172,5 +172,91 @@ Encoder:    nvenc (Nvidia) or amf (AMD)</pre>
   </div>
 </div>
 
+<hr>
+
+<div class="section">
+  <div class="section-title">🌐 Xbox Live Emulation — Playing Together Online</div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Honest status:</strong> Xbox Live emulation for Xenia is still maturing. True seamless Xbox Live (the way it worked on a real 360) isn't available yet in Xenia. What IS available are several workarounds that cover different use cases — from asynchronous sharing to real-time co-op.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option 1: System Link via Virtual LAN (Best for co-op)</div>
+    <p>System Link is the 360's LAN multiplayer mode — it was designed for local network play. Using a virtual LAN tool makes players on different machines appear to be on the same LAN, enabling System Link for games that support it.</p>
+    <p><strong>Tools: Radmin VPN or ZeroTier (both free)</strong></p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>All players install Radmin VPN (or ZeroTier)</strong>
+          <p>Download from <a href="https://radmin-vpn.com" target="_blank">radmin-vpn.com</a> — free for up to 100 devices on a network. All players join the same network using a network ID and password you share.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create a shared network</strong>
+          <p>One person (the host — you) creates the network: Radmin VPN → Network → Create Network. Share the network name and password with players. Everyone joins and gets a virtual 26.x.x.x IP.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>In Xenia: enable System Link</strong>
+          <p>Edit <code>xenia-canary.config.toml</code>:</p>
+          <pre>[XAudio2]
+# These settings help with System Link connectivity:
+
+[Live]
+# Not yet supported — use SystemLink instead</pre>
+          <p>In most games, go to the multiplayer menu → LAN Party / System Link → Create or Join a session. Players on the Radmin network will see each other's sessions.</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🎮</div>
+      <div class="callout-body"><strong>Games with confirmed System Link support in Xenia:</strong> Halo 3, Halo: ODST, Halo: Reach, Gears of War 1/2/3, Left 4 Dead (partially), CoD Black Ops (partially). Check each game's Xenia issue tracker for the current status.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option 2: Insignia — Real Xbox Live Replacement (Real Hardware Only)</div>
+    <p><strong>Insignia</strong> (<a href="https://insignia.live" target="_blank">insignia.live</a>) is a fan-run replacement for Xbox Live that works on <em>actual Xbox 360 hardware</em>. It supports real-time online play for games like CoD: Black Ops, Halo 3, Left 4 Dead, etc.</p>
+    <p><strong>Xenia does not currently support Insignia.</strong> The Insignia authentication system requires kernel-level Xbox Live calls that Xenia's HLE (high-level emulation) doesn't fully implement yet. This may change — the Xenia team is actively working on Live support.</p>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>If you have a real Xbox 360:</strong> Insignia is the definitive way to play 360 games online with friends. You need a real console and the ability to modify it slightly (RGH/JTAG or a specific dashboard version). Insignia is completely free and has a growing community of players.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option 3: Asynchronous / Package Sharing (Viva Piñata style)</div>
+    <p>Some 360 games had asynchronous online features — sending gifts, sharing buildings, trading items between players without being online at the same time. <strong>Viva Piñata</strong> is the best example: you could send pinatas as gifts to friends even when they weren't playing.</p>
+    <p>These features relied on Xbox Live's cloud storage ("Marketplace" items and friend sharing), which is now offline. In Xenia, there's currently no equivalent — the save data is local only. <strong>However:</strong></p>
+    <ul style="margin:8px 0 0 18px">
+      <li>You can manually copy save files between players and have them import them (share a piñata by sending someone your save file)</li>
+      <li>A community-built tool could theoretically host a simple "item exchange" server — but none exists specifically for Viva Piñata yet</li>
+      <li>The Xenia save data for Viva Piñata is at <code>D:\Emulation\Xbox360\Content\[profile_id]\4D5308AB\00000001\</code> — shareable as a file</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option 4: Parsec for Same-Screen Co-op</div>
+    <p>For games that support local co-op (2-player on the same screen), use Parsec to share your Xenia session with a friend. They connect and use their controller as Player 2. This works for any game with local co-op including Halo, Gears, Castle Crashers, etc. See the Mario Party tab for Parsec setup details.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Summary: What Works Today</div>
+    <table>
+      <tr><th>Use Case</th><th>Method</th><th>Works?</th></tr>
+      <tr><td>Co-op in the same room (local)</td><td>Xenia local multiplayer</td><td>✅ Yes</td></tr>
+      <tr><td>Co-op over internet (same-screen feel)</td><td>Parsec co-op streaming</td><td>✅ Yes (same game instance)</td></tr>
+      <tr><td>LAN/System Link co-op over internet</td><td>Radmin VPN + Xenia System Link</td><td>⚠️ Some games work</td></tr>
+      <tr><td>Real Xbox Live (achievements, lobbies)</td><td>Insignia</td><td>❌ Xenia only — real HW only</td></tr>
+      <tr><td>Async gifting/sharing (Viva Piñata)</td><td>Manual save file sharing</td><td>⚠️ Manual workaround only</td></tr>
+      <tr><td>CoD Zombies online</td><td>Radmin VPN System Link</td><td>⚠️ Partially — lobby detection issues</td></tr>
+    </table>
+  </div>
+</div>
+
 </body>
 </html>

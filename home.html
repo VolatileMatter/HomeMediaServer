@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Home</title><link rel="stylesheet" href="shared.css">
+<style>
+  .phase {
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-num {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--accent);
+    min-width: 36px;
+    text-align: center;
+    text-shadow: 0 0 16px rgba(200,168,75,0.4);
+  }
+  .phase-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-bright, #edf0f8);
+  }
+  .phase-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .phase-badge {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    padding: 3px 9px;
+    border-radius: 10px;
+  }
+  .badge-critical { background: rgba(224,92,92,.15); color: #e05c5c; border: 1px solid rgba(224,92,92,.25); }
+  .badge-high     { background: rgba(224,184,75,.15); color: #e0b84b; border: 1px solid rgba(224,184,75,.25); }
+  .badge-medium   { background: rgba(78,205,196,.12); color: var(--accent3); border: 1px solid rgba(78,205,196,.22); }
+  .badge-low      { background: rgba(120,130,160,.1); color: var(--text-dim); border: 1px solid rgba(120,130,160,.2); }
+
+  .phase-body { padding: 16px 18px; background: var(--bg2); }
+
+  .task-list { list-style: none; padding: 0; margin: 0; }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(37,45,61,0.5);
+  }
+  .task-item:last-child { border: none; }
+
+  .task-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--bg);
+    flex-shrink: 0; margin-top: 1px; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+  }
+  .task-check:hover { border-color: var(--accent); }
+  .task-check.done { background: rgba(76,175,125,.2); border-color: #4caf7d; color: #4caf7d; }
+
+  .task-body { flex: 1; }
+  .task-name { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .task-name.done-text { text-decoration: line-through; color: var(--text-dim); }
+  .task-detail { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+  .task-tab { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; color: var(--accent2); margin-top: 3px; }
+
+  .time-est {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .progress-bar-wrap { margin-bottom: 20px; }
+  .progress-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-track { height: 6px; background: var(--bg3); border-radius: 3px; }
+  .progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transition: width 0.5s; }
+
+  .tip-box {
+    background: rgba(200,168,75,.06);
+    border: 1px solid rgba(200,168,75,.2);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-top: 10px;
+  }
+  .tip-box strong { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🏠</div>
+  <div>
+    <h1>Implementation Roadmap</h1>
+    <div class="subtitle">// Where to Start · What Order · How Long Each Phase Takes //</div>
+    <p class="desc">Check off tasks as you complete them. Progress is saved in your browser. Start with the physical infrastructure and work outward — never skip ahead, each phase depends on the last.</p>
+  </div>
+</div>
+
+<!-- Overall progress -->
+<div class="progress-bar-wrap">
+  <div class="progress-label">
+    <span>Overall Progress</span>
+    <span id="prog-pct">0 / 0 tasks complete</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="prog-bar" style="width:0%"></div></div>
+</div>
+
+<!-- ══ PHASE 1 ══ -->
+<div class="phase" id="phase-1">
+  <div class="phase-header">
+    <div class="phase-num">1</div>
+    <div>
+      <div class="phase-title">Physical Server &amp; Hardware</div>
+      <div class="phase-subtitle">Before any software can run, you need a stable machine with proper internal storage</div>
+    </div>
+    <span class="phase-badge badge-critical">START HERE</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Decide: use existing gaming desktop or buy a new machine</div>
+          <div class="task-detail">Your existing gaming PC covers everything including game streaming. A second server is optional. See the Hardware tab for cost comparison.</div>
+          <div class="task-tab">→ Hardware tab</div>
+        </div>
+        <div class="time-est">1 hour</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Assess open SATA ports and drive bays on the case</div>
+          <div class="task-detail">Open the case, count free SATA ports on the motherboard and free 3.5" bays. Note how many drives you can add without a PCIe expansion card.</div>
+          <div class="task-tab">→ Hardware tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Buy and install internal storage drives</div>
+          <div class="task-detail">Shucked WD Elements externals are the best value (~$15/TB on sale). Install at minimum 2x 14TB for media + 1x SATA SSD for games. Use Storage Spaces to pool them.</div>
+          <div class="task-tab">→ Hardware tab</div>
+        </div>
+        <div class="time-est">2–4 hours (including shipping wait)</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Migrate data off USB drives to internal storage</div>
+          <div class="task-detail">Use robocopy to copy all media. Update Plex library paths. Remove USB drives or disable their sleep settings if keeping them temporarily.</div>
+          <div class="task-tab">→ Hardware tab</div>
+        </div>
+        <div class="time-est">2–8 hours (file transfer time)</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Assign server a static local IP in router</div>
+          <div class="task-detail">Log into your router → DHCP reservations → bind the server's MAC to a fixed IP like 192.168.1.100. This prevents all your bookmarks and firewall rules from breaking on reboot.</div>
+        </div>
+        <div class="time-est">15 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Connect server to router via Ethernet cable</div>
+          <div class="task-detail">Wi-Fi is not sufficient for a media server. Use a wired connection. If the PC is far from the router, a powerline adapter (~$40) sends Ethernet over house wiring.</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+    </ul>
+    <div class="tip-box"><strong>🐉 Don't skip this phase.</strong> Everything else fails on USB drives. Spend the $150–250 on internal storage first — it pays back immediately in reliability.</div>
+  </div>
+</div>
+
+<!-- ══ PHASE 2 ══ -->
+<div class="phase" id="phase-2">
+  <div class="phase-header">
+    <div class="phase-num">2</div>
+    <div>
+      <div class="phase-title">Security Foundation &amp; Remote Access</div>
+      <div class="phase-subtitle">Set up the safety net before exposing anything to the internet</div>
+    </div>
+    <span class="phase-badge badge-critical">BEFORE ANYTHING GOES ONLINE</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Tailscale on server + all your personal devices</div>
+          <div class="task-detail">This gives you private remote access to everything without opening any ports. Free. Takes 10 minutes. Do this before any port forwarding.</div>
+          <div class="task-tab">→ Security tab</div>
+        </div>
+        <div class="time-est">15 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Vaultwarden (self-hosted password manager)</div>
+          <div class="task-detail">Every service needs a unique password. Set up Vaultwarden first so you have somewhere to store them all securely from day one.</div>
+          <div class="task-tab">→ Security tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install and configure Caddy reverse proxy</div>
+          <div class="task-detail">Caddy handles HTTPS, domain routing, and acts as a security layer in front of all services. Set up a basic Caddyfile even if you don't have a domain yet — you can use LAN IPs.</div>
+          <div class="task-tab">→ Security tab</div>
+        </div>
+        <div class="time-est">1–2 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Register a domain (optional but recommended)</div>
+          <div class="task-detail">~$10/yr from Cloudflare Registrar. Enables real HTTPS certs, clean URLs, and Cloudflare proxy to hide your home IP.</div>
+          <div class="task-tab">→ Domain tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up SSO (start with Tier 1: per-app passwords)</div>
+          <div class="task-detail">Don't try to set up Google OAuth or Authentik yet. Just pick strong unique passwords for each service and store them in Vaultwarden. You'll layer on Google OAuth later.</div>
+          <div class="task-tab">→ SSO &amp; Users tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ PHASE 3 ══ -->
+<div class="phase" id="phase-3">
+  <div class="phase-header">
+    <div class="phase-num">3</div>
+    <div>
+      <div class="phase-title">🎬 Plex — Priority One</div>
+      <div class="phase-subtitle">Get your existing media server back online on proper storage</div>
+    </div>
+    <span class="phase-badge badge-critical">HIGHEST PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Verify Plex data migrated correctly to new internal drive path</div>
+          <div class="task-detail">In Plex: Settings → Libraries → edit each library → update the path from the old USB letter (e.g. F:\) to the new internal drive path (e.g. D:\Media\TV).</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Verify Plex starts automatically on Windows boot</div>
+          <div class="task-detail">Plex Media Server installs as a Windows service by default. Check Services (services.msc) → Plex Media Server → set to Automatic. Test by rebooting.</div>
+        </div>
+        <div class="time-est">15 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Invite users to your Plex server via plex.tv</div>
+          <div class="task-detail">Settings → Manage Library Access → invite by email. Plex handles its own auth — no SSO needed here.</div>
+        </div>
+        <div class="time-est">15 min</div>
+      </li>
+    </ul>
+    <div class="tip-box"><strong>Note:</strong> Plex is already installed. This phase is just about ensuring it runs reliably on proper storage. Don't reinstall it — just re-point its libraries.</div>
+  </div>
+</div>
+
+<!-- ══ PHASE 4 ══ -->
+<div class="phase" id="phase-4">
+  <div class="phase-header">
+    <div class="phase-num">4</div>
+    <div>
+      <div class="phase-title">🌱 Seedbox &amp; Automated Downloads</div>
+      <div class="phase-subtitle">Mullvad VPN → qBittorrent → Prowlarr → Sonarr → Radarr → Readarr</div>
+    </div>
+    <span class="phase-badge badge-high">HIGH PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Subscribe to Mullvad VPN and install the Windows client</div>
+          <div class="task-detail">€5/month, no account name needed. Enable port forwarding. Set to auto-connect on startup with LAN access allowed.</div>
+          <div class="task-tab">→ Seedbox tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install qBittorrent, bind to Mullvad interface</div>
+          <div class="task-detail">The binding is the critical step — it creates an automatic kill switch so downloads stop if VPN drops. Enable the Web UI on port 8090.</div>
+          <div class="task-tab">→ Seedbox tab</div>
+        </div>
+        <div class="time-est">1 hour</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Prowlarr, Sonarr, Radarr, Readarr</div>
+          <div class="task-detail">Prowlarr manages indexers for all the others. Set up in this order: Prowlarr first → connect to Sonarr + Radarr + Readarr → add your TV shows and movies.</div>
+          <div class="task-tab">→ Seedbox tab</div>
+        </div>
+        <div class="time-est">2–3 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Connect Sonarr and Radarr to Plex for auto-refresh</div>
+          <div class="task-detail">After setup, new downloads appear in Plex within seconds automatically.</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ PHASE 5 ══ -->
+<div class="phase" id="phase-5">
+  <div class="phase-header">
+    <div class="phase-num">5</div>
+    <div>
+      <div class="phase-title">⛏️ Minecraft Servers</div>
+      <div class="phase-subtitle">Vanilla (25565) + Modded (25566) — both with 2am maintenance window</div>
+    </div>
+    <span class="phase-badge badge-high">HIGH PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up vanilla Minecraft server on port 25565</div>
+          <div class="task-detail">Create D:\Minecraft\vanilla\, download server.jar, configure auto-start via Task Scheduler.</div>
+          <div class="task-tab">→ Minecraft tab</div>
+        </div>
+        <div class="time-est">1–2 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up modded server (Forge or Fabric) on port 25566</div>
+          <div class="task-detail">Install modloader, configure separate world folder, add performance mods. All players need matching client mods.</div>
+          <div class="task-tab">→ Minecraft tab</div>
+        </div>
+        <div class="time-est">2–3 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Configure RCON and 2am shutdown/3am restart for both servers</div>
+          <div class="task-detail">One combined shutdown script handles both. See the full script in the Minecraft tab.</div>
+          <div class="task-tab">→ Minecraft tab</div>
+        </div>
+        <div class="time-est">1 hour</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ PHASE 6 ══ -->
+<div class="phase" id="phase-6">
+  <div class="phase-header">
+    <div class="phase-num">6</div>
+    <div>
+      <div class="phase-title">📚 Calibre &amp; Audiobookshelf</div>
+      <div class="phase-subtitle">Book library + Readarr automation + audiobooks with per-user progress</div>
+    </div>
+    <span class="phase-badge badge-high">HIGH PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Calibre desktop + Calibre-Web</div>
+          <div class="task-detail">Point library at D:\Books. Install Calibre-Web via pip. Run as NSSM service on port 8083.</div>
+          <div class="task-tab">→ Calibre tab</div>
+        </div>
+        <div class="time-est">1–2 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Connect Readarr to qBittorrent for automated ebook downloads</div>
+          <div class="task-detail">Readarr can monitor for new releases by author and auto-download. Connect to Prowlarr for indexers. Root folder should be D:\Books.</div>
+          <div class="task-tab">→ Seedbox tab (Readarr section)</div>
+        </div>
+        <div class="time-est">1 hour</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Audiobookshelf</div>
+          <div class="task-detail">Windows native installer, runs as a service on port 13378. Point at D:\Audiobooks.</div>
+          <div class="task-tab">→ Audiobooks tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up per-user accounts in Calibre-Web and Audiobookshelf</div>
+          <div class="task-detail">Create accounts for each family member/friend. Each person's reading/listening progress is stored separately.</div>
+          <div class="task-tab">→ SSO tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ PHASE 7 ══ -->
+<div class="phase" id="phase-7">
+  <div class="phase-header">
+    <div class="phase-num">7</div>
+    <div>
+      <div class="phase-title">☁️ Nextcloud &amp; Dashboard</div>
+      <div class="phase-subtitle">File sync, status monitoring, and the public-facing status page</div>
+    </div>
+    <span class="phase-badge badge-medium">MEDIUM PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install XAMPP and set up Nextcloud</div>
+          <div class="task-detail">Data folder on D:\NextcloudData. Register XAMPP services to auto-start. Set per-user storage quotas.</div>
+          <div class="task-tab">→ Nextcloud tab</div>
+        </div>
+        <div class="time-est">2–3 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up the dashboard (monitor-control.html) and stats agent</div>
+          <div class="task-detail">Run the Python stats server on port 9001 and control server on port 9002. Serve dashboard from a local Python HTTP server on port 9000.</div>
+          <div class="task-tab">→ Dashboard tab</div>
+        </div>
+        <div class="time-est">1–2 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Deploy public status page (monitor-public.html) via Caddy</div>
+          <div class="task-detail">Expose read-only status at status.yourdomain.com. No controls exposed publicly.</div>
+          <div class="task-tab">→ Dashboard tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ PHASE 8 ══ -->
+<div class="phase" id="phase-8">
+  <div class="phase-header">
+    <div class="phase-num">8</div>
+    <div>
+      <div class="phase-title">🎮 Retro Gaming &amp; Emulation</div>
+      <div class="phase-subtitle">Browser-based emulation for Pokémon/Castlevania/FE + Sunshine streaming for GameCube/Xbox 360</div>
+    </div>
+    <span class="phase-badge badge-medium">MEDIUM PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Sunshine game streaming server</div>
+          <div class="task-detail">Windows installer, runs as a service. Admin UI at https://localhost:47990. This enables ALL remote game streaming including GameCube, Xbox 360, and Steam.</div>
+          <div class="task-tab">→ GameCube tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Dolphin, add GameCube/Wii ISOs, add to Sunshine</div>
+          <div class="task-detail">Configure XInput controller mapping for remote play. Test locally first before streaming.</div>
+          <div class="task-tab">→ GameCube tab</div>
+        </div>
+        <div class="time-est">1–2 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up browser-based emulation server (EmulatorJS)</div>
+          <div class="task-detail">Flask server with per-user save files. Serves Pokémon, Castlevania, and Fire Emblem game libraries. Users play in any browser, saves stored on server.</div>
+          <div class="task-tab">→ Pokémon / Castlevania / Fire Emblem tabs</div>
+        </div>
+        <div class="time-est">3–5 hours (one setup, serves all three game series)</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Xenia Canary for Xbox 360</div>
+          <div class="task-detail">Add games to Sunshine as individual apps. Check compatibility list for each game before planning sessions.</div>
+          <div class="task-tab">→ Xbox 360 tab</div>
+        </div>
+        <div class="time-est">1 hour</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up Mario Party netplay (Parsec Arcade)</div>
+          <div class="task-detail">Install Parsec + Project64. Create a room code for sessions. No permanent configuration needed — just do it when you want to play.</div>
+          <div class="task-tab">→ Mario Party tab</div>
+        </div>
+        <div class="time-est">1 hour</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ PHASE 9 ══ -->
+<div class="phase" id="phase-9">
+  <div class="phase-header">
+    <div class="phase-num">9</div>
+    <div>
+      <div class="phase-title">🤖 AI, Music &amp; Recommendations</div>
+      <div class="phase-subtitle">Ollama private AI + Navidrome + AI book/game recommendations</div>
+    </div>
+    <span class="phase-badge badge-medium">MEDIUM PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Ollama + pull Llama 3.1 8B (or larger if GPU allows)</div>
+          <div class="task-detail">Ollama installs as a Windows service. Set OLLAMA_HOST=0.0.0.0 for LAN access. Pull your chosen model.</div>
+          <div class="task-tab">→ Private AI tab</div>
+        </div>
+        <div class="time-est">1–2 hours (model download time varies)</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Open WebUI</div>
+          <div class="task-detail">pip install open-webui. Run on port 3000. Create user accounts for everyone.</div>
+          <div class="task-tab">→ Private AI tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up AI Recommendations and build your book/game index</div>
+          <div class="task-detail">Create the catalog JSON files for your books and retro games. The recommendation system reads these + user history from SSO to personalize suggestions.</div>
+          <div class="task-tab">→ Recommendations tab</div>
+        </div>
+        <div class="time-est">2–4 hours (catalog building takes time)</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Install Navidrome for music</div>
+          <div class="task-detail">Single binary, runs as NSSM service on port 4533. Point at your music folder. Add users.</div>
+          <div class="task-tab">→ Navidrome tab</div>
+        </div>
+        <div class="time-est">30 min</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ PHASE 10 ══ -->
+<div class="phase" id="phase-10">
+  <div class="phase-header">
+    <div class="phase-num">10</div>
+    <div>
+      <div class="phase-title">🌍 Languages, Wiki, Jukebox &amp; Everything Else</div>
+      <div class="phase-subtitle">Nice-to-haves that don't block core functionality</div>
+    </div>
+    <span class="phase-badge badge-low">LOW PRIORITY</span>
+  </div>
+  <div class="phase-body">
+    <ul class="task-list">
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up Kiwix with Wikipedia + WikiHow ZIM files</div>
+          <div class="task-detail">Download the ~25–47GB ZIM files. Run kiwix-serve as NSSM service on port 8888.</div>
+          <div class="task-tab">→ Offline Wiki tab</div>
+        </div>
+        <div class="time-est">1 hour setup + download time</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up Infinite Jukebox</div>
+          <div class="task-detail">Flask server + Remixatron + yt-dlp. YouTube URL → infinite looping version. Port 5050.</div>
+          <div class="task-tab">→ Jukebox tab</div>
+        </div>
+        <div class="time-est">2 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up LinguaCafe + Anki sync + LibreLingo</div>
+          <div class="task-detail">LinguaCafe requires WSL2 and Docker. Anki sync is a simple pip install. LibreLingo is a Django app.</div>
+          <div class="task-tab">→ Languages tab</div>
+        </div>
+        <div class="time-est">3–5 hours</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Set up ARK, SS13 servers (on-demand, off by default)</div>
+          <div class="task-detail">ARK needs 30GB download via SteamCMD. SS13 needs BYOND + codebase compilation. Both are off by default — only run when needed.</div>
+          <div class="task-tab">→ ARK / SS13 tabs</div>
+        </div>
+        <div class="time-est">3–6 hours each</div>
+      </li>
+      <li class="task-item">
+        <div class="task-check" onclick="toggle(this)"></div>
+        <div class="task-body">
+          <div class="task-name">Upgrade SSO to Tier 2 (Google OAuth per app)</div>
+          <div class="task-detail">Set up Google Cloud project → OAuth credentials → configure each app. One-time 30-min setup per app. Only do this after everything is working on basic passwords.</div>
+          <div class="task-tab">→ SSO tab</div>
+        </div>
+        <div class="time-est">2–4 hours</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// Save progress to localStorage
+function toggle(el) {
+  el.classList.toggle('done');
+  const name = el.parentElement.querySelector('.task-name');
+  if (el.classList.contains('done')) {
+    el.textContent = '✓';
+    name.classList.add('done-text');
+  } else {
+    el.textContent = '';
+    name.classList.remove('done-text');
+  }
+  saveProgress();
+  updateProgress();
+}
+
+function saveProgress() {
+  const checks = document.querySelectorAll('.task-check');
+  const state = Array.from(checks).map(c => c.classList.contains('done'));
+  localStorage.setItem('homeserver_progress', JSON.stringify(state));
+}
+
+function loadProgress() {
+  const saved = localStorage.getItem('homeserver_progress');
+  if (!saved) return;
+  const state = JSON.parse(saved);
+  const checks = document.querySelectorAll('.task-check');
+  checks.forEach((c, i) => {
+    if (state[i]) {
+      c.classList.add('done');
+      c.textContent = '✓';
+      const name = c.parentElement.querySelector('.task-name');
+      if (name) name.classList.add('done-text');
+    }
+  });
+}
+
+function updateProgress() {
+  const all  = document.querySelectorAll('.task-check').length;
+  const done = document.querySelectorAll('.task-check.done').length;
+  const pct  = all ? Math.round((done / all) * 100) : 0;
+  document.getElementById('prog-pct').textContent = `${done} / ${all} tasks complete`;
+  document.getElementById('prog-bar').style.width = pct + '%';
+}
+
+loadProgress();
+updateProgress();
+</script>
+</body>
+</html>

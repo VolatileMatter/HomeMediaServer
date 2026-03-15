@@ -157,5 +157,173 @@
   </div>
 </div>
 
+<div class="section">
+  <div class="section-title">💰 Total Cost Estimation</div>
+  <div class="card">
+    <div class="card-title">Software Costs (Annual)</div>
+    <table>
+      <tr><th>Item</th><th>Cost</th><th>Notes</th></tr>
+      <tr><td>Mullvad VPN</td><td>€5/month (~$65/yr)</td><td>Required for seedbox/privacy</td></tr>
+      <tr><td>Domain name (.com)</td><td>~$10/year</td><td>From Cloudflare Registrar</td></tr>
+      <tr><td>Plex Pass (optional)</td><td>$40/year or $120 lifetime</td><td>Required for hardware transcoding; free tier works for most uses</td></tr>
+      <tr><td>Everything else</td><td>$0</td><td>All other software is FOSS</td></tr>
+      <tr><td><strong>Total annual software</strong></td><td><strong>~$75–115/year</strong></td><td>Or ~$175 first year with Plex lifetime</td></tr>
+    </table>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">Hardware Costs (One-Time)</div>
+    <table>
+      <tr><th>Item</th><th>Budget Option</th><th>Recommended Option</th></tr>
+      <tr><td>Gaming desktop (if buying new)</td><td>$0 (use existing)</td><td>$0 (use existing)</td></tr>
+      <tr><td>2× 14TB shucked WD Elements (media storage)</td><td>~$280 (on sale)</td><td>~$280</td></tr>
+      <tr><td>2TB SATA SSD (games)</td><td>~$120 (e.g. Samsung 870 EVO)</td><td>~$120</td></tr>
+      <tr><td>PCIe SATA expansion card (if needed)</td><td>~$20</td><td>~$20</td></tr>
+      <tr><td>5.25" to 3.5" bay adapter (if needed)</td><td>~$7</td><td>~$7</td></tr>
+      <tr><td>Ethernet powerline adapter (if needed)</td><td>~$40</td><td>—</td></tr>
+      <tr><td><strong>Total hardware (storage only)</strong></td><td><strong>~$427–467</strong></td><td></td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Wait for sales:</strong> WD Elements drives go on sale at Best Buy, Costco, and Amazon regularly — often 30–40% off. The $280 estimate above assumes sale pricing. At full price they're closer to $400 total. Check <a href="https://diskprices.com" target="_blank">diskprices.com</a> for current best prices.</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">Total Cost Summary</div>
+    <table>
+      <tr><th>Category</th><th>First Year</th><th>Per Year After</th></tr>
+      <tr><td>Hardware (storage)</td><td>~$430</td><td>$0 (one-time)</td></tr>
+      <tr><td>Software + VPN</td><td>~$75–115</td><td>~$75 (just Mullvad + domain)</td></tr>
+      <tr><td>Electricity (24/7 desktop)</td><td>~$120–200</td><td>~$120–200/yr (~$10–17/mo)</td></tr>
+      <tr><td><strong>Total Year 1</strong></td><td><strong>~$625–745</strong></td><td></td></tr>
+      <tr><td><strong>Ongoing (Year 2+)</strong></td><td></td><td><strong>~$195–275/year</strong></td></tr>
+    </table>
+    <p style="margin-top:8px;font-size:.82rem;color:var(--text-dim)">Compare to: Netflix ($192/yr) + Spotify ($120/yr) + Audible ($108/yr) + Kindle Unlimited ($108/yr) + Google One 2TB ($100/yr) + game streaming service ($180/yr) = <strong>~$808/year</strong> for less functionality and no ownership. Your server pays for itself by Year 2.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">👥 Active Users &amp; Live Load Monitor</div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">This section requires the stats agent (<code>stats_server.py</code>) from the Dashboard tab to be running on port 9001. It polls automatically every 30 seconds.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+    <div class="card" style="text-align:center;padding:14px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:var(--accent)" id="ov-cpu">—</div>
+      <div style="font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.1em;margin-top:2px">CPU USAGE</div>
+      <div id="ov-cpu-bar" style="height:4px;background:#1a2030;border-radius:2px;margin-top:8px"><div id="ov-cpu-fill" style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),#e0c870);transition:width 1s;width:0%"></div></div>
+    </div>
+    <div class="card" style="text-align:center;padding:14px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:var(--accent2)" id="ov-ram">—</div>
+      <div style="font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.1em;margin-top:2px">RAM USAGE</div>
+      <div id="ov-ram-bar" style="height:4px;background:#1a2030;border-radius:2px;margin-top:8px"><div id="ov-ram-fill" style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent2),var(--accent3));transition:width 1s;width:0%"></div></div>
+    </div>
+    <div class="card" style="text-align:center;padding:14px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:var(--accent3)" id="ov-disk">—</div>
+      <div style="font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.1em;margin-top:2px">DISK USED</div>
+      <div id="ov-disk-bar" style="height:4px;background:#1a2030;border-radius:2px;margin-top:8px"><div id="ov-disk-fill" style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent3),#4ecdc4);transition:width 1s;width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Load warning banner -->
+  <div id="load-warning" style="display:none;background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);border-radius:3px;padding:12px 16px;margin-bottom:14px">
+    <div style="font-family:'Cinzel',serif;font-size:.85rem;color:var(--danger);margin-bottom:6px">⚠️ Server Under Heavy Load</div>
+    <div id="load-warning-text" style="font-size:.82rem;color:var(--text-dim)"></div>
+  </div>
+
+  <!-- Active users list -->
+  <div class="card">
+    <div class="card-title">Active Sessions Right Now</div>
+    <div id="active-sessions">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text-dim)">Polling active sessions… (requires stats agent on port 9001)</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Load Guidelines — What to Avoid When Server Is Busy</div>
+    <table>
+      <tr><th>If CPU is above…</th><th>Avoid</th><th>These still work fine</th></tr>
+      <tr><td>60%</td><td>Starting ARK server</td><td>Plex, Calibre, Downloads, Minecraft</td></tr>
+      <tr><td>80%</td><td>ARK, SS13, large Minecraft mod packs</td><td>Plex, Calibre, Audiobooks, Nextcloud</td></tr>
+      <tr><td>90%+</td><td>Everything intensive — let it settle first</td><td>Calibre, Audiobooks, Nextcloud (light reads)</td></tr>
+    </table>
+    <table style="margin-top:10px">
+      <tr><th>If GPU is above…</th><th>Avoid</th><th>These still work fine</th></tr>
+      <tr><td>60%</td><td>Starting a second Sunshine game stream, running Ollama large models</td><td>Plex (software transcode), Minecraft, downloads</td></tr>
+      <tr><td>80%</td><td>Any additional GPU task — one game stream is the max</td><td>Everything non-GPU</td></tr>
+      <tr><td>90%+</td><td>Don't start game streaming — warn active streamer if possible</td><td>CPU services unaffected</td></tr>
+    </table>
+  </div>
+</div>
+
+<script>
+async function pollStats() {
+  try {
+    const r = await fetch('http://localhost:9001/stats', { cache: 'no-cache' });
+    const d = await r.json();
+
+    const cpu  = d.cpu  || 0;
+    const ram  = d.ram  || 0;
+    const disk = d.disk_used || 0;
+
+    document.getElementById('ov-cpu').textContent  = cpu + '%';
+    document.getElementById('ov-ram').textContent  = ram + '%';
+    document.getElementById('ov-disk').textContent = disk + '%';
+
+    document.getElementById('ov-cpu-fill').style.width  = cpu + '%';
+    document.getElementById('ov-ram-fill').style.width  = ram + '%';
+    document.getElementById('ov-disk-fill').style.width = disk + '%';
+
+    // Color the bars based on load
+    const cpuFill  = document.getElementById('ov-cpu-fill');
+    cpuFill.style.background = cpu > 90  ? 'linear-gradient(90deg,#e05c5c,#e08050)' :
+                                cpu > 70  ? 'linear-gradient(90deg,#e0b84b,#e0c870)' :
+                                            'linear-gradient(90deg,var(--accent),#e0c870)';
+
+    // Load warnings
+    const warnings = [];
+    if (cpu > 90)  warnings.push('CPU is critically high ('+cpu+'%) — avoid starting ARK, SS13, or intensive game sessions.');
+    if (cpu > 75)  warnings.push('CPU is elevated ('+cpu+'%) — ARK server start not recommended right now.');
+    if (ram > 85)  warnings.push('RAM is at '+ram+'% — some services may be slow. Avoid launching Minecraft modded server.');
+    if (disk > 90) warnings.push('Storage is '+disk+'% full — add more drives or clear space before downloading new content.');
+
+    const warnEl = document.getElementById('load-warning');
+    if (warnings.length > 0) {
+      warnEl.style.display = 'block';
+      document.getElementById('load-warning-text').innerHTML = warnings.map(w => '• ' + w).join('<br>');
+    } else {
+      warnEl.style.display = 'none';
+    }
+
+    // Active sessions
+    if (d.active_sessions) {
+      const sessions = d.active_sessions;
+      const el = document.getElementById('active-sessions');
+      el.innerHTML = sessions.length > 0
+        ? sessions.map(s => `
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+              <div style="width:8px;height:8px;border-radius:50%;background:#4caf7d;box-shadow:0 0 6px #4caf7d;flex-shrink:0"></div>
+              <div style="font-weight:700;font-size:.85rem;flex:1">${s.user || 'Unknown'}</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--accent2)">${s.service || ''}</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim)">${s.since || ''}</div>
+            </div>`).join('')
+        : '<div style="font-size:.78rem;color:var(--text-dim)">No active sessions detected</div>';
+    }
+  } catch(e) {
+    // Stats agent not running
+    document.getElementById('ov-cpu').textContent  = 'N/A';
+    document.getElementById('ov-ram').textContent  = 'N/A';
+    document.getElementById('ov-disk').textContent = 'N/A';
+  }
+}
+
+pollStats();
+setInterval(pollStats, 30000);
+</script>
+
 </body>
 </html>

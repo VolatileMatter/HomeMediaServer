@@ -235,6 +235,88 @@ Category: tv-sonarr</pre>
 <hr>
 
 <div class="section">
+  <div class="section-title">📚 Step 6: Readarr — Automated Book Downloads <span class="tag tag-native">FOSS</span></div>
+
+  <div class="card">
+    <div class="card-title">What Readarr Does for Books</div>
+    <p>Readarr monitors for ebook and audiobook releases, automatically downloads them when they appear, and drops them into your Calibre library folder. It can watch for:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li><strong>All new books by a specific author</strong> — add the author once, get every release automatically</li>
+      <li><strong>A specific title you're waiting for</strong> — add it as "Wanted" and Readarr keeps searching until it finds it</li>
+      <li><strong>Series sequels</strong> — add the whole series; Readarr monitors for books you don't have yet</li>
+    </ul>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download and install Readarr for Windows</strong>
+        <p>From <a href="https://readarr.com" target="_blank">readarr.com</a> — Windows installer, runs as a service. Access at <code>http://localhost:8787</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add qBittorrent as download client</strong>
+        <p>Settings → Download Clients → + → qBittorrent:</p>
+        <pre>Host:     localhost
+Port:     8090
+Username: [your qbit username]
+Password: [your qbit password]
+Category: readarr</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Set root folder to your Calibre library</strong>
+        <p>Settings → Media Management → Root Folders → Add → <code>D:\Books</code>. This is the same folder Calibre reads from — new downloads go here and Calibre picks them up automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Connect Prowlarr indexers</strong>
+        <p>In Prowlarr → Apps → Add → Readarr. All your existing indexers sync to Readarr automatically — same as Sonarr/Radarr.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add authors and books to monitor</strong>
+        <p>Author → Add New → search for an author's name. Readarr fetches their entire bibliography from Goodreads/OpenLibrary. You can:</p>
+        <ul style="margin:6px 0 0 18px">
+          <li>Monitor an author — get <em>every</em> future release automatically</li>
+          <li>Add individual books as "Wanted" — Readarr searches and downloads when found</li>
+          <li>Add a series — it tracks which entries you have and monitors for new ones</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Trigger a Calibre-Web library refresh after downloads</strong>
+        <p>In Readarr: Settings → Connect → + → Custom Script. Point it at a script that refreshes Calibre-Web's metadata cache:</p>
+        <pre># calibre_refresh.ps1
+# Tells Calibre-Web to re-scan the library after a new book arrives
+Invoke-WebRequest -Uri "http://localhost:8083/api/admin/libraries/scan" `
+  -Method POST -Headers @{"X-Api-Key"="your-calibre-web-api-key"}
+
+# Or trigger a full library refresh:
+Invoke-WebRequest -Uri "http://localhost:8083/admin/recreatedb" -Method GET</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">📖</div>
+    <div class="callout-body"><strong>Waiting for an unreleased book?</strong> Add it to Readarr as "Wanted" and set a release date. Readarr checks your indexers daily and will download it within hours of it appearing. This works perfectly for sequels, anticipated releases, or "any new Brandon Sanderson" style monitoring.</div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">Audiobook Downloads via Readarr</div>
+    <p>Readarr can also handle audiobook formats. In Settings → Quality Profiles, add MP3 and M4B to your accepted formats. Set a separate root folder for audiobooks: <code>D:\Audiobooks</code>. Create a second Readarr root folder entry pointing there, and assign audiobook authors to it. Audiobookshelf will pick up new files automatically.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
   <div class="section-title">🌐 The Full *arr Stack</div>
   <div class="card">
     <table>
@@ -242,14 +324,10 @@ Category: tv-sonarr</pre>
       <tr><td>Prowlarr</td><td>Indexer management (feeds to all apps)</td><td>9696</td><td>✅</td></tr>
       <tr><td>Sonarr</td><td>Automated TV episode downloads</td><td>8989</td><td>✅</td></tr>
       <tr><td>Radarr</td><td>Automated movie downloads</td><td>7878</td><td>✅</td></tr>
+      <tr><td><strong>Readarr</strong></td><td><strong>Automated ebook + audiobook downloads</strong></td><td>8787</td><td>✅</td></tr>
       <tr><td>qBittorrent</td><td>Torrent client (Mullvad-bound)</td><td>8090</td><td>✅</td></tr>
       <tr><td>Lidarr</td><td>Automated music downloads (optional)</td><td>8686</td><td>✅</td></tr>
-      <tr><td>Readarr</td><td>Automated ebook downloads (optional)</td><td>8787</td><td>✅</td></tr>
     </table>
-    <div class="callout callout-tip">
-      <div class="callout-icon">🐉</div>
-      <div class="callout-body"><strong>Readarr + Calibre:</strong> Readarr can automatically populate your Calibre library by downloading ebooks and triggering a Calibre-Web library refresh. Set Readarr's root folder to your Calibre library folder and configure the Calibre import script.</div>
-    </div>
   </div>
 </div>
 
@@ -257,7 +335,7 @@ Category: tv-sonarr</pre>
   <div class="section-title">🔐 Security Notes</div>
   <div class="card">
     <ul style="margin:0 0 0 18px">
-      <li>All *arr apps should be <strong>localhost only</strong> — never expose ports 8989, 7878, 9696, 8090 to the internet</li>
+      <li>All *arr apps should be <strong>localhost only</strong> — never expose ports 8989, 7878, 9696, 8090, 8787 to the internet</li>
       <li>Access them via Tailscale when remote, or add them behind Caddy with auth if needed</li>
       <li>Set API keys on all apps (they generate one by default) — don't share these</li>
       <li>qBittorrent Web UI: keep "Bypass auth for localhost" unchecked</li>

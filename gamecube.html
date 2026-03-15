@@ -202,5 +202,61 @@ netsh advfirewall firewall add rule name="Sunshine Control" dir=in action=allow 
   </div>
 </div>
 
+<div class="section">
+  <div class="section-title">🎮 Sunshine + Steam: Can They Coexist?</div>
+
+  <div class="card">
+    <div class="card-title">Short answer: Yes — but only one Sunshine stream at a time</div>
+    <p>Sunshine can only stream one session at a time. If someone is already streaming Dolphin via Moonlight, a second person can't start a new Sunshine stream until the first disconnects. <strong>However</strong>, Steam Remote Play and Steam Link are completely separate protocols — they don't go through Sunshine at all, and they can run simultaneously with each other (one person streaming Dolphin via Moonlight, another watching via Steam Remote Play from a different device).</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">How Sunshine and Steam Remote Play interact</div>
+    <table>
+      <tr><th>Scenario</th><th>Works?</th><th>Notes</th></tr>
+      <tr><td>Person A streams a game via Sunshine/Moonlight</td><td>✅</td><td>Normal, this is the main use case</td></tr>
+      <tr><td>Person B tries to stream a DIFFERENT game via Sunshine while A is connected</td><td>❌</td><td>Sunshine only supports one session at a time</td></tr>
+      <tr><td>Person B uses Steam Remote Play while Person A uses Sunshine</td><td>⚠️ Maybe</td><td>Depends on whether it's the same game; Steam can stream alongside Sunshine in some configurations</td></tr>
+      <tr><td>Sunshine streams Dolphin while Plex serves 4K video to others</td><td>✅</td><td>Plex doesn't use GPU; no conflict</td></tr>
+      <tr><td>Sunshine streams Dolphin while Minecraft runs</td><td>✅</td><td>Minecraft is CPU-bound; no GPU conflict</td></tr>
+      <tr><td>Sunshine streams a demanding game while Xenia runs separately</td><td>❌</td><td>Both need GPU — major performance hit</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Does game streaming interrupt other server functions?</div>
+    <p>Generally no — the key insight is that game streaming uses the <strong>GPU</strong> heavily, while most other services (Plex, Minecraft, Calibre, downloads) are <strong>CPU-bound</strong>. They don't conflict. The exceptions are:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li><strong>Plex hardware transcoding</strong>: uses the GPU's video encoder — this can conflict with Sunshine's encoder. If streaming a game, Plex may fall back to software transcoding (slower but functional)</li>
+      <li><strong>Multiple GPU-dependent emulators at once</strong>: Dolphin + Xenia simultaneously = bad time</li>
+      <li><strong>Ollama (AI) + game streaming</strong>: If running a large model on the GPU, game streaming performance will degrade</li>
+    </ul>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Best practice:</strong> Treat the GPU as a single resource. Game streaming is the highest-priority GPU task. When someone is actively streaming a game, avoid running Ollama large models or multiple emulators simultaneously. The Overview tab's load warnings help users know when to hold off.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Is there a better way to stream Steam games from a server?</div>
+    <p>Sunshine/Moonlight is actually the best option for Steam games <em>and</em> non-Steam games (emulators, etc.). But for Steam specifically, there are alternatives worth knowing:</p>
+    <table>
+      <tr><th>Method</th><th>Quality</th><th>Setup</th><th>Works for non-Steam?</th></tr>
+      <tr><td><strong>Sunshine + Moonlight</strong></td><td>Best (low latency, high bitrate)</td><td>Medium</td><td>✅ Yes — any app</td></tr>
+      <tr><td>Steam Remote Play</td><td>Good</td><td>Zero (built-in)</td><td>❌ Steam games only</td></tr>
+      <tr><td>Steam Link app</td><td>Good (same as above)</td><td>Zero</td><td>❌ Steam games only</td></tr>
+      <tr><td>Parsec</td><td>Very good</td><td>Easy</td><td>✅ Any app (but paid for low-latency)</td></tr>
+      <tr><td>GeForce Experience / Nvidia GameStream</td><td>Good (deprecated)</td><td>Medium</td><td>Nvidia GPU only</td></tr>
+    </table>
+    <p style="margin-top:8px"><strong>Recommendation:</strong> Use Sunshine for everything — retro games, Steam games, Xenia, Dolphin. It's the most versatile and highest quality option. Add Steam games as Sunshine apps for one-click launch from Moonlight. This way your friends don't need to distinguish between "Steam streaming" and "emulator streaming" — it all looks the same from Moonlight.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Retro games and Steam: keeping them separate</div>
+    <p>The retro emulation (Pokémon, Castlevania, Fire Emblem via EmulatorJS) runs in the browser and doesn't use Sunshine at all — it's served by a web server and played in a browser tab. This is completely independent of Steam and Sunshine.</p>
+    <p>For Dolphin (GameCube) and Xenia (Xbox 360), those are added to Sunshine as separate apps from Steam games. In Moonlight, they appear in the same list as Steam games, but they're clearly labeled — there's no confusion or interference at the app level. The only shared resource is the GPU and Sunshine's single streaming session.</p>
+  </div>
+</div>
+
 </body>
 </html>
