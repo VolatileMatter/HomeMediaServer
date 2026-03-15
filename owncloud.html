@@ -179,5 +179,79 @@ php occ maintenance:mode --off</pre>
   </div>
 </div>
 
+<div class="section">
+  <div class="section-title">🗂️ Unified User Data — External Storage Mount</div>
+  <div class="card">
+    <div class="card-title">How D:\Users\[username]\ ties into Nextcloud quotas</div>
+    <p>Every per-user app on this server (emulators, Calibre, ABS, MTG decks, recommendations history) stores its data in <code>D:\Users\[username]\</code>. This folder is mounted into Nextcloud as <strong>External Storage</strong> for each user, which means:</p>
+    <ul style="margin:6px 0 0 18px;font-size:.85rem">
+      <li>Users can see and download their app data from Nextcloud's file browser</li>
+      <li>The size counts toward their storage quota alongside regular Nextcloud files</li>
+      <li>One backup of <code>D:\Users\</code> covers all app data for all users</li>
+      <li>If you delete a user's Nextcloud account, you can optionally also wipe <code>D:\Users\[username]\</code></li>
+    </ul>
+
+    <div class="card-title" style="margin-top:14px">Step 1: Enable External Storage app</div>
+    <pre>cd C:\xampp\htdocs\nextcloud
+php occ app:enable files_external</pre>
+
+    <div class="card-title" style="margin-top:14px">Step 2: Add a local mount for each user's app data folder</div>
+    <p>Nextcloud's External Storage app supports a <code>%user%</code> template variable that automatically resolves to the current user's name:</p>
+    <pre># Add via occ (applies to ALL users using the %user% template):
+php occ files_external:create \
+  --config=datadir="D:\Users\%user%" \
+  --apply-to-all-users \
+  "App Data" local null
+
+# This creates a folder called "App Data" in every user's Nextcloud
+# that maps to D:\Users\[their-username]\ on disk.
+
+# Verify the mount was created:
+php occ files_external:list</pre>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Username matching:</strong> Nextcloud resolves <code>%user%</code> to the user's Nextcloud login name. This must exactly match the folder name in <code>D:\Users\</code>, which in turn must match their Authentik username (Gmail prefix). All three must be consistent: Authentik username = <code>alice</code>, Nextcloud username = <code>alice</code>, folder = <code>D:\Users\alice\</code>.</div>
+    </div>
+
+    <div class="card-title" style="margin-top:14px">Step 3: Enable quota counting for external storage</div>
+    <pre># In Nextcloud admin → External Storage → edit the App Data mount:
+# ☑ Enable sharing
+# ☑ Enable encryption
+# ☑ Previews
+# ☑ Check changes: "Once every direct access" (so quota updates when files change)
+
+# Or via config.php — force quota to include external storage:
+php occ config:app:set files_external allow_user_mounting --value=yes
+php occ config:system:set quota_include_external_storage --value=true --type=boolean</pre>
+
+    <div class="card-title" style="margin-top:14px">Step 4: Individual user quota overrides</div>
+    <p>Group defaults (set in Authentik → Nextcloud group mapping) apply first, but you can override any individual user:</p>
+    <pre># Set a specific quota for one user (covers BOTH Nextcloud files AND App Data):
+php occ user:setting alice files quota "50 GB"
+php occ user:setting bob   files quota "10 GB"
+php occ user:setting dave  files quota "1 GB"
+php occ user:setting john  files quota "5 GB"
+
+# Check current usage for all users:
+php occ user:report</pre>
+
+    <div class="card-title" style="margin-top:14px">Result: what users see in Nextcloud</div>
+    <pre>alice's Nextcloud file browser:
+  📁 Documents/       ← regular Nextcloud sync
+  📁 Photos/          ← Nextcloud photos
+  📁 App Data/        ← D:\Users\alice\ (external mount)
+      📁 emulation/
+          📁 pokemon/     ← Pokémon saves
+          📁 dolphin/     ← Dolphin GC/Wii saves
+          📁 xenia/       ← Xbox 360 saves
+      📁 calibre/         ← reading progress export
+      📁 audiobooks/      ← listening progress export
+      📁 mtg/decks/       ← personal MTG decks
+      📁 recommendations/ ← recommendation history
+  💾 50 GB total quota (shared across all folders above)</pre>
+  </div>
+</div>
+
 </body>
 </html>

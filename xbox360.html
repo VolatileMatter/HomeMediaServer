@@ -84,7 +84,9 @@ gpu = "vulkan"
 resolution_scale = 2
 
 [Storage]
-content_root = "D:/Emulation/Xbox360/Content"  # saves, DLC
+content_root = "D:/Emulation/Xbox360/Content/active"
+# ↑ Junction point — session_manager.py re-points this per user
+# → D:\Users\[username]\emulation\xenia\ on Sunshine session start
 
 [CPU]
 # Leave at default unless experiencing crashes
@@ -135,10 +137,35 @@ Encoder:    nvenc (Nvidia) or amf (AMD)</pre>
 <hr>
 
 <div class="section">
-  <div class="section-title">💾 Save Files</div>
+  <div class="section-title">💾 Per-User Save Files via Session Manager <span class="tag tag-sso">→ SSO TAB</span></div>
   <div class="card">
-    <p>Xenia stores save files in the <code>content_root</code> folder you configure — by default <code>D:\Emulation\Xbox360\Content\</code>. Each save is tied to a virtual "profile" that Xenia manages. Unlike the Pokémon/Castlevania setup, Xenia doesn't have a multi-user save system — all saves are in one location.</p>
-    <p>For per-user saves over Sunshine streaming, the simplest approach is to maintain separate Xenia installation folders per user and configure each Sunshine session to use the appropriate one. This is complex — for V1, one shared save location is fine.</p>
+    <div class="card-title">Architecture: symlinks replace the shared content_root</div>
+    <p>Xenia stores all saves and DLC under a single <code>content_root</code> folder. By making this a symlink managed by the Session Manager, each user gets their own isolated save data in <code>D:\Users\[username]\emulation\xenia\</code>.</p>
+
+    <pre># xenia-canary.config.toml — point at the SYMLINK, not a real folder:
+content_root = "D:/Emulation/Xbox360/Content/active"
+#                                               ↑ this is a junction point
+# Session manager re-points this to D:\Users\[username]\emulation\xenia\
+# whenever a Sunshine session starts.</pre>
+
+    <div class="card-title" style="margin-top:14px">Sunshine configuration with pre-launch</div>
+    <pre># In Sunshine Admin → Applications → Add:
+Name:     Xbox 360 (Xenia)
+Command:  "D:\Emulators\Xenia\xenia_canary.exe"
+
+# Pre-launch (set symlinks for this user before Xenia opens):
+Detached: curl -s -X POST http://localhost:9004/session/start -H "Content-Type: application/json" -d "{\"username\":\"%%SUNSHINE_CLIENT_NAME%%\"}"
+
+# Post-session cleanup:
+Detached: curl -s -X POST http://localhost:9004/session/end</pre>
+
+    <div class="card-title" style="margin-top:14px">Result</div>
+    <p>Alice's Halo 3 campaign save is in <code>D:\Users\alice\emulation\xenia\</code>. Bob's is in <code>D:\Users\bob\emulation\xenia\</code>. They never interfere. All data counts toward each user's Nextcloud quota.</p>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Set the Moonlight client name to match the Authentik username when pairing. In Moonlight settings, the client name is what Sunshine sees as <code>%%SUNSHINE_CLIENT_NAME%%</code>. Pair as "alice", not "Alice's PC".</div>
+    </div>
   </div>
 </div>
 

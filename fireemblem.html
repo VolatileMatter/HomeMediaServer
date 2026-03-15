@@ -47,6 +47,10 @@
     <div class="card-title">Same architecture as Pokémon and Castlevania libraries</div>
     <p>The Flask save server, EmulatorJS frontend, and per-user save architecture is identical. Extend the same server.py:</p>
     <pre>FIRE_EMBLEM_ROMS = 'D:/Emulation/FireEmblem'
+# Saves go directly to D:/Users/[username]/emulation/fireemblem/
+# username = request.headers.get('X-authentik-username', 'anonymous')
+# save_dir = f'D:/Users/{username}/emulation/fireemblem'
+# See SSO tab → User Data Storage for full architecture
 
 @app.route('/fe/roms/&lt;path:filename&gt;')
 def serve_fe_rom(filename):
@@ -73,14 +77,16 @@ def serve_fe_rom(filename):
   <div class="section-title">🎮 GameCube / Wii Games via Dolphin + Sunshine</div>
   <div class="card">
     <div class="card-title">Path of Radiance &amp; Radiant Dawn</div>
-    <p>These run in Dolphin (GameCube/Wii emulator). Use the Sunshine streaming setup from the GameCube tab. Add each game as a Sunshine application:</p>
+    <p>These run in Dolphin (GameCube/Wii emulator). Use the Sunshine streaming setup from the GameCube tab. Add each game as a Sunshine application with a pre-launch command that sets the user's symlinks:</p>
     <pre># In Sunshine → Applications → Add:
 Name:    Fire Emblem: Path of Radiance
 Cmd:     "D:\Emulators\Dolphin\Dolphin.exe" -e "D:\Emulation\FireEmblem\gc\path-of-radiance.iso"
+# Pre-launch (sets symlinks for this user before Dolphin opens):
+Detached: curl -s -X POST http://localhost:9004/session/start -H "Content-Type: application/json" -d "{\"username\":\"%%SUNSHINE_CLIENT_NAME%%\"}"
 
 Name:    Fire Emblem: Radiant Dawn
 Cmd:     "D:\Emulators\Dolphin\Dolphin.exe" -e "D:\Emulation\FireEmblem\wii\radiant-dawn.iso"</pre>
-    <p>Save files for Dolphin are stored in <code>%USERPROFILE%\Documents\Dolphin Emulator\GC\USA\</code> (GameCube) and <code>\Wii\</code> (Wii) — these are shared by whoever accesses the Dolphin instance. For per-user saves over streaming, you'd need multiple Dolphin profiles, which is complex. Simpler: agree that Path of Radiance and Radiant Dawn are single-player experiences with one save each.</p>
+    <p>Save files for Dolphin are managed by the <strong>Session Manager</strong> (port 9004). When a Sunshine session starts, it calls the session manager which re-points the Dolphin save folder symlink at <code>D:\Users\[username]\emulation\dolphin\</code>. Each user's Fire Emblem memory card and save data is completely isolated. See the <strong>SSO tab → User Data Storage</strong> for the full symlink architecture.</p>
   </div>
 </div>
 
@@ -96,6 +102,19 @@ Cmd:     "D:\Emulators\Dolphin\Dolphin.exe" -e "D:\Emulation\FireEmblem\wii\radi
       <tr><td>New Mystery of the Emblem</td><td>Various — "Serenes Forest" community patch</td><td>Good</td></tr>
     </table>
     <p>Apply patches with <strong>Lunar IPS</strong> (Windows) or <strong>Flips</strong> — drag the .ips/.bps patch onto the tool, then onto your clean ROM. The patched ROM replaces the original.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p><strong>GBA/NDS games (EmulatorJS):</strong> Saves go directly to <code>D:\Users\[username]\emulation\fireemblem\</code> via the Authentik username header. Each user's progress is isolated.</p>
+    <p><strong>GCN/Wii games (Dolphin via Sunshine):</strong> The Session Manager (port 9004) re-points Dolphin's save folder symlink to <code>D:\Users\[username]\emulation\dolphin\</code> when a Sunshine session starts. The Sunshine pre-launch command triggers this automatically.</p>
+    <pre># Sunshine pre-launch (set before Dolphin opens):
+curl -s -X POST http://localhost:9004/session/start ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"%%SUNSHINE_CLIENT_NAME%%\"}"</pre>
+    <p>All save data lives in <code>D:\Users\[username]\</code> and counts toward Nextcloud quota. See <strong>SSO tab → User Data Storage</strong>.</p>
   </div>
 </div>
 

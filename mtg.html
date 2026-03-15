@@ -326,33 +326,39 @@ Write-Host "`n✓ All symlinks created. Both XMage and Forge now share the same 
 
   <div class="card" style="margin-top:12px">
     <div class="card-title">Deck file export from the Deck Manager</div>
-    <p>The Deck Manager above stores decks in browser localStorage. A small Flask server on the server machine handles actual file writes to disk when you click "Export to XMage/Forge":</p>
+    <p>Deck metadata is stored in browser localStorage for the UI. When you click <strong>Export .dck</strong>, the file is written to <code>D:\Users\[username]\mtg\decks\</code> — the user's personal folder. The <code>D:\Games\MTG\Decks\mine</code> symlink (managed by session_manager.py) always points there, so XMage and Forge see the right decks automatically:</p>
     <pre># D:\Server\MTG\deck_server.py
 from flask import Flask, request, jsonify
-import os, json
+import os
 
 app = Flask(__name__)
-MINE_DIR  = 'D:/Games/MTG/Decks/mine'
-ENEMY_DIR = 'D:/Games/MTG/Decks/enemy'
+USERS_BASE = 'D:/Users'
+ENEMY_DIR  = 'D:/Games/MTG/Decks/enemy'   # shared AI opponent pool
 
 @app.route('/export', methods=['POST'])
 def export():
-    data = request.json
-    deck = data['deck']
-    folder = ENEMY_DIR if data.get('enemy') else MINE_DIR
+    data     = request.json
+    deck     = data['deck']
+    username = request.headers.get('X-authentik-username', 'anonymous')
+
+    # Enemy decks → shared folder; My decks → user's personal folder
+    folder = ENEMY_DIR if data.get('enemy') else f'{USERS_BASE}/{username}/mtg/decks'
     os.makedirs(folder, exist_ok=True)
 
-    # Build .dck content
     safe_name = "".join(c for c in deck['name'] if c.isalnum() or c in ' _-').strip()
-    filename = f"{safe_name}.dck"
-    content = f"NAME:{deck['name']}\n"
+    filename  = f"{safe_name}.dck"
+    content   = f"NAME:{deck['name']}\n"
     if deck.get('commander'):
         content += f"COMMANDER:{deck['commander']}\n"
     content += deck.get('cards', '# Paste card list here\n')
 
     with open(os.path.join(folder, filename), 'w') as f:
         f.write(content)
-    return jsonify({'ok': True, 'file': filename})
+    return jsonify({'ok': True, 'file': filename, 'folder': folder})
+
+# D:\Games\MTG\Decks\mine is a symlink → D:\Users\[username]\mtg\decks\
+# session_manager.py updates this symlink on every Sunshine/session start.
+# XMage and Forge always read from the symlink path — no app reconfiguration needed.
 
 if __name__ == '__main__':
     app.run(port=8099, host='localhost')

@@ -173,7 +173,7 @@ app = Flask(__name__)
 
 BOOKS_FILE = 'D:/Server/Recommendations/books.json'
 GAMES_FILE = 'D:/Server/Recommendations/games.json'
-HIST_FILE  = 'D:/Server/Recommendations/history.json'
+USERS_BASE = 'D:/Users'           # unified user data folder
 OLLAMA_URL = 'http://localhost:11434/api/chat'
 MODEL      = 'llama3.1'  # or whichever you pulled
 
@@ -182,19 +182,27 @@ def load_json(path):
         with open(path) as f: return json.load(f)
     return []
 
+def hist_path(username):
+    """Each user's history lives in their own folder, not a shared file."""
+    p = f'{USERS_BASE}/{username}/recommendations/history.json'
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    return p
+
 def get_user_history(username):
-    hist = load_json(HIST_FILE)
-    return hist.get(username, {'books_read': [], 'games_played': []})
+    return load_json(hist_path(username)) or {'books_read': [], 'games_played': []}
 
 def record_activity(username, item_type, item_id):
-    hist = load_json(HIST_FILE)
-    if username not in hist:
-        hist[username] = {'books_read': [], 'games_played': []}
+    hist = get_user_history(username)
+    if not isinstance(hist, dict):
+        hist = {'books_read': [], 'games_played': []}
     key = 'books_read' if item_type == 'book' else 'games_played'
-    if item_id not in hist[username][key]:
-        hist[username][key].append(item_id)
-    with open(HIST_FILE, 'w') as f:
+    if item_id not in hist[key]:
+        hist[key].append(item_id)
+    with open(hist_path(username), 'w') as f:
         json.dump(hist, f, indent=2)
+    # history.json lives at D:\Users\[username]\recommendations\history.json
+    # → visible in Nextcloud App Data folder
+    # → counts toward their storage quota
 
 @app.route('/api/recommend', methods=['POST'])
 def recommend():

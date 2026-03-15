@@ -48,6 +48,10 @@
     <p>You can extend the same Flask server to serve Castlevania too. Just add a <code>/castlevania</code> route and point it at a separate ROM folder. The save files are stored per-user, per-game-ID, so there's no conflict.</p>
     <pre># Extend server.py with Castlevania routes:
 CASTLEVANIA_ROMS = 'D:/Emulation/Castlevania'
+# Saves go directly to D:/Users/[username]/emulation/castlevania/
+# username = request.headers.get('X-authentik-username', 'anonymous')
+# save_dir = f'D:/Users/{username}/emulation/castlevania'
+# See SSO tab → User Data Storage for full architecture
 
 @app.route('/cv/roms/&lt;path:filename&gt;')
 def serve_cv_rom(filename):
@@ -92,6 +96,19 @@ def serve_cv_rom(filename):
   <div class="card">
     <p>The game selector UI works identically to the Pokémon library. Sort by release year and label each card with its platform. For Symphony of the Night, note that the PS1 core has slight load times on first boot — this is normal.</p>
     <p><strong>Controller mapping for Castlevania:</strong> NES games need D-pad + A/B + Start/Select. GBA/DS games need an analog shoulder button for the sub-weapon system. EmulatorJS handles this automatically with a standard Xbox or PlayStation controller, or you can use the on-screen touch controls on mobile.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Save files are written directly to <code>D:\Users\[username]\emulation\castlevania\</code> by the Flask save server. The Authentik <code>X-authentik-username</code> header identifies each user — no login prompt inside the game page. Each user's saves are completely isolated and count toward their Nextcloud storage quota.</p>
+    <pre># In server.py, saves go directly to the user's path:
+username = request.headers.get('X-authentik-username', 'anonymous')
+save_dir = f'D:/Users/{username}/emulation/castlevania'
+os.makedirs(save_dir, exist_ok=True)
+save_path = os.path.join(save_dir, f'{game_id}.sav')</pre>
+    <p>See the <strong>SSO tab → User Data Storage</strong> for the full architecture, Nextcloud quota integration, and the session manager service.</p>
   </div>
 </div>
 

@@ -45,6 +45,7 @@
 
 <div class="sect-nav">
   <button class="snav active" onclick="showSec('setup')">⚙️ Authentik Setup</button>
+  <button class="snav" onclick="showSec('userdata')">🗂️ User Data Storage</button>
   <button class="snav" onclick="showSec('users')">👥 Users</button>
   <button class="snav" onclick="showSec('groups')">🏷️ Groups &amp; Quotas</button>
   <button class="snav" onclick="showSec('services')">🔗 Per-Service Config</button>
@@ -166,7 +167,232 @@ movies.yourdomain.com {
 </div>
 
 <!-- ══ USERS ══ -->
-<div id="s-users" style="display:none">
+<div id="s-userdata" style="display:none">
+  <div class="section-title">🗂️ User Data Storage — The Unified Architecture</div>
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>The principle:</strong> Every piece of per-user data — emulator saves, reading progress, listening history, MTG decks, AI recommendation history — lives inside <code>D:\Users\[username]\</code>. This folder counts toward each user's Nextcloud storage quota. Apps never store data directly; they always read from a <strong>symlink</strong> that points to the active user's subfolder. Switching users means re-pointing the symlink — the app itself never changes.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Folder Structure</div>
+    <div class="card">
+      <pre>D:\Users\
+  alice\
+    emulation\
+      pokemon\        ← EmulatorJS Pokémon saves
+      castlevania\    ← EmulatorJS Castlevania saves
+      fireemblem\     ← EmulatorJS Fire Emblem saves
+      dolphin\
+        gc\           ← Dolphin GameCube memory cards
+        wii\          ← Dolphin Wii save data
+      xenia\          ← Xenia Xbox 360 saves
+    calibre\          ← Calibre-Web reading progress
+    audiobooks\       ← Audiobookshelf listening progress
+    immich\           ← Immich photos (per-user upload folder)
+    recommendations\  ← Book/game recommendation history
+    mtg\
+      decks\          ← Personal MTG deck .dck files
+    settings.json     ← Homepage and app preferences
+
+  bob\
+    emulation\
+      ... (same structure, separate data)
+
+  __nobody__\         ← Empty stubs — active when no session is running
+    emulation\
+      pokemon\        (empty folder, safe fallback)
+      ... etc</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔗 The Symlink Layer</div>
+    <div class="card">
+      <div class="card-title">How it works</div>
+      <p>Each app has a fixed path it always reads/writes to — the <strong>symlink target</strong>. The symlink itself is what changes when a user logs in. The app never needs to be reconfigured.</p>
+      <pre>App reads from:                      Points to (changes per user):
+D:\Emulation\Pokemon\active_saves → D:\Users\alice\emulation\pokemon\
+D:\Emulation\Castlevania\active_saves → D:\Users\alice\emulation\castlevania\
+D:\Emulation\Xbox360\Content\active → D:\Users\alice\emulation\xenia\
+[Dolphin save folder]               → D:\Users\alice\emulation\dolphin\
+D:\Games\MTG\Decks\mine             → D:\Users\alice\mtg\decks\
+D:\Server\Recommendations\active_history → D:\Users\alice\recommendations\</pre>
+      <p>When Bob logs in instead, the session manager re-points all symlinks to <code>D:\Users\bob\...</code>. Alice's saves are untouched in her folder. Bob's saves load from his.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Single-seat limitation:</strong> This architecture means only one user can actively be using the emulators at a time (since the symlink can only point one place). For EmulatorJS (browser-based) this isn't a constraint — each user has their own browser session. For Dolphin/Xenia via Sunshine, only one person streams at once anyway.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐍 Session Manager Service (Port 9004)</div>
+    <div class="card">
+      <div class="card-title">Install as a Windows service</div>
+      <pre># D:\Server\SessionManager\session_manager.py
+# Manages symlinks when users start/end sessions
+
+import os, json, subprocess, logging
+from flask import Flask, request, jsonify
+from pathlib import Path
+
+app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
+
+USERS_BASE  = Path('D:/Users')
+NOBODY_BASE = Path('D:/Server/SessionManager/nobody')
+
+SYMLINK_MAP = [
+    {'link': 'D:/Emulation/Pokemon/active_saves',      'subdir': 'emulation/pokemon'},
+    {'link': 'D:/Emulation/Castlevania/active_saves',  'subdir': 'emulation/castlevania'},
+    {'link': 'D:/Emulation/FireEmblem/active_saves',   'subdir': 'emulation/fireemblem'},
+    {'link': 'C:/Users/ServerUser/Documents/Dolphin Emulator/GC/USA', 'subdir': 'emulation/dolphin/gc'},
+    {'link': 'C:/Users/ServerUser/Documents/Dolphin Emulator/Wii/title', 'subdir': 'emulation/dolphin/wii'},
+    {'link': 'D:/Emulation/Xbox360/Content/active',    'subdir': 'emulation/xenia'},
+    {'link': 'D:/Server/Recommendations/active_history','subdir': 'recommendations'},
+    {'link': 'D:/Games/MTG/Decks/mine',                'subdir': 'mtg/decks'},
+]
+
+USER_SUBDIRS = [
+    'emulation/pokemon', 'emulation/castlevania', 'emulation/fireemblem',
+    'emulation/dolphin/gc', 'emulation/dolphin/wii', 'emulation/xenia',
+    'calibre', 'audiobooks', 'immich', 'recommendations', 'mtg/decks',
+]
+
+def ensure_user_dirs(username):
+    for sub in USER_SUBDIRS:
+        (USERS_BASE / username / sub).mkdir(parents=True, exist_ok=True)
+
+def set_symlinks(username):
+    target_base = NOBODY_BASE if username == '__nobody__' else USERS_BASE / username
+    if username != '__nobody__':
+        ensure_user_dirs(username)
+    for entry in SYMLINK_MAP:
+        link = Path(entry['link'])
+        target = target_base / entry['subdir']
+        target.mkdir(parents=True, exist_ok=True)
+        link.parent.mkdir(parents=True, exist_ok=True)
+        # Remove existing junction/symlink
+        if link.is_symlink(): link.unlink()
+        elif link.is_dir():
+            subprocess.run(['cmd','/c','rmdir',str(link)], check=True)
+        # Create Windows junction point
+        subprocess.run(['cmd','/c','mklink','/J',str(link),str(target)],
+                       check=True, capture_output=True)
+        logging.info(f"  {link} -> {target}")
+
+active = {}
+
+@app.route('/session/start', methods=['POST'])
+def start():
+    username = (request.json or {}).get('username') or request.headers.get('X-authentik-username')
+    if not username: return jsonify({'error': 'no username'}), 400
+    set_symlinks(username)
+    active['current'] = username
+    return jsonify({'ok': True, 'user': username})
+
+@app.route('/session/end', methods=['POST'])
+def end():
+    set_symlinks('__nobody__')
+    active.pop('current', None)
+    return jsonify({'ok': True})
+
+@app.route('/session/current')
+def current():
+    return jsonify({'user': active.get('current')})
+
+if __name__ == '__main__':
+    for entry in SYMLINK_MAP:
+        (NOBODY_BASE / entry['subdir']).mkdir(parents=True, exist_ok=True)
+    app.run(port=9004, host='0.0.0.0')</pre>
+      <pre>pip install flask
+nssm install SessionManager python "D:\Server\SessionManager\session_manager.py"
+nssm set SessionManager AppDirectory "D:\Server\SessionManager"
+nssm start SessionManager
+
+netsh advfirewall firewall add rule name="SessionManager" dir=in action=allow protocol=TCP localport=9004</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔗 Integration Points</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Authentik webhook on login</div>
+        <p>In Authentik admin → Property Mappings → add a webhook notification that fires when a user authenticates. This calls the session manager to set up their symlinks:</p>
+        <pre># Authentik → System → Event Rules → Create rule:
+# Event: authorization_code (user logs in)
+# Action: Webhook → POST http://localhost:9004/session/start
+# Headers: X-authentik-username: {{ user.username }}</pre>
+      </div>
+      <div class="card">
+        <div class="card-title">Sunshine pre-launch command</div>
+        <p>For streaming sessions, Sunshine calls the session manager before launching the emulator:</p>
+        <pre># In Sunshine app config (Dolphin example):
+# Command: cmd /c "curl -s -X POST http://localhost:9004/session/start -H Content-Type:application/json -d {\"username\":\"PLACEHOLDER\"} && dolphin.exe"
+# The username must come from the Sunshine session metadata</pre>
+      </div>
+      <div class="card">
+        <div class="card-title">EmulatorJS (browser-based)</div>
+        <p>For browser emulation, the Authentik forward_auth header already passes the username to the Flask save server. The save server itself writes to <code>D:\Users\[username]\emulation\[game]\</code> directly — no symlink needed for these apps.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">User provisioning (new user first login)</div>
+        <p>When a user logs in for the first time, <code>ensure_user_dirs()</code> creates their complete folder tree. Nextcloud sees these as new files in their External Storage mount and counts them toward quota immediately.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">☁️ Nextcloud Quota Integration</div>
+    <div class="card">
+      <div class="card-title">Mount D:\Users\[username]\ as Nextcloud External Storage</div>
+      <p>Each user's <code>D:\Users\[username]\</code> folder is mounted into Nextcloud as their "App Data" external storage. This means:</p>
+      <ul style="margin:8px 0 0 18px;font-size:.85rem">
+        <li>Users can browse their save files in Nextcloud's file manager</li>
+        <li>The folder counts toward their storage quota alongside their regular Nextcloud files</li>
+        <li>Backups are handled by backing up <code>D:\Users\</code> — one folder covers all apps</li>
+      </ul>
+      <pre># In Nextcloud admin → External Storage → Add storage:
+# Type:          Local
+# Folder name:   App Data
+# Configuration: D:\Users\alice          ← per-user path (use %user% template)
+# Apply to:      Specific user: alice
+# Quota:         Counts toward user quota: ☑
+
+# The magic: use Nextcloud's %user% variable for bulk setup:
+# In Nextcloud config.php via occ:
+php occ files_external:create "App Data" local null \
+  --config=datadir="D:/Users/%user%" \
+  --user-applicable-all</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>Quota accounting:</strong> Nextcloud counts external storage against quota when the "Enable User Quota" option is on for that mount. A user with a 50 GB quota: their 20 GB of Nextcloud files + 5 GB of emulator saves + 2 GB of photos = 27 GB used, 23 GB remaining.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Per-App Data Locations Reference</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table style="margin:0">
+        <tr><th>App</th><th>User data subfolder</th><th>Method</th><th>Tab</th></tr>
+        <tr><td>Pokémon (EmulatorJS)</td><td><code>emulation/pokemon/</code></td><td>Flask saves direct to path</td><td>Pokémon</td></tr>
+        <tr><td>Castlevania (EmulatorJS)</td><td><code>emulation/castlevania/</code></td><td>Flask saves direct to path</td><td>Castlevania</td></tr>
+        <tr><td>Fire Emblem (EmulatorJS)</td><td><code>emulation/fireemblem/</code></td><td>Flask saves direct to path</td><td>Fire Emblem</td></tr>
+        <tr><td>Dolphin (GameCube/Wii)</td><td><code>emulation/dolphin/</code></td><td>Symlink (Sunshine pre-launch)</td><td>GameCube/Wii</td></tr>
+        <tr><td>Xenia (Xbox 360)</td><td><code>emulation/xenia/</code></td><td>Symlink (Sunshine pre-launch)</td><td>Xbox 360</td></tr>
+        <tr><td>Calibre-Web</td><td><code>calibre/</code></td><td>Nextcloud + OIDC email match</td><td>Books</td></tr>
+        <tr><td>Audiobookshelf</td><td><code>audiobooks/</code></td><td>Nextcloud + OIDC email match</td><td>Audiobooks</td></tr>
+        <tr><td>Immich</td><td><code>immich/</code></td><td>OIDC user isolation</td><td>Photos</td></tr>
+        <tr><td>Recommendations</td><td><code>recommendations/</code></td><td>Symlink to active_history path</td><td>Recs</td></tr>
+        <tr><td>MTG Decks</td><td><code>mtg/decks/</code></td><td>Symlink (mine/ folder)</td><td>MTG</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
   <div class="section-title">👥 Current Users</div>
   <div class="callout callout-tip">
     <div class="callout-icon">🔐</div>
@@ -175,21 +401,21 @@ movies.yourdomain.com {
   <div id="user-list">
     <div class="user-row">
       <div class="user-avatar">A</div>
-      <div style="flex:1"><div class="user-name">alice <span class="group-tag gt-admin">Admin</span></div><div class="user-meta">alice@gmail.com · Last seen: today · All services</div></div>
+      <div style="flex:1"><div class="user-name">alice <span class="group-tag gt-admin">Admin</span></div><div class="user-meta"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="41202d28222401262c20282d6f222e2c">[email&#160;protected]</a> · Last seen: today · All services</div></div>
       <span class="ustatus u-active">ACTIVE</span>
       <button class="ab warn" onclick="openBlock('alice')">🚫 Block</button>
       <button class="ab nuke-btn" onclick="openNuke('alice')">💣 Nuke</button>
     </div>
     <div class="user-row">
       <div class="user-avatar">B</div>
-      <div style="flex:1"><div class="user-name">bob <span class="group-tag gt-family">Family</span></div><div class="user-meta">bob@gmail.com · Last seen: yesterday · Jellyfin, Calibre, Games</div></div>
+      <div style="flex:1"><div class="user-name">bob <span class="group-tag gt-family">Family</span></div><div class="user-meta"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fc9e939ebc9b919d9590d29f9391">[email&#160;protected]</a> · Last seen: yesterday · Jellyfin, Calibre, Games</div></div>
       <span class="ustatus u-active">ACTIVE</span>
       <button class="ab warn" onclick="openBlock('bob')">🚫 Block</button>
       <button class="ab nuke-btn" onclick="openNuke('bob')">💣 Nuke</button>
     </div>
     <div class="user-row">
       <div class="user-avatar" style="background:linear-gradient(135deg,#555,#333)">C</div>
-      <div style="flex:1"><div class="user-name">charlie <span class="group-tag gt-friends">Friends</span></div><div class="user-meta">charlie@gmail.com · Blocked until 2025-03-22</div></div>
+      <div style="flex:1"><div class="user-name">charlie <span class="group-tag gt-friends">Friends</span></div><div class="user-meta"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4c2f242d3e2025290c2b212d2520622f2321">[email&#160;protected]</a> · Blocked until 2025-03-22</div></div>
       <span class="ustatus u-blocked">BLOCKED</span>
       <button class="ab" onclick="unblock('charlie')">✓ Unblock</button>
       <button class="ab nuke-btn" onclick="openNuke('charlie')">💣 Nuke</button>
@@ -321,7 +547,7 @@ Provider:     Create new OAuth2/OIDC Provider
 
   <div class="callout callout-dragon">
     <div class="callout-icon">🐉</div>
-    <div class="callout-body"><strong>The problem:</strong> Before Authentik, services created user accounts with local usernames. After Authentik, the "username" passed to services comes from the Google account's email prefix (e.g. <code>alice</code> from <code>alice@gmail.com</code>). These migration scripts rename existing save/data directories to match the new Authentik-derived usernames.</div>
+    <div class="callout-body"><strong>The problem:</strong> Before Authentik, services created user accounts with local usernames. After Authentik, the "username" passed to services comes from the Google account's email prefix (e.g. <code>alice</code> from <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="70111c19131530171d11191c5e131f1d">[email&#160;protected]</a></code>). These migration scripts rename existing save/data directories to match the new Authentik-derived usernames.</div>
   </div>
 
   <div class="card">
@@ -332,7 +558,7 @@ import os, shutil, json
 
 # Map old local usernames → new Gmail prefixes
 USERNAME_MAP = {
-    'alice_local':  'alice',    # alice_local → alice@gmail.com prefix
+    'alice_local':  'alice',    # alice_local → <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f495989d9791b49399959d98da979b99">[email&#160;protected]</a> prefix
     'bob123':       'bob',
     'charlie_mc':   'charlie',
 }
@@ -361,7 +587,7 @@ print('Done. Verify saves work before deleting old directories.')</pre>
 # If they have a different username format, also update via SQLite:
 import sqlite3
 db = sqlite3.connect('D:/Books/app.db')
-db.execute("UPDATE user SET email=? WHERE name=?", ('alice@gmail.com', 'alice_old'))
+db.execute("UPDATE user SET email=? WHERE name=?", ('<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c6a7aaafa5a386a1aba7afaae8a5a9ab">[email&#160;protected]</a>', 'alice_old'))
 db.commit()
 print('Done')</pre>
   </div>
@@ -380,7 +606,7 @@ print('Done')</pre>
 curl -X PATCH http://localhost:13378/api/users/[user-id] \
   -H "Authorization: Bearer [admin-token]" \
   -H "Content-Type: application/json" \
-  -d '{"email": "alice@gmail.com"}'</pre>
+  -d '{"email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f99895909a9cb99e94989095d79a9694">[email&#160;protected]</a>"}'</pre>
   </div>
 
   <div class="card" style="margin-top:12px">
@@ -495,7 +721,7 @@ def nuke_user(username, gmail, authentik_token, authentik_base_url, user_pk):
     print(f"NUKE COMPLETE for {username}")
 
 # Usage:
-# nuke_user('bob', 'bob@gmail.com', 'YOUR_TOKEN', 'https://auth.yourdomain.com', 42)</pre>
+# nuke_user('bob', '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5e3c313c1e39333f3732703d3133">[email&#160;protected]</a>', 'YOUR_TOKEN', 'https://auth.yourdomain.com', 42)</pre>
   </div>
 
   <div class="card" style="margin-top:12px">
@@ -592,10 +818,10 @@ GET /api/v3/core/users/?username=[username]
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 let CU = null;
 function showSec(n){
-  ['setup','users','groups','services','savemigration','nuke','achievements'].forEach(s=>{
+  ['setup','userdata','users','groups','services','savemigration','nuke','achievements'].forEach(s=>{
     document.getElementById('s-'+s).style.display='none';
     const b=document.querySelector(`[onclick="showSec('${s}')"]`);
     if(b)b.classList.remove('active');
@@ -609,7 +835,7 @@ function openNuke(u){CU=u;document.getElementById('nk-user').textContent=u;docum
 function unblock(u){window.open('https://auth.yourdomain.com/if/admin/','_blank');}
 function doNuke(){
   if(document.getElementById('nk-confirm').value.trim()!==CU){alert('Username mismatch.');return;}
-  alert(`Nuke procedure for ${CU}:\n\n1. Open Authentik admin → Delete user\n2. Run nuke_user.py\n3. Block IP in Windows Firewall\n4. Add IP to Cloudflare WAF blocklist\n\nA reminder ticket will be created automatically by the nuke script.`);
+  alert(`Nuke procedure for ${CU}:\n\n1. Open Authentik admin → Delete user\n2. Run nuke_user.py\n3. Block IP in Windows Firewall\n4. Add IP to Cloudflare WAF blocklist\n5. Delete D:\\Users\\${CU}\\ folder (all app data)\n\nA reminder ticket will be created automatically by the nuke script.`);
   document.getElementById('mo-nuke').classList.remove('open');
 }
 document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));

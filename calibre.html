@@ -155,4 +155,51 @@ From:        <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfe
   <div class="section-title">🔐 SSO Integration (See SSO Tab) <span class="tag tag-sso">→ SSO TAB</span></div>
   <div class="card">
     <p>Calibre-Web supports <strong>OAuth via Google</strong> natively. You can enable "Login with Google" in Admin settings and restrict access to specific Gmail accounts. Full walkthrough is in the <strong>SSO tab</strong>.</p>
-    <p>It also supports <strong>LDAP/Active Directory</strong>
+    <p>It also supports <strong>LDAP/Active Directory</strong> and Authentik OIDC — connect via the user_oidc app. When a user authenticates via Authentik with their Google account, Calibre-Web matches on email address and logs them into their existing account (preserving all reading progress). See the <strong>SSO tab → Save Migration</strong> for the script that links existing Calibre-Web accounts to Gmail addresses.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <div class="card-title">Where Calibre-Web stores per-user data</div>
+    <p>Calibre-Web stores reading progress, bookmarks, and shelf data in its own SQLite database (<code>D:\Books\app.db</code>), keyed per user account. This is distinct from the book files themselves (which are shared). The database is lightweight (~1–10 MB) and does <em>not</em> need to live in the user's personal folder — it stays where it is.</p>
+
+    <p><strong>What lives in <code>D:\Users\[username]\calibre\</code>:</strong></p>
+    <ul style="margin:6px 0 0 18px;font-size:.85rem">
+      <li>Exported reading progress snapshots (JSON exports for backup/portability)</li>
+      <li>Custom book uploads the user adds to the shared library</li>
+      <li>Personal reading lists exported from Calibre-Web</li>
+    </ul>
+
+    <p>The reading progress <em>inside</em> Calibre-Web's own database counts toward quota via Nextcloud External Storage, but it's negligible in size. The main quota item here is any books they upload.</p>
+
+    <div class="card-title" style="margin-top:14px">Calibre-Web + Nextcloud External Storage</div>
+    <p>The stats server exposes an endpoint that exports a user's Calibre-Web reading progress to their personal folder, enabling it to be backed up with everything else:</p>
+    <pre># Add to stats_server.py:
+@app.route('/calibre/export/&lt;username&gt;')
+def export_calibre_progress(username):
+    import sqlite3, json
+    conn = sqlite3.connect('D:/Books/app.db')
+    conn.row_factory = sqlite3.Row
+    progress = conn.execute('''
+        SELECT b.title, b.author_sort, brl.read_status, brl.last_modified,
+               brl.read_pos_epub_cfi, brl.kobo_reading_state_id
+        FROM book_read_link brl
+        JOIN books b ON b.id = brl.book_id
+        JOIN user u ON u.id = brl.user_id
+        WHERE u.name = ?
+    ''', (username,)).fetchall()
+    conn.close()
+    export = [dict(r) for r in progress]
+    # Write to user's personal folder:
+    out_path = f'D:/Users/{username}/calibre/reading_progress.json'
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    json.dump(export, open(out_path, 'w'), indent=2, default=str)
+    return jsonify({'ok': True, 'books': len(export)})</pre>
+    <p>Call this nightly via Task Scheduler per user to keep their <code>D:\Users\[username]\calibre\</code> folder current. Counts toward their Nextcloud quota.</p>
+  </div>
+</div>
+
+</body>
+</html>

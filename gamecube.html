@@ -258,5 +258,55 @@ netsh advfirewall firewall add rule name="Sunshine Control" dir=in action=allow 
   </div>
 </div>
 
+<div class="section">
+  <div class="section-title">💾 Per-User Dolphin Saves via Session Manager <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <div class="card-title">The problem</div>
+    <p>Dolphin stores save data (memory cards, state saves) in a fixed location: <code>%USERPROFILE%\Documents\Dolphin Emulator\</code>. All users would share the same save files by default — Bob's Wind Waker file would overwrite Alice's.</p>
+
+    <div class="card-title" style="margin-top:14px">The solution: Sunshine pre-launch + symlinks</div>
+    <p>When a Sunshine session starts, it calls the <strong>Session Manager</strong> (port 9004) before launching Dolphin. The session manager re-points the Dolphin save folder symlink at the user's personal directory in <code>D:\Users\[username]\emulation\dolphin\</code>.</p>
+
+    <pre># How the symlink works:
+# FIXED path Dolphin always reads:
+%USERPROFILE%\Documents\Dolphin Emulator\GC\USA\   (symlink)
+  ↓ points to ↓
+D:\Users\alice\emulation\dolphin\gc\           (when Alice is streaming)
+  - OR -
+D:\Users\bob\emulation\dolphin\gc\             (when Bob is streaming)
+
+# Same for Wii saves:
+%USERPROFILE%\Documents\Dolphin Emulator\Wii\title\  (symlink)
+  → D:\Users\[username]\emulation\dolphin\wii\</pre>
+
+    <div class="card-title" style="margin-top:14px">Sunshine application configuration</div>
+    <pre># In Sunshine Admin (https://localhost:47990) → Applications → Add:
+
+Name:     GameCube (Dolphin)
+Command:  "D:\Emulators\Dolphin\Dolphin.exe" --no-gui
+
+# Pre-launch command (runs BEFORE Dolphin opens):
+Detached: curl -s -X POST http://localhost:9004/session/start -H "Content-Type: application/json" -d "{\"username\":\"%%SUNSHINE_CLIENT_NAME%%\"}"
+
+# Undo command (runs when session ends):
+Detached: curl -s -X POST http://localhost:9004/session/end</pre>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong><code>%%SUNSHINE_CLIENT_NAME%%</code></strong> is a Sunshine variable that contains the connecting client's paired name. Set the Moonlight client name to match the user's Authentik username when pairing — e.g. pair as "alice" not "Alice's Laptop". The session manager uses this to look up the right folder.</div>
+    </div>
+
+    <div class="card-title" style="margin-top:14px">Initial setup: create save directories</div>
+    <pre># Run once per user to create their Dolphin save folder structure:
+mkdir "D:\Users\alice\emulation\dolphin\gc"
+mkdir "D:\Users\alice\emulation\dolphin\wii"
+
+# The session manager's ensure_user_dirs() does this automatically
+# on first login, but you can pre-create them manually.</pre>
+
+    <p>All Dolphin save data lives inside <code>D:\Users\[username]\</code> and counts toward the user's Nextcloud storage quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</p>
+  </div>
+</div>
+
 </body>
 </html>

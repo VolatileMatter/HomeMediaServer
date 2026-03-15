@@ -94,7 +94,10 @@ import os, json
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'change-this-to-a-random-string'
 
-SAVES_DIR = 'D:/Emulation/Pokemon/saves'
+SAVES_DIR = 'D:/Emulation/Pokemon/active_saves'
+# ↑ This is a Windows junction point managed by session_manager.py (port 9004)
+# It points to D:\Users\[current_user]\emulation\pokemon\ automatically
+# See SSO tab → User Data Storage for the full architecture
 ROMS_DIR  = 'D:/Emulation/Pokemon'
 USERS_FILE = 'D:/Emulation/Pokemon/users.json'
 
@@ -291,9 +294,18 @@ initGame();
 </div>
 
 <div class="section">
-  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="section-title">🔐 SSO &amp; User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
   <div class="card">
-    <p>V1 uses the simple username/password system above. For SSO, the Flask session can be replaced with Authentik forward auth — when a user authenticates via Authentik, the username header is passed to Flask which uses it to look up the correct save directory. The <code>X-authentik-username</code> header replaces the session-based login entirely.</p>
+    <div class="card-title">How saves work with the unified user data system</div>
+    <p>The Pokemon emulator server uses Authentik's <code>X-authentik-username</code> header to identify the current user. Saves are written directly to <code>D:\Users\[username]\emulation\pokemon\</code> — no symlinks needed for browser-based emulation since each user has their own HTTP session.</p>
+    <pre># server.py uses the Authentik username header directly:
+username = request.headers.get('X-authentik-username', 'anonymous')
+user_save_dir = f'D:/Users/{username}/emulation/pokemon'
+os.makedirs(user_save_dir, exist_ok=True)
+# Write save file:
+save_path = os.path.join(user_save_dir, f'{game_id}.sav')</pre>
+    <p>The <code>active_saves</code> symlink at <code>D:\Emulation\Pokemon\active_saves</code> is only needed when running Pokemon via Sunshine streaming (rare). For normal browser play, the server writes to each user's path directly.</p>
+    <p>All save data lives inside <code>D:\Users\[username]\</code> which counts toward the user's Nextcloud storage quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture including Nextcloud quota integration.</p>
   </div>
 </div>
 

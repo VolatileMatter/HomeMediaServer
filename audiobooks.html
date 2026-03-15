@@ -164,5 +164,46 @@ robocopy "C:\ProgramData\audiobookshelf" "E:\Backups\abs-config" /E /MIR</pre>
   </div>
 </div>
 
+<div class="section">
+  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <div class="card-title">Where Audiobookshelf stores per-user data</div>
+    <p>Audiobookshelf maintains listening progress, bookmarks, and playback position in its own database (<code>C:\ProgramData\audiobookshelf\</code>), keyed per user account. The audio files themselves are shared across all users from <code>D:\Audiobooks\</code>.</p>
+
+    <p><strong>What lives in <code>D:\Users\[username]\audiobooks\</code>:</strong></p>
+    <ul style="margin:6px 0 0 18px;font-size:.85rem">
+      <li>Progress export snapshots — a JSON file of all their listening positions and bookmarks</li>
+      <li>Any personal podcast feeds they've added (if ABS supports per-user custom RSS)</li>
+    </ul>
+
+    <div class="card-title" style="margin-top:14px">Export progress to user folder nightly</div>
+    <p>Audiobookshelf has an API that can export a user's progress. Add this to the stats server for nightly Task Scheduler runs:</p>
+    <pre># stats_server.py — nightly progress export per user:
+@app.route('/abs/export/&lt;username&gt;')
+def export_abs_progress(username):
+    import requests as req, json
+
+    # Get ABS user ID from username
+    headers = {'Authorization': f'Bearer {ABS_ADMIN_TOKEN}'}
+    users_r = req.get('http://localhost:13378/api/users', headers=headers)
+    users   = users_r.json().get('users', [])
+    user    = next((u for u in users if u.get('username') == username), None)
+    if not user:
+        return jsonify({'error': 'user not found'}), 404
+
+    # Export their media progress
+    prog_r = req.get(
+        f"http://localhost:13378/api/me/progress",
+        headers={'Authorization': f'Bearer {user.get(\"token\",\"\")}'}
+    )
+    out_path = f'D:/Users/{username}/audiobooks/listening_progress.json'
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    json.dump(prog_r.json(), open(out_path, 'w'), indent=2)
+    return jsonify({'ok': True})</pre>
+
+    <p>All data in <code>D:\Users\[username]\audiobooks\</code> counts toward their Nextcloud storage quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</p>
+  </div>
+</div>
+
 </body>
 </html>
