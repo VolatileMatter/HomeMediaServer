@@ -1,202 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>SSO</title><link rel="stylesheet" href="shared.css"></head>
+<head>
+<meta charset="UTF-8"><title>SSO & Users</title><link rel="stylesheet" href="shared.css">
+<style>
+.user-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:6px;flex-wrap:wrap;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;}
+.user-name{font-weight:700;font-size:.9rem;flex:1;min-width:100px;}
+.user-meta{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);}
+.ustatus{font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:2px 7px;border-radius:2px;}
+.u-active{background:rgba(76,175,125,.15);color:#4caf7d;border:1px solid rgba(76,175,125,.25);}
+.u-blocked{background:rgba(224,92,92,.12);color:var(--danger);border:1px solid rgba(224,92,92,.2);}
+.ab{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:3px 8px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ab:hover{border-color:var(--accent);color:var(--accent);}
+.ab.warn:hover{border-color:#e0b84b;color:#e0b84b;}
+.ab.nuke-btn{border-color:rgba(224,92,92,.3);color:var(--danger);}
+.ab.nuke-btn:hover{background:rgba(224,92,92,.1);}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.mc{background:#141820;border:1px solid var(--border);border-radius:6px;padding:24px;max-width:480px;width:95%;max-height:85vh;overflow-y:auto;}
+.mc h3{font-family:'Cinzel',serif;margin-bottom:14px;}
+.mclose{float:right;background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.65rem;}
+.mclose:hover{border-color:var(--danger);color:var(--danger);}
+.nuke-box{background:rgba(224,92,92,.07);border:1px solid rgba(224,92,92,.3);border-radius:4px;padding:14px;margin-bottom:12px;}
+.nuke-box h4{color:var(--danger);font-family:'Cinzel',serif;margin-bottom:8px;}
+.ipr{display:flex;gap:8px;align-items:center;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:6px;}
+.ipa{font-family:'Share Tech Mono',monospace;font-size:.78rem;flex:1;}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.ach{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px;text-align:center;}
+.ach.earned{border-color:rgba(200,168,75,.4);background:rgba(200,168,75,.05);}
+.ach-ic{font-size:1.8rem;margin-bottom:5px;}
+.ach-n{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+.ach-d{font-size:.66rem;color:var(--text-dim);}
+.finput{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:.78rem;}
+.sect-nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.snav{font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
+.snav.active{border-color:var(--accent);color:var(--accent);}
+</style>
+</head>
 <body>
 
 <div class="page-header">
   <div class="page-icon">🔐</div>
   <div>
-    <h1>Single Sign-On (SSO)</h1>
-    <div class="subtitle">// Per-User Progress · Google OAuth · Authentik · Emulation Saves //</div>
-    <p class="desc">SSO for apps where individual users need their own tracked progress: Calibre-Web (reading history), Audiobookshelf (listening progress), Nextcloud (personal files), and emulated game saves.</p>
+    <h1>SSO &amp; User Management</h1>
+    <div class="subtitle">// Users · IP Blocking · Nuke · Achievements · Google OAuth //</div>
+    <p class="desc">Manage all users, block or ban bad actors, nuke accounts, and track reading/gaming achievements across all services.</p>
   </div>
 </div>
 
-<div class="callout callout-tip">
-  <div class="callout-icon">💡</div>
-  <div class="callout-body"><strong>Plex is excluded here</strong> — Plex has its own account system (plex.tv) and handles multi-user watch history natively. Share your server by inviting friends via Settings → Manage Library Access.</div>
+<div class="sect-nav">
+  <button class="snav active" onclick="showSec('users')">👥 Users</button>
+  <button class="snav" onclick="showSec('ipblocks')">🚫 IP Blocks</button>
+  <button class="snav" onclick="showSec('achievements')">🏆 Achievements</button>
+  <button class="snav" onclick="showSec('setup')">⚙️ SSO Setup</button>
 </div>
 
-<div class="v1-banner">🐉 V1 Strategy: Give each user their own local username/password in each app. Then upgrade to Google OAuth per service. Then optionally centralize with Authentik for one login page.</div>
-
-<div class="section">
-  <div class="section-title">🗺️ Why Per-User Matters for These Apps</div>
-  <div class="card">
-    <table>
-      <tr><th>App</th><th>Why users need separate accounts</th></tr>
-      <tr><td>Calibre-Web</td><td>Reading progress, bookmarks, "currently reading" shelf</td></tr>
-      <tr><td>Audiobookshelf</td><td>Listening position, finished chapters, podcast subscriptions</td></tr>
-      <tr><td>Nextcloud</td><td>Personal files, private calendars, separate storage quotas</td></tr>
-      <tr><td>Pokémon / Castlevania / Fire Emblem</td><td>Individual game save files — crucial, can't share</td></tr>
-      <tr><td>Jukebox</td><td>History / favorites (optional; a simple shared password may be fine)</td></tr>
-    </table>
-  </div>
-</div>
-
-<hr>
-
-<div class="section">
-  <div class="section-title">1️⃣ Tier 1 — Per-App Username &amp; Password (V1)</div>
-
-  <div class="card">
-    <div class="card-title">Calibre-Web User Setup</div>
-    <p>Admin panel → User Management → Add new user. Set per-user permissions:</p>
-    <pre>Read only:   can browse and download books
-Upload:      can add new books
-Edit books:  can modify metadata
-Admin:       full control</pre>
-    <p>Each user's reading progress (currently reading, bookmarks, read history) is tied to their account.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Audiobookshelf User Setup</div>
-    <p>Settings → Users → Add User. Set per-user library access — you can restrict a user to only see specific libraries (e.g. a child's account that only sees kids' audiobooks).</p>
-    <p>Each user's listening position is stored server-side — they can switch from laptop to phone and resume exactly where they left off.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Nextcloud User Setup</div>
-    <p>Admin → Users → New User → set username, email, initial password, storage quota. Each user gets their own private file storage, separate from other users.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Emulation (Pokémon / Castlevania / Fire Emblem)</div>
-    <p>The emulation Flask server has its own username/password system (see the respective tabs). Users log in, and their saves are stored in <code>saves/[username]/</code> directories. Each user's game progress is completely separate.</p>
-    <pre># Add users via Python one-liner:
-python -c "
-import json
-from werkzeug.security import generate_password_hash
-users = json.load(open('users.json')) if os.path.exists('users.json') else {}
-users['newuser'] = {'password': generate_password_hash('their-password')}
-json.dump(users, open('users.json','w'))
-print('User added.')
-"</pre>
-  </div>
-</div>
-
-<hr>
-
-<div class="section">
-  <div class="section-title">2️⃣ Tier 2 — Google OAuth ("Sign in with Google")</div>
-
-  <div class="card">
-    <div class="card-title">One-Time: Set Up Google OAuth Credentials</div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-content">
-          <strong>Create a project in Google Cloud Console</strong>
-          <p><a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Create Project → name it "Home Server SSO"</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-content">
-          <strong>Configure OAuth Consent Screen</strong>
-          <p>APIs &amp; Services → OAuth consent screen → External → fill in app name, your email. Under "Test users," add every Gmail address that should have access. (While in "Testing" mode, only listed users can authenticate.)</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-content">
-          <strong>Create OAuth Client ID</strong>
-          <p>APIs &amp; Services → Credentials → Create Credentials → OAuth Client ID → Web application. Save the <strong>Client ID</strong> and <strong>Client Secret</strong>.</p>
-        </div>
-      </div>
+<!-- ── USERS ── -->
+<div id="s-users">
+  <div class="section-title">👥 User Roster</div>
+  <div id="user-list">
+    <div class="user-row">
+      <div class="user-avatar">A</div>
+      <div style="flex:1"><div class="user-name">alice</div><div class="user-meta">alice@gmail.com · Last seen 2025-03-15 · Saves: Pokémon Emerald, SotN</div></div>
+      <span class="ustatus u-active">ACTIVE</span>
+      <button class="ab warn" onclick="openBlock('alice')">🚫 Block</button>
+      <button class="ab nuke-btn" onclick="openNuke('alice')">💣 Nuke</button>
+    </div>
+    <div class="user-row">
+      <div class="user-avatar">B</div>
+      <div style="flex:1"><div class="user-name">bob</div><div class="user-meta">bob@gmail.com · Last seen 2025-03-14</div></div>
+      <span class="ustatus u-active">ACTIVE</span>
+      <button class="ab warn" onclick="openBlock('bob')">🚫 Block</button>
+      <button class="ab nuke-btn" onclick="openNuke('bob')">💣 Nuke</button>
+    </div>
+    <div class="user-row">
+      <div class="user-avatar" style="background:linear-gradient(135deg,#555,#333)">C</div>
+      <div style="flex:1"><div class="user-name">charlie</div><div class="user-meta">Blocked until 2025-03-22 · Reason: spam in feedback</div></div>
+      <span class="ustatus u-blocked">BLOCKED</span>
+      <button class="ab" onclick="alert('Unblock charlie: set status=active in users.json')">✓ Unblock</button>
+      <button class="ab nuke-btn" onclick="openNuke('charlie')">💣 Nuke</button>
     </div>
   </div>
-
-  <div class="card">
-    <div class="card-title">📚 Calibre-Web + Google</div>
-    <p>Add redirect URI in Google Console: <code>http://[server-ip]:8083/google/authorized</code></p>
-    <p>In Calibre-Web Admin → Edit app configuration:</p>
-    <pre>☑ Enable Google OAuth Login
-Google Client ID:     [paste client id]
-Google Client Secret: [paste client secret]</pre>
-    <p>Each user links their Google account once: Admin → Users → Edit user → "Link Google account." After that, they see "Sign in with Google" on the login page.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🎧 Audiobookshelf + OpenID Connect (Google)</div>
-    <p>Add redirect URI: <code>http://[server-ip]:13378/auth/openid/callback</code></p>
-    <p>In ABS Admin → Settings → Authentication:</p>
-    <pre>☑ OpenID Connect Authentication
-Issuer URL:     https://accounts.google.com
-Client ID:      [paste]
-Client Secret:  [paste]
-Button Text:    Sign in with Google
-Auto Register:  ☑ (creates ABS account on first Google login)</pre>
-  </div>
-
-  <div class="card">
-    <div class="card-title">☁️ Nextcloud + Google Login</div>
-    <p>Install the "Social Login" app in Nextcloud App Store. Add redirect URI: <code>http://[server]/nextcloud/index.php/apps/sociallogin/custom_oidc/google</code></p>
-    <p>In Admin → Social Login → Add Custom OpenID Connect:</p>
-    <pre>Name:          google
-Authorize URL: https://accounts.google.com/o/oauth2/auth
-Token URL:     https://oauth2.googleapis.com/token
-Username:      email
-Client ID:     [paste]
-Client Secret: [paste]
-Scope:         openid email profile</pre>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🎮 Emulation Server + Google</div>
-    <p>The Flask-based emulation server can be extended with Google OAuth using the <code>authlib</code> library:</p>
-    <pre>pip install authlib requests
-
-# In server.py, replace the login route with Google OAuth:
-from authlib.integrations.flask_client import OAuth
-
-oauth = OAuth(app)
-google = oauth.register('google',
-    client_id='YOUR_GOOGLE_CLIENT_ID',
-    client_secret='YOUR_GOOGLE_CLIENT_SECRET',
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'}
-)
-
-@app.route('/login/google')
-def google_login():
-    return google.authorize_redirect(url_for('google_callback', _external=True))
-
-@app.route('/login/google/callback')
-def google_callback():
-    token = google.authorize_access_token()
-    user_info = token['userinfo']
-    email = user_info['email']
-    # Use email as the username for save directory lookup
-    session['user'] = email.split('@')[0]  # or use full email
-    return redirect('/')
-</pre>
-    <p>After this, each user's saves are stored in <code>saves/[gmail-prefix]/</code> — completely separate.</p>
+  <div class="callout callout-dragon" style="margin-top:14px">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>In production</strong> this reads from <code>users.json</code>. Block/nuke buttons call the local control server (<code>localhost:9002</code>). Plex removal can't be fully automated — a ticket is created in the Feedback tab instead.</div>
   </div>
 </div>
 
-<hr>
+<!-- ── IP BLOCKS ── -->
+<div id="s-ipblocks" style="display:none">
+  <div class="section-title">🚫 IP Block List</div>
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <input id="new-ip" class="finput" placeholder="IP address" style="flex:1;min-width:150px">
+    <input id="new-ip-reason" class="finput" placeholder="Reason" style="flex:1;min-width:120px;font-family:'Raleway',sans-serif">
+    <select id="new-ip-dur" class="finput">
+      <option value="1h">1 hour</option><option value="24h">24 hours</option>
+      <option value="7d">7 days</option><option value="30d">30 days</option>
+      <option value="permanent">Permanent</option>
+    </select>
+    <button onclick="addIPBlock()" style="background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);color:var(--danger);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.7rem">Block IP</button>
+  </div>
+  <div id="ip-list">
+    <div class="ipr"><div class="ipa">203.0.113.45</div><div style="flex:2;font-size:.75rem;color:var(--text-dim)">Brute force attempts</div><div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--accent)">Expires 2025-03-22</div><button class="ab" onclick="this.closest('.ipr').remove()">✕</button></div>
+    <div class="ipr"><div class="ipa">198.51.100.22</div><div style="flex:2;font-size:.75rem;color:var(--text-dim)">Account nuked</div><div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--danger)">PERMANENT</div><button class="ab" onclick="this.closest('.ipr').remove()">✕</button></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">How blocks are enforced</div>
+    <p>The control server writes to Windows Firewall via <code>netsh</code> and appends to a Caddy blocklist file. Add this to your <code>Caddyfile</code>:</p>
+    <pre>@blocked remote_ip 203.0.113.45 198.51.100.22
+respond @blocked "Access Denied" 403</pre>
+    <p>For dynamic updates without restarting Caddy, use the Caddy admin API:</p>
+    <pre>curl -X POST http://localhost:2019/config/apps/http/servers/srv0/routes \
+  -H "Content-Type: application/json" \
+  -d '{"match":[{"remote_ip":{"ranges":["1.2.3.4"]}}],"handle":[{"handler":"static_response","status_code":403}]}'</pre>
+  </div>
+</div>
 
-<div class="section">
-  <div class="section-title">3️⃣ Tier 3 — Authentik (One Login to Rule Them All)</div>
+<!-- ── ACHIEVEMENTS ── -->
+<div id="s-achievements" style="display:none">
+  <div class="section-title">🏆 Achievements</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🎮 RetroAchievements (retro games)</div>
+      <p>EmulatorJS supports RetroAchievements natively. Each user enters their own RA username and API token in the game UI. Achievements are tracked on retroachievements.org per user account.</p>
+      <pre>// In your game launcher page:
+EJS_retroArchCheevos = true;
+EJS_cheevosUsername = userRAName;  // from user profile
+EJS_cheevosToken = userRAToken;    // from RA settings page</pre>
+      <p>Users create free accounts at <a href="https://retroachievements.org" target="_blank">retroachievements.org</a> and enter their credentials once.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📚 Reading &amp; Listening Achievements</div>
+      <p><strong>Audiobookshelf</strong> → Settings → Notifications → add webhook on "Audiobook Finished" → POST to <code>http://localhost:9003/api/achievement/book</code>.</p>
+      <p><strong>Calibre-Web</strong> → when user marks a book "read," fires to the same endpoint.</p>
+      <pre>@app.route('/api/achievement/book', methods=['POST'])
+def book_ach():
+    d = request.json
+    grant(d['user'], 'BOOK_FINISH', d.get('title',''))
+    return jsonify({'ok':True})</pre>
+    </div>
+  </div>
+  <div class="section-title" style="margin-top:20px">🏅 Achievement Catalog</div>
+  <div class="ach-grid">
+    <div class="ach earned"><div class="ach-ic">📖</div><div class="ach-n">Bookworm</div><div class="ach-d">Finish first Calibre book</div></div>
+    <div class="ach earned"><div class="ach-ic">🎧</div><div class="ach-n">Listener</div><div class="ach-d">Finish first audiobook</div></div>
+    <div class="ach"><div class="ach-ic">📚</div><div class="ach-n">Bibliophile</div><div class="ach-d">Finish 10 books</div></div>
+    <div class="ach"><div class="ach-ic">⚡</div><div class="ach-n">Pokémon Master</div><div class="ach-d">Complete any Pokédex</div></div>
+    <div class="ach"><div class="ach-ic">🧛</div><div class="ach-n">Belmont</div><div class="ach-d">Beat any Castlevania</div></div>
+    <div class="ach"><div class="ach-ic">🌍</div><div class="ach-n">Polyglot</div><div class="ach-d">3 LinguaCafe lessons in 3 languages</div></div>
+    <div class="ach"><div class="ach-ic">🎵</div><div class="ach-n">DJ</div><div class="ach-d">50 songs in Navidrome</div></div>
+    <div class="ach"><div class="ach-ic">🤖</div><div class="ach-n">AI Whisperer</div><div class="ach-d">100 messages to Private AI</div></div>
+    <div class="ach"><div class="ach-ic">⚔️</div><div class="ach-n">Tactician</div><div class="ach-d">Beat any Fire Emblem</div></div>
+    <div class="ach"><div class="ach-ic">🎲</div><div class="ach-n">Party Animal</div><div class="ach-d">Play Mario Party with 4 people</div></div>
+  </div>
+</div>
 
+<!-- ── SETUP ── -->
+<div id="s-setup" style="display:none">
+  <div class="section-title">⚙️ SSO Tier 1 — Per-App Passwords</div>
   <div class="card">
-    <div class="card-title">What Authentik Provides</div>
-    <p>A single login page. Users authenticate once, and every app trusts that session. Supports Google as an upstream "social login" — so users can still use their Gmail, but through Authentik instead of per-app.</p>
-    <p>Runs via Docker on Linux or WSL2 on Windows. See the Linux tab for WSL2 setup.</p>
-    <pre># Install via WSL2 + Docker Compose:
+    <table>
+      <tr><th>App</th><th>Where to add users</th><th>Per-user saves?</th></tr>
+      <tr><td>Calibre-Web</td><td>Admin → User Management</td><td>✅ Reading progress</td></tr>
+      <tr><td>Audiobookshelf</td><td>Settings → Users</td><td>✅ Listen position</td></tr>
+      <tr><td>Nextcloud</td><td>Admin → Users</td><td>✅ Files, calendar</td></tr>
+      <tr><td>Emulation server</td><td>Edit users.json</td><td>✅ Game saves</td></tr>
+      <tr><td>Navidrome</td><td>Admin UI → Users</td><td>✅ Playlists, history</td></tr>
+      <tr><td>Open WebUI (Ollama)</td><td>Admin → Users</td><td>✅ Chat history</td></tr>
+    </table>
+  </div>
+  <div class="section-title">⚙️ SSO Tier 2 — Google OAuth</div>
+  <div class="card">
+    <p>Get Client ID + Secret from <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>. Configure per app:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li><strong>Calibre-Web:</strong> Admin → config → ☑ Enable Google OAuth</li>
+      <li><strong>Audiobookshelf:</strong> Settings → Auth → OpenID Connect (Issuer: accounts.google.com)</li>
+      <li><strong>Nextcloud:</strong> Apps → Social Login → Custom OIDC</li>
+      <li><strong>Emulation server:</strong> Add <code>authlib</code> Google flow</li>
+    </ul>
+  </div>
+  <div class="section-title">⚙️ SSO Tier 3 — Authentik (One Page for All)</div>
+  <div class="card">
+    <pre>cd ~/authentik  # (in WSL2)
 wget https://goauthentik.io/docker-compose.yml
-# Edit .env: set AUTHENTIK_SECRET_KEY, database passwords
 docker-compose up -d
-
-# Access admin at http://localhost:9000/if/admin/</pre>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Connecting Authentik to Each App</div>
-    <p>For each app, create an "Application" and "OAuth2/OIDC Provider" in Authentik. The app then uses Authentik's OIDC endpoints instead of Google's directly. The process is identical to Tier 2 per app — just replace Google's URLs with your Authentik URL.</p>
-    <pre>Issuer URL:     http://localhost:9000/application/o/[app-name]/
-Client ID:      (from Authentik app config)
-Client Secret:  (from Authentik app config)</pre>
-    <p>Authentik can itself be configured to use Google as a "social login" upstream, so users click "Sign in with Google" on the Authentik page and all apps get the Google identity.</p>
+# Admin: http://localhost:9000/if/admin/</pre>
+    <p>All apps redirect to Authentik's login page. Configure Google as a social login source in Authentik. All users log in with Google once and access everything.</p>
   </div>
 </div>
 
+<!-- BLOCK MODAL -->
+<div class="mo" id="mo-block">
+  <div class="mc">
+    <button class="mclose" onclick="document.getElementById('mo-block').classList.remove('open')">✕</button>
+    <h3 style="color:#e0b84b">🚫 Block: <span id="bl-user"></span></h3>
+    <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:12px">User will be denied access on all services for the selected duration.</p>
+    <select id="bl-dur" class="finput" style="width:100%;margin-bottom:8px">
+      <option value="1h">1 hour</option><option value="24h">24 hours</option>
+      <option value="7d">7 days</option><option value="30d">30 days</option>
+      <option value="permanent">Permanent</option>
+    </select>
+    <input id="bl-reason" class="finput" placeholder="Reason (optional)" style="width:100%;font-family:'Raleway',sans-serif;margin-bottom:12px">
+    <div style="display:flex;gap:8px">
+      <button onclick="doBlock()" style="background:rgba(224,184,75,.12);border:1px solid rgba(224,184,75,.3);color:#e0b84b;padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.72rem">Confirm Block</button>
+      <button class="ab" onclick="document.getElementById('mo-block').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NUKE MODAL -->
+<div class="mo" id="mo-nuke">
+  <div class="mc">
+    <button class="mclose" onclick="document.getElementById('mo-nuke').classList.remove('open')">✕</button>
+    <h3 style="color:var(--danger)">💣 NUKE: <span id="nk-user"></span></h3>
+    <div class="nuke-box">
+      <h4>⚠️ This cannot be undone</h4>
+      <ul style="font-size:.82rem;color:var(--text-dim);margin-top:6px 0 0 18px">
+        <li>Permanently blocks account + IP</li>
+        <li>Deletes ALL save files from all games</li>
+        <li>Removes Calibre reading history</li>
+        <li>Removes Audiobookshelf progress</li>
+        <li>Removes Nextcloud files</li>
+        <li>Creates a Feedback ticket: "Remove [user] from Plex"</li>
+      </ul>
+    </div>
+    <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:8px">Type the exact username to confirm:</p>
+    <input id="nk-confirm" class="finput" placeholder="Username…" style="width:100%;margin-bottom:12px">
+    <div style="display:flex;gap:8px">
+      <button onclick="doNuke()" style="background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.4);color:var(--danger);padding:8px 18px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.75rem">💣 NUKE</button>
+      <button class="ab" onclick="document.getElementById('mo-nuke').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let CU = null;
+function showSec(n){
+  ['users','ipblocks','achievements','setup'].forEach(s=>{
+    document.getElementById('s-'+s).style.display='none';
+    const b=document.querySelector(`[onclick="showSec('${s}')"]`);
+    if(b)b.classList.remove('active');
+  });
+  document.getElementById('s-'+n).style.display='block';
+  const ab=document.querySelector(`[onclick="showSec('${n}')"]`);
+  if(ab)ab.classList.add('active');
+}
+
+function openBlock(u){CU=u;document.getElementById('bl-user').textContent=u;document.getElementById('mo-block').classList.add('open');}
+function doBlock(){
+  const dur=document.getElementById('bl-dur').value;
+  const reason=document.getElementById('bl-reason').value;
+  fetch('http://localhost:9002/control/user/block',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:CU,duration:dur,reason})})
+  .catch(()=>alert(`Manual: set status=blocked for user ${CU} in users.json\nDuration: ${dur}`));
+  alert(`${CU} blocked for ${dur}.`);
+  document.getElementById('mo-block').classList.remove('open');
+}
+
+function openNuke(u){CU=u;document.getElementById('nk-user').textContent=u;document.getElementById('nk-confirm').value='';document.getElementById('mo-nuke').classList.add('open');}
+function doNuke(){
+  if(document.getElementById('nk-confirm').value.trim()!==CU){alert('Username mismatch.');return;}
+  fetch('http://localhost:9002/control/user/nuke',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:CU})})
+  .catch(()=>alert(`Manual nuke of ${CU}:\n1. Delete saves/${CU}/ in all emulation folders\n2. Remove from users.json\n3. Block their IP in Windows Firewall\n4. Remove from Plex web UI\n5. Delete their Nextcloud account`));
+  alert(`${CU} nuked. A Plex-removal ticket has been created.`);
+  document.getElementById('mo-nuke').classList.remove('open');
+}
+
+function addIPBlock(){
+  const ip=document.getElementById('new-ip').value.trim();
+  const reason=document.getElementById('new-ip-reason').value.trim()||'(no reason)';
+  const dur=document.getElementById('new-ip-dur').value;
+  if(!ip)return;
+  fetch('http://localhost:9002/control/ip/block',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip,reason,duration:dur})})
+  .catch(()=>alert(`Block ${ip}:\nnetsh advfirewall firewall add rule name="BLOCK_${ip}" dir=in action=block remoteip=${ip}`));
+  const r=document.createElement('div');r.className='ipr';
+  r.innerHTML=`<div class="ipa">${ip}</div><div style="flex:2;font-size:.75rem;color:var(--text-dim)">${reason}</div><div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:${dur==='permanent'?'var(--danger)':'var(--accent)'}">${dur==='permanent'?'PERMANENT':dur}</div><button class="ab" onclick="this.closest('.ipr').remove()">✕</button>`;
+  document.getElementById('ip-list').prepend(r);
+  document.getElementById('new-ip').value='';document.getElementById('new-ip-reason').value='';
+}
+
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+</script>
 </body>
 </html>

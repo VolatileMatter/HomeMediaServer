@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Languages</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🌍</div>
+  <div>
+    <h1>Language Learning</h1>
+    <div class="subtitle">// LinguaCafe · Anki · LibreLingo · EN · ES · RU //</div>
+    <p class="desc">Self-hosted language learning suite: LinguaCafe for reading-based vocab acquisition, AnkiWeb-compatible flashcard server for SRS review, and LibreLingo for structured courses.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: LinguaCafe on port 8090 serving English, Spanish, Russian. Anki-web on port 8091 with per-user progress. LibreLingo on port 8092.</div>
+
+<div class="section">
+  <div class="section-title">🗣️ LinguaCafe — Reading-Based Vocab <span class="tag tag-native">FOSS</span></div>
+
+  <div class="card">
+    <div class="card-title">What LinguaCafe Is</div>
+    <p>LinguaCafe is a self-hosted tool inspired by LingQ. You import texts in your target language, and it tracks which words you know. As you read, you look up unfamiliar words, mark them, and they get added to your review queue. Supports 15+ languages including Spanish and Russian.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Installation on Windows (Docker via WSL2) <span class="tag tag-docker">REQUIRES WSL2</span></div>
+    <p>LinguaCafe is Docker-only officially. Run it under WSL2 (the lightweight Linux layer built into Windows 10).</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Enable WSL2 and install Ubuntu</strong>
+          <pre>wsl --install
+# Reboot, then open Ubuntu from Start menu</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Install Docker inside WSL2</strong>
+          <pre>sudo apt update
+sudo apt install -y docker.io docker-compose
+sudo usermod -aG docker $USER
+newgrp docker</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Set up LinguaCafe</strong>
+          <pre>mkdir ~/linguacafe && cd ~/linguacafe
+
+# Download the compose file:
+wget https://raw.githubusercontent.com/simjanos-dev/LinguaCafe/main/docker-compose.yml
+
+# Configure .env — set your admin password:
+echo "LINGUACAFE_ADMIN_PASSWORD=yourpassword" > .env
+
+docker-compose up -d</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Enable Spanish and Russian language packs</strong>
+          <p>Access LinguaCafe at <code>http://localhost:8090</code>. Go to Settings → Languages → enable Español and Русский. Each language requires downloading a model from within the UI (NLP models for tokenization, ~200–500MB each).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Open firewall and auto-start</strong>
+          <pre>netsh advfirewall firewall add rule name="LinguaCafe" dir=in action=allow protocol=TCP localport=8090
+
+# Auto-start WSL2 + Docker on Windows boot:
+# Create a Task Scheduler task:
+# Action: wsl -d Ubuntu -e bash -c "cd ~/linguacafe && docker-compose up -d"
+# Trigger: At startup, delay 2 minutes</pre>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-tip">
+      <div class="callout-icon">📖</div>
+      <div class="callout-body"><strong>Per-user accounts:</strong> LinguaCafe has a built-in user system. Each user has their own word knowledge database. SSO via Google OAuth can be added through Authentik forward auth.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🃏 Anki — Spaced Repetition Flashcards <span class="tag tag-native">FOSS</span></div>
+
+  <div class="card">
+    <div class="card-title">Architecture: AnkiWeb-Compatible Self-Hosted Server</div>
+    <p>The self-hosted option for Anki sync is <strong>anki-sync-server</strong> (official Anki project). It lets users sync their Anki decks to your server instead of ankiweb.net, with per-user progress stored locally.</p>
+    <p>Users still use the regular Anki desktop/mobile app — they just change the sync server URL to yours.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install anki-sync-server</strong>
+        <pre>pip install anki
+
+# Run the sync server:
+python -m anki.syncserver
+
+# It starts on port 8091 by default.
+# Set environment variable for data storage:
+ANKI_SYNC_PATH = D:\Server\AnkiSync</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create user accounts</strong>
+        <pre># Set via environment variables before starting:
+SYNC_USER1=alice:alicepassword
+SYNC_USER2=bob:bobpassword
+
+# Or use the newer config approach:
+# In a .env file or Windows environment variables</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run as a Windows service with NSSM</strong>
+        <pre>nssm install AnkiSync python "-m anki.syncserver"
+nssm set AnkiSync AppEnvironmentExtra "SYNC_USER1=alice:password ANKI_SYNC_PATH=D:\Server\AnkiSync"
+nssm start AnkiSync</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Configure Anki clients to use your server</strong>
+        <p>In the Anki desktop app: Tools → Preferences → Network → Self-hosted sync server → enter <code>http://[server-ip]:8091/</code>. Users log in with the username/password you created above.</p>
+        <p>For AnkiDroid (Android): Settings → Advanced → Custom sync server → same URL.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Anki Sync" dir=in action=allow protocol=TCP localport=8091</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">🃏</div>
+    <div class="callout-body"><strong>Adding language decks:</strong> Users download community decks from <a href="https://ankiweb.net/shared/decks/" target="_blank">ankiweb.net/shared/decks</a> into their local Anki app, then sync to your server. Popular decks: "Spanish 5000 Most Common Words," "Russian Core 2000," "Duolingo Spanish" etc. Once synced, their progress lives on your server.</div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌱 LibreLingo — Structured Courses <span class="tag tag-native">FOSS</span></div>
+
+  <div class="card">
+    <div class="card-title">What LibreLingo Is</div>
+    <p>LibreLingo is a Duolingo-like FOSS alternative. It serves structured language courses with exercises, listening practice, and progress tracking. The courses are community-created and the server is self-hostable.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install LibreLingo</strong>
+        <pre>pip install librelingo-tools librelingo-yaml-loader
+
+# Or run the web app directly:
+git clone https://github.com/LibreLingo/LibreLingo
+cd LibreLingo
+pip install -r requirements.txt
+python manage.py runserver 0.0.0.0:8092</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Add Spanish and Russian courses</strong>
+        <p>Download community course files from the LibreLingo course repository:</p>
+        <pre># Spanish for English speakers:
+git clone https://github.com/LibreLingo/Spanish-from-English
+
+# Russian for English speakers (check repo for current state):
+# https://github.com/LibreLingo/</pre>
+        <p>Note: LibreLingo is still growing — the Spanish course is the most complete. Russian is in development. Check current availability at <a href="https://librelingo.app" target="_blank">librelingo.app</a>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run as a service</strong>
+        <pre>nssm install LibreLingo python "manage.py runserver 0.0.0.0:8092"
+nssm set LibreLingo AppDirectory "D:\Server\LibreLingo"
+nssm start LibreLingo
+
+netsh advfirewall firewall add rule name="LibreLingo" dir=in action=allow protocol=TCP localport=8092</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>LibreLingo maturity:</strong> LibreLingo is actively developed but less mature than LinguaCafe. If the course content for Russian isn't ready yet, consider using <strong>Mnemosyne</strong> (another FOSS Anki-like) or simply relying on LinguaCafe + Anki for Russian until LibreLingo catches up.</div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🗺️ How the Three Tools Work Together</div>
+  <div class="card">
+    <table>
+      <tr><th>Tool</th><th>Best for</th><th>Languages</th></tr>
+      <tr><td>LinguaCafe</td><td>Reading comprehension, word acquisition from real texts</td><td>EN, ES, RU + 12 others</td></tr>
+      <tr><td>Anki</td><td>Vocabulary SRS review, memorizing grammar rules, user-curated decks</td><td>Any (user-supplied decks)</td></tr>
+      <tr><td>LibreLingo</td><td>Structured beginner courses, gamified exercises</td><td>ES (best), RU (in progress)</td></tr>
+    </table>
+    <p style="margin-top:10px">Typical learning flow: LibreLingo for structure → LinguaCafe to read real content → Anki to drill vocabulary that keeps slipping.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌐 Remote Access</div>
+  <div class="card">
+    <p>All three are web apps. Add them to your Caddyfile:</p>
+    <pre>languages.yourdomain.com {
+    reverse_proxy localhost:8090  # LinguaCafe
+}
+anki.yourdomain.com {
+    reverse_proxy localhost:8091  # Anki sync
+}
+lingo.yourdomain.com {
+    reverse_proxy localhost:8092  # LibreLingo
+}</pre>
+    <p>Or access all via Tailscale using internal ports directly.</p>
+  </div>
+</div>
+
+</body>
+</html>

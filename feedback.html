@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Feedback</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* ── Ticket board ── */
+  .ticket-board { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  @media(max-width:800px){ .ticket-board { grid-template-columns: 1fr 1fr; } }
+  @media(max-width:500px){ .ticket-board { grid-template-columns: 1fr; } }
+
+  .ticket-col { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 4px; padding: 10px; min-height: 200px; }
+  .col-header { font-family: 'Share Tech Mono', monospace; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+  .col-count { background: rgba(255,255,255,.08); border-radius: 8px; padding: 1px 6px; font-size: .6rem; }
+
+  .ticket {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 3px;
+    padding: 10px 12px; margin-bottom: 8px; cursor: pointer;
+    transition: border-color .2s;
+  }
+  .ticket:hover { border-color: rgba(200,168,75,.3); }
+  .ticket.unread { border-left: 3px solid var(--danger); }
+  .ticket.inprogress { border-left: 3px solid var(--warning, #e0b84b); }
+  .ticket.complete { border-left: 3px solid var(--success); opacity: .7; }
+  .ticket.invalid { border-left: 3px solid var(--text-dim); opacity: .5; }
+
+  .ticket-id { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--text-dim); margin-bottom: 4px; }
+  .ticket-user { font-weight: 700; font-size: .8rem; color: var(--text); }
+  .ticket-preview { font-size: .76rem; color: var(--text-dim); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ticket-date { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--text-dim); margin-top: 6px; }
+  .ticket-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+  .t-btn { font-family: 'Share Tech Mono', monospace; font-size: .58rem; padding: 2px 6px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); cursor: pointer; transition: all .15s; }
+  .t-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .t-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ── Detail modal ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #141820; border: 1px solid var(--border); border-radius: 6px; padding: 24px; max-width: 560px; width: 95%; max-height: 80vh; overflow-y: auto; }
+  .modal h3 { font-family: 'Cinzel', serif; color: var(--accent); margin-bottom: 14px; }
+  .modal-body { font-size: .88rem; color: var(--text); line-height: 1.7; white-space: pre-wrap; margin-bottom: 16px; }
+  .modal-close { float: right; background: transparent; border: 1px solid var(--border); color: var(--text-dim); padding: 4px 10px; border-radius: 2px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: .65rem; }
+  .modal-close:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ── Submit form (public-facing part, shown in public dashboard) ── */
+  .submit-note { background: rgba(78,205,196,.06); border: 1px solid rgba(78,205,196,.2); border-radius: 3px; padding: 10px 14px; font-size: .82rem; color: var(--accent3); margin-bottom: 18px; }
+
+  select.status-select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 3px 6px; border-radius: 2px; font-family: 'Share Tech Mono', monospace; font-size: .65rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">💬</div>
+  <div>
+    <h1>User Feedback</h1>
+    <div class="subtitle">// JIRA-Style Ticket Inbox · Unread · In Progress · Done //</div>
+    <p class="desc">Your users leave comments and requests; you manage them here with ticket statuses. New tickets are flagged with a notification badge on the tab.</p>
+  </div>
+</div>
+
+<div class="submit-note">
+  💡 Users submit feedback at <code>http://[server-ip]:9000/feedback.html</code> (the public monitor page). The form on that page posts to <code>tickets.json</code> which this page reads. No extra backend needed — pure JSON file.
+</div>
+
+<!-- Stats bar -->
+<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+  <div class="card" style="padding:10px 16px;flex:1;min-width:100px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:var(--danger)" id="count-unread">0</div>
+    <div style="font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.08em">UNREAD</div>
+  </div>
+  <div class="card" style="padding:10px 16px;flex:1;min-width:100px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:#e0b84b" id="count-inprogress">0</div>
+    <div style="font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.08em">IN PROGRESS</div>
+  </div>
+  <div class="card" style="padding:10px 16px;flex:1;min-width:100px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:var(--success)" id="count-complete">0</div>
+    <div style="font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.08em">COMPLETE</div>
+  </div>
+  <div class="card" style="padding:10px 16px;flex:1;min-width:100px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:var(--text-dim)" id="count-invalid">0</div>
+    <div style="font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;letter-spacing:.08em">INVALID</div>
+  </div>
+  <button onclick="loadTickets()" style="background:var(--bg3);border:1px solid var(--border);color:var(--accent);padding:8px 14px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.08em">⟳ Refresh</button>
+</div>
+
+<!-- Board -->
+<div class="ticket-board">
+  <div class="ticket-col">
+    <div class="col-header" style="color:var(--danger)">🔴 Unread <span class="col-count" id="badge-unread">0</span></div>
+    <div id="col-unread"></div>
+  </div>
+  <div class="ticket-col">
+    <div class="col-header" style="color:#e0b84b">🟡 In Progress <span class="col-count" id="badge-inprogress">0</span></div>
+    <div id="col-inprogress"></div>
+  </div>
+  <div class="ticket-col">
+    <div class="col-header" style="color:var(--success)">🟢 Complete <span class="col-count" id="badge-complete">0</span></div>
+    <div id="col-complete"></div>
+  </div>
+  <div class="ticket-col">
+    <div class="col-header" style="color:var(--text-dim)">⚫ Invalid <span class="col-count" id="badge-invalid">0</span></div>
+    <div id="col-invalid"></div>
+  </div>
+</div>
+
+<!-- Add test ticket (admin) -->
+<div class="section">
+  <div class="section-title">➕ Add Test Ticket (Admin)</div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <input id="t-user" placeholder="Username" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-family:'Raleway',sans-serif;font-size:.85rem">
+      <input id="t-subject" placeholder="Subject / title" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-family:'Raleway',sans-serif;font-size:.85rem">
+    </div>
+    <textarea id="t-body" placeholder="Feedback message…" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-family:'Raleway',sans-serif;font-size:.85rem;resize:vertical;margin-bottom:10px"></textarea>
+    <button onclick="addTicket()" style="background:rgba(200,168,75,.15);border:1px solid rgba(200,168,75,.3);color:var(--accent);padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.7rem">Add Ticket</button>
+  </div>
+</div>
+
+<!-- Setup instructions -->
+<div class="section">
+  <div class="section-title">⚙️ How to Set This Up (One-Time)</div>
+  <div class="card">
+    <div class="card-title">tickets.json — the backend</div>
+    <p>Create <code>D:\Server\Dashboard\tickets.json</code> with an empty array:</p>
+    <pre>[]</pre>
+    <p>In the public status page (<code>monitor-public.html</code>), a feedback form submits to a tiny Python endpoint that appends to this file:</p>
+    <pre># In your stats_server.py (from the Dashboard tab), add:
+import json, uuid
+from datetime import datetime
+
+@app.route('/api/feedback', methods=['POST'])
+def feedback():
+    data = request.json
+    tickets = []
+    try:
+        with open('D:/Server/Dashboard/tickets.json') as f:
+            tickets = json.load(f)
+    except: pass
+
+    ticket = {
+        'id':      'TKT-' + str(len(tickets)+1).zfill(4),
+        'user':    data.get('user', 'anonymous'),
+        'subject': data.get('subject', '(no subject)')[:100],
+        'body':    data.get('body', '')[:2000],
+        'status':  'unread',
+        'date':    datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'ip':      request.remote_addr
+    }
+    tickets.append(ticket)
+    with open('D:/Server/Dashboard/tickets.json','w') as f:
+        json.dump(tickets, f, indent=2)
+    return jsonify({'ok': True, 'id': ticket['id']})</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Public feedback form (add to monitor-public.html)</div>
+    <pre>&lt;form onsubmit="submitFeedback(event)" style="margin-top:24px"&gt;
+  &lt;input name="user" placeholder="Your username" required&gt;
+  &lt;input name="subject" placeholder="Subject" required&gt;
+  &lt;textarea name="body" placeholder="Your message…" rows="4"&gt;&lt;/textarea&gt;
+  &lt;button type="submit"&gt;Send Feedback&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+async function submitFeedback(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  await fetch('http://[server-ip]:9001/api/feedback', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(Object.fromEntries(fd))
+  });
+  alert('Feedback sent! Thanks.');
+  e.target.reset();
+}
+&lt;/script&gt;</pre>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕ Close</button>
+    <div class="ticket-id" id="modal-id"></div>
+    <h3 id="modal-subject"></h3>
+    <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:12px">
+      From: <span id="modal-user" style="color:var(--accent2)"></span> &nbsp;·&nbsp;
+      <span id="modal-date"></span> &nbsp;·&nbsp;
+      IP: <span id="modal-ip" style="font-family:'Share Tech Mono',monospace"></span>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="t-btn" onclick="setStatus(currentTicket,'unread')">🔴 Unread</button>
+      <button class="t-btn" onclick="setStatus(currentTicket,'inprogress')">🟡 In Progress</button>
+      <button class="t-btn" onclick="setStatus(currentTicket,'complete')">🟢 Complete</button>
+      <button class="t-btn" onclick="setStatus(currentTicket,'invalid')">⚫ Invalid</button>
+      <button class="t-btn danger" onclick="deleteTicket(currentTicket)">🗑 Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let tickets = [];
+let currentTicket = null;
+
+async function loadTickets() {
+  try {
+    const r = await fetch('tickets.json?t=' + Date.now());
+    tickets = await r.json();
+  } catch(e) {
+    // Use demo data if file not found
+    tickets = [
+      { id:'TKT-0001', user:'alice', subject:'Audiobooks not loading', body:'Hi! The audiobooks page gives me a 404 when I try to open chapter 3 of my current book. Started yesterday.', status:'unread', date:'2025-03-15 14:22', ip:'192.168.1.42' },
+      { id:'TKT-0002', user:'bob', subject:'Can you add more Pokémon games?', body:'Would love to have Gen 6 (X/Y) added if possible! Also the GBA games load really fast now, great work.', status:'inprogress', date:'2025-03-14 09:15', ip:'192.168.1.55' },
+      { id:'TKT-0003', user:'charlie', subject:'Minecraft lag last night', body:'Server was really laggy around 10pm, kept rubber-banding. Just FYI.', status:'complete', date:'2025-03-13 22:10', ip:'192.168.1.61' },
+    ];
+  }
+  renderBoard();
+}
+
+function renderBoard() {
+  const cols = { unread: [], inprogress: [], complete: [], invalid: [] };
+  tickets.forEach(t => { if (cols[t.status]) cols[t.status].push(t); });
+
+  for (const [status, list] of Object.entries(cols)) {
+    document.getElementById('col-' + status).innerHTML = list.map(t => `
+      <div class="ticket ${t.status}" onclick="openModal('${t.id}')">
+        <div class="ticket-id">${t.id}</div>
+        <div class="ticket-user">${esc(t.user)}</div>
+        <div class="ticket-preview">${esc(t.subject)}</div>
+        <div class="ticket-date">${t.date}</div>
+      </div>
+    `).join('');
+    document.getElementById('badge-' + status).textContent = list.length;
+    document.getElementById('count-' + status).textContent = list.length;
+  }
+}
+
+function openModal(id) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  currentTicket = id;
+  document.getElementById('modal-id').textContent = t.id;
+  document.getElementById('modal-subject').textContent = t.subject;
+  document.getElementById('modal-user').textContent = t.user;
+  document.getElementById('modal-date').textContent = t.date;
+  document.getElementById('modal-ip').textContent = t.ip || '—';
+  document.getElementById('modal-body').textContent = t.body;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  currentTicket = null;
+}
+
+function setStatus(id, status) {
+  const t = tickets.find(x => x.id === id);
+  if (t) { t.status = status; saveTickets(); renderBoard(); closeModal(); }
+}
+
+function deleteTicket(id) {
+  if (!confirm('Delete this ticket permanently?')) return;
+  tickets = tickets.filter(x => x.id !== id);
+  saveTickets(); renderBoard(); closeModal();
+}
+
+function addTicket() {
+  const user = document.getElementById('t-user').value.trim() || 'admin';
+  const subject = document.getElementById('t-subject').value.trim() || '(no subject)';
+  const body = document.getElementById('t-body').value.trim();
+  const id = 'TKT-' + String(tickets.length + 1).padStart(4, '0');
+  const now = new Date().toISOString().slice(0,16).replace('T',' ');
+  tickets.unshift({ id, user, subject, body, status: 'unread', date: now, ip: 'local' });
+  saveTickets(); renderBoard();
+  document.getElementById('t-user').value='';
+  document.getElementById('t-subject').value='';
+  document.getElementById('t-body').value='';
+}
+
+function saveTickets() {
+  // POST to local stats/control server to persist to disk
+  fetch('http://localhost:9001/api/tickets/save', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(tickets)
+  }).catch(() => {
+    // Fallback: save to localStorage as backup
+    localStorage.setItem('homeserver_tickets', JSON.stringify(tickets));
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+loadTickets();
+</script>
+</body>
+</html>

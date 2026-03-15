@@ -10,14 +10,14 @@
 <div class="page-header">
   <div class="page-icon">⛏️</div>
   <div>
-    <h1>Automated Minecraft Server</h1>
-    <div class="subtitle">// Auto-Start · Scheduled Shutdown 2–3am · Always Running //</div>
-    <p class="desc">A Minecraft server that starts automatically when Windows boots, shuts down gracefully at 2:00am, and restarts at 3:00am — all without any manual intervention.</p>
+    <h1>Minecraft Servers</h1>
+    <div class="subtitle">// Vanilla · Modded · Auto-Start · Shutdown 2–3am //</div>
+    <p class="desc">Two separate Minecraft servers: a clean vanilla server on port 25565 and a modded server (Forge or Fabric) on port 25566. Both auto-start on boot and use the same 2–3am maintenance window.</p>
   </div>
 </div>
 
 <div class="v1-banner">
-  🐉 V1 Goal: Minecraft server runs as a Windows scheduled task, restarts on boot, and a separate task handles the 2–3am maintenance window automatically.
+  🐉 V1 Goal: Both servers run as scheduled tasks, auto-start on boot, and share the nightly 2–3am maintenance window. The modded server uses a separate port and world folder.
 </div>
 
 <!-- Server setup -->
@@ -57,9 +57,99 @@ timeout /t 10</pre>
   </div>
 
   <div class="card">
-    <div class="card-title">Step 4: Open Firewall for Minecraft</div>
-    <pre>netsh advfirewall firewall add rule name="Minecraft Server" dir=in action=allow protocol=TCP localport=25565
-netsh advfirewall firewall add rule name="Minecraft Server UDP" dir=in action=allow protocol=UDP localport=25565</pre>
+    <div class="card-title">Step 4: Open Firewall — Vanilla (port 25565)</div>
+    <pre>netsh advfirewall firewall add rule name="Minecraft Vanilla" dir=in action=allow protocol=TCP localport=25565
+netsh advfirewall firewall add rule name="Minecraft Vanilla UDP" dir=in action=allow protocol=UDP localport=25565</pre>
+  </div>
+</div>
+
+<hr>
+
+<!-- Modded server -->
+<div class="section">
+  <div class="section-title">🔧 Modded Server (Port 25566)</div>
+
+  <div class="card">
+    <div class="card-title">Folder Structure — keep vanilla and modded separate</div>
+    <pre>D:\Minecraft\
+  ├── vanilla\        ← port 25565 (this server)
+  │   ├── server.jar
+  │   ├── start.bat
+  │   └── world\
+  └── modded\         ← port 25566
+      ├── mods\
+      ├── start.bat
+      └── world\</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option A: Forge (most mods) <span class="tag tag-native">RECOMMENDED</span></div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Download the Forge installer for your MC version</strong>
+          <p>Go to <a href="https://files.minecraftforge.net" target="_blank">files.minecraftforge.net</a>, pick your Minecraft version → "Installer." Run it:</p>
+          <pre>java -jar forge-1.20.1-47.3.0-installer.jar --installServer D:\Minecraft\modded\</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Accept EULA in modded folder</strong>
+          <p>Run the server once to generate <code>eula.txt</code>, then edit it to <code>eula=true</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create <code>D:\Minecraft\modded\start.bat</code> — note different port</strong>
+          <pre>@echo off
+title Minecraft Modded Server (Forge)
+cd /d D:\Minecraft\modded
+java -Xmx8G -Xms2G @user_jvm_args.txt ^
+  @libraries/net/minecraftforge/forge/1.20.1-47.3.0/unix_args.txt nogui ^
+  -- --port 25566
+echo Server stopped.
+timeout /t 10</pre>
+          <p>The <code>--port 25566</code> keeps it from conflicting with vanilla. Players connect to <code>[your-ip]:25566</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Drop mods into D:\Minecraft\modded\mods\</strong>
+          <p>Download mods from <a href="https://modrinth.com" target="_blank">modrinth.com</a> or CurseForge. Remember: all players must have the same client-side mods. Server-side-only mods (like Lithium, Chunky) don't need to be installed by players.</p>
+          <div class="callout callout-tip">
+            <div class="callout-icon">⚡</div>
+            <div class="callout-body"><strong>Essential performance mods for any server:</strong> Lithium (server-side, no client install needed), FerriteCore (reduces RAM usage), Starlight (faster chunk lighting). These alone can double server performance.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Option B: Fabric (lighter, better for optimization mods)</div>
+    <pre># Download installer from fabricmc.net
+java -jar fabric-installer.jar server -mcversion 1.20.1 -dir D:\Minecraft\modded\
+
+# start.bat for Fabric:
+@echo off
+title Minecraft Modded (Fabric)
+cd /d D:\Minecraft\modded
+java -Xmx8G -Xms2G -jar fabric-server-launch.jar nogui -- --port 25566</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Enable RCON on Modded Server (different port)</div>
+    <p>In <code>D:\Minecraft\modded\server.properties</code>:</p>
+    <pre>server-port=25566
+enable-rcon=true
+rcon.password=modded_rcon_password
+rcon.port=25576      ← different from vanilla's 25575!</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Open Firewall for Modded</div>
+    <pre>netsh advfirewall firewall add rule name="Minecraft Modded" dir=in action=allow protocol=TCP localport=25566
+netsh advfirewall firewall add rule name="Minecraft Modded UDP" dir=in action=allow protocol=UDP localport=25566</pre>
   </div>
 </div>
 
@@ -67,62 +157,41 @@ netsh advfirewall firewall add rule name="Minecraft Server UDP" dir=in action=al
 
 <!-- Auto-start on boot -->
 <div class="section">
-  <div class="section-title">🚀 Auto-Start on Windows Boot</div>
+  <div class="section-title">🚀 Auto-Start Both Servers on Windows Boot</div>
 
   <div class="card">
-    <div class="card-title">Method: Windows Task Scheduler (Most Reliable)</div>
-    <p>Using Task Scheduler means the server starts even without anyone logging in, and it runs with proper permissions.</p>
+    <div class="card-title">Create separate Task Scheduler tasks for each server</div>
+    <p>Both servers get their own startup task. Stagger the delays so they don't both try to start at the same second.</p>
 
     <div class="steps">
       <div class="step">
         <div class="step-content">
           <strong>Open Task Scheduler</strong>
-          <p>Press <code>Win + R</code> → type <code>taskschd.msc</code> → Enter.</p>
+          <p>Press <code>Win + R</code> → type <code>taskschd.msc</code> → Enter. Use "Create Task" (not Basic Task) for each.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
-          <strong>Create a new task (not basic task)</strong>
-          <p>Action menu → "Create Task" (not "Create Basic Task").</p>
+          <strong>Vanilla server task settings</strong>
+          <pre>Name:          Minecraft Vanilla - Auto Start
+General:       ☑ Run whether user is logged on or not
+               ☑ Run with highest privileges
+Trigger:       At startup → Delay 1 minute
+Action:        D:\Minecraft\vanilla\start.bat
+Start in:      D:\Minecraft\vanilla\
+Settings:      ☑ Restart on failure every 1 min, up to 3 times</pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
-          <strong>General tab settings</strong>
-          <pre>Name: Minecraft Server - Auto Start
-☑ Run whether user is logged on or not
-☑ Run with highest privileges
-Configure for: Windows 10</pre>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-content">
-          <strong>Triggers tab → New</strong>
-          <pre>Begin the task: At startup
-Delay task for: 1 minute (gives Windows time to fully boot)
-☑ Enabled</pre>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-content">
-          <strong>Actions tab → New</strong>
-          <pre>Action: Start a program
-Program/script: D:\Minecraft\server\start.bat
-Start in: D:\Minecraft\server\</pre>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-content">
-          <strong>Conditions tab</strong>
-          <p>Uncheck "Start the task only if the computer is on AC power" (if this is a desktop it doesn't matter, but good practice).</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-content">
-          <strong>Settings tab</strong>
-          <pre>☑ Allow task to be run on demand
-☑ If the task fails, restart every: 1 minute
-Attempt to restart up to: 3 times</pre>
+          <strong>Modded server task settings</strong>
+          <pre>Name:          Minecraft Modded - Auto Start
+General:       ☑ Run whether user is logged on or not
+               ☑ Run with highest privileges
+Trigger:       At startup → Delay 2 minutes   ← 1 min after vanilla
+Action:        D:\Minecraft\modded\start.bat
+Start in:      D:\Minecraft\modded\
+Settings:      ☑ Restart on failure every 1 min, up to 3 times</pre>
         </div>
       </div>
     </div>
@@ -133,66 +202,80 @@ Attempt to restart up to: 3 times</pre>
 
 <!-- 2am shutdown / 3am restart -->
 <div class="section">
-  <div class="section-title">🌙 Scheduled 2am Shutdown &amp; 3am Restart</div>
+  <div class="section-title">🌙 Scheduled 2am Shutdown &amp; 3am Restart (Both Servers)</div>
 
   <div class="card">
     <div class="card-title">The Strategy</div>
-    <p>We create two scheduled tasks: one that gracefully stops the server at 2:00am (using RCON or taskkill), and one that starts it back up at 3:00am.</p>
-    <div class="callout callout-tip">
-      <div class="callout-icon">⚔️</div>
-      <div class="callout-body"><strong>Graceful vs forceful shutdown:</strong> The best approach is to use RCON (Remote Console) to send a <code>/stop</code> command to the server, which saves all chunks and disconnects players cleanly. If RCON isn't set up, we use <code>taskkill</code> as a fallback, but this can cause world corruption if the server is writing data.</div>
-    </div>
+    <p>One shutdown script handles both servers — it sends a 5-minute warning to both, waits, then stops them both. One restart script starts both back up. RCON sends the graceful <code>/stop</code> command to each server on their separate RCON ports.</p>
   </div>
 
   <div class="card">
-    <div class="card-title">Part A: Enable RCON on Your Server</div>
-    <p>In <code>D:\Minecraft\server\server.properties</code>, set:</p>
-    <pre>enable-rcon=true
-rcon.password=your_rcon_password_here
-rcon.port=25575</pre>
-    <p>Restart the server for changes to take effect.</p>
+    <div class="card-title">Part A: Enable RCON (already done above for both servers)</div>
+    <p>Vanilla: RCON port <strong>25575</strong>, password <code>vanilla_rcon_pass</code><br>
+    Modded: RCON port <strong>25576</strong>, password <code>modded_rcon_pass</code></p>
+    <p>Install <strong>mcrcon</strong> from <a href="https://github.com/Tiiffi/mcrcon/releases" target="_blank">github.com/Tiiffi/mcrcon</a> → extract to <code>D:\Minecraft\tools\</code>.</p>
   </div>
 
   <div class="card">
-    <div class="card-title">Part B: Create the Shutdown Script</div>
-    <p>Install <strong>mcrcon</strong> (a tiny RCON client) — download from <a href="https://github.com/Tiiffi/mcrcon/releases" target="_blank">github.com/Tiiffi/mcrcon</a>, extract to <code>D:\Minecraft\tools\</code>.</p>
-    <p>Create <code>D:\Minecraft\shutdown.bat</code>:</p>
+    <div class="card-title">Part B: Combined Shutdown Script</div>
+    <p>Create <code>D:\Minecraft\shutdown_all.bat</code>:</p>
     <pre>@echo off
-echo Sending shutdown warning to players...
-D:\Minecraft\tools\mcrcon.exe -H localhost -P 25575 -p your_rcon_password_here "say Server shutting down in 5 minutes for maintenance!"
+echo [%time%] Sending 5-minute warnings to both servers...
+
+rem Warn vanilla server
+D:\Minecraft\tools\mcrcon.exe -H localhost -P 25575 -p vanilla_rcon_pass "say [VANILLA] Server shutting down in 5 minutes for maintenance!"
+
+rem Warn modded server  
+D:\Minecraft\tools\mcrcon.exe -H localhost -P 25576 -p modded_rcon_pass "say [MODDED] Server shutting down in 5 minutes for maintenance!"
+
 timeout /t 240
-D:\Minecraft\tools\mcrcon.exe -H localhost -P 25575 -p your_rcon_password_here "say Server shutting down in 1 minute!"
+
+D:\Minecraft\tools\mcrcon.exe -H localhost -P 25575 -p vanilla_rcon_pass "say Server shutting down in 1 minute!"
+D:\Minecraft\tools\mcrcon.exe -H localhost -P 25576 -p modded_rcon_pass "say Server shutting down in 1 minute!"
+
 timeout /t 60
-D:\Minecraft\tools\mcrcon.exe -H localhost -P 25575 -p your_rcon_password_here "stop"
-echo Shutdown command sent.
+
+echo [%time%] Stopping both servers...
+D:\Minecraft\tools\mcrcon.exe -H localhost -P 25575 -p vanilla_rcon_pass "stop"
+D:\Minecraft\tools\mcrcon.exe -H localhost -P 25576 -p modded_rcon_pass "stop"
+
 timeout /t 30
-echo Done.</pre>
-    <p>Create <code>D:\Minecraft\start_server.bat</code> (used by the restart task):</p>
+
+rem Backup worlds
+echo [%time%] Backing up worlds...
+set DATE_STR=%date:~-4,4%%date:~-7,2%%date:~0,2%
+robocopy "D:\Minecraft\vanilla\world"  "E:\Backups\Minecraft\vanilla\world_%DATE_STR%" /E /NP
+robocopy "D:\Minecraft\modded\world"   "E:\Backups\Minecraft\modded\world_%DATE_STR%"  /E /NP
+
+echo [%time%] Shutdown and backup complete.
+</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Part C: Combined Restart Script</div>
+    <p>Create <code>D:\Minecraft\start_all.bat</code>:</p>
     <pre>@echo off
-cd /d D:\Minecraft\server
-start "Minecraft Server" java -Xmx6G -Xms2G -jar server.jar nogui</pre>
+echo [%time%] Starting vanilla server...
+start "Minecraft Vanilla" /D "D:\Minecraft\vanilla" cmd /c "java -Xmx6G -Xms2G -jar server.jar nogui"
+
+timeout /t 30
+
+echo [%time%] Starting modded server...
+start "Minecraft Modded" /D "D:\Minecraft\modded" cmd /c "start.bat"
+
+echo [%time%] Both servers started.</pre>
   </div>
 
   <div class="card">
-    <div class="card-title">Part C: Create the 2am Shutdown Task</div>
-    <p>In Task Scheduler → Create Task:</p>
-    <pre>Name: Minecraft - Nightly Shutdown
-Trigger: Daily at 1:55 AM (sends warning before 2am)
-Action: D:\Minecraft\shutdown.bat
-Run whether logged on or not: ☑
-Run with highest privileges: ☑</pre>
-  </div>
+    <div class="card-title">Part D: Scheduled Tasks</div>
+    <pre>rem Shutdown task (fires at 1:55am — gives 5min warning before 2am):
+schtasks /create /tn "Minecraft - Nightly Shutdown" /sc daily /st 01:55 /tr "D:\Minecraft\shutdown_all.bat" /ru SYSTEM /f
 
-  <div class="card">
-    <div class="card-title">Part D: Create the 3am Restart Task</div>
-    <pre>Name: Minecraft - Nightly Restart
-Trigger: Daily at 3:00 AM
-Action: D:\Minecraft\start_server.bat
-Run whether logged on or not: ☑
-Run with highest privileges: ☑</pre>
+rem Restart task (fires at 3:00am):
+schtasks /create /tn "Minecraft - Nightly Restart" /sc daily /st 03:00 /tr "D:\Minecraft\start_all.bat" /ru SYSTEM /f</pre>
     <div class="callout callout-warn">
       <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>Important:</strong> Task Scheduler tasks set to "Run whether user is logged on or not" won't open a visible console window. To see server output, log in and check the server window, or add logging to your start.bat: add <code>&gt;&gt; D:\Minecraft\logs\startup.log 2&gt;&amp;1</code> to the end of the java command.</div>
+      <div class="callout-body">Tasks set to "Run whether user is logged on or not" (SYSTEM) won't show a console window. To see output, add <code>&gt;&gt; D:\Minecraft\logs\shutdown.log 2&gt;&amp;1</code> at the end of each echo line in the bat files, or check Event Viewer → Task Scheduler after a run.</div>
     </div>
   </div>
 </div>

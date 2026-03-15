@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Private AI</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🤖</div>
+  <div>
+    <h1>Private AI — Ollama</h1>
+    <div class="subtitle">// 100% Local · No Logs · No Internet · Claude-like Models //</div>
+    <p class="desc">Run large language models entirely on your own hardware. No data ever leaves your server. Slow compared to cloud AI, but completely private. Accessible from any device via a web UI.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Ollama running as a Windows service, serving a model like Llama 3 or Mistral, with Open WebUI providing a polished chat interface accessible from any browser on your network.</div>
+
+<div class="section">
+  <div class="section-title">🧠 Which Model is Closest to Claude?</div>
+  <div class="card">
+    <p>Claude is a proprietary model — there's no open-source clone of it. But the closest freely available models in terms of reasoning quality, instruction-following, and conversational style are:</p>
+    <table>
+      <tr><th>Model</th><th>Size</th><th>VRAM needed</th><th>RAM (no GPU)</th><th>Claude similarity</th></tr>
+      <tr><td><strong>Llama 3.1 70B</strong></td><td>70B params</td><td>48GB VRAM</td><td>~48GB RAM</td><td>⭐⭐⭐⭐ Closest overall</td></tr>
+      <tr><td><strong>Llama 3.1 8B</strong></td><td>8B params</td><td>8GB VRAM</td><td>~8GB RAM</td><td>⭐⭐⭐ Good, fast</td></tr>
+      <tr><td><strong>Mistral 7B</strong></td><td>7B params</td><td>6GB VRAM</td><td>~8GB RAM</td><td>⭐⭐⭐ Excellent for size</td></tr>
+      <tr><td><strong>Qwen2.5 72B</strong></td><td>72B params</td><td>48GB VRAM</td><td>~48GB RAM</td><td>⭐⭐⭐⭐ Top tier reasoning</td></tr>
+      <tr><td><strong>Phi-3 Mini</strong></td><td>3.8B params</td><td>4GB VRAM</td><td>~6GB RAM</td><td>⭐⭐ Surprisingly capable for size</td></tr>
+    </table>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Practical recommendation:</strong> If your gaming PC has an Nvidia GPU with 8GB+ VRAM, run <strong>Llama 3.1 8B</strong> — it runs fast on the GPU and gives good results. If you have 16GB+ VRAM (RTX 3090, 4090, etc.), try <strong>Llama 3.1 70B quantized (Q4)</strong> — much smarter, still runs at usable speed. Without a good GPU, any model will be very slow (CPU-only).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">About Speed</div>
+    <p>On a mid-range gaming GPU (RTX 3060/3070), expect:</p>
+    <ul style="margin:6px 0 0 18px">
+      <li><strong>7B/8B models:</strong> 20–60 tokens/second — fast, usable in real time</li>
+      <li><strong>13B models:</strong> 10–25 tokens/second — a bit slower, still fine</li>
+      <li><strong>70B models (quantized):</strong> 2–8 tokens/second — noticeably slow but functional</li>
+      <li><strong>CPU only:</strong> 1–5 tokens/second for any model — usable for short prompts only</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Step 1: Install Ollama <span class="tag tag-native">FOSS · Windows Native</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download and install Ollama</strong>
+        <p>From <a href="https://ollama.com/download/windows" target="_blank">ollama.com/download/windows</a>. The Windows installer registers Ollama as a system service that starts automatically. After install, Ollama runs at <code>http://localhost:11434</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Pull your first model</strong>
+        <p>Open a PowerShell or Command Prompt window:</p>
+        <pre># Recommended first model (8GB VRAM / 8GB RAM):
+ollama pull llama3.1
+
+# If you have 16GB+ VRAM, try the bigger quantized version:
+ollama pull llama3.1:70b-instruct-q4_K_M
+
+# Ultra-lightweight (works on anything with 4GB RAM):
+ollama pull phi3
+
+# Great instruction-following (6GB VRAM):
+ollama pull mistral</pre>
+        <p>Models are stored in <code>C:\Users\[you]\.ollama\models\</code>. They can be moved to a different drive — see below.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Test it from the command line</strong>
+        <pre>ollama run llama3.1
+# You'll get a prompt: >>> 
+# Type anything, hit Enter. Type /bye to exit.</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Move models to a larger drive (optional)</strong>
+        <p>Models are large (4–40GB each). Move the storage to your big internal drive:</p>
+        <pre># Set environment variable OLLAMA_MODELS before running Ollama:
+# System Properties → Environment Variables → New System Variable:
+# Name:  OLLAMA_MODELS
+# Value: D:\AI\OllamaModels
+
+# Then re-pull your models — they'll download to the new location.
+# Or move the existing folder and set the variable.</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Allow network access (for web UI and remote devices)</strong>
+        <p>By default Ollama only listens on localhost. Set it to accept connections from your LAN:</p>
+        <pre># System Properties → Environment Variables → New System Variable:
+# Name:  OLLAMA_HOST
+# Value: 0.0.0.0:11434
+
+# Then restart the Ollama service:
+# Task Manager → Services → Ollama → Restart
+# Or: net stop ollama && net start ollama</pre>
+        <pre># Open firewall:
+netsh advfirewall firewall add rule name="Ollama" dir=in action=allow protocol=TCP localport=11434</pre>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Security:</strong> Don't expose port 11434 to the internet — it has no built-in auth. Access it via Tailscale or put the Open WebUI behind Caddy with authentication (see below).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌐 Step 2: Open WebUI — Chat Interface <span class="tag tag-native">FOSS</span></div>
+
+  <div class="card">
+    <div class="card-title">What Open WebUI Is</div>
+    <p>Open WebUI is a polished, ChatGPT-like web interface for Ollama. It runs in any browser, supports multiple models, has conversation history, file uploads, system prompt customization, and per-user accounts. It's the main way users on your server will interact with the AI.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Node.js 20 LTS (if not already)</strong>
+        <p>From <a href="https://nodejs.org" target="_blank">nodejs.org</a>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install Open WebUI via pip (Python)</strong>
+        <pre>pip install open-webui
+
+# Run it:
+open-webui serve --port 3000</pre>
+        <p>Access at <code>http://localhost:3000</code>. On first launch, create an admin account. It auto-detects Ollama at <code>localhost:11434</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run Open WebUI as a Windows Service</strong>
+        <pre># Using NSSM:
+nssm install OpenWebUI "python" "-m open_webui serve --port 3000"
+nssm set OpenWebUI AppEnvironmentExtra OLLAMA_BASE_URL=http://localhost:11434
+nssm start OpenWebUI</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Open WebUI" dir=in action=allow protocol=TCP localport=3000</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">🤖</div>
+    <div class="callout-body"><strong>Open WebUI features worth knowing:</strong> It supports multiple users with separate conversation histories. It can be set to require login. You can create custom "Model" presets with specific system prompts (e.g. a "Research Assistant" persona with certain instructions baked in). It also supports RAG (Retrieval Augmented Generation) — you can upload documents and the AI will answer questions about them.</div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔒 Privacy Confirmation</div>
+  <div class="card">
+    <div class="card-title">What "No Logs" Actually Means Here</div>
+    <ul style="margin:0 0 0 18px">
+      <li><strong>Ollama itself</strong> does not log conversations or send any data to external servers</li>
+      <li><strong>Open WebUI</strong> stores conversation history in a local SQLite database on your server — no external calls</li>
+      <li><strong>The model</strong> runs entirely in RAM/VRAM on your machine — inference is 100% local</li>
+      <li><strong>Zero internet required</strong> after the initial model download — you can firewall the entire thing after setup</li>
+    </ul>
+    <p style="margin-top:8px">To verify: block Ollama and Open WebUI in Windows Firewall after setup and they still work perfectly — because they only talk to each other on localhost.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🌍 Remote Access</div>
+  <div class="card">
+    <p>The cleanest approach: put Open WebUI behind Caddy with a login requirement, exposed via Tailscale or Cloudflare Tunnel. Users go to <code>ai.yourdomain.com</code>, log in, and chat — all traffic stays within your infrastructure.</p>
+    <pre># Caddyfile entry:
+ai.yourdomain.com {
+    reverse_proxy localhost:3000
+    # Open WebUI has its own login — no need for Caddy basicauth
+}</pre>
+    <p>Open WebUI's own user accounts system is sufficient for access control — users must have an account to use it.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📦 Model Storage Estimates</div>
+  <div class="card">
+    <table>
+      <tr><th>Model</th><th>Storage</th><th>Notes</th></tr>
+      <tr><td>Llama 3.1 8B (Q4)</td><td>~4.7 GB</td><td>Good default</td></tr>
+      <tr><td>Llama 3.1 70B (Q4)</td><td>~40 GB</td><td>Best quality, needs big VRAM</td></tr>
+      <tr><td>Mistral 7B (Q4)</td><td>~4.1 GB</td><td>Fast, great instruction following</td></tr>
+      <tr><td>Phi-3 Mini (Q4)</td><td>~2.2 GB</td><td>Runs anywhere</td></tr>
+      <tr><td>Qwen 2.5 14B (Q4)</td><td>~8.2 GB</td><td>Great balance of size/quality</td></tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

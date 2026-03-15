@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Offline Wiki</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📖</div>
+  <div>
+    <h1>Offline Wikipedia &amp; WikiHow</h1>
+    <div class="subtitle">// Kiwix · Local Hosting · One-Click Updates //</div>
+    <p class="desc">Host your own offline copies of Wikipedia (English) and WikiHow using Kiwix — a FOSS offline wiki reader. Accessible from any browser on your network.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Kiwix server running on port 8888, serving both Wikipedia and WikiHow from your local drive. Accessible from phones, TVs, tablets — no internet needed. One-command updates.</div>
+
+<div class="section">
+  <div class="section-title">📦 Storage Size Estimates</div>
+  <div class="card">
+    <table>
+      <tr><th>Content</th><th>Without Images</th><th>With Images</th><th>Notes</th></tr>
+      <tr><td><strong>Wikipedia (English)</strong></td><td>~22 GB</td><td>~90 GB</td><td>All 6.7M+ articles. No-images is very usable.</td></tr>
+      <tr><td><strong>Wikipedia (English, mini)</strong></td><td>~1 GB</td><td>~8 GB</td><td>Top articles only — good starting point</td></tr>
+      <tr><td><strong>WikiHow</strong></td><td>~3 GB</td><td>~25 GB</td><td>Images help a lot for how-to guides</td></tr>
+      <tr><td><strong>Both (no images)</strong></td><td>~25 GB total</td><td>—</td><td>Fits on a single 14TB shucked drive easily</td></tr>
+      <tr><td><strong>Both (with images)</strong></td><td>—</td><td>~115 GB total</td><td>Recommend a dedicated partition</td></tr>
+    </table>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Recommendation:</strong> Start with Wikipedia without images (22 GB) — the text is everything you need for reference. Add WikiHow with images (25 GB) since the how-to photos are actually useful. Total ~47 GB, very manageable.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">⚙️ Setup with Kiwix <span class="tag tag-native">FOSS · Windows Native</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Kiwix Tools (the server component)</strong>
+        <p>Go to <a href="https://download.kiwix.org/release/kiwix-tools/" target="_blank">download.kiwix.org/release/kiwix-tools/</a> and download the Windows 64-bit zip (e.g. <code>kiwix-tools_win-x86_64.zip</code>). Extract to <code>D:\Server\Kiwix\</code>.</p>
+        <p>You'll mainly use <code>kiwix-serve.exe</code> — it's a self-contained web server for ZIM files.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create a ZIM storage folder</strong>
+        <pre>D:\Server\Kiwix\zims\</pre>
+        <p>ZIM files are Kiwix's compressed archive format. One file = one entire website.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Wikipedia ZIM</strong>
+        <p>Browse the Kiwix library at <a href="https://library.kiwix.org" target="_blank">library.kiwix.org</a> and search for "Wikipedia English." Download to your ZIM folder. Options:</p>
+        <pre># Option A: Download via kiwix-manage (command line):
+kiwix-manage.exe D:\Server\Kiwix\library.xml add "https://download.kiwix.org/zim/wikipedia_en_all_nopic_2024-11.zim"
+
+# Option B: Direct download (large file — use a download manager):
+# wikipedia_en_all_nopic_YYYY-MM.zim  ← no pictures (~22GB)
+# wikipedia_en_all_maxi_YYYY-MM.zim   ← with pictures (~90GB)</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Download WikiHow ZIM</strong>
+        <pre># Search library.kiwix.org for "wikihow"
+# Download: wikihow_en_all_YYYY-MM.zim (~25GB with images)</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Start kiwix-serve pointing at your ZIM folder</strong>
+        <pre>D:\Server\Kiwix\kiwix-serve.exe --port=8888 --library D:\Server\Kiwix\library.xml
+
+# Or simply point at the folder (serves all ZIM files in it):
+D:\Server\Kiwix\kiwix-serve.exe --port=8888 D:\Server\Kiwix\zims\</pre>
+        <p>Open <code>http://localhost:8888</code> — you'll see a library index with all your ZIM files listed. Click any to browse.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run Kiwix as a Windows Service (NSSM)</strong>
+        <pre>nssm install Kiwix "D:\Server\Kiwix\kiwix-serve.exe" "--port=8888 D:\Server\Kiwix\zims\"
+nssm start Kiwix</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Kiwix" dir=in action=allow protocol=TCP localport=8888</pre>
+        <p>Access from any device: <code>http://[server-ip]:8888</code></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🔄 One-Command Updates</div>
+  <div class="card">
+    <div class="card-title">Update Script — updates both ZIM files</div>
+    <p>Kiwix releases updated ZIM snapshots monthly. Create <code>D:\Server\Kiwix\update.ps1</code>:</p>
+    <pre># update.ps1 — downloads latest ZIM files, replaces old ones
+$zimDir = "D:\Server\Kiwix\zims"
+$baseUrl = "https://download.kiwix.org/zim"
+
+# Latest Wikipedia no-pics (check current filename at library.kiwix.org)
+$wikiUrl  = "$baseUrl/wikipedia/wikipedia_en_all_nopic_2024-11.zim"
+$wikihowUrl = "$baseUrl/wikihow/wikihow_en_all_2024-11.zim"
+
+Write-Host "Stopping Kiwix service..."
+nssm stop Kiwix
+
+Write-Host "Downloading Wikipedia..."
+Invoke-WebRequest -Uri $wikiUrl -OutFile "$zimDir\wikipedia_en.zim" -Resume
+
+Write-Host "Downloading WikiHow..."
+Invoke-WebRequest -Uri $wikihowUrl -OutFile "$zimDir\wikihow_en.zim" -Resume
+
+Write-Host "Restarting Kiwix..."
+nssm start Kiwix
+Write-Host "Update complete."</pre>
+    <p>Run this monthly or quarterly. The <code>-Resume</code> flag means if the download is interrupted, it resumes from where it left off. <strong>Use a scheduled task to run it monthly, overnight.</strong></p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Check for new filenames:</strong> Kiwix ZIM URLs include the year-month. Update the <code>$wikiUrl</code> and <code>$wikihowUrl</code> variables in the script monthly, or automate this by scraping the library.kiwix.org API.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Auto-detect Latest Version (Advanced)</div>
+    <pre># Automatically find the latest ZIM URL:
+$apiUrl = "https://library.kiwix.org/catalog/v2/entries?lang=eng&name=wikipedia_en_all_nopic"
+$latest = (Invoke-RestMethod $apiUrl).entries[0].link.href
+Write-Host "Latest Wikipedia ZIM: $latest"
+Invoke-WebRequest -Uri $latest -OutFile "$zimDir\wikipedia_en.zim" -Resume</pre>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">🏠 Home Page Integration</div>
+  <div class="card">
+    <div class="card-title">Add to Dashboard &amp; Monitor</div>
+    <p>Add Kiwix to the dashboard's quick-launch buttons and service status checks:</p>
+    <pre>// In monitor-control.html SERVICES array, add:
+{ id:'kiwix', name:'Offline Wiki', url:'http://localhost:8888', port:8888, ctrl:false },
+
+// In QL (quick launch) array:
+{ icon:'📖', label:'Wikipedia', url:'http://localhost:8888/wikipedia_en/A/Main_Page' },
+{ icon:'❓', label:'WikiHow',   url:'http://localhost:8888/wikihow_en/A/Main-Page' },</pre>
+    <p>Direct deep links to Wikipedia article search:</p>
+    <pre>http://[server-ip]:8888/wikipedia_en/A/Special:Search?search=YOUR_QUERY
+
+# Example bookmark for instant Wikipedia search from any device:
+# Set as a browser search engine with keyword "w" pointing to:
+# http://192.168.1.100:8888/wikipedia_en/A/Special:Search?search=%s</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌍 Remote Access</div>
+  <div class="card">
+    <p>Kiwix can be made publicly accessible (read-only, no auth needed for public reference material):</p>
+    <pre># Caddyfile:
+wiki.yourdomain.com {
+    reverse_proxy localhost:8888
+    # No auth needed — it's just reference content
+}</pre>
+    <p>Or keep it private via Tailscale and access with <code>http://[tailscale-ip]:8888</code> from anywhere.</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Navidrome</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎶</div>
+  <div>
+    <h1>Navidrome Music Server</h1>
+    <div class="subtitle">// Self-Hosted Spotify · Subsonic API · Per-User Playlists //</div>
+    <p class="desc">Navidrome is the best FOSS self-hosted music server. Stream your entire music library from any device, with per-user play history, playlists, and favorites. Compatible with dozens of client apps.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Navidrome serving your music library from an internal drive, accessible via browser at port 4533, and via mobile apps like DSub or Symfonium.</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Installation on Windows <span class="tag tag-native">FOSS · Windows Native</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Download Navidrome</strong>
+        <p>From <a href="https://github.com/navidrome/navidrome/releases" target="_blank">github.com/navidrome/navidrome/releases</a> — download the latest <code>navidrome_X.X.X_windows_amd64.zip</code>. Extract to <code>D:\Server\Navidrome\</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Create a configuration file</strong>
+        <p>Create <code>D:\Server\Navidrome\navidrome.toml</code>:</p>
+        <pre>MusicFolder    = "D:/Music"
+DataFolder     = "D:/Server/Navidrome/data"
+Port           = 4533
+LogLevel       = "info"
+EnableTranscoding = true
+DefaultTheme   = "Dark"
+EnableSharing  = true  # allows public share links for playlists</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Run Navidrome</strong>
+        <pre>cd D:\Server\Navidrome
+navidrome.exe --configfile navidrome.toml</pre>
+        <p>Access at <code>http://localhost:4533</code>. First login creates the admin account.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Install as a Windows Service (NSSM)</strong>
+        <pre>nssm install Navidrome "D:\Server\Navidrome\navidrome.exe" "--configfile D:\Server\Navidrome\navidrome.toml"
+nssm set Navidrome AppDirectory "D:\Server\Navidrome"
+nssm start Navidrome</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Open firewall</strong>
+        <pre>netsh advfirewall firewall add rule name="Navidrome" dir=in action=allow protocol=TCP localport=4533</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📁 Music Library Organization</div>
+  <div class="card">
+    <p>Navidrome reads standard music folder structures. Best practice:</p>
+    <pre>D:\Music\
+  ├── Artist Name\
+  │   ├── Album Name (Year)\
+  │   │   ├── 01 - Track Title.mp3
+  │   │   ├── 02 - Track Title.flac
+  │   │   └── cover.jpg
+  │   └── Another Album (Year)\
+  └── Another Artist\
+      └── ...</pre>
+    <p>Navidrome reads ID3 tags embedded in the files. If tags are missing or wrong, use <strong>MusicBrainz Picard</strong> (free, FOSS) to bulk-tag your library.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">🎵</div>
+      <div class="callout-body"><strong>Supported formats:</strong> MP3, FLAC, AAC, OGG, OPUS, WAV, AIFF, WMA, M4A. FLAC is ideal for quality; MP3/AAC for compatibility. Navidrome transcodes on-the-fly for devices that can't handle lossless.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">📱 Client Apps</div>
+  <div class="card">
+    <p>Navidrome uses the Subsonic API, so it works with any Subsonic/Airsonic-compatible app:</p>
+    <table>
+      <tr><th>App</th><th>Platform</th><th>Notes</th></tr>
+      <tr><td><strong>Feishin</strong></td><td>Windows/Mac/Linux desktop</td><td>Best desktop client, FOSS</td></tr>
+      <tr><td><strong>Symfonium</strong></td><td>Android</td><td>Best Android client (paid, ~$5)</td></tr>
+      <tr><td><strong>DSub</strong></td><td>Android</td><td>Free, solid</td></tr>
+      <tr><td><strong>Substreamer</strong></td><td>iOS</td><td>Best iOS client</td></tr>
+      <tr><td><strong>Navidrome Web UI</strong></td><td>Any browser</td><td>Built-in, decent</td></tr>
+      <tr><td><strong>Sonixd</strong></td><td>Desktop (Electron)</td><td>Spotify-like UI, FOSS</td></tr>
+    </table>
+    <p style="margin-top:10px">To connect any of these: set the server URL to <code>http://[server-ip]:4533</code>, username, and password. Done.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-title">👥 Per-User Features</div>
+  <div class="card">
+    <p>Each Navidrome user gets their own:</p>
+    <ul style="margin:0 0 0 18px">
+      <li><strong>Play history</strong> — every song played is logged, with scrobbling to Last.fm optional</li>
+      <li><strong>Starred songs/albums</strong> — per-user favorites</li>
+      <li><strong>Playlists</strong> — private and shareable playlists</li>
+      <li><strong>Play counts</strong> — "most played" statistics per user</li>
+    </ul>
+    <p>Admin panel lets you create, modify, and delete user accounts. Roles can be set (regular user vs admin vs disabled).</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Navidrome doesn't natively support Google OAuth or OIDC (yet). For V1, use Navidrome's own username/password system. For Tier 3 SSO, put Navidrome behind Authentik's forward auth proxy — Authentik handles the login and passes the username header to Navidrome.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌍 Remote Access</div>
+  <div class="card">
+    <pre># Caddyfile:
+music.yourdomain.com {
+    reverse_proxy localhost:4533
+}</pre>
+    <p>Or via Tailscale. Once accessible remotely, mobile apps will stream your music over mobile data — even in your car.</p>
+  </div>
+</div>
+
+</body>
+</html>
