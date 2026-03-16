@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wordle</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      color: #4caf7d;
+      flex-shrink: 0;
+    }
+    .setup-complete-label { font-weight: 700; font-size: .88rem; color: var(--text-bright); }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🟩</div>
+  <div>
+    <h1>Wordle</h1>
+    <div class="subtitle">
+      // Custom Family Wordle · Port <span data-cfg="port:wordle"></span> · Docker WSL2 · Authentik forward-auth //
+    </div>
+    <p class="desc">
+      A self-hosted fork of the classic Wordle game with a custom daily word list and SSO-integrated score tracking.
+      Each day's word can be hand-curated via <code>customWords.ts</code>; when the custom list runs out it falls back to
+      the standard word list. Scores are posted to a small API endpoint and stored in <code>scores.json</code> per user,
+      with the authenticated username injected by the reverse proxy via <code>X-Authentik-Username</code>.
+    </p>
+  </div>
+</div>
+
+<!-- ─── SUB-TAB NAV ─────────────────────────────────────────────────────── -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+════════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div id="complete-sub" style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Mark as done → activates Overview tab
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Build the image -->
+  <div class="section">
+    <div class="section-title">1 · Build &amp; run the Docker image</div>
+    <div class="card">
+      <p>The repo lives at <code>userdata/common/wordle</code> on the server. Build once; rebuild whenever
+         <code>customWords.ts</code> or <code>wordlist.ts</code> change (they are baked into the image at build time).</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Build the image</strong>
+            <pre>cd userdata/common/wordle
+docker build -t custom-family-wordle .</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Start with Docker Compose</strong>
+            <pre>docker compose up -d</pre>
+            <p>The container listens on port 80 internally and is exposed on the host at port
+               <span data-cfg="port:wordle"></span>. The reverse proxy handles TLS and SSO.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify it's running</strong>
+            <pre>docker ps | grep wordle
+# Should show: wordle   Up   0.0.0.0:8081->80/tcp</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Score API -->
+  <div class="section">
+    <div class="section-title">2 · Score tracking API</div>
+    <div class="card">
+      <p>The front-end calls <code>POST /wordle-score</code> (or your chosen endpoint) with a JSON body containing
+         <code>{ score, status, date }</code>. A small Node script reads the <code>X-Authentik-Username</code>
+         header injected by Caddy and appends the result to <code>userdata/common/wordle/scores.json</code>.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          <strong>The score endpoint must run separately from the static game container.</strong>
+          It needs to read the <code>X-Authentik-Username</code> header, so it must be behind the same
+          Caddy forward-auth middleware. A lightweight <code>node</code> / <code>express</code> process on a
+          separate port works; or add a second service to <code>docker-compose.yml</code>.
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Install Node dependencies (if running natively)</strong>
+            <pre>cd userdata/common/wordle
+npm install express</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Start the score server</strong>
+            <pre>node score-server.js
+# Ensure it listens on a port forwarded through Caddy
+# and that Caddy injects X-Authentik-Username</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: SSO / Authentik -->
+  <div class="section">
+    <div class="section-title">3 · 🔐 SSO — Authentik forward-auth (admin step)</div>
+    <div class="card">
+      <p>Wordle uses <strong>Caddy forward-auth</strong> via Authentik. There is no native OIDC support in the
+         static app — Authentik gates the entire subdomain and the proxy injects the username header.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Create an Authentik application + provider</strong>
+            <p>In the Authentik admin panel (<code data-cfg="authentik-admin"></code>):</p>
+            <ul style="margin:6px 0 0 18px;font-size:.85rem">
+              <li>Create a <strong>Proxy Provider</strong> (forward-auth, single application)</li>
+              <li>External host: <code data-cfg="url:wordle"></code></li>
+              <li>Internal host: <code>http://localhost:<span data-cfg="port:wordle"></span></code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Add forward-auth to Caddyfile</strong>
+            <pre><span data-cfg="url:wordle"></span> {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-Authentik-Username Remote-User
+    }
+    reverse_proxy localhost:<span data-cfg="port:wordle"></span>
+}</pre>
+            <p>The <code>X-Authentik-Username</code> (aliased as <code>Remote-User</code>) header is what the
+               score API reads to attribute scores to the logged-in user.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Reload Caddy and verify</strong>
+            <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+            <p>Navigate to <code data-cfg="url:wordle"></code> — you should be redirected to Authentik before
+               seeing the game.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Custom word list -->
+  <div class="section">
+    <div class="section-title">4 · Customise the word list</div>
+    <div class="card">
+      <p>Edit <code>src/constants/customWords.ts</code> in the repo to add or change curated daily words.
+         The game's <code>getSolution()</code> function picks words by the day-index: custom words first,
+         then the standard <code>wordlist.ts</code> once the custom list is exhausted.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          After editing <code>customWords.ts</code>, rebuild the Docker image —
+          the word lists are compiled into the static bundle at build time.
+          <pre style="margin-top:8px">docker build -t custom-family-wordle .
+docker compose up -d</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+════════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">
+    🟩 Custom Wordle running in Docker on port <span data-cfg="port:wordle"></span>.
+    SSO via Authentik forward-auth. Score tracking via <code>scores.json</code>.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:wordle"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:wordle"></span></code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:wordle"></span></td></tr>
+          <tr><td>Install type</td><td>Docker WSL2</td></tr>
+          <tr><td>Container name</td><td><code>wordle</code></td></tr>
+          <tr><td>Auth method</td><td>Authentik forward-auth</td></tr>
+          <tr><td>Username header</td><td><code>X-Authentik-Username</code> / <code>Remote-User</code></td></tr>
+          <tr><td>Word lists</td><td><code>src/constants/customWords.ts</code> → <code>wordlist.ts</code></td></tr>
+          <tr><td>Score data</td><td><code>userdata/common/wordle/scores.json</code></td></tr>
+          <tr><td>Repo</td><td><code>brianramseyau/wordle</code> (GitHub)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Any browser</td><td>Go to <code data-cfg="url:wordle"></code> — log in with Authentik, then play.</td></tr>
+        <tr><td>Mobile browser</td><td>Same URL — the React app is responsive.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔑 How score attribution works</div>
+    <div class="card">
+      <p>When a game ends the client fires a <code>POST</code> to the score endpoint. The reverse proxy
+         has already authenticated the user and stamped the request with <code>X-Authentik-Username</code>.
+         The score server reads that header and writes an entry to <code>scores.json</code> — no separate
+         login or token needed inside the game itself.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+════════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--accent3)" data-cfg="version:wordle"></p>
+      <p style="font-size:.8rem;color:var(--text-dim);margin-top:6px">
+        When you confirm a new version works: open <code>versions.json</code>, find the entry for <code>wordle</code>,
+        and fill in <code>version</code> and <code>checkedDate</code>. Do not edit this page.
+      </p>
+      <div class="card-title" style="margin-top:14px">How to update</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Pull latest changes from GitHub</strong>
+            <pre>cd userdata/common/wordle
+git pull origin main</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Rebuild the Docker image</strong>
+            <pre>docker build -t custom-family-wordle .
+docker compose up -d</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify and record the version</strong>
+            <p>Confirm the game loads at <code data-cfg="url:wordle"></code>, then update <code>versions.json</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Routine tasks</div>
+    <div class="card">
+      <table>
+        <tr><th>Task</th><th>Frequency</th></tr>
+        <tr><td>Add new words to <code>customWords.ts</code> and rebuild</td><td>As desired / before list runs out</td></tr>
+        <tr><td>Back up <code>scores.json</code></td><td>Weekly</td></tr>
+        <tr><td>Check Authentik outpost is healthy</td><td>If login stops working</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Potential Breakpoints</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 Custom word list exhausted</div>
+      <div class="trouble-a">Once all entries in <code>customWords.ts</code> are used, the game silently falls back to
+        the standard word list. This is fine functionally, but players may notice unfamiliar or harder words.
+        Add new words and rebuild before the list runs out to keep the curated experience.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Score API goes down independently of the game</div>
+      <div class="trouble-a">The static game container and the score server are separate processes. If the score
+        server crashes, players can still play but scores won't be recorded. Monitor with <code>docker ps</code>
+        and restart as needed. Consider adding the score server to <code>docker-compose.yml</code> so it restarts
+        automatically.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Authentik outpost update breaks forward-auth headers</div>
+      <div class="trouble-a">After Authentik updates, verify that <code>X-Authentik-Username</code> is still being
+        forwarded correctly. The score server will silently write entries with a blank or wrong username if the
+        header disappears. Check <code>scores.json</code> after an Authentik update to confirm usernames look right.</div>
+    </div>
+
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — DATA STORAGE
+════════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Where data lives</div>
+    <div class="card">
+      <table>
+        <tr><th>Data</th><th>Location</th><th>Notes</th></tr>
+        <tr>
+          <td>Game static files</td>
+          <td>Inside Docker image</td>
+          <td>Rebuilt from source on each <code>docker build</code></td>
+        </tr>
+        <tr>
+          <td>Custom word list</td>
+          <td><code>userdata/common/wordle/src/constants/customWords.ts</code></td>
+          <td>Baked into image at build time</td>
+        </tr>
+        <tr>
+          <td>Score history</td>
+          <td><code>userdata/common/wordle/scores.json</code></td>
+          <td>Written at runtime by score server; lives on host, not in container</td>
+        </tr>
+      </table>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong><code>scores.json</code> is the only stateful file.</strong> The game itself is fully stateless —
+          no database, no user accounts inside the app. Back up <code>scores.json</code> regularly; everything else
+          can be rebuilt from source.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td><code>scores.json</code></td><td><code>userdata/common/wordle/scores.json</code></td><td>Weekly</td><td>🟡 Medium</td></tr>
+        <tr><td><code>customWords.ts</code></td><td><code>userdata/common/wordle/src/constants/</code></td><td>On change</td><td>🟡 Medium</td></tr>
+        <tr><td>Full repo</td><td>GitHub (<code>brianramseyau/wordle</code>)</td><td>On push</td><td>🟢 Low (already versioned)</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — TROUBLESHOOTING
+════════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Game loads blank / white screen</div>
+      <div class="trouble-a">
+        Usually a failed build. Check the container logs:
+        <pre>docker logs wordle</pre>
+        If you see JS errors, rebuild the image — a broken <code>customWords.ts</code> export
+        (e.g. a word longer than 5 letters) can crash the bundle.
+      </div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Authentik login loop / 401 on the game URL</div>
+      <div class="trouble-a">
+        Check the Authentik outpost is running and reachable from Caddy. Also verify
+        the Caddyfile <code>forward_auth</code> block points to the correct outpost address.
+        Reload Caddy after any config change:
+        <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Scores not being recorded</div>
+      <div class="trouble-a">
+        Check the score server is running (<code>docker ps</code> or <code>node</code> process).
+        Confirm Caddy is forwarding <code>X-Authentik-Username</code> to the score endpoint —
+        add a temporary debug log to the score server to print all incoming headers.
+        Also verify the endpoint URL in the game's <code>reportScore()</code> function matches
+        what Caddy is routing.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Wrong or missing username in scores.json</div>
+      <div class="trouble-a">
+        The <code>X-Authentik-Username</code> header is not reaching the score server.
+        Check the Caddyfile <code>copy_headers</code> directive includes it, and that
+        the score endpoint is behind the same <code>forward_auth</code> block as the game.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">🟢 Word repeats / same word two days in a row</div>
+      <div class="trouble-a">
+        The day-index is calculated from a fixed epoch (check <code>src/lib/words.ts</code>).
+        If the server clock drifted or was reset, the index may jump. Verify the container's
+        timezone is set correctly in <code>docker-compose.yml</code>:
+        <pre>environment:
+  - TZ=Australia/Sydney   # adjust to your timezone</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Useful commands</div>
+    <div class="card">
+      <table>
+        <tr><th>Task</th><th>Command</th></tr>
+        <tr><td>View container logs</td><td><code>docker logs wordle</code></td></tr>
+        <tr><td>Restart the game container</td><td><code>docker compose restart wordle</code></td></tr>
+        <tr><td>Rebuild after word list change</td><td><code>docker build -t custom-family-wordle . && docker compose up -d</code></td></tr>
+        <tr><td>Inspect scores</td><td><code>cat userdata/common/wordle/scores.json | python -m json.tool</code></td></tr>
+        <tr><td>Check port is open</td><td><code>curl -I http://localhost:<span data-cfg="port:wordle"></span></code></td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ─── JS ──────────────────────────────────────────────────────────────── -->
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'wordle_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar      = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub      = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      overviewBtn.style.fontWeight = '700';
+      overviewBtn.style.color = 'var(--accent3)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      overviewBtn.style.fontWeight = '';
+      overviewBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
+
+</body>
+</html>
