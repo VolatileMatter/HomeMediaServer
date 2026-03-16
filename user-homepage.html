@@ -26,27 +26,27 @@
   .feed-block[draggable="true"]{cursor:grab;}
   .feed-block[draggable="true"]:active{cursor:grabbing;opacity:.8;}
   .feed-block-inner{position:relative;}
-  .drag-handle{position:absolute;top:0;right:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:grab;color:#3a4555;font-size:.8rem;opacity:0;transition:opacity .15s;}
-  .feed-block:hover .drag-handle{opacity:1;}
-  .feed-title{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#6e7a94;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
-  .media-card{display:flex;gap:9px;align-items:center;background:rgba(255,255,255,.02);border:1px solid #1e2535;border-radius:3px;padding:7px 9px;cursor:pointer;transition:all .16s;text-decoration:none;color:inherit;margin-bottom:4px;}
-  .media-card:hover{border-color:rgba(200,168,75,.24);background:rgba(200,168,75,.03);}
-  .media-thumb{width:38px;height:52px;border-radius:2px;background:#1a2030;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
-  .media-title{font-weight:700;font-size:.82rem;color:#d0d4e0;margin-bottom:2px;}
-  .media-sub{font-size:.69rem;color:#6e7a94;}
-  .media-prog{height:2px;background:#1a2030;border-radius:2px;margin-top:4px;}
-  .media-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#c8a84b,#4ecdc4);}
-  .app-badge{font-family:'Share Tech Mono',monospace;font-size:.54rem;padding:1px 4px;border-radius:2px;white-space:nowrap;}
-  /* App Library */
-  .app-lib-btn{display:flex;align-items:center;gap:7px;padding:8px 12px;background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.2);border-radius:3px;font-size:.77rem;color:#c8a84b;cursor:pointer;transition:all .16s;margin-bottom:10px;}
-  .app-lib-btn:hover{background:rgba(200,168,75,.12);}
-  .app-lib-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;align-items:center;justify-content:center;}
+  .drag-handle{position:absolute;top:6px;right:6px;font-size:.75rem;color:#2a3040;cursor:grab;user-select:none;}
+  .feed-title{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#6e7a94;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+  /* Media cards */
+  .media-card{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#111620;border:1px solid #1e2535;border-radius:3px;margin-bottom:5px;text-decoration:none;transition:border-color .15s;cursor:pointer;}
+  .media-card:hover{border-color:rgba(200,168,75,.3);}
+  .media-thumb{font-size:1.4rem;flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#0e1320;border-radius:3px;}
+  .media-title{font-size:.8rem;font-weight:700;color:#d0d4e0;margin-bottom:2px;}
+  .media-sub{font-size:.68rem;color:#6e7a94;}
+  .media-prog{height:2px;background:#1a2030;border-radius:1px;margin-top:4px;}
+  .media-prog-fill{height:100%;border-radius:1px;background:linear-gradient(90deg,#c8a84b,#5b8dd9);}
+  .app-badge{font-family:'Share Tech Mono',monospace;font-size:.52rem;padding:2px 6px;border-radius:2px;flex-shrink:0;}
+  /* App library button */
+  .app-lib-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;background:rgba(200,168,75,.06);border:1px solid rgba(200,168,75,.18);border-radius:3px;cursor:pointer;font-size:.8rem;color:#c8a84b;margin-bottom:12px;transition:all .15s;}
+  .app-lib-btn:hover{background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.3);}
+  /* App library modal */
+  .app-lib-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
   .app-lib-overlay.open{display:flex;}
-  .app-lib-modal{background:#111520;border:1px solid #252d3d;border-radius:5px;padding:20px;width:540px;max-width:96vw;max-height:84vh;overflow-y:auto;}
-  .alm-title{font-family:'Cinzel',serif;font-size:.92rem;color:#c8a84b;margin-bottom:4px;}
-  .alm-sub{font-size:.74rem;color:#6e7a94;margin-bottom:12px;line-height:1.5;}
-  .app-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-  @media(max-width:460px){.app-grid{grid-template-columns:1fr;}}
+  .app-lib-modal{background:#111420;border:1px solid #252d3d;border-radius:6px;padding:20px;width:min(520px,94vw);max-height:80vh;overflow-y:auto;}
+  .alm-title{font-family:'Cinzel',serif;font-size:1rem;color:#c8a84b;margin-bottom:4px;}
+  .alm-sub{font-size:.75rem;color:#6e7a94;margin-bottom:14px;line-height:1.5;}
+  .app-grid{display:flex;flex-direction:column;gap:6px;}
   .app-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#141820;border:1px solid #1e2535;border-radius:3px;cursor:pointer;transition:all .15s;user-select:none;}
   .app-item:hover{border-color:rgba(200,168,75,.26);}
   .app-item.on{border-color:rgba(76,175,125,.28);background:rgba(76,175,125,.04);}
@@ -172,20 +172,21 @@
 
 <script>
 const APPS = [
-  {id:'jellyfin',   icon:'🎬', name:'Movies & TV',    desc:'Jellyfin streaming',            url:'http://localhost:8096', blk:'blk-jellyfin',   locked:true,  def:true,  ql:'🎬 Movies'},
-  {id:'calibre',    icon:'📚', name:'Books',           desc:'Calibre-Web ebook reader',      url:'http://localhost:8083', blk:'blk-calibre',    locked:false, def:false, ql:'📚 Books'},
-  {id:'audiobooks', icon:'🎧', name:'Audiobooks',      desc:'Audiobookshelf',                url:'http://localhost:13378',blk:'blk-audiobooks', locked:false, def:false, ql:'🎧 Audio'},
-  {id:'navidrome',  icon:'🎵', name:'Music',           desc:'Navidrome music server',        url:'http://localhost:4533', blk:'blk-navidrome',  locked:false, def:false, ql:'🎵 Music'},
-  {id:'games',      icon:'🎮', name:'Browser Games',   desc:'Pokémon, Castlevania, FE',      url:'http://localhost:8085', blk:'blk-games',      locked:false, def:false, ql:'🎮 Games'},
-  {id:'photos',     icon:'📷', name:'Photos',          desc:'Immich photo backup',           url:'http://localhost:2283', blk:'blk-photos',     locked:false, def:false, ql:'📷 Photos'},
-  {id:'nextcloud',  icon:'☁️', name:'Files',           desc:'Nextcloud file sync',           url:'http://localhost/nextcloud',blk:null,          locked:false, def:false, ql:'☁️ Files'},
-  {id:'comics',     icon:'📕', name:'Comics',          desc:'Kavita comic reader',           url:'http://localhost:5000', blk:null,             locked:false, def:false, ql:'📕 Comics'},
-  {id:'dnd',        icon:'⚔️', name:'DnD Books',       desc:'Kavita DnD rulebooks',          url:'http://localhost:5001', blk:null,             locked:false, def:false, ql:'⚔️ DnD'},
-  {id:'ai',         icon:'🤖', name:'Private AI',      desc:'Ollama / Open WebUI',           url:'http://localhost:3000', blk:null,             locked:false, def:false, ql:'🤖 AI'},
-  {id:'wiki',       icon:'📖', name:'Offline Wiki',    desc:'Wikipedia + WikiHow',           url:'http://localhost:8888', blk:null,             locked:false, def:false, ql:'📖 Wiki'},
-  {id:'tasks',      icon:'✅', name:'Tasks',           desc:'Vikunja task manager',          url:'http://localhost:3456', blk:null,             locked:false, def:false, ql:'✅ Tasks'},
-  {id:'recipes',    icon:'🍲', name:'Recipes',         desc:'Mealie recipe manager',         url:'http://localhost:9925', blk:null,             locked:false, def:false, ql:'🍲 Recipes'},
-  {id:'jukebox',    icon:'🎙️', name:'Jukebox',         desc:'Infinite music looper',         url:'http://localhost:5050', blk:null,             locked:false, def:false, ql:'🎙️ Jukebox'},
+  {id:'jellyfin',    icon:'🎬', name:'Movies & TV',    desc:'Jellyfin streaming',            url:'http://localhost:8096', blk:'blk-jellyfin',   locked:true,  def:true,  ql:'🎬 Movies'},
+  {id:'calibre',     icon:'📚', name:'Books',           desc:'Calibre-Web ebook reader',      url:'http://localhost:8083', blk:'blk-calibre',    locked:false, def:false, ql:'📚 Books'},
+  {id:'audiobooks',  icon:'🎧', name:'Audiobooks',      desc:'Audiobookshelf',                url:'http://localhost:13378',blk:'blk-audiobooks', locked:false, def:false, ql:'🎧 Audio'},
+  {id:'navidrome',   icon:'🎵', name:'Music',           desc:'Navidrome music server',        url:'http://localhost:4533', blk:'blk-navidrome',  locked:false, def:false, ql:'🎵 Music'},
+  {id:'games',       icon:'🎮', name:'Browser Games',   desc:'Pokémon, Castlevania, FE',      url:'http://localhost:8085', blk:'blk-games',      locked:false, def:false, ql:'🎮 Games'},
+  {id:'flasharcade', icon:'🕹️', name:'Flash Arcade',    desc:'Classic Flash games via Ruffle', url:'http://localhost:[ARCADE_PORT]', blk:null,   locked:false, def:false, ql:'🕹️ Arcade'},
+  {id:'photos',      icon:'📷', name:'Photos',          desc:'Immich photo backup',           url:'http://localhost:2283', blk:'blk-photos',     locked:false, def:false, ql:'📷 Photos'},
+  {id:'nextcloud',   icon:'☁️', name:'Files',           desc:'Nextcloud file sync',           url:'http://localhost/nextcloud',blk:null,          locked:false, def:false, ql:'☁️ Files'},
+  {id:'comics',      icon:'📕', name:'Comics',          desc:'Kavita comic reader',           url:'http://localhost:5000', blk:null,             locked:false, def:false, ql:'📕 Comics'},
+  {id:'dnd',         icon:'⚔️', name:'DnD Books',       desc:'Kavita DnD rulebooks',          url:'http://localhost:5001', blk:null,             locked:false, def:false, ql:'⚔️ DnD'},
+  {id:'ai',          icon:'🤖', name:'Private AI',      desc:'Ollama / Open WebUI',           url:'http://localhost:3000', blk:null,             locked:false, def:false, ql:'🤖 AI'},
+  {id:'wiki',        icon:'📖', name:'Offline Wiki',    desc:'Wikipedia + WikiHow',           url:'http://localhost:8888', blk:null,             locked:false, def:false, ql:'📖 Wiki'},
+  {id:'tasks',       icon:'✅', name:'Tasks',           desc:'Vikunja task manager',          url:'http://localhost:3456', blk:null,             locked:false, def:false, ql:'✅ Tasks'},
+  {id:'recipes',     icon:'🍲', name:'Recipes',         desc:'Mealie recipe manager',         url:'http://localhost:9925', blk:null,             locked:false, def:false, ql:'🍲 Recipes'},
+  {id:'jukebox',     icon:'🎙️', name:'Jukebox',         desc:'Infinite music looper',         url:'http://localhost:5050', blk:null,             locked:false, def:false, ql:'🎙️ Jukebox'},
 ];
 
 // Feed block HTML templates (only for apps with a blk id)
@@ -257,12 +258,9 @@ function saveState() {
 
 // ── Build ordered block list from enabled apps ──
 function getOrderedBlocks() {
-  // All enabled apps that have a blk
   const enabled = APPS.filter(a => ON.has(a.id) && a.blk);
   const enabledBlks = enabled.map(a => a.blk);
-  // Start with saved order (only keep still-enabled blocks)
   const ordered = blockOrder.filter(b => enabledBlks.includes(b));
-  // Append any newly-enabled blocks not yet in order
   enabledBlks.forEach(b => { if (!ordered.includes(b)) ordered.push(b); });
   return ordered;
 }
@@ -271,13 +269,12 @@ function getOrderedBlocks() {
 function renderFeed() {
   const col = document.getElementById('feed-col');
   const ordered = getOrderedBlocks();
-  blockOrder = ordered; // keep in sync
+  blockOrder = ordered;
 
   const showHint = ordered.length > 1;
   document.getElementById('drag-hint').style.display = showHint ? 'flex' : 'none';
 
   col.innerHTML = ordered.map(blkId => {
-    const app = APPS.find(a => a.blk === blkId);
     return `
       <div class="feed-block feed-block-inner" id="${blkId}" draggable="${ordered.length > 1}"
            ondragstart="dragStart(event,'${blkId}')"
@@ -346,7 +343,7 @@ function updateCount() {
 function renderLib() {
   document.getElementById('app-grid').innerHTML = APPS.map(a => `
     <div class="app-item ${ON.has(a.id)?'on':''} ${a.locked?'locked':''}"
-         id="ai-${a.id}" onclick="${a.locked?'':''(`toggleApp('${a.id}')`)}">
+         id="ai-${a.id}">
       <div style="font-size:1.1rem;flex-shrink:0">${a.icon}</div>
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:3px">
@@ -379,9 +376,7 @@ function openLib() { renderLib(); document.getElementById('app-overlay').classLi
 function closeLib() { document.getElementById('app-overlay').classList.remove('open'); }
 
 // ── Pin from services catalogue ──
-// External service: parent.pinService(id, icon, name, url, ql) calls this
 window.pinService = function(id, icon, name, url, ql) {
-  // Add as a quick-link-only entry if not already in APPS
   const exists = APPS.find(a => a.id === id);
   if (!exists) {
     APPS.push({ id, icon, name, desc: 'Pinned from Services', url, blk: null, locked: false, def: false, ql: `${icon} ${name}` });

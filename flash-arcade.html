@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Flash Arcade</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🕹️</div>
+  <div>
+    <h1>Flash Arcade</h1>
+    <div class="subtitle">// Ruffle · .swf Preservation · Per-User Saves · Authentik SSO · nginx · Docker //</div>
+    <p class="desc">A private browser-based Flash game arcade powered by Ruffle (WebAssembly Flash emulator). Games load from a shared read-only library; save files (.sol) are stored per-user. Authentication is handled entirely by Authentik via the <code>X-authentik-username</code> header — no separate login needed.</p>
+  </div>
+</div>
+
+<div class="v1-banner">🐉 V1 Goal: Serve .swf games via Ruffle in the browser with per-user .sol save file isolation. No Flash plugin required — Ruffle runs entirely in WebAssembly.</div>
+
+<div class="section">
+  <div class="section-title">🗺️ Architecture Overview</div>
+  <div class="card">
+    <p>The arcade has two layers: a shared read-only game library (common to all users) and a per-user writable saves directory. nginx serves both. The correct saves directory is mounted based on the authenticated Authentik username injected by Caddy at the proxy layer.</p>
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Core principle:</strong> The game library is identical for every user. Only the saves mount changes. Caddy reads <code>X-authentik-username</code> from Authentik and passes it as an environment variable — the container mounts the correct saves path before serving.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🗂️ Directory Structure</div>
+  <div class="card">
+    <pre>userdata/
+  common/
+    arcade/
+      bin/              ← Ruffle WASM runtime files (ruffle.js, ruffle_bg.wasm, …)
+      library/          ← All .swf game files (shared, read-only for all users)
+        game1.swf
+        game2.swf
+        library.json    ← Game manifest (id, title, thumbnail, filename)
+  {NAME}/               ← Per-user directory — NAME = Authentik username
+    arcade/
+      saves/            ← User's .sol save files, one per game</pre>
+    <p>The <code>common/arcade/</code> directory is mounted read-only and is identical for every user. The <code>userdata/{NAME}/arcade/saves/</code> directory is writable and unique per user. Create it when provisioning a new user:</p>
+    <pre>mkdir -p userdata/{NAME}/arcade/saves</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🐳 Docker Compose</div>
+  <div class="card">
+    <div class="card-title">docker-compose.yml — arcade service block</div>
+    <pre>services:
+  arcade:
+    image: nginx:alpine
+    volumes:
+      - ./userdata/common/arcade:/usr/share/nginx/html:ro
+      - ./userdata/${USER}/arcade/saves:/usr/share/nginx/html/saves
+    environment:
+      - AUTHENTIK_USER=${USER}
+    restart: unless-stopped</pre>
+    <p>The <code>${USER}</code> variable is resolved from the environment at container start. The shared library is read-only; only the <code>saves/</code> subdirectory is writable. When a different user logs in, restart the container (or re-up) with the new <code>USER</code> value to re-point the saves mount.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Single-seat note:</strong> The standard Docker approach mounts one user's saves at a time. For true multi-user concurrency (multiple users playing simultaneously), run one container instance per user on separate ports, each with their own <code>USER</code> value, and route via Caddy subdomain or path prefix.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔐 Authentication — Authentik Forward Auth</div>
+  <div class="card">
+    <p>Caddy protects the arcade via Authentik forward auth. Every request is validated before reaching nginx. Authentik injects <code>X-authentik-username</code>, which is used to route save files to the correct user directory.</p>
+    <pre># Caddyfile entry:
+arcade.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:[ARCADE_PORT]
+}</pre>
+    <p>The save server reads the username from the header to determine which user's saves directory to read/write:</p>
+    <pre># Save routing logic (in save handler):
+# POST/PUT /saves/game_name.sol
+#   → username = request.headers.get('X-authentik-username')
+#   → write to: userdata/{username}/arcade/saves/game_name.sol
+
+# GET /saves/game_name.sol
+#   → username = request.headers.get('X-authentik-username')
+#   → read from: userdata/{username}/arcade/saves/game_name.sol</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Ruffle Runtime Setup</div>
+  <div class="card">
+    <div class="card-title">Installing Ruffle</div>
+    <p>Ruffle is a WebAssembly Flash emulator — no browser plugin required. Download the latest self-hosted build from <a href="https://ruffle.rs" target="_blank">ruffle.rs</a> and extract the files into <code>userdata/common/arcade/bin/</code>.</p>
+    <pre>userdata/common/arcade/bin/
+  ruffle.js
+  ruffle_bg.wasm        ← must be served as application/wasm
+  …</pre>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>MIME type required:</strong> The <code>.wasm</code> file must be served with the <code>application/wasm</code> Content-Type. Browsers will refuse to load it otherwise. Add this to your nginx config inside the arcade container:</div>
+    </div>
+    <pre># nginx.conf addition — add inside the server {} block:
+location ~* \.wasm$ {
+    types { }
+    default_type application/wasm;
+    add_header Cache-Control "public, max-age=86400";
+}
+
+# Or add to mime.types:
+application/wasm  wasm;</pre>
+    <div class="card-title" style="margin-top:16px">Embedding Ruffle in the game page</div>
+    <pre>&lt;!-- In your game player page --&gt;
+&lt;script&gt;
+  window.RufflePlayer = window.RufflePlayer || {};
+  window.RufflePlayer.config = {
+    autoplay: "on",
+    unmuteOverlay: "hidden",
+  };
+&lt;/script&gt;
+&lt;script src="/bin/ruffle.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  window.addEventListener("load", () =&gt; {
+    const ruffle = window.RufflePlayer.newest();
+    const player = ruffle.createPlayer();
+    document.getElementById("game-container").appendChild(player);
+    player.load("/library/game1.swf");
+  });
+&lt;/script&gt;
+&lt;div id="game-container"&gt;&lt;/div&gt;</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">💾 Save File Architecture (.sol)</div>
+  <div class="card">
+    <p>Flash save files are <code>.sol</code> (SharedObject) files. By default Ruffle writes these to the browser's local storage. To get per-user server-side saves, the arcade frontend intercepts Ruffle's save/load events and proxies them to the save endpoint instead.</p>
+    <pre># Save write:
+PUT  /saves/game_name.sol
+     Host: nginx serving userdata/{NAME}/arcade/saves/game_name.sol
+
+# Save read:
+GET  /saves/game_name.sol
+     Host: nginx reading userdata/{NAME}/arcade/saves/game_name.sol</pre>
+    <p>Ruffle exposes a <code>callExternalInterface</code> hook and save callbacks. Wire them up in the player initialization:</p>
+    <pre>player.addEventListener("savegame", async (e) =&gt; {
+  await fetch(`/saves/${e.detail.name}.sol`, {
+    method: 'PUT',
+    body: e.detail.data,
+    headers: { 'Content-Type': 'application/octet-stream' }
+  });
+});
+
+player.addEventListener("loadgame", async (e) =&gt; {
+  const res = await fetch(`/saves/${e.detail.name}.sol`);
+  if (res.ok) e.detail.resolve(await res.arrayBuffer());
+  else e.detail.resolve(null);
+});</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎮 Game Library</div>
+  <div class="card">
+    <p>All <code>.swf</code> files live in <code>userdata/common/arcade/library/</code>. They are shared read-only across all users. The arcade frontend reads <code>library.json</code> to build the game browser UI.</p>
+    <pre>userdata/common/arcade/library/
+  game1.swf
+  game2.swf
+  game1.png             ← thumbnail (optional)
+  library.json</pre>
+    <pre># library.json format:
+[
+  {
+    "id":    "game1",
+    "title": "My Flash Game",
+    "swf":   "library/game1.swf",
+    "thumb": "library/game1.png"
+  },
+  ...
+]</pre>
+    <p>To add a game: drop the <code>.swf</code> (and optional thumbnail) into <code>library/</code> and add an entry to <code>library.json</code>. No service restart required — static files are served directly by nginx.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+  <div class="card">
+    <p>Save files are stored at <code>userdata/{NAME}/arcade/saves/</code>, where <code>NAME</code> is the Authentik username injected by Caddy. Each user's saves are completely isolated. This path follows the same per-user convention as other services on the server.</p>
+    <pre>userdata/
+  alice/
+    arcade/
+      saves/
+        game1.sol
+        game2.sol
+  bob/
+    arcade/
+      saves/
+        game1.sol       ← Bob's separate save — never touches Alice's</pre>
+    <p>See the <strong>SSO tab → User Data Storage</strong> for the full cross-service user data architecture.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🔁 Auto-Start on Boot</div>
+  <div class="card">
+    <pre># Add to D:\Server\Scripts\start_docker_services.bat:
+wsl -d Ubuntu -- bash -c "cd ~/arcade && docker-compose up -d >> ~/startup.log 2>&1"
+
+# In Task Scheduler:
+# Name: Flash Arcade
+# Trigger: At startup, delay 2 minutes
+# Action: Run start_docker_services.bat (or add the line above to your existing bat)</pre>
+    <pre># Open firewall for arcade port:
+netsh advfirewall firewall add rule name="Flash Arcade" dir=in action=allow protocol=TCP localport=[ARCADE_PORT]</pre>
+  </div>
+</div>
+
+</body>
+</html>
