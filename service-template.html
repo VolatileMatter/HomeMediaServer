@@ -1074,6 +1074,8 @@ Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></spa
        • Identify confusing UX before onboarding real users
        • Communicate what a service looks like to people helping
          with the binder who can't access the live service
+       • Assess theming options and CSS customizability before
+         committing time to a full theme overhaul
      
      GUIDELINES:
      • Use .preview-chrome + .preview-bar + .preview-body structure
@@ -1092,6 +1094,41 @@ Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></spa
      user settings, and any service-specific unique screens.
      Focus on layout and information hierarchy — exact pixel-perfect
      accuracy is not the goal.
+     ───────────────────────────────────────────────────────────────
+     THEMING SECTION (required in every UI Preview pane):
+     Every service page must include a "🎨 Theming & Customization"
+     section below the mock frames. It should answer four questions:
+     
+     1. DOES THE SERVICE HAVE BUILT-IN THEME SUPPORT?
+        • Can the user switch themes inside the service's own UI?
+          (e.g. Jellyfin has built-in theme picker, dark/light mode)
+        • Are there community theme packs? Where to find them?
+        • Rate the built-in theming: None / Basic / Good / Excellent
+     
+     2. CAN THE CSS BE OVERRIDDEN FROM OUTSIDE THE SERVICE?
+        • Does Caddy support JS/CSS injection for this service?
+          (some services block injection via CSP headers)
+        • Can custom CSS be dropped into the service's data folder?
+        • Is there an official "custom CSS" field in the service UI?
+        • Rate CSS override difficulty: Easy / Moderate / Hard / Blocked
+     
+     3. HOW HARD IS IT TO MATCH THE SERVER'S DARK BINDER AESTHETIC?
+        • What's the dominant color in the service's default UI?
+        • Are the accent colors (backgrounds, borders, text) easy to
+          remap to the server palette (--accent gold, --bg dark navy)?
+        • Does the service use a CSS framework (Tailwind, Bootstrap,
+          Material) that makes variable overrides easier or harder?
+        • Overall effort estimate: 30 min / Half day / Full day / Not feasible
+     
+     4. KNOWN CSS VARIABLES OR OVERRIDE HOOKS
+        • List any documented CSS custom properties the service exposes
+        • List the relevant selectors for background, accent, sidebar
+        • Link to any community theming resources or GitHub issues
+     
+     Use the three-tier rating system in the Theming card:
+       🟢 Easy    — built-in theme picker or simple CSS file drop-in
+       🟡 Moderate — requires Caddy injection or config file edits
+       🔴 Hard    — CSP blocks injection; must patch source or use a fork
 ═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-uipreview">
 
@@ -1162,19 +1199,129 @@ Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></spa
     </div>
   </div>
 
-  <!-- ── Notes for UI iteration ── -->
+  <!-- ── Theming & Customization ──
+       REQUIRED in every UI Preview pane. Answer all four questions.
+       Use the difficulty ratings defined in the pane comment above.
+  -->
   <div class="section" style="margin-top:20px">
+    <div class="section-title">🎨 Theming &amp; Customization</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Built-in Theme Support</div>
+        <!--
+          Does the service have a theme picker or dark/light mode toggle
+          built into its own settings UI? Are there community theme packs?
+          Rating: None / Basic / Good / Excellent
+        -->
+        <table>
+          <tr><th>Feature</th><th>Available?</th></tr>
+          <tr><td>Dark / light mode toggle</td><td>✅ / ❌ / ⚠️ Partial</td></tr>
+          <tr><td>Built-in theme picker</td><td>✅ / ❌</td></tr>
+          <tr><td>Community theme packs</td><td>✅ / ❌ — [link if yes]</td></tr>
+          <tr><td>Custom CSS field in UI</td><td>✅ / ❌</td></tr>
+        </table>
+        <p style="margin-top:8px;font-size:.78rem;color:var(--text-dim)">
+          <!-- Fill in: e.g. "Good — has a dark mode and three built-in colour themes.
+               Community themes available on GitHub." -->
+          Rating: <strong>[None / Basic / Good / Excellent]</strong> — [brief explanation]
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">CSS Override Difficulty</div>
+        <!--
+          Can CSS be injected from outside the service (via Caddy, a custom
+          CSS file drop-in, or an official override field)?
+          Check for CSP headers that would block Caddy injection.
+          Rating: 🟢 Easy / 🟡 Moderate / 🔴 Hard / ⛔ Blocked
+        -->
+        <table>
+          <tr><th>Method</th><th>Works?</th></tr>
+          <tr><td>Caddy CSS/JS injection</td><td>✅ / ❌ (CSP blocks) / ⚠️ Partial</td></tr>
+          <tr><td>Custom CSS file drop-in</td><td>✅ / ❌ — [path if yes]</td></tr>
+          <tr><td>Official custom CSS field</td><td>✅ / ❌ — [location if yes]</td></tr>
+          <tr><td>Config-file theme variable</td><td>✅ / ❌ — [key if yes]</td></tr>
+        </table>
+        <p style="margin-top:8px;font-size:.78rem;color:var(--text-dim)">
+          <!-- Fill in: e.g. "🟡 Moderate — CSP prevents Caddy injection on most pages
+               but the service has an official custom CSS field under Settings → Appearance." -->
+          Difficulty: <strong>[🟢 Easy / 🟡 Moderate / 🔴 Hard / ⛔ Blocked]</strong> — [brief explanation]
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Matching the Server Aesthetic</div>
+      <!--
+        How hard would it be to restyle this service to roughly match the
+        server binder's dark-navy / gold-accent look?
+        Factors: color scheme distance, CSS framework used, selector complexity.
+        Effort estimate: 30 min / Half day / Full day / Not feasible
+      -->
+      <p style="font-size:.83rem;margin-bottom:10px">
+        The server binder uses a dark navy background (<code>#0d1117</code>), gold accents (<code>#c8a84b</code>),
+        and Share Tech Mono for monospace text. How well does this service's default theme align,
+        and how much work would a restyle take?
+      </p>
+      <table>
+        <tr><th>Factor</th><th>Assessment</th></tr>
+        <tr><td>Default theme (dark/light/custom)</td><td>[describe the service's default look]</td></tr>
+        <tr><td>Primary accent colour</td><td>[e.g. "Blue — easy to swap via one CSS variable"]</td></tr>
+        <tr><td>CSS framework used internally</td><td>[Tailwind / Bootstrap / Material / None / Unknown]</td></tr>
+        <tr><td>Background colour override</td><td>[Easy — one variable / Hard — hardcoded in 40+ places]</td></tr>
+        <tr><td>Font override</td><td>[Easy / Moderate / Blocked by CSP]</td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:.78rem;color:var(--text-dim)">
+        <!-- Fill in your honest effort estimate and key obstacles. -->
+        Overall effort to match server aesthetic: <strong>[30 min / Half day / Full day / Not feasible]</strong><br>
+        Key obstacle: [e.g. "CSP headers prevent external font loading" or "Theme variables are well-documented and easy to override"]
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Known CSS Variables &amp; Override Hooks</div>
+      <!--
+        List any CSS custom properties the service officially exposes,
+        relevant selectors for background/sidebar/accent, and links to
+        community theming resources. Leave blank and note "None documented"
+        if the service doesn't expose any hooks.
+      -->
+      <pre>/* Known CSS custom properties (fill in from service source or docs): */
+--[variable-name]:  [what it controls]
+--[variable-name]:  [what it controls]
+
+/* Key selectors: */
+body / #app / .layout-wrapper    ← main background
+.sidebar / .nav                  ← sidebar background
+.accent / .btn-primary           ← accent colour
+.topbar / header                 ← top navigation bar
+
+/* To override via custom CSS field or injected stylesheet: */
+:root {
+  --[variable]: #c8a84b;   /* gold accent to match server */
+  --[variable]: #0d1117;   /* dark navy background */
+}
+
+/* Community theming resources: */
+/* [link to theme repo, GitHub issue, or forum thread — or "None found"] */</pre>
+    </div>
+  </div>
+
+  <!-- ── UI Notes & Iteration Log ── -->
+  <div class="section">
     <div class="section-title">📝 UI Notes &amp; Iteration Log</div>
     <div class="card">
       <!--
-        Use this section to note things you want to change or follow up on
-        after seeing the UI. This is the scratchpad for UI decisions.
-        Delete entries once they're resolved.
+        Scratchpad for UI decisions. Delete entries once resolved.
+        Include both layout notes AND theming follow-ups here.
       -->
       <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;color:var(--text-dim)">
-        <li>[ ] Note any UI decisions to revisit here</li>
+        <li>[ ] Note any UI layout decisions to revisit here</li>
         <li>[ ] E.g. "The library grid is too dense on mobile — check if pagination helps"</li>
         <li>[ ] E.g. "User settings are buried 3 levels deep — add a shortcut link from homepage"</li>
+        <li>[ ] E.g. "Theming: custom CSS field exists but doesn't affect the login page — needs Caddy injection for that"</li>
+        <li>[ ] E.g. "The service's blue accent clashes with the gold binder aesthetic — low priority but worth a 30-min pass"</li>
       </ul>
     </div>
   </div>
