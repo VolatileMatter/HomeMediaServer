@@ -79,6 +79,7 @@ const CFG = {
     jukebox:          'jukebox',
     invidious: 'invidious',
     wordle: 'wordle',
+    hoarder: 'hoarder',
   },
 
   // ── PORTS ────────────────────────────────────────────────────────────────
@@ -136,6 +137,8 @@ const CFG = {
     upscayl:           8094,
     pxls:              8095,
     genart:            5052,
+    hoarder: 8101,
+    hoarder_meili: 7700,   // internal only, no subdomain needed
 
     // Gaming
     emulatorjs:        8085,
