@@ -1,171 +1,918 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Photos</title><link rel="stylesheet" href="shared.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Immich</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION
+       Copy this style block into every service page.
+       Do not modify — it matches the shared design system.
+    ═══════════════════════════════════════════════ */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+
+    /* ── Achievement cards ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    .ach-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      transition: border-color .15s;
+    }
+    .ach-card:hover { border-color: rgba(200,168,75,.3); }
+    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+    .ach-footer { display: flex; gap: 6px; align-items: center; }
+    .ach-pts {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(200,168,75,.1);
+      color: var(--accent);
+      border: 1px solid rgba(200,168,75,.2);
+    }
+    .ach-method {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(78,205,196,.08);
+      color: var(--accent3);
+      border: 1px solid rgba(78,205,196,.18);
+    }
+
+    /* ── Storage breakdown grid ── */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* ── Troubleshooting items ── */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+  </style>
+</head>
 <body>
 
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════════════ -->
 <div class="page-header">
   <div class="page-icon">📷</div>
   <div>
-    <h1>Photos</h1>
-    <div class="subtitle">// Immich vs Nextcloud Photos · Self-Hosted Google Photos //</div>
-    <p class="desc">Two options for self-hosted photo storage: Immich (dedicated photo app, closest to Google Photos) or Nextcloud's built-in Photos app. Here's how they compare and why Immich wins for most use cases.</p>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">⚖️ Immich vs Nextcloud Photos — Full Comparison</div>
-  <div class="card">
-    <table>
-      <tr><th>Feature</th><th>Immich</th><th>Nextcloud Photos</th></tr>
-      <tr><td>Purpose-built for photos</td><td>✅ Yes — photos is its only job</td><td>❌ Photos is an add-on to a file sync tool</td></tr>
-      <tr><td>Mobile auto-backup</td><td>✅ Excellent dedicated app (iOS + Android)</td><td>⚠️ OK — uses the Nextcloud mobile app's camera upload feature</td></tr>
-      <tr><td>Google Photos similarity</td><td>⭐⭐⭐⭐⭐ Closest of anything self-hosted</td><td>⭐⭐ Different paradigm (file browser, not a photo viewer)</td></tr>
-      <tr><td>Face recognition</td><td>✅ Yes, runs locally on CPU/GPU</td><td>⚠️ Via "Recognize" plugin — works but slower to configure</td></tr>
-      <tr><td>AI smart search ("beach 2023")</td><td>✅ CLIP model, runs locally</td><td>⚠️ Basic — relies on EXIF metadata, not image content</td></tr>
-      <tr><td>Duplicate detection</td><td>✅ Built-in</td><td>❌ No</td></tr>
-      <tr><td>Map view (photos on a map)</td><td>✅ Built-in with GPS data</td><td>⚠️ Via plugin</td></tr>
-      <tr><td>Album sharing (public links)</td><td>✅ Built-in</td><td>✅ Via Nextcloud sharing</td></tr>
-      <tr><td>Video support</td><td>✅ Excellent — auto-transcodes for web</td><td>⚠️ OK — streams files as-is</td></tr>
-      <tr><td>Photo editing</td><td>❌ View only</td><td>⚠️ Basic filters via web client</td></tr>
-      <tr><td>File access / WebDAV</td><td>❌ Not a file manager</td><td>✅ Full file access to any synced folder</td></tr>
-      <tr><td>Storage location</td><td>Dedicated /photos folder</td><td>Shared with all Nextcloud files</td></tr>
-      <tr><td>Resource usage</td><td>Higher (ML models for face/search)</td><td>Lower (shares Nextcloud's Apache/MySQL)</td></tr>
-      <tr><td>SSO (Authentik OIDC)</td><td>✅ Native OIDC support</td><td>✅ Via user_oidc app</td></tr>
-      <tr><td>Setup complexity</td><td>Medium (Docker in WSL2)</td><td>Low (already installed with Nextcloud)</td></tr>
-    </table>
-    <div class="callout callout-dragon">
-      <div class="callout-icon">🐉</div>
-      <div class="callout-body"><strong>Recommendation: Use Immich.</strong> If you want an experience that feels like Google Photos — beautiful timeline, face albums, "On This Day", map view, smart search — Immich is the only self-hosted option that genuinely delivers it. Nextcloud Photos is functional but it's a photo viewer bolted onto a file sync tool. The setup complexity difference is minor.<br><br>That said, if you only need "a place to store and browse photos" and you already have Nextcloud running, the built-in Photos app might be enough. Use Immich if you want to actually replace Google Photos.</div>
+    <h1>Immich</h1>
+    <div class="subtitle">
+      // Self-Hosted Google Photos · Port <span data-cfg="port:immich"></span> · Docker WSL2 · Authentik OIDC //
     </div>
+    <p class="desc">
+      Immich is a dedicated self-hosted photo and video backup solution — the closest thing to Google Photos available. It handles auto-backup from mobile, face recognition, AI-powered smart search, map view, shared albums, and duplicate detection. All runs locally; no data leaves the server.
+    </p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 Recommendation: Run Immich. Install after Nextcloud is up. They serve different purposes — Nextcloud for files/documents, Immich for photos/videos.</div>
-
-
-<div class="callout callout-warn">
-  <div class="callout-icon">⚠️</div>
-  <div class="callout-body"><strong>WSL2 / Docker required.</strong> Immich is officially Linux/Docker only. On Windows, the cleanest path is WSL2 + Docker Compose. This also means Immich won't interfere with your Windows services at all — it's isolated in WSL2.</div>
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
 </div>
 
-<div class="section">
-  <div class="section-title">⚙️ Installation via WSL2 + Docker <span class="tag tag-docker">WSL2</span></div>
 
-  <div class="steps">
-    <div class="step">
-      <div class="step-content">
-        <strong>Ensure WSL2 + Docker are installed</strong>
-        <p>See the RomM tab for WSL2 + Docker install steps. If you set up RomM first, this is already done.</p>
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div id="complete-sub" style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Mark as done → activates Overview tab
       </div>
     </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Create Immich directory and download official compose file</strong>
-        <pre>mkdir ~/immich && cd ~/immich
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>WSL2 + Docker required.</strong> Immich is Linux/Docker only. On Windows, run it inside WSL2 via Docker Compose. It won't interfere with Windows services — it's fully isolated in WSL2. If you've already set up RomM, WSL2 and Docker are already installed.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Installation <span class="tag tag-docker">WSL2 + Docker</span></div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Confirm WSL2 + Docker are installed</strong>
+          <p>See the RomM tab for WSL2 + Docker setup. If RomM is already running, skip this — you're good.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Create Immich directory and download official compose file</strong>
+          <pre>mkdir ~/immich && cd ~/immich
 wget -O docker-compose.yml https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
 wget -O .env https://github.com/immich-app/immich/releases/latest/download/example.env</pre>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Edit the .env file</strong>
-        <pre># Key settings in .env:
-UPLOAD_LOCATION=/mnt/d/Photos/Immich    # Windows D:\Photos\Immich
-DB_PASSWORD=strongpassword
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Edit the .env file</strong>
+          <pre># Key values to set in .env:
+UPLOAD_LOCATION=/mnt/d/Photos/Immich    # maps to D:\Photos\Immich on Windows
+DB_PASSWORD=your_strong_password_here
 IMMICH_VERSION=release</pre>
-        <p>The <code>UPLOAD_LOCATION</code> points to your Windows storage drive via the WSL2 mount. Photos uploaded to Immich land here.</p>
+          <p>The <code>UPLOAD_LOCATION</code> is where all uploaded photos land. Point it at your large media drive so photos don't fill up WSL2's virtual disk.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Start Immich</strong>
-        <pre>docker-compose up -d
 
-# First startup takes 2-3 minutes while it initializes the database.
-# Access at http://localhost:2283</pre>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create the D:\Photos\Immich folder on Windows first</strong>
+          <pre># In PowerShell:
+New-Item -ItemType Directory -Force "D:\Photos\Immich"</pre>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Create admin account at http://localhost:2283</strong>
-        <p>First visit shows a signup page. Create your admin account. Then add users via Administration → Users → Create User.</p>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Start Immich</strong>
+          <pre>cd ~/immich
+docker-compose up -d
+
+# First startup takes 2–3 minutes while it initialises the database.
+# Access at http://localhost:<span data-cfg="port:immich"></span></pre>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Auto-start on Windows boot</strong>
-        <pre># Add to Task Scheduler (At startup, delay 3 minutes):
-# Action: wsl -d Ubuntu -- bash -c "cd ~/immich && docker-compose up -d"</pre>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Create the admin account 🔐</strong>
+          <p>Navigate to <code>http://localhost:<span data-cfg="port:immich"></span></code> — the first visit shows a signup page. Create your admin account. Then add users via <strong>Administration → Users → Create User</strong>.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Open firewall</strong>
-        <pre>netsh advfirewall firewall add rule name="Immich" dir=in action=allow protocol=TCP localport=2283</pre>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Open Windows Firewall for port <span data-cfg="port:immich"></span></strong>
+          <pre>netsh advfirewall firewall add rule name="Immich" dir=in action=allow protocol=TCP localport=<span data-cfg="port:immich"></span></pre>
+        </div>
       </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Auto-start on Windows boot via Task Scheduler 🔐</strong>
+          <pre># In Task Scheduler → Create Task:
+# Trigger: At startup, delay 3 minutes
+# Action:  wsl -d Ubuntu -- bash -c "cd ~/immich && docker-compose up -d"</pre>
+        </div>
+      </div>
+
     </div>
   </div>
-</div>
 
-<hr>
+  <hr>
 
-<div class="section">
-  <div class="section-title">📱 Mobile Apps</div>
-  <div class="card">
-    <table>
-      <tr><th>Platform</th><th>Download</th><th>Auto-backup?</th></tr>
-      <tr><td>iOS</td><td>App Store: "Immich"</td><td>✅ Background auto-backup</td></tr>
-      <tr><td>Android</td><td>Play Store or F-Droid: "Immich"</td><td>✅ Background auto-backup</td></tr>
-    </table>
-    <p style="margin-top:10px">In the mobile app: Settings → Server URL → enter <code>http://[server-ip]:2283</code>. Log in with your Immich account. Enable "Background Backup" — the app will automatically upload new photos as they're taken.</p>
-  </div>
-</div>
-
-<hr>
-
-<div class="section">
-  <div class="section-title">✨ Key Features</div>
-  <div class="grid-2">
+  <div class="section">
+    <div class="section-title">🌐 Caddy Reverse Proxy <span class="tag tag-caddy">Caddy</span></div>
     <div class="card">
-      <div class="card-title">Face Recognition &amp; People Albums</div>
-      <p>Immich automatically groups photos by faces. After initial processing (can take hours on a large library), you'll see "People" in the UI — tap a face to name the person and see all their photos. Processing uses the CPU and runs in the background.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">Smart Search</div>
-      <p>Type "beach sunset 2023" and Immich finds matching photos using CLIP (AI image understanding). No need to tag photos manually. Runs locally — no data leaves your server.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">Album Sharing</div>
-      <p>Create albums and share them with other Immich users on your server, or generate a public share link (read-only, no account needed) for external guests.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">External Library</div>
-      <p>Point Immich at an existing folder of photos without moving them. Administration → External Libraries → add your D:\Photos folder. Immich indexes and displays them without copying.</p>
+      <p>Add to your Caddyfile at <code data-cfg="path:caddyfile"></code>:</p>
+      <pre>photos.<span data-cfg="domain"></span> {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:<span data-cfg="port:immich"></span>
+}</pre>
+      <p>Then reload Caddy:</p>
+      <pre>caddy reload --config "C:\caddy\Caddyfile"</pre>
     </div>
   </div>
-</div>
 
-<hr>
+  <hr>
 
-<div class="section">
-  <div class="section-title">💾 Storage Estimates</div>
-  <div class="card">
-    <table>
-      <tr><th>Library Size</th><th>Storage</th><th>Notes</th></tr>
-      <tr><td>10,000 photos</td><td>~30–80 GB</td><td>Depends on phone camera resolution</td></tr>
-      <tr><td>50,000 photos</td><td>~150–400 GB</td><td>Average family/friends library</td></tr>
-      <tr><td>Photos + 4K video</td><td>Add 1–5 GB per video</td><td>Video is the space killer</td></tr>
-    </table>
-    <p style="margin-top:8px">Store photos on your large media HDD (e.g. <code>D:\Photos\Immich</code>). The Immich database (metadata, thumbnails, ML models) is ~5GB and stays in WSL2's home directory.</p>
+  <div class="section">
+    <div class="section-title">🔐 SSO — Authentik OIDC</div>
+    <div class="card">
+      <p>Immich supports OAuth2/OIDC natively. Configure it in <strong>Administration → OAuth</strong>.</p>
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Create an Authentik Application 🔐</strong>
+            <p>In Authentik admin (<code data-cfg="authentik-admin"></code>) → Applications → Create:</p>
+            <pre>Name:        Immich
+Slug:        immich
+Launch URL:  <span data-cfg="url:immich"></span>
+Provider:    Create new OAuth2/OIDC Provider
+  Redirect URI: <span data-cfg="url:immich"></span>/auth/login
+  Signing key:  (select your existing key)
+  Access:       authentik-family + authentik-admins groups</pre>
+            <p>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong> — you'll need them in the next step.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Configure Immich OAuth</strong>
+            <p>In Immich: <strong>Administration → OAuth → Enable OAuth</strong>:</p>
+            <pre>Issuer URL:     <span data-cfg="oidc-issuer:immich"></span>
+Client ID:      (from Authentik)
+Client Secret:  (from Authentik)
+Scope:          openid email profile
+Button text:    Sign in with Authentik
+Auto-register:  ✅ (creates Immich account on first SSO login)</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Test SSO login in an incognito window</strong>
+            <p>Open <code data-cfg="url:immich"></span></code> in an incognito tab, click "Sign in with Authentik", and confirm it authenticates and lands on the Immich timeline.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <p>Immich supports OAuth2/OIDC natively. Administration → OAuth → enable → set your Google OAuth or Authentik OIDC endpoint. Users then see "Sign in with Google" on the login page.</p>
+  <hr>
+
+  <div class="section">
+    <div class="section-title">📚 Importing an Existing Photo Library</div>
+    <div class="card">
+      <div class="card-title">Option A — External Library (non-destructive, recommended first)</div>
+      <p>Point Immich at your existing photos folder without moving files. Immich indexes and displays them without copying. In Immich: <strong>Administration → External Libraries → Create</strong>, set the import path to <code>/mnt/d/Photos</code> (the WSL2 path to <code>D:\Photos</code>).</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">External library photos are read-only in Immich — you can view them but the mobile app backup goes to <code>UPLOAD_LOCATION</code> instead. Run a scan after adding to index the files.</div>
+      </div>
+
+      <div class="card-title" style="margin-top:14px">Option B — Upload via mobile app</div>
+      <p>Install the Immich mobile app, point it at your server, and enable <strong>Background Backup</strong>. The app will upload all existing camera roll photos on first sync, then auto-backup new ones as they're taken.</p>
+
+      <div class="card-title" style="margin-top:14px">Option C — Bulk upload via CLI</div>
+      <pre># From WSL2, use the Immich CLI to bulk-import a folder:
+npx @immich/cli upload --server http://localhost:<span data-cfg="port:immich"></span> --key YOUR_API_KEY /mnt/d/Photos/OldLibrary/</pre>
+      <p>Generate an API key in Immich: <strong>Account Settings → API Keys → New API Key</strong>.</p>
+    </div>
   </div>
-</div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">📷 Immich is running in Docker on WSL2. Auto-backup is working from mobile. Face recognition and smart search process in the background — large libraries can take hours on first run.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:immich"></code></td></tr>
+          <tr><td>Web (LAN)</td><td><code>http://[server-ip]:<span data-cfg="port:immich"></span></code></td></tr>
+          <tr><td>Admin panel</td><td><code data-cfg="url:immich"></code>/admin</td></tr>
+          <tr><td>Mobile server URL</td><td><code>http://[server-ip]:<span data-cfg="port:immich"></span></code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:immich"></span></td></tr>
+          <tr><td>Install type</td><td>Docker Compose in WSL2</td></tr>
+          <tr><td>Compose file</td><td><code>~/immich/docker-compose.yml</code></td></tr>
+          <tr><td>Auth method</td><td>Authentik OIDC (native)</td></tr>
+          <tr><td>Upload path (Windows)</td><td><code data-cfg="path:photos"></code>\Immich</td></tr>
+          <tr><td>Upload path (WSL2)</td><td><code>/mnt/d/Photos/Immich</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Apps &amp; Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Browser (any)</td><td>Go to <code data-cfg="url:immich"></code> — full-featured web UI</td></tr>
+        <tr><td>iOS — Immich app</td><td>App Store: "Immich" → Settings → Server URL → <code>http://[server-ip]:<span data-cfg="port:immich"></span></code></td></tr>
+        <tr><td>Android — Immich app</td><td>Play Store or F-Droid: "Immich" → same server URL setup</td></tr>
+      </table>
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">In the mobile app: go to <strong>Settings → Background Backup</strong> and enable it. The app will automatically upload new photos as you take them, and can back up your existing camera roll on first run.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">✨ Key Features</div>
+    <div class="grid-2">
+
+      <div class="card">
+        <div class="card-title">📅 Photo Timeline</div>
+        <p>Immich displays all photos in a chronological timeline sorted by date taken (from EXIF data), just like Google Photos. Swipe or scroll through years, months, and days. Thumbnail grid updates in real-time as new photos are backed up.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Face Recognition &amp; People Albums</div>
+        <p>Immich automatically detects and groups faces. After initial processing (which can take hours on a large library), you'll see a <strong>People</strong> section in the sidebar. Tap a face to name the person and browse all their photos. Runs entirely on the server CPU — no cloud involved.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔍 Smart Search (CLIP)</div>
+        <p>Type "beach sunset 2023" or "dog in snow" and Immich returns semantically matching photos using the CLIP AI model. It understands the <em>content</em> of images, not just their filenames or tags. No photo tagging required. Runs locally.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🗺️ Map View</div>
+        <p>Any photo with GPS EXIF data appears on an interactive map. Navigate the map to browse photos by location. Useful for travel photos — see exactly where every shot was taken.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📁 Albums &amp; Sharing</div>
+        <p>Create named albums and add photos to them manually or by date range. Share albums with other Immich users on the server, or generate a public share link (read-only, no account required) for external guests.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔁 Duplicate Detection</div>
+        <p>Immich detects duplicate photos across your library automatically. Review duplicates via <strong>Administration → Jobs → Duplicate Detection</strong>. Saves space and keeps the library clean without manual review.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎞️ Video Support</div>
+        <p>Videos are fully supported — Immich auto-transcodes them for smooth browser streaming at any bitrate. Original files are preserved. Videos appear in the timeline alongside photos.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📚 External Library</div>
+        <p>Point Immich at an existing folder of photos (e.g. <code>D:\Photos\Archive</code>) without moving files. Immich indexes them for search and display. Files stay in place — Immich just reads them.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">💾 Storage Estimates</div>
+    <div class="card">
+      <table>
+        <tr><th>Library Size</th><th>Storage</th><th>Notes</th></tr>
+        <tr><td>10,000 photos</td><td>~30–80 GB</td><td>Depends on phone camera resolution</td></tr>
+        <tr><td>50,000 photos</td><td>~150–400 GB</td><td>Typical family/friend group library</td></tr>
+        <tr><td>+ 4K video</td><td>Add 1–5 GB per video</td><td>Video is the dominant space consumer</td></tr>
+      </table>
+      <p style="margin-top:8px">Store photos on your large media drive (<code data-cfg="path:photos"></code>\Immich</code>). The Immich database, thumbnails, and ML models live in WSL2 home (~5 GB total) and don't need to be on the large drive.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p data-cfg="version:immich">Check versions.json</p>
+
+      <div class="card-title" style="margin-top:14px">How to update Immich</div>
+      <p>Immich does <strong>not</strong> auto-update. Check the <a href="https://github.com/immich-app/immich/releases" target="_blank">Immich releases page</a> periodically, especially after any major version bump.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Pull the latest images and restart</strong>
+            <pre>cd ~/immich
+docker-compose pull
+docker-compose up -d</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify the update</strong>
+            <p>Open <code data-cfg="url:immich"></code> and check <strong>Administration → About</strong> for the new version number. Test SSO login in an incognito window. Record the confirmed working version in <code>versions.json</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warn" style="margin-top:12px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Never skip major versions.</strong> Immich database migrations run sequentially. If you skip from v1.x to v1.x+5, always update one major version at a time to avoid migration failures.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Check for Immich updates on GitHub releases page</td></tr>
+        <tr><td>Monthly</td><td>Review container logs: <code>docker-compose logs --tail=100</code> in <code>~/immich</code></td></tr>
+        <tr><td>Monthly</td><td>Run duplicate detection job: Administration → Jobs → Duplicate Detection</td></tr>
+        <tr><td>After any update</td><td>Test SSO login in incognito window</td></tr>
+        <tr><td>After any update</td><td>Record confirmed working version in <code>versions.json</code></td></tr>
+        <tr><td>After any domain change</td><td>Update redirect URI in Authentik (<code data-cfg="authentik-admin"></code>) → Applications → Immich → Edit Provider</td></tr>
+        <tr><td>After any domain change</td><td>Update Caddy config at <code data-cfg="path:caddyfile"></code> with the new subdomain</td></tr>
+        <tr><td>After any domain change</td><td>Update the OAuth Issuer URL in Immich Administration → OAuth settings</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">⚡ Known Breakpoints</div>
+    <div class="card">
+      <div class="trouble-item danger">
+        <div class="trouble-q">🔴 Database migration failure on update</div>
+        <div class="trouble-a">If you skip multiple major versions, the Postgres migration chain can break. Always update incrementally. If this happens, restore from a database backup and re-run the migration from the correct version.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">🟡 WSL2 network changes break the Task Scheduler auto-start</div>
+        <div class="trouble-a">After Windows updates, WSL2 networking occasionally resets, causing the startup task to fail silently. Check if Immich is running by visiting <code>http://[server-ip]:<span data-cfg="port:immich"></span></code>. If it's down, run <code>cd ~/immich && docker-compose up -d</code> manually in WSL2.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">🟡 ML models stop processing (face recognition / smart search stall)</div>
+        <div class="trouble-a">The ML container occasionally hangs, particularly after host sleep/hibernate. Restart it with <code>docker-compose restart immich-machine-learning</code> from <code>~/immich</code>.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🎯 How Immich Achievements Work</div>
+    <div class="card">
+      <p>Immich does not have a native webhook system. Achievements are triggered by <strong>polling the Immich API</strong> — the achievement server periodically queries Immich's REST API for stats (upload counts, album count, etc.) and fires triggers when thresholds are crossed.</p>
+      <pre># Immich API — get asset stats for a user:
+GET http://localhost:<span data-cfg="port:immich"></span>/api/assets/statistics
+Headers:
+  x-api-key: USER_API_KEY
+
+# Example response:
+{
+  "images": 1042,
+  "videos": 38,
+  "total":  1080
+}</pre>
+      <p>Generate a per-user API key via <strong>Account Settings → API Keys → New API Key</strong> in the Immich web UI. Store these in the achievement server config so it can poll each user's stats.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏅 Available Achievements</div>
+    <div class="ach-grid">
+
+      <div class="ach-card">
+        <div class="ach-icon">📤</div>
+        <div class="ach-name">First Upload</div>
+        <div class="ach-desc">Back up your first photo to the server</div>
+        <div class="ach-footer">
+          <span class="ach-pts">10 XP</span>
+          <span class="ach-method">API poll (asset count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📷</div>
+        <div class="ach-name">Shutterbug</div>
+        <div class="ach-desc">Upload 1,000 photos</div>
+        <div class="ach-footer">
+          <span class="ach-pts">25 XP</span>
+          <span class="ach-method">API poll (asset count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📸</div>
+        <div class="ach-name">Archivist</div>
+        <div class="ach-desc">Upload 10,000 photos</div>
+        <div class="ach-footer">
+          <span class="ach-pts">50 XP</span>
+          <span class="ach-method">API poll (asset count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🎞️</div>
+        <div class="ach-name">Cinematographer</div>
+        <div class="ach-desc">Back up your first video</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 XP</span>
+          <span class="ach-method">API poll (video count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📁</div>
+        <div class="ach-name">Curator</div>
+        <div class="ach-desc">Create your first album</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 XP</span>
+          <span class="ach-method">API poll (album count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🔗</div>
+        <div class="ach-name">Open Gallery</div>
+        <div class="ach-desc">Share an album via public link</div>
+        <div class="ach-footer">
+          <span class="ach-pts">10 XP</span>
+          <span class="ach-method">API poll (shared links)</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Storage Overview</div>
+    <div class="storage-breakdown">
+      <div class="storage-cell">
+        <div class="storage-cell-label">Photo Library</div>
+        <div class="storage-cell-val">30 GB – 400+ GB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Postgres DB</div>
+        <div class="storage-cell-val">~500 MB – 2 GB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Thumbnails</div>
+        <div class="storage-cell-val">~1–5 GB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">ML Models</div>
+        <div class="storage-cell-val">~1–2 GB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Video Transcodes</div>
+        <div class="storage-cell-val">~1–10 GB (cached)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Where Everything Lives</div>
+    <div class="card">
+      <pre>D:\Photos\Immich\                  ← uploaded photos and videos (UPLOAD_LOCATION)
+  upload\                           ← originals from mobile backup
+  library\                          ← auto-organised by date
+  thumbs\                           ← generated thumbnails
+  encoded-video\                    ← transcoded video cache
+
+~/immich/                           ← Docker Compose files (WSL2 home)
+  docker-compose.yml
+  .env
+
+(Docker volume — immich_model-cache) ← ML models (CLIP, face recognition)
+(Docker volume — immich_pgdata)      ← Postgres database
+
+# To find Docker volume paths in WSL2:
+docker volume inspect immich_pgdata</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Per-User Data</div>
+    <div class="card">
+      <div class="card-title">What Immich stores per user</div>
+      <p>All per-user data (photo library, albums, favourites, face assignments, shared links, API keys) is stored inside Immich's <strong>Postgres database</strong> (Docker volume <code>immich_pgdata</code>). The actual photo files in <code>D:\Photos\Immich</code> are physically separated but logically tied to the owning user in the database.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>All per-user metadata is in the Postgres database.</strong> No per-user folder in <code data-cfg="path:users"></code> is needed for Immich. Back up the database volume and the <code data-cfg="path:photos"></code>\Immich</code> folder to fully preserve all user data.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td>Postgres database</td><td>Docker volume <code>immich_pgdata</code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>Photo library (originals)</td><td><code data-cfg="path:photos"></code>\Immich\upload</td><td>As uploaded</td><td>🔴 High</td></tr>
+        <tr><td>Compose + .env config</td><td><code>~/immich/</code> (WSL2)</td><td>After any config change</td><td>🟡 Medium</td></tr>
+        <tr><td>Thumbnails + transcodes</td><td><code data-cfg="path:photos"></code>\Immich\thumbs, encoded-video</td><td>Skip — regeneratable</td><td>🟢 Low</td></tr>
+      </table>
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">To back up the Postgres database, use <code>docker exec immich_postgres pg_dumpall -U postgres > immich_backup.sql</code> from WSL2. Schedule this via Task Scheduler daily, outputting to <code>D:\Backups\immich\</code>.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Immich is unreachable — containers aren't running</div>
+      <div class="trouble-a">
+        Check if the containers are up:<br>
+        <code>cd ~/immich && docker-compose ps</code><br><br>
+        If any containers are stopped or restarting:<br>
+        <code>docker-compose logs --tail=50</code><br><br>
+        Try a full restart:<br>
+        <code>docker-compose down && docker-compose up -d</code>
+      </div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Database migration failed after update</div>
+      <div class="trouble-a">
+        Check the Postgres container logs:<br>
+        <code>docker-compose logs immich_postgres --tail=100</code><br><br>
+        If migration failed, roll back by restoring your most recent <code>immich_backup.sql</code> backup, then update one version at a time rather than skipping. Do not run the containers with a partially-migrated database.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 SSO login redirects back to login page without signing in</div>
+      <div class="trouble-a">
+        The redirect URI in Authentik must exactly match the one Immich sends. In Authentik admin (<code data-cfg="authentik-admin"></code>) → Applications → Immich → Edit Provider → verify the Redirect URI is:<br>
+        <code><span data-cfg="url:immich"></span>/auth/login</code><br><br>
+        Also check that the Issuer URL in Immich Administration → OAuth matches <code data-cfg="oidc-issuer:immich"></code>.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Face recognition / smart search not processing</div>
+      <div class="trouble-a">
+        The ML container may have hung (common after host sleep):<br>
+        <code>docker-compose restart immich-machine-learning</code><br><br>
+        Then go to <strong>Administration → Jobs</strong> and manually queue a Smart Search or Face Detection job to resume processing.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Mobile backup not running in background</div>
+      <div class="trouble-a">
+        On iOS, Immich background backup requires the app to have Background App Refresh enabled (Settings → Immich → Background App Refresh = On). On Android, ensure Immich is excluded from battery optimisation. Also confirm the server URL in the app resolves correctly from outside the LAN if using an external URL.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">🟢 Thumbnails are missing or broken after moving the upload folder</div>
+      <div class="trouble-a">
+        If you change <code>UPLOAD_LOCATION</code> in <code>.env</code>, update the Docker volume mount in <code>docker-compose.yml</code> to match, then regenerate thumbnails: <strong>Administration → Jobs → Generate Thumbnails → Run All</strong>. This can take a while on a large library.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Check for Immich updates (GitHub releases)</td></tr>
+        <tr><td>Monthly</td><td>Review container logs for errors</td></tr>
+        <tr><td>Monthly</td><td>Run duplicate detection job in Administration → Jobs</td></tr>
+        <tr><td>After any update</td><td>Test SSO login in incognito window</td></tr>
+        <tr><td>After any update</td><td>Record confirmed working version in <code>versions.json</code></td></tr>
+        <tr><td>After any domain change</td><td>Update redirect URI in Authentik AND Issuer URL in Immich OAuth settings</td></tr>
+        <tr><td>After any domain change</td><td>Update Caddy config at <code data-cfg="path:caddyfile"></code></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Useful Commands</div>
+    <div class="card">
+      <pre># Check running containers
+cd ~/immich && docker-compose ps
+
+# View recent logs
+docker-compose logs --tail=100
+
+# Restart a specific container
+docker-compose restart immich-server
+docker-compose restart immich-machine-learning
+docker-compose restart immich_postgres
+
+# Backup the database
+docker exec immich_postgres pg_dumpall -U postgres > /mnt/d/Backups/immich/immich_$(date +%Y%m%d).sql
+
+# Open a Postgres shell (for advanced debugging)
+docker exec -it immich_postgres psql -U postgres -d immich
+
+# Trigger a full library re-scan (if thumbnails or metadata are broken)
+# Administration → Jobs → Run All (in web UI)
+
+# Update Immich
+docker-compose pull && docker-compose up -d</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete checkbox
+═══════════════════════════════════════════════════════════════ -->
+<script>
+  // ── Sub-tab switching ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Setup complete checkbox ──
+  const STORAGE_KEY = 'immich_setup_complete';
+
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      overviewBtn.style.fontWeight = '700';
+      overviewBtn.style.color = 'var(--accent3)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      overviewBtn.style.fontWeight = '';
+      overviewBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+
+    // Apply data-cfg attributes via config.js
+    if (typeof CFG !== 'undefined' && CFG.applyAll) CFG.applyAll();
+  });
+</script>
 
 </body>
 </html>
