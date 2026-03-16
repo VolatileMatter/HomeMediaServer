@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Monica</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<!-- ╔══════════════════════════════════════════════════════════════════╗
+     ║  Monica CRM — Personal Relationship Manager                      ║
+     ║  Docker in WSL2 · monicahq/monica:fpm · Port 8100               ║
+     ║  Per-user storage: userdata/{NAME}/monica/                       ║
+     ║  AI Inbox: userdata/{NAME}/inbox/ → Ollama watchdog              ║
+     ╚══════════════════════════════════════════════════════════════════╝ -->
+
+<div class="page-header">
+  <div class="page-icon">💛</div>
+  <div>
+    <h1>Monica</h1>
+    <div class="subtitle">
+      // Personal CRM · Port <span data-cfg="port:monica"></span> · Docker WSL2 · Authentik OIDC · AI Inbox //
+    </div>
+    <p class="desc">
+      Monica is a personal relationship manager — track contacts, life events, reminders, and notes about the people you care about. On this server it also has an AI-powered inbox: drop a <code>.txt</code> or <code>.md</code> file into your inbox folder and Ollama automatically extracts contact data and creates Monica entries.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Check when Monica is running, SSO is connected, all users have accounts, and the AI inbox watchdog is active.
+      </div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">
+    🐉 V1 Goal: Monica running on port <span data-cfg="port:monica"></span> at <code data-cfg="url:monica"></code>. Per-user data isolated under <code>userdata/{NAME}/monica/</code>. AI inbox watchdog processing <code>.txt</code>/<code>.md</code> drops via Ollama (llama3.1 or mistral).
+  </div>
+
+  <!-- STEP 1: DIRECTORY STRUCTURE -->
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Create Directory Structure <span class="tag tag-admin">🔐 ADMIN ONLY</span></div>
+    <div class="card">
+      <div class="card-title">Per-user folder layout</div>
+      <p>Monica uses an isolated storage structure per user. Create these directories before deploying the container. Repeat for each user you'll be adding to the <code>monica-users</code> group.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create base directories for each user (PowerShell)</strong>
+          <pre># Replace {NAME} with the actual username (e.g. alice, bob)
+$name = "alice"
+
+New-Item -ItemType Directory -Force "D:\Users\$name\monica\storage"
+New-Item -ItemType Directory -Force "D:\Users\$name\monica\db"
+New-Item -ItemType Directory -Force "D:\Users\$name\inbox"
+New-Item -ItemType Directory -Force "D:\Users\$name\inbox\processed"
+New-Item -ItemType Directory -Force "D:\Users\$name\backups"
+
+# Set permissions so WSL2 container user (1000:1000) can write:
+# In WSL2 terminal:
+# chmod -R 755 /mnt/d/Users/$name/monica/
+# chmod -R 755 /mnt/d/Users/$name/inbox/</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Verify the layout matches the expected structure</strong>
+          <pre>userdata/{NAME}/
+  monica/
+    storage/   ← Monica file uploads, avatars, attachments
+    db/        ← MySQL / SQLite database files
+  inbox/
+    *.txt      ← Drop notes here → AI processes automatically
+    *.md       ← Drop markdown notes here → AI processes automatically
+    processed/ ← Files moved here after Ollama has handled them
+  backups/     ← Periodic DB dumps stored here</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 2: DOCKER DEPLOYMENT -->
+  <div class="section">
+    <div class="section-title">🐳 Step 2 — Deploy Monica via Docker <span class="tag tag-docker">DOCKER WSL2</span></div>
+    <div class="card">
+      <div class="card-title">Architecture</div>
+      <p>Monica uses the official <code>monicahq/monica:fpm</code> image. It runs alongside an nginx container (serving the PHP-FPM app) and a MySQL container. Each user's database and storage are bind-mounted from their personal directory on the Windows host.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the compose file</strong>
+          <pre>mkdir -p ~/services/monica && cd ~/services/monica
+
+cat > docker-compose.yml << 'EOF'
+services:
+
+  monica-db:
+    image: mysql:8.0
+    container_name: monica-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: changeme_root
+      MYSQL_DATABASE: monica
+      MYSQL_USER: monica
+      MYSQL_PASSWORD: changeme_monica
+    volumes:
+      - /mnt/d/Users/common/monica/db:/var/lib/mysql
+    networks:
+      - monica-net
+
+  monica:
+    image: monicahq/monica:fpm
+    container_name: monica
+    restart: always
+    depends_on:
+      - monica-db
+    environment:
+      APP_ENV: production
+      APP_KEY: base64:REPLACE_WITH_GENERATED_KEY
+      APP_URL: https://monica.yourdomain.com
+      DB_HOST: monica-db
+      DB_PORT: 3306
+      DB_DATABASE: monica
+      DB_USERNAME: monica
+      DB_PASSWORD: changeme_monica
+      MAIL_MAILER: log
+    volumes:
+      - /mnt/d/Users/common/monica/storage:/var/www/html/storage
+    networks:
+      - monica-net
+
+  monica-nginx:
+    image: nginx:alpine
+    container_name: monica-nginx
+    restart: always
+    depends_on:
+      - monica
+    ports:
+      - "8100:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /mnt/d/Users/common/monica/storage:/var/www/html/storage:ro
+    networks:
+      - monica-net
+
+networks:
+  monica-net:
+    driver: bridge
+EOF</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the nginx config</strong>
+          <pre>cat > nginx.conf << 'EOF'
+server {
+    listen 80;
+    root /var/www/html/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass monica:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+        expires max;
+        log_not_found off;
+    }
+}
+EOF</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Generate the APP_KEY and start the stack</strong>
+          <pre># Generate a key:
+docker run --rm monicahq/monica:fpm php artisan key:generate --show
+# Paste the output into docker-compose.yml → APP_KEY
+
+# Start everything:
+docker compose up -d
+
+# Run first-time migrations:
+docker exec -it monica php artisan migrate --force
+
+# Verify it's running:
+curl http://localhost:8100</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Open Windows Firewall (LAN access)</strong>
+          <pre>netsh advfirewall firewall add rule name="Monica" dir=in action=allow protocol=TCP localport=8100</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 3: SSO -->
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — SSO Integration (Authentik)</div>
+    <div class="v1-banner">
+      🔑 Monica authenticates users through Authentik OIDC so everyone uses the same Google login as every other service on this server. Only members of the <strong>monica-users</strong> group get access.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Create the Authentik group</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>🔐 Create the monica-users group</strong>
+            <pre>Authentik Admin → Directory → Groups → Create
+Name: monica-users
+# Add users who should have Monica access to this group</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Create provider and application in Authentik</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>🔐 Create the OIDC provider</strong>
+            <pre>Authentik Admin → Applications → Providers → Create → OAuth2/OpenID Provider
+
+Name:          Monica
+Client type:   Confidential
+Client ID:     (auto-generated — copy this)
+Client Secret: (auto-generated — copy this)
+Redirect URIs: <span data-cfg="url:monica"></span>/auth/callback</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>🔐 Create the Application</strong>
+            <pre>Authentik Admin → Applications → Applications → Create
+Name:       Monica
+Slug:       monica
+Provider:   (provider above)
+Launch URL: <span data-cfg="url:monica"></span>
+Policy:     Require group → monica-users</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>🔐 Configure OIDC in Monica's environment</strong>
+            <p>Add these to <code>docker-compose.yml</code> under Monica's <code>environment:</code> block, then restart the stack:</p>
+            <pre>SOCIALITE_DRIVER: authentik
+AUTHENTIK_CLIENT_ID: (from provider above)
+AUTHENTIK_CLIENT_SECRET: (from provider above)
+AUTHENTIK_ISSUER: <span data-cfg="oidc-issuer:monica"></span>
+AUTHENTIK_REDIRECT_URI: <span data-cfg="url:monica"></span>/auth/callback</pre>
+            <div class="callout callout-warn">
+              <div class="callout-icon">⚠️</div>
+              <div class="callout-body">Monica's OIDC integration is handled via Laravel Socialite. If the version you're running doesn't have a built-in Authentik driver, use the generic OAuth2 driver with the Authentik endpoints instead. Check the <a href="https://github.com/monicahq/monica" target="_blank">Monica GitHub</a> for the current supported auth providers.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 4: AI INBOX WATCHDOG -->
+  <div class="section">
+    <div class="section-title">🤖 Step 4 — AI Inbox Watchdog</div>
+    <div class="v1-banner">
+      🧠 The inbox watchdog monitors <code>userdata/{NAME}/inbox/</code> for new <code>.txt</code> or <code>.md</code> files. When a file appears, it sends the content to Ollama (llama3.1 or mistral) asking it to extract contact information, then creates or updates the contact in Monica via the API. The file is then moved to <code>inbox/processed/</code>.
+    </div>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Use case:</strong> You've just met someone at an event. You jot notes in a text file: "Met Sarah Chen at the conference. Works at Acme Corp as a lead engineer. Loves hiking. Birthday is March 4th." Drop it in your inbox — Monica creates the contact automatically.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Requirements</div>
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Ollama must be running with <code>llama3.1</code> or <code>mistral</code> pulled</li>
+        <li>Monica API token generated (Settings → API → Create token)</li>
+        <li>Python 3.10+ on the server</li>
+        <li>The watchdog script runs as a Windows Service via NSSM</li>
+      </ul>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Install Python dependencies</strong>
+          <pre>pip install watchdog requests --break-system-packages</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the watchdog script</strong>
+          <p>Save as <code>D:\Scripts\monica_inbox_watchdog.py</code>:</p>
+          <pre>"""
+Monica Inbox Watchdog
+Watches userdata/{user}/inbox/ for .txt/.md files,
+sends content to Ollama for contact extraction,
+creates contact in Monica via API, then moves file to processed/.
+"""
+import os, time, shutil, json, requests
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+USERDATA_ROOT = r"D:\Users"
+OLLAMA_URL    = "http://localhost:11434/api/generate"
+OLLAMA_MODEL  = "llama3.1"   # or "mistral"
+MONICA_URL    = "http://localhost:8100"
+
+# Map each username to their Monica API token
+# Generate tokens: Monica → Settings → API → Create token
+USER_TOKENS = {
+    "alice": "YOUR_ALICE_MONICA_TOKEN",
+    "bob":   "YOUR_BOB_MONICA_TOKEN",
+}
+
+EXTRACTION_PROMPT = """
+Extract contact information from the following note.
+Return ONLY a JSON object with these fields (use null if not found):
+{
+  "first_name": "",
+  "last_name": "",
+  "company": "",
+  "job_title": "",
+  "birthday_day": null,
+  "birthday_month": null,
+  "birthday_year": null,
+  "notes": "",
+  "email": null,
+  "phone": null
+}
+
+Note:
+{NOTE_TEXT}
+"""
+
+def extract_contact(text):
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": EXTRACTION_PROMPT.replace("{NOTE_TEXT}", text),
+        "stream": False
+    }
+    r = requests.post(OLLAMA_URL, json=payload, timeout=120)
+    r.raise_for_status()
+    raw = r.json()["response"].strip()
+    # Strip markdown fences if present
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    return json.loads(raw)
+
+def create_monica_contact(contact, token):
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    payload = {
+        "first_name": contact.get("first_name") or "Unknown",
+        "last_name":  contact.get("last_name")  or "",
+        "company":    contact.get("company")     or "",
+        "job_title":  contact.get("job_title")   or "",
+    }
+    r = requests.post(f"{MONICA_URL}/api/contacts", json=payload, headers=headers, timeout=30)
+    r.raise_for_status()
+    contact_id = r.json()["data"]["id"]
+
+    # Add note if present
+    if contact.get("notes"):
+        note_payload = {"contact_id": contact_id, "body": contact["notes"]}
+        requests.post(f"{MONICA_URL}/api/notes", json=note_payload, headers=headers)
+
+    return contact_id
+
+class InboxHandler(FileSystemEventHandler):
+    def __init__(self, username, token):
+        self.username = username
+        self.token    = token
+        self.inbox    = os.path.join(USERDATA_ROOT, username, "inbox")
+        self.done     = os.path.join(self.inbox, "processed")
+
+    def on_created(self, event):
+        if event.is_directory:
+            return
+        path = event.src_path
+        if not (path.endswith(".txt") or path.endswith(".md")):
+            return
+        time.sleep(1)  # let the file finish writing
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                text = f.read()
+            print(f"[{self.username}] Processing: {os.path.basename(path)}")
+            contact = extract_contact(text)
+            cid = create_monica_contact(contact, self.token)
+            print(f"[{self.username}] Created Monica contact ID {cid}: {contact.get('first_name')} {contact.get('last_name')}")
+            dest = os.path.join(self.done, os.path.basename(path))
+            shutil.move(path, dest)
+            print(f"[{self.username}] Moved to processed/")
+        except Exception as e:
+            print(f"[{self.username}] ERROR processing {path}: {e}")
+
+if __name__ == "__main__":
+    observer = Observer()
+    for user, token in USER_TOKENS.items():
+        inbox = os.path.join(USERDATA_ROOT, user, "inbox")
+        os.makedirs(os.path.join(inbox, "processed"), exist_ok=True)
+        handler = InboxHandler(user, token)
+        observer.schedule(handler, inbox, recursive=False)
+        print(f"Watching {inbox} for user {user}")
+    observer.start()
+    try:
+        while True:
+            time.sleep(10)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Generate Monica API tokens for each user</strong>
+          <p>Each user logs into Monica, goes to <strong>Settings → API → Create new token</strong>, and provides you the token (or you do it as admin under their account). Paste them into <code>USER_TOKENS</code> in the script above.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Register the watchdog as a Windows Service via NSSM</strong>
+          <pre>nssm install MonicaInboxWatchdog python "D:\Scripts\monica_inbox_watchdog.py"
+nssm set MonicaInboxWatchdog AppStdout "D:\Logs\monica_watchdog.log"
+nssm set MonicaInboxWatchdog AppStderr "D:\Logs\monica_watchdog.log"
+nssm set MonicaInboxWatchdog Start SERVICE_AUTO_START
+nssm start MonicaInboxWatchdog</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Test it — drop a sample note</strong>
+          <pre># Drop a test file into alice's inbox:
+echo "Met Jake Torres at the library. He's a retired teacher, loves chess. Birthday Sept 12. Email: jake@example.com" > "D:\Users\alice\inbox\jake_note.txt"
+
+# Check the log:
+Get-Content "D:\Logs\monica_watchdog.log" -Tail 20 -Wait
+
+# Verify in Monica: new contact "Jake Torres" should appear</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 5: CADDY -->
+  <div class="section">
+    <div class="section-title">🌐 Step 5 — Caddy Reverse Proxy</div>
+    <div class="card">
+      <div class="card-title">Caddyfile entry</div>
+      <pre><span data-cfg="url:monica"></span> {
+    reverse_proxy localhost:<span data-cfg="port:monica"></span>
+}</pre>
+      <p>Monica handles its own auth via Authentik OIDC — no forward_auth wrapper needed at the Caddy layer.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">
+    💛 Monica is running via Docker in WSL2. The AI inbox watchdog is active. Users access Monica at <code data-cfg="url:monica"></code> and can log notes to their inbox folder from any device that has network share access.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:monica"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:monica"></span></code></td></tr>
+          <tr><td>API base</td><td><code data-cfg="url:monica"></code>/api</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:monica"></span></td></tr>
+          <tr><td>Image</td><td><code>monicahq/monica:fpm</code></td></tr>
+          <tr><td>Install type</td><td>Docker in WSL2</td></tr>
+          <tr><td>Auth method</td><td>Authentik OIDC (native)</td></tr>
+          <tr><td>Access group</td><td><code>monica-users</code></td></tr>
+          <tr><td>DB</td><td>MySQL 8.0 (Docker)</td></tr>
+          <tr><td>AI model</td><td>llama3.1 / mistral via Ollama</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 Using the AI Inbox</div>
+    <div class="card">
+      <div class="card-title">How to drop a note</div>
+      <p>Write any plain text or markdown file describing a person and save it to your inbox folder. The watchdog picks it up within a few seconds and asks Ollama to extract structured contact data, which is then added to Monica automatically.</p>
+      <table>
+        <tr><th>Path</th><th>Description</th></tr>
+        <tr><td><code>D:\Users\{you}\inbox\</code></td><td>Drop <code>.txt</code> or <code>.md</code> files here</td></tr>
+        <tr><td><code>D:\Users\{you}\inbox\processed\</code></td><td>Files land here after successful processing</td></tr>
+      </table>
+      <div class="callout callout-tip" style="margin-top:14px">
+        <div class="callout-icon">✍️</div>
+        <div class="callout-body">
+          <strong>Good note format:</strong> Natural language works fine. Include name, company, job, birthday, email, phone, and any personal notes. The LLM handles extraction — you don't need structured input.
+          <br><br>
+          <strong>Example:</strong> <em>"Ran into Maria Vasquez again at the farmers market. She's now head chef at Rosewood Bistro on 5th. Her daughter just started college. Birthday is July 22. She mentioned she's allergic to shellfish — remember this for dinner invites."</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Apps &amp; Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Browser</td><td>Go to <code data-cfg="url:monica"></code> and log in with your server account</td></tr>
+        <tr><td>Monica mobile (iOS/Android)</td><td>Use the <a href="https://github.com/monicahq/mobile" target="_blank">Monica mobile app</a> pointed at <code data-cfg="url:monica"></code></td></tr>
+        <tr><td>AI Inbox (any device)</td><td>Drop <code>.txt</code>/<code>.md</code> into your user's inbox share — processing happens server-side</td></tr>
+        <tr><td>REST API</td><td>Generate a token in Settings → API. Full API docs at <code data-cfg="url:monica"></code>/api/documentation</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p data-cfg="version:monica">Check versions.json</p>
+      <div class="card-title" style="margin-top:14px">How to update</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Pull the new image and restart</strong>
+            <pre>cd ~/services/monica
+docker compose pull
+docker compose up -d
+
+# Run any pending migrations:
+docker exec -it monica php artisan migrate --force</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify and record the version</strong>
+            <pre># Check the running version in Monica → Settings → About
+# Then update versions.json with the confirmed version number</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Backups</div>
+    <div class="card">
+      <p>Monica's data lives in two places: the MySQL database and the storage folder (uploaded files, avatars). Both need to be backed up.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Database backup (run periodically)</strong>
+            <pre># Dump the Monica database:
+docker exec monica-db mysqldump -u monica -pchangeme_monica monica > "D:\Users\common\backups\monica_$(Get-Date -Format 'yyyy-MM-dd').sql"
+
+# Optionally compress:
+Compress-Archive -Path "D:\Users\common\backups\monica_*.sql" -DestinationPath "D:\Users\common\backups\monica_db_backup.zip" -Update</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Storage backup</strong>
+            <pre># Storage folder (avatars, uploads):
+robocopy "D:\Users\common\monica\storage" "D:\Backups\monica\storage" /MIR /R:2 /W:5</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 Migrations fail after update</div>
+      <div class="trouble-a">Always run <code>docker exec -it monica php artisan migrate --force</code> after pulling a new image. Monica frequently adds columns between releases. If the app is showing a 500 error after update, a pending migration is almost always the cause.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Watchdog stops processing files</div>
+      <div class="trouble-a">
+        Check in order:
+        <ul style="margin:6px 0 0 18px">
+          <li>Is Ollama running? → <code>curl http://localhost:11434/api/tags</code></li>
+          <li>Is the watchdog service running? → <code>Get-Service MonicaInboxWatchdog</code></li>
+          <li>Is the model still pulled? → <code>ollama list</code></li>
+          <li>Check logs: <code>Get-Content D:\Logs\monica_watchdog.log -Tail 50</code></li>
+          <li>Stale file locks: move the stuck file out and back in after restarting the watchdog</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Ollama returns malformed JSON from the extraction prompt</div>
+      <div class="trouble-a">Mistral is more reliable for structured JSON extraction than llama3.1 in some cases. Try switching <code>OLLAMA_MODEL = "mistral"</code> in the watchdog script. Alternatively, the note text may be too short or ambiguous — add more detail to the input file. The script strips markdown fences but if Ollama adds additional commentary, the JSON parse will fail — check the log for the raw output.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ SSO login redirect loop</div>
+      <div class="trouble-a">Usually a mismatch between <code>APP_URL</code> in docker-compose.yml and the configured redirect URI in Authentik. Both must be exactly <code data-cfg="url:monica"></code>. Rebuild the container after any environment change: <code>docker compose up -d --force-recreate monica</code></div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">💡 Per-user storage (multi-tenancy)</div>
+      <div class="trouble-a">Monica is not natively multi-tenant — each user's data lives in the same database. The <code>userdata/{NAME}/monica/</code> folder structure is used for the inbox and backups, but all Monica contacts/data are stored in a shared DB keyed by user account. If you need complete data isolation between users, you'd need separate Monica stacks per user.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:18px">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Weekly</td><td>Check watchdog log for any processing errors</td></tr>
+        <tr><td>Weekly</td><td>Verify inbox processed/ folders are clearing (no stuck files)</td></tr>
+        <tr><td>Monthly</td><td>Run database backup to <code>userdata/{NAME}/backups/</code></td></tr>
+        <tr><td>Monthly</td><td>Check for new Monica releases on <a href="https://github.com/monicahq/monica/releases" target="_blank">GitHub</a></td></tr>
+        <tr><td>After Ollama model change</td><td>Test inbox processing with a sample note file to confirm JSON extraction still works</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+  <div class="section">
+    <div class="section-title">🏆 Achievements</div>
+    <div class="card">
+      <div class="card-title">Monica Achievements</div>
+      <div class="ach-grid">
+        <div class="ach-card">
+          <div class="ach-icon">💛</div>
+          <div class="ach-name">First Contact</div>
+          <div class="ach-desc">Add your first contact to Monica — manually or via the AI inbox.</div>
+          <div class="ach-footer"><span class="ach-pts">10 pts</span><span class="ach-method">Monica API</span></div>
+        </div>
+        <div class="ach-card">
+          <div class="ach-icon">📬</div>
+          <div class="ach-name">Inbox Zero</div>
+          <div class="ach-desc">Successfully process your first AI inbox note — a contact appears in Monica from a dropped text file.</div>
+          <div class="ach-footer"><span class="ach-pts">25 pts</span><span class="ach-method">Watchdog log</span></div>
+        </div>
+        <div class="ach-card">
+          <div class="ach-icon">🧠</div>
+          <div class="ach-name">Networker</div>
+          <div class="ach-desc">Have 25 or more contacts tracked in Monica.</div>
+          <div class="ach-footer"><span class="ach-pts">50 pts</span><span class="ach-method">Monica API</span></div>
+        </div>
+        <div class="ach-card">
+          <div class="ach-icon">🎂</div>
+          <div class="ach-name">Birthday Tracker</div>
+          <div class="ach-desc">Have birthdays recorded for 10 or more contacts.</div>
+          <div class="ach-footer"><span class="ach-pts">30 pts</span><span class="ach-method">Monica API</span></div>
+        </div>
+        <div class="ach-card">
+          <div class="ach-icon">🤖</div>
+          <div class="ach-name">AI Secretary</div>
+          <div class="ach-desc">Process 10 inbox notes via the AI watchdog.</div>
+          <div class="ach-footer"><span class="ach-pts">75 pts</span><span class="ach-method">Watchdog log</span></div>
+        </div>
+        <div class="ach-card">
+          <div class="ach-icon">📔</div>
+          <div class="ach-name">Journaller</div>
+          <div class="ach-desc">Have 50 or more notes or activity logs recorded in Monica.</div>
+          <div class="ach-footer"><span class="ach-pts">40 pts</span><span class="ach-method">Monica API</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+  <div class="section">
+    <div class="section-title">💾 Data Storage</div>
+    <div class="card">
+      <div class="card-title">What lives where</div>
+      <div class="storage-breakdown">
+        <div class="storage-cell">
+          <div class="storage-cell-label">Monica DB</div>
+          <div class="storage-cell-val">userdata/{NAME}/monica/db/</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">Monica Storage</div>
+          <div class="storage-cell-val">userdata/{NAME}/monica/storage/</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">Inbox</div>
+          <div class="storage-cell-val">userdata/{NAME}/inbox/</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">Processed</div>
+          <div class="storage-cell-val">userdata/{NAME}/inbox/processed/</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">Backups</div>
+          <div class="storage-cell-val">userdata/{NAME}/backups/</div>
+        </div>
+      </div>
+      <table style="margin-top:12px">
+        <tr><th>Path</th><th>Contents</th><th>Typical Size</th></tr>
+        <tr><td><code>monica/db/</code></td><td>MySQL data files — all Monica contacts, notes, reminders</td><td>10–200 MB</td></tr>
+        <tr><td><code>monica/storage/</code></td><td>Uploaded avatars, file attachments, app cache</td><td>50–500 MB</td></tr>
+        <tr><td><code>inbox/</code></td><td>Incoming notes pending processing (transient)</td><td>&lt;1 MB</td></tr>
+        <tr><td><code>inbox/processed/</code></td><td>Notes that have been successfully ingested</td><td>Grows over time</td></tr>
+        <tr><td><code>backups/</code></td><td>Database dump files</td><td>Varies</td></tr>
+      </table>
+    </div>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Monica is not natively multi-tenant. The <code>db/</code> directory shown above is the shared MySQL container storage — it contains data for all users. The folder path uses <code>{NAME}</code> for the inbox/storage convention but in practice Monica's DB is a single shared store mounted at <code>D:\Users\common\monica\db\</code>. See Known Breakpoints for the implications.</div>
+    </div>
+  </div>
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Troubleshooting</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 Monica shows a 500 error after update</div>
+      <div class="trouble-a">Almost always a pending migration. Run: <code>docker exec -it monica php artisan migrate --force</code>. If that fails, check <code>docker logs monica</code> for a more specific PHP error.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ SSO login fails / redirect error</div>
+      <div class="trouble-a">
+        Check in order:
+        <ul style="margin:6px 0 0 18px">
+          <li>Authentik provider → Redirect URIs matches exactly: <code data-cfg="url:monica"></code>/auth/callback</li>
+          <li><code>APP_URL</code> in docker-compose.yml matches exactly (no trailing slash)</li>
+          <li>Restart Monica after any environment change: <code>docker compose up -d --force-recreate monica</code></li>
+          <li>Check Authentik logs for the specific rejection reason</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ AI inbox note processed but no contact created in Monica</div>
+      <div class="trouble-a">The Ollama extraction may have succeeded but the Monica API call failed. Check <code>D:\Logs\monica_watchdog.log</code> for the specific API error. Common causes: API token expired or was regenerated, Monica is unreachable on port <span data-cfg="port:monica"></span>, or the extracted JSON had a null <code>first_name</code> that Monica rejected.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Container fails to start — MySQL permission error</div>
+      <div class="trouble-a">The WSL2 container needs write access to the bind-mounted DB directory. From WSL2: <code>chmod -R 777 /mnt/d/Users/common/monica/db/</code>. On first run, if the db/ directory has Windows-only permissions MySQL can't initialize.</div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">💡 Inbox file is stuck (not being processed)</div>
+      <div class="trouble-a">The watchdog only reacts to file creation events. If a file was already there when the watchdog started, it won't process it. Move the file out and back in (copy → delete → paste) to trigger the creation event, or restart the watchdog service: <code>Restart-Service MonicaInboxWatchdog</code>.</div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 Useful Admin Commands</div>
+    <div class="card">
+      <pre># Monica Docker stack status:
+docker compose -f ~/services/monica/docker-compose.yml ps
+docker compose -f ~/services/monica/docker-compose.yml logs -f monica
+
+# Monica container shell (for artisan commands):
+docker exec -it monica bash
+php artisan migrate:status
+php artisan cache:clear
+
+# Watchdog service:
+Get-Service MonicaInboxWatchdog
+Restart-Service MonicaInboxWatchdog
+Get-Content "D:\Logs\monica_watchdog.log" -Tail 50 -Wait
+
+# MySQL quick check:
+docker exec monica-db mysql -u monica -pchangeme_monica monica -e "SELECT COUNT(*) FROM contacts;"
+
+# Test Ollama is reachable and model is loaded:
+curl http://localhost:11434/api/tags
+
+# Test Monica API token (replace TOKEN):
+curl -H "Authorization: Bearer TOKEN" http://localhost:<span data-cfg="port:monica"></span>/api/contacts</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+═══════════════════════════════════════════════════════════════ -->
+<script>
+const STORAGE_KEY = 'monica_setup_complete';
+
+function switchTab(id, btn) {
+  const complete = localStorage.getItem(STORAGE_KEY) === 'true';
+  if (id !== 'setup' && !complete) return;
+  document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleComplete() {
+  const current = localStorage.getItem(STORAGE_KEY) === 'true';
+  const next = !current;
+  localStorage.setItem(STORAGE_KEY, next);
+  updateCompleteUI(next);
+  if (next) {
+    setTimeout(() => {
+      document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+      const overviewBtn = document.querySelector('.subtab-btn:nth-child(2)');
+      overviewBtn.classList.add('active');
+      document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById('pane-overview').classList.add('active');
+    }, 400);
+  }
+}
+
+function updateCompleteUI(done) {
+  const bar = document.getElementById('setup-complete-bar');
+  const box = document.getElementById('setup-checkbox');
+  const sub = document.getElementById('complete-sub');
+  if (done) {
+    bar.classList.add('done');
+    box.classList.add('done');
+    if (sub) sub.textContent = '✓ Setup complete';
+    document.querySelectorAll('.subtab-btn').forEach(b => b.style.opacity = '1');
+  } else {
+    bar.classList.remove('done');
+    box.classList.remove('done');
+    if (sub) sub.textContent = 'Mark as done → activates Overview tab';
+    document.querySelectorAll('.subtab-btn:not(:first-child)').forEach(b => b.style.opacity = '0.4');
+  }
+}
+
+(function init() {
+  const done = localStorage.getItem(STORAGE_KEY) === 'true';
+  updateCompleteUI(done);
+})();
+</script>
+
+</body>
+</html>

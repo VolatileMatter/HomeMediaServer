@@ -434,6 +434,223 @@ npx @immich/cli upload --server http://localhost:<span data-cfg="port:immich"></
     </div>
   </div>
 
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🛡️ Content Scanning — CYA / Illegal Content Detection</div>
+
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>Honest assessment before you proceed.</strong> You're running a private server shared with known family and friends — not a public platform. The realistic risk of actual illegal content being uploaded by these specific people is very low. That said, documenting a scanning effort is a reasonable CYA measure, and it's worth understanding what's actually achievable for a private operator vs. what's marketed at large platforms.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What the enterprise tools are (and why you can't fully use them)</div>
+      <p>The industry-standard tools — <strong>Microsoft PhotoDNA</strong> and <strong>Thorn Safer</strong> — work by hashing every uploaded image and comparing it against a database of hashes of <em>known</em> CSAM compiled by NCMEC and law enforcement. They're extremely accurate for <em>known</em> material and aren't trained to recognize arbitrary illegal content.</p>
+      <table style="margin-top:10px">
+        <tr><th>Tool</th><th>Access</th><th>Reality for a private server</th></tr>
+        <tr><td>Microsoft PhotoDNA Cloud</td><td>Free, but requires org vetting by Microsoft</td><td>Not available to individuals — requires you to be an approved organization and agree to terms that assume you're operating a platform</td></tr>
+        <tr><td>Thorn Safer Essential</td><td>Paid API, enterprise pricing</td><td>Not priced for personal use — designed for commercial platforms processing millions of uploads</td></tr>
+        <tr><td>Hive Moderation (wraps Thorn)</td><td>Paid API</td><td>Same situation — commercial platform pricing</td></tr>
+        <tr><td>Meta PDQ (open source)</td><td>Free, open source</td><td>Hashing algorithm only — no hash <em>database</em>. NCMEC does not distribute their hash list to individuals.</td></tr>
+      </table>
+      <div class="callout callout-warn" style="margin-top:12px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>The core constraint:</strong> The hash <em>databases</em> of known CSAM are tightly controlled by NCMEC and law enforcement. They will not distribute them to individuals — only to vetted platforms. Any self-hosted scanning solution you build will be doing its best with whatever public or partial hash lists are available, which is meaningfully less comprehensive than what large platforms use.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">✅ What you can realistically deploy: a filesystem watcher + PDQ hashing sidecar</div>
+      <p>The practical approach for a private server is a Python script running in WSL2 alongside Immich that:</p>
+      <ol style="margin:8px 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Watches the <code>D:\Users\</code> upload folder for new image files using <code>watchdog</code></li>
+        <li>Hashes each new file using <strong>Meta's PDQ algorithm</strong> (open source perceptual hash, similar in concept to PhotoDNA)</li>
+        <li>Compares the hash against any known-bad hash lists you have access to</li>
+        <li>Logs all scans to a dated log file in <code>D:\Server\scan-logs\</code></li>
+        <li>Optionally moves flagged files to a quarantine folder and alerts you via email or a webhook</li>
+      </ol>
+      <p style="margin-top:8px">The logging itself is the most important CYA element — it demonstrates that you operated a scanning process in good faith. The actual detection capability depends on what hash databases you can access.</p>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Installation — PDQ scanner sidecar (WSL2)</div>
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Install dependencies in WSL2</strong>
+            <pre>pip install pdqhash watchdog pillow requests --break-system-packages</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Create the scan log and quarantine directories 🔐</strong>
+            <pre># In PowerShell:
+New-Item -ItemType Directory -Force "D:\Server\scan-logs"
+New-Item -ItemType Directory -Force "D:\Server\quarantine"</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Create the scanner script</strong>
+            <p>Save as <code>D:\Server\scanner\immich_scanner.py</code> (accessible in WSL2 as <code>/mnt/d/Server/scanner/immich_scanner.py</code>):</p>
+            <pre>#!/usr/bin/env python3
+"""
+Immich Upload Scanner — PDQ hash-based content screening
+Watches D:\Users\ for new image uploads and logs every scan.
+Comparing against known-bad hashes requires a hash list (see KNOWN_BAD_HASHES).
+"""
+
+import os, time, logging, hashlib, json, shutil
+from datetime import datetime
+from pathlib import Path
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import pdqhash
+from PIL import Image
+
+# ── Config ────────────────────────────────────────────────────────────────
+WATCH_DIR    = "/mnt/d/Users"               # UPLOAD_LOCATION root
+LOG_DIR      = "/mnt/d/Server/scan-logs"
+QUARANTINE   = "/mnt/d/Server/quarantine"
+KNOWN_BAD_HASHES_FILE = "/mnt/d/Server/scanner/known_bad.json"  # load your hash list here
+IMAGE_EXTS   = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'}
+PDQ_THRESHOLD = 10   # hamming distance — matches within this are flagged
+
+# ── Logging ───────────────────────────────────────────────────────────────
+log_file = Path(LOG_DIR) / f"scan_{datetime.now().strftime('%Y-%m')}.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s  %(levelname)-8s  %(message)s',
+    handlers=[
+        logging.FileHandler(log_file),
+        logging.StreamHandler()
+    ]
+)
+log = logging.getLogger("scanner")
+
+# ── Load known-bad hash list ──────────────────────────────────────────────
+def load_known_bad():
+    p = Path(KNOWN_BAD_HASHES_FILE)
+    if p.exists():
+        with open(p) as f:
+            return set(json.load(f))
+    log.warning("No known_bad.json found — scanning will log hashes but cannot match.")
+    return set()
+
+known_bad = load_known_bad()
+log.info(f"Loaded {len(known_bad)} known-bad hashes.")
+
+# ── Scanning logic ────────────────────────────────────────────────────────
+def pdq_hamming(h1, h2):
+    """Count bit differences between two 256-bit PDQ hashes (as hex strings)."""
+    a, b = int(h1, 16), int(h2, 16)
+    return bin(a ^ b).count('1')
+
+def scan_file(filepath):
+    path = Path(filepath)
+    if path.suffix.lower() not in IMAGE_EXTS:
+        return
+    try:
+        img = Image.open(path).convert("RGB")
+        hash_vector, quality = pdqhash.compute(img)
+        pdq_hex = hash_vector.hex()
+        sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+
+        # Check against known-bad list
+        flagged = False
+        for bad_hash in known_bad:
+            if pdq_hamming(pdq_hex, bad_hash) <= PDQ_THRESHOLD:
+                flagged = True
+                break
+
+        if flagged:
+            log.warning(f"FLAGGED  {path}  pdq={pdq_hex}  sha256={sha256[:16]}…")
+            dest = Path(QUARANTINE) / path.name
+            shutil.move(str(path), str(dest))
+            log.warning(f"QUARANTINED → {dest}")
+            # TODO: add email/webhook alert here
+        else:
+            log.info(f"CLEAN    {path.name}  pdq={pdq_hex[:16]}…  sha256={sha256[:16]}…")
+
+    except Exception as e:
+        log.error(f"ERROR scanning {path}: {e}")
+
+# ── Filesystem watcher ────────────────────────────────────────────────────
+class UploadHandler(FileSystemEventHandler):
+    def on_created(self, event):
+        if not event.is_directory:
+            time.sleep(1)   # let the file finish writing
+            scan_file(event.src_path)
+
+if __name__ == "__main__":
+    log.info(f"Starting Immich upload scanner on {WATCH_DIR}")
+    observer = Observer()
+    observer.schedule(UploadHandler(), WATCH_DIR, recursive=True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(10)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Run it as a startup service via Task Scheduler 🔐</strong>
+            <pre># In Task Scheduler → Create Task:
+# Trigger: At startup, delay 4 minutes (after Immich is up)
+# Action:  wsl -d Ubuntu -- bash -c "python3 /mnt/d/Server/scanner/immich_scanner.py >> /mnt/d/Server/scan-logs/startup.log 2>&1"
+# Run as: your WSL2 username
+# ☑ Run whether user is logged on or not</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify it's running and logging</strong>
+            <pre># In WSL2:
+tail -f /mnt/d/Server/scan-logs/scan_$(date +%Y-%m).log
+
+# Upload a test image via the Immich mobile app or web UI.
+# You should see a "CLEAN" log line appear within a few seconds.</pre>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Hash databases — what you can actually get</div>
+      <table>
+        <tr><th>Source</th><th>Access</th><th>Notes</th></tr>
+        <tr><td>NCMEC hash list</td><td>❌ Not available to individuals</td><td>Only distributed to vetted platforms via PhotoDNA/Safer partnerships</td></tr>
+        <tr><td>Internet Watch Foundation (IWF)</td><td>⚠️ Organization membership required</td><td>IWF members can access their hash list — apply at iwf.org.uk</td></tr>
+        <tr><td>Project Arachnid (Shield)</td><td>⚠️ Platform approval required</td><td>Canadian Centre for Child Protection — designed for ESPs, not individuals</td></tr>
+        <tr><td>StopNCII / GIFCT</td><td>❌ Platform-level only</td><td>Focused on non-consensual intimate images and terrorist content</td></tr>
+        <tr><td>Custom list (your own)</td><td>✅ You build it</td><td>Start with an empty <code>known_bad.json = []</code> and add hashes of any flagged content you encounter. Not comprehensive but it's something.</td></tr>
+      </table>
+      <div class="callout callout-warn" style="margin-top:12px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Bottom line:</strong> Without access to a verified CSAM hash database, the scanner will log all uploads and detect any hashes you manually add, but it cannot perform comprehensive known-CSAM matching. The log itself is your primary legal protection — it demonstrates good-faith operation of a scanning process. If you ever do find content that concerns you, report it to NCMEC's CyberTipline at <strong>missingkids.org/gethelpnow/cybertipline</strong> and contact law enforcement.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Log retention policy</div>
+      <p>Keep scan logs for a minimum of 90 days. The logs prove that every upload was scanned on a specific date, with its hash recorded. Back them up with everything else in <code>D:\Server\</code>.</p>
+      <pre># Monthly log rotation happens automatically via the filename pattern scan_YYYY-MM.log
+# Archive old logs to D:\Backups\scan-logs\ via a monthly Task Scheduler job:
+# Action: PowerShell -Command "Copy-Item 'D:\Server\scan-logs\*.log' 'D:\Backups\scan-logs\'"</pre>
+    </div>
+
+  </div>
+
 </div><!-- /pane-setup -->
 
 
@@ -603,6 +820,8 @@ docker-compose up -d</pre>
         <tr><td>Monthly</td><td>Check for Immich updates on GitHub releases page</td></tr>
         <tr><td>Monthly</td><td>Review container logs: <code>docker-compose logs --tail=100</code> in <code>~/immich</code></td></tr>
         <tr><td>Monthly</td><td>Run duplicate detection job: Administration → Jobs → Duplicate Detection</td></tr>
+        <tr><td>Monthly</td><td>Verify upload scanner is running: <code>tail /mnt/d/Server/scan-logs/scan_$(date +%Y-%m).log</code></td></tr>
+        <tr><td>Monthly</td><td>Archive previous month's scan log to <code>D:\Backups\scan-logs\</code> (keep minimum 90 days)</td></tr>
         <tr><td>After any update</td><td>Test SSO login in incognito window</td></tr>
         <tr><td>After any update</td><td>Record confirmed working version in <code>versions.json</code></td></tr>
         <tr><td>After any domain change</td><td>Update redirect URI in Authentik (<code data-cfg="authentik-admin"></code>) → Applications → Immich → Edit Provider</td></tr>
@@ -894,6 +1113,17 @@ php occ user:setting bob   files quota "5 GB"    # friends</pre>
       <div class="trouble-q">🟡 Mobile backup not running in background</div>
       <div class="trouble-a">
         On iOS, Immich background backup requires the app to have Background App Refresh enabled (Settings → Immich → Background App Refresh = On). On Android, ensure Immich is excluded from battery optimisation. Also confirm the server URL in the app resolves correctly from outside the LAN if using an external URL.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Content scanner not running / no log output</div>
+      <div class="trouble-a">
+        Check if the Task Scheduler job fired:<br>
+        <code>cat /mnt/d/Server/scan-logs/startup.log</code><br><br>
+        Test the script manually in WSL2:<br>
+        <code>python3 /mnt/d/Server/scanner/immich_scanner.py</code><br><br>
+        Common causes: WSL2 didn't start before the task ran (increase delay to 5+ minutes), or pip dependencies weren't installed in the correct WSL2 distro.
       </div>
     </div>
 
