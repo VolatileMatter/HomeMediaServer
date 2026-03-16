@@ -77,6 +77,7 @@ const CFG = {
     pxls:             'pxls',
     genart:           'art',
     jukebox:          'jukebox',
+    invidious: 'invidious',
   },
 
   // ── PORTS ────────────────────────────────────────────────────────────────
@@ -104,6 +105,7 @@ const CFG = {
     immich:            2283,
     kavita_comics:     5000,
     kavita_dnd:        5001,
+    invidious:         8097,
 
     // Downloads / automation (LAN-only, admin-only)
     qbittorrent:       8090,
