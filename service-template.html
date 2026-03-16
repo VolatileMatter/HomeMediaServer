@@ -3,13 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>SERVICE NAME</title>
+  <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  shared.css — the server-wide design system stylesheet           ║
+    ║  Contains: CSS variables (colors, spacing), .page-header,       ║
+    ║  .section, .card, .grid-2, .callout, .step, pre styling,        ║
+    ║  tables, .ach-card, .ach-grid, .tag badges, and .trouble-item.  ║
+    ║  Never override these in service files; add page-specific       ║
+    ║  styles in the <style> block below.                              ║
+    ╚══════════════════════════════════════════════════════════════════╝
+  -->
   <link rel="stylesheet" href="shared.css">
+  <!--
+    config.js — the single source of truth for all server values.
+    Provides window.CFG with: ports, URLs, paths, and version strings.
+    NEVER hardcode port numbers, domain names, or file paths in HTML.
+    Always use data-cfg="port:KEY", data-cfg="url:KEY", etc.
+    After config.js loads it walks the DOM and resolves all data-cfg
+    attributes automatically. See config.js for the full key list.
+  -->
   <script src="config.js"></script>
   <style>
     /* ═══════════════════════════════════════════════
-       SUB-TAB NAVIGATION
-       Copy this style block into every service page.
-       Do not modify — it matches the shared design system.
+       SUB-TAB NAVIGATION STYLES
+       Copy this entire style block verbatim to every
+       service page. Do not modify — it must match the
+       shared design system across all service tabs.
     ═══════════════════════════════════════════════ */
     .subtab-nav {
       display: flex;
@@ -36,10 +55,11 @@
     .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
     .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+    /* Each pane is hidden by default; only .active shows */
     .subtab-pane { display: none; }
     .subtab-pane.active { display: block; }
 
-    /* ── Setup-complete checkbox ── */
+    /* ── Setup-complete checkbox bar ── */
     .setup-complete-bar {
       display: flex;
       align-items: center;
@@ -60,54 +80,33 @@
       border: 2px solid rgba(76,175,125,.6);
       border-radius: 3px;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: all .2s;
-      font-size: .85rem;
+      font-size: .85rem; color: #4caf7d; flex-shrink: 0;
     }
-    .setup-complete-bar.done .setup-checkbox {
-      background: #4caf7d;
-      border-color: #4caf7d;
-    }
-    .setup-complete-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .72rem;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: #4caf7d;
-    }
+    .setup-complete-label { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .setup-complete-sub { font-size: .74rem; color: var(--text-dim); margin-left: auto; }
 
-    /* ── Achievement cards ── */
-    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    /* ── Achievement cards (used in Achievements pane) ── */
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
     .ach-card {
       background: var(--bg2);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 16px;
-      transition: border-color .15s;
+      padding: 12px 14px;
     }
-    .ach-card:hover { border-color: rgba(200,168,75,.3); }
-    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
-    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
-    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
-    .ach-footer { display: flex; gap: 6px; align-items: center; }
-    .ach-pts {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .6rem;
-      padding: 2px 7px;
-      border-radius: 2px;
-      background: rgba(200,168,75,.1);
-      color: var(--accent);
-      border: 1px solid rgba(200,168,75,.2);
+    .ach-icon  { font-size: 1.3rem; margin-bottom: 5px; }
+    .ach-name  { font-weight: 700; font-size: .82rem; margin-bottom: 3px; }
+    .ach-desc  { font-size: .74rem; color: var(--text-dim); line-height: 1.5; }
+    .ach-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
     }
-    .ach-method {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .6rem;
-      padding: 2px 7px;
-      border-radius: 2px;
-      background: rgba(78,205,196,.08);
-      color: var(--accent3);
-      border: 1px solid rgba(78,205,196,.18);
-    }
+    .ach-pts    { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--accent); }
+    .ach-method { font-size: .65rem; color: var(--text-dim); background: var(--bg3); padding: 1px 5px; border-radius: 2px; }
 
     /* ── Storage breakdown grid ── */
     .storage-breakdown {
@@ -149,6 +148,87 @@
     .trouble-item.ok    { border-left-color: #4caf7d; }
     .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
     .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+
+    /* ═══════════════════════════════════════════════════════════
+       UI PREVIEW PANE STYLES
+       These styles are only for the UI Preview tab. They create
+       a realistic-looking mock of a logged-in user's interface.
+       The preview is entirely static dummy data — no real server
+       calls are made. Goal: let you tweak layout and content
+       decisions quickly without needing a live service running.
+    ═══════════════════════════════════════════════════════════ */
+    .preview-chrome {
+      /* The outer browser-chrome frame that wraps the mock UI */
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .preview-bar {
+      /* Fake browser address bar / app title bar at the top */
+      background: #161b22;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .65rem;
+      color: var(--text-dim);
+    }
+    .preview-dot {
+      /* Fake macOS-style traffic light dots for realism */
+      width: 9px; height: 9px; border-radius: 50%;
+    }
+    .preview-url {
+      /* Fake address bar showing the service URL */
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+      flex: 1;
+      max-width: 380px;
+    }
+    .preview-user-badge {
+      /* Shows which dummy user is "logged in" for this preview */
+      margin-left: auto;
+      background: rgba(200,168,75,.12);
+      border: 1px solid rgba(200,168,75,.25);
+      border-radius: 3px;
+      padding: 2px 8px;
+      color: var(--accent);
+      font-size: .6rem;
+    }
+    .preview-body {
+      /* The content area of the mocked UI */
+      padding: 20px;
+      min-height: 300px;
+    }
+    .preview-note {
+      /* Yellow banner explaining this is a dummy preview */
+      background: rgba(200,168,75,.08);
+      border: 1px solid rgba(200,168,75,.22);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .preview-todo {
+      /* Red box for incomplete/placeholder sections of the preview */
+      background: rgba(224,92,92,.07);
+      border: 1px dashed rgba(224,92,92,.35);
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-size: .8rem;
+      color: rgba(224,92,92,.8);
+      text-align: center;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -159,14 +239,6 @@
      ║  When rewriting an existing page to this template, enforce all  ║
      ║  of these without exception.                                     ║
      ╠══════════════════════════════════════════════════════════════════╣
-     ║                                                                  ║
-     ║  ❌ NO TAILSCALE — Remove all references to Tailscale.           ║
-     ║     Server is home-only. Admin tools are LAN-accessible          ║
-     ║     directly. Tailscale is not part of this setup.               ║
-     ║     • Delete any "Tailscale only" access notes                   ║
-     ║     • Delete any steps involving Tailscale install/config        ║
-     ║     • Replace "Tailscale IP" with "server LAN IP"                ║
-     ║     • If a tool was Tailscale-only, it's now LAN-only            ║
      ║                                                                  ║
      ║  ✅ USE config.js FOR ALL VALUES — No hardcoded ports, domains,  ║
      ║     or paths. Use data-cfg attributes in HTML and                ║
@@ -188,25 +260,40 @@
      ║  🌐 SSO IS REQUIRED — Every service tab must have an SSO         ║
      ║     section in First Time Setup. No exceptions.                  ║
      ║                                                                  ║
+     ║  🖥️  UI PREVIEW TAB — All new service pages should include a     ║
+     ║     UI Preview pane with dummy data. Mark incomplete sections    ║
+     ║     with .preview-todo boxes. The goal is to understand layout   ║
+     ║     and user flow — not to perfectly replicate the real service. ║
+     ║                                                                  ║
      ╚══════════════════════════════════════════════════════════════════╝ -->
 
 <!-- ═══════════════════════════════════════════════════════════
      PAGE HEADER
-     Update: icon emoji, service name, subtitle ports/tags,
-     and the description paragraph.
+     ─────────────────────────────────────────────────────────
+     Update: icon emoji, service name, subtitle, description.
+     
+     The subtitle line should follow this format:
+       // What It Is · Port [PORT] · Install Type · Auth Method //
+     
+     Install types: Native Windows / Docker WSL2 / Python http.server
+     Auth methods: Authentik OIDC / Caddy forward_auth / Both
      
      For CFG-powered values use data-cfg attributes:
-       <span data-cfg="port:SERVICEKEY"></span>
-       <span data-cfg="url:SERVICEKEY"></span>
-       <span data-cfg="domain"></span>
+       <span data-cfg="port:SERVICEKEY"></span>   → resolves to port number
+       <span data-cfg="url:SERVICEKEY"></span>    → resolves to full URL
+       <span data-cfg="domain"></span>            → resolves to base domain
 ═══════════════════════════════════════════════════════════ -->
 <div class="page-header">
-  <div class="page-icon">🔧</div><!-- ← change emoji -->
+  <div class="page-icon">🔧</div><!-- ← change this emoji to match the service -->
   <div>
-    <h1>Service Name</h1><!-- ← change -->
+    <h1>Service Name</h1><!-- ← change to actual service name -->
     <div class="subtitle">
-      // Description · Port <span data-cfg="port:SERVICEKEY"></span> · Install Type · Auth Method //
+      // What It Does · Port <span data-cfg="port:SERVICEKEY"></span> · Install Type · Auth Method //
     </div>
+    <!--
+      Write 1-2 sentences. Answer: what is this, why is it on this server,
+      and what makes it better than the commercial alternative (if applicable)?
+    -->
     <p class="desc">
       One or two sentences describing what this service does and why it exists on this server.
     </p>
@@ -215,13 +302,20 @@
 
 <!-- ═══════════════════════════════════════════════════════════
      SUB-TAB NAVIGATION
-     Standard across all service tabs. Tab order is fixed:
-     1. First Time Setup  2. Overview  3. Maintenance
-     4. Achievements      5. Data Storage  6. Troubleshooting
+     ─────────────────────────────────────────────────────────
+     Tab order is FIXED across all service pages:
+       1. 🚀 First Time Setup   — admin install + SSO hookup
+       2. 📋 Overview           — quick ref, URLs, supported apps
+       3. 🔧 Maintenance        — updates, schedules, known breakpoints
+       4. 🏆 Achievements       — webhook config + achievement cards
+       5. 💾 Data Storage       — where files live, quota, backups
+       6. 🛠️ Troubleshooting    — common issues + admin commands
+       7. 🖥️ UI Preview         — dummy logged-in user view (NEW)
      
-     The JS at the bottom handles switching, setup-complete
-     persistence (per service, keyed by page title), and
-     auto-switching to Overview once setup is marked done.
+     The JS at the bottom handles:
+       • Tab switching (switchTab)
+       • Setup-complete persistence (localStorage, per STORAGE_KEY)
+       • Auto-switch to Overview once setup is marked done
 ═══════════════════════════════════════════════════════════ -->
 <div class="subtab-nav" id="subtab-nav">
   <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
@@ -230,258 +324,207 @@
   <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
   <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
   <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <!-- UI Preview is last — it's a design/iteration tool, not a reference tab -->
+  <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
 </div>
 
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANE 1 — FIRST TIME SETUP
+     ───────────────────────────────────────────────────────────────
+     PURPOSE: Step-by-step guide for the server owner to install and
+     configure this service from scratch. Users never see this tab.
      
      RULES:
-     • Always starts with the setup-complete checkbox
-     • Always includes SSO/Authentik hookup section
-     • Steps should be numbered and in deployment order
-     • Use <span data-cfg="..."> for domain/port references
+     • Always starts with the setup-complete checkbox bar
+     • Include a V1 Goal banner (v1-banner) stating the minimum
+       viable outcome — what "done" looks like
+     • Always include an SSO section (Authentik OIDC or forward_auth)
+     • Steps should be in deployment order (install → configure → SSO → firewall)
+     • Mark admin-only steps with 🔐
+     • Use <span data-cfg="..."> for all domain/port references
      • If migrating from another service, put migration info first
 ═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane active" id="pane-setup">
 
-  <!-- REQUIRED: Setup complete checkbox — always first -->
+  <!--
+    REQUIRED: Setup complete checkbox — always the first element in this pane.
+    Once clicked it persists to localStorage (keyed by STORAGE_KEY).
+    When marked done it auto-switches to the Overview tab and highlights it.
+  -->
   <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
       <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        <!--
+          Update this text: list the specific things that must be true
+          before this service is considered fully set up.
+        -->
         Check when SERVICE NAME is fully installed, configured, and SSO is connected.
-        <!-- ↑ Describe what "complete" means for this specific service -->
       </div>
     </div>
-    <div style="font-size:.75rem;color:var(--text-dim);margin-left:auto" id="complete-sub">
-      Mark as done → activates Overview tab
-    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <!-- OPTIONAL: Migration section — include if replacing an existing service -->
   <!--
-  <div class="section">
-    <div class="section-title">📦 Migrating from [OLD SERVICE]</div>
-    <div class="card">
-      <div class="card-title">What transfers and what doesn't</div>
-      <table>
-        <tr><th>Data</th><th>Migrates?</th><th>How</th></tr>
-        <tr><td>Example data</td><td>✅ Automatic</td><td>How it migrates</td></tr>
-        <tr><td>Example data</td><td>⚠️ Via tool</td><td>Tool name and command</td></tr>
-        <tr><td>Example data</td><td>❌</td><td>Must recreate manually</td></tr>
-      </table>
-    </div>
-  </div>
-  <hr>
+    v1-banner: A brief statement of the V1 goal.
+    Use data-cfg attributes for port/URL references.
+    Example: "V1 Goal: Jellyfin running at jellyfin.yourdomain.com
+    with all libraries indexed and hardware transcoding enabled."
   -->
+  <div class="v1-banner">
+    🔧 V1 Goal: SERVICE NAME running on port <span data-cfg="port:SERVICEKEY"></span>
+    at <code data-cfg="url:SERVICEKEY"></code>, SSO connected, all users provisioned.
+  </div>
 
-  <!-- STEP 1: Install -->
+  <!-- ── Installation Steps ── -->
   <div class="section">
-    <div class="section-title">⚙️ Step 1 — Install</div>
+    <div class="section-title">📦 Installation</div>
+    <!--
+      Use the .steps / .step / .step-content pattern for multi-step processes.
+      Each step gets a numbered disc automatically via CSS counter.
+      Use <pre> for commands. Use callout-warn for things that can break things.
+    -->
     <div class="steps">
       <div class="step">
         <div class="step-content">
-          <strong>Download and install SERVICE NAME</strong>
-          <p>Where to get it, how to install it. Note: native Windows vs Docker.</p>
-          <pre># Installation commands here
-# e.g. for Windows services:
-# Download installer from [url]
-# Run as administrator
-
-# e.g. for Docker in WSL2:
-# cd ~/services/servicename
-# docker compose up -d</pre>
+          <strong>Step 1 — [First action]</strong>
+          <p>Explanation. Keep it brief — this is a reference doc, not a tutorial.</p>
+          <pre># Example command
+# Replace PORT with actual value from config.js</pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
-          <strong>Confirm service is running</strong>
-          <pre># Windows service check:
-Get-Service -Name ServiceName
-
-# Or verify port is listening:
-netstat -an | findstr :<span data-cfg="port:SERVICEKEY"></span>
-
-# Access at:
-# http://localhost:<span data-cfg="port:SERVICEKEY"></span></pre>
+          <strong>Step 2 — [Next action]</strong>
+          <p>Continue setup steps in order.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-content">
-          <strong>Open firewall port</strong>
-          <pre>netsh advfirewall firewall add rule name="SERVICE NAME" ^
-  dir=in action=allow protocol=TCP localport=<span data-cfg="port:SERVICEKEY"></span></pre>
-        </div>
-      </div>
+      <!-- Add as many steps as needed -->
     </div>
   </div>
 
-  <hr>
-
-  <!-- STEP 2: Configure -->
+  <!-- ── SSO Integration ── -->
+  <!--
+    REQUIRED — Every service must have this section.
+    Choose the correct pattern for this service:
+    
+    Pattern A: Authentik OIDC (native SSO support in the app)
+      Use when the service has a built-in OAuth2/OIDC login option.
+      The user logs in through the service's own login form, which
+      redirects to Authentik for authentication.
+    
+    Pattern B: Caddy forward_auth (proxy-level SSO)
+      Use when the service has no native SSO support.
+      Caddy intercepts all requests, checks the Authentik outpost,
+      and injects X-authentik-username / X-authentik-groups headers.
+      The service trusts those headers for user identity.
+  -->
   <div class="section">
-    <div class="section-title">⚙️ Step 2 — Initial Configuration</div>
+    <div class="section-title">🔐 SSO / Authentik Integration <span class="tag tag-sso">SSO TAB</span></div>
     <div class="card">
-      <div class="card-title">First-time setup</div>
-      <p>What to configure on first run. Libraries, directories, media paths, admin account, etc.</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-content">
-            <strong>Step title</strong>
-            <p>Step description.</p>
-            <pre># Code block if needed</pre>
-          </div>
-        </div>
-        <!-- Add more steps as needed -->
-      </div>
+      <div class="card-title">Pattern A — Authentik OIDC (native)</div>
+      <pre># Step 1 — Create provider in Authentik admin:
+# <span data-cfg="authentik-admin"></span> → Applications → Providers → Create → OAuth2/OIDC
+#   Name:          SERVICE NAME
+#   Client type:   Confidential
+#   Redirect URIs: <span data-cfg="url:SERVICEKEY"></span>/auth/callback
+#   Signing Key:   authentik Self-signed Certificate
+#   Scopes:        openid email profile
+
+# Step 2 — Create application in Authentik:
+#   Name:     SERVICE NAME
+#   Slug:     SERVICESLUG
+#   Provider: (the one you just created)
+#   Policy:   server-users group
+
+# Step 3 — Configure the service's OIDC settings:
+#   OIDC Issuer:       <span data-cfg="oidc-issuer:SERVICESLUG"></span>
+#   Client ID:         (from provider)
+#   Client Secret:     (from provider)
+#   Redirect URI:      <span data-cfg="url:SERVICEKEY"></span>/auth/callback</pre>
     </div>
-  </div>
-
-  <hr>
-
-  <!-- STEP 3: SSO — REQUIRED ON EVERY SERVICE TAB -->
-  <div class="section">
-    <div class="section-title">🔐 Step 3 — SSO Integration (Authentik)</div>
-    <div class="v1-banner">
-      🔑 This section explains how SERVICE NAME authenticates users through Authentik,
-      so everyone uses the same Google login as every other service on this server.
-    </div>
-
-    <!-- Choose ONE of these three SSO patterns based on how this service authenticates. -->
-    <!-- Delete the other two patterns. -->
-
-    <!-- PATTERN A: Native OIDC support (Jellyfin, Immich, Nextcloud, Open WebUI, Vikunja, Mealie) -->
-    <div class="card">
-      <div class="card-title">Pattern: Native OIDC — SERVICE NAME handles auth directly</div>
-      <p>This service has built-in OpenID Connect support. No Caddy forward_auth needed — users are redirected to Authentik when they log in.</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-content">
-            <strong>Create provider in Authentik</strong>
-            <pre>Authentik Admin → Applications → Providers → Create → OAuth2/OpenID Provider
-
-Name:          SERVICE NAME
-Client type:   Confidential
-Client ID:     (auto-generated — copy to service config)
-Client Secret: (auto-generated — copy to service config)
-Redirect URIs: <span data-cfg="url:SERVICEKEY"></span>/auth/callback
-               (adjust path to match what this service expects)</pre>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Create the Application in Authentik</strong>
-            <pre>Authentik Admin → Applications → Applications → Create
-Name:      SERVICE NAME
-Slug:      servicename
-Provider:  (the provider above)
-Launch URL: <span data-cfg="url:SERVICEKEY"></span></pre>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Configure OIDC in SERVICE NAME</strong>
-            <p>Location of the OIDC config varies by service — see the service's own docs. Common fields:</p>
-            <pre>OIDC Endpoint / Issuer: <span data-cfg="url:auth"></span>/application/o/servicename/
-Client ID:              (from Authentik provider)
-Client Secret:          (from Authentik provider)
-Redirect URI:           <span data-cfg="url:SERVICEKEY"></span>/auth/callback</pre>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Caddy config — proxy only, no forward_auth</strong>
-            <pre># In Caddyfile — no forward_auth needed, service handles auth:
-servicename.<span data-cfg="domain"></span> {
-    reverse_proxy localhost:<span data-cfg="port:SERVICEKEY"></span>
-}</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PATTERN B: Caddy forward_auth (services without native OIDC: Navidrome, EmulatorJS, etc.) -->
-    <!--
-    <div class="card">
-      <div class="card-title">Pattern: Caddy forward_auth — Authentik intercepts at the proxy level</div>
-      <p>This service has no native SSO support. Caddy validates the Authentik session before every request. The service receives the username in the <code>X-authentik-username</code> header.</p>
-      <pre># In Caddyfile:
-servicename.<span data-cfg="domain"></span> {
-    forward_auth localhost:<span data-cfg="port:authentik"></span> {
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Pattern B — Caddy forward_auth (proxy-level)</div>
+      <pre># Add to Caddyfile (<span data-cfg="path:caddyfile"></span>):
+SERVICEKEY.<span data-cfg="domain"></span> {
+    forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
-        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        copy_headers X-authentik-username
+                     X-authentik-groups
+                     X-authentik-email
         trusted_proxies private_ranges
     }
     reverse_proxy localhost:<span data-cfg="port:SERVICEKEY"></span>
 }
 
-# The service can then read the logged-in user from:
-# request.headers.get('X-authentik-username')</pre>
-    </div>
-    -->
-
-    <!-- PATTERN C: Plugin-based (Jellyfin SSO-Auth, etc.) -->
-    <!--
-    <div class="card">
-      <div class="card-title">Pattern: Plugin-based OIDC</div>
-      <p>Install the [plugin name] plugin first, then configure it with your Authentik OIDC provider details.</p>
-      <pre># Plugin install location:
-Dashboard → Plugins → Catalog → search "[plugin name]" → Install → Restart
-
-# Plugin config:
-OID Endpoint:  <span data-cfg="url:auth"></span>/application/o/servicename/
-Client ID:     (from Authentik)
-Client Secret: (from Authentik)
-Redirect URI:  <span data-cfg="url:SERVICEKEY"></span>/sso/OID/redirect/Authentik</pre>
-    </div>
-    -->
-
-    <!-- ALWAYS INCLUDE: Test the SSO flow -->
-    <div class="card">
-      <div class="card-title">Test the login flow</div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-content">
-            <strong>Open an incognito window → go to <span data-cfg="url:SERVICEKEY"></span></strong>
-            <p>You should be redirected to Authentik. Sign in with Google. You should land in the service as an authenticated user.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Verify user provisioning</strong>
-            <p>Confirm the user account was auto-created in the service with the correct username (should match the Authentik username). Check in Authentik admin at <code data-cfg="authentik-admin"></code> → Directory → Users if needed.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Verify the Caddyfile entry</strong>
-            <p>Confirm the reverse proxy or forward_auth block for this service is in place at <code data-cfg="path:caddyfile"></code> and that Caddy has reloaded it:</p>
-            <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
-          </div>
-        </div>
-      </div>
+# Reload Caddy:
+caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
     </div>
   </div>
 
-  <!-- Add more setup steps/sections as needed for this service -->
+  <!-- ── Firewall ── -->
+  <div class="section">
+    <div class="section-title">🛡️ Firewall</div>
+    <div class="card">
+      <!--
+        Open the Windows Firewall for this service.
+        Note: these ports are LAN-only unless the service is public-facing.
+        External access goes through Cloudflare Tunnel / Caddy — the service
+        port itself never needs to be open to the internet.
+      -->
+      <pre>netsh advfirewall firewall add rule name="SERVICE NAME" dir=in action=allow protocol=TCP localport=<span data-cfg="port:SERVICEKEY"></span></pre>
+    </div>
+  </div>
+
+  <!-- ── Auto-restart ── -->
+  <div class="section">
+    <div class="section-title">♻️ Auto-restart on Boot</div>
+    <div class="card">
+      <!--
+        Every always-on service must restart after a Windows reboot.
+        Choose the right pattern:
+        • NSSM — for executables that aren't native Windows Services
+        • Windows Service — for apps that install as services natively
+        • Task Scheduler — for WSL2/Docker that can't run as services
+        After configuring, update the Restarting tab in the main binder.
+      -->
+      <pre># NSSM pattern (for non-service executables):
+nssm install SERVICENAME "C:\path\to\service.exe"
+nssm set SERVICENAME AppParameters "--config C:\path\to\config"
+nssm set SERVICENAME Start SERVICE_AUTO_START
+nssm start SERVICENAME
+
+# Windows Service pattern (if app installs as a service natively):
+# Run the installer as Administrator — it registers itself.
+# Verify: Get-Service -Name SERVICENAME</pre>
+    </div>
+  </div>
 
 </div><!-- /pane-setup -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANE 2 — OVERVIEW
+     ───────────────────────────────────────────────────────────────
+     PURPOSE: The day-to-day reference tab. Once setup is complete,
+     this becomes the default landing tab for this service.
      
-     Shown as the DEFAULT tab once setup is marked complete.
-     Should contain: quick reference (URLs, ports, tech details),
-     supported apps/clients, and anything a user needs day-to-day.
+     Should contain:
+     • A v1-banner stating the current state (version, caveats)
+     • Quick Reference: access URLs + technical details table
+     • Supported Apps & Clients: what devices/apps work with this
+     • Any other at-a-glance info a user or admin needs regularly
 ═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-overview">
 
+  <!--
+    Update this banner to reflect the current state of the service.
+    What version? What's working? Any known caveats right now?
+  -->
   <div class="v1-banner">
-    🔧 Brief one-liner about the service's current state on this server.
-    What version? What's working? Any caveats?
+    🔧 Current state of the service — version, what's working, any active caveats.
   </div>
 
   <div class="section">
@@ -489,12 +532,18 @@ Redirect URI:  <span data-cfg="url:SERVICEKEY"></span>/sso/OID/redirect/Authenti
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Access Points</div>
+        <!--
+          List every URL this service is accessible at.
+          External = through Cloudflare Tunnel (public internet).
+          Local = direct LAN access (no tunnel). Admin = LAN only.
+          Admin tools are never exposed publicly.
+        -->
         <table>
           <tr><th>Type</th><th>URL / Address</th></tr>
           <tr><td>Web (external)</td><td><code data-cfg="url:SERVICEKEY"></code></td></tr>
           <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:SERVICEKEY"></span></code></td></tr>
-          <tr><td>Admin dashboard</td><td><code>http://localhost:<span data-cfg="port:SERVICEKEY"></span>/admin</code></td></tr>
-          <!-- Add/remove rows as appropriate -->
+          <tr><td>Admin (LAN only)</td><td><code>http://localhost:<span data-cfg="port:SERVICEKEY"></span>/admin</code></td></tr>
+          <!-- Add/remove rows as appropriate for this service -->
         </table>
       </div>
       <div class="card">
@@ -506,7 +555,6 @@ Redirect URI:  <span data-cfg="url:SERVICEKEY"></span>/sso/OID/redirect/Authenti
           <tr><td>Service name</td><td><code>ServiceName</code></td></tr>
           <tr><td>Auth method</td><td>Authentik OIDC / Caddy forward_auth ← pick one</td></tr>
           <tr><td>Data path</td><td><code data-cfg="path:DATAPATH"></code></td></tr>
-          <!-- Add rows as appropriate -->
         </table>
       </div>
     </div>
@@ -515,6 +563,11 @@ Redirect URI:  <span data-cfg="url:SERVICEKEY"></span>/sso/OID/redirect/Authenti
   <div class="section">
     <div class="section-title">📱 Supported Apps &amp; Clients</div>
     <div class="card">
+      <!--
+        List every way a user can interact with this service.
+        Include browser, mobile apps, desktop clients, CLI tools.
+        Note any differences in capability between client types.
+      -->
       <table>
         <tr><th>Device / App</th><th>How to use it</th></tr>
         <tr><td>Browser</td><td>Go to <code data-cfg="url:SERVICEKEY"></code> — works everywhere</td></tr>
@@ -523,16 +576,21 @@ Redirect URI:  <span data-cfg="url:SERVICEKEY"></span>/sso/OID/redirect/Authenti
     </div>
   </div>
 
-  <!-- Add more overview sections as needed -->
+  <!-- Add more overview sections as needed for this specific service -->
 
 </div><!-- /pane-overview -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANE 3 — MAINTENANCE
+     ───────────────────────────────────────────────────────────────
+     PURPOSE: Everything needed to keep this service healthy over time.
+     Nothing auto-updates. All updates are manual, deliberate, and
+     documented here.
      
      Should cover:
-     • How to update the service (manual steps — nothing auto-updates)
+     • How to update (exact steps — download, replace, restart)
+     • Last confirmed working version (via versions.json / data-cfg)
      • Known breakpoints — things that WILL break eventually
      • Maintenance schedule (what to check and when)
      • Any routine cleanup tasks
@@ -540,94 +598,80 @@ Redirect URI:  <span data-cfg="url:SERVICEKEY"></span>/sso/OID/redirect/Authenti
 <div class="subtab-pane" id="pane-maintenance">
 
   <div class="section">
-    <div class="section-title">🔄 Updates</div>
+    <div class="section-title">🔄 How to Update</div>
     <div class="card">
-      <div class="card-title">Last confirmed working version</div>
-      <!-- data-cfg="version:SERVICEID" pulls from versions.json automatically.
-           Replace SERVICEID with the id field from services.json (e.g. "jellyfin").
-           After confirming an update works: fill in versions.json — don't edit this page. -->
-      <p style="font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--accent3)" data-cfg="version:SERVICEID"></p>
-      <p style="font-size:.8rem;color:var(--text-dim);margin-top:6px">
-        When you confirm a new version works: open <code>versions.json</code>, find the entry for this service,
-        and fill in <code>version</code> and <code>checkedDate</code>. Do not edit this page.
-      </p>
-    </div>
-    <div class="card">
-      <div class="card-title">How to update SERVICE NAME</div>
-      <p>Describe how updates work. Does it auto-update? Manual installer? Docker pull? Note any pre-update steps (backup, check plugin compatibility, etc.).</p>
+      <div class="card-title">
+        Last confirmed working version:
+        <!--
+          data-cfg="version:SERVICEID" pulls the version string from
+          versions.json automatically. Replace SERVICEID with the id
+          field for this service in services.json (e.g. "jellyfin").
+          Update versions.json after confirming an upgrade works —
+          never hardcode the version string here.
+        -->
+        <span data-cfg="version:SERVICEID"></span>
+      </div>
+      <!--
+        Write exact update steps. This server uses no auto-update tools.
+        Always: stop service → back up config/DB → replace binaries →
+        restart → verify. Adapt for Docker vs native vs Python installs.
+      -->
       <div class="steps">
         <div class="step">
           <div class="step-content">
-            <strong>Check current version</strong>
-            <pre># How to find the installed version:
-# e.g. Settings → About, or:
-Get-Service ServiceName | Select-Object -Property *</pre>
+            <strong>Stop the service and back up</strong>
+            <pre>Stop-Service ServiceName
+# Back up config/database before touching anything:
+Copy-Item "C:\path\to\config" "E:\Backups\SERVICENAME\config_$(Get-Date -Format 'yyyy-MM-dd')" -Recurse</pre>
           </div>
         </div>
         <div class="step">
           <div class="step-content">
-            <strong>Perform the update</strong>
-            <pre># Windows native:
-Stop-Service ServiceName
-# Run new installer
-Start-Service ServiceName
-
-# Docker:
-# cd ~/services/servicename
-# docker compose pull && docker compose up -d</pre>
+            <strong>Download and replace</strong>
+            <p>Download the new release from [official source]. Extract/install, replacing the old binaries. Do NOT overwrite the config or data directories.</p>
           </div>
         </div>
         <div class="step">
           <div class="step-content">
-            <strong>After confirming the update works — record the version</strong>
-            <p>Open <code data-cfg="path:server"></code>\configersions.json → find the entry for this service → fill in <code>version</code> and <code>checkedDate</code>. This gives you a known-good baseline to reference if a future update breaks something.</p>
+            <strong>Restart and verify</strong>
+            <pre>Start-Service ServiceName
+# Verify the service is healthy:
+# Open <span data-cfg="url:SERVICEKEY"></span> and check [specific indicator]</pre>
           </div>
         </div>
-      </div>
-      <div class="callout callout-warn">
-        <div class="callout-icon">⚠️</div>
-        <div class="callout-body"><strong>Before updating:</strong> Note any specific pre-update warnings for this service — database migrations, plugin compatibility, config format changes, etc.</div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">⚠️ Potential Breakpoints</div>
-    <!-- Color coding: danger class = red (likely to cause outage), default = yellow (degraded), ok class = green (minor) -->
-    <!-- ❌ NO TAILSCALE: If the original page listed any tools as "Tailscale only",
-         rewrite those as LAN-only (accessible via server IP on local network).
-         Do not add Tailscale recovery steps anywhere on this page. -->
-
-    <div class="trouble-item danger">
-      <div class="trouble-q">🔴 [Most critical breakpoint — what will definitely break someday]</div>
-      <div class="trouble-a">Description of what breaks, why, and how to recover. Be specific.</div>
+    <div class="section-title">⚠️ Known Breakpoints</div>
+    <!--
+      Document things that WILL break — based on past experience,
+      known service quirks, or things discovered during setup.
+      Being explicit here saves hours of debugging later.
+    -->
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li><strong>[Known issue 1]:</strong> Describe what breaks and why.</li>
+        <li><strong>[Known issue 2]:</strong> Describe what breaks and why.</li>
+        <!-- Add real breakpoints as you discover them -->
+      </ul>
     </div>
-
-    <div class="trouble-item">
-      <div class="trouble-q">🟡 [Second breakpoint — SSO/Authentik related issues are common]</div>
-      <div class="trouble-a">e.g. If you change your domain, update redirect URIs in Authentik AND in the service config. The exact URI must match: <code data-cfg="url:SERVICEKEY"></code>/auth/callback</div>
-    </div>
-
-    <div class="trouble-item ok">
-      <div class="trouble-q">🟢 [Minor maintenance item — routine housekeeping]</div>
-      <div class="trouble-a">Description of routine cleanup (logs, database bloat, orphaned files, etc.)</div>
-    </div>
-
-    <!-- Add more breakpoints as discovered -->
   </div>
 
   <div class="section">
     <div class="section-title">📅 Maintenance Schedule</div>
     <div class="card">
+      <!--
+        Use realistic frequencies. Don't add checks just for the sake of it.
+        Only include tasks that actually need doing on a schedule.
+      -->
       <table>
         <tr><th>Frequency</th><th>Task</th></tr>
-        <tr><td>Monthly</td><td>Check for updates</td></tr>
-        <tr><td>Monthly</td><td>Review error logs</td></tr>
-        <tr><td>After any update</td><td>Test SSO login in an incognito window</td></tr>
-        <tr><td>After any update</td><td>Record confirmed working version in <code>versions.json</code></td></tr>
-        <tr><td>After any domain change</td><td>Update redirect URIs in Authentik (<code data-cfg="authentik-admin"></code>) AND in the service config</td></tr>
-        <tr><td>After any domain change</td><td>Update Caddy config at <code data-cfg="path:caddyfile"></code> with new subdomain if applicable</td></tr>
-        <!-- Add service-specific tasks -->
+        <tr><td>Monthly</td><td>Check for new version releases</td></tr>
+        <tr><td>Monthly</td><td>[Service-specific routine check]</td></tr>
+        <tr><td>Quarterly</td><td>[Less frequent task]</td></tr>
+        <!-- Adjust rows to what this service actually needs -->
       </table>
     </div>
   </div>
@@ -637,28 +681,38 @@ Start-Service ServiceName
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANE 4 — ACHIEVEMENTS
+     ───────────────────────────────────────────────────────────────
+     PURPOSE: Documents how this service triggers achievements and
+     feeds data to the AI recommendation engine. This tab is for
+     the server owner to understand the integration — it shows how
+     the webhook flow works, which events to subscribe to, and
+     what achievement definitions to add to definitions.json.
      
-     Should cover:
-     • How achievements work for this service (webhooks vs polling vs manual)
-     • Webhook setup instructions (if applicable)
-     • Achievement definitions (JSON snippets for definitions.json)
-     • Achievement card grid showing what's available
-     • AI recommendation engine integration (if the service produces
-       content history — e.g. finished books, watched movies, played games)
+     For full context on the achievement system architecture and
+     the AI recommender pipeline, see the Activity Tracking page
+     in the Standards section of this binder.
      
-     COMPLEXITY TIERS:
-     • Simple (webhook fires on action) → just document the webhook URL + event
-     • Medium (requires counting) → document the counter logic in achievement server
-     • Complex (no webhook, requires polling or scraping) → document the approach
+     WHEN TO INCLUDE THE AI RECOMMENDER SECTION:
+     Include it ONLY if this service produces content-consumption
+     history that the recommender can use (finished books, watched
+     movies, played games, completed audiobooks, etc.).
+     OMIT it for utility services (Nextcloud, Vaultwarden, Monica,
+     Vikunja, etc.) that don't produce media history.
 ═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-achievements">
 
+  <!-- ── Achievement Flow ── -->
   <div class="section">
-    <div class="section-title">🎯 How SERVICE NAME Achievements Work</div>
+    <div class="section-title">🏆 How Achievements Are Triggered</div>
     <div class="card">
-      <p>Describe the mechanism: does this service have native webhooks? Does it require polling? Is it webhook-based with a counter? Explain the flow in plain language.</p>
+      <!--
+        Describe: how does this service detect the triggering event?
+        Options: webhook fired by the service, polling the service DB,
+        manual admin trigger, or no achievements (remove this section).
+      -->
+      <p>Describe how this service triggers achievements. Does it support webhooks? Does the achievement server need to poll the DB? Is it a manual grant?</p>
       <pre>User does [action] in SERVICE NAME
-  → [How it's detected: webhook / polling / manual trigger]
+  → [Detection method: webhook / DB poll / manual trigger]
   → POST http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger
     { "username": "alice", "trigger": "trigger_name", "metadata": { ... } }
   → Achievement server checks definitions.json
@@ -668,38 +722,46 @@ Start-Service ServiceName
     </div>
   </div>
 
-  <!-- WEBHOOK SETUP (include if service has native webhooks) -->
+  <!-- ── Webhook Setup (only if the service supports native webhooks) ── -->
   <div class="section">
     <div class="section-title">🔌 Webhook Setup</div>
     <div class="card">
       <div class="card-title">Where to configure webhooks in SERVICE NAME</div>
+      <!--
+        Show the exact path in the service UI to the webhook config,
+        the URL to use, and which events to subscribe to.
+      -->
       <pre># Location in service UI:
-# Settings → [path to webhook config]
+# Settings → [exact path to webhook config]
 
-# Webhook URL:
+# Webhook URL (the achievement server endpoint):
 http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger
 
 # Events to subscribe to:
-# [list relevant events]
+# [list the specific event names this service uses]
 
-# Body template:
+# Payload template (what the webhook should send):
 {
   "username": "{{USERNAME_VARIABLE}}",
   "trigger":  "{{EVENT_VARIABLE}}",
-  "metadata": {
-    "relevant": "{{DATA}}"
-  }
+  "metadata": { "relevant": "{{DATA}}" }
 }</pre>
     </div>
 
     <div class="card">
       <div class="card-title">Achievement definitions — add to definitions.json</div>
+      <!--
+        These are the entries to paste into definitions.json.
+        Triggers must match the webhook event names exactly.
+        "once: true" = one-time badge. Omit "once" for repeatable.
+        "requires.count" = must fire N times before unlocking.
+      -->
       <pre># <span data-cfg="path:achievements"></span>\definitions.json — add these entries:
 {
   "service_first_action": {
     "name":     "Achievement Name",
     "icon":     "🏅",
-    "desc":     "Plain language description of what triggers this",
+    "desc":     "What the user did to earn this",
     "triggers": ["trigger_event_name"],
     "xp":       10,
     "once":     true
@@ -712,14 +774,21 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
     "requires": { "count": 10 },
     "xp":       50
   }
-  // Add more achievements here
 }</pre>
     </div>
   </div>
 
-  <!-- ACHIEVEMENT CARDS -->
+  <!-- ── Achievement Cards ── -->
   <div class="section">
     <div class="section-title">🏅 Available Achievements</div>
+    <!--
+      One .ach-card per achievement. ach-method options:
+        webhook            — fired directly by the service
+        webhook + counter  — webhook fires, server counts to threshold
+        webhook + timestamp — webhook fires, server checks time-of-day
+        db poll            — achievement server polls the service DB
+        manual             — admin grants manually
+    -->
     <div class="ach-grid">
 
       <div class="ach-card">
@@ -727,9 +796,8 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
         <div class="ach-name">Achievement Name</div>
         <div class="ach-desc">What the user has to do to earn this.</div>
         <div class="ach-footer">
-          <span class="ach-pts">XP pts</span>
+          <span class="ach-pts">10 XP</span>
           <span class="ach-method">webhook</span>
-          <!-- ach-method options: webhook / webhook + counter / webhook + timestamp / polling / manual -->
         </div>
       </div>
 
@@ -738,15 +806,21 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
     </div>
   </div>
 
-  <!-- AI RECOMMENDATION INTEGRATION
-       Include this section ONLY if this service produces content history
-       that the recommendation engine can use (finished books, watched content,
-       played games, etc.). Remove if not applicable (e.g. Vaultwarden, Nextcloud). -->
-  <!--
+  <!-- ── AI Recommendation Engine Integration ──
+       INCLUDE THIS SECTION only if this service produces content history
+       (finished books, watched content, played games, etc.).
+       REMOVE for utility services (Vaultwarden, Nextcloud, Monica, etc.).
+  -->
   <div class="section">
     <div class="section-title">🤖 Feeding the AI Recommendation Engine</div>
     <div class="card">
-      <p>Explanation of what data from this service is useful for the recommendation engine and why (e.g. "books finished at 90%+ is a reliable taste signal").</p>
+      <!--
+        Explain what data from this service is a useful taste signal.
+        Example: "Books finished at 90%+ are reliable. Abandoned books
+        (< 20% read) are a strong negative signal."
+        See Activity Tracking page for full rec engine architecture.
+      -->
+      <p>Explain what data from this service is a useful recommendation signal and why (e.g. "books finished at 90%+ is a reliable taste signal"). Note any thresholds or edge cases.</p>
     </div>
     <div class="card">
       <div class="card-title">Webhook / endpoint to record to rec_server.py</div>
@@ -763,21 +837,36 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
 # <span data-cfg="path:recommendations"></span>\rec_server.py</pre>
     </div>
   </div>
-  -->
 
 </div><!-- /pane-achievements -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANE 5 — DATA STORAGE
+     ───────────────────────────────────────────────────────────────
+     PURPOSE: Complete map of where every byte of this service lives.
+     Critical for backups, user management, and knowing what to move
+     if the server is migrated.
      
      Should cover:
-     • How much space the app itself takes
-     • Where all the files live (full path map)
+     • Storage overview (sizes for app, config, per-user, shared library)
+     • Full path map of every directory this service uses
      • What's per-user vs shared
      • Where per-user data lives in D:\Users\[username]\
      • How it integrates with Nextcloud quota
      • Backup recommendations with priority levels
+     
+     USER DATA STORAGE PATTERNS:
+     Pattern A — In-service database (e.g. Jellyfin, Navidrome):
+       User data (watch progress, playlists, etc.) is stored in the
+       service's own SQLite/Postgres DB. No per-user folder needed.
+       Back up the DB file.
+     
+     Pattern B — D:\Users\[username]\[service-name]\ (most services):
+       Per-user data lives in the user's personal folder.
+       It's visible in Nextcloud as "App Data" and counts toward quota.
+       The session_manager.py symlink points the service at the right folder.
+       Use X-authentik-username header for browser-based services.
 ═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-storage">
 
@@ -798,26 +887,28 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
       </div>
       <div class="storage-cell">
         <div class="storage-cell-label">Shared Library</div>
-        <div class="storage-cell-val">Shared — <span data-cfg="path:DATAPATH"></span></div>
-        <!-- Use the relevant path key, or hardcode if no CFG key exists -->
+        <div class="storage-cell-val"><span data-cfg="path:DATAPATH"></span></div>
       </div>
-      <!-- Add/remove cells as appropriate -->
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">📂 Where Everything Lives</div>
     <div class="card">
-      <pre>C:\[InstallPath]\                 ← app binaries
-  config\                          ← service config files
+      <!--
+        Map every directory this service reads from or writes to.
+        Use data-cfg for paths so they stay accurate if paths change.
+      -->
+      <pre>C:\[InstallPath]\                  ← app binaries
+  config\                           ← service config files
   data\
-    app.db                         ← main database (if SQLite)
-    logs\                          ← log files
+    app.db                          ← main database (if SQLite)
+    logs\                           ← log files
 
-<span data-cfg="path:DATAPATH"></span>\                 ← shared content (read-only to service)
+<span data-cfg="path:DATAPATH"></span>\           ← shared content library (read-only to service)
 
-<span data-cfg="path:users"></span>\[username]\SUBFOLDER\  ← per-user data
-  (explain what lives here)</pre>
+<span data-cfg="path:users"></span>\[username]\SUBFOLDER\   ← per-user data
+  (describe what lives in this folder)</pre>
     </div>
   </div>
 
@@ -825,26 +916,31 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
     <div class="section-title">👤 Per-User Data</div>
     <div class="card">
       <div class="card-title">What SERVICE NAME stores per user</div>
-      <p>Describe where user-specific data lives. Is it in the service's own database, or in <code data-cfg="path:users"></code>\[username]\? What's in each location?</p>
+      <!--
+        Describe what's in the per-user folder. Or if all user data is
+        in the service DB (Pattern A), say so explicitly and use the
+        callout-tip block below.
+      -->
+      <p>Describe where user-specific data lives and what each file/subfolder contains.</p>
 
-      <!-- Choose the appropriate callout based on storage pattern: -->
-
-      <!-- Pattern A: Data in service's own DB (like Jellyfin) -->
+      <!-- Pattern A: Everything in service DB -->
       <div class="callout callout-tip">
         <div class="callout-icon">💡</div>
         <div class="callout-body"><strong>All per-user data is in the service database.</strong> No per-user folder in <code data-cfg="path:users"></code> is needed for this service. Back up the database file to preserve all user data.</div>
       </div>
 
-      <!-- Pattern B: Data in D:\Users\[username]\ (most services) -->
       <!--
-      <p><strong>What lives in <code data-cfg="path:userpath:[username]"></code>\SUBFOLDER\</code>:</strong></p>
+        Pattern B: Data in D:\Users\[username]\ — uncomment and fill in:
+      -->
+      <!--
+      <p><strong>What lives in <code data-cfg="path:users"></code>\[username]\SUBFOLDER\</code>:</strong></p>
       <ul style="margin:6px 0 0 18px;font-size:.85rem">
         <li>List each type of file/data stored here</li>
         <li>Explain what it is and why it's there</li>
       </ul>
       <div class="callout callout-tip">
         <div class="callout-icon">💡</div>
-        <div class="callout-body">This folder is visible in Nextcloud as "App Data" and counts toward the user's storage quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</div>
+        <div class="callout-body">This folder is visible in Nextcloud as "App Data" and counts toward the user's storage quota.</div>
       </div>
       -->
     </div>
@@ -853,12 +949,16 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
   <div class="section">
     <div class="section-title">🗄️ Backup Recommendations</div>
     <div class="card">
+      <!--
+        Priority: 🔴 High = irreplaceable (user saves, DB, config)
+                  🟡 Med = recoverable but painful
+                  🟢 Low = can be re-acquired easily
+      -->
       <table>
         <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
         <tr><td>Database / config</td><td><code>C:\[path]\app.db</code></td><td>Daily</td><td>🔴 High</td></tr>
         <tr><td>User data folder</td><td><code data-cfg="path:users"></code></td><td>Daily</td><td>🔴 High</td></tr>
-        <tr><td>Shared library/content</td><td><code data-cfg="path:DATAPATH"></code></td><td>As acquired</td><td>🔴 High</td></tr>
-        <!-- Add/remove rows as appropriate, adjust priorities -->
+        <tr><td>Shared library</td><td><code data-cfg="path:DATAPATH"></code></td><td>As acquired</td><td>🔴 High</td></tr>
       </table>
     </div>
   </div>
@@ -868,17 +968,17 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANE 6 — TROUBLESHOOTING
+     ───────────────────────────────────────────────────────────────
+     PURPOSE: Quick-reference for diagnosing and fixing common issues.
+     Documents problems discovered during setup or operation so they
+     don't need to be solved from scratch the next time.
      
-     Should cover:
-     • Most common issues in priority order (critical → minor)
-     • Diagnostic steps for each issue
-     • Useful admin commands for this service
-     • How to generate support/debug info
+     TROUBLE-ITEM COLOR CODING:
+     • class="danger"  🔴 — causes complete service outage
+     • (default)       🟡 — degraded functionality or annoying bug
+     • class="ok"      🟢 — cosmetic / minor / useful tip
      
-     Color coding for trouble-item:
-     • class="danger"  → 🔴 causes complete service outage
-     • (default)       → 🟡 degraded functionality
-     • class="ok"      → 🟢 cosmetic / minor
+     Sort issues by severity: danger first, then default, then ok.
 ═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-troubleshooting">
 
@@ -886,7 +986,7 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
     <div class="section-title">🛠️ Common Issues</div>
 
     <div class="trouble-item danger">
-      <div class="trouble-q">❌ [Most common critical issue]</div>
+      <div class="trouble-q">❌ [Most common critical failure]</div>
       <div class="trouble-a">
         What causes it. Diagnostic steps:
         <ul style="margin:6px 0 0 18px">
@@ -902,7 +1002,7 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
       <div class="trouble-a">
         <p>Almost always a redirect URI mismatch. Check:</p>
         <ul style="margin:6px 0 0 18px">
-          <li>Authentik provider → Redirect URIs matches exactly: <code data-cfg="url:SERVICEKEY"></code>/[callback path]</li>
+          <li>Authentik provider → Redirect URIs exactly matches: <code data-cfg="url:SERVICEKEY"></code>/[callback path]</li>
           <li>Service OIDC config → Redirect URI matches exactly</li>
           <li>Restart the service after any config change</li>
         </ul>
@@ -917,38 +1017,42 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
           <li>Is the service running? → <code>Get-Service ServiceName</code></li>
           <li>Is Caddy running? → check <code data-cfg="url:SERVICEKEY"></code> in browser</li>
           <li>Is the Cloudflare DNS record correct for <code data-cfg="url:SERVICEKEY"></code>?</li>
+          <li>Check Caddy error log for upstream connection failures</li>
         </ul>
       </div>
     </div>
 
     <div class="trouble-item ok">
-      <div class="trouble-q">💡 [Minor / cosmetic issue or tip]</div>
+      <div class="trouble-q">💡 [Minor / cosmetic issue or useful tip]</div>
       <div class="trouble-a">Description and fix.</div>
     </div>
 
-    <!-- Add more trouble items as discovered during setup -->
+    <!-- Add more trouble-items as discovered during setup and operation -->
 
   </div>
 
   <div class="section">
     <div class="section-title">🔍 Useful Admin Commands</div>
-    <!-- ❌ NO TAILSCALE: All admin commands run from the LAN. No Tailscale IP,
-         no "connect to Tailscale first" steps. Access is via server LAN IP directly. -->
+    <!--
+      All admin commands are run from the LAN — directly at the server
+      or via SSH/RDP from within the local network.
+      Admin tools are never exposed publicly, even behind Authentik.
+    -->
     <div class="card">
-      <pre># Service management (Windows native):
+      <pre># Service management (Windows native service):
 Get-Service -Name ServiceName          # check status
 Stop-Service ServiceName               # stop
 Start-Service ServiceName              # start
 Restart-Service ServiceName            # restart
 
-# View logs:
+# View recent logs:
 Get-Content "C:\[log path]\service.log" -Tail 100
 
 # Docker services (WSL2):
 # docker compose -f ~/services/servicename/docker-compose.yml logs -f
 # docker compose -f ~/services/servicename/docker-compose.yml restart
 
-# Test SSO webhook reachability:
+# Test achievement webhook is reachable:
 Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger" `
   -Method POST -ContentType "application/json" `
   -Body '{"username":"test","trigger":"test","metadata":{}}'</pre>
@@ -959,15 +1063,145 @@ Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></spa
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+     PANE 7 — UI PREVIEW
+     ───────────────────────────────────────────────────────────────
+     PURPOSE: A static, dummy-data mockup of what a logged-in user
+     sees when using this service. No server calls, no embeds, no
+     authentication required. This exists so the server owner can:
      
+       • Understand the user-facing layout and flow at a glance
+       • Tweak layout decisions without spinning up the real service
+       • Identify confusing UX before onboarding real users
+       • Communicate what a service looks like to people helping
+         with the binder who can't access the live service
+     
+     GUIDELINES:
+     • Use .preview-chrome + .preview-bar + .preview-body structure
+     • Set the dummy user to "alex" (the generic demo user)
+     • Use realistic but clearly fake data (movies, books, etc.)
+     • Mark sections you haven't mocked yet with .preview-todo boxes
+     • NOT every service will have a complete preview — a partial
+       preview is fine and still useful. Better partial than nothing.
+     • Add a .preview-note at the top explaining limitations
+     • DO NOT embed iframes or make real network calls
+     • Style mock UI elements with inline styles or .preview-* classes
+     ───────────────────────────────────────────────────────────────
+     HOW TO BUILD THE MOCK:
+     Look at the real service's screenshots or documentation and
+     recreate the key screens: main library view, item detail page,
+     user settings, and any service-specific unique screens.
+     Focus on layout and information hierarchy — exact pixel-perfect
+     accuracy is not the goal.
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-uipreview">
+
+  <!-- ── Preview metadata ── -->
+  <div class="preview-note">
+    <span>🖥️</span>
+    <div>
+      <strong>UI Preview — Dummy Data</strong><br>
+      This is a static mockup of what SERVICE NAME looks like to a logged-in user.
+      Logged in as: <strong>alex</strong> (demo user). No real server calls are made.
+      Incomplete sections are marked with red dashed boxes.
+      To build out a section: replace .preview-todo boxes with actual mock HTML.
+    </div>
+  </div>
+
+  <!-- ── Main View Mock ── -->
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <!-- Fake traffic light dots for browser chrome realism -->
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <!-- Fake address bar showing service URL -->
+      <div class="preview-url" data-cfg="url:SERVICEKEY">servicekey.yourdomain.com</div>
+      <!-- Shows which dummy user is viewing this preview -->
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body">
+      <!--
+        ╔═════════════════════════════════════════╗
+        ║  REPLACE THIS TODO BOX WITH YOUR MOCK  ║
+        ║                                         ║
+        ║  Start with the main library/home view. ║
+        ║  Use inline styles to approximate the   ║
+        ║  real service's layout and color scheme. ║
+        ║                                         ║
+        ║  Example approaches:                    ║
+        ║  • Grid of cards for media libraries    ║
+        ║  • Table layout for list-based services ║
+        ║  • Sidebar + content for reading apps   ║
+        ║  • Dashboard stats for monitoring tools ║
+        ╚═════════════════════════════════════════╝
+      -->
+      <div class="preview-todo">
+        🖥️ Main view not yet mocked — replace this box with a layout approximation.<br>
+        <small>Tip: look at official screenshots or the service's demo and recreate the key layout in HTML/inline CSS.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Secondary View Mock (e.g. item detail, settings, etc.) ── -->
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin:16px 0 8px">
+    [Secondary View — e.g. Item Detail / User Settings / Search Results]
+  </div>
+
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">servicekey.yourdomain.com/[subpath]</div>
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-todo">
+        🖥️ [Secondary view] not yet mocked.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Notes for UI iteration ── -->
+  <div class="section" style="margin-top:20px">
+    <div class="section-title">📝 UI Notes &amp; Iteration Log</div>
+    <div class="card">
+      <!--
+        Use this section to note things you want to change or follow up on
+        after seeing the UI. This is the scratchpad for UI decisions.
+        Delete entries once they're resolved.
+      -->
+      <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;color:var(--text-dim)">
+        <li>[ ] Note any UI decisions to revisit here</li>
+        <li>[ ] E.g. "The library grid is too dense on mobile — check if pagination helps"</li>
+        <li>[ ] E.g. "User settings are buried 3 levels deep — add a shortcut link from homepage"</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-uipreview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+     ───────────────────────────────────────────────────────────────
      Copy this script block verbatim to every service page.
-     The only thing that changes is the STORAGE_KEY value —
-     make it unique per service (e.g. 'jellyfin_setup_complete',
-     'calibre_setup_complete', etc.)
+     
+     The ONLY thing you change per service is STORAGE_KEY.
+     It must be unique across all pages so localStorage entries
+     don't collide. Convention: '[servicename]_setup_complete'
+     Examples: 'jellyfin_setup_complete', 'calibre_setup_complete'
+     
+     HOW IT WORKS:
+     • switchTab(id, btn) — shows the named pane, highlights the btn
+     • toggleComplete() — flips the checkbox, saves to localStorage,
+       and if marking done: auto-switches to Overview tab
+     • DOMContentLoaded — restores checkbox state on page load,
+       auto-switches to Overview if setup was previously completed
 ═══════════════════════════════════════════════════════════════ -->
 <script>
   // ── Sub-tab switching ──
+  // Called by onclick="switchTab('tabname', this)" on each button.
   function switchTab(id, btn) {
     document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
@@ -981,10 +1215,11 @@ Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></spa
 
   let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
 
+  // Updates all UI elements to reflect the current isComplete state.
   function renderComplete() {
-    const bar      = document.getElementById('setup-complete-bar');
-    const checkbox = document.getElementById('setup-checkbox');
-    const sub      = document.getElementById('complete-sub');
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
     const overviewBtn = document.querySelector('[onclick*="overview"]');
 
     if (isComplete) {
@@ -1002,16 +1237,19 @@ Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></spa
     }
   }
 
+  // Toggles the setup-complete state and saves it to localStorage.
   function toggleComplete() {
     isComplete = !isComplete;
     localStorage.setItem(STORAGE_KEY, isComplete);
     renderComplete();
+    // Auto-switch to Overview when marking complete — the tab is now the default.
     if (isComplete) {
       const overviewBtn = document.querySelector('[onclick*="overview"]');
       switchTab('overview', overviewBtn);
     }
   }
 
+  // On load: restore saved state and auto-switch to Overview if already done.
   window.addEventListener('DOMContentLoaded', () => {
     renderComplete();
     if (isComplete) {

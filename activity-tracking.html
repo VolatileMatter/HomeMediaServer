@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Activity Tracking</title><link rel="stylesheet" href="shared.css">
+<script src="config.js"></script>
+<style>
+  /* ── Trophy bar ── */
+  .trophy-bar{display:flex;gap:20px;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;margin-bottom:20px;align-items:center;}
+  .trophy-stat{text-align:center;}
+  .trophy-num{font-family:'Cinzel',serif;font-size:1.5rem;color:var(--accent);font-weight:900;line-height:1;}
+  .trophy-lbl{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-top:3px;}
+
+  /* ── Achievement cards ── */
+  .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;margin-top:10px;}
+  .ach-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px 14px;transition:border-color .16s;}
+  .ach-card:hover{border-color:rgba(200,168,75,.3);}
+  .ach-card.earned{border-color:rgba(76,175,125,.35);background:rgba(76,175,125,.04);}
+  .ach-icon-lg{font-size:2rem;margin-bottom:8px;}
+  .ach-icon{font-size:1.3rem;margin-bottom:5px;}
+  .ach-name{font-weight:700;font-size:.83rem;margin-bottom:3px;}
+  .ach-desc{font-size:.74rem;color:var(--text-dim);line-height:1.5;}
+  .ach-src{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--accent2);margin-top:4px;}
+  .ach-pts{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--accent);margin-top:4px;}
+  .ach-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+  .ach-method{font-size:.65rem;color:var(--text-dim);background:var(--bg3);padding:1px 5px;border-radius:2px;}
+
+  /* ── Section headers with colored left accent ── */
+  .cat-header{font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:22px 0 10px;padding-left:10px;border-left:2px solid var(--accent);}
+
+  /* ── Showcase strip ── */
+  .ach-showcase{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:20px;}
+  .ach-showcase .ach-card{min-width:130px;flex-shrink:0;}
+
+  /* ── Flow diagram ── */
+  .flow-row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap;}
+  .flow-box{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:6px 12px;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--text);}
+  .flow-arrow{color:var(--text-dim);font-size:.9rem;}
+  .flow-box.highlight{border-color:rgba(200,168,75,.4);color:var(--accent);}
+  .flow-box.green{border-color:rgba(76,175,125,.35);color:#4caf7d;}
+  .flow-box.blue{border-color:rgba(91,141,217,.35);color:var(--accent2);}
+
+  /* ── Opt-out banner ── */
+  .optout-banner{background:rgba(91,141,217,.07);border:1px solid rgba(91,141,217,.25);border-radius:4px;padding:14px 16px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;}
+  .optout-banner-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px;}
+  .optout-banner-body{font-size:.83rem;color:var(--text-dim);line-height:1.6;}
+  .optout-banner-body strong{color:var(--text);}
+
+  /* ── Rec engine signal table ── */
+  .signal-strong{color:#4caf7d;font-weight:700;}
+  .signal-weak{color:var(--warning);}
+  .signal-negative{color:var(--danger);}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📊</div>
+  <div>
+    <h1>Activity Tracking</h1>
+    <div class="subtitle">// Achievements · AI Recommendations · User Privacy · How It All Works //</div>
+    <p class="desc">The complete reference for the server's activity tracking systems — the achievement engine that rewards users for engaging with the library, and the AI recommendation engine that learns their tastes. Both run entirely on-server with no data leaving the building. Users can opt out at any time.</p>
+  </div>
+</div>
+
+<!-- ── Live stats preview ── -->
+<div class="trophy-bar">
+  <div class="trophy-stat"><div class="trophy-num">🏆</div><div class="trophy-lbl">System</div></div>
+  <div class="trophy-stat"><div class="trophy-num" style="color:var(--accent2)">12</div><div class="trophy-lbl">Earned total</div></div>
+  <div class="trophy-stat"><div class="trophy-num" style="color:#4caf7d">3</div><div class="trophy-lbl">This week</div></div>
+  <div class="trophy-stat"><div class="trophy-num" style="color:var(--accent3)">47</div><div class="trophy-lbl">Available</div></div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);margin-left:auto">(Demo data — connect achievement server for live stats)</div>
+</div>
+
+<!-- ── Opt-out notice — prominent and first ── -->
+<div class="optout-banner">
+  <div class="optout-banner-icon">🛡️</div>
+  <div class="optout-banner-body">
+    <strong>Users can opt out of activity tracking at any time.</strong>
+    Go to <strong>settings.yourdomain.com → Privacy → Activity Tracking</strong> and toggle it off.
+    When opted out: no new activity events are collected, the recommendation engine stops updating the user's profile,
+    and achievement triggers are suppressed. Previously collected data can be deleted on request.
+    The achievement_server.py and rec_server.py both check and respect the opt-out flag on every event — an opted-out user
+    is silently skipped, with no error and no data written.
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗
+     ║                   PART 1 — ACHIEVEMENTS                       ║
+     ╚═══════════════════════════════════════════════════════════════╝ -->
+
+<hr>
+<div class="cat-header">Part 1 — Achievement System</div>
+
+<!-- ── How achievements work (architecture) ── -->
+<div class="section">
+  <div class="section-title">⚙️ Architecture Overview</div>
+  <div class="card">
+    <div class="card-title">The achievement pipeline</div>
+    <p style="font-size:.84rem;margin-bottom:14px">Achievements are triggered by events from services (via webhook or polling), evaluated by a central achievement server, and stored per-user. The homepage polls the achievement server for the community feed.</p>
+
+    <div class="flow-row">
+      <div class="flow-box">Calibre-Web / ABS / EmulatorJS / etc.</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight">POST /api/achievement/trigger</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight">achievement_server.py (port <span data-cfg="port:achievement"></span>)</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-arrow" style="margin-left:40px">↓</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-box">Check opt-out flag</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Match trigger → definitions.json</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">Unlock + write to unlocks.json</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-arrow" style="margin-left:40px">↓</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-box blue">Homepage polls /api/feed (every 60s) → community feed</div>
+    </div>
+
+    <pre style="margin-top:16px"># Achievement server data files:
+# <span data-cfg="path:achievements"></span>\achievement_server.py   ← the server (port <span data-cfg="port:achievement"></span>)
+# <span data-cfg="path:achievements"></span>\definitions.json         ← all achievement definitions
+# <span data-cfg="path:achievements"></span>\unlocks.json             ← per-user unlock records
+
+# Per-user achievement file (also written):
+# <span data-cfg="path:users"></span>\[username]\achievements.json</pre>
+  </div>
+</div>
+
+<!-- ── achievement_server.py code ── -->
+<div class="section">
+  <div class="section-title">🐍 achievement_server.py</div>
+  <div class="card">
+    <div class="card-title">Core server implementation</div>
+    <pre># <span data-cfg="path:achievements"></span>\achievement_server.py
+# Flask server — port <span data-cfg="port:achievement"></span>
+from flask import Flask, request, jsonify
+import json, os, time
+
+app = Flask(__name__)
+DEFS_FILE    = '<span data-cfg="path:achievements"></span>/definitions.json'
+UNLOCKS_FILE = '<span data-cfg="path:achievements"></span>/unlocks.json'
+USERS_BASE   = '<span data-cfg="path:users"></span>'
+
+def load(f): return json.load(open(f)) if os.path.exists(f) else {}
+def save(f, d): json.dump(d, open(f,'w'), indent=2)
+
+def is_opted_out(username):
+    """Check the user's opt-out flag before processing any event."""
+    prefs_path = os.path.join(USERS_BASE, username, 'preferences.json')
+    if os.path.exists(prefs_path):
+        prefs = json.load(open(prefs_path))
+        if prefs.get('tracking_optout', False):
+            return True
+    return False
+
+@app.route('/api/achievement/trigger', methods=['POST'])
+def trigger():
+    data     = request.json
+    username = data.get('username')
+    trigger  = data.get('trigger')
+    meta     = data.get('metadata', {})
+    if not username or not trigger:
+        return jsonify({'error': 'missing fields'}), 400
+
+    # Respect opt-out — silently ignore, no error
+    if is_opted_out(username):
+        return jsonify({'status': 'skipped', 'reason': 'opted_out'}), 200
+
+    defs    = load(DEFS_FILE)
+    unlocks = load(UNLOCKS_FILE)
+    if username not in unlocks: unlocks[username] = {}
+    newly_unlocked = []
+
+    for ach_id, ach in defs.items():
+        if trigger in ach.get('triggers', []) and ach_id not in unlocks[username]:
+            req = ach.get('requires', {})
+            ok  = all(meta.get(k, 0) >= v for k, v in req.items())
+            if ok:
+                unlocks[username][ach_id] = {
+                    'unlocked_at': time.time(),
+                    'metadata':    meta
+                }
+                newly_unlocked.append(ach_id)
+
+    if newly_unlocked:
+        save(UNLOCKS_FILE, unlocks)
+
+    return jsonify({'unlocked': newly_unlocked}), 200
+
+@app.route('/api/feed', methods=['GET'])
+def feed():
+    """Returns recent community unlocks for the homepage feed."""
+    unlocks = load(UNLOCKS_FILE)
+    defs    = load(DEFS_FILE)
+    events  = []
+    for user, achievements in unlocks.items():
+        for ach_id, info in achievements.items():
+            if ach_id in defs:
+                events.append({
+                    'user':        user,
+                    'ach_id':      ach_id,
+                    'name':        defs[ach_id].get('name'),
+                    'icon':        defs[ach_id].get('icon'),
+                    'unlocked_at': info['unlocked_at']
+                })
+    events.sort(key=lambda e: e['unlocked_at'], reverse=True)
+    return jsonify(events[:20])
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=<span data-cfg="port:achievement"></span>)</pre>
+  </div>
+</div>
+
+<!-- ── definitions.json structure ── -->
+<div class="section">
+  <div class="section-title">📄 definitions.json — Achievement Schema</div>
+  <div class="card">
+    <div class="card-title">Full schema with all field options</div>
+    <pre># <span data-cfg="path:achievements"></span>\definitions.json
+
+{
+  "achievement_id": {               ← unique snake_case key, never change once deployed
+    "name":     "Display Name",     ← shown in UI and community feed
+    "icon":     "🏅",               ← emoji icon (one character)
+    "desc":     "What triggers it", ← shown to users as the achievement description
+    "service":  "calibre-web",      ← which service this belongs to (for grouping)
+    "triggers": ["event_name"],     ← list of trigger strings that can unlock this
+    "xp":       10,                 ← XP value (10 = minor, 25 = moderate, 75 = major)
+    "once":     true,               ← true = one-time badge; omit/false = repeatable
+    "requires": { "count": 10 }     ← optional: metadata thresholds to meet
+  }
+}
+
+# ── Trigger method reference ──
+# webhook              — service fires HTTP POST directly to achievement server
+# webhook + counter    — webhook fires on each event; server counts to threshold
+# webhook + timestamp  — webhook fires; server checks time metadata (e.g. midnight)
+# db poll              — achievement_server polls service DB (Task Scheduler, hourly)
+# manual               — admin grants via curl or admin UI</pre>
+  </div>
+</div>
+
+<!-- ── How to add a new achievement ── -->
+<div class="section">
+  <div class="section-title">➕ Adding a New Achievement</div>
+  <div class="card">
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Identify the trigger event</strong>
+          <p>What user action should unlock this? Does the source service support webhooks, or does it require DB polling? Check the service's documentation or Achievements tab in its binder page.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure the webhook or polling in the source service</strong>
+          <p>For webhook-based services: go to Settings → Webhooks in that service and add the endpoint:</p>
+          <pre>http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger</pre>
+          <p>For polling-based services: add a Task Scheduler job that calls the achievement server on a schedule.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add the definition to definitions.json</strong>
+          <pre># Edit <span data-cfg="path:achievements"></span>\definitions.json
+# Add your new entry following the schema above.
+# Use a unique, descriptive snake_case ID.
+# Don't reuse IDs — existing unlocks are keyed by ID forever.</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Test it</strong>
+          <pre># Manually fire the trigger to verify:
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger" `
+  -Method POST -ContentType "application/json" `
+  -Body '{"username":"alice","trigger":"YOUR_TRIGGER","metadata":{}}'
+
+# Check the response — should include your new achievement ID in "unlocked"
+# Also check: <span data-cfg="path:achievements"></span>\unlocks.json</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Document it in the service's Achievements tab</strong>
+          <p>Add an <code>.ach-card</code> block to the service's HTML file so the achievement is visible in the binder.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Community showcase (dummy) ── -->
+<div class="section">
+  <div class="section-title">🌟 Community Showcase — Recent Unlocks (Demo)</div>
+  <div class="ach-showcase">
+    <div class="ach-card earned">
+      <div class="ach-icon-lg">📖</div>
+      <div class="ach-name">Bookworm</div>
+      <div class="ach-desc">Finish your first book in Calibre-Web</div>
+      <div class="ach-src">Calibre-Web</div>
+      <div class="ach-pts">10 XP</div>
+    </div>
+    <div class="ach-card earned">
+      <div class="ach-icon-lg">🎧</div>
+      <div class="ach-name">First Chapter</div>
+      <div class="ach-desc">Finish your first audiobook (95%+)</div>
+      <div class="ach-src">Audiobookshelf</div>
+      <div class="ach-pts">25 XP</div>
+    </div>
+    <div class="ach-card earned">
+      <div class="ach-icon-lg">🎮</div>
+      <div class="ach-name">Insert Coin</div>
+      <div class="ach-desc">Play your first retro game</div>
+      <div class="ach-src">EmulatorJS</div>
+      <div class="ach-pts">10 XP</div>
+    </div>
+    <div class="ach-card earned">
+      <div class="ach-icon-lg">🎬</div>
+      <div class="ach-name">Movie Night</div>
+      <div class="ach-desc">Watch your first movie on Jellyfin</div>
+      <div class="ach-src">Jellyfin</div>
+      <div class="ach-pts">10 XP</div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon-lg">🦉</div>
+      <div class="ach-name">Night Owl</div>
+      <div class="ach-desc">Start a session after midnight</div>
+      <div class="ach-src">Any service</div>
+      <div class="ach-pts">15 XP</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗
+     ║              PART 2 — AI RECOMMENDATION ENGINE                ║
+     ╚═══════════════════════════════════════════════════════════════╝ -->
+
+<hr>
+<div class="cat-header">Part 2 — AI Recommendation Engine</div>
+
+<!-- ── Overview ── -->
+<div class="section">
+  <div class="section-title">🤖 What the Recommender Does</div>
+  <div class="card">
+    <p style="font-size:.84rem;line-height:1.7">The recommendation engine watches what users read, watch, and play — then uses Ollama (running locally) to suggest what they might enjoy next. It reads two catalogue files (<code>books.json</code> and <code>games.json</code>) and a history file per user, and feeds them into a system-prompted Ollama session. No data leaves the server. No third-party API calls.</p>
+    <p style="font-size:.84rem;line-height:1.7;margin-top:8px">The recommendations page (<code>ai.yourdomain.com/recommend</code> or the homepage widget) lets users chat with the engine in natural language: "I want something like Dune but shorter" or "a retro game I can play in 30 minutes."</p>
+
+    <div class="callout callout-tip" style="margin-top:12px">
+      <div class="callout-icon">🔒</div>
+      <div class="callout-body"><strong>Opt-out respected here too.</strong> rec_server.py checks the tracking opt-out flag before writing any history record. Opted-out users still get the recommendation chat interface — it just uses an empty history (no personalization). They can still provide explicit preferences in-chat.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Architecture ── -->
+<div class="section">
+  <div class="section-title">⚙️ Recommendation Engine Architecture</div>
+  <div class="card">
+    <div class="card-title">Data pipeline</div>
+
+    <div class="flow-row">
+      <div class="flow-box">Service webhook fires on completion</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight">POST /api/history/record → rec_server.py (port <span data-cfg="port:recommendation"></span>)</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-arrow" style="margin-left:40px">↓</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-box">Check opt-out flag</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">Write to <span data-cfg="path:users"></span>\[user]\rec_history.json</div>
+    </div>
+    <div class="flow-row" style="margin-top:12px">
+      <div class="flow-box blue">User opens Recommendations page</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">rec_server.py builds context: catalogue + user history</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">Ollama (local) generates suggestions</div>
+    </div>
+
+    <pre style="margin-top:16px"># Recommendation engine files:
+# <span data-cfg="path:recommendations"></span>\rec_server.py       ← server (port <span data-cfg="port:recommendation"></span>)
+# <span data-cfg="path:recommendations"></span>\books.json          ← full books catalogue
+# <span data-cfg="path:recommendations"></span>\games.json          ← full games catalogue
+# <span data-cfg="path:users"></span>\[username]\rec_history.json   ← per-user history</pre>
+  </div>
+</div>
+
+<!-- ── rec_server.py ── -->
+<div class="section">
+  <div class="section-title">🐍 rec_server.py — History Recording Endpoint</div>
+  <div class="card">
+    <pre># POST /api/history/record
+# Called by services when a user finishes (or significantly interacts with) content.
+# Payload:
+{
+  "user":     "username",          ← Authentik username
+  "type":     "book|game|movie|audiobook",
+  "id":       "item_id",           ← catalogue ID from books.json or games.json
+  "title":    "Item Title",
+  "signal":   "finished|abandoned|started",  ← see signal quality table below
+  "metadata": {
+    "percent_complete": 95,        ← for books/audiobooks
+    "play_time_minutes": 120       ← for games
+  }
+}
+
+# rec_server.py checks opt-out before writing:
+def record_history(data):
+    username = data.get('user')
+    if is_opted_out(username):
+        return {'status': 'skipped', 'reason': 'opted_out'}
+
+    history_path = os.path.join(USERS_BASE, username, 'rec_history.json')
+    history = load(history_path) if os.path.exists(history_path) else []
+    history.append({
+        'type':      data['type'],
+        'id':        data['id'],
+        'title':     data['title'],
+        'signal':    data.get('signal', 'finished'),
+        'metadata':  data.get('metadata', {}),
+        'recorded_at': time.time()
+    })
+    save(history_path, history)
+    return {'status': 'ok'}</pre>
+  </div>
+</div>
+
+<!-- ── Signal quality reference ── -->
+<div class="section">
+  <div class="section-title">📶 Signal Quality — What Makes a Good Recommendation Input</div>
+  <div class="card">
+    <p style="font-size:.83rem;margin-bottom:12px">Not all events carry equal weight. The rec engine uses the <code>signal</code> field to understand the quality of the interaction. Only strong signals meaningfully influence recommendations.</p>
+    <table>
+      <tr><th>Signal</th><th>When to send</th><th>Weight</th></tr>
+      <tr><td class="signal-strong">finished</td><td>Book 90%+, movie/episode watched to end, audiobook 95%+, game played 2+ hours</td><td class="signal-strong">Strong ✅</td></tr>
+      <tr><td class="signal-weak">started</td><td>Opened the item, played &lt;15 min, read &lt;10%</td><td class="signal-weak">Weak — skip unless nothing else available</td></tr>
+      <tr><td class="signal-negative">abandoned</td><td>Started but stopped at &lt;30% / &lt;30 min</td><td class="signal-negative">Negative signal — avoid similar content</td></tr>
+    </table>
+    <div class="callout callout-warn" style="margin-top:14px">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Don't over-fire the history endpoint. Sending "started" events for every item the user briefly previews will dilute the history and produce worse recommendations. Only record meaningful interactions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Per-service signal map ── -->
+<div class="section">
+  <div class="section-title">🗺️ Per-Service Signal Map</div>
+  <div class="card">
+    <p style="font-size:.83rem;margin-bottom:12px">How each media service maps its events to recommendation signals. Reference this when adding a new service to the pipeline.</p>
+    <table>
+      <tr><th>Service</th><th>Trigger event</th><th>Signal to send</th><th>Threshold</th></tr>
+      <tr><td>Jellyfin</td><td>PlaybackStopped</td><td>finished / abandoned</td><td>% played &gt; 85% = finished; &lt; 30% = abandoned</td></tr>
+      <tr><td>Calibre-Web</td><td>read_progress webhook</td><td>finished / abandoned</td><td>&gt; 90% = finished; &lt; 20% after 2 sessions = abandoned</td></tr>
+      <tr><td>Audiobookshelf</td><td>item_finished webhook</td><td>finished</td><td>Built-in "finished" event = &gt;95%</td></tr>
+      <tr><td>EmulatorJS</td><td>DB poll (session length)</td><td>finished (approximate)</td><td>&gt; 90 min play time = "engaged" signal</td></tr>
+      <tr><td>Kavita</td><td>chapter_read webhook</td><td>finished (per volume)</td><td>Series marked read = finished</td></tr>
+      <tr><td>Navidrome</td><td>— (no rec integration)</td><td>N/A</td><td>Music taste is separate from book/game recs</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ── Catalogue files ── -->
+<div class="section">
+  <div class="section-title">📚 Maintaining the Catalogue Files</div>
+  <div class="card">
+    <div class="card-title">books.json — entry schema</div>
+    <pre># <span data-cfg="path:recommendations"></span>\books.json
+[
+  {
+    "id":               "dune",             ← unique slug, matches rec_history id
+    "title":            "Dune",
+    "author":           "Frank Herbert",
+    "genre":            ["science fiction", "epic", "political"],
+    "description":      "One-paragraph description useful for the AI to understand content.",
+    "series":           "Dune Chronicles",
+    "series_position":  1,
+    "length":           "long",             ← short / medium / long
+    "tags":             ["political intrigue", "ecology", "chosen one"]
+  }
+]</pre>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">games.json — entry schema</div>
+    <pre># <span data-cfg="path:recommendations"></span>\games.json
+[
+  {
+    "id":               "fe-blazing",       ← unique slug
+    "title":            "Fire Emblem: The Blazing Blade",
+    "platform":         "GBA",
+    "genre":            ["strategy", "rpg", "tactical"],
+    "description":      "One-paragraph description useful for the AI to understand content.",
+    "length_hours":     30,                 ← estimated hours to complete
+    "tags":             ["permadeath", "narrative", "grid-based"]
+  }
+]</pre>
+    <div class="callout callout-tip" style="margin-top:10px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Keep descriptions accurate and specific.</strong> The Ollama model uses these descriptions directly when deciding recommendations. "A fantasy epic" is useless. "A slow-burn political fantasy with complex world-building and minimal action" gives the model real signal.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Ollama system prompt ── -->
+<div class="section">
+  <div class="section-title">🧠 Ollama System Prompt</div>
+  <div class="card">
+    <div class="card-title">The system prompt sent to Ollama on each recommendation session</div>
+    <pre>You are a personal librarian and game curator for a private home media server.
+You have access to two catalogues: books and games. You also have the user's
+history of completed items. Use this history to understand their taste.
+
+Rules:
+- Only recommend items from the provided catalogues — never invent titles.
+- If the user has already finished an item, do not recommend it again.
+- If an item is in their "abandoned" history, avoid similar content unless asked.
+- Be specific about WHY you're recommending something — connect it to their history.
+- Ask clarifying questions if the request is vague.
+- Keep recommendations to 3-5 items per response unless asked for more.
+
+User history: [INJECTED FROM rec_history.json]
+Books catalogue: [INJECTED FROM books.json]
+Games catalogue: [INJECTED FROM games.json]</pre>
+  </div>
+</div>
+
+<!-- ── Testing ── -->
+<div class="section">
+  <div class="section-title">🧪 Testing &amp; Debugging</div>
+  <div class="card">
+    <pre># Manually fire a history record (test the pipeline):
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:recommendation"></span>/api/history/record" `
+  -Method POST -ContentType "application/json" `
+  -Body '{
+    "user":   "alice",
+    "type":   "book",
+    "id":     "dune",
+    "title":  "Dune",
+    "signal": "finished",
+    "metadata": {"percent_complete": 100}
+  }'
+
+# Inspect a user's history:
+Get-Content "<span data-cfg="path:users"></span>\alice\rec_history.json"
+
+# Test the recommendation endpoint:
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:recommendation"></span>/api/recommend" `
+  -Method POST -ContentType "application/json" `
+  -Body '{"user":"alice","query":"What should I read next?"}'
+
+# Check Ollama is running:
+curl http://localhost:11434/api/tags</pre>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗
+     ║               PART 3 — PRIVACY &amp; ADMINISTRATION              ║
+     ╚═══════════════════════════════════════════════════════════════╝ -->
+
+<hr>
+<div class="cat-header">Part 3 — Privacy &amp; Administration</div>
+
+<div class="section">
+  <div class="section-title">🛡️ Opt-Out System — Implementation Details</div>
+  <div class="card">
+    <div class="card-title">How opt-out is stored and checked</div>
+    <pre># Opt-out preference is stored in:
+# <span data-cfg="path:users"></span>\[username]\preferences.json
+{
+  "tracking_optout": true,       ← set to true when user opts out
+  "tracking_optout_date": "...",  ← ISO timestamp of when they opted out
+  "feed_private": false,          ← hides achievements from community feed
+  "achievements_private": []      ← list of specific achievement IDs to hide
+}
+
+# BOTH achievement_server.py AND rec_server.py call is_opted_out() before writing:
+def is_opted_out(username):
+    prefs_path = os.path.join(USERS_BASE, username, 'preferences.json')
+    if os.path.exists(prefs_path):
+        return json.load(open(prefs_path)).get('tracking_optout', False)
+    return False
+
+# When opted out:
+# - No achievement triggers are processed (existing unlocks preserved)
+# - No new history records are written to rec_history.json
+# - The recommendations chat still works but uses empty history
+# - The community feed still shows existing unlocks (unless feed_private is also set)</pre>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">Data deletion on request</div>
+    <pre># To delete a user's tracking history (on their request):
+# 1. Delete their rec history:
+Remove-Item "<span data-cfg="path:users"></span>\[username]\rec_history.json"
+
+# 2. Optionally clear their achievement unlocks from unlocks.json:
+# (edit <span data-cfg="path:achievements"></span>\unlocks.json and remove their key)
+
+# 3. Optionally reset their per-user achievement file:
+Remove-Item "<span data-cfg="path:users"></span>\[username]\achievements.json"
+
+# Note: do NOT delete preferences.json — that's where opt-out lives.</pre>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📊 Privacy Summary for Users</div>
+  <div class="card">
+    <table>
+      <tr><th>What's collected</th><th>Stored where</th><th>Used for</th><th>Opt-out stops it?</th></tr>
+      <tr><td>Item completions (books, movies, games, audio)</td><td>Per-user rec_history.json on server</td><td>AI recommendations</td><td>✅ Yes</td></tr>
+      <tr><td>Achievement trigger events</td><td>unlocks.json on server</td><td>Achievement system + XP</td><td>✅ Yes (new only)</td></tr>
+      <tr><td>Watch/read progress</td><td>Service database (Jellyfin, ABS, etc.)</td><td>Resume playback</td><td>❌ Not part of tracking opt-out — this is core service function</td></tr>
+      <tr><td>File storage (Nextcloud)</td><td>D:\Users\[username]\files\</td><td>Your cloud storage</td><td>N/A — not tracking</td></tr>
+    </table>
+    <p style="font-size:.78rem;color:var(--text-dim);margin-top:10px">All data lives on the server. Nothing is sent to third parties. The AI recommendation engine runs entirely on Ollama (local). No external API calls are made with user data.</p>
+  </div>
+</div>
+
+</body>
+</html>
