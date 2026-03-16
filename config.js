@@ -78,6 +78,7 @@ const CFG = {
     genart:           'art',
     jukebox:          'jukebox',
     invidious: 'invidious',
+    wordle: 'wordle',
   },
 
   // ── PORTS ────────────────────────────────────────────────────────────────
@@ -149,6 +150,7 @@ const CFG = {
     ss13:              1337,
     foundry:           30000,
     mtg_server:        8099,
+    wordle: 8081,
 
     // Legacy
     plex_legacy:       32400,
