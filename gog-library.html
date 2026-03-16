@@ -1,6 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>GOG Library</title><link rel="stylesheet" href="shared.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <title>GOG Library</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ── Sub-tab navigation ── */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+    .setup-complete-sub {
+      font-size: .75rem;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    /* ── Storage breakdown ── */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* ── Library toolbar ── */
+    .lib-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .lib-title-area { display: flex; align-items: baseline; gap: 8px; }
+    .lib-count { font-family: 'Share Tech Mono', monospace; font-size: .85rem; color: var(--accent); font-weight: 700; }
+    .lib-subtitle { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); }
+    .lib-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .lib-search {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem; padding: 5px 10px; border-radius: 3px; width: 180px; outline: none;
+    }
+    .lib-search:focus { border-color: var(--accent); }
+    .lib-sort {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem; padding: 5px 8px; border-radius: 3px; cursor: pointer; outline: none;
+    }
+
+    /* ── Game grid ── */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Game card ── */
+    .game-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+      transition: border-color .15s, transform .1s;
+      display: flex;
+      flex-direction: column;
+    }
+    .game-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .game-cover {
+      height: 130px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .game-cover-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,.7) 100%);
+    }
+    .game-cover-year {
+      position: absolute; bottom: 8px; right: 10px;
+      font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+      color: rgba(255,255,255,.6); letter-spacing: .08em;
+    }
+    .game-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; }
+    .game-title { font-size: .88rem; font-weight: 700; color: var(--text-bright); margin-bottom: 3px; line-height: 1.3; }
+    .game-meta { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .game-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .55rem; letter-spacing: .07em; text-transform: uppercase;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text-dim); padding: 2px 6px; border-radius: 2px;
+    }
+    .game-desc { font-size: .77rem; color: var(--text); line-height: 1.5; flex: 1; margin-bottom: 10px; }
+    .game-stats {
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6px; margin-bottom: 10px;
+    }
+    .game-stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .54rem; letter-spacing: .09em; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 2px;
+    }
+    .game-stat-val { font-family: 'Share Tech Mono', monospace; font-size: .78rem; color: var(--text-bright); font-weight: 700; }
+    .game-stat-val.never { color: var(--text-dim); font-weight: normal; }
+    .game-actions { display: flex; gap: 6px; }
+    .game-btn {
+      flex: 1; padding: 6px 8px; border: 1px solid var(--border);
+      background: var(--bg3); color: var(--text);
+      font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+      letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+      border-radius: 3px; transition: all .12s; text-align: center;
+    }
+    .game-btn:hover { background: var(--bg2); border-color: var(--accent); color: var(--accent); }
+    .game-btn.primary { background: rgba(200,168,75,.12); border-color: var(--accent); color: var(--accent); }
+    .game-btn.primary:hover { background: rgba(200,168,75,.2); }
+
+    /* ── Library footer ── */
+    .lib-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 14px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 3px; flex-wrap: wrap; gap: 6px;
+    }
+    .lib-footer span { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); }
+    .lib-link { color: var(--accent); cursor: pointer; }
+    .lib-link:hover { text-decoration: underline; }
+
+    /* ── Play session modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 24px; width: 320px; max-width: 90vw;
+    }
+    .modal-title {
+      font-size: .95rem; font-weight: 700; color: var(--text-bright);
+      margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px;
+    }
+    .modal-label {
+      display: block; font-family: 'Share Tech Mono', monospace; font-size: .62rem;
+      letter-spacing: .09em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
+    }
+    .modal-time-row { display: flex; gap: 10px; }
+    .modal-time-group { display: flex; align-items: center; gap: 6px; }
+    .modal-input {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text-bright); font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem; padding: 6px 10px; border-radius: 3px; width: 60px;
+      outline: none; text-align: center;
+    }
+    .modal-input[type="date"] { width: auto; }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-time-unit { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); }
+    .modal-body { margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .modal-btn {
+      padding: 7px 16px; border-radius: 3px;
+      font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+      letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg3); color: var(--text);
+      transition: all .12s;
+    }
+    .modal-btn-save { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+    .modal-btn-save:hover { background: rgba(200,168,75,.25); }
+    .modal-btn-cancel:hover { border-color: var(--text-dim); color: var(--text-bright); }
+
+    .no-results {
+      grid-column: 1 / -1; text-align: center; padding: 40px;
+      font-family: 'Share Tech Mono', monospace; font-size: .75rem;
+      color: var(--text-dim); letter-spacing: .1em;
+    }
+  </style>
+</head>
 <body>
 
 <div class="page-header">
@@ -12,8 +272,6 @@
   </div>
 </div>
 
-<div class="v1-banner">🏰 V1 Goal: All three GOG titles installed, added to Sunshine, and play-time tracking live. Connect via Moonlight, pick a game, and it launches directly.</div>
-
 <div class="subtab-nav" id="subtab-nav">
   <button class="subtab-btn active" onclick="switchTab('library', this)">🎮 Game Library</button>
   <button class="subtab-btn" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
@@ -22,7 +280,9 @@
 </div>
 
 
-<!-- ═══════════════════ PANE 1 — GAME LIBRARY ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — GAME LIBRARY
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane active" id="pane-library">
 
   <div class="lib-toolbar">
@@ -44,23 +304,24 @@
 
   <div class="lib-footer">
     <span id="total-playtime-label"></span>
-    <span class="lib-note">Play times stored in your browser. <span class="lib-link" onclick="resetAllStats()">Reset all stats</span></span>
+    <span>Play times stored in your browser. <span class="lib-link" onclick="resetAllStats()">Reset all stats</span></span>
   </div>
 
 </div><!-- /pane-library -->
 
 
-<!-- ═══════════════════ PANE 2 — FIRST TIME SETUP ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-setup">
 
   <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
-      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
-        Check when all GOG games are installed, added to Sunshine, and play-time tracking is wired up.
-      </div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when all GOG games are installed, added to Sunshine, and play-time tracking is live.</div>
     </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Game Library tab</div>
   </div>
 
   <div class="section">
@@ -68,12 +329,12 @@
     <div class="steps">
       <div class="step">
         <div class="step-content">
-          <strong>Use GOG Galaxy or offline installers</strong>
-          <p>GOG games are DRM-free. The simplest approach: log in at <a href="https://www.gog.com" target="_blank">gog.com</a>, download the offline installer for each game, and run it on the server. No GOG Galaxy launcher required to play.</p>
+          <strong>Use offline installers from gog.com</strong>
+          <p>GOG games are DRM-free. Log in at <a href="https://www.gog.com" target="_blank">gog.com</a>, download the offline installer for each game, and run it on the server. No GOG Galaxy launcher required to play.</p>
           <pre># Recommended install path structure:
 D:\Games\GOG\
   DivinityOriginalSin\          ← Divinity: Original Sin
-  ZooTycoon\                    ← Zoo Tycoon (original or Complete Edition)
+  ZooTycoon\                    ← Zoo Tycoon
   WarlordsBattlecry3\           ← Warlords: Battlecry 3</pre>
         </div>
       </div>
@@ -96,7 +357,6 @@ D:\Games\GOG\
 Name:         Divinity: Original Sin
 Command:      "D:\Games\GOG\DivinityOriginalSin\Divinity.exe"
 Working Dir:  D:\Games\GOG\DivinityOriginalSin\
-Image:        (upload cover art — get from steamgriddb.com)
 
 # Zoo Tycoon
 Name:         Zoo Tycoon
@@ -109,7 +369,7 @@ Command:      "D:\Games\GOG\WarlordsBattlecry3\Battlecry3.exe"
 Working Dir:  D:\Games\GOG\WarlordsBattlecry3\</pre>
           <div class="callout callout-tip">
             <div class="callout-icon">💡</div>
-            <div class="callout-body">Get high-quality cover art from <a href="https://www.steamgriddb.com" target="_blank">steamgriddb.com</a>. Search each game title — they have art for GOG and retro titles. Portrait/poster format (600×900) works best in Moonlight's grid view.</div>
+            <div class="callout-body">Get high-quality cover art from <a href="https://www.steamgriddb.com" target="_blank">steamgriddb.com</a>. Portrait format (600×900) works best in Moonlight's grid view.</div>
           </div>
         </div>
       </div>
@@ -119,26 +379,21 @@ Working Dir:  D:\Games\GOG\WarlordsBattlecry3\</pre>
   <div class="section">
     <div class="section-title">⏱️ Step 3 — Play Time Tracking</div>
     <div class="card">
-      <div class="card-title">How tracking works on this page</div>
-      <p>The Game Library tab on this page shows play time and last-played timestamps for each game. Times are stored in browser <code>localStorage</code>. To record actual play time, you have two options:</p>
-      <ol style="margin:10px 0 0 18px;font-size:.85rem;line-height:1.9">
-        <li><strong>Manual entry (v1, simple):</strong> Click "Log Session" on any game card to manually record how long you played. Quick and low-friction.</li>
-        <li><strong>Automatic via Sunshine pre/post commands (future):</strong> Sunshine can call a local script when a session starts and ends, recording the duration to a JSON file that this page reads. See the Adding Games tab for the script template.</li>
-      </ol>
+      <div class="card-title">How tracking works</div>
+      <p>The Game Library tab tracks play time and last-played per game. Times are stored in browser <code>localStorage</code>. Use the <strong>Log Session</strong> button on any game card to manually record how long you played. See the Adding Games tab for the optional PowerShell auto-tracking wrapper.</p>
     </div>
   </div>
 
 </div><!-- /pane-setup -->
 
 
-<!-- ═══════════════════ PANE 3 — ADDING GAMES ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — ADDING GAMES
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-adding">
 
   <div class="section">
-    <div class="section-title">➕ Adding a New GOG Game to the Library</div>
-    <div class="card">
-      <p>The game library on the Library tab is defined in this page's JavaScript. When you buy and install a new GOG game, follow these steps:</p>
-    </div>
+    <div class="section-title">➕ Adding a New GOG Game</div>
     <div class="steps">
       <div class="step">
         <div class="step-content">
@@ -148,27 +403,26 @@ Working Dir:  D:\Games\GOG\WarlordsBattlecry3\</pre>
       <div class="step">
         <div class="step-content">
           <strong>2. Add it to Sunshine Web UI → Applications → Add New</strong>
-          <pre>Name:        [Game Name exactly as you want it shown]
-Command:     "D:\Games\GOG\[GameName]\[game_exe].exe"
+          <pre>Name:        [Game Name]
+Command:     "D:\Games\GOG\[GameName]\[game].exe"
 Working Dir: D:\Games\GOG\[GameName]\
-Image:       (cover art from steamgriddb.com)</pre>
+Image:       (portrait cover art from steamgriddb.com)</pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
           <strong>3. Add the game to the GAMES array in this page's source</strong>
-          <p>Edit <code>gog-library.html</code> and add an entry to the <code>GAMES</code> array:</p>
-          <pre>// In the GAMES array near the bottom of the script tag:
-{
-  id: 'your-game-id',          // unique key, no spaces
+          <p>Edit <code>gog-library.html</code> and add an entry to the <code>GAMES</code> array near the bottom of the <code>&lt;script&gt;</code> tag:</p>
+          <pre>{
+  id: 'your-game-id',           // unique key, no spaces
   title: 'Your Game Title',
-  year: 2000,                  // original release year
-  genre: 'RPG',                // genre shown on card
-  desc: 'Short description of the game.',
-  cover: '🎮',                  // emoji fallback (replace with cover URL if hosting images)
-  coverColor: '#1a2a1a',       // dark background color matching cover art theme
-  exe: 'D:\\Games\\GOG\\YourGame\\game.exe',
-}</pre>
+  year: 2000,
+  genre: 'RPG',
+  publisher: 'Studio Name',
+  desc: 'Short description.',
+  cover: '🎮',                   // emoji shown in the cover area
+  coverColor: 'linear-gradient(135deg, #1a1a2e 0%, #2a1a3e 100%)',
+},</pre>
         </div>
       </div>
     </div>
@@ -177,19 +431,14 @@ Image:       (cover art from steamgriddb.com)</pre>
   <div class="section">
     <div class="section-title">🤖 Automatic Play Time Tracking (Advanced)</div>
     <div class="card">
-      <div class="card-title">PowerShell wrapper script</div>
-      <p>Instead of pointing Sunshine directly at the game exe, point it at a PowerShell wrapper that records start/stop times:</p>
+      <div class="card-title">PowerShell wrapper — records session time automatically</div>
+      <p>Instead of pointing Sunshine directly at the game exe, use a wrapper script that records start/stop times to a JSON file.</p>
       <pre># D:\Games\GOG\launch_and_track.ps1
-param(
-  [string]$GameId,
-  [string]$GameExe,
-  [string]$WorkingDir
-)
+param([string]$GameId, [string]$GameExe, [string]$WorkingDir)
 
 $trackFile = "D:\Server\GOGTracker\playtimes.json"
 $startTime = Get-Date
 
-# Launch the game and wait for it to exit
 Set-Location $WorkingDir
 $proc = Start-Process $GameExe -PassThru -WorkingDirectory $WorkingDir
 $proc.WaitForExit()
@@ -197,29 +446,25 @@ $proc.WaitForExit()
 $elapsed = (Get-Date) - $startTime
 $minutes = [int]$elapsed.TotalMinutes
 
-# Update the JSON tracking file
-$data = if (Test-Path $trackFile) { 
-  Get-Content $trackFile | ConvertFrom-Json 
-} else { @{} }
-
-if (-not $data.$GameId) { 
-  $data | Add-Member -NotePropertyName $GameId -NotePropertyValue @{totalMinutes=0;lastPlayed=''} 
-}
+$data = if (Test-Path $trackFile) { Get-Content $trackFile | ConvertFrom-Json } else { @{} }
+if (-not $data.$GameId) { $data | Add-Member -NotePropertyName $GameId -NotePropertyValue @{totalMinutes=0;lastPlayed=''} }
 $data.$GameId.totalMinutes += $minutes
 $data.$GameId.lastPlayed = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
-
-$data | ConvertTo-Json -Depth 10 | Set-Content $trackFile
-Write-Host "Session: $minutes min played. Total: $($data.$GameId.totalMinutes) min."</pre>
-      <pre># In Sunshine for each game:
-Command: powershell -File "D:\Games\GOG\launch_and_track.ps1" -GameId "divinity-os" -GameExe "Divinity.exe" -WorkingDir "D:\Games\GOG\DivinityOriginalSin"</pre>
-      <p>The tracking file is read by this page's JavaScript if you configure it to fetch from a local stats endpoint. For now, manual log sessions in the Library tab are the primary tracking method.</p>
+$data | ConvertTo-Json -Depth 10 | Set-Content $trackFile</pre>
+      <pre># Sunshine command using the wrapper:
+powershell -File "D:\Games\GOG\launch_and_track.ps1" ^
+  -GameId "divinity-os" ^
+  -GameExe "Divinity.exe" ^
+  -WorkingDir "D:\Games\GOG\DivinityOriginalSin"</pre>
     </div>
   </div>
 
 </div><!-- /pane-adding -->
 
 
-<!-- ═══════════════════ PANE 4 — DATA STORAGE ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-storage">
 
   <div class="section">
@@ -238,7 +483,7 @@ Command: powershell -File "D:\Games\GOG\launch_and_track.ps1" -GameId "divinity-
         <div class="storage-cell-val">~600 MB</div>
       </div>
       <div class="storage-cell">
-        <div class="storage-cell-label">Play Tracker JSON</div>
+        <div class="storage-cell-label">Play Tracker</div>
         <div class="storage-cell-val">&lt;1 MB</div>
       </div>
     </div>
@@ -265,17 +510,17 @@ D:\Users\[username]\gog\
   <div class="section">
     <div class="section-title">👤 Per-User Save Files</div>
     <div class="card">
-      <p>GOG games typically store saves in <code>Documents\My Games\[Game]\</code> or within the game folder itself. For single-player games without concurrent use, saves are naturally isolated since only one person streams at a time.</p>
-      <p style="margin-top:8px">For fuller isolation (if multiple people play the same game and want separate campaigns), the Session Manager symlink approach used for Dolphin and Xenia can be applied: redirect the game's save path via a junction point to <code>D:\Users\[username]\gog\[game]\saves\</code>.</p>
+      <p>GOG games typically store saves in <code>Documents\My Games\[Game]\</code> or within the game folder itself. Since only one person streams at a time, saves are naturally isolated for casual use.</p>
+      <p style="margin-top:8px">For fuller isolation (multiple people playing separate campaigns), the Session Manager symlink approach used for Dolphin and Xenia can be applied: redirect the game's save path via a junction point to <code>D:\Users\[username]\gog\[game]\saves\</code>.</p>
     </div>
   </div>
 
 </div><!-- /pane-storage -->
 
 
-<!-- ══════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════
      PLAY SESSION LOG MODAL
-══════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title" id="modal-game-title">Log Session</div>
@@ -283,11 +528,11 @@ D:\Users\[username]\gog\
       <label class="modal-label">How long did you play?</label>
       <div class="modal-time-row">
         <div class="modal-time-group">
-          <input class="modal-input" type="number" id="modal-hours" min="0" max="99" value="0" placeholder="0">
+          <input class="modal-input" type="number" id="modal-hours" min="0" max="99" value="0">
           <span class="modal-time-unit">hours</span>
         </div>
         <div class="modal-time-group">
-          <input class="modal-input" type="number" id="modal-minutes" min="0" max="59" value="0" placeholder="0">
+          <input class="modal-input" type="number" id="modal-minutes" min="0" max="59" value="0">
           <span class="modal-time-unit">min</span>
         </div>
       </div>
@@ -302,475 +547,274 @@ D:\Users\[username]\gog\
 </div>
 
 
-<style>
-/* ── Library toolbar ── */
-.lib-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-.lib-title-area { display: flex; align-items: baseline; gap: 8px; }
-.lib-count { font-family: 'Share Tech Mono', monospace; font-size: .85rem; color: var(--accent); font-weight: 700; }
-.lib-subtitle { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); }
-.lib-controls { display: flex; gap: 8px; flex-wrap: wrap; }
-.lib-search {
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text); font-family: 'Share Tech Mono', monospace;
-  font-size: .72rem; padding: 5px 10px; border-radius: 3px; width: 180px;
-  outline: none;
-}
-.lib-search:focus { border-color: var(--accent); }
-.lib-sort {
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text); font-family: 'Share Tech Mono', monospace;
-  font-size: .72rem; padding: 5px 8px; border-radius: 3px; cursor: pointer; outline: none;
-}
-
-/* ── Game grid ── */
-.game-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-/* ── Game card ── */
-.game-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  overflow: hidden;
-  transition: border-color .15s, transform .1s;
-  display: flex;
-  flex-direction: column;
-}
-.game-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-.game-cover {
-  height: 130px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.game-cover-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,.7) 100%);
-}
-.game-cover-year {
-  position: absolute;
-  bottom: 8px; right: 10px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: .6rem;
-  color: rgba(255,255,255,.6);
-  letter-spacing: .08em;
-}
-.game-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; }
-.game-title {
-  font-size: .88rem; font-weight: 700; color: var(--text-bright);
-  margin-bottom: 3px; line-height: 1.3;
-}
-.game-meta {
-  display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
-}
-.game-tag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: .55rem; letter-spacing: .07em; text-transform: uppercase;
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text-dim); padding: 2px 6px; border-radius: 2px;
-}
-.game-desc {
-  font-size: .77rem; color: var(--text); line-height: 1.5;
-  flex: 1; margin-bottom: 10px;
-}
-.game-stats {
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-.game-stat-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: .54rem; letter-spacing: .09em; text-transform: uppercase;
-  color: var(--text-dim); margin-bottom: 2px;
-}
-.game-stat-val {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: .78rem; color: var(--text-bright); font-weight: 700;
-}
-.game-stat-val.never { color: var(--text-dim); font-weight: normal; }
-.game-actions { display: flex; gap: 6px; }
-.game-btn {
-  flex: 1; padding: 6px 8px; border: 1px solid var(--border);
-  background: var(--bg3); color: var(--text);
-  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
-  letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
-  border-radius: 3px; transition: all .12s; text-align: center;
-}
-.game-btn:hover { background: var(--bg2); border-color: var(--accent); color: var(--accent); }
-.game-btn.primary { background: rgba(200,168,75,.12); border-color: var(--accent); color: var(--accent); }
-.game-btn.primary:hover { background: rgba(200,168,75,.2); }
-
-/* ── Library footer ── */
-.lib-footer {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 14px;
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 3px; flex-wrap: wrap; gap: 6px;
-}
-.lib-footer span { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); }
-.lib-note { display: flex; gap: 6px; align-items: center; }
-.lib-link { color: var(--accent); cursor: pointer; }
-.lib-link:hover { text-decoration: underline; }
-
-/* ── Play session modal ── */
-.modal-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.65); z-index: 1000;
-  align-items: center; justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-.modal-box {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 6px; padding: 24px; width: 320px; max-width: 90vw;
-}
-.modal-title {
-  font-size: .95rem; font-weight: 700; color: var(--text-bright);
-  margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px;
-}
-.modal-label {
-  display: block;
-  font-family: 'Share Tech Mono', monospace; font-size: .62rem;
-  letter-spacing: .09em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
-}
-.modal-time-row { display: flex; gap: 10px; }
-.modal-time-group { display: flex; align-items: center; gap: 6px; }
-.modal-input {
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--text-bright); font-family: 'Share Tech Mono', monospace;
-  font-size: .85rem; padding: 6px 10px; border-radius: 3px; width: 60px;
-  outline: none; text-align: center;
-}
-.modal-input[type="date"] { width: auto; }
-.modal-input:focus { border-color: var(--accent); }
-.modal-time-unit {
-  font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim);
-}
-.modal-body { margin-bottom: 16px; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.modal-btn {
-  padding: 7px 16px; border-radius: 3px;
-  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
-  letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
-  border: 1px solid var(--border); background: var(--bg3); color: var(--text);
-  transition: all .12s;
-}
-.modal-btn-save { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
-.modal-btn-save:hover { background: rgba(200,168,75,.25); }
-.modal-btn-cancel:hover { border-color: var(--text-dim); color: var(--text-bright); }
-
-.no-results {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: .75rem;
-  color: var(--text-dim);
-  letter-spacing: .1em;
-}
-</style>
-
 <script>
-// ─────────────────────────────────────────────
-//  GAME DEFINITIONS
-//  Add new GOG games here. id must be unique.
-// ─────────────────────────────────────────────
-const GAMES = [
-  {
-    id: 'divinity-os',
-    title: 'Divinity: Original Sin',
-    year: 2014,
-    genre: 'RPG',
-    publisher: 'Larian Studios',
-    desc: 'A deep, turn-based RPG with co-op support. Craft your own story, solve puzzles with elemental interactions, and explore a handcrafted world. The Enhanced Edition included.',
-    cover: '🧙',
-    coverColor: 'linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #0a1a2e 100%)',
-  },
-  {
-    id: 'zoo-tycoon',
-    title: 'Zoo Tycoon',
-    year: 2001,
-    genre: 'Strategy / Sim',
-    publisher: 'Blue Fang Games',
-    desc: 'Build and manage your dream zoo. Design enclosures, keep animals happy, and satisfy your guests. A classic management sim that holds up beautifully.',
-    cover: '🦁',
-    coverColor: 'linear-gradient(135deg, #0a2a0a 0%, #1a3a0a 50%, #2a2a0a 100%)',
-  },
-  {
-    id: 'warlords-battlecry-3',
-    title: 'Warlords: Battlecry 3',
-    year: 2004,
-    genre: 'RTS',
-    publisher: 'Infinite Interactive',
-    desc: 'The pinnacle of the Warlords Battlecry series. Command one of 16 races, level up your persistent hero across campaigns, and battle in skirmish or multiplayer modes.',
-    cover: '⚔️',
-    coverColor: 'linear-gradient(135deg, #2a0a0a 0%, #3a1a0a 50%, #1a0a0a 100%)',
-  },
-];
+  // ─────────────────────────────────────────────
+  //  GAME DEFINITIONS — add new GOG games here
+  // ─────────────────────────────────────────────
+  const GAMES = [
+    {
+      id: 'divinity-os',
+      title: 'Divinity: Original Sin',
+      year: 2014,
+      genre: 'RPG',
+      publisher: 'Larian Studios',
+      desc: 'A deep, turn-based RPG with co-op support. Craft your own story, solve puzzles with elemental interactions, and explore a handcrafted world. Enhanced Edition included.',
+      cover: '🧙',
+      coverColor: 'linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #0a1a2e 100%)',
+    },
+    {
+      id: 'zoo-tycoon',
+      title: 'Zoo Tycoon',
+      year: 2001,
+      genre: 'Strategy / Sim',
+      publisher: 'Blue Fang Games',
+      desc: 'Build and manage your dream zoo. Design enclosures, keep animals happy, and satisfy your guests. A classic management sim that holds up beautifully.',
+      cover: '🦁',
+      coverColor: 'linear-gradient(135deg, #0a2a0a 0%, #1a3a0a 50%, #2a2a0a 100%)',
+    },
+    {
+      id: 'warlords-battlecry-3',
+      title: 'Warlords: Battlecry 3',
+      year: 2004,
+      genre: 'RTS',
+      publisher: 'Infinite Interactive',
+      desc: 'Command one of 16 races, level up your persistent hero across campaigns, and battle in skirmish or multiplayer modes. The pinnacle of the Battlecry series.',
+      cover: '⚔️',
+      coverColor: 'linear-gradient(135deg, #2a0a0a 0%, #3a1a0a 50%, #1a0a0a 100%)',
+    },
+  ];
 
-// ─────────────────────────────────────────────
-//  PLAY TIME STORAGE
-// ─────────────────────────────────────────────
-const STORE_KEY = 'gog_playtimes_v1';
+  // ─────────────────────────────────────────────
+  //  PLAY TIME STORAGE
+  // ─────────────────────────────────────────────
+  const STORE_KEY = 'gog_playtimes_v1';
 
-function loadStats() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
-  catch(e) { return {}; }
-}
+  function loadStats() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+    catch(e) { return {}; }
+  }
+  function saveStats(data) { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 
-function saveStats(data) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(data));
-}
+  function getGameStats(id) {
+    return loadStats()[id] || { totalMinutes: 0, lastPlayed: null, sessions: 0 };
+  }
 
-function getGameStats(id) {
-  const data = loadStats();
-  return data[id] || { totalMinutes: 0, lastPlayed: null, sessions: 0 };
-}
+  function formatPlaytime(minutes) {
+    if (minutes === 0) return '0 min';
+    if (minutes < 60) return `${minutes} min`;
+    const h = Math.floor(minutes / 60), m = minutes % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
 
-function updateGameStats(id, addMinutes) {
-  const data = loadStats();
-  if (!data[id]) data[id] = { totalMinutes: 0, lastPlayed: null, sessions: 0 };
-  data[id].totalMinutes += addMinutes;
-  data[id].lastPlayed = new Date().toISOString();
-  data[id].sessions = (data[id].sessions || 0) + 1;
-  saveStats(data);
-}
+  function formatLastPlayed(iso) {
+    if (!iso) return 'Never';
+    const d = new Date(iso), now = new Date();
+    const days = Math.floor((now - d) / 86400000);
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7)  return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+    return `${Math.floor(days / 365)}y ago`;
+  }
 
-function formatPlaytime(minutes) {
-  if (minutes === 0) return '0 min';
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
+  // ─────────────────────────────────────────────
+  //  RENDER LIBRARY
+  // ─────────────────────────────────────────────
+  function renderLibrary() {
+    const q    = document.getElementById('lib-search').value.toLowerCase();
+    const sort = document.getElementById('lib-sort').value;
 
-function formatLastPlayed(isoString) {
-  if (!isoString) return 'Never';
-  const d = new Date(isoString);
-  const now = new Date();
-  const diffDays = Math.floor((now - d) / 86400000);
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-  return `${Math.floor(diffDays / 365)}y ago`;
-}
+    let games = GAMES.filter(g =>
+      !q || g.title.toLowerCase().includes(q) || g.genre.toLowerCase().includes(q) || g.publisher.toLowerCase().includes(q)
+    );
 
-// ─────────────────────────────────────────────
-//  RENDER
-// ─────────────────────────────────────────────
-function renderLibrary() {
-  const q = document.getElementById('lib-search').value.toLowerCase();
-  const sort = document.getElementById('lib-sort').value;
+    games = [...games].sort((a, b) => {
+      const sa = getGameStats(a.id), sb = getGameStats(b.id);
+      if (sort === 'playtime')   return sb.totalMinutes - sa.totalMinutes;
+      if (sort === 'lastplayed') {
+        if (!sa.lastPlayed && !sb.lastPlayed) return 0;
+        if (!sa.lastPlayed) return 1;
+        if (!sb.lastPlayed) return -1;
+        return new Date(sb.lastPlayed) - new Date(sa.lastPlayed);
+      }
+      return a.title.localeCompare(b.title);
+    });
 
-  let games = GAMES.filter(g =>
-    !q || g.title.toLowerCase().includes(q) || g.genre.toLowerCase().includes(q) || g.publisher.toLowerCase().includes(q)
-  );
+    document.getElementById('lib-count').textContent = `${GAMES.length} Game${GAMES.length !== 1 ? 's' : ''}`;
+    const grid = document.getElementById('game-grid');
 
-  // Sort
-  games = [...games].sort((a, b) => {
-    const sa = getGameStats(a.id);
-    const sb = getGameStats(b.id);
-    if (sort === 'playtime') return sb.totalMinutes - sa.totalMinutes;
-    if (sort === 'lastplayed') {
-      if (!sa.lastPlayed && !sb.lastPlayed) return 0;
-      if (!sa.lastPlayed) return 1;
-      if (!sb.lastPlayed) return -1;
-      return new Date(sb.lastPlayed) - new Date(sa.lastPlayed);
+    if (games.length === 0) {
+      grid.innerHTML = '<div class="no-results">NO GAMES MATCH YOUR SEARCH</div>';
+      return;
     }
-    return a.title.localeCompare(b.title);
+
+    grid.innerHTML = games.map(g => {
+      const s = getGameStats(g.id);
+      const played = s.totalMinutes > 0;
+      return `
+      <div class="game-card">
+        <div class="game-cover" style="background:${g.coverColor}">
+          <span style="position:relative;z-index:1">${g.cover}</span>
+          <div class="game-cover-overlay"></div>
+          <div class="game-cover-year">${g.year}</div>
+        </div>
+        <div class="game-body">
+          <div class="game-title">${g.title}</div>
+          <div class="game-meta">
+            <span class="game-tag">${g.genre}</span>
+            <span class="game-tag">${g.publisher}</span>
+            <span class="game-tag">GOG</span>
+            <span class="game-tag">DRM-Free</span>
+          </div>
+          <div class="game-desc">${g.desc}</div>
+          <div class="game-stats">
+            <div>
+              <div class="game-stat-label">Play Time</div>
+              <div class="game-stat-val ${played ? '' : 'never'}">${formatPlaytime(s.totalMinutes)}</div>
+            </div>
+            <div>
+              <div class="game-stat-label">Last Played</div>
+              <div class="game-stat-val ${s.lastPlayed ? '' : 'never'}">${formatLastPlayed(s.lastPlayed)}</div>
+            </div>
+            <div>
+              <div class="game-stat-label">Sessions</div>
+              <div class="game-stat-val ${s.sessions ? '' : 'never'}">${s.sessions || 0}</div>
+            </div>
+            <div>
+              <div class="game-stat-label">Avg Session</div>
+              <div class="game-stat-val ${s.sessions ? '' : 'never'}">${s.sessions ? formatPlaytime(Math.round(s.totalMinutes / s.sessions)) : '—'}</div>
+            </div>
+          </div>
+          <div class="game-actions">
+            <button class="game-btn primary" onclick="openLogModal('${g.id}', '${g.title.replace(/'/g, "\\'")}')">⏱ Log Session</button>
+            <button class="game-btn" onclick="resetGame('${g.id}', '${g.title.replace(/'/g, "\\'")}')">↺ Reset</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    updateTotalPlaytime();
+  }
+
+  function updateTotalPlaytime() {
+    const data  = loadStats();
+    const total = GAMES.reduce((sum, g) => sum + (data[g.id]?.totalMinutes || 0), 0);
+    const el    = document.getElementById('total-playtime-label');
+    if (el) el.textContent = total > 0 ? `Total across all games: ${formatPlaytime(total)}` : 'No play time recorded yet';
+  }
+
+  // ─────────────────────────────────────────────
+  //  MODAL
+  // ─────────────────────────────────────────────
+  let modalGameId = null;
+
+  function openLogModal(id, title) {
+    modalGameId = id;
+    document.getElementById('modal-game-title').textContent = `Log Session — ${title}`;
+    document.getElementById('modal-hours').value   = 0;
+    document.getElementById('modal-minutes').value = 0;
+    document.getElementById('modal-date').value    = new Date().toISOString().split('T')[0];
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('modal-hours').focus(), 50);
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    modalGameId = null;
+  }
+
+  function saveSession() {
+    if (!modalGameId) return;
+    const h   = parseInt(document.getElementById('modal-hours').value)   || 0;
+    const m   = parseInt(document.getElementById('modal-minutes').value) || 0;
+    const tot = h * 60 + m;
+    if (tot <= 0) { document.getElementById('modal-hours').focus(); return; }
+
+    const dateStr = document.getElementById('modal-date').value;
+    const data    = loadStats();
+    if (!data[modalGameId]) data[modalGameId] = { totalMinutes: 0, lastPlayed: null, sessions: 0 };
+    data[modalGameId].totalMinutes += tot;
+    data[modalGameId].sessions      = (data[modalGameId].sessions || 0) + 1;
+    data[modalGameId].lastPlayed    = dateStr ? new Date(dateStr + 'T12:00:00').toISOString() : new Date().toISOString();
+    saveStats(data);
+    closeModal();
+    renderLibrary();
+  }
+
+  function resetGame(id, title) {
+    if (!confirm(`Reset all play time stats for "${title}"?`)) return;
+    const data = loadStats();
+    delete data[id];
+    saveStats(data);
+    renderLibrary();
+  }
+
+  function resetAllStats() {
+    if (!confirm('Reset ALL play time stats for all games? This cannot be undone.')) return;
+    localStorage.removeItem(STORE_KEY);
+    renderLibrary();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) saveSession();
   });
 
-  const grid = document.getElementById('game-grid');
-  document.getElementById('lib-count').textContent = `${GAMES.length} Game${GAMES.length !== 1 ? 's' : ''}`;
-
-  if (games.length === 0) {
-    grid.innerHTML = '<div class="no-results">NO GAMES MATCH YOUR SEARCH</div>';
-    return;
+  // ─────────────────────────────────────────────
+  //  SUB-TAB SWITCHING
+  // ─────────────────────────────────────────────
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
   }
 
-  grid.innerHTML = games.map(g => {
-    const stats = getGameStats(g.id);
-    const played = stats.totalMinutes > 0;
-    return `
-    <div class="game-card" id="card-${g.id}">
-      <div class="game-cover" style="background:${g.coverColor}">
-        <span style="position:relative;z-index:1">${g.cover}</span>
-        <div class="game-cover-overlay"></div>
-        <div class="game-cover-year">${g.year}</div>
-      </div>
-      <div class="game-body">
-        <div class="game-title">${g.title}</div>
-        <div class="game-meta">
-          <span class="game-tag">${g.genre}</span>
-          <span class="game-tag">${g.publisher}</span>
-          <span class="game-tag">GOG</span>
-          <span class="game-tag">DRM-Free</span>
-        </div>
-        <div class="game-desc">${g.desc}</div>
-        <div class="game-stats">
-          <div>
-            <div class="game-stat-label">Play Time</div>
-            <div class="game-stat-val ${played ? '' : 'never'}">${formatPlaytime(stats.totalMinutes)}</div>
-          </div>
-          <div>
-            <div class="game-stat-label">Last Played</div>
-            <div class="game-stat-val ${stats.lastPlayed ? '' : 'never'}">${formatLastPlayed(stats.lastPlayed)}</div>
-          </div>
-          <div>
-            <div class="game-stat-label">Sessions</div>
-            <div class="game-stat-val ${stats.sessions ? '' : 'never'}">${stats.sessions || 0}</div>
-          </div>
-          <div>
-            <div class="game-stat-label">Avg Session</div>
-            <div class="game-stat-val ${stats.sessions ? '' : 'never'}">${stats.sessions ? formatPlaytime(Math.round(stats.totalMinutes / stats.sessions)) : '—'}</div>
-          </div>
-        </div>
-        <div class="game-actions">
-          <button class="game-btn primary" onclick="openLogModal('${g.id}', '${g.title.replace(/'/g, "\\'")}')">⏱ Log Session</button>
-          <button class="game-btn" onclick="resetGame('${g.id}', '${g.title.replace(/'/g, "\\'")}')">↺ Reset</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  // ─────────────────────────────────────────────
+  //  SETUP COMPLETE
+  // ─────────────────────────────────────────────
+  const STORAGE_KEY = 'goglibrary_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
 
-  updateTotalPlaytime();
-}
+  function renderComplete() {
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
+    const libraryBtn  = document.querySelector('[onclick*="library"]');
 
-function updateTotalPlaytime() {
-  const data = loadStats();
-  const total = GAMES.reduce((sum, g) => sum + (data[g.id]?.totalMinutes || 0), 0);
-  const el = document.getElementById('total-playtime-label');
-  if (el) el.textContent = total > 0 ? `Total across all games: ${formatPlaytime(total)}` : 'No play time recorded yet';
-}
-
-// ─────────────────────────────────────────────
-//  MODAL
-// ─────────────────────────────────────────────
-let modalGameId = null;
-
-function openLogModal(id, title) {
-  modalGameId = id;
-  document.getElementById('modal-game-title').textContent = `Log Session — ${title}`;
-  document.getElementById('modal-hours').value = 0;
-  document.getElementById('modal-minutes').value = 0;
-  // Set date to today
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('modal-date').value = today;
-  document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('modal-hours').focus(), 50);
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  modalGameId = null;
-}
-
-function saveSession() {
-  if (!modalGameId) return;
-  const h = parseInt(document.getElementById('modal-hours').value) || 0;
-  const m = parseInt(document.getElementById('modal-minutes').value) || 0;
-  const totalMin = h * 60 + m;
-  if (totalMin <= 0) {
-    document.getElementById('modal-hours').focus();
-    return;
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Game Library is now the default tab';
+      if (libraryBtn) { libraryBtn.style.fontWeight = '700'; libraryBtn.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Game Library tab';
+      if (libraryBtn) { libraryBtn.style.fontWeight = ''; libraryBtn.style.color = ''; }
+    }
   }
-  const dateStr = document.getElementById('modal-date').value;
 
-  // Update stats
-  const data = loadStats();
-  if (!data[modalGameId]) data[modalGameId] = { totalMinutes: 0, lastPlayed: null, sessions: 0 };
-  data[modalGameId].totalMinutes += totalMin;
-  data[modalGameId].sessions = (data[modalGameId].sessions || 0) + 1;
-  data[modalGameId].lastPlayed = dateStr ? new Date(dateStr + 'T12:00:00').toISOString() : new Date().toISOString();
-  saveStats(data);
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const libraryBtn = document.querySelector('[onclick*="library"]');
+      switchTab('library', libraryBtn);
+    }
+  }
 
-  closeModal();
-  renderLibrary();
-}
-
-function resetGame(id, title) {
-  if (!confirm(`Reset all play time stats for "${title}"?`)) return;
-  const data = loadStats();
-  delete data[id];
-  saveStats(data);
-  renderLibrary();
-}
-
-function resetAllStats() {
-  if (!confirm('Reset ALL play time stats for all games? This cannot be undone.')) return;
-  localStorage.removeItem(STORE_KEY);
-  renderLibrary();
-}
-
-// Keyboard: Escape closes modal, Enter saves
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) saveSession();
-});
-
-// ─────────────────────────────────────────────
-//  SUB-TAB SWITCHING
-// ─────────────────────────────────────────────
-function switchTab(id, btn) {
-  document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-  const pane = document.getElementById('pane-' + id);
-  if (pane) pane.classList.add('active');
-  if (btn) btn.classList.add('active');
-}
-
-function goTab(name) {
-  try { if (window.parent && window.parent.go) window.parent.go(name); }
-  catch(e) {}
-}
-
-// ─────────────────────────────────────────────
-//  SETUP COMPLETE PERSISTENCE
-// ─────────────────────────────────────────────
-const COMPLETE_KEY = 'setup_complete_goglibrary';
-function toggleComplete() {
-  const done = localStorage.getItem(COMPLETE_KEY) === 'true';
-  localStorage.setItem(COMPLETE_KEY, !done);
-  applyComplete();
-  if (!done) switchTab('library', document.querySelector('.subtab-btn'));
-}
-function applyComplete() {
-  const done = localStorage.getItem(COMPLETE_KEY) === 'true';
-  const bar = document.getElementById('setup-complete-bar');
-  const chk = document.getElementById('setup-checkbox');
-  if (bar) bar.style.background = done ? 'rgba(76,175,125,.12)' : '';
-  if (chk) { chk.textContent = done ? '✓' : ''; chk.style.background = done ? 'var(--success)' : ''; chk.style.color = done ? '#000' : ''; chk.style.borderColor = done ? 'var(--success)' : ''; }
-}
-applyComplete();
-
-// ─────────────────────────────────────────────
-//  INIT
-// ─────────────────────────────────────────────
-renderLibrary();
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const libraryBtn = document.querySelector('[onclick*="library"]');
+      switchTab('library', libraryBtn);
+    }
+    renderLibrary();
+  });
 </script>
+
 </body>
 </html>

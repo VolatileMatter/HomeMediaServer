@@ -1,6 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Sunshine Streaming</title><link rel="stylesheet" href="shared.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Sunshine Streaming</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ── Sub-tab navigation ── */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+    .setup-complete-sub {
+      font-size: .75rem;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    /* ── Sunshine app cards ── */
+    .sunshine-app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .sunshine-app-card {
+      display: flex;
+      gap: 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      padding: 14px 16px;
+      transition: border-color .15s;
+    }
+    .sunshine-app-card:hover { border-left-color: var(--accent2); }
+    .sa-icon { font-size: 1.8rem; flex-shrink: 0; line-height: 1; padding-top: 2px; }
+    .sa-name { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 5px; }
+    .sa-desc { font-size: .78rem; color: var(--text); line-height: 1.55; }
+    .sa-links { margin-top: 8px; }
+    .sa-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      color: var(--accent);
+      cursor: pointer;
+      letter-spacing: .04em;
+    }
+    .sa-link:hover { color: var(--accent2); text-decoration: underline; }
+
+    /* ── Trouble items ── */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+  </style>
+</head>
 <body>
 
 <div class="page-header">
@@ -12,8 +131,6 @@
   </div>
 </div>
 
-<div class="v1-banner">☀️ V1 Goal: Sunshine installed and running as a Windows service. Moonlight paired on all household devices. All games below launchable directly from Moonlight with per-user session management.</div>
-
 <div class="subtab-nav" id="subtab-nav">
   <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
   <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
@@ -23,17 +140,18 @@
 </div>
 
 
-<!-- ═══════════════════ PANE 1 — FIRST TIME SETUP ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane active" id="pane-setup">
 
   <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
-      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
-        Check when Sunshine is installed, all apps are added, and at least one Moonlight client is paired.
-      </div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Sunshine is installed, all apps are added, and at least one Moonlight client is paired.</div>
     </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
   <div class="section">
@@ -87,12 +205,11 @@ netsh advfirewall firewall add rule name="Sunshine Control TCP" dir=in action=al
         <tr><td>Raspberry Pi / TV</td><td><code>sudo apt install moonlight-qt</code></td></tr>
       </table>
     </div>
-
     <div class="steps">
       <div class="step">
         <div class="step-content">
           <strong>Pair each device with your server</strong>
-          <p>Open Moonlight → Add Host → enter your server's LAN IP. Moonlight displays a 4-digit PIN. Enter it in <code>https://localhost:47990 → PIN Pairing</code>. The device is then permanently paired.</p>
+          <p>Open Moonlight → Add Host → enter your server's LAN IP. Moonlight displays a 4-digit PIN. Enter it in Sunshine web UI → PIN Pairing. The device is then permanently paired.</p>
           <div class="callout callout-tip">
             <div class="callout-icon">💡</div>
             <div class="callout-body"><strong>Name each client after its user's Authentik username</strong> (e.g. "alice", "bob"). Sunshine exposes this as <code>%%SUNSHINE_CLIENT_NAME%%</code> in pre-launch commands, which the Session Manager uses to route save data to the correct user folder.</div>
@@ -139,8 +256,12 @@ Pre-launch: (same session manager call as Dolphin)</pre>
 </div><!-- /pane-setup -->
 
 
-<!-- ═══════════════════ PANE 2 — OVERVIEW ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">☀️ Sunshine is installed and running as a Windows service. Moonlight is paired on all household devices. All games listed in the Available Apps tab are launchable directly from Moonlight.</div>
 
   <div class="section">
     <div class="section-title">📋 What Is Sunshine?</div>
@@ -181,7 +302,7 @@ Pre-launch: (same session manager call as Dolphin)</pre>
         <tr><td>Sunshine + Plex direct play</td><td>✅</td><td>No conflict — Plex doesn't use GPU for direct play</td></tr>
         <tr><td>Sunshine + Plex hardware transcode</td><td>⚠️</td><td>Both use GPU encoder — Plex may fall back to software</td></tr>
         <tr><td>Sunshine + Ollama large model</td><td>❌</td><td>Serious performance impact — avoid during streams</td></tr>
-        <tr><td>Sunshine + Minecraft/ARK</td><td>✅</td><td>Those are CPU-bound — no conflict</td></tr>
+        <tr><td>Sunshine + Minecraft / ARK</td><td>✅</td><td>Those are CPU-bound — no conflict</td></tr>
         <tr><td>Sunshine + second emulator</td><td>❌</td><td>Both need GPU — major performance hit</td></tr>
       </table>
     </div>
@@ -190,7 +311,9 @@ Pre-launch: (same session manager call as Dolphin)</pre>
 </div><!-- /pane-overview -->
 
 
-<!-- ═══════════════════ PANE 3 — AVAILABLE APPS ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — AVAILABLE APPS
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-apps">
 
   <div class="section">
@@ -300,20 +423,17 @@ Pre-launch: (same session manager call as Dolphin)</pre>
 </div><!-- /pane-apps -->
 
 
-<!-- ═══════════════════ PANE 4 — MAINTENANCE ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-maintenance">
 
   <div class="section">
-    <div class="section-title">🔄 Updating Sunshine</div>
+    <div class="section-title">🔄 Updates</div>
     <div class="card">
-      <p>Sunshine updates are released on GitHub. Check periodically and update when new versions add features or fix bugs. The installer handles migration — your app list and settings are preserved.</p>
-      <pre># Check current version in Sunshine web UI → About tab
-# Download new installer from:
-# https://github.com/LizardByte/Sunshine/releases
-
-# Stop the service, run new installer, restart:
-net stop SunshineService
-# (run installer)
+      <p>Sunshine updates are released on GitHub. The installer handles migration — your app list and settings are preserved. Stop the service, run the new installer, restart.</p>
+      <pre>net stop SunshineService
+# run new installer from github.com/LizardByte/Sunshine/releases
 net start SunshineService</pre>
     </div>
   </div>
@@ -325,23 +445,25 @@ net start SunshineService</pre>
         <tr><th>Frequency</th><th>Task</th></tr>
         <tr><td>Monthly</td><td>Check GitHub releases for new Sunshine version</td></tr>
         <tr><td>When adding a new game</td><td>Add it as a Sunshine app with correct working directory and cover art</td></tr>
-        <tr><td>When pairing a new device</td><td>Ensure client name is set to the user's Authentik username</td></tr>
+        <tr><td>When pairing a new device</td><td>Ensure client name matches the user's Authentik username exactly</td></tr>
         <tr><td>If streaming degrades</td><td>Check GPU usage — another GPU task may be competing with encoding</td></tr>
       </table>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">🖼️ Adding Cover Art to Sunshine Apps</div>
+    <div class="section-title">🖼️ Adding Cover Art</div>
     <div class="card">
-      <p>In the Sunshine app editor, you can upload a cover image for each game. This is what Moonlight displays in the app grid. Square or portrait images work best. Source art from <a href="https://www.steamgriddb.com" target="_blank">steamgriddb.com</a> — they have custom art for GOG, emulator games, and non-Steam titles.</p>
+      <p>In the Sunshine app editor, upload a cover image for each game. This is what Moonlight displays in the app grid. Source art from <a href="https://www.steamgriddb.com" target="_blank">steamgriddb.com</a> — they have custom art for GOG, emulator games, and non-Steam titles. Portrait format (600×900) works best in Moonlight's grid view.</p>
     </div>
   </div>
 
 </div><!-- /pane-maintenance -->
 
 
-<!-- ═══════════════════ PANE 5 — TROUBLESHOOTING ═══════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-troubleshooting">
 
   <div class="section">
@@ -354,7 +476,7 @@ net start SunshineService</pre>
 
     <div class="trouble-item">
       <div class="trouble-q">Controller input not working in the game</div>
-      <div class="trouble-a">Moonlight forwards input as a virtual XInput controller. Ensure the game or emulator is configured for XInput (not direct hardware input). In Dolphin: Controllers → Standard Controller → XInput/0/Gamepad. In most PC games, XInput works by default.</div>
+      <div class="trouble-a">Moonlight forwards input as a virtual XInput controller. Ensure the game or emulator is configured for XInput. In Dolphin: Controllers → Standard Controller → XInput/0/Gamepad. In most PC games, XInput works by default.</div>
     </div>
 
     <div class="trouble-item">
@@ -364,17 +486,17 @@ net start SunshineService</pre>
 
     <div class="trouble-item">
       <div class="trouble-q">Can't connect — Moonlight can't find the server</div>
-      <div class="trouble-a">Ensure the server's LAN IP hasn't changed (set a static LAN IP on the server's network adapter or via router DHCP reservation). Confirm the firewall rules are in place. Try adding the IP manually in Moonlight → Add Host.</div>
+      <div class="trouble-a">Ensure the server's LAN IP hasn't changed (set a static LAN IP or DHCP reservation via your router). Confirm the firewall rules are in place. Try adding the IP manually in Moonlight → Add Host.</div>
     </div>
 
     <div class="trouble-item">
-      <div class="trouble-q">Audio not transmitted / audio on server but not client</div>
-      <div class="trouble-a">In Sunshine web UI → Configuration → Audio: select the correct output device. The device must be the one Windows is routing audio to. If using HDMI out or virtual audio, select that specifically.</div>
+      <div class="trouble-q">Audio not transmitted to client</div>
+      <div class="trouble-a">In Sunshine web UI → Configuration → Audio: select the correct output device. The device must be the one Windows is actively routing audio to. If using HDMI or a virtual audio device, select that specifically.</div>
     </div>
 
     <div class="trouble-item">
       <div class="trouble-q">Save data ended up in the wrong user's folder</div>
-      <div class="trouble-a">The Session Manager (port 9004) matches by Moonlight client name. Verify the Moonlight client is named exactly as the Authentik username (lowercase, no spaces). Re-pair if needed — when Moonlight asks for a name during pairing, enter the username exactly.</div>
+      <div class="trouble-a">The Session Manager (port 9004) matches saves by Moonlight client name. Verify the Moonlight client is named exactly as the Authentik username (lowercase, no spaces). Re-pair the device if the name needs to change.</div>
     </div>
 
   </div>
@@ -382,73 +504,62 @@ net start SunshineService</pre>
 </div><!-- /pane-troubleshooting -->
 
 
-<style>
-.sunshine-app-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 12px;
-  margin: 14px 0;
-}
-.sunshine-app-card {
-  display: flex;
-  gap: 14px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: 4px;
-  padding: 14px 16px;
-  transition: border-color .15s;
-}
-.sunshine-app-card:hover { border-left-color: var(--accent2); }
-.sa-icon { font-size: 1.8rem; flex-shrink: 0; line-height: 1; padding-top: 2px; }
-.sa-name { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 5px; }
-.sa-desc { font-size: .78rem; color: var(--text); line-height: 1.55; }
-.sa-links { margin-top: 8px; }
-.sa-link {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: .68rem;
-  color: var(--accent);
-  cursor: pointer;
-  letter-spacing: .04em;
-}
-.sa-link:hover { color: var(--accent2); text-decoration: underline; }
-</style>
-
 <script>
-// ── Sub-tab switching ──────────────────────────────────────────
-function switchTab(id, btn) {
-  document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-  const pane = document.getElementById('pane-' + id);
-  if (pane) pane.classList.add('active');
-  if (btn) btn.classList.add('active');
-}
+  // ── Sub-tab switching ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
 
-// ── Navigate parent frame to a tab ────────────────────────────
-function goTab(name) {
-  try { if (window.parent && window.parent.go) window.parent.go(name); }
-  catch(e) { console.log('Tab nav:', name); }
-}
+  // ── Navigate parent frame to a tab ──
+  function goTab(name) {
+    try { if (window.parent && window.parent.go) window.parent.go(name); }
+    catch(e) { console.log('Tab nav:', name); }
+  }
 
-// ── Setup-complete persistence ─────────────────────────────────
-const COMPLETE_KEY = 'setup_complete_sunshine';
-function toggleComplete() {
-  const done = localStorage.getItem(COMPLETE_KEY) === 'true';
-  localStorage.setItem(COMPLETE_KEY, !done);
-  applyComplete();
-  if (!done) switchTab('overview', document.querySelectorAll('.subtab-btn')[1]);
-}
-function applyComplete() {
-  const done = localStorage.getItem(COMPLETE_KEY) === 'true';
-  const bar = document.getElementById('setup-complete-bar');
-  const chk = document.getElementById('setup-checkbox');
-  if (bar)  bar.style.background  = done ? 'rgba(76,175,125,.12)' : '';
-  if (chk)  chk.textContent       = done ? '✓' : '';
-  if (chk)  chk.style.background  = done ? 'var(--success)' : '';
-  if (chk)  chk.style.color       = done ? '#000' : '';
-  if (chk)  chk.style.borderColor = done ? 'var(--success)' : '';
-}
-applyComplete();
+  // ── Setup complete checkbox ──
+  const STORAGE_KEY = 'sunshine_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = '700'; overviewBtn.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = ''; overviewBtn.style.color = ''; }
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
 </script>
+
 </body>
 </html>
