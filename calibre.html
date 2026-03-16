@@ -4,8 +4,12 @@
   <meta charset="UTF-8">
   <title>Books — Calibre-Web</title>
   <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
   <style>
-    /* ── Sub-tab navigation ── */
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION — copy verbatim to every service page.
+       Do not modify — must stay in sync with shared design system.
+    ═══════════════════════════════════════════════ */
     .subtab-nav {
       display: flex;
       gap: 0;
@@ -31,10 +35,11 @@
     .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
     .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+    /* Each pane is hidden by default; only .active shows */
     .subtab-pane { display: none; }
     .subtab-pane.active { display: block; }
 
-    /* ── Setup-complete checkbox ── */
+    /* ── Setup-complete checkbox bar ── */
     .setup-complete-bar {
       display: flex;
       align-items: center;
@@ -55,65 +60,38 @@
       border: 2px solid rgba(76,175,125,.6);
       border-radius: 3px;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: all .2s;
-      font-size: .85rem;
+      font-size: .85rem; color: #4caf7d; flex-shrink: 0;
     }
-    .setup-complete-bar.done .setup-checkbox {
-      background: #4caf7d;
-      border-color: #4caf7d;
-    }
-    .setup-complete-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .72rem;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: #4caf7d;
-    }
-    .setup-complete-sub {
-      font-size: .75rem;
-      color: var(--text-dim);
-      margin-left: auto;
-    }
+    .setup-complete-label { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .setup-complete-sub { font-size: .74rem; color: var(--text-dim); margin-left: auto; }
 
-    /* ── Achievement cards ── */
-    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    /* ── Achievement cards (used in Achievements pane) ── */
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
     .ach-card {
       background: var(--bg2);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 16px;
-      position: relative;
-      transition: border-color .15s;
+      padding: 12px 14px;
     }
-    .ach-card:hover { border-color: rgba(200,168,75,.3); }
-    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
-    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
-    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
-    .ach-footer { display: flex; gap: 6px; align-items: center; }
-    .ach-pts {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .6rem;
-      padding: 2px 7px;
-      border-radius: 2px;
-      background: rgba(200,168,75,.1);
-      color: var(--accent);
-      border: 1px solid rgba(200,168,75,.2);
+    .ach-icon  { font-size: 1.3rem; margin-bottom: 5px; }
+    .ach-name  { font-weight: 700; font-size: .82rem; margin-bottom: 3px; }
+    .ach-desc  { font-size: .74rem; color: var(--text-dim); line-height: 1.5; }
+    .ach-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
     }
-    .ach-method {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .6rem;
-      padding: 2px 7px;
-      border-radius: 2px;
-      background: rgba(78,205,196,.08);
-      color: var(--accent3);
-      border: 1px solid rgba(78,205,196,.18);
-    }
+    .ach-pts    { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--accent); }
+    .ach-method { font-size: .65rem; color: var(--text-dim); background: var(--bg3); padding: 1px 5px; border-radius: 2px; }
 
-    /* ── Storage breakdown ── */
+    /* ── Storage breakdown grid ── */
     .storage-breakdown {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
       gap: 10px;
       margin: 14px 0;
     }
@@ -137,7 +115,7 @@
       color: var(--text-bright);
     }
 
-    /* ── Trouble items ── */
+    /* ── Troubleshooting items ── */
     .trouble-item {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -146,16 +124,72 @@
       padding: 14px 16px;
       margin-bottom: 12px;
     }
-    .trouble-q {
-      font-weight: 700;
-      font-size: .88rem;
-      color: var(--text-bright);
-      margin-bottom: 8px;
-    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok     { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
     .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
 
-    @media (max-width: 680px) {
-      .storage-breakdown { grid-template-columns: 1fr 1fr; }
+    /* ══════════════════════════════════════════════════
+       UI PREVIEW PANE STYLES
+    ══════════════════════════════════════════════════ */
+    .preview-chrome {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .preview-bar {
+      background: #161b22;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .65rem;
+      color: var(--text-dim);
+    }
+    .preview-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .preview-url {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+      flex: 1;
+      max-width: 380px;
+    }
+    .preview-user-badge {
+      margin-left: auto;
+      background: rgba(200,168,75,.12);
+      border: 1px solid rgba(200,168,75,.25);
+      border-radius: 3px;
+      padding: 2px 8px;
+      color: var(--accent);
+      font-size: .6rem;
+    }
+    .preview-body { padding: 20px; min-height: 300px; }
+    .preview-note {
+      background: rgba(200,168,75,.08);
+      border: 1px solid rgba(200,168,75,.22);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .preview-todo {
+      background: rgba(224,92,92,.07);
+      border: 1px dashed rgba(224,92,92,.35);
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-size: .8rem;
+      color: rgba(224,92,92,.8);
+      text-align: center;
+      margin: 10px 0;
     }
   </style>
 </head>
@@ -165,8 +199,10 @@
   <div class="page-icon">📚</div>
   <div>
     <h1>Books — Calibre-Web</h1>
-    <div class="subtitle">// Calibre-Web · Port 8083 · Native Windows · Authentik OIDC · Readarr Auto-Downloads //</div>
-    <p class="desc">Self-hosted ebook library via Calibre-Web. Browse, read, and manage your entire book collection from any browser. Supports EPUB, MOBI, PDF, and wireless Kindle delivery.</p>
+    <div class="subtitle">
+      // Ebook Library · Port <span data-cfg="port:calibre"></span> · Native Windows · Authentik OIDC + Caddy forward_auth //
+    </div>
+    <p class="desc">Self-hosted ebook library via Calibre-Web. Browse, read, and manage your entire book collection from any browser. Supports EPUB, MOBI, PDF, and wireless Kindle delivery. Readarr handles automatic new-release downloads.</p>
   </div>
 </div>
 
@@ -178,6 +214,7 @@
   <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
   <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
   <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
 </div>
 
 
@@ -232,7 +269,7 @@
 
   <!-- STEP 2: CALIBRE-WEB -->
   <div class="section">
-    <div class="section-title">⚙️ Step 2 — Install Calibre-Web <span class="tag tag-native">NATIVE · NO DOCKER</span></div>
+    <div class="section-title">⚙️ Step 2 — Install Calibre-Web 🔐 <span class="tag tag-native">NATIVE · NO DOCKER</span></div>
     <div class="steps">
       <div class="step">
         <div class="step-content">
@@ -250,14 +287,14 @@ pip install --upgrade calibreweb</pre>
         <div class="step-content">
           <strong>First launch</strong>
           <pre>cps</pre>
-          <p>Open <code>http://localhost:8083</code>. You'll see the initial setup wizard.</p>
+          <p>Open <code>http://localhost:<span data-cfg="port:calibre"></span></code>. You'll see the initial setup wizard.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
           <strong>Point Calibre-Web at your library</strong>
           <p>In the setup wizard, enter the path to your Calibre library folder — the folder that contains <code>metadata.db</code>:</p>
-          <pre>D:\Books</pre>
+          <pre><span data-cfg="path:books"></span></pre>
           <p>Set an admin username and password. Store this in Vaultwarden. <strong>Do not use your SSO account for the admin account</strong> — keep a local fallback.</p>
         </div>
       </div>
@@ -282,14 +319,14 @@ nssm start CalibreWeb</pre>
       </div>
       <div class="step">
         <div class="step-content">
-          <strong>Open Windows Firewall for port 8083</strong>
-          <pre>netsh advfirewall firewall add rule name="Calibre-Web" dir=in action=allow protocol=TCP localport=8083</pre>
+          <strong>Open Windows Firewall for port <span data-cfg="port:calibre"></span></strong>
+          <pre>netsh advfirewall firewall add rule name="Calibre-Web" dir=in action=allow protocol=TCP localport=<span data-cfg="port:calibre"></span></pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
           <strong>Verify it's running</strong>
-          <p>Open <code>http://[server-ip]:8083</code> from another device on your network. You should see the Calibre-Web login page with your library.</p>
+          <p>Open <code>http://[server-ip]:<span data-cfg="port:calibre"></span></code> from another device on your network. You should see the Calibre-Web login page with your library.</p>
         </div>
       </div>
     </div>
@@ -311,12 +348,12 @@ nssm start CalibreWeb</pre>
           <p>In Authentik Admin → Applications → Create:</p>
           <pre>Name:        Calibre-Web
 Slug:        calibre-web
-Launch URL:  https://books.yourdomain.com
+Launch URL:  <span data-cfg="url:calibre"></span>
 Provider:    Create new → OAuth2/OIDC Provider
 
 Provider settings:
   Client type:     Confidential
-  Redirect URIs:   https://books.yourdomain.com/oauth/authorize/google/callback
+  Redirect URIs:   <span data-cfg="url:calibre"></span>/oauth/authorize/google/callback
   Signing Key:     [your Authentik signing key]
   Scopes:          openid, profile, email
   Access:          authentik-family + authentik-admins groups
@@ -337,7 +374,7 @@ Client ID:     [from Authentik]
 Client Secret: [from Authentik]
 
 # Authentik OIDC discovery URL:
-# https://auth.yourdomain.com/application/o/calibre-web/.well-known/openid-configuration</pre>
+# <span data-cfg="oidc-issuer:calibre-web"></span>.well-known/openid-configuration</pre>
           <div class="callout callout-warn">
             <div class="callout-icon">⚠️</div>
             <div class="callout-body">Calibre-Web's native OAuth integration uses "Login with Google" as the OAuth flow. Authentik serves as the OAuth provider. The redirect URI <strong>must</strong> match exactly what's set in Authentik.</div>
@@ -348,14 +385,14 @@ Client Secret: [from Authentik]
         <div class="step-content">
           <strong>Alternative: Caddy forward_auth (simpler)</strong>
           <p>If the native OAuth approach is fiddly, put Calibre-Web behind Caddy with Authentik forward auth instead. This gates access at the proxy layer without touching Calibre-Web's internal auth:</p>
-          <pre># Caddyfile:
-books.yourdomain.com {
+          <pre># <span data-cfg="path:caddyfile"></span>:
+<span data-cfg="url:calibre"></span> {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username X-authentik-groups X-authentik-email
         trusted_proxies private_ranges
     }
-    reverse_proxy localhost:8083
+    reverse_proxy localhost:<span data-cfg="port:calibre"></span>
 }</pre>
           <p>With this approach, users are already authenticated by the time they reach Calibre-Web. Calibre-Web's own login page is bypassed. Create matching Calibre-Web accounts for each user with their Google username.</p>
         </div>
@@ -370,7 +407,7 @@ books.yourdomain.com {
 
 # Or via SQLite if you need to bulk-update:
 import sqlite3
-db = sqlite3.connect('D:/Books/app.db')
+db = sqlite3.connect('<span data-cfg="path:books"></span>/app.db')
 db.execute("UPDATE user SET email=? WHERE name=?",
            ('alice@gmail.com', 'alice_old'))
 db.commit()</pre>
@@ -383,14 +420,14 @@ db.commit()</pre>
 
   <!-- STEP 4: REVERSE PROXY -->
   <div class="section">
-    <div class="section-title">🌍 Step 4 — Reverse Proxy &amp; Remote Access</div>
+    <div class="section-title">🌍 Step 4 — Reverse Proxy &amp; Remote Access 🔐</div>
     <div class="steps">
       <div class="step">
         <div class="step-content">
           <strong>Add Calibre-Web to your Caddyfile</strong>
-          <pre># Caddyfile — add this block:
-books.yourdomain.com {
-    reverse_proxy localhost:8083
+          <pre># <span data-cfg="path:caddyfile"></span> — add this block:
+<span data-cfg="url:calibre"></span> {
+    reverse_proxy localhost:<span data-cfg="port:calibre"></span>
 }
 
 # If using forward_auth for SSO (see Step 3 above), use the forward_auth block instead.</pre>
@@ -399,7 +436,7 @@ books.yourdomain.com {
       <div class="step">
         <div class="step-content">
           <strong>Or access via Tailscale (no port forwarding needed)</strong>
-          <p>If you're using Tailscale for remote access, just connect to <code>http://[tailscale-ip]:8083</code> from anywhere. No Caddy config changes needed.</p>
+          <p>If you're using Tailscale for remote access, just connect to <code>http://[tailscale-ip]:<span data-cfg="port:calibre"></span></code> from anywhere. No Caddy config changes needed.</p>
         </div>
       </div>
     </div>
@@ -409,7 +446,7 @@ books.yourdomain.com {
 
   <!-- STEP 5: READARR -->
   <div class="section">
-    <div class="section-title">📥 Step 5 — Readarr Auto-Downloads <span class="tag tag-native">OPTIONAL · FOSS</span></div>
+    <div class="section-title">📥 Step 5 — Readarr Auto-Downloads 🔐 <span class="tag tag-native">OPTIONAL · FOSS</span></div>
     <div class="card">
       <div class="card-title">What Readarr does</div>
       <p>Readarr monitors for new ebook releases and automatically downloads them into your Calibre library folder. Add an author once, get every future release. Add a series and it monitors for books you don't have yet.</p>
@@ -418,7 +455,7 @@ books.yourdomain.com {
       <div class="step">
         <div class="step-content">
           <strong>Install Readarr for Windows</strong>
-          <p>Download from <a href="https://readarr.com" target="_blank">readarr.com</a> — Windows installer, runs as a service. Access at <code>http://localhost:8787</code>.</p>
+          <p>Download from <a href="https://readarr.com" target="_blank">readarr.com</a> — Windows installer, runs as a service. Access at <code>http://localhost:<span data-cfg="port:readarr"></span></code>.</p>
         </div>
       </div>
       <div class="step">
@@ -426,7 +463,7 @@ books.yourdomain.com {
           <strong>Add qBittorrent as download client</strong>
           <pre>Settings → Download Clients → + → qBittorrent:
 Host:     localhost
-Port:     8090
+Port:     <span data-cfg="port:qbittorrent"></span>
 Username: [your qbit username]
 Password: [your qbit password]
 Category: readarr</pre>
@@ -435,7 +472,7 @@ Category: readarr</pre>
       <div class="step">
         <div class="step-content">
           <strong>Set root folder to your Calibre library</strong>
-          <pre>Settings → Media Management → Root Folders → Add → D:\Books</pre>
+          <pre>Settings → Media Management → Root Folders → Add → <span data-cfg="path:books"></span></pre>
           <p>This is the same folder Calibre reads from. New downloads land here and Calibre-Web picks them up automatically after a library scan.</p>
         </div>
       </div>
@@ -451,11 +488,11 @@ Category: readarr</pre>
           <strong>Trigger a Calibre-Web library refresh after downloads</strong>
           <p>In Readarr: <strong>Settings → Connect → + → Custom Script</strong>. Create a script that refreshes Calibre-Web's metadata cache when a new book arrives:</p>
           <pre># calibre_refresh.ps1
-Invoke-WebRequest -Uri "http://localhost:8083/api/admin/libraries/scan" `
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:calibre"></span>/api/admin/libraries/scan" `
   -Method POST -Headers @{"X-Api-Key"="your-calibre-web-api-key"}
 
 # Or trigger a full library refresh:
-Invoke-WebRequest -Uri "http://localhost:8083/admin/recreatedb" -Method GET</pre>
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:calibre"></span>/admin/recreatedb" -Method GET</pre>
         </div>
       </div>
     </div>
@@ -486,12 +523,12 @@ From:        yourserver@gmail.com
   <div class="section">
     <div class="section-title">📱 Step 7 — OPDS for E-Readers <span class="tag tag-native">OPTIONAL</span></div>
     <div class="card">
-      <p>Calibre-Web exposes an OPDS catalog at <code>http://[server-ip]:8083/opds</code>. Apps like <strong>Moon+ Reader</strong>, <strong>KyBook</strong>, and <strong>Librera</strong> can subscribe to this and browse/download books directly onto the device — no web browser needed. This is the best experience for dedicated e-reader apps on tablets and phones.</p>
+      <p>Calibre-Web exposes an OPDS catalog at <code>http://[server-ip]:<span data-cfg="port:calibre"></span>/opds</code>. Apps like <strong>Moon+ Reader</strong>, <strong>KyBook</strong>, and <strong>Librera</strong> can subscribe to this and browse/download books directly onto the device — no web browser needed. This is the best experience for dedicated e-reader apps on tablets and phones.</p>
       <pre># OPDS endpoint:
-http://[server-ip]:8083/opds
+http://[server-ip]:<span data-cfg="port:calibre"></span>/opds
 
 # For external access (via Caddy):
-https://books.yourdomain.com/opds</pre>
+<span data-cfg="url:calibre"></span>/opds</pre>
     </div>
   </div>
 
@@ -503,7 +540,7 @@ https://books.yourdomain.com/opds</pre>
 ═══════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-overview">
 
-  <div class="v1-banner">📚 Calibre-Web is your self-hosted ebook library. Calibre Desktop manages the library file; Calibre-Web serves it to every device. All books stored on internal storage at D:\Books\. Readarr auto-downloads new releases.</div>
+  <div class="v1-banner">📚 Calibre-Web is your self-hosted ebook library. Calibre Desktop manages the library file; Calibre-Web serves it to every device. All books stored on internal storage at <span data-cfg="path:books"></span>. Readarr auto-downloads new releases.</div>
 
   <!-- ── WHAT IS CALIBRE ── -->
   <div class="section">
@@ -624,23 +661,23 @@ https://books.yourdomain.com/opds</pre>
         <div class="card-title">Access Points</div>
         <table>
           <tr><th>Type</th><th>URL / Address</th></tr>
-          <tr><td>Web (external)</td><td><code>books.yourdomain.com</code></td></tr>
-          <tr><td>Web (local)</td><td><code>http://[server-ip]:8083</code></td></tr>
-          <tr><td>Admin panel</td><td><code>http://localhost:8083/admin</code></td></tr>
-          <tr><td>OPDS catalog</td><td><code>http://[server-ip]:8083/opds</code></td></tr>
-          <tr><td>Readarr</td><td><code>http://localhost:8787</code></td></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:calibre"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:calibre"></span></code></td></tr>
+          <tr><td>Admin panel</td><td><code>http://localhost:<span data-cfg="port:calibre"></span>/admin</code></td></tr>
+          <tr><td>OPDS catalog</td><td><code>http://[server-ip]:<span data-cfg="port:calibre"></span>/opds</code></td></tr>
+          <tr><td>Readarr</td><td><code>http://localhost:<span data-cfg="port:readarr"></span></code></td></tr>
         </table>
       </div>
       <div class="card">
         <div class="card-title">Technical Details</div>
         <table>
           <tr><th>Item</th><th>Value</th></tr>
-          <tr><td>Port</td><td>8083 (Calibre-Web), 8787 (Readarr)</td></tr>
+          <tr><td>Port</td><td><span data-cfg="port:calibre"></span> (Calibre-Web), <span data-cfg="port:readarr"></span> (Readarr)</td></tr>
           <tr><td>Install type</td><td>Native Windows (no Docker)</td></tr>
           <tr><td>Service name</td><td><code>CalibreWeb</code> (NSSM)</td></tr>
           <tr><td>Auth method</td><td>Authentik OIDC / Caddy forward_auth</td></tr>
-          <tr><td>Library database</td><td><code>D:\Books\metadata.db</code></td></tr>
-          <tr><td>App database</td><td><code>D:\Books\app.db</code></td></tr>
+          <tr><td>Library database</td><td><code data-cfg="path:books"></code>\metadata.db</td></tr>
+          <tr><td>App database</td><td><code data-cfg="path:books"></code>\app.db</td></tr>
         </table>
       </div>
     </div>
@@ -675,7 +712,7 @@ https://books.yourdomain.com/opds</pre>
   <div class="section">
     <div class="section-title">📁 Library Structure</div>
     <div class="card">
-      <pre>D:\Books\
+      <pre><span data-cfg="path:books"></span>\
   metadata.db             ← Calibre's library index (never edit directly)
   app.db                  ← Calibre-Web's user data (progress, shelves, bookmarks)
   Author Name\
@@ -704,7 +741,7 @@ https://books.yourdomain.com/opds</pre>
   <div class="section">
     <div class="section-title">🔄 Updates</div>
     <div class="card">
-      <div class="card-title">How to update Calibre-Web</div>
+      <div class="card-title">How to update Calibre-Web &nbsp;·&nbsp; Last confirmed: <span data-cfg="version:calibre-web"></span></div>
       <p>Calibre-Web does <strong>not</strong> auto-update. Check periodically, especially if the login flow or reading experience breaks.</p>
       <div class="steps">
         <div class="step">
@@ -726,7 +763,7 @@ https://books.yourdomain.com/opds</pre>
           <div class="step-content">
             <strong>Restart the service and verify</strong>
             <pre>nssm start CalibreWeb</pre>
-            <p>Open <code>http://localhost:8083</code> and confirm the new version is running. Test SSO login with an incognito window.</p>
+            <p>Open <code>http://localhost:<span data-cfg="port:calibre"></span></code> and confirm the new version is running. Test SSO login with an incognito window.</p>
           </div>
         </div>
         <div class="step">
@@ -748,32 +785,32 @@ https://books.yourdomain.com/opds</pre>
   <div class="section">
     <div class="section-title">⚠️ Potential Breakpoints — Watch For These</div>
 
-    <div class="trouble-item" style="border-left-color: var(--danger)">
+    <div class="trouble-item danger">
       <div class="trouble-q">🔴 SSO / OAuth login breaks after a Calibre-Web update</div>
       <div class="trouble-a">Calibre-Web's OAuth implementation can shift between versions. After any update, test the SSO login from an incognito window before assuming everything is fine. If it breaks, the fallback is the local admin account. Check the Calibre-Web GitHub issues for OAuth-related regressions in the release notes.</div>
     </div>
 
-    <div class="trouble-item" style="border-left-color: var(--warning)">
+    <div class="trouble-item">
       <div class="trouble-q">🟡 Calibre-Web loses track of the library after a Calibre update</div>
-      <div class="trouble-a">If Calibre Desktop updates and moves or rebuilds <code>metadata.db</code>, Calibre-Web may fail to find the library. Go to <strong>Admin → Edit Basic Configuration</strong> and re-confirm the library path is still <code>D:\Books</code>. If <code>metadata.db</code> moved, point Calibre-Web to the new location.</div>
+      <div class="trouble-a">If Calibre Desktop updates and moves or rebuilds <code>metadata.db</code>, Calibre-Web may fail to find the library. Go to <strong>Admin → Edit Basic Configuration</strong> and re-confirm the library path is still <code data-cfg="path:books"></code>. If <code>metadata.db</code> moved, point Calibre-Web to the new location.</div>
     </div>
 
-    <div class="trouble-item" style="border-left-color: var(--warning)">
+    <div class="trouble-item">
       <div class="trouble-q">🟡 Readarr downloads land in the library but don't appear in Calibre-Web</div>
       <div class="trouble-a">Calibre-Web doesn't watch the filesystem in real time. After Readarr downloads a book, you need to trigger a library scan in Calibre-Web: <strong>Admin → Reconnect Database</strong>. Or set up the Readarr post-download script (see First Time Setup) to trigger this automatically via API.</div>
     </div>
 
-    <div class="trouble-item" style="border-left-color: var(--warning)">
+    <div class="trouble-item">
       <div class="trouble-q">🟡 Authentik redirect URI mismatch after a domain change</div>
-      <div class="trouble-a">If you change your domain name, update the Redirect URI in both Authentik (the provider config) and Calibre-Web's OAuth settings simultaneously. The exact URI format must match: <code>https://books.yourdomain.com/oauth/authorize/google/callback</code>. Mismatches cause a silent redirect error.</div>
+      <div class="trouble-a">If you change your domain name, update the Redirect URI in both Authentik (the provider config) and Calibre-Web's OAuth settings simultaneously. The exact URI format must match: <code><span data-cfg="url:calibre"></span>/oauth/authorize/google/callback</code>. Mismatches cause a silent redirect error.</div>
     </div>
 
-    <div class="trouble-item" style="border-left-color: var(--warning)">
+    <div class="trouble-item">
       <div class="trouble-q">🟡 metadata.db gets locked when both Calibre Desktop and Calibre-Web try to access it</div>
       <div class="trouble-a">SQLite has limited concurrent write support. If Calibre Desktop is actively doing a large metadata update while Calibre-Web is serving requests, you may see brief errors. The solution is to close Calibre Desktop before doing bulk edits, or do large library operations during off-hours. Calibre-Web is read-mostly so this is rarely a problem in practice.</div>
     </div>
 
-    <div class="trouble-item" style="border-left-color: #4caf7d">
+    <div class="trouble-item ok">
       <div class="trouble-q">🟢 app.db grows over time with reading history</div>
       <div class="trouble-a">Calibre-Web's <code>app.db</code> accumulates reading progress, bookmark data, and activity logs. It stays under 50 MB in almost all cases and doesn't need manual maintenance. If you ever need to clean it, export user reading lists first, then use the admin panel's database tools.</div>
     </div>
@@ -788,7 +825,7 @@ https://books.yourdomain.com/opds</pre>
         <tr><td>Monthly</td><td>Check for Readarr updates (System → Updates in Readarr UI)</td></tr>
         <tr><td>Monthly</td><td>Review Readarr → Activity → History for failed downloads</td></tr>
         <tr><td>Quarterly</td><td>Run Calibre Desktop → Check Library → Fix broken entries or duplicate metadata</td></tr>
-        <tr><td>Quarterly</td><td>Back up <code>D:\Books\app.db</code> (contains all reading progress)</td></tr>
+        <tr><td>Quarterly</td><td>Back up <code><span data-cfg="path:books"></span>\app.db</code> (contains all reading progress)</td></tr>
         <tr><td>After any domain change</td><td>Update Redirect URIs in Authentik and Calibre-Web OAuth config</td></tr>
         <tr><td>After any major update</td><td>Test SSO login from incognito window</td></tr>
       </table>
@@ -809,10 +846,10 @@ https://books.yourdomain.com/opds</pre>
       <p>Calibre-Web does <strong>not</strong> have a built-in webhook system like Jellyfin. Reading progress and completion events must be detected by polling Calibre-Web's SQLite database (<code>app.db</code>) or by adding a lightweight middleware layer that watches for status changes. The recommended approach is a scheduled polling script that runs every few minutes and calls the achievement server when milestones are hit.</p>
       <pre>Polling script checks app.db every 5 minutes
   → Finds user "alice" has read_status=1 (finished) for a new book
-  → POST http://localhost:9003/api/achievement/trigger
+  → POST http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger
     { "username": "alice", "trigger": "book_finished", "metadata": { "title": "..." } }
   → Achievement server grants "Bookworm" achievement + 10 XP
-  → Stored in D:\Users\alice\achievements.json
+  → Stored in <span data-cfg="userpath:achievements.json"></span>
   → Appears in homepage community feed</pre>
     </div>
   </div>
@@ -821,13 +858,13 @@ https://books.yourdomain.com/opds</pre>
     <div class="section-title">🔌 Polling Script Setup</div>
     <div class="card">
       <div class="card-title">Step 1 — Create the polling script</div>
-      <pre># D:\Server\Achievements\calibre_poll.py
+      <pre># <span data-cfg="path:server"></span>\Achievements\calibre_poll.py
 import sqlite3, requests, json, os, time
 from datetime import datetime
 
-DB_PATH      = 'D:/Books/app.db'
-ACH_ENDPOINT = 'http://localhost:9003/api/achievement/trigger'
-STATE_FILE   = 'D:/Server/Achievements/calibre_state.json'
+DB_PATH      = r'<span data-cfg="path:books"></span>\app.db'
+ACH_ENDPOINT = 'http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger'
+STATE_FILE   = r'<span data-cfg="path:server"></span>\Achievements\calibre_state.json'
 
 def load_state():
     if os.path.exists(STATE_FILE):
@@ -875,13 +912,13 @@ if __name__ == '__main__':
     </div>
     <div class="card" style="margin-top:14px">
       <div class="card-title">Step 2 — Run as a Windows Service (NSSM)</div>
-      <pre>nssm install CalibreAchievements python "D:\Server\Achievements\calibre_poll.py"
-nssm set CalibreAchievements AppDirectory "D:\Server\Achievements"
+      <pre>nssm install CalibreAchievements python "<span data-cfg="path:server"></span>\Achievements\calibre_poll.py"
+nssm set CalibreAchievements AppDirectory "<span data-cfg="path:server"></span>\Achievements"
 nssm start CalibreAchievements</pre>
     </div>
     <div class="card" style="margin-top:14px">
       <div class="card-title">Step 3 — Add achievement definitions to definitions.json</div>
-      <pre># D:\Server\Achievements\definitions.json — add these entries:
+      <pre># <span data-cfg="path:server"></span>\Achievements\definitions.json — add these entries:
 {
   "bookworm": {
     "name":     "Bookworm",
@@ -1033,7 +1070,7 @@ nssm start CalibreAchievements</pre>
     <div class="callout callout-tip" style="margin-top:16px">
       <div class="callout-icon">💡</div>
       <div class="callout-body"><strong>Testing achievements manually:</strong> Use curl to fire a trigger directly to the achievement server without waiting for the poll cycle.<br>
-      <code>curl -X POST http://localhost:9003/api/achievement/trigger -H "Content-Type: application/json" -d '{"username":"alice","trigger":"book_finished","metadata":{"title":"Test Book"}}'</code></div>
+      <code>curl -X POST http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger -H "Content-Type: application/json" -d '{"username":"alice","trigger":"book_finished","metadata":{"title":"Test Book"}}'</code></div>
     </div>
   </div>
 
@@ -1050,26 +1087,26 @@ nssm start CalibreAchievements</pre>
     <div class="storage-breakdown">
       <div class="storage-cell">
         <div class="storage-cell-label">Book Library (shared)</div>
-        <div class="storage-cell-val">D:\Books\</div>
+        <div class="storage-cell-val" data-cfg="path:books"></div>
       </div>
       <div class="storage-cell">
         <div class="storage-cell-label">App Database</div>
-        <div class="storage-cell-val">D:\Books\app.db</div>
+        <div class="storage-cell-val"><span data-cfg="path:books"></span>\app.db</div>
       </div>
       <div class="storage-cell">
         <div class="storage-cell-label">Per-User Folder</div>
-        <div class="storage-cell-val">D:\Users\[name]\calibre\</div>
+        <div class="storage-cell-val"><span data-cfg="userpath:calibre"></span></div>
       </div>
     </div>
     <div class="card">
       <div class="card-title">What lives where</div>
-      <p>The book files themselves (<code>D:\Books\</code>) are <strong>shared</strong> — every user reads from the same library. Calibre-Web's <code>app.db</code> is also shared but stores data <em>per user account</em> inside it (reading progress, bookmarks, shelves). Per-user personal data (exports, backups, uploaded books) lives in each user's own folder under <code>D:\Users\</code>.</p>
-      <pre>D:\Books\
+      <p>The book files themselves (<code data-cfg="path:books"></code>) are <strong>shared</strong> — every user reads from the same library. Calibre-Web's <code>app.db</code> is also shared but stores data <em>per user account</em> inside it (reading progress, bookmarks, shelves). Per-user personal data (exports, backups, uploaded books) lives in each user's own folder under <code data-cfg="path:users"></code>.</p>
+      <pre><span data-cfg="path:books"></span>\
   metadata.db            ← Calibre's library index (~50–500 MB depending on library size)
   app.db                 ← Calibre-Web users, progress, bookmarks (~1–50 MB)
   [Author]\[Book]\       ← The actual ebook files (as large as your library is)
 
-D:\Users\alice\calibre\
+<span data-cfg="userpath:calibre"></span>\  (example: alice)
   progress_export.json   ← Reading progress snapshot (exportable for backup)
   uploads\               ← Books alice has personally uploaded to the shared library
   reading_lists\         ← Exported shelves / reading lists</pre>
@@ -1092,7 +1129,7 @@ D:\Users\alice\calibre\
     </div>
     <div class="card">
       <div class="card-title">Counts toward Nextcloud quota?</div>
-      <p>The shared <code>app.db</code> and <code>metadata.db</code> do <em>not</em> count toward any individual user's Nextcloud quota — they're server-side shared files. What <em>does</em> count toward a user's quota is anything they store in <code>D:\Users\[name]\calibre\</code>: personal progress exports, uploaded books, and reading list exports. These are typically negligible in size unless a user is uploading large PDF books.</p>
+      <p>The shared <code>app.db</code> and <code>metadata.db</code> do <em>not</em> count toward any individual user's Nextcloud quota — they're server-side shared files. What <em>does</em> count toward a user's quota is anything they store in <code><span data-cfg="userpath:calibre"></span></code>: personal progress exports, uploaded books, and reading list exports. These are typically negligible in size unless a user is uploading large PDF books.</p>
     </div>
   </div>
 
@@ -1101,11 +1138,11 @@ D:\Users\alice\calibre\
     <div class="card">
       <div class="card-title">Progress export endpoint (add to stats_server.py)</div>
       <p>This lets reading progress be backed up alongside everything else in the user's Nextcloud-synced folder:</p>
-      <pre># Add to D:\Server\Dashboard\stats_server.py:
+      <pre># Add to <span data-cfg="path:server"></span>\Dashboard\stats_server.py:
 @app.route('/calibre/export/&lt;username&gt;')
 def export_calibre_progress(username):
     import sqlite3, json
-    conn = sqlite3.connect('D:/Books/app.db')
+    conn = sqlite3.connect(r'<span data-cfg="path:books"></span>\app.db')
     conn.row_factory = sqlite3.Row
     progress = conn.execute('''
         SELECT b.title, b.author_sort, brl.read_status, brl.last_modified,
@@ -1116,7 +1153,7 @@ def export_calibre_progress(username):
         WHERE u.name = ?
     ''', (username,)).fetchall()
 
-    out_path = f'D:/Users/{username}/calibre/progress_export.json'
+    out_path = fr'<span data-cfg="path:users"></span>\{username}\calibre\progress_export.json'
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, 'w') as f:
         json.dump([dict(r) for r in progress], f, indent=2, default=str)
@@ -1130,21 +1167,21 @@ def export_calibre_progress(username):
     <div class="card">
       <table>
         <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
-        <tr><td>Calibre-Web app database</td><td><code>D:\Books\app.db</code></td><td>Daily</td><td>🔴 High — all user reading progress</td></tr>
-        <tr><td>Calibre library index</td><td><code>D:\Books\metadata.db</code></td><td>Daily</td><td>🔴 High — the library structure</td></tr>
-        <tr><td>Book files</td><td><code>D:\Books\[Author]\</code></td><td>As acquired</td><td>🔴 High — the actual books</td></tr>
-        <tr><td>Achievement poll state</td><td><code>D:\Server\Achievements\calibre_state.json</code></td><td>Daily</td><td>🟡 Medium — prevents re-triggering</td></tr>
-        <tr><td>User progress exports</td><td><code>D:\Users\[name]\calibre\</code></td><td>Via Nextcloud sync</td><td>🟢 Low — auto-exported nightly</td></tr>
+        <tr><td>Calibre-Web app database</td><td><code><span data-cfg="path:books"></span>\app.db</code></td><td>Daily</td><td>🔴 High — all user reading progress</td></tr>
+        <tr><td>Calibre library index</td><td><code><span data-cfg="path:books"></span>\metadata.db</code></td><td>Daily</td><td>🔴 High — the library structure</td></tr>
+        <tr><td>Book files</td><td><code><span data-cfg="path:books"></span>\[Author]\</code></td><td>As acquired</td><td>🔴 High — the actual books</td></tr>
+        <tr><td>Achievement poll state</td><td><code><span data-cfg="path:server"></span>\Achievements\calibre_state.json</code></td><td>Daily</td><td>🟡 Medium — prevents re-triggering</td></tr>
+        <tr><td>User progress exports</td><td><code><span data-cfg="userpath:calibre"></span></code></td><td>Via Nextcloud sync</td><td>🟢 Low — auto-exported nightly</td></tr>
       </table>
       <pre># Simple backup script (run via Task Scheduler, daily):
-$src1 = "D:\Books\app.db"
-$src2 = "D:\Books\metadata.db"
-$dst  = "D:\Backups\Calibre\$(Get-Date -f yyyy-MM-dd)"
+$src1 = "<span data-cfg="path:books"></span>\app.db"
+$src2 = "<span data-cfg="path:books"></span>\metadata.db"
+$dst  = "<span data-cfg="path:backups"></span>\Calibre\$(Get-Date -f yyyy-MM-dd)"
 New-Item -Path $dst -ItemType Directory -Force
 Copy-Item $src1 $dst
 Copy-Item $src2 $dst
 # Keep last 30 days:
-Get-ChildItem "D:\Backups\Calibre\" |
+Get-ChildItem "<span data-cfg="path:backups"></span>\Calibre\" |
   Sort-Object Name -Descending |
   Select-Object -Skip 30 |
   Remove-Item -Recurse -Force</pre>
@@ -1166,9 +1203,9 @@ Get-ChildItem "D:\Backups\Calibre\" |
       <div class="trouble-q">❌ Calibre-Web shows a blank library or "No books found"</div>
       <div class="trouble-a">
         <ul style="margin:0 0 0 18px">
-          <li>Verify the library path is correct: <strong>Admin → Edit Basic Configuration</strong> → confirm the path is <code>D:\Books</code> (or wherever <code>metadata.db</code> lives)</li>
+          <li>Verify the library path is correct: <strong>Admin → Edit Basic Configuration</strong> → confirm the path is <code data-cfg="path:books"></code> (or wherever <code>metadata.db</code> lives)</li>
           <li>Confirm <code>metadata.db</code> exists in that folder and is not zero bytes</li>
-          <li>Check that the CalibreWeb service account has read permission on <code>D:\Books</code></li>
+          <li>Check that the CalibreWeb service account has read permission on <code data-cfg="path:books"></code></li>
           <li>Try <strong>Admin → Reconnect Database</strong> to force a re-read</li>
         </ul>
       </div>
@@ -1180,7 +1217,7 @@ Get-ChildItem "D:\Backups\Calibre\" |
         Check in order:
         <ul style="margin:6px 0 0 18px">
           <li><strong>Admin → Edit Basic Configuration → Feature Configuration</strong> — confirm OAuth is enabled and the Client ID/Secret are filled in</li>
-          <li>Confirm the Redirect URI in Authentik exactly matches <code>https://books.yourdomain.com/oauth/authorize/google/callback</code></li>
+          <li>Confirm the Redirect URI in Authentik exactly matches <code><span data-cfg="url:calibre"></span>/oauth/authorize/google/callback</code></li>
           <li>If using Caddy forward_auth instead of native OAuth, the "Sign in" button won't appear — users are redirected automatically by Caddy</li>
           <li>Restart the CalibreWeb service after any OAuth config change: <code>nssm restart CalibreWeb</code></li>
         </ul>
@@ -1204,8 +1241,8 @@ Get-ChildItem "D:\Backups\Calibre\" |
         Calibre-Web doesn't auto-scan. Trigger a manual refresh:
         <ul style="margin:6px 0 0 18px">
           <li><strong>Admin → Reconnect Database</strong> — reloads <code>metadata.db</code></li>
-          <li>Or call the API: <code>POST http://localhost:8083/api/admin/libraries/scan</code> with your API key</li>
-          <li>Note: Readarr downloads to <code>D:\Books</code>, but Calibre-Web reads from <code>metadata.db</code>. The file being on disk isn't enough — Calibre Desktop must also have imported/indexed it first. Run Calibre Desktop → Add Books to pick up the file, then reconnect in Calibre-Web.</li>
+          <li>Or call the API: <code>POST http://localhost:<span data-cfg="port:calibre"></span>/api/admin/libraries/scan</code> with your API key</li>
+          <li>Note: Readarr downloads to <code data-cfg="path:books"></code>, but Calibre-Web reads from <code>metadata.db</code>. The file being on disk isn't enough — Calibre Desktop must also have imported/indexed it first. Run Calibre Desktop → Add Books to pick up the file, then reconnect in Calibre-Web.</li>
         </ul>
       </div>
     </div>
@@ -1235,7 +1272,7 @@ Get-ChildItem "D:\Backups\Calibre\" |
       </div>
     </div>
 
-    <div class="trouble-item" style="border-left-color: #4caf7d">
+    <div class="trouble-item ok">
       <div class="trouble-q">🟢 In-browser EPUB reader is slow or doesn't load</div>
       <div class="trouble-a">The built-in reader (Read Online) works best for EPUBs under ~50 MB. Very large EPUBs with heavy images may time out. For large books, download the file and read in a dedicated app instead. PDFs always perform better downloaded than read in-browser.</div>
     </div>
@@ -1259,15 +1296,258 @@ pip install --upgrade calibreweb
 nssm start CalibreWeb
 
 # Manually trigger a library reconnect via API:
-Invoke-WebRequest -Uri "http://localhost:8083/api/admin/libraries/scan" `
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:calibre"></span>/api/admin/libraries/scan" `
   -Method POST -Headers @{"X-Api-Key"="[your-api-key]"}
 
 # Quick SQLite check on app.db:
-sqlite3 D:\Books\app.db "SELECT u.name, COUNT(*) as books_read FROM book_read_link brl JOIN user u ON u.id=brl.user_id WHERE brl.read_status=1 GROUP BY u.name;"</pre>
+sqlite3 "<span data-cfg="path:books"></span>\app.db" "SELECT u.name, COUNT(*) as books_read FROM book_read_link brl JOIN user u ON u.id=brl.user_id WHERE brl.read_status=1 GROUP BY u.name;"</pre>
     </div>
   </div>
 
 </div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 7 — UI PREVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-uipreview">
+
+  <div class="preview-note">
+    <span>🖥️</span>
+    <div>
+      <strong>UI Preview — Dummy Data</strong><br>
+      Static mockup of what Calibre-Web looks like to a logged-in family member.
+      Logged in as: <strong>alex</strong> (demo user). No real server calls are made.
+      Incomplete sections are marked with red dashed boxes.
+    </div>
+  </div>
+
+  <!-- ── Main Library View ── -->
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url" data-cfg="url:calibre"></div>
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body" style="padding:0;display:flex;min-height:480px">
+
+      <!-- Sidebar -->
+      <div style="width:200px;flex-shrink:0;background:#111520;border-right:1px solid #1e2535;padding:16px 0;display:flex;flex-direction:column;gap:2px">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:#3a4555;padding:0 16px 8px">Library</div>
+        <div style="padding:7px 16px;background:rgba(200,168,75,.12);border-left:2px solid #c8a84b;font-size:.8rem;color:#c8a84b;cursor:pointer">📚 All Books</div>
+        <div style="padding:7px 16px;font-size:.8rem;color:#6e7a94;cursor:pointer">🔍 Search</div>
+        <div style="padding:7px 16px;font-size:.8rem;color:#6e7a94;cursor:pointer">🏷️ Tags</div>
+        <div style="padding:7px 16px;font-size:.8rem;color:#6e7a94;cursor:pointer">✍️ Authors</div>
+        <div style="padding:7px 16px;font-size:.8rem;color:#6e7a94;cursor:pointer">📖 Series</div>
+        <div style="margin:12px 0 6px;font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:#3a4555;padding:0 16px">My Shelves</div>
+        <div style="padding:7px 16px;font-size:.8rem;color:#6e7a94;cursor:pointer">📌 Want to Read <span style="float:right;font-size:.65rem;color:#3a4555">12</span></div>
+        <div style="padding:7px 16px;font-size:.8rem;color:#6e7a94;cursor:pointer">✅ Finished <span style="float:right;font-size:.65rem;color:#3a4555">7</span></div>
+        <div style="padding:7px 16px;font-size:.8rem;color:#6e7a94;cursor:pointer">⭐ Favorites <span style="float:right;font-size:.65rem;color:#3a4555">3</span></div>
+        <div style="margin-top:auto;padding:12px 16px;border-top:1px solid #1e2535">
+          <div style="font-size:.72rem;color:#6e7a94">👤 alex</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:#3a4555;margin-top:2px">7 books read</div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div style="flex:1;padding:20px;overflow:auto">
+        <!-- Toolbar -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#6e7a94;letter-spacing:.08em;text-transform:uppercase">All Books — 347 titles</div>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <div style="padding:4px 10px;background:#1a2235;border:1px solid #252d3d;border-radius:3px;font-size:.7rem;color:#6e7a94;cursor:pointer">Sort: Title ▾</div>
+            <div style="padding:4px 10px;background:#1a2235;border:1px solid #252d3d;border-radius:3px;font-size:.7rem;color:#6e7a94;cursor:pointer">⊞ Grid</div>
+          </div>
+        </div>
+
+        <!-- Book grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px">
+
+          <!-- Book card 1 -->
+          <div style="cursor:pointer" title="The Way of Kings">
+            <div style="background:linear-gradient(135deg,#1a3a5c,#0d2340);border:1px solid #1e3a5c;border-radius:4px;aspect-ratio:2/3;display:flex;align-items:flex-end;padding:8px;margin-bottom:6px;position:relative">
+              <div style="position:absolute;top:6px;right:6px;background:rgba(200,168,75,.9);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#000">EPUB</div>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#e8eaf0;line-height:1.3">The Way of Kings</div>
+                <div style="font-size:.62rem;color:#8090a8;margin-top:2px">Brandon Sanderson</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">Read</div>
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">+ Shelf</div>
+            </div>
+          </div>
+
+          <!-- Book card 2 — in progress -->
+          <div style="cursor:pointer" title="Project Hail Mary">
+            <div style="background:linear-gradient(135deg,#2a1a3c,#1a0d28);border:1px solid #3a1e5c;border-radius:4px;aspect-ratio:2/3;display:flex;align-items:flex-end;padding:8px;margin-bottom:6px;position:relative">
+              <div style="position:absolute;top:6px;left:6px;background:rgba(78,205,196,.85);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#000">READING</div>
+              <div style="position:absolute;top:6px;right:6px;background:rgba(200,168,75,.9);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#000">EPUB</div>
+              <!-- Progress bar -->
+              <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:#1a2235">
+                <div style="width:43%;height:100%;background:#4ecdc4"></div>
+              </div>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#e8eaf0;line-height:1.3">Project Hail Mary</div>
+                <div style="font-size:.62rem;color:#8090a8;margin-top:2px">Andy Weir</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;padding:3px 0;background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3);border-radius:2px;font-size:.6rem;color:#4ecdc4;text-align:center;cursor:pointer">Continue</div>
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">+ Shelf</div>
+            </div>
+          </div>
+
+          <!-- Book card 3 — finished -->
+          <div style="cursor:pointer" title="Dune">
+            <div style="background:linear-gradient(135deg,#3a2a0d,#251a08);border:1px solid #5c3e1e;border-radius:4px;aspect-ratio:2/3;display:flex;align-items:flex-end;padding:8px;margin-bottom:6px;position:relative">
+              <div style="position:absolute;top:6px;left:6px;background:rgba(76,175,125,.85);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#000">✓ READ</div>
+              <div style="position:absolute;top:6px;right:6px;background:rgba(200,168,75,.9);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#000">MOBI</div>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#e8eaf0;line-height:1.3">Dune</div>
+                <div style="font-size:.62rem;color:#8090a8;margin-top:2px">Frank Herbert</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">Read</div>
+              <div style="flex:1;padding:3px 0;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.25);border-radius:2px;font-size:.6rem;color:#c8a84b;text-align:center;cursor:pointer">✓ Shelf</div>
+            </div>
+          </div>
+
+          <!-- Book card 4 -->
+          <div style="cursor:pointer" title="The Name of the Wind">
+            <div style="background:linear-gradient(135deg,#0d2a1a,#081a10);border:1px solid #1e5c3a;border-radius:4px;aspect-ratio:2/3;display:flex;align-items:flex-end;padding:8px;margin-bottom:6px;position:relative">
+              <div style="position:absolute;top:6px;right:6px;background:rgba(200,168,75,.9);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#000">EPUB</div>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#e8eaf0;line-height:1.3">The Name of the Wind</div>
+                <div style="font-size:.62rem;color:#8090a8;margin-top:2px">Patrick Rothfuss</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">Read</div>
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">+ Shelf</div>
+            </div>
+          </div>
+
+          <!-- Book card 5 -->
+          <div style="cursor:pointer" title="Flowers for Algernon">
+            <div style="background:linear-gradient(135deg,#2a1a2a,#1a0d1a);border:1px solid #5c1e5c;border-radius:4px;aspect-ratio:2/3;display:flex;align-items:flex-end;padding:8px;margin-bottom:6px;position:relative">
+              <div style="position:absolute;top:6px;right:6px;background:rgba(224,92,92,.85);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#fff">PDF</div>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#e8eaf0;line-height:1.3">Flowers for Algernon</div>
+                <div style="font-size:.62rem;color:#8090a8;margin-top:2px">Daniel Keyes</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">Read</div>
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">+ Shelf</div>
+            </div>
+          </div>
+
+          <!-- Book card 6 — kindle send -->
+          <div style="cursor:pointer" title="A Memory Called Empire">
+            <div style="background:linear-gradient(135deg,#1a2a3a,#0d1a28);border:1px solid #1e3a5c;border-radius:4px;aspect-ratio:2/3;display:flex;align-items:flex-end;padding:8px;margin-bottom:6px;position:relative">
+              <div style="position:absolute;top:6px;right:6px;background:rgba(200,168,75,.9);border-radius:2px;padding:1px 5px;font-size:.55rem;font-family:'Share Tech Mono',monospace;color:#000">EPUB</div>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#e8eaf0;line-height:1.3">A Memory Called Empire</div>
+                <div style="font-size:.62rem;color:#8090a8;margin-top:2px">Arkady Martine</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">Read</div>
+              <div style="flex:1;padding:3px 0;background:#1a2235;border:1px solid #252d3d;border-radius:2px;font-size:.6rem;color:#6e7a94;text-align:center;cursor:pointer">📬 Kindle</div>
+            </div>
+          </div>
+
+        </div><!-- /book grid -->
+      </div><!-- /main content -->
+    </div><!-- /preview-body -->
+  </div><!-- /preview-chrome -->
+
+  <!-- ── Book Detail View ── -->
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin:16px 0 8px">
+    Book Detail View — clicking a title
+  </div>
+
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url"><span data-cfg="url:calibre"></span>/book/42/view</div>
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body" style="display:flex;gap:24px;padding:24px">
+
+      <!-- Cover -->
+      <div style="flex-shrink:0;width:120px">
+        <div style="background:linear-gradient(135deg,#2a1a3c,#1a0d28);border:1px solid #3a1e5c;border-radius:4px;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center">
+          <div style="text-align:center;padding:8px">
+            <div style="font-size:2rem">📚</div>
+            <div style="font-size:.6rem;color:#8090a8;margin-top:4px">Cover Art</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+          <div style="padding:6px;background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3);border-radius:3px;font-size:.7rem;color:#4ecdc4;text-align:center;cursor:pointer">▶ Read Online</div>
+          <div style="padding:6px;background:#1a2235;border:1px solid #252d3d;border-radius:3px;font-size:.7rem;color:#6e7a94;text-align:center;cursor:pointer">⬇ Download EPUB</div>
+          <div style="padding:6px;background:#1a2235;border:1px solid #252d3d;border-radius:3px;font-size:.7rem;color:#6e7a94;text-align:center;cursor:pointer">📬 Send to Kindle</div>
+        </div>
+      </div>
+
+      <!-- Book info -->
+      <div style="flex:1">
+        <div style="font-size:1.3rem;font-weight:700;color:#e8eaf0;margin-bottom:4px">Project Hail Mary</div>
+        <div style="font-size:.85rem;color:#8090a8;margin-bottom:12px">Andy Weir · 2021</div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+          <span style="background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.25);border-radius:2px;padding:2px 8px;font-size:.65rem;color:#c8a84b">Science Fiction</span>
+          <span style="background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.25);border-radius:2px;padding:2px 8px;font-size:.65rem;color:#c8a84b">Space</span>
+          <span style="background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.25);border-radius:2px;padding:2px 8px;font-size:.65rem;color:#c8a84b">Adventure</span>
+        </div>
+
+        <!-- Reading progress -->
+        <div style="background:#1a2235;border:1px solid #252d3d;border-radius:3px;padding:10px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#6e7a94;text-transform:uppercase;letter-spacing:.08em">Reading Progress</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#4ecdc4">43%</span>
+          </div>
+          <div style="height:4px;background:#0d1117;border-radius:2px">
+            <div style="width:43%;height:100%;background:#4ecdc4;border-radius:2px"></div>
+          </div>
+          <div style="font-size:.65rem;color:#3a4555;margin-top:5px">Started Mar 12 · Last read Mar 15</div>
+        </div>
+
+        <div style="font-size:.8rem;color:#8090a8;line-height:1.6;margin-bottom:14px">
+          A lone astronaut must save Earth from a mysterious threat. Wakes up with no memory, two dead crewmates, and a mission he can't remember accepting.
+        </div>
+
+        <!-- Shelf actions -->
+        <div style="display:flex;gap:6px">
+          <div style="padding:5px 12px;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.25);border-radius:3px;font-size:.72rem;color:#c8a84b;cursor:pointer">📌 Add to Want to Read</div>
+          <div style="padding:5px 12px;background:#1a2235;border:1px solid #252d3d;border-radius:3px;font-size:.72rem;color:#6e7a94;cursor:pointer">⭐ Add to Favorites</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── UI Notes ── -->
+  <div class="section" style="margin-top:20px">
+    <div class="section-title">📝 UI Notes &amp; Iteration Log</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;color:var(--text-dim)">
+        <li>[ ] Confirm the "Read Online" button correctly opens the Calibre-Web built-in reader for EPUB — PDF opens in-browser but quality is inconsistent</li>
+        <li>[ ] The "Send to Kindle" button only appears if the user has a Kindle address set in their profile — worth noting in onboarding</li>
+        <li>[ ] Virtual Library restrictions hide books the user doesn't have access to — they won't see them at all, not a "locked" state</li>
+        <li>[ ] Shelf visibility: private shelves are visible only to the owner; public shelves appear in the community feed on the homepage</li>
+        <li>[ ] Format badges (EPUB/MOBI/PDF) in library grid are a useful quick indicator — some books have multiple formats available</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-uipreview -->
 
 
 <script>
