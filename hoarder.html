@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hoarder (Karakeep)</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION
+       Copy this style block into every service page.
+       Do not modify — it matches the shared design system.
+    ═══════════════════════════════════════════════ */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+
+    /* ── Achievement cards ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    .ach-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      transition: border-color .15s;
+    }
+    .ach-card:hover { border-color: rgba(200,168,75,.3); }
+    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+    .ach-footer { display: flex; gap: 6px; align-items: center; }
+    .ach-pts {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(200,168,75,.1);
+      color: var(--accent);
+      border: 1px solid rgba(200,168,75,.2);
+    }
+    .ach-method {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(78,205,196,.08);
+      color: var(--accent3);
+      border: 1px solid rgba(78,205,196,.18);
+    }
+
+    /* ── Storage breakdown grid ── */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* ── Troubleshooting items ── */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🗂️</div>
+  <div>
+    <h1>Hoarder <span style="font-size:.65em;opacity:.6">(Karakeep)</span></h1>
+    <div class="subtitle">
+      // AI Bookmark Manager · Port <span data-cfg="port:hoarder"></span> · Docker WSL2 · Authentik OIDC //
+    </div>
+    <p class="desc">
+      Save links, articles, and notes — Ollama automatically tags and categorises everything using your local AI.
+      Full-text search is powered by Meilisearch. Three containers: <code>web</code>, <code>meilisearch</code>, <code>chrome</code>.
+      Overlaps in purpose with Readeck — Hoarder focuses on AI organisation and tagging; Readeck on clean reading copies.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <!-- REQUIRED: Setup complete checkbox -->
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Check when all three Hoarder containers are running, Authentik OIDC is connected, and bookmarking works end-to-end.
+      </div>
+    </div>
+    <div style="font-size:.75rem;color:var(--text-dim);margin-left:auto" id="complete-sub">
+      Mark as done → activates Overview tab
+    </div>
+  </div>
+
+  <div class="v1-banner">
+    🐉 V1 Goal: Hoarder running on port <span data-cfg="port:hoarder"></span> behind Caddy at <code data-cfg="url:hoarder"></code>.
+    Ollama AI tagging active. Authentik OIDC login working. Browser extension installed.
+  </div>
+
+  <hr>
+
+  <!-- STEP 1: Pre-flight -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 1 — Pre-flight Checks <span class="tag tag-docker">WSL2 + Docker</span></div>
+    <div class="card">
+      <div class="card-title">What you need before starting</div>
+      <ul>
+        <li>WSL2 (Ubuntu) running with Docker — confirm with <code>wsl -d Ubuntu -- docker ps</code></li>
+        <li>Ollama already running on your server at port <span data-cfg="port:ollama"></span> — Hoarder will call it for AI tagging</li>
+        <li>Port <span data-cfg="port:hoarder"></span> free on the host</li>
+        <li>Two secrets generated (do this now, store in your password manager):</li>
+      </ul>
+      <pre># Generate HOARDER_SECRET (NextAuth secret):
+openssl rand -base64 36
+
+# Generate MEILI_KEY (Meilisearch master key):
+openssl rand -base64 36</pre>
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Generate both secrets <strong>before</strong> writing the compose file. If you change either after first run, you will need to wipe and recreate the Meilisearch index and all existing sessions.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 2: Deploy -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 2 — Deploy with Docker Compose <span class="tag tag-docker">Docker Compose</span></div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the directory inside WSL2</strong>
+          <pre>mkdir -p ~/hoarder
+cd ~/hoarder</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create <code>docker-compose.yml</code></strong>
+          <p>Create <code>~/hoarder/docker-compose.yml</code> with the following content. Replace the placeholder values with the secrets you generated in Step 1.</p>
+          <pre>services:
+  web:
+    image: ghcr.io/hoarder-app/hoarder:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/hoarder:/data
+    ports:
+      - "<span data-cfg="port:hoarder"></span>:3000"
+    environment:
+      - NEXTAUTH_URL=<span data-cfg="url:hoarder"></span>
+      - NEXTAUTH_SECRET=PASTE_HOARDER_SECRET_HERE
+      - MEILI_ADDR=http://meilisearch:7700
+      - MEILI_MASTER_KEY=PASTE_MEILI_KEY_HERE
+      - BROWSER_WEB_URL=http://chrome:9222
+      - OLLAMA_BASE_URL=http://[server-lan-ip]:<span data-cfg="port:ollama"></span>
+      - INFERENCE_TEXT_MODEL=llama3.1
+      - INFERENCE_IMAGE_MODEL=llava
+      # Authentik OIDC — fill in after creating the Authentik application (Step 4)
+      - OAUTH_WELLKNOWN_URL=<span data-cfg="oidc-issuer:hoarder"></span>.well-known/openid-configuration
+      - OAUTH_CLIENT_ID=PASTE_CLIENT_ID_HERE
+      - OAUTH_CLIENT_SECRET=PASTE_CLIENT_SECRET_HERE
+      - OAUTH_PROVIDER_NAME=Authentik
+    depends_on:
+      - meilisearch
+      - chrome
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.11
+    restart: unless-stopped
+    volumes:
+      - ./data/hoarder_meili:/meili_data
+    environment:
+      - MEILI_MASTER_KEY=PASTE_MEILI_KEY_HERE
+      - MEILI_NO_ANALYTICS=true
+
+  chrome:
+    image: gcr.io/zenika-hub/alpine-chrome:123
+    restart: unless-stopped
+    command: [
+      "--headless",
+      "--disable-gpu",
+      "--disable-software-rasterizer",
+      "--remote-debugging-address=0.0.0.0",
+      "--remote-debugging-port=9222",
+      "--hide-scrollbars"
+    ]</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Start the stack</strong>
+          <pre>cd ~/hoarder
+docker compose up -d
+
+# Verify all three containers are running:
+docker compose ps</pre>
+          <p>You should see <code>web</code>, <code>meilisearch</code>, and <code>chrome</code> all in state <code>running</code>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Confirm Hoarder is reachable locally</strong>
+          <pre># From the WSL2 terminal:
+curl -s -o /dev/null -w "%{http_code}" http://localhost:<span data-cfg="port:hoarder"></span>
+# Expected: 200 or 302</pre>
+          <p>Or open <code>http://[server-lan-ip]:<span data-cfg="port:hoarder"></span></code> in a browser — you should see the Hoarder login page.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Open firewall port</strong>
+          <pre>netsh advfirewall firewall add rule name="Hoarder" ^
+  dir=in action=allow protocol=TCP localport=<span data-cfg="port:hoarder"></span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 3: Caddy -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 3 — Caddy Reverse Proxy</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Add the Hoarder block to your Caddyfile</strong>
+          <p>Open <code data-cfg="path:caddyfile"></code> and add:</p>
+          <pre>hoarder.<span data-cfg="domain"></span> {
+  reverse_proxy localhost:<span data-cfg="port:hoarder"></span>
+}</pre>
+          <p>Hoarder handles its own authentication via OIDC, so no <code>forward_auth</code> wrapper is needed here — Caddy only needs to proxy the traffic.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Reload Caddy</strong>
+          <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+          <p>Confirm <code data-cfg="url:hoarder"></code> loads (will redirect to login — that's expected until OIDC is configured).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 4: Authentik -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 4 — Authentik OIDC <span class="tag tag-sso">SSO · OIDC</span></div>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Hoarder supports OAuth2/OIDC natively — no plugin or forward_auth wrapper needed. You configure the provider via environment variables and Hoarder handles the login flow itself.</div>
+    </div>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create an OAuth2/OIDC provider in Authentik</strong>
+          <p>Go to <code data-cfg="authentik-admin"></code> → Applications → Providers → Create → OAuth2/OpenID Provider.</p>
+          <ul>
+            <li><strong>Name:</strong> Hoarder</li>
+            <li><strong>Client type:</strong> Confidential</li>
+            <li><strong>Redirect URIs:</strong> <code><span data-cfg="url:hoarder"></span>/api/auth/callback/custom</code></li>
+            <li><strong>Signing key:</strong> Select your default signing certificate</li>
+            <li><strong>Scopes:</strong> openid, email, profile</li>
+          </ul>
+          <p>Save the provider and note the <strong>Client ID</strong> and <strong>Client Secret</strong>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the Authentik Application</strong>
+          <p>Go to Applications → Applications → Create.</p>
+          <ul>
+            <li><strong>Name:</strong> Hoarder</li>
+            <li><strong>Slug:</strong> <code>hoarder</code></li>
+            <li><strong>Provider:</strong> Select the provider you just created</li>
+            <li><strong>Launch URL:</strong> <code data-cfg="url:hoarder"></code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Update the compose file with your OIDC credentials</strong>
+          <p>Edit <code>~/hoarder/docker-compose.yml</code> and fill in the three OAuth environment variables:</p>
+          <pre>- OAUTH_CLIENT_ID=YOUR_CLIENT_ID_FROM_AUTHENTIK
+- OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET_FROM_AUTHENTIK
+- OAUTH_PROVIDER_NAME=Authentik</pre>
+          <p>The <code>OAUTH_WELLKNOWN_URL</code> should already be set from Step 2. Verify it matches the Authentik slug <code>hoarder</code>:</p>
+          <pre>- OAUTH_WELLKNOWN_URL=<span data-cfg="oidc-issuer:hoarder"></span>.well-known/openid-configuration</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Restart the web container to pick up the new env vars</strong>
+          <pre>cd ~/hoarder
+docker compose up -d --force-recreate web</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Test SSO login</strong>
+          <p>Open <code data-cfg="url:hoarder"></code> in an incognito window. You should be redirected to Authentik to log in, then land in Hoarder as an authenticated user.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>Verify the Caddyfile entry</strong>
+          <p>Confirm the reverse proxy block for Hoarder is in place at <code data-cfg="path:caddyfile"></code> and that Caddy has reloaded:</p>
+          <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 5: Browser Extension -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 5 — Browser Extension</div>
+    <div class="card">
+      <p>Hoarder has an official browser extension for one-click bookmarking.</p>
+      <ul>
+        <li><strong>Chrome / Edge:</strong> Install from the Chrome Web Store — search "Hoarder"</li>
+        <li><strong>Firefox:</strong> Install from Firefox Add-ons — search "Hoarder"</li>
+      </ul>
+      <p>After installing, configure the extension's <strong>Server URL</strong> to <code data-cfg="url:hoarder"></code>. Sign in with your Authentik account. The extension will save pages and trigger AI tagging automatically.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">
+    🗂️ Hoarder is running with Ollama AI tagging, Meilisearch full-text search, and Authentik OIDC login.
+    Three Docker containers: <code>web</code> · <code>meilisearch</code> · <code>chrome</code>.
+    Version: <span data-cfg="version:hoarder"></span>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:hoarder"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-lan-ip]:<span data-cfg="port:hoarder"></span></code></td></tr>
+          <tr><td>Meilisearch (internal)</td><td><code>http://localhost:7700</code> (WSL2 only, not exposed to LAN)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:hoarder"></span></td></tr>
+          <tr><td>Install type</td><td>Docker Compose (WSL2) — 3 containers</td></tr>
+          <tr><td>Auth method</td><td>Authentik OIDC (native)</td></tr>
+          <tr><td>AI backend</td><td>Ollama at <code>http://[server-lan-ip]:<span data-cfg="port:ollama"></span></code></td></tr>
+          <tr><td>Text model</td><td><code>llama3.1</code></td></tr>
+          <tr><td>Image model</td><td><code>llava</code></td></tr>
+          <tr><td>Compose path</td><td><code>~/hoarder/docker-compose.yml</code> (WSL2)</td></tr>
+          <tr><td>Data path</td><td><code>~/hoarder/data/</code> (WSL2)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Apps &amp; Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Browser (web UI)</td><td>Go to <code data-cfg="url:hoarder"></code> — full management interface</td></tr>
+        <tr><td>Chrome / Edge extension</td><td>Install from Chrome Web Store → set server URL → one-click save from any page</td></tr>
+        <tr><td>Firefox extension</td><td>Install from Firefox Add-ons → set server URL → one-click save from any page</td></tr>
+        <tr><td>iOS / Android</td><td>Hoarder has a mobile app — search "Hoarder" in your app store, point it at <code data-cfg="url:hoarder"></code></td></tr>
+        <tr><td>REST API</td><td><code data-cfg="url:hoarder"></code>/api — useful for automation and importing from other tools</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 How AI Tagging Works</div>
+    <div class="card">
+      <p>When you save a bookmark, Hoarder sends the page content to your local Ollama instance (<code>llama3.1</code>) and asks it to generate tags and a summary. For images and screenshots, it uses <code>llava</code> to describe the visual content. Tags are applied automatically — you can edit or delete them at any time.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">If Ollama is slow or unavailable, bookmarks are still saved — they just won't have AI tags until Ollama is reachable. You can trigger re-tagging from the bookmark's context menu.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔖 Hoarder vs Readeck</div>
+    <div class="card">
+      <table>
+        <tr><th>Feature</th><th>Hoarder</th><th>Readeck</th></tr>
+        <tr><td>Primary purpose</td><td>AI-organised bookmark library</td><td>Clean read-later / reader view</td></tr>
+        <tr><td>AI tagging</td><td>✅ Via Ollama</td><td>❌</td></tr>
+        <tr><td>Full-text search</td><td>✅ Meilisearch</td><td>✅ Built-in</td></tr>
+        <tr><td>Clean article reader</td><td>Basic</td><td>✅ Primary feature</td></tr>
+        <tr><td>Use for</td><td>Organising links you want to find again</td><td>Reading long articles without distraction</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p><span data-cfg="version:hoarder"></span></p>
+      <p style="margin-top:10px">Hoarder uses a rolling <code>latest</code> tag. To update all three containers:</p>
+      <pre>cd ~/hoarder
+
+# Pull new images:
+docker compose pull
+
+# Recreate containers with new images:
+docker compose up -d
+
+# Verify all three containers started cleanly:
+docker compose ps
+docker compose logs web --tail=30</pre>
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">After updating, test SSO login in an incognito window and confirm AI tagging still works on a new bookmark. Update <code>versions.json</code> once confirmed.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 Meilisearch index becomes corrupt or out of sync</div>
+      <div class="trouble-a">
+        If search stops returning results or returns errors, the Meilisearch index may need rebuilding.
+        This is safe — the source of truth is Hoarder's own database, not Meilisearch.
+        <pre>cd ~/hoarder
+docker compose restart meilisearch
+docker compose restart web
+# Hoarder will re-index automatically on restart.</pre>
+        If that doesn't fix it, wipe the index volume and let it rebuild:
+        <pre>docker compose down
+rm -rf ./data/hoarder_meili
+docker compose up -d</pre>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Domain change breaks OIDC callback</div>
+      <div class="trouble-a">
+        If you change your domain, you must update three places:
+        <ol style="margin:6px 0 0 18px;font-size:.85rem;line-height:1.8">
+          <li>Authentik provider redirect URI → <code data-cfg="authentik-admin"></code> → Providers → Hoarder</li>
+          <li><code>NEXTAUTH_URL</code> in <code>~/hoarder/docker-compose.yml</code></li>
+          <li><code>OAUTH_WELLKNOWN_URL</code> in <code>~/hoarder/docker-compose.yml</code></li>
+        </ol>
+        Then <code>docker compose up -d --force-recreate web</code> to apply.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 AI tagging stops working after Ollama model changes</div>
+      <div class="trouble-a">
+        If you remove or rename the <code>llama3.1</code> or <code>llava</code> models from Ollama, Hoarder's tagging will silently fail.
+        Bookmarks will still save but will have no AI tags. Update <code>INFERENCE_TEXT_MODEL</code> and <code>INFERENCE_IMAGE_MODEL</code>
+        in the compose file to match the models currently available in Ollama, then restart the web container.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">🟢 Chrome container logs fill up</div>
+      <div class="trouble-a">
+        The headless Chrome container generates verbose debug logs. These don't affect functionality but can bloat Docker log storage over time.
+        Prune periodically: <code>docker compose logs chrome --tail=0</code> or set a log limit in compose with <code>logging: driver: "json-file" options: max-size: "10m"</code>.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Pull new images and update all three containers</td></tr>
+        <tr><td>Monthly</td><td>Test SSO login in incognito after any update</td></tr>
+        <tr><td>Monthly</td><td>Verify AI tagging still works on a new bookmark</td></tr>
+        <tr><td>After update</td><td>Record confirmed working version in <code>versions.json</code></td></tr>
+        <tr><td>After Ollama model changes</td><td>Check that <code>INFERENCE_TEXT_MODEL</code> and <code>INFERENCE_IMAGE_MODEL</code> still resolve in Ollama</td></tr>
+        <tr><td>After domain change</td><td>Update redirect URIs in Authentik AND <code>NEXTAUTH_URL</code> / <code>OAUTH_WELLKNOWN_URL</code> in compose</td></tr>
+        <tr><td>After domain change</td><td>Update Caddy config at <code data-cfg="path:caddyfile"></code> and reload</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🎯 How Hoarder Achievements Work</div>
+    <div class="card">
+      <p>Hoarder does not have native webhooks. Achievements are driven by polling Hoarder's REST API
+         periodically and checking bookmark counts, tag usage, and list membership.
+         The achievement server makes authenticated API calls using a per-user API key generated in Hoarder settings.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Each user needs to generate an API key in Hoarder (<strong>Settings → API Keys → Create</strong>) and provide it to the achievement server config so it can poll on their behalf.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 Available Achievements</div>
+    <div class="ach-grid">
+
+      <div class="ach-card">
+        <div class="ach-icon">📎</div>
+        <div class="ach-name">First Hoard</div>
+        <div class="ach-desc">Save your first bookmark</div>
+        <div class="ach-footer">
+          <span class="ach-pts">10 XP</span>
+          <span class="ach-method">API poll (count ≥ 1)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📚</div>
+        <div class="ach-name">Collector</div>
+        <div class="ach-desc">Save 50 bookmarks</div>
+        <div class="ach-footer">
+          <span class="ach-pts">30 XP</span>
+          <span class="ach-method">API poll (count ≥ 50)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🏛️</div>
+        <div class="ach-name">The Archive</div>
+        <div class="ach-desc">Save 500 bookmarks</div>
+        <div class="ach-footer">
+          <span class="ach-pts">100 XP</span>
+          <span class="ach-method">API poll (count ≥ 500)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🏷️</div>
+        <div class="ach-name">Taxonomist</div>
+        <div class="ach-desc">Create 10 unique tags manually</div>
+        <div class="ach-footer">
+          <span class="ach-pts">25 XP</span>
+          <span class="ach-method">API poll (tags count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🤖</div>
+        <div class="ach-name">Let the Robot Sort It</div>
+        <div class="ach-desc">Have 25 bookmarks AI-tagged by Ollama</div>
+        <div class="ach-footer">
+          <span class="ach-pts">20 XP</span>
+          <span class="ach-method">API poll (tagged count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📂</div>
+        <div class="ach-name">Organised Chaos</div>
+        <div class="ach-desc">Create 5 lists to organise bookmarks</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 XP</span>
+          <span class="ach-method">API poll (lists count)</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Where Data Lives</div>
+    <div class="card">
+      <p>All Hoarder data is stored inside the WSL2 filesystem under <code>~/hoarder/data/</code>.
+         There is no per-user folder in <code data-cfg="path:users"></code> for this service —
+         all user data (bookmarks, tags, lists) is stored in Hoarder's own SQLite database.</p>
+
+      <div class="storage-breakdown">
+        <div class="storage-cell">
+          <div class="storage-cell-label">Hoarder DB + attachments</div>
+          <div class="storage-cell-val">~/hoarder/data/hoarder/</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">Meilisearch index</div>
+          <div class="storage-cell-val">~/hoarder/data/hoarder_meili/</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">Docker images (3 containers)</div>
+          <div class="storage-cell-val">~800 MB</div>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>All per-user data is in the Hoarder database.</strong> No per-user folder in <code data-cfg="path:users"></code> is needed for this service. Back up <code>~/hoarder/data/hoarder/</code> to preserve all bookmarks and user accounts. The Meilisearch index is rebuildable from the database and is lower priority to back up.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td>Hoarder database + attachments</td><td><code>~/hoarder/data/hoarder/</code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>Docker Compose file</td><td><code>~/hoarder/docker-compose.yml</code></td><td>After any edit</td><td>🔴 High</td></tr>
+        <tr><td>Meilisearch index</td><td><code>~/hoarder/data/hoarder_meili/</code></td><td>Weekly</td><td>🟡 Medium (rebuildable)</td></tr>
+      </table>
+      <div class="callout callout-warning" style="margin-top:12px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">The <code>docker-compose.yml</code> contains your <code>NEXTAUTH_SECRET</code> and <code>MEILI_MASTER_KEY</code>. Back it up securely — losing these keys means existing sessions and the search index will need to be reset.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ All three containers crash-loop on startup</div>
+      <div class="trouble-a">
+        Usually caused by a malformed <code>docker-compose.yml</code> (bad indentation, missing quotes) or a mismatched <code>MEILI_MASTER_KEY</code> between the <code>web</code> and <code>meilisearch</code> services — both must use the exact same key.
+        <pre>cd ~/hoarder
+docker compose logs web --tail=50
+docker compose logs meilisearch --tail=50</pre>
+        Verify the <code>MEILI_MASTER_KEY</code> value is identical in both service blocks, then:
+        <pre>docker compose up -d --force-recreate</pre>
+      </div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ OIDC login fails — "Invalid redirect URI"</div>
+      <div class="trouble-a">
+        The redirect URI registered in Authentik must exactly match what Hoarder sends. Go to
+        <code data-cfg="authentik-admin"></code> → Providers → Hoarder and confirm the redirect URI is:
+        <pre><span data-cfg="url:hoarder"></span>/api/auth/callback/custom</pre>
+        Also verify <code>NEXTAUTH_URL</code> in <code>docker-compose.yml</code> matches your current domain exactly (no trailing slash).
+        After any change, restart the web container: <code>docker compose up -d --force-recreate web</code>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Search returns no results / search is broken</div>
+      <div class="trouble-a">
+        Meilisearch may have lost its index. Restart both services — Hoarder will trigger a re-index automatically:
+        <pre>cd ~/hoarder
+docker compose restart meilisearch
+docker compose restart web</pre>
+        If still broken after 5 minutes, wipe the index volume and let it rebuild from scratch:
+        <pre>docker compose down
+rm -rf ./data/hoarder_meili
+docker compose up -d</pre>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 AI tags are not being applied to new bookmarks</div>
+      <div class="trouble-a">
+        Check that Ollama is reachable from the WSL2 container. The <code>OLLAMA_BASE_URL</code> must use the
+        server's LAN IP, not <code>localhost</code> (which would point inside the container, not to the Windows host).
+        <pre># Test from inside the web container:
+docker compose exec web wget -qO- http://[server-lan-ip]:<span data-cfg="port:ollama"></span>/api/tags</pre>
+        Also confirm that <code>llama3.1</code> is pulled in Ollama: <code>ollama list</code>. If the model name changed, update <code>INFERENCE_TEXT_MODEL</code> in the compose file.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 Chrome container is not reachable — page snapshots fail</div>
+      <div class="trouble-a">
+        The <code>chrome</code> container exposes its remote debugging port on <code>9222</code> to the internal Docker network.
+        If it's not reachable, Hoarder will save bookmarks without a snapshot/screenshot. Restart the chrome container:
+        <pre>cd ~/hoarder
+docker compose restart chrome</pre>
+        Verify it's up: <code>docker compose ps chrome</code> should show <code>running</code>.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">🟢 Hoarder UI is slow on first load after server restart</div>
+      <div class="trouble-a">
+        Meilisearch takes 10–20 seconds to warm up after a container restart before it can serve search queries.
+        The web UI may feel sluggish during this window. This is normal — wait a moment and reload.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Useful Diagnostic Commands</div>
+    <div class="card">
+      <pre># Check status of all three containers:
+cd ~/hoarder && docker compose ps
+
+# Tail logs for each container:
+docker compose logs web -f
+docker compose logs meilisearch -f
+docker compose logs chrome -f
+
+# Restart the entire stack:
+docker compose restart
+
+# Restart only the web container (e.g. after env var changes):
+docker compose up -d --force-recreate web
+
+# Check Ollama model availability:
+ollama list
+
+# Test Ollama reachability from inside the web container:
+docker compose exec web wget -qO- http://[server-lan-ip]:<span data-cfg="port:ollama"></span>/api/tags
+
+# Nuclear reset — wipe everything and redeploy (loses search index, not bookmarks):
+docker compose down
+rm -rf ./data/hoarder_meili
+docker compose up -d</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JS — Sub-tab switching + setup-complete persistence
+═══════════════════════════════════════════════════════════════ -->
+<script>
+  // ── Sub-tab switching ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Setup complete checkbox ──
+  const STORAGE_KEY = 'hoarder_setup_complete';
+
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      overviewBtn.style.fontWeight = '700';
+      overviewBtn.style.color = 'var(--accent3)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      overviewBtn.style.fontWeight = '';
+      overviewBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
+
+</body>
+</html>
