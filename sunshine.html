@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Sunshine Streaming</title><link rel="stylesheet" href="shared.css"></head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">☀️</div>
+  <div>
+    <h1>Sunshine</h1>
+    <div class="subtitle">// Game Streaming Host · Port 47990 (Admin) · LAN Only · Pairs with Moonlight //</div>
+    <p class="desc">Sunshine is the self-hosted game-streaming server that powers all streamed gaming on this server. Install Moonlight on any device, pair once, and access any Sunshine app — emulators, PC games, GOG titles — from anywhere on the network.</p>
+  </div>
+</div>
+
+<div class="v1-banner">☀️ V1 Goal: Sunshine installed and running as a Windows service. Moonlight paired on all household devices. All games below launchable directly from Moonlight with per-user session management.</div>
+
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('apps', this)">🎮 Available Apps</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════ PANE 1 — FIRST TIME SETUP ═══════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Check when Sunshine is installed, all apps are added, and at least one Moonlight client is paired.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">☀️ Step 1 — Install Sunshine</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Download and install Sunshine</strong>
+          <p>Get the latest Windows installer from <a href="https://github.com/LizardByte/Sunshine/releases" target="_blank">github.com/LizardByte/Sunshine</a>. Run the <code>.exe</code> installer — it registers itself as a Windows service that auto-starts with Windows.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Access the Sunshine admin UI</strong>
+          <p>Open <code>https://localhost:47990</code> in a browser on the server. Accept the self-signed certificate warning. Set your admin username and password on first launch.</p>
+          <div class="callout callout-warn">
+            <div class="callout-icon">🔐</div>
+            <div class="callout-body">The Sunshine admin UI is <strong>LAN only</strong> — never expose port 47990 externally. Use a strong password anyway.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure encoding quality</strong>
+          <p>In the Sunshine web UI → Configuration tab:</p>
+          <pre>Resolution:  1920x1080
+FPS:         60
+Bitrate:     20–50 Mbps
+Encoder:     nvenc (Nvidia) / amf (AMD) / vaapi (Intel)</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Open required firewall ports</strong>
+          <pre>netsh advfirewall firewall add rule name="Sunshine HTTPS" dir=in action=allow protocol=TCP localport=47990
+netsh advfirewall firewall add rule name="Sunshine Stream UDP" dir=in action=allow protocol=UDP localport=47998-48000
+netsh advfirewall firewall add rule name="Sunshine Control TCP" dir=in action=allow protocol=TCP localport=47998-48010</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌙 Step 2 — Install Moonlight on Client Devices</div>
+    <div class="card">
+      <table>
+        <tr><th>Platform</th><th>Download</th></tr>
+        <tr><td>Windows / macOS / Linux</td><td><a href="https://moonlight-stream.org" target="_blank">moonlight-stream.org</a></td></tr>
+        <tr><td>Android</td><td>Google Play: "Moonlight Game Streaming"</td></tr>
+        <tr><td>iOS / iPadOS</td><td>App Store: "Moonlight Game Streaming"</td></tr>
+        <tr><td>Raspberry Pi / TV</td><td><code>sudo apt install moonlight-qt</code></td></tr>
+      </table>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Pair each device with your server</strong>
+          <p>Open Moonlight → Add Host → enter your server's LAN IP. Moonlight displays a 4-digit PIN. Enter it in <code>https://localhost:47990 → PIN Pairing</code>. The device is then permanently paired.</p>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body"><strong>Name each client after its user's Authentik username</strong> (e.g. "alice", "bob"). Sunshine exposes this as <code>%%SUNSHINE_CLIENT_NAME%%</code> in pre-launch commands, which the Session Manager uses to route save data to the correct user folder.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 Step 3 — Add Apps to Sunshine</div>
+    <div class="card">
+      <p>Each game or emulator is added as a Sunshine "Application." Users see all apps in Moonlight and can click any one to start streaming it directly.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add each app in Sunshine Web UI → Applications → Add New</strong>
+          <pre># Example: Dolphin (GameCube/Wii)
+Name:     GameCube (Dolphin)
+Command:  "D:\Emulators\Dolphin\Dolphin.exe" --no-gui
+Pre-launch (detached):
+  curl -s -X POST http://localhost:9004/session/start ^
+    -H "Content-Type: application/json" ^
+    -d "{\"username\":\"%%SUNSHINE_CLIENT_NAME%%\"}"
+Undo cmd (detached):
+  curl -s -X POST http://localhost:9004/session/end
+
+# Example: GOG game (e.g. Divinity: Original Sin)
+Name:     Divinity: Original Sin
+Command:  "D:\Games\GOG\DivinityOriginalSin\Divinity.exe"
+Working:  D:\Games\GOG\DivinityOriginalSin\
+
+# Example: Xenia (Xbox 360)
+Name:     Xbox 360 (Xenia)
+Command:  "D:\Emulators\Xenia\xenia_canary.exe"
+Pre-launch: (same session manager call as Dolphin)</pre>
+          <p>See the <strong>Available Apps</strong> tab for the full list of what's configured through Sunshine.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════ PANE 2 — OVERVIEW ═══════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="section">
+    <div class="section-title">📋 What Is Sunshine?</div>
+    <div class="card">
+      <p>Sunshine is a self-hosted implementation of NVIDIA's GameStream protocol — the same protocol used by Moonlight clients. It captures the server's display, encodes it using the GPU (NVENC/AMF/VAAPI), and streams it to Moonlight over the network. Input (keyboard, mouse, controller) is forwarded back from client to server in real time.</p>
+      <p style="margin-top:8px">The result: any device running Moonlight can play any game that runs on the server, with near-zero-latency control at 1080p60 or higher — even over WiFi on the same network.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚡ Key Facts</div>
+    <div class="card">
+      <table>
+        <tr><th>Property</th><th>Value</th></tr>
+        <tr><td>Admin UI</td><td><code>https://localhost:47990</code> (LAN only)</td></tr>
+        <tr><td>Protocol</td><td>GameStream (Moonlight-compatible)</td></tr>
+        <tr><td>Sessions</td><td><strong>One at a time</strong> — only one person can stream concurrently</td></tr>
+        <tr><td>GPU usage</td><td>High during streaming — encoding shares GPU with game</td></tr>
+        <tr><td>Auth</td><td>PIN pairing (one-time per device) — no Authentik needed</td></tr>
+        <tr><td>Session manager</td><td>Port 9004 — called on session start/end to route per-user saves</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🖥️ Single-Seat Limitation</div>
+    <div class="card">
+      <p>Sunshine can only stream one session at a time. If Alice is streaming, Bob cannot start a new Sunshine session until Alice disconnects. This is a hardware/protocol limitation, not a configuration issue.</p>
+      <p style="margin-top:8px">Browser-based games (EmulatorJS, Flash Arcade) are <strong>completely independent</strong> of Sunshine — multiple people can use those simultaneously. Minecraft, ARK, and other server games are also unaffected.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔗 GPU Resource Sharing</div>
+    <div class="card">
+      <table>
+        <tr><th>Scenario</th><th>Works?</th><th>Notes</th></tr>
+        <tr><td>Sunshine + Plex direct play</td><td>✅</td><td>No conflict — Plex doesn't use GPU for direct play</td></tr>
+        <tr><td>Sunshine + Plex hardware transcode</td><td>⚠️</td><td>Both use GPU encoder — Plex may fall back to software</td></tr>
+        <tr><td>Sunshine + Ollama large model</td><td>❌</td><td>Serious performance impact — avoid during streams</td></tr>
+        <tr><td>Sunshine + Minecraft/ARK</td><td>✅</td><td>Those are CPU-bound — no conflict</td></tr>
+        <tr><td>Sunshine + second emulator</td><td>❌</td><td>Both need GPU — major performance hit</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════ PANE 3 — AVAILABLE APPS ═══════════════════ -->
+<div class="subtab-pane" id="pane-apps">
+
+  <div class="section">
+    <div class="section-title">🎮 All Apps Available Through Sunshine</div>
+    <div class="card">
+      <p>These are all the applications configured in Sunshine. Users see this list in Moonlight and can click any entry to start a stream. Each app is also documented in its own tab in this reference.</p>
+    </div>
+
+    <div class="sunshine-app-grid">
+
+      <div class="sunshine-app-card">
+        <div class="sa-icon">🟣</div>
+        <div class="sa-body">
+          <div class="sa-name">GameCube &amp; Wii <span class="tag tag-native">Dolphin</span></div>
+          <div class="sa-desc">Full GameCube and Wii emulation. Per-user memory card saves via Session Manager symlinks. XInput controller forwarded automatically from Moonlight.</div>
+          <div class="sa-links">
+            <span class="sa-link" onclick="goTab('gamecube')">→ GameCube / Wii tab</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sunshine-app-card">
+        <div class="sa-icon">🟢</div>
+        <div class="sa-body">
+          <div class="sa-name">Xbox 360 <span class="tag tag-native">Xenia Canary</span></div>
+          <div class="sa-desc">Xbox 360 emulator. Per-user saves via content_root symlink managed by Session Manager. High GPU/CPU demand — avoid streaming other GPU tasks simultaneously.</div>
+          <div class="sa-links">
+            <span class="sa-link" onclick="goTab('xbox360')">→ Xbox 360 tab</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sunshine-app-card">
+        <div class="sa-icon">🏠</div>
+        <div class="sa-body">
+          <div class="sa-name">The Sims 2 <span class="tag tag-native">Single-seat</span></div>
+          <div class="sa-desc">Sims 2 Ultimate Collection with per-user saves, optional personal mods, and shared neighborhood mode. Session picker runs in browser first, then Sunshine launches the game.</div>
+          <div class="sa-links">
+            <span class="sa-link" onclick="goTab('sims2')">→ Sims 2 tab</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sunshine-app-card">
+        <div class="sa-icon">🎮</div>
+        <div class="sa-body">
+          <div class="sa-name">Steam Library <span class="tag tag-native">Steam</span></div>
+          <div class="sa-desc">Full Steam client on the server, streamed via Sunshine. Add individual games as Sunshine apps for one-click launch, or add the Steam launcher to browse the full library.</div>
+          <div class="sa-links">
+            <span class="sa-link" onclick="goTab('steam')">→ Steam tab</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sunshine-app-card">
+        <div class="sa-icon">🏰</div>
+        <div class="sa-body">
+          <div class="sa-name">GOG Library <span class="tag tag-native">GOG · DRM-Free</span></div>
+          <div class="sa-desc">DRM-free retro PC games from GOG. Each game is a standalone Sunshine app. Includes play time tracking and last-played timestamps visible in the GOG Library tab.</div>
+          <div class="sa-links">
+            <span class="sa-link" onclick="goTab('goglibrary')">→ GOG Library tab</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sunshine-app-card">
+        <div class="sa-icon">⚔️</div>
+        <div class="sa-body">
+          <div class="sa-name">Fire Emblem (GCN) <span class="tag tag-native">via Dolphin</span></div>
+          <div class="sa-desc">Path of Radiance (GameCube) and Radiant Dawn (Wii) streamed via Dolphin. Added as separate Sunshine apps for direct game launch without navigating Dolphin's UI.</div>
+          <div class="sa-links">
+            <span class="sa-link" onclick="goTab('fireemblem')">→ Fire Emblem tab</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌊 User Flow: From Moonlight to Playing</div>
+    <div class="card">
+      <ol style="margin:0 0 0 18px;line-height:2;font-size:.85rem">
+        <li>Open <strong>Moonlight</strong> on your device</li>
+        <li>Select the server (paired once — stays paired permanently)</li>
+        <li>Browse the app list — all Sunshine apps appear as tiles with cover art</li>
+        <li>Click any app to start streaming instantly</li>
+        <li>For Sims 2 and emulators: a session picker page may appear first in the browser to select your user — then the game launches automatically</li>
+        <li>When done, close Moonlight or press the quit shortcut — the session ends and saves are committed to your user folder</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Client Platforms</div>
+    <div class="card">
+      <table>
+        <tr><th>Platform</th><th>Controller Support</th><th>Resolution</th></tr>
+        <tr><td>Windows / macOS / Linux (Moonlight desktop)</td><td>USB, Bluetooth, XInput</td><td>Up to 4K60</td></tr>
+        <tr><td>Android (Moonlight)</td><td>USB OTG, Bluetooth gamepad</td><td>Up to 4K60</td></tr>
+        <tr><td>iOS / iPadOS (Moonlight)</td><td>MFi controllers, PS/Xbox BT</td><td>Up to 1080p60</td></tr>
+        <tr><td>TV / Raspberry Pi (moonlight-qt)</td><td>USB, Bluetooth</td><td>Up to 4K60</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-apps -->
+
+
+<!-- ═══════════════════ PANE 4 — MAINTENANCE ═══════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updating Sunshine</div>
+    <div class="card">
+      <p>Sunshine updates are released on GitHub. Check periodically and update when new versions add features or fix bugs. The installer handles migration — your app list and settings are preserved.</p>
+      <pre># Check current version in Sunshine web UI → About tab
+# Download new installer from:
+# https://github.com/LizardByte/Sunshine/releases
+
+# Stop the service, run new installer, restart:
+net stop SunshineService
+# (run installer)
+net start SunshineService</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Check GitHub releases for new Sunshine version</td></tr>
+        <tr><td>When adding a new game</td><td>Add it as a Sunshine app with correct working directory and cover art</td></tr>
+        <tr><td>When pairing a new device</td><td>Ensure client name is set to the user's Authentik username</td></tr>
+        <tr><td>If streaming degrades</td><td>Check GPU usage — another GPU task may be competing with encoding</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🖼️ Adding Cover Art to Sunshine Apps</div>
+    <div class="card">
+      <p>In the Sunshine app editor, you can upload a cover image for each game. This is what Moonlight displays in the app grid. Square or portrait images work best. Source art from <a href="https://www.steamgriddb.com" target="_blank">steamgriddb.com</a> — they have custom art for GOG, emulator games, and non-Steam titles.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════ PANE 5 — TROUBLESHOOTING ═══════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Black screen when connecting via Moonlight</div>
+      <div class="trouble-a">Sunshine requires a logged-in Windows desktop session — not the lock screen or login prompt. Ensure the server is logged in and not sleeping. Disable sleep/hibernate in Windows power settings.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Controller input not working in the game</div>
+      <div class="trouble-a">Moonlight forwards input as a virtual XInput controller. Ensure the game or emulator is configured for XInput (not direct hardware input). In Dolphin: Controllers → Standard Controller → XInput/0/Gamepad. In most PC games, XInput works by default.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">High latency or stuttering stream</div>
+      <div class="trouble-a">Lower the Sunshine bitrate to 15–20 Mbps and try 720p. Check if another GPU task (Plex hardware transcode, Ollama) is running simultaneously. For best results, use 5GHz WiFi or wired Ethernet on both ends.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Can't connect — Moonlight can't find the server</div>
+      <div class="trouble-a">Ensure the server's LAN IP hasn't changed (set a static LAN IP on the server's network adapter or via router DHCP reservation). Confirm the firewall rules are in place. Try adding the IP manually in Moonlight → Add Host.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Audio not transmitted / audio on server but not client</div>
+      <div class="trouble-a">In Sunshine web UI → Configuration → Audio: select the correct output device. The device must be the one Windows is routing audio to. If using HDMI out or virtual audio, select that specifically.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Save data ended up in the wrong user's folder</div>
+      <div class="trouble-a">The Session Manager (port 9004) matches by Moonlight client name. Verify the Moonlight client is named exactly as the Authentik username (lowercase, no spaces). Re-pair if needed — when Moonlight asks for a name during pairing, enter the username exactly.</div>
+    </div>
+
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<style>
+.sunshine-app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+.sunshine-app-card {
+  display: flex;
+  gap: 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 14px 16px;
+  transition: border-color .15s;
+}
+.sunshine-app-card:hover { border-left-color: var(--accent2); }
+.sa-icon { font-size: 1.8rem; flex-shrink: 0; line-height: 1; padding-top: 2px; }
+.sa-name { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 5px; }
+.sa-desc { font-size: .78rem; color: var(--text); line-height: 1.55; }
+.sa-links { margin-top: 8px; }
+.sa-link {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  color: var(--accent);
+  cursor: pointer;
+  letter-spacing: .04em;
+}
+.sa-link:hover { color: var(--accent2); text-decoration: underline; }
+</style>
+
+<script>
+// ── Sub-tab switching ──────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ── Navigate parent frame to a tab ────────────────────────────
+function goTab(name) {
+  try { if (window.parent && window.parent.go) window.parent.go(name); }
+  catch(e) { console.log('Tab nav:', name); }
+}
+
+// ── Setup-complete persistence ─────────────────────────────────
+const COMPLETE_KEY = 'setup_complete_sunshine';
+function toggleComplete() {
+  const done = localStorage.getItem(COMPLETE_KEY) === 'true';
+  localStorage.setItem(COMPLETE_KEY, !done);
+  applyComplete();
+  if (!done) switchTab('overview', document.querySelectorAll('.subtab-btn')[1]);
+}
+function applyComplete() {
+  const done = localStorage.getItem(COMPLETE_KEY) === 'true';
+  const bar = document.getElementById('setup-complete-bar');
+  const chk = document.getElementById('setup-checkbox');
+  if (bar)  bar.style.background  = done ? 'rgba(76,175,125,.12)' : '';
+  if (chk)  chk.textContent       = done ? '✓' : '';
+  if (chk)  chk.style.background  = done ? 'var(--success)' : '';
+  if (chk)  chk.style.color       = done ? '#000' : '';
+  if (chk)  chk.style.borderColor = done ? 'var(--success)' : '';
+}
+applyComplete();
+</script>
+</body>
+</html>
