@@ -226,18 +226,28 @@ wget -O .env https://github.com/immich-app/immich/releases/latest/download/examp
         <div class="step-content">
           <strong>Edit the .env file</strong>
           <pre># Key values to set in .env:
-UPLOAD_LOCATION=/mnt/d/Photos/Immich    # maps to D:\Photos\Immich on Windows
+UPLOAD_LOCATION=/mnt/d/Users           # maps to D:\Users on Windows (unified storage root)
 DB_PASSWORD=your_strong_password_here
 IMMICH_VERSION=release</pre>
-          <p>The <code>UPLOAD_LOCATION</code> is where all uploaded photos land. Point it at your large media drive so photos don't fill up WSL2's virtual disk.</p>
+          <p>Setting <code>UPLOAD_LOCATION</code> to <code>D:\Users</code> (the server's unified per-user storage root) means Immich's upload subfolder structure lives alongside every other service's per-user data, making it quota-trackable and backup-simple. Immich will create its own subdirectories inside this root.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-content">
-          <strong>Create the D:\Photos\Immich folder on Windows first</strong>
-          <pre># In PowerShell:
-New-Item -ItemType Directory -Force "D:\Photos\Immich"</pre>
+          <strong>Create per-user upload folders in D:\Users\ 🔐</strong>
+          <p>Immich photos follow the server's unified storage standard: each user's uploads live in <code>D:\Users\[username]\immich\</code> so they count toward their Nextcloud quota alongside all other per-user app data.</p>
+          <pre># In PowerShell — create a folder for each user on your server:
+New-Item -ItemType Directory -Force "D:\Users\alice\immich"
+New-Item -ItemType Directory -Force "D:\Users\bob\immich"
+# etc. — add one for each Authentik user
+
+# Also create a 'common' folder for the shared Immich DB volume:
+New-Item -ItemType Directory -Force "D:\Users\common\immich"</pre>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">Unlike most services, Immich cannot write photos directly to per-user OS folders — all uploads go into a single <code>UPLOAD_LOCATION</code> root and Immich tracks ownership internally via its database. The per-user folders are created here so Nextcloud can mount and quota-track them. See the <strong>Data Storage tab</strong> for how per-user quota enforcement works.</div>
+          </div>
         </div>
       </div>
 
@@ -347,6 +357,64 @@ Auto-register:  ✅ (creates Immich account on first SSO login)</pre>
   <hr>
 
   <div class="section">
+    <div class="section-title">💾 Per-User Storage Quotas</div>
+    <div class="card">
+      <p>Immich has its own built-in per-user quota system. Set these to match (or be slightly under) the user's Nextcloud quota so Immich enforces its own limit before the filesystem fills up. This gives users a clear "you're out of space" message in the mobile app rather than silent upload failures.</p>
+
+      <div class="card-title">Set quotas in Immich Admin</div>
+      <p>In Immich: <strong>Administration → Users → [username] → Storage Quota</strong>. Set in GB. A quota of <code>0</code> means unlimited.</p>
+      <table style="margin-top:8px">
+        <tr><th>Authentik Group</th><th>Nextcloud Quota</th><th>Suggested Immich Quota</th><th>Notes</th></tr>
+        <tr><td>authentik-admins</td><td>Unlimited</td><td>0 (unlimited)</td><td>Full access</td></tr>
+        <tr><td>authentik-family</td><td>50 GB</td><td>40 GB</td><td>Leaves 10 GB headroom for other app data</td></tr>
+        <tr><td>authentik-friends</td><td>5 GB</td><td>4 GB</td><td>Leaves 1 GB headroom</td></tr>
+      </table>
+
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>Two-layer quota enforcement:</strong> Immich's own quota stops uploads before hitting the filesystem limit. Nextcloud's quota (set via <code>php occ user:setting [user] files quota</code>) counts everything in <code>D:\Users\[username]\</code> — including Immich uploads — as a hard ceiling. Both layers need to be set. See the <strong>Data Storage tab</strong> for the Nextcloud external storage mount that makes this work.</div>
+      </div>
+
+      <div class="card-title" style="margin-top:14px">Check per-user usage in Immich</div>
+      <pre># No CLI yet — check in web UI:
+# Administration → Users → shows each user's used / quota</pre>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">☁️ Nextcloud External Storage Mount (Quota Integration)</div>
+    <div class="card">
+      <p>For Immich uploads to count toward a user's unified Nextcloud quota, <code>D:\Users\[username]\immich\</code> must be mounted as External Storage in Nextcloud — the same way every other per-user service folder is handled.</p>
+
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Important constraint:</strong> Immich writes photos into its own opaque folder structure inside <code>UPLOAD_LOCATION</code> (organised by upload UUID, not by username). You cannot point <code>UPLOAD_LOCATION</code> at a single user's folder. Instead, mount the entire <code>D:\Users\</code> root as the Nextcloud App Data mount (which is already done for all services), and Immich's subfolder appears automatically inside it.</div>
+      </div>
+
+      <p>If you've already set up the <code>D:\Users\%user%</code> → Nextcloud "App Data" external storage mount (see the SSO tab → User Data Storage), the Immich subfolder at <code>D:\Users\[username]\immich\</code> is already quota-tracked — no extra steps needed.</p>
+
+      <p>If you haven't set up the external storage mount yet:</p>
+      <pre>cd C:\xampp\htdocs\nextcloud
+# Mount D:\Users\[username]\ as "App Data" for all users:
+php occ files_external:create \
+  --config=datadir="D:\Users\%user%" \
+  --apply-to-all-users \
+  "App Data" local null
+
+# Enable quota counting for external storage:
+php occ config:system:set quota_include_external_storage --value=true --type=boolean
+
+# Set per-user quotas (covers ALL app data including Immich):
+php occ user:setting alice files quota "50 GB"
+php occ user:setting bob   files quota "50 GB"</pre>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
     <div class="section-title">📚 Importing an Existing Photo Library</div>
     <div class="card">
       <div class="card-title">Option A — External Library (non-destructive, recommended first)</div>
@@ -361,7 +429,7 @@ Auto-register:  ✅ (creates Immich account on first SSO login)</pre>
 
       <div class="card-title" style="margin-top:14px">Option C — Bulk upload via CLI</div>
       <pre># From WSL2, use the Immich CLI to bulk-import a folder:
-npx @immich/cli upload --server http://localhost:<span data-cfg="port:immich"></span> --key YOUR_API_KEY /mnt/d/Photos/OldLibrary/</pre>
+npx @immich/cli upload --server http://localhost:<span data-cfg="port:immich"></span> --key YOUR_API_KEY /mnt/d/OldPhotos/</pre>
       <p>Generate an API key in Immich: <strong>Account Settings → API Keys → New API Key</strong>.</p>
     </div>
   </div>
@@ -397,8 +465,9 @@ npx @immich/cli upload --server http://localhost:<span data-cfg="port:immich"></
           <tr><td>Install type</td><td>Docker Compose in WSL2</td></tr>
           <tr><td>Compose file</td><td><code>~/immich/docker-compose.yml</code></td></tr>
           <tr><td>Auth method</td><td>Authentik OIDC (native)</td></tr>
-          <tr><td>Upload path (Windows)</td><td><code data-cfg="path:photos"></code>\Immich</td></tr>
-          <tr><td>Upload path (WSL2)</td><td><code>/mnt/d/Photos/Immich</code></td></tr>
+          <tr><td>Upload path (Windows)</td><td><code data-cfg="path:users"></code>\[username]\immich</td></tr>
+          <tr><td>Upload path (WSL2)</td><td><code>/mnt/d/Users</code> (UPLOAD_LOCATION root)</td></tr>
+          <tr><td>Quota enforcement</td><td>Immich built-in quota + Nextcloud external storage</td></tr>
         </table>
       </div>
     </div>
@@ -480,7 +549,7 @@ npx @immich/cli upload --server http://localhost:<span data-cfg="port:immich"></
         <tr><td>50,000 photos</td><td>~150–400 GB</td><td>Typical family/friend group library</td></tr>
         <tr><td>+ 4K video</td><td>Add 1–5 GB per video</td><td>Video is the dominant space consumer</td></tr>
       </table>
-      <p style="margin-top:8px">Store photos on your large media drive (<code data-cfg="path:photos"></code>\Immich</code>). The Immich database, thumbnails, and ML models live in WSL2 home (~5 GB total) and don't need to be on the large drive.</p>
+      <p style="margin-top:8px">Photo originals land in <code data-cfg="path:users"></code>\[username]\immich\</code> — on your large storage drive alongside all other per-user data. The Immich database, thumbnails, and ML models live in WSL2 Docker volumes (~5 GB total) and are separate from the photo files.</p>
     </div>
   </div>
 
@@ -694,33 +763,63 @@ Headers:
   <div class="section">
     <div class="section-title">📂 Where Everything Lives</div>
     <div class="card">
-      <pre>D:\Photos\Immich\                  ← uploaded photos and videos (UPLOAD_LOCATION)
-  upload\                           ← originals from mobile backup
-  library\                          ← auto-organised by date
-  thumbs\                           ← generated thumbnails
-  encoded-video\                    ← transcoded video cache
+      <pre><span data-cfg="path:users"></span>\                       ← unified per-user storage root (UPLOAD_LOCATION in WSL2: /mnt/d/Users)
+  [username]\
+    immich\                         ← Immich's upload subfolder for this user
+      upload\                       ← original photos and videos from mobile backup
+      library\                      ← auto-organised by EXIF date
+      thumbs\                       ← generated thumbnails (regeneratable)
+      encoded-video\                ← transcoded video cache (regeneratable)
+  common\
+    immich\                         ← any shared/admin Immich data (optional)
 
-~/immich/                           ← Docker Compose files (WSL2 home)
+~/immich/                           ← Docker Compose files (WSL2 home directory)
   docker-compose.yml
-  .env
+  .env                              ← UPLOAD_LOCATION=/mnt/d/Users
 
-(Docker volume — immich_model-cache) ← ML models (CLIP, face recognition)
-(Docker volume — immich_pgdata)      ← Postgres database
+(Docker volume — immich_model-cache) ← ML models: CLIP, facial recognition (~1–2 GB)
+(Docker volume — immich_pgdata)      ← Postgres: all metadata, user accounts, albums
 
-# To find Docker volume paths in WSL2:
+# Find Docker volume paths in WSL2:
 docker volume inspect immich_pgdata</pre>
+
+      <div class="callout callout-tip" style="margin-top:10px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>Why UPLOAD_LOCATION = D:\Users?</strong> Pointing Immich's root at the unified <code>D:\Users\</code> directory (rather than a separate <code>D:\Photos\Immich\</code> folder) means Immich's files live alongside every other per-user app's data. This lets the Nextcloud "App Data" external storage mount quota-track Immich storage automatically — no special handling needed.</div>
+      </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">👤 Per-User Data</div>
+    <div class="section-title">👤 Per-User Data &amp; Quota Architecture</div>
     <div class="card">
       <div class="card-title">What Immich stores per user</div>
-      <p>All per-user data (photo library, albums, favourites, face assignments, shared links, API keys) is stored inside Immich's <strong>Postgres database</strong> (Docker volume <code>immich_pgdata</code>). The actual photo files in <code>D:\Photos\Immich</code> are physically separated but logically tied to the owning user in the database.</p>
-      <div class="callout callout-tip">
+      <p>Per-user <strong>metadata</strong> (albums, favourites, face assignments, shared links, API keys, quota settings) lives inside Immich's <strong>Postgres database</strong> (Docker volume <code>immich_pgdata</code>). Per-user <strong>photo files</strong> are written to subdirectories inside <code>UPLOAD_LOCATION</code> and are logically tied to the owning user in the database.</p>
+
+      <div class="card-title" style="margin-top:14px">How the two-layer quota system works</div>
+      <table>
+        <tr><th>Layer</th><th>What enforces it</th><th>Where set</th><th>Effect</th></tr>
+        <tr><td>Layer 1 — Immich quota</td><td>Immich built-in storage quota per user</td><td>Administration → Users → Storage Quota</td><td>Blocks new uploads in the mobile app with a clear message when reached</td></tr>
+        <tr><td>Layer 2 — Nextcloud quota</td><td>Nextcloud filesystem quota on <code>D:\Users\[username]\</code></td><td><code>php occ user:setting [user] files quota</code></td><td>Hard ceiling on all data in D:\Users for this user across all services</td></tr>
+      </table>
+
+      <div class="callout callout-tip" style="margin-top:12px">
         <div class="callout-icon">💡</div>
-        <div class="callout-body"><strong>All per-user metadata is in the Postgres database.</strong> No per-user folder in <code data-cfg="path:users"></code> is needed for Immich. Back up the database volume and the <code data-cfg="path:photos"></code>\Immich</code> folder to fully preserve all user data.</div>
+        <div class="callout-body">Set the Immich quota slightly <em>under</em> the Nextcloud quota so users get a friendly in-app warning before hitting the filesystem hard limit. Example: Nextcloud = 50 GB, Immich = 40 GB. This leaves 10 GB headroom for other app data (saves, calibre, audiobooks progress, etc.).</div>
       </div>
+
+      <div class="card-title" style="margin-top:14px">Nextcloud App Data mount makes it all work</div>
+      <p>The <code>D:\Users\%user%</code> → Nextcloud "App Data" external storage mount (set up in the SSO tab) means <code>D:\Users\[username]\immich\</code> automatically appears in the user's Nextcloud file browser and counts against their quota. No additional Nextcloud config is needed for Immich specifically — it inherits from the unified mount.</p>
+      <pre># Verify the external storage mount is active:
+cd C:\xampp\htdocs\nextcloud
+php occ files_external:list
+
+# Check per-user quota and current usage across ALL services:
+php occ user:report
+
+# Set or update a user's unified quota:
+php occ user:setting alice files quota "50 GB"   # family
+php occ user:setting bob   files quota "5 GB"    # friends</pre>
     </div>
   </div>
 
@@ -730,13 +829,13 @@ docker volume inspect immich_pgdata</pre>
       <table>
         <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
         <tr><td>Postgres database</td><td>Docker volume <code>immich_pgdata</code></td><td>Daily</td><td>🔴 High</td></tr>
-        <tr><td>Photo library (originals)</td><td><code data-cfg="path:photos"></code>\Immich\upload</td><td>As uploaded</td><td>🔴 High</td></tr>
+        <tr><td>Photo originals (all users)</td><td><code data-cfg="path:users"></code>\[username]\immich\upload\</td><td>As uploaded / daily</td><td>🔴 High</td></tr>
         <tr><td>Compose + .env config</td><td><code>~/immich/</code> (WSL2)</td><td>After any config change</td><td>🟡 Medium</td></tr>
-        <tr><td>Thumbnails + transcodes</td><td><code data-cfg="path:photos"></code>\Immich\thumbs, encoded-video</td><td>Skip — regeneratable</td><td>🟢 Low</td></tr>
+        <tr><td>Thumbnails + transcodes</td><td><code data-cfg="path:users"></code>\[username]\immich\thumbs\, encoded-video\</td><td>Skip — regeneratable</td><td>🟢 Low</td></tr>
       </table>
       <div class="callout callout-tip" style="margin-top:12px">
         <div class="callout-icon">💡</div>
-        <div class="callout-body">To back up the Postgres database, use <code>docker exec immich_postgres pg_dumpall -U postgres > immich_backup.sql</code> from WSL2. Schedule this via Task Scheduler daily, outputting to <code>D:\Backups\immich\</code>.</div>
+        <div class="callout-body">Back up the Postgres database daily with: <code>docker exec immich_postgres pg_dumpall -U postgres &gt; /mnt/d/Backups/immich/immich_$(date +%Y%m%d).sql</code>. Schedule via Task Scheduler. The photo originals in <code>D:\Users\</code> are covered by your standard <code>D:\Users\</code> backup — one backup job covers all services.</div>
       </div>
     </div>
   </div>
