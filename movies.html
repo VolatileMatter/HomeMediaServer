@@ -2,10 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Movies &amp; TV — Jellyfin</title>
+  <title>Movies &amp; TV Streaming</title>
+  <!--
+    shared.css — server-wide design system. Contains all base styles:
+    CSS variables, .page-header, .section, .card, .grid-2, .callout,
+    .step, pre, tables, .ach-card, .ach-grid, .tag badges, and .trouble-item.
+    Never override these here. Page-specific styles go in the <style> block below.
+  -->
   <link rel="stylesheet" href="shared.css">
+  <!--
+    config.js — single source of truth for ports, URLs, and paths.
+    Resolves all data-cfg attributes in the DOM automatically on load.
+    Never hardcode port numbers, domains, or paths in HTML.
+  -->
+  <script src="config.js"></script>
   <style>
-    /* ── Sub-tab navigation ── */
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION — copy verbatim to every service page.
+       Do not modify — must stay in sync with shared design system.
+    ═══════════════════════════════════════════════ */
     .subtab-nav {
       display: flex;
       gap: 0;
@@ -30,11 +45,10 @@
     }
     .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
     .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-
     .subtab-pane { display: none; }
     .subtab-pane.active { display: block; }
 
-    /* ── Setup-complete checkbox ── */
+    /* ── Setup-complete checkbox bar ── */
     .setup-complete-bar {
       display: flex;
       align-items: center;
@@ -55,65 +69,38 @@
       border: 2px solid rgba(76,175,125,.6);
       border-radius: 3px;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: all .2s;
-      font-size: .85rem;
+      font-size: .85rem; color: #4caf7d; flex-shrink: 0;
     }
-    .setup-complete-bar.done .setup-checkbox {
-      background: #4caf7d;
-      border-color: #4caf7d;
-    }
-    .setup-complete-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .72rem;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: #4caf7d;
-    }
-    .setup-complete-sub {
-      font-size: .75rem;
-      color: var(--text-dim);
-      margin-left: auto;
-    }
+    .setup-complete-label { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .setup-complete-sub { font-size: .74rem; color: var(--text-dim); margin-left: auto; }
 
     /* ── Achievement cards ── */
-    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
     .ach-card {
       background: var(--bg2);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 16px;
-      position: relative;
-      transition: border-color .15s;
+      padding: 12px 14px;
     }
-    .ach-card:hover { border-color: rgba(200,168,75,.3); }
-    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
-    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
-    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
-    .ach-footer { display: flex; gap: 6px; align-items: center; }
-    .ach-pts {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .6rem;
-      padding: 2px 7px;
-      border-radius: 2px;
-      background: rgba(200,168,75,.1);
-      color: var(--accent);
-      border: 1px solid rgba(200,168,75,.2);
+    .ach-icon  { font-size: 1.3rem; margin-bottom: 5px; }
+    .ach-name  { font-weight: 700; font-size: .82rem; margin-bottom: 3px; }
+    .ach-desc  { font-size: .74rem; color: var(--text-dim); line-height: 1.5; }
+    .ach-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
     }
-    .ach-method {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .6rem;
-      padding: 2px 7px;
-      border-radius: 2px;
-      background: rgba(78,205,196,.08);
-      color: var(--accent3);
-      border: 1px solid rgba(78,205,196,.18);
-    }
+    .ach-pts    { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--accent); }
+    .ach-method { font-size: .65rem; color: var(--text-dim); background: var(--bg3); padding: 1px 5px; border-radius: 2px; }
 
-    /* ── Storage bar ── */
+    /* ── Storage breakdown grid ── */
     .storage-breakdown {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 10px;
       margin: 14px 0;
     }
@@ -137,7 +124,7 @@
       color: var(--text-bright);
     }
 
-    /* ── Trouble items ── */
+    /* ── Troubleshooting items ── */
     .trouble-item {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -146,31 +133,239 @@
       padding: 14px 16px;
       margin-bottom: 12px;
     }
-    .trouble-q {
-      font-weight: 700;
-      font-size: .88rem;
-      color: var(--text-bright);
-      margin-bottom: 8px;
-    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
     .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
 
-    @media (max-width: 680px) {
-      .storage-breakdown { grid-template-columns: 1fr 1fr; }
+    /* ═══════════════════════════════════════════════════════════
+       UI PREVIEW PANE STYLES
+       Static mock of a logged-in user's Jellyfin experience.
+       No real server calls — all dummy data.
+    ═══════════════════════════════════════════════════════════ */
+    .preview-chrome {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .preview-bar {
+      background: #161b22;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .65rem;
+      color: var(--text-dim);
+    }
+    .preview-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .preview-url {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+      flex: 1;
+      max-width: 380px;
+    }
+    .preview-user-badge {
+      margin-left: auto;
+      background: rgba(200,168,75,.12);
+      border: 1px solid rgba(200,168,75,.25);
+      border-radius: 3px;
+      padding: 2px 8px;
+      color: var(--accent);
+      font-size: .6rem;
+    }
+    .preview-body { padding: 0; min-height: 300px; background: #101010; }
+    .preview-note {
+      background: rgba(200,168,75,.08);
+      border: 1px solid rgba(200,168,75,.22);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    /* ── Jellyfin-themed mock UI ── */
+    .jf-topbar {
+      background: #1c1c1c;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .jf-logo {
+      font-family: 'Cinzel', serif;
+      font-size: .9rem;
+      color: #aa5cc3;
+      font-weight: 700;
+      letter-spacing: .05em;
+    }
+    .jf-nav {
+      display: flex;
+      gap: 4px;
+      margin-left: 12px;
+    }
+    .jf-nav-item {
+      font-size: .72rem;
+      color: #aaa;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: default;
+    }
+    .jf-nav-item.active {
+      background: rgba(170,92,195,.15);
+      color: #cc88ee;
+    }
+    .jf-search {
+      margin-left: auto;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-size: .7rem;
+      color: #666;
+      width: 160px;
+    }
+    .jf-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #aa5cc3, #7b3fa0);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; color: white; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .jf-content { padding: 20px; }
+    .jf-section-label {
+      font-size: .7rem;
+      color: #aaa;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .jf-section-label a {
+      margin-left: auto;
+      font-size: .65rem;
+      color: #aa5cc3;
+      text-decoration: none;
+    }
+    .jf-row {
+      display: flex;
+      gap: 10px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .jf-card {
+      flex-shrink: 0;
+      width: 120px;
+      cursor: default;
+    }
+    .jf-poster {
+      width: 120px;
+      height: 180px;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      background: #1a1a2e;
+      display: flex;
+      align-items: flex-end;
+    }
+    .jf-poster-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      opacity: .4;
+    }
+    .jf-poster-overlay {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 8px 6px 6px;
+      background: linear-gradient(transparent, rgba(0,0,0,.85));
+      font-size: .6rem;
+      color: #eee;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .jf-progress {
+      height: 3px;
+      background: #333;
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .jf-progress-fill {
+      height: 100%;
+      background: #aa5cc3;
+      border-radius: 2px;
+    }
+    .jf-card-title {
+      font-size: .66rem;
+      color: #ccc;
+      margin-top: 6px;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .jf-card-sub {
+      font-size: .58rem;
+      color: #666;
+      margin-top: 1px;
+    }
+    .jf-badge {
+      position: absolute;
+      top: 5px; right: 5px;
+      background: rgba(170,92,195,.85);
+      color: white;
+      font-size: .55rem;
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-weight: 700;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
 
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+     icon + service name + subtitle line + short description.
+     Use data-cfg for port/URL so values resolve from config.js.
+═══════════════════════════════════════════════════════════ -->
 <div class="page-header">
   <div class="page-icon">🎬</div>
   <div>
     <h1>Movies &amp; TV Streaming</h1>
-    <div class="subtitle">// Jellyfin · Port 8096 · Native Windows · Authentik OIDC · Free Hardware Transcoding //</div>
-    <p class="desc">Self-hosted media streaming via Jellyfin. Stream your entire movie and TV library to any device — no Plex account, no subscriptions, no telemetry. Full SSO integration with Authentik.</p>
+    <div class="subtitle">
+      // Jellyfin · Port <span data-cfg="port:jellyfin"></span> · Native Windows · Authentik OIDC (SSO-Auth plugin) · Free Hardware Transcoding //
+    </div>
+    <p class="desc">
+      Self-hosted media streaming via Jellyfin. Stream your entire movie and TV library to any device — no Plex account, no subscriptions, no telemetry. Full SSO integration with Authentik.
+    </p>
   </div>
 </div>
 
-<!-- ── Sub-tab nav ── -->
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+     Tab order is fixed: Setup → Overview → Maintenance →
+     Achievements → Storage → Troubleshooting → UI Preview
+     JS at the bottom handles switching and setup-complete persistence.
+═══════════════════════════════════════════════════════════ -->
 <div class="subtab-nav" id="subtab-nav">
   <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
   <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
@@ -178,114 +373,121 @@
   <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
   <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
   <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════════
      PANE 1 — FIRST TIME SETUP
-═══════════════════════════════════════════════════ -->
+     Admin-only. Documents the full install + SSO setup from scratch.
+     Once setup is marked complete, Overview becomes the default tab.
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane active" id="pane-setup">
 
+  <!-- REQUIRED: setup-complete checkbox — always first in this pane -->
   <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
-      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Jellyfin is fully installed, libraries added, SSO connected, and hardware transcoding enabled.</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Check when Jellyfin is installed, all libraries are indexed, SSO is connected, and hardware transcoding is enabled.
+      </div>
     </div>
     <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <!-- TRANSITIONING FROM PLEX -->
+  <!--
+    V1 Goal banner: what "done" looks like for this service.
+    Update after setup is confirmed working.
+  -->
+  <div class="v1-banner">
+    🎬 V1 Goal: Jellyfin running at <code data-cfg="url:jellyfin"></code>, Movies + TV libraries indexed, hardware transcoding enabled (NVENC/QSV), SSO login working for all users.
+  </div>
+
+  <!-- ── Migration from Plex ── -->
   <div class="section">
     <div class="section-title">📦 Transitioning Away from Plex</div>
     <div class="card">
       <div class="card-title">Why switch to Jellyfin?</div>
-      <p>Jellyfin is 100% free and open-source, requires no plex.tv cloud account for remote access, includes hardware transcoding at no cost, has zero telemetry by default, and integrates natively with Authentik SSO — something Plex cannot do. The migration is non-destructive and reversible.</p>
-      <table>
+      <p>Jellyfin is 100% free and open-source, requires no plex.tv cloud account, includes hardware transcoding at no cost, has zero telemetry by default, and integrates natively with Authentik SSO — something Plex cannot do. The migration is non-destructive and reversible.</p>
+      <table style="margin-top:12px">
         <tr><th>Feature</th><th>Plex</th><th>Jellyfin</th></tr>
         <tr><td>Cost</td><td>Free basic; Plex Pass $40/yr for hw transcode</td><td><strong>100% free, forever</strong></td></tr>
         <tr><td>Cloud dependency</td><td>Requires plex.tv account</td><td><strong>No cloud — purely self-hosted</strong></td></tr>
         <tr><td>Hardware transcoding</td><td>Plex Pass required</td><td><strong>Free, built-in</strong></td></tr>
-        <tr><td>SSO / Authentik</td><td>❌ Not supported</td><td><strong>✅ Full OIDC support</strong></td></tr>
-        <tr><td>Privacy / telemetry</td><td>Plex collects viewing data</td><td><strong>Zero telemetry by default</strong></td></tr>
-        <tr><td>Skip intro / chapters</td><td>Plex Pass required</td><td><strong>Free</strong></td></tr>
-        <tr><td>Offline sync</td><td>Plex Pass required</td><td><strong>Free</strong></td></tr>
+        <tr><td>SSO / Authentik</td><td>❌ Not supported</td><td><strong>✅ Full OIDC support via plugin</strong></td></tr>
+        <tr><td>Telemetry</td><td>Plex collects viewing data</td><td><strong>Zero telemetry by default</strong></td></tr>
+        <tr><td>Skip intro / offline sync</td><td>Plex Pass required</td><td><strong>Free</strong></td></tr>
       </table>
     </div>
-
-    <div class="card">
+    <div class="card" style="margin-top:10px">
       <div class="card-title">What migrates and what doesn't</div>
       <table>
         <tr><th>Data</th><th>Migrates?</th><th>How</th></tr>
-        <tr><td>Media files (movies, TV)</td><td>✅ Automatic</td><td>Point Jellyfin at the same folders Plex uses — no copying needed</td></tr>
+        <tr><td>Media files (movies, TV)</td><td>✅ Automatic</td><td>Point Jellyfin at the same folders — no copying needed</td></tr>
         <tr><td>Watch history / progress</td><td>⚠️ Via tool</td><td>Use <strong>plex2jellyfin</strong> (see below)</td></tr>
-        <tr><td>Ratings / favorites</td><td>⚠️ Partial</td><td>plex2jellyfin handles some</td></tr>
+        <tr><td>User accounts</td><td>❌</td><td>Recreate, or users get auto-provisioned via SSO on first login</td></tr>
         <tr><td>Custom artwork / posters</td><td>❌</td><td>Re-download via Jellyfin metadata refresh</td></tr>
         <tr><td>Playlists</td><td>⚠️ Manual</td><td>Recreate in Jellyfin</td></tr>
-        <tr><td>User accounts</td><td>❌</td><td>Recreate in Jellyfin (or use SSO — users get auto-provisioned on first login)</td></tr>
       </table>
     </div>
-
-    <div class="card">
+    <div class="card" style="margin-top:10px">
       <div class="card-title">plex2jellyfin — migrate watch history</div>
       <pre># Install:
 pip install plex2jellyfin
 
-# Run migration (exports Plex watch history → imports to Jellyfin):
+# Run migration (exports Plex history → imports to Jellyfin):
 plex2jellyfin --plex-url http://localhost:32400 \
               --plex-token YOUR_PLEX_TOKEN \
-              --jellyfin-url http://localhost:8096 \
+              --jellyfin-url http://localhost:<span data-cfg="port:jellyfin"></span> \
               --jellyfin-api-key YOUR_JELLYFIN_KEY \
-              --migrate watched</pre>
-      <p>To find your Plex token: open Plex Web → F12 → Network tab → any API request → look for <code>X-Plex-Token</code> header.</p>
+              --migrate watched
+
+# To find your Plex token: Plex Web → F12 → Network → any API request → X-Plex-Token header</pre>
       <div class="callout callout-tip">
         <div class="callout-icon">💡</div>
-        <div class="callout-body"><strong>Run both simultaneously during transition.</strong> Plex (port 32400) and Jellyfin (port 8096) can run at the same time pointing at the same media folders — neither modifies the files. Run Jellyfin in parallel for a few weeks, then shut Plex down when you're confident.</div>
+        <div class="callout-body"><strong>Run both simultaneously during transition.</strong> Plex (port 32400) and Jellyfin (port <span data-cfg="port:jellyfin"></span>) can run at the same time pointing at the same media folders — neither modifies the files. Run Jellyfin in parallel for a few weeks, then shut Plex down when confident.</div>
       </div>
     </div>
   </div>
 
   <hr>
 
-  <!-- STEP 1: INSTALL -->
+  <!-- ── Step 1: Install ── -->
   <div class="section">
     <div class="section-title">⚙️ Step 1 — Install Jellyfin (Windows Native)</div>
     <div class="steps">
       <div class="step">
         <div class="step-content">
           <strong>Download and install Jellyfin</strong>
-          <p>Go to <a href="https://jellyfin.org/downloads/server" target="_blank">jellyfin.org/downloads/server</a> → choose <strong>Windows</strong>. Run the installer as administrator. It registers itself as a Windows Service automatically — no Docker, no XAMPP, no dependencies required.</p>
-          <pre>Default install path: C:\Program Files\Jellyfin\Server\
-Data path:            C:\ProgramData\Jellyfin\Server\</pre>
+          <p>Go to <a href="https://jellyfin.org/downloads/server" target="_blank">jellyfin.org/downloads/server</a> → choose <strong>Windows</strong>. Run the installer as administrator. It registers itself as a Windows Service automatically — no Docker, no XAMPP, no extra dependencies.</p>
+          <pre>Default install path:  C:\Program Files\Jellyfin\Server\
+Data path:             C:\ProgramData\Jellyfin\Server\</pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
-          <strong>Confirm the service is running</strong>
+          <strong>Confirm the service is running and set to auto-start</strong>
           <pre># In PowerShell (admin):
-Get-Service -Name JellyfinServer
-# Should show: Running
-
-# Set to start automatically on boot:
+Get-Service -Name JellyfinServer        # should show: Running
 Set-Service -Name JellyfinServer -StartupType Automatic</pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
           <strong>Open firewall port</strong>
-          <pre>netsh advfirewall firewall add rule name="Jellyfin" ^
-  dir=in action=allow protocol=TCP localport=8096</pre>
+          <pre>netsh advfirewall firewall add rule name="Jellyfin" dir=in action=allow protocol=TCP localport=<span data-cfg="port:jellyfin"></span></pre>
         </div>
       </div>
       <div class="step">
         <div class="step-content">
-          <strong>Complete first-time setup wizard at http://localhost:8096</strong>
-          <p>Create an admin account → choose language → add media libraries:</p>
+          <strong>Complete first-time setup wizard at http://localhost:<span data-cfg="port:jellyfin"></span></strong>
+          <p>Create an admin account (strong password, store in Vaultwarden — don't use SSO for the admin account) → choose language → add media libraries:</p>
           <ul style="margin:6px 0 0 18px;font-size:.85rem">
-            <li><strong>Movies library:</strong> <code>D:\Media\Movies</code></li>
-            <li><strong>TV Shows library:</strong> <code>D:\Media\TV</code></li>
+            <li><strong>Movies library:</strong> <code data-cfg="path:movies"></code></li>
+            <li><strong>TV Shows library:</strong> <code data-cfg="path:tv"></code></li>
           </ul>
-          <p>These are the same folders Plex uses — no copying required. Jellyfin scans and builds its own metadata database independently.</p>
+          <p>These are the same folders Plex uses — no copying needed. Jellyfin scans and builds its own metadata database independently.</p>
         </div>
       </div>
     </div>
@@ -293,29 +495,33 @@ Set-Service -Name JellyfinServer -StartupType Automatic</pre>
 
   <hr>
 
-  <!-- STEP 2: HARDWARE TRANSCODING -->
+  <!-- ── Step 2: Hardware Transcoding ── -->
   <div class="section">
     <div class="section-title">🎮 Step 2 — Enable Hardware Transcoding (Free)</div>
     <div class="card">
-      <p>Unlike Plex, hardware transcoding is completely free in Jellyfin. This dramatically reduces CPU load when multiple users stream different resolutions.</p>
+      <p>Unlike Plex, hardware transcoding is completely free in Jellyfin. Enable it to prevent CPU bottlenecks when multiple users are streaming simultaneously.</p>
       <div class="steps">
         <div class="step">
           <div class="step-content">
-            <strong>Dashboard → Playback → Transcoding</strong>
-            <p>Select the hardware acceleration type that matches your GPU:</p>
-            <table>
-              <tr><th>GPU</th><th>Select this option</th></tr>
-              <tr><td>NVIDIA GTX/RTX</td><td>NVENC</td></tr>
-              <tr><td>Intel (integrated/Arc)</td><td>Intel QuickSync (QSV)</td></tr>
-              <tr><td>AMD Radeon</td><td>AMF</td></tr>
-              <tr><td>No GPU</td><td>Software (CPU only — acceptable for 1–2 users)</td></tr>
-            </table>
+            <strong>Go to Dashboard → Playback → Transcoding</strong>
+            <p>Select your hardware acceleration type:</p>
+            <ul style="margin:6px 0 0 18px;font-size:.85rem">
+              <li><strong>NVIDIA GPU:</strong> select <em>NVENC</em> — best performance</li>
+              <li><strong>Intel CPU/iGPU:</strong> select <em>Intel QuickSync (QSV)</em></li>
+              <li><strong>AMD GPU:</strong> select <em>AMF</em></li>
+            </ul>
           </div>
         </div>
         <div class="step">
           <div class="step-content">
-            <strong>Verify it's working</strong>
-            <p>Start playing a video that requires transcoding (mismatched format or resolution) → Dashboard → Active Streams → verify the stream shows the GPU encoder name (e.g. <code>h264_nvenc</code>) instead of <code>libx264</code>.</p>
+            <strong>Enable the recommended codecs</strong>
+            <p>Check: H.264 (8-bit), H.264 (10-bit), H.265/HEVC (8-bit), H.265 (10-bit), AV1 (if supported), VP9. Leave audio codecs at defaults.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify hardware transcoding is working</strong>
+            <p>Start a stream that requires transcoding → Dashboard → Active Streams. The codec should show <code>h264_nvenc</code> (or equivalent), <strong>not</strong> <code>libx264</code>. If it shows <code>libx264</code>, hardware transcoding isn't engaged.</p>
           </div>
         </div>
       </div>
@@ -324,121 +530,133 @@ Set-Service -Name JellyfinServer -StartupType Automatic</pre>
 
   <hr>
 
-  <!-- STEP 3: SSO / AUTHENTIK -->
+  <!-- ── Step 3: SSO ── -->
+  <!--
+    Jellyfin doesn't have native OIDC — it uses the third-party SSO-Auth plugin.
+    This is the only service that uses oidc-plugin instead of oidc-native.
+    The plugin adds a "Sign in with Authentik" button to the Jellyfin login page.
+  -->
   <div class="section">
-    <div class="section-title">🔐 Step 3 — SSO Integration (Authentik OIDC)</div>
-    <div class="v1-banner">🔑 This is how Jellyfin connects to your Authentik instance so users log in with their Google account — the same login they use for every other service.</div>
-
+    <div class="section-title">🔐 Step 3 — SSO via Authentik (SSO-Auth Plugin)</div>
     <div class="card">
-      <div class="card-title">Part A — Install the SSO-Auth plugin in Jellyfin</div>
+      <div class="card-title">Install the SSO-Auth plugin in Jellyfin</div>
       <div class="steps">
         <div class="step">
           <div class="step-content">
-            <strong>Dashboard → Plugins → Catalog → search "SSO"</strong>
-            <p>Install the <strong>SSO-Auth</strong> plugin (by 9p4). After installation, restart the Jellyfin service:</p>
+            <strong>Add the plugin repository</strong>
+            <p>Dashboard → Plugins → Repositories → Add:</p>
+            <pre>Name: SSO-Auth
+URL:  https://raw.githubusercontent.com/9p4/jellyfin-plugin-sso/manifest-release/manifest.json</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Install and restart</strong>
+            <p>Dashboard → Plugins → Catalogue → find SSO Authentication → Install → restart Jellyfin:</p>
             <pre>Restart-Service JellyfinServer</pre>
           </div>
         </div>
         <div class="step">
           <div class="step-content">
-            <strong>Dashboard → Plugins → SSO-Auth → Configure</strong>
-            <p>Add an OIDC provider with these settings:</p>
-            <pre>Provider Name:       Authentik
-OID Endpoint:        https://auth.yourdomain.com/application/o/jellyfin/
-Client ID:           (from Authentik — see Part B)
-Client Secret:       (from Authentik — see Part B)
-Enabled:             ✅
-Enable Authorization: ✅
-Roles:               jellyfin-users   ← Authentik group name
-Admin Roles:         jellyfin-admins  ← Authentik group name (optional)
-Default Provider:    ✅ (skip local login, go straight to Authentik)</pre>
+            <strong>🔐 Create provider in Authentik admin</strong>
+            <p>Go to <code data-cfg="authentik-admin"></code> → Applications → Providers → Create → OAuth2/OIDC:</p>
+            <pre>Name:          Jellyfin
+Client type:   Confidential
+Redirect URIs: <span data-cfg="url:jellyfin"></span>/sso/OID/redirect/Authentik
+               (must match the provider name exactly — case-sensitive)
+Signing Key:   authentik Self-signed Certificate
+Scopes:        openid email profile groups</pre>
+            <p>Then create the Application: Name = Jellyfin, Slug = jellyfin, Provider = (just created), Policy = server-users group.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Configure the SSO-Auth plugin in Jellyfin</strong>
+            <p>Dashboard → Plugins → SSO Authentication → Configure:</p>
+            <pre>Provider name:    Authentik   (must match the Redirect URI path — case-sensitive)
+OID Endpoint:     <span data-cfg="oidc-issuer:jellyfin"></span>
+Client ID:        (from Authentik provider)
+Client Secret:    (from Authentik provider)
+Roles:            server-users
+Default provider: ✅ (shows the SSO button on login page)
+Set administrator on login: ❌ (don't auto-promote SSO users)</pre>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-title">Part B — Create the Jellyfin application in Authentik</div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-content">
-            <strong>Authentik Admin → Applications → Providers → Create → OAuth2/OpenID Provider</strong>
-            <pre>Name:                Jellyfin
-Authorization flow:  (your default authorization flow)
-Client type:         Confidential
-Client ID:           (auto-generated — copy this into Jellyfin)
-Client Secret:       (auto-generated — copy this into Jellyfin)
-Redirect URIs:       https://jellyfin.yourdomain.com/sso/OID/redirect/Authentik
-Signing Key:         (your Authentik signing key)</pre>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Create the Application</strong>
-            <pre>Authentik Admin → Applications → Applications → Create
-Name:           Jellyfin
-Slug:           jellyfin
-Provider:       (the provider you just created)
-Launch URL:     https://jellyfin.yourdomain.com</pre>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Assign users / groups</strong>
-            <p>In the Application's Policy/Binding tab, add a group binding for the Authentik group that should have Jellyfin access (e.g. <code>family</code> or <code>jellyfin-users</code>). Users not in this group will be denied access even if they have an Authentik account.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Part C — Caddy reverse proxy config</div>
-      <p>Jellyfin does NOT use Caddy <code>forward_auth</code> — SSO is handled natively by the SSO-Auth plugin. Caddy only needs to proxy the traffic:</p>
-      <pre># In your Caddyfile:
-jellyfin.yourdomain.com {
-    reverse_proxy localhost:8096
-}</pre>
-      <div class="callout callout-tip">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body"><strong>No forward_auth needed.</strong> Jellyfin's SSO-Auth plugin handles authentication via OIDC directly. Users who hit <code>jellyfin.yourdomain.com</code> will see a "Sign in with Authentik" button and are redirected through your Authentik login flow automatically.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Part D — Test the login flow</div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-content">
-            <strong>Open an incognito window → go to jellyfin.yourdomain.com</strong>
-            <p>You should see the Jellyfin login page with a <strong>"Sign in with Authentik"</strong> button. Click it → you're redirected to Authentik → authenticate with Google → redirected back to Jellyfin as a logged-in user.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-content">
-            <strong>Verify user was auto-created</strong>
-            <p>Dashboard → Users → confirm the SSO user appeared with the correct username (should match their Authentik username). If the user doesn't appear, check the SSO-Auth plugin logs.</p>
-          </div>
-        </div>
-      </div>
+    <div class="callout callout-warn" style="margin-top:10px">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Keep the local admin account.</strong> The admin account you created in the setup wizard should remain active with a password. Don't use SSO for it. If the SSO-Auth plugin ever breaks (after a Jellyfin update), you still need a way in to fix it. Store the password in Vaultwarden.</div>
     </div>
   </div>
 
   <hr>
 
-  <!-- STEP 4: USERS -->
+  <!-- ── Step 4: Caddy ── -->
   <div class="section">
-    <div class="section-title">👥 Step 4 — User Access</div>
+    <div class="section-title">🌐 Step 4 — Caddy Reverse Proxy</div>
     <div class="card">
-      <p>With SSO enabled, new users are auto-provisioned in Jellyfin on their first login via Authentik. You don't need to manually create accounts. However, you may want to set default permissions for auto-created users:</p>
-      <pre>Dashboard → Users → (click auto-created user) → set:
-  ✅ Allow media playback
-  ✅ Allow audio playback
-  ✅ Allow subtitle management
-  ❌ Allow media management (uploading/deleting — leave off for regular users)
-  ❌ Allow live TV access (unless you have a tuner)</pre>
-      <div class="callout callout-warn">
-        <div class="callout-icon">⚠️</div>
-        <div class="callout-body"><strong>Keep at least one local admin account.</strong> If Authentik goes down, you'll want a local Jellyfin admin account as a fallback. Create one with a strong password and store it in Vaultwarden. Don't use SSO for it.</div>
+      <!--
+        Jellyfin uses Caddy as a plain reverse proxy (no forward_auth needed —
+        Jellyfin handles its own auth via the SSO-Auth plugin).
+        External access goes through Cloudflare Tunnel → Caddy → Jellyfin.
+        Port 8096 does NOT need to be open to the internet.
+      -->
+      <pre># Add to Caddyfile (<span data-cfg="path:caddyfile"></span>):
+<span data-cfg="url:jellyfin"></span> {
+    reverse_proxy localhost:<span data-cfg="port:jellyfin"></span>
+}</pre>
+      <pre># Reload Caddy:
+caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-top:8px">Note: Jellyfin manages its own authentication via the SSO-Auth plugin — no <code>forward_auth</code> block needed in Caddy for this service.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── Step 5: Webhooks for achievements ── -->
+  <div class="section">
+    <div class="section-title">🔌 Step 5 — Webhooks (for Achievements &amp; Recommendations)</div>
+    <div class="card">
+      <div class="card-title">Install the Jellyfin Webhooks plugin</div>
+      <p>Dashboard → Plugins → Catalogue → search "Webhooks" → Install → restart Jellyfin.</p>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Webhook 1 — Achievement trigger (playback finished)</div>
+      <pre># Dashboard → Plugins → Webhooks → Add Webhook:
+Name:   Achievements
+URL:    http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger
+Events: ✅ Playback Stop
+
+Body template:
+{
+  "username": "{{NotificationUsername}}",
+  "trigger":  "jellyfin_watched",
+  "metadata": {
+    "title":      "{{Name}}",
+    "item_type":  "{{ItemType}}",
+    "percent":    {{PlaybackPositionTicks}}
+  }
+}</pre>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Webhook 2 — Recommendation engine (content finished)</div>
+      <pre># Add a second webhook:
+Name:   Recommendations
+URL:    http://localhost:<span data-cfg="port:recommendation"></span>/api/history/record
+Events: ✅ Playback Stop (filter: only fire when >85% watched — see note)
+
+Body template:
+{
+  "user":   "{{NotificationUsername}}",
+  "type":   "movie",
+  "id":     "{{ItemId}}",
+  "title":  "{{Name}}",
+  "signal": "finished"
+}</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Jellyfin webhooks fire on every playback stop, including pauses and partial watches. The recommendation server filters by signal quality — only sends with <code>"signal":"finished"</code> when <code>PlaybackPositionTicks</code> indicates &gt;85% completion. Implement this threshold in rec_server.py, not the webhook template.</div>
       </div>
     </div>
   </div>
@@ -446,57 +664,45 @@ jellyfin.yourdomain.com {
 </div><!-- /pane-setup -->
 
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════════
      PANE 2 — OVERVIEW
-═══════════════════════════════════════════════════ -->
+     Day-to-day reference tab. Default once setup is marked complete.
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-overview">
 
-  <div class="v1-banner">🎬 Jellyfin is your primary media server. It replaced Plex as the household streaming platform. All media is on internal storage at D:\Media\. Hardware transcoding is free and enabled.</div>
+  <div class="v1-banner">
+    🎬 Jellyfin is the primary household media server. It replaced Plex. All media is on internal storage at <code data-cfg="path:media"></code>. Hardware transcoding is free and enabled. Version: <span data-cfg="version:jellyfin"></span>
+  </div>
 
   <div class="section">
     <div class="section-title">📡 Quick Reference</div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Access Points</div>
+        <!--
+          External = through Cloudflare Tunnel (public internet, Authentik SSO).
+          Local = direct LAN access (faster for in-home streaming).
+          Admin = LAN-only — never exposed publicly.
+        -->
         <table>
           <tr><th>Type</th><th>URL / Address</th></tr>
-          <tr><td>Web (external)</td><td><code>jellyfin.yourdomain.com</code></td></tr>
-          <tr><td>Web (local)</td><td><code>http://[server-ip]:8096</code></td></tr>
-          <tr><td>Admin dashboard</td><td><code>http://localhost:8096/web/#!/dashboard.html</code></td></tr>
-          <tr><td>API base URL</td><td><code>http://localhost:8096/api</code></td></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:jellyfin"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:jellyfin"></span></code></td></tr>
+          <tr><td>Admin dashboard (LAN)</td><td><code>http://localhost:<span data-cfg="port:jellyfin"></span>/web/#!/dashboard.html</code></td></tr>
+          <tr><td>API base</td><td><code>http://localhost:<span data-cfg="port:jellyfin"></span>/api</code></td></tr>
         </table>
       </div>
       <div class="card">
         <div class="card-title">Technical Details</div>
         <table>
           <tr><th>Item</th><th>Value</th></tr>
-          <tr><td>Port</td><td>8096 (HTTP), 8920 (HTTPS optional)</td></tr>
-          <tr><td>Install type</td><td>Native Windows (no Docker)</td></tr>
+          <tr><td>Port</td><td><span data-cfg="port:jellyfin"></span> (HTTP) / 8920 (HTTPS optional)</td></tr>
+          <tr><td>Install type</td><td>Native Windows Service</td></tr>
           <tr><td>Service name</td><td><code>JellyfinServer</code></td></tr>
           <tr><td>Auth method</td><td>Authentik OIDC via SSO-Auth plugin</td></tr>
-          <tr><td>Hardware transcoding</td><td>Free (NVENC / QSV / AMF)</td></tr>
+          <tr><td>Hardware transcoding</td><td>NVENC / QSV / AMF (free)</td></tr>
+          <tr><td>Data path</td><td><code>C:\ProgramData\Jellyfin\Server\</code></td></tr>
         </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">📱 Supported Apps &amp; Devices</div>
-    <div class="card">
-      <table>
-        <tr><th>Device</th><th>Recommended App</th><th>Notes</th></tr>
-        <tr><td>Windows PC</td><td>Browser (any) or Jellyfin Media Player</td><td>Browser works great for casual use; Media Player gives better video quality</td></tr>
-        <tr><td>Mac</td><td>Browser (Safari/Chrome/Firefox)</td><td>Full feature set in browser</td></tr>
-        <tr><td>iPhone / iPad</td><td>Infuse or Jellyfin iOS app</td><td>Infuse has better Apple TV integration and offline sync</td></tr>
-        <tr><td>Android phone</td><td>Jellyfin for Android</td><td>Free on Play Store and F-Droid</td></tr>
-        <tr><td>Roku</td><td>Jellyfin channel (unofficial)</td><td>Install via developer mode or search Roku Channel Store</td></tr>
-        <tr><td>Fire TV / Stick</td><td>Jellyfin for Android TV</td><td>Sideload the APK or install from Amazon Appstore</td></tr>
-        <tr><td>Apple TV</td><td>Infuse (paid, best option) or Jellyfin tvOS</td><td>Infuse handles virtually any codec natively</td></tr>
-        <tr><td>Smart TV</td><td>Browser or built-in app (varies)</td><td>LG WebOS and Samsung Tizen have Jellyfin apps</td></tr>
-      </table>
-      <div class="callout callout-tip">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body">When setting up a TV app, enter the server address as <strong>https://jellyfin.yourdomain.com</strong> and sign in with your Authentik credentials. On first launch you may be directed through the Google SSO flow.</div>
       </div>
     </div>
   </div>
@@ -506,98 +712,117 @@ jellyfin.yourdomain.com {
     <div class="card">
       <table>
         <tr><th>Library</th><th>Path</th><th>Metadata Agent</th></tr>
-        <tr><td>🎬 Movies</td><td><code>D:\Media\Movies</code></td><td>TheMovieDB + AniDB (anime)</td></tr>
-        <tr><td>📺 TV Shows</td><td><code>D:\Media\TV</code></td><td>TheTVDB + TheMovieDB</td></tr>
+        <tr><td>🎬 Movies</td><td><code data-cfg="path:movies"></code></td><td>TheMovieDB + AniDB (for anime)</td></tr>
+        <tr><td>📺 TV Shows</td><td><code data-cfg="path:tv"></code></td><td>TheTVDB + TheMovieDB</td></tr>
       </table>
-      <p style="margin-top:12px;font-size:.84rem">Jellyfin auto-scans for new content every 30 minutes by default. You can also trigger a manual scan: <strong>Dashboard → Libraries → [library] → Scan Library</strong>.</p>
+      <p style="margin-top:10px;font-size:.84rem">Jellyfin auto-scans for new content every 30 minutes. Trigger a manual scan anytime: <strong>Dashboard → Libraries → [library] → Scan Library</strong>.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Apps &amp; Devices</div>
+    <div class="card">
+      <table>
+        <tr><th>Device</th><th>Recommended App</th><th>Notes</th></tr>
+        <tr><td>Windows PC</td><td>Browser (any) or Jellyfin Media Player</td><td>Browser works great; Media Player gives better local quality</td></tr>
+        <tr><td>Mac</td><td>Browser (Safari / Chrome / Firefox)</td><td>Full feature set in browser</td></tr>
+        <tr><td>iPhone / iPad</td><td>Infuse or Jellyfin iOS</td><td>Infuse has better Apple TV integration and offline sync</td></tr>
+        <tr><td>Android</td><td>Jellyfin for Android</td><td>Free on Play Store and F-Droid</td></tr>
+        <tr><td>Roku</td><td>Jellyfin channel</td><td>Install via Roku Channel Store</td></tr>
+        <tr><td>Fire TV / Stick</td><td>Jellyfin for Android TV</td><td>Available on Amazon Appstore</td></tr>
+        <tr><td>Apple TV</td><td>Infuse (best) or Jellyfin tvOS</td><td>Infuse handles virtually any codec natively without transcoding</td></tr>
+        <tr><td>Smart TV (LG / Samsung)</td><td>Built-in Jellyfin app</td><td>LG WebOS and Samsung Tizen have official apps</td></tr>
+      </table>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">When setting up any TV app, enter the server address as <strong><span data-cfg="url:jellyfin"></span></strong> and sign in with your Authentik credentials. On first launch you may be directed through the Google SSO flow.</div>
+      </div>
     </div>
   </div>
 
 </div><!-- /pane-overview -->
 
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════════
      PANE 3 — MAINTENANCE
-═══════════════════════════════════════════════════ -->
+     How to update, known breakpoints, and routine schedule.
+     Nothing auto-updates. All updates are manual and documented here.
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-maintenance">
 
   <div class="section">
-    <div class="section-title">🔄 Updates</div>
+    <div class="section-title">🔄 How to Update Jellyfin</div>
     <div class="card">
-      <div class="card-title">How to update Jellyfin</div>
-      <p>Jellyfin does <strong>not</strong> auto-update. Check for new releases periodically (especially if something breaks — updates often contain fixes).</p>
+      <div class="card-title">
+        Last confirmed working version: <span data-cfg="version:jellyfin"></span>
+        <!--
+          Version string pulls from versions.json via config.js.
+          After confirming an upgrade works, update versions.json —
+          never hardcode the version string here.
+        -->
+      </div>
+      <p>Jellyfin does <strong>not</strong> auto-update. Check releases periodically, especially after something breaks — updates often contain fixes.</p>
       <div class="steps">
         <div class="step">
           <div class="step-content">
-            <strong>Check current version</strong>
-            <pre>Dashboard → Admin → About → version shown at top</pre>
-            <p>Or check GitHub: <a href="https://github.com/jellyfin/jellyfin/releases" target="_blank">github.com/jellyfin/jellyfin/releases</a></p>
+            <strong>Back up the database first</strong>
+            <pre>Stop-Service JellyfinServer
+Copy-Item "C:\ProgramData\Jellyfin\Server\data\jellyfin.db" `
+  "E:\Backups\Jellyfin\jellyfin-pre-update-$(Get-Date -f yyyy-MM-dd).db"</pre>
           </div>
         </div>
         <div class="step">
           <div class="step-content">
-            <strong>Download the new installer and run it</strong>
-            <p>From <a href="https://jellyfin.org/downloads/server" target="_blank">jellyfin.org/downloads/server</a>. The installer handles stopping the service, replacing binaries, and restarting — your config and library database are preserved.</p>
-            <pre># Or via PowerShell (stops service, updates, restarts):
-Stop-Service JellyfinServer
-# (run installer manually)
-Start-Service JellyfinServer</pre>
+            <strong>Download and run the new installer</strong>
+            <p>From <a href="https://jellyfin.org/downloads/server" target="_blank">jellyfin.org/downloads/server</a>. The installer stops the service, replaces binaries, and restarts. Config and library database are preserved.</p>
           </div>
         </div>
         <div class="step">
           <div class="step-content">
             <strong>Update plugins separately</strong>
-            <p>Dashboard → Plugins → check each installed plugin for updates. The SSO-Auth plugin is particularly important to keep current as Jellyfin updates can change the plugin API.</p>
+            <p>Dashboard → Plugins → check each installed plugin for updates. The SSO-Auth plugin is especially important to keep current — major Jellyfin version updates can change the plugin API and break SSO.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify the update</strong>
+            <pre>Get-Service JellyfinServer   # confirm Running
+# Open http://localhost:<span data-cfg="port:jellyfin"></span> — confirm version in Dashboard → About
+# Test SSO login with a non-admin user account
+# Test a transcode stream — confirm hw codec still shows in Active Streams</pre>
           </div>
         </div>
       </div>
-      <div class="callout callout-warn">
+      <div class="callout callout-warn" style="margin-top:12px">
         <div class="callout-icon">⚠️</div>
-        <div class="callout-body"><strong>Check plugin compatibility before updating Jellyfin.</strong> Major version updates (e.g. 10.8 → 10.9) can break plugins. Check the SSO-Auth plugin's GitHub issues for compatibility notes before upgrading.</div>
+        <div class="callout-body"><strong>Check plugin compatibility before major version updates.</strong> Major version bumps (e.g. 10.8 → 10.9) can break plugins. Check the SSO-Auth plugin GitHub for a compatible release before upgrading Jellyfin. If SSO breaks after an update, the admin password fallback gets you back in.</div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">⚠️ Potential Breakpoints — Watch For These</div>
-
-    <div class="trouble-item" style="border-left-color: var(--danger)">
-      <div class="trouble-q">🔴 SSO-Auth plugin breaks after a Jellyfin update</div>
-      <div class="trouble-a">The SSO-Auth plugin is a third-party plugin and may lag behind Jellyfin releases. If users can't log in after a Jellyfin update, check if a compatible version of SSO-Auth is available. In the meantime, users can use the local admin account as a fallback. Always keep a local admin account active.</div>
-    </div>
-
-    <div class="trouble-item" style="border-left-color: var(--warning)">
-      <div class="trouble-q">🟡 Authentik OIDC redirect URI changes</div>
-      <div class="trouble-a">If you ever change your domain, the Redirect URI in both Authentik (the provider config) and the SSO-Auth plugin must be updated simultaneously. Mismatched URIs cause a silent redirect_uri_mismatch error. Keep a note of the exact URI format: <code>https://jellyfin.yourdomain.com/sso/OID/redirect/Authentik</code></div>
-    </div>
-
-    <div class="trouble-item" style="border-left-color: var(--warning)">
-      <div class="trouble-q">🟡 Hardware transcoding stops working after a Windows or driver update</div>
-      <div class="trouble-a">GPU driver updates occasionally reset NVENC/QSV settings. After any major driver or Windows update, verify transcoding still works by starting a stream that requires transcode and checking the Active Sessions dashboard. Re-enable the hardware acceleration setting if it was reset.</div>
-    </div>
-
-    <div class="trouble-item" style="border-left-color: var(--warning)">
-      <div class="trouble-q">🟡 Library scan stops finding new media</div>
-      <div class="trouble-a">If new files added to <code>D:\Media\</code> don't appear in Jellyfin, check that the folder structure matches Jellyfin's naming conventions. Movies must be in their own subfolder: <code>D:\Media\Movies\Movie Name (Year)\Movie Name (Year).mkv</code>. TV must follow: <code>D:\Media\TV\Show Name\Season 01\Show Name S01E01.mkv</code>.</div>
-    </div>
-
-    <div class="trouble-item" style="border-left-color: #4caf7d">
-      <div class="trouble-q">🟢 Media database becomes slow / large over time</div>
-      <div class="trouble-a">Jellyfin's SQLite database can grow over time with cached metadata, images, and activity logs. Dashboard → Administration → Clean Up Logs, and periodically run Dashboard → Libraries → Manage Libraries → Clean Library to remove orphaned entries. No data loss occurs from these operations.</div>
+    <div class="section-title">⚠️ Known Breakpoints</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li><strong>SSO-Auth plugin / Jellyfin version mismatch:</strong> Major Jellyfin updates sometimes break the SSO-Auth plugin. Always check plugin compatibility before updating. Fallback: admin password login still works.</li>
+        <li><strong>Hardware transcoding after driver updates:</strong> GPU driver updates can occasionally break NVENC/QSV. If transcoding suddenly uses CPU (<code>libx264</code>), go to Dashboard → Playback → Transcoding and re-save the hardware acceleration settings to force a re-detect.</li>
+        <li><strong>New media not appearing after adding files:</strong> Jellyfin's realtime filesystem monitoring can miss new files added by Radarr/Sonarr. If content doesn't appear within 30 minutes, trigger a manual scan.</li>
+        <li><strong>Database corruption after power loss:</strong> The SQLite database (<code>jellyfin.db</code>) can corrupt if the server loses power mid-write. Maintain daily automated backups — see the Data Storage tab.</li>
+      </ul>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">📅 Recommended Maintenance Schedule</div>
+    <div class="section-title">📅 Maintenance Schedule</div>
     <div class="card">
       <table>
         <tr><th>Frequency</th><th>Task</th></tr>
-        <tr><td>Monthly</td><td>Check for Jellyfin updates and plugin updates</td></tr>
-        <tr><td>Monthly</td><td>Review Dashboard → Activity → look for repeated failed logins or errors</td></tr>
-        <tr><td>Monthly</td><td>Verify hardware transcoding is still active (stream a transcode test)</td></tr>
-        <tr><td>Quarterly</td><td>Clean up logs and orphaned library entries</td></tr>
-        <tr><td>After any major update</td><td>Test SSO login flow with an incognito window</td></tr>
-        <tr><td>After any domain change</td><td>Update Redirect URIs in both Authentik provider config and SSO-Auth plugin config</td></tr>
+        <tr><td>When adding content</td><td>Verify Radarr/Sonarr triggered a library scan; spot-check metadata</td></tr>
+        <tr><td>Monthly</td><td>Check GitHub releases for new Jellyfin version</td></tr>
+        <tr><td>Monthly</td><td>Check Dashboard → Plugins for plugin updates (especially SSO-Auth and Webhooks)</td></tr>
+        <tr><td>Monthly</td><td>Review Dashboard → Activity Log for failed login attempts or errors</td></tr>
+        <tr><td>Quarterly</td><td>Run Dashboard → Libraries → [library] → Analyze Videos to check for corrupt files</td></tr>
+        <tr><td>Quarterly</td><td>Clean up transcoding temp folder: <code>C:\ProgramData\Jellyfin\Server\data\transcodes\</code></td></tr>
       </table>
     </div>
   </div>
@@ -605,225 +830,175 @@ Start-Service JellyfinServer</pre>
 </div><!-- /pane-maintenance -->
 
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════════
      PANE 4 — ACHIEVEMENTS
-═══════════════════════════════════════════════════ -->
+     Webhook config, achievement definitions, and recommendation
+     engine integration. See the Activity Tracking page for full
+     architecture context.
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-achievements">
 
+  <!-- ── Achievement flow ── -->
   <div class="section">
-    <div class="section-title">🎯 How Jellyfin Achievements Work</div>
+    <div class="section-title">🏆 How Achievements Are Triggered</div>
     <div class="card">
-      <p>Jellyfin has a built-in <strong>Webhooks plugin</strong> that fires HTTP POST requests when users take actions (play, pause, finish, etc.). These webhooks post to the achievement server at port 9003, which checks the trigger against <code>definitions.json</code> and grants XP/achievements.</p>
-      <pre>User finishes a movie in Jellyfin
-  → Jellyfin fires webhook → POST http://localhost:9003/api/achievement/trigger
-    { "username": "alice", "trigger": "movie_finished", "metadata": { "title": "..." } }
-  → Achievement server grants "First Watch" achievement + 10 XP
-  → Stored in D:\Users\alice\achievements.json
-  → Appears in homepage community feed</pre>
+      <p>Jellyfin fires webhook events when a user stops playback. The achievement server receives these, checks definitions.json, and unlocks matching achievements. Opt-out is respected — the server silently skips opted-out users.</p>
+      <pre>User finishes watching a movie / episode
+  → Jellyfin Webhooks plugin fires PlaybackStop event
+  → POST http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger
+    { "username": "alice", "trigger": "jellyfin_watched", "metadata": {...} }
+  → Achievement server checks opt-out → checks definitions.json
+  → Grants achievement + XP if criteria met
+  → Stored in <span data-cfg="path:users"></span>\alice\achievements.json
+  → definitions.json at: <span data-cfg="path:achievements"></span>\definitions.json</pre>
     </div>
   </div>
 
+  <!-- ── Achievement definitions ── -->
   <div class="section">
-    <div class="section-title">🔌 Webhook Setup</div>
+    <div class="section-title">📄 Achievement Definitions — definitions.json Entries</div>
     <div class="card">
-      <div class="card-title">Step 1 — Install the Webhooks plugin</div>
-      <pre>Dashboard → Plugins → Catalog → search "Webhooks" → Install → Restart Jellyfin</pre>
-    </div>
-    <div class="card">
-      <div class="card-title">Step 2 — Configure webhook endpoints</div>
-      <pre>Dashboard → Plugins → Webhooks → Add Webhook
-
-Name:          Achievement Server
-URL:           http://localhost:9003/api/achievement/trigger
-Events:        ✅ Playback Start
-               ✅ Playback Stop
-               ✅ Item Marked Played  ← most reliable "finished" signal
-               ✅ User Created
-
-Template (JSON body):
+      <pre># Add to <span data-cfg="path:achievements"></span>\definitions.json:
 {
-  "username": "{{NotificationUsername}}",
-  "trigger":  "{{Event}}",
-  "metadata": {
-    "itemId":    "{{ItemId}}",
-    "title":     "{{Name}}",
-    "mediaType": "{{ItemType}}",
-    "year":      "{{Year}}",
-    "seriesName":"{{SeriesName}}"
-  }
-}</pre>
-      <div class="callout callout-tip">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body">The <code>NotificationUsername</code> variable in Jellyfin webhooks returns the Jellyfin username — which should match the Authentik username if SSO is set up correctly. Verify this is consistent when testing.</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Step 3 — Add achievement triggers to definitions.json</div>
-      <pre># D:\Server\Achievements\definitions.json — add these entries:
-{
-  "first_watch": {
-    "name":     "First Watch",
+  "jellyfin_first_watch": {
+    "name":     "Lights, Camera, Action",
     "icon":     "🎬",
-    "desc":     "Watch your first thing on Jellyfin",
-    "triggers": ["ItemMarkedPlayed"],
+    "desc":     "Watch your first movie or episode on Jellyfin",
+    "service":  "jellyfin",
+    "triggers": ["jellyfin_watched"],
     "xp":       10,
     "once":     true
   },
-  "movie_marathon": {
-    "name":     "Movie Marathon",
-    "icon":     "🍿",
-    "desc":     "Watch 5 movies in one week",
-    "triggers": ["ItemMarkedPlayed"],
-    "requires": { "weekly_movies": 5, "mediaType": "Movie" },
+  "jellyfin_cinephile": {
+    "name":     "Cinephile",
+    "icon":     "🎞️",
+    "desc":     "Watch 25 movies",
+    "service":  "jellyfin",
+    "triggers": ["jellyfin_watched"],
+    "requires": { "count": 25 },
     "xp":       50
   },
-  "binge_watcher": {
-    "name":     "Binge Watcher",
+  "jellyfin_binge": {
+    "name":     "Just One More Episode",
     "icon":     "📺",
-    "desc":     "Watch an entire TV season in one day",
-    "triggers": ["ItemMarkedPlayed"],
-    "requires": { "season_episodes_today": 1 },
-    "xp":       75
+    "desc":     "Watch 5 TV episodes in a single day",
+    "service":  "jellyfin",
+    "triggers": ["jellyfin_watched"],
+    "requires": { "daily_count": 5 },
+    "xp":       25
   },
-  "night_owl": {
+  "jellyfin_night_owl": {
     "name":     "Night Owl",
     "icon":     "🦉",
-    "desc":     "Start watching something after midnight",
-    "triggers": ["PlaybackStart"],
+    "desc":     "Start watching after midnight",
+    "service":  "jellyfin",
+    "triggers": ["jellyfin_watched"],
     "requires": { "hour_gte": 0, "hour_lt": 4 },
-    "xp":       15
-  },
-  "early_bird": {
-    "name":     "Early Bird",
-    "icon":     "🐦",
-    "desc":     "Watch something before 7am",
-    "triggers": ["PlaybackStart"],
-    "requires": { "hour_lt": 7 },
-    "xp":       15
-  },
-  "centurion": {
-    "name":     "Centurion",
-    "icon":     "💯",
-    "desc":     "Watch 100 movies total",
-    "triggers": ["ItemMarkedPlayed"],
-    "requires": { "total_movies": 100, "mediaType": "Movie" },
-    "xp":       200,
+    "xp":       15,
     "once":     true
   }
 }</pre>
     </div>
   </div>
 
+  <!-- ── Achievement cards ── -->
   <div class="section">
     <div class="section-title">🏅 Available Achievements</div>
     <div class="ach-grid">
+
       <div class="ach-card">
         <div class="ach-icon">🎬</div>
-        <div class="ach-name">First Watch</div>
-        <div class="ach-desc">Watch your first movie or TV episode on Jellyfin</div>
+        <div class="ach-name">Lights, Camera, Action</div>
+        <div class="ach-desc">Watch your first movie or episode on Jellyfin.</div>
         <div class="ach-footer">
           <span class="ach-pts">10 XP</span>
           <span class="ach-method">webhook</span>
         </div>
       </div>
+
       <div class="ach-card">
-        <div class="ach-icon">🍿</div>
-        <div class="ach-name">Movie Marathon</div>
-        <div class="ach-desc">Watch 5 movies in a single week</div>
+        <div class="ach-icon">🎞️</div>
+        <div class="ach-name">Cinephile</div>
+        <div class="ach-desc">Watch 25 movies on Jellyfin.</div>
         <div class="ach-footer">
           <span class="ach-pts">50 XP</span>
           <span class="ach-method">webhook + counter</span>
         </div>
       </div>
+
       <div class="ach-card">
         <div class="ach-icon">📺</div>
-        <div class="ach-name">Binge Watcher</div>
-        <div class="ach-desc">Watch an entire TV season in one day</div>
+        <div class="ach-name">Just One More Episode</div>
+        <div class="ach-desc">Watch 5 TV episodes in a single day.</div>
         <div class="ach-footer">
-          <span class="ach-pts">75 XP</span>
+          <span class="ach-pts">25 XP</span>
           <span class="ach-method">webhook + counter</span>
         </div>
       </div>
+
       <div class="ach-card">
         <div class="ach-icon">🦉</div>
         <div class="ach-name">Night Owl</div>
-        <div class="ach-desc">Start watching something after midnight</div>
+        <div class="ach-desc">Start a watch session after midnight.</div>
         <div class="ach-footer">
           <span class="ach-pts">15 XP</span>
           <span class="ach-method">webhook + timestamp</span>
         </div>
       </div>
+
       <div class="ach-card">
-        <div class="ach-icon">🐦</div>
-        <div class="ach-name">Early Bird</div>
-        <div class="ach-desc">Watch something before 7am</div>
+        <div class="ach-icon">📽️</div>
+        <div class="ach-name">Film Festival</div>
+        <div class="ach-desc">Watch 100 movies total.</div>
         <div class="ach-footer">
-          <span class="ach-pts">15 XP</span>
-          <span class="ach-method">webhook + timestamp</span>
-        </div>
-      </div>
-      <div class="ach-card">
-        <div class="ach-icon">💯</div>
-        <div class="ach-name">Centurion</div>
-        <div class="ach-desc">Watch 100 movies total (lifetime)</div>
-        <div class="ach-footer">
-          <span class="ach-pts">200 XP</span>
-          <span class="ach-method">webhook + lifetime counter</span>
-        </div>
-      </div>
-      <div class="ach-card">
-        <div class="ach-icon">🌙</div>
-        <div class="ach-name">Insomniac</div>
-        <div class="ach-desc">Watch something after midnight 5 times</div>
-        <div class="ach-footer">
-          <span class="ach-pts">40 XP</span>
+          <span class="ach-pts">100 XP</span>
           <span class="ach-method">webhook + counter</span>
         </div>
       </div>
-      <div class="ach-card">
-        <div class="ach-icon">🎭</div>
-        <div class="ach-name">Genre Hopper</div>
-        <div class="ach-desc">Watch movies from 10 different genres</div>
-        <div class="ach-footer">
-          <span class="ach-pts">60 XP</span>
-          <span class="ach-method">webhook + genre tracking</span>
-        </div>
-      </div>
-    </div>
 
-    <div class="callout callout-tip" style="margin-top:16px">
-      <div class="callout-icon">💡</div>
-      <div class="callout-body"><strong>Testing achievements:</strong> Trigger them manually via curl to verify the achievement server processes them correctly before relying on live webhook data.<br>
-      <code>curl -X POST http://localhost:9003/api/achievement/trigger -H "Content-Type: application/json" -d '{"username":"alice","trigger":"ItemMarkedPlayed","metadata":{"mediaType":"Movie"}}'</code></div>
     </div>
   </div>
 
+  <!-- ── AI Recommendation Engine integration ── -->
+  <!--
+    Jellyfin is a strong source for the recommendation engine —
+    movies watched to completion are reliable taste signals.
+    See the Activity Tracking page for full rec engine architecture.
+  -->
   <div class="section">
-    <div class="section-title">📊 Active Session Tracking (Dashboard Feed)</div>
+    <div class="section-title">🤖 Feeding the AI Recommendation Engine</div>
     <div class="card">
-      <p>The home dashboard can show "Alice is watching Jellyfin" in the active sessions feed. Set up two webhook endpoints for playback start and stop:</p>
-      <pre># In Jellyfin Webhooks plugin — add a SECOND webhook:
-Name: Session Tracker
-URL:  http://localhost:9001/session/update
-
-Events: ✅ Playback Start, ✅ Playback Stop
-
-Body template:
+      <p>Movies and episodes watched to completion (85%+ of runtime) are reliable taste signals for the recommendation engine. Partially-watched items (&lt;30%) are negative signals and should be recorded as <code>"signal":"abandoned"</code>. The recommendation engine uses this to avoid suggesting similar content.</p>
+      <p style="margin-top:8px">Note: The Jellyfin webhook fires on every playback stop, including pauses. The rec_server.py endpoint should check the <code>PlaybackPositionTicks</code> metadata against the total item duration to determine the actual percentage watched before deciding the signal quality.</p>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Record to rec_server.py</div>
+      <pre># POST http://localhost:<span data-cfg="port:recommendation"></span>/api/history/record
 {
-  "user":    "{{NotificationUsername}}",
-  "service": "Jellyfin",
-  "title":   "{{Name}}",
-  "action":  "{{Event}}"
-}</pre>
+  "user":   "username",
+  "type":   "movie",         # or "episode" for TV
+  "id":     "jellyfin_item_id",
+  "title":  "Movie Title",
+  "signal": "finished",      # or "abandoned"
+  "metadata": {
+    "percent_complete": 92,
+    "genre": ["action", "sci-fi"]
+  }
+}
+
+# rec_server.py lives at:
+# <span data-cfg="path:recommendations"></span>\rec_server.py</pre>
     </div>
   </div>
 
 </div><!-- /pane-achievements -->
 
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════════
      PANE 5 — DATA STORAGE
-═══════════════════════════════════════════════════ -->
+     Complete map of where every byte lives. Critical for backups,
+     user management, and server migrations.
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-storage">
 
   <div class="section">
@@ -839,7 +1014,7 @@ Body template:
       </div>
       <div class="storage-cell">
         <div class="storage-cell-label">Media Library</div>
-        <div class="storage-cell-val">Shared — D:\Media\</div>
+        <div class="storage-cell-val">Shared — <span data-cfg="path:media"></span></div>
       </div>
       <div class="storage-cell">
         <div class="storage-cell-label">Per-User Data</div>
@@ -861,18 +1036,18 @@ Body template:
     <div class="card">
       <pre>C:\ProgramData\Jellyfin\Server\
   data\
-    jellyfin.db          ← main SQLite database (libraries, users, watch history)
-    library.db           ← media metadata index
-    transcodes\          ← temporary transcode cache (auto-purged)
+    jellyfin.db              ← main SQLite DB (libraries, users, watch history) 🔴 Back up daily
+    library.db               ← media metadata index (re-buildable from files)
+    transcodes\              ← temporary transcode cache (auto-purged, safe to delete)
   config\
-    system.xml           ← server config (ports, network)
-    logging.default.json ← log settings
+    system.xml               ← server config (ports, network settings)
+    logging.default.json     ← log rotation config
   log\
-    jellyfin-YYYYMMDD.log ← daily logs (auto-rotated)
+    jellyfin-YYYYMMDD.log    ← daily log files (auto-rotated, keep 30 days)
   metadata\
-    [artist/movie/show folders] ← downloaded artwork, metadata cache
+    [movie/show folders]     ← downloaded artwork and NFO files (re-downloadable)
 
-D:\Media\               ← shared media files (read-only to Jellyfin)
+<span data-cfg="path:media"></span>\             ← shared media (read-only to Jellyfin, never written to)
   Movies\
     Movie Name (Year)\
       Movie Name (Year).mkv
@@ -886,24 +1061,28 @@ D:\Media\               ← shared media files (read-only to Jellyfin)
   <div class="section">
     <div class="section-title">👤 Per-User Data</div>
     <div class="card">
-      <div class="card-title">What Jellyfin stores per user</div>
-      <p>Unlike most services on this server, Jellyfin keeps all per-user data <strong>inside its own database</strong> (<code>jellyfin.db</code>) rather than in <code>D:\Users\[username]\</code>. This includes:</p>
+      <div class="card-title">What Jellyfin stores per user (Pattern A — all in service DB)</div>
+      <!--
+        Jellyfin uses Pattern A: all user data is stored in jellyfin.db.
+        No per-user folder in D:\Users\[username]\ is needed.
+        This is the exception — most services on this server use Pattern B.
+      -->
+      <p>Unlike most services on this server, Jellyfin stores all per-user data <strong>inside its own database</strong> (<code>jellyfin.db</code>) — not in <code data-cfg="path:users"></code>\[username]\. This includes:</p>
       <ul style="margin:8px 0 0 18px;font-size:.85rem">
-        <li>Watch history and playback progress</li>
+        <li>Watch history and playback progress (resume points)</li>
         <li>Continue Watching queue</li>
         <li>Personal ratings and favorites</li>
-        <li>Subtitle and audio stream preferences</li>
-        <li>User-level parental control settings</li>
+        <li>Audio track and subtitle preferences</li>
+        <li>Parental control settings (per-user)</li>
       </ul>
       <div class="callout callout-tip">
         <div class="callout-icon">💡</div>
-        <div class="callout-body"><strong>No per-user folder needed.</strong> Jellyfin's database handles all user data internally. The media files in <code>D:\Media\</code> are shared and read-only — Jellyfin never writes to them. Backup <code>C:\ProgramData\Jellyfin\Server\data\jellyfin.db</code> regularly to preserve all watch history.</div>
+        <div class="callout-body"><strong>No per-user folder needed.</strong> The media files in <code data-cfg="path:media"></code> are shared and read-only — Jellyfin never writes to them. Back up <code>C:\ProgramData\Jellyfin\Server\data\jellyfin.db</code> daily to preserve all watch history.</div>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-title">How much does each user's data take up?</div>
-      <p>Jellyfin's per-user data is extremely lightweight — a few kilobytes of database rows per user, per show or movie. Even a power user who has watched hundreds of items will have under 5 MB of personal data stored in the database. The bulk of Jellyfin's storage is metadata (artwork, NFO files) which is shared across all users.</p>
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Storage footprint per user</div>
+      <p style="font-size:.84rem">Jellyfin's per-user data is extremely lightweight — a few kilobytes of database rows per user per item. A power user with hundreds of watched items will have under 5 MB of personal data in the database. The bulk of Jellyfin's storage is the shared metadata cache (artwork, NFO files).</p>
     </div>
   </div>
 
@@ -912,19 +1091,18 @@ D:\Media\               ← shared media files (read-only to Jellyfin)
     <div class="card">
       <table>
         <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
-        <tr><td>Jellyfin database</td><td><code>C:\ProgramData\Jellyfin\Server\data\jellyfin.db</code></td><td>Daily</td><td>🔴 High — contains all watch history</td></tr>
+        <tr><td>Jellyfin database</td><td><code>C:\ProgramData\Jellyfin\Server\data\jellyfin.db</code></td><td>Daily</td><td>🔴 High — all watch history lives here</td></tr>
         <tr><td>Server config</td><td><code>C:\ProgramData\Jellyfin\Server\config\</code></td><td>After any config change</td><td>🟡 Medium</td></tr>
         <tr><td>Metadata cache</td><td><code>C:\ProgramData\Jellyfin\Server\metadata\</code></td><td>Monthly (or skip — re-downloadable)</td><td>🟢 Low</td></tr>
-        <tr><td>Media files</td><td><code>D:\Media\</code></td><td>As acquired</td><td>🔴 High — this IS the library</td></tr>
+        <tr><td>Media files</td><td><code data-cfg="path:media"></code></td><td>As acquired</td><td>🔴 High — this IS the library</td></tr>
       </table>
-      <pre># Simple backup script (run via Task Scheduler, daily):
-# Backs up the Jellyfin database to D:\Backups\Jellyfin\
+      <pre style="margin-top:12px"># Automated daily DB backup (add to Task Scheduler):
 $src = "C:\ProgramData\Jellyfin\Server\data\jellyfin.db"
-$dst = "D:\Backups\Jellyfin\jellyfin-$(Get-Date -f yyyy-MM-dd).db"
-New-Item -Path "D:\Backups\Jellyfin" -ItemType Directory -Force
+$dst = "E:\Backups\Jellyfin\jellyfin-$(Get-Date -f yyyy-MM-dd).db"
+New-Item -Path "E:\Backups\Jellyfin" -ItemType Directory -Force
 Copy-Item $src $dst
-# Keep last 30 days:
-Get-ChildItem "D:\Backups\Jellyfin\*.db" | Sort-Object LastWriteTime -Descending |
+# Keep last 30 days, remove older:
+Get-ChildItem "E:\Backups\Jellyfin\*.db" | Sort-Object LastWriteTime -Descending |
   Select-Object -Skip 30 | Remove-Item</pre>
     </div>
   </div>
@@ -932,47 +1110,49 @@ Get-ChildItem "D:\Backups\Jellyfin\*.db" | Sort-Object LastWriteTime -Descending
 </div><!-- /pane-storage -->
 
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════════
      PANE 6 — TROUBLESHOOTING
-═══════════════════════════════════════════════════ -->
+     Common issues sorted by severity. Danger (complete outage) first,
+     then degraded, then cosmetic/tips.
+═══════════════════════════════════════════════════════════════ -->
 <div class="subtab-pane" id="pane-troubleshooting">
 
   <div class="section">
     <div class="section-title">🛠️ Common Issues</div>
 
-    <div class="trouble-item">
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Jellyfin service won't start after an update</div>
+      <div class="trouble-a">
+        Check the daily log for startup errors:
+        <pre>Get-Content "C:\ProgramData\Jellyfin\Server\log\jellyfin-$(Get-Date -f yyyyMMdd).log" -Tail 50</pre>
+        Common causes:
+        <ul style="margin:6px 0 0 18px">
+          <li>Incompatible plugin after a major version update — remove the offending plugin from <code>C:\ProgramData\Jellyfin\Server\plugins\</code> and retry</li>
+          <li>Database schema migration failed — check for "migration" errors in the log. Restore from last known-good backup if needed.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item danger">
       <div class="trouble-q">❌ "Sign in with Authentik" button doesn't appear on the login page</div>
       <div class="trouble-a">
-        The SSO-Auth plugin isn't installed or isn't configured. Check:
+        The SSO-Auth plugin isn't installed, isn't configured, or Jellyfin needs a restart after plugin config changes.
         <ul style="margin:6px 0 0 18px">
-          <li>Dashboard → Plugins → confirm SSO-Auth is listed and enabled</li>
-          <li>Dashboard → Plugins → SSO-Auth → confirm the provider is configured and "Enabled" checkbox is ticked</li>
-          <li>Restart Jellyfin after any plugin config change: <code>Restart-Service JellyfinServer</code></li>
+          <li>Dashboard → Plugins → confirm SSO-Auth is listed and the Enabled checkbox is ticked</li>
+          <li>Dashboard → Plugins → SSO-Auth → confirm the Authentik provider is configured</li>
+          <li>Restart after any plugin config change: <code>Restart-Service JellyfinServer</code></li>
+          <li>If the button appears but login fails: check the redirect URI in Authentik matches exactly (case-sensitive)</li>
         </ul>
       </div>
     </div>
 
-    <div class="trouble-item">
-      <div class="trouble-q">❌ SSO login redirects to Authentik but then shows "redirect_uri_mismatch" error</div>
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ SSO login shows "redirect_uri_mismatch" error in Authentik</div>
       <div class="trouble-a">
-        The redirect URI in Authentik doesn't match what Jellyfin is sending. Check the exact URI format:
-        <pre>Required format: https://jellyfin.yourdomain.com/sso/OID/redirect/Authentik
-                                                              ↑ must match your provider name exactly (case-sensitive)</pre>
-        Update both: Authentik provider → Redirect URIs, and SSO-Auth plugin config.
-      </div>
-    </div>
-
-    <div class="trouble-item">
-      <div class="trouble-q">❌ Jellyfin isn't accessible from outside the network</div>
-      <div class="trouble-a">
-        Check in order:
-        <ul style="margin:6px 0 0 18px">
-          <li>Is the Jellyfin service running? → <code>Get-Service JellyfinServer</code></li>
-          <li>Is Caddy running and proxying correctly? → check <code>jellyfin.yourdomain.com</code> in browser</li>
-          <li>Is the Cloudflare DNS record pointing to your server's public IP?</li>
-          <li>Is port 443 open on your router and forwarded to the server running Caddy?</li>
-        </ul>
-        Note: Jellyfin's port 8096 does NOT need to be forwarded — Caddy handles all external traffic on 443.
+        The redirect URI in Authentik doesn't match what Jellyfin is sending. The exact format must be:
+        <pre>https://jellyfin.<span data-cfg="domain"></span>/sso/OID/redirect/Authentik
+                                                  ↑ must match your provider name exactly (case-sensitive)</pre>
+        Update both: Authentik provider → Redirect URIs, and the SSO-Auth plugin config in Jellyfin.
       </div>
     </div>
 
@@ -981,75 +1161,304 @@ Get-ChildItem "D:\Backups\Jellyfin\*.db" | Sort-Object LastWriteTime -Descending
       <div class="trouble-a">
         Almost always a transcoding issue. Check Dashboard → Active Streams during playback:
         <ul style="margin:6px 0 0 18px">
-          <li><strong>Direct Play</strong> = client can play the file natively (best — no server load)</li>
+          <li><strong>Direct Play</strong> = client plays natively (best — zero server load)</li>
           <li><strong>Direct Stream</strong> = container remux only (good — minimal CPU)</li>
-          <li><strong>Transcode</strong> = full re-encode (check that hardware transcoding is active — codec should show <code>h264_nvenc</code> not <code>libx264</code>)</li>
+          <li><strong>Transcode</strong> = re-encode. Codec should show <code>h264_nvenc</code> not <code>libx264</code>. If it shows <code>libx264</code>, hardware transcoding is off — re-enable: Dashboard → Playback → Transcoding.</li>
         </ul>
-        If transcoding to CPU (<code>libx264</code>), re-enable hardware acceleration: Dashboard → Playback → Transcoding.
       </div>
     </div>
 
     <div class="trouble-item">
-      <div class="trouble-q">⚠️ New movies/shows added to D:\Media\ don't appear in Jellyfin</div>
+      <div class="trouble-q">⚠️ New movies / shows added to the library don't appear in Jellyfin</div>
       <div class="trouble-a">
         <ul style="margin:0 0 0 18px">
-          <li>Trigger manual scan: Dashboard → Libraries → [library] → <strong>Scan Library</strong></li>
-          <li>Check folder naming matches Jellyfin's expected format: <code>Movie Name (Year)\Movie Name (Year).mkv</code> for movies</li>
-          <li>Check for hidden files or permissions issues on the new files (Jellyfin must have read access)</li>
+          <li>Trigger a manual scan: Dashboard → Libraries → [library] → <strong>Scan Library</strong></li>
+          <li>Check folder naming: <code>Movie Name (Year)\Movie Name (Year).mkv</code> for movies; <code>Show Name\Season 01\Show Name S01E01.mkv</code> for TV</li>
+          <li>Check file permissions — Jellyfin must have read access to the new files</li>
           <li>Enable realtime monitoring: Dashboard → Libraries → [library] → check "Enable realtime monitoring"</li>
         </ul>
       </div>
     </div>
 
     <div class="trouble-item">
-      <div class="trouble-q">⚠️ Metadata / artwork is wrong for a movie or show</div>
+      <div class="trouble-q">⚠️ Metadata or artwork is wrong for a specific movie or show</div>
       <div class="trouble-a">
-        Right-click the item → Identify → search by name or IMDB/TMDB ID → select the correct match → Save. If artwork is wrong, right-click → Edit Images → Search for artwork to pick from the database.
+        Right-click the item → <strong>Identify</strong> → search by name or IMDB/TMDB ID → select the correct match → Save. If artwork is wrong, right-click → <strong>Edit Images</strong> → search for artwork to pick from the database.
       </div>
     </div>
 
-    <div class="trouble-item">
-      <div class="trouble-q">❌ Jellyfin service won't start after an update</div>
+    <div class="trouble-item ok">
+      <div class="trouble-q">💡 Jellyfin not accessible from outside the network</div>
       <div class="trouble-a">
-        Check the log for errors:
-        <pre>Get-Content "C:\ProgramData\Jellyfin\Server\log\jellyfin-$(Get-Date -f yyyyMMdd).log" -Tail 50</pre>
-        Common causes: a plugin is incompatible with the new version (remove it and retry), or the database needs migration (usually done automatically — check for error messages about schema).
+        Check in order:
+        <ul style="margin:0 0 0 18px">
+          <li>Is Jellyfin running? → <code>Get-Service JellyfinServer</code></li>
+          <li>Is Caddy running and proxying correctly? → check <code data-cfg="url:jellyfin"></code> in browser</li>
+          <li>Is the Cloudflare DNS record correct for <code data-cfg="url:jellyfin"></code>?</li>
+          <li>Is Cloudflare Tunnel running? → check cloudflared service status</li>
+          <li>Note: Jellyfin's port <span data-cfg="port:jellyfin"></span> does NOT need router port-forwarding — Caddy handles all external traffic on 443 via the tunnel.</li>
+        </ul>
       </div>
     </div>
 
-    <div class="trouble-item">
+    <div class="trouble-item ok">
       <div class="trouble-q">💡 How to generate a support bundle for debugging</div>
       <div class="trouble-a">
-        Dashboard → Help → click <strong>Generate Support Bundle</strong>. This creates a ZIP with logs, config info, and system details. Don't share it publicly as it contains server paths and usernames.
+        Dashboard → Help → click <strong>Generate Support Bundle</strong>. Creates a ZIP with logs, config info, and system details. Don't share it publicly — it contains server paths and usernames.
       </div>
     </div>
+
   </div>
 
   <div class="section">
     <div class="section-title">🔍 Useful Admin Commands</div>
+    <!--
+      All admin commands run from the LAN — at the server directly
+      or via RDP/SSH from within the local network.
+      Never exposed publicly, even behind Authentik.
+    -->
     <div class="card">
       <pre># Service management:
-Get-Service JellyfinServer                           # check status
-Stop-Service JellyfinServer                          # stop
-Start-Service JellyfinServer                         # start
-Restart-Service JellyfinServer                       # restart
+Get-Service JellyfinServer                # check status
+Stop-Service JellyfinServer               # stop
+Start-Service JellyfinServer              # start
+Restart-Service JellyfinServer            # restart
 
-# View recent logs:
+# View today's logs:
 Get-Content "C:\ProgramData\Jellyfin\Server\log\jellyfin-$(Get-Date -f yyyyMMdd).log" -Tail 100
 
-# Jellyfin API — get API key for external tools:
-# Dashboard → API Keys → Add API Key → name it (e.g. "achievement-server")
+# Clear transcoding cache (safe to do at any time):
+Remove-Item "C:\ProgramData\Jellyfin\Server\data\transcodes\*" -Recurse -Force
 
-# Test the webhook endpoint is reachable from Jellyfin:
-Invoke-WebRequest -Uri "http://localhost:9003/api/achievement/trigger" -Method POST `
-  -ContentType "application/json" `
-  -Body '{"username":"test","trigger":"test","metadata":{}}'</pre>
+# Jellyfin API — get API key for external tools:
+# Dashboard → API Keys → Add API Key → name it (e.g. "plex2jellyfin")
+
+# Test achievement webhook is reachable:
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger" `
+  -Method POST -ContentType "application/json" `
+  -Body '{"username":"test","trigger":"jellyfin_watched","metadata":{}}'</pre>
     </div>
   </div>
 
 </div><!-- /pane-troubleshooting -->
 
 
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 7 — UI PREVIEW
+     ───────────────────────────────────────────────────────────────
+     Static mock of what a logged-in user sees in Jellyfin.
+     Dummy user: alex. No real server calls — all fake data.
+     Goal: understand layout and flow without needing the server live.
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-uipreview">
+
+  <div class="preview-note">
+    <span>🖥️</span>
+    <div>
+      <strong>UI Preview — Dummy Data</strong><br>
+      This is a static mockup of what Jellyfin looks like to a logged-in user. Logged in as: <strong>alex</strong> (demo user). No real server calls are made. The color scheme, layout, and card style approximate real Jellyfin — exact styling will differ slightly.
+    </div>
+  </div>
+
+  <!-- ── Main Jellyfin homepage (Continue Watching + Libraries) ── -->
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">jellyfin.<span data-cfg="domain">yourdomain.com</span></div>
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body">
+      <!-- Jellyfin top nav bar -->
+      <div class="jf-topbar">
+        <div class="jf-logo">⬡ Jellyfin</div>
+        <div class="jf-nav">
+          <div class="jf-nav-item active">Home</div>
+          <div class="jf-nav-item">Movies</div>
+          <div class="jf-nav-item">TV Shows</div>
+        </div>
+        <div class="jf-search">🔍  Search…</div>
+        <div class="jf-avatar">A</div>
+      </div>
+
+      <!-- Main content area -->
+      <div class="jf-content">
+
+        <!-- Continue Watching -->
+        <div class="jf-section-label">
+          Continue Watching
+          <a href="#">More →</a>
+        </div>
+        <div class="jf-row">
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#1a1a2e,#16213e)">
+              <div class="jf-poster-bg">🌌</div>
+              <div class="jf-poster-overlay">Dune: Part Two</div>
+            </div>
+            <div class="jf-progress"><div class="jf-progress-fill" style="width:62%"></div></div>
+            <div class="jf-card-title">Dune: Part Two</div>
+            <div class="jf-card-sub">62% · 1h 08m left</div>
+          </div>
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#2e1a1a,#3e1616)">
+              <div class="jf-poster-bg">🧟</div>
+              <div class="jf-poster-overlay">The Last of Us S02E03</div>
+            </div>
+            <div class="jf-progress"><div class="jf-progress-fill" style="width:28%"></div></div>
+            <div class="jf-card-title">The Last of Us</div>
+            <div class="jf-card-sub">S02E03 · 28% · 42m left</div>
+          </div>
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#1a2e1a,#16321a)">
+              <div class="jf-poster-bg">🌿</div>
+              <div class="jf-poster-overlay">Oppenheimer</div>
+            </div>
+            <div class="jf-progress"><div class="jf-progress-fill" style="width:85%"></div></div>
+            <div class="jf-card-title">Oppenheimer</div>
+            <div class="jf-card-sub">85% · 27m left</div>
+          </div>
+        </div>
+
+        <!-- Recently Added Movies -->
+        <div class="jf-section-label">
+          Recently Added — Movies
+          <a href="#">More →</a>
+        </div>
+        <div class="jf-row">
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#1e1a2e,#2a1a3e)">
+              <div class="jf-badge">NEW</div>
+              <div class="jf-poster-bg">🚀</div>
+              <div class="jf-poster-overlay">Interstellar</div>
+            </div>
+            <div class="jf-card-title">Interstellar</div>
+            <div class="jf-card-sub">2014 · Sci-Fi</div>
+          </div>
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#2e2a1a,#3e341a)">
+              <div class="jf-badge">NEW</div>
+              <div class="jf-poster-bg">⚔️</div>
+              <div class="jf-poster-overlay">Gladiator II</div>
+            </div>
+            <div class="jf-card-title">Gladiator II</div>
+            <div class="jf-card-sub">2024 · Action</div>
+          </div>
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#1a2a2e,#1a323e)">
+              <div class="jf-poster-bg">🦈</div>
+              <div class="jf-poster-overlay">Alien: Romulus</div>
+            </div>
+            <div class="jf-card-title">Alien: Romulus</div>
+            <div class="jf-card-sub">2024 · Horror/Sci-Fi</div>
+          </div>
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#2e1a2a,#3e1a36)">
+              <div class="jf-poster-bg">🌊</div>
+              <div class="jf-poster-overlay">Poor Things</div>
+            </div>
+            <div class="jf-card-title">Poor Things</div>
+            <div class="jf-card-sub">2023 · Drama</div>
+          </div>
+        </div>
+
+        <!-- Recently Added TV -->
+        <div class="jf-section-label">
+          Recently Added — TV Shows
+          <a href="#">More →</a>
+        </div>
+        <div class="jf-row">
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#1a1f2e,#1a273e)">
+              <div class="jf-badge">NEW</div>
+              <div class="jf-poster-bg">🧬</div>
+              <div class="jf-poster-overlay">Severance S02</div>
+            </div>
+            <div class="jf-card-title">Severance</div>
+            <div class="jf-card-sub">Season 2 added</div>
+          </div>
+          <div class="jf-card">
+            <div class="jf-poster" style="background:linear-gradient(160deg,#2e2e1a,#3e3c1a)">
+              <div class="jf-poster-bg">🤖</div>
+              <div class="jf-poster-overlay">Shogun S01</div>
+            </div>
+            <div class="jf-card-title">Shōgun</div>
+            <div class="jf-card-sub">Season 1 added</div>
+          </div>
+        </div>
+
+      </div><!-- /jf-content -->
+    </div>
+  </div>
+
+  <!-- ── Movie detail view ── -->
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin:16px 0 8px">
+    Movie Detail View
+  </div>
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">jellyfin.<span data-cfg="domain">yourdomain.com</span>/web/#!/details?id=…</div>
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body" style="padding:0">
+      <div class="jf-topbar">
+        <div class="jf-logo">⬡ Jellyfin</div>
+        <div class="jf-nav">
+          <div class="jf-nav-item">Home</div>
+          <div class="jf-nav-item active">Movies</div>
+        </div>
+        <div class="jf-search">🔍  Search…</div>
+        <div class="jf-avatar">A</div>
+      </div>
+      <!-- Backdrop area -->
+      <div style="background:linear-gradient(160deg,#1a1a2e 0%,#0d1117 100%);padding:28px 24px;display:flex;gap:24px;align-items:flex-start">
+        <!-- Poster -->
+        <div style="flex-shrink:0;width:140px;height:210px;background:linear-gradient(160deg,#1a1a3e,#16213e);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:3rem;border:1px solid #333">🌌</div>
+        <!-- Info -->
+        <div style="flex:1">
+          <div style="font-size:1.4rem;font-weight:700;color:#eee;margin-bottom:6px">Dune: Part Two</div>
+          <div style="font-size:.75rem;color:#888;margin-bottom:12px">2024 · 2h 46m · PG-13 · Sci-Fi, Adventure, Drama</div>
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <div style="background:#aa5cc3;color:white;border-radius:4px;padding:7px 20px;font-size:.78rem;font-weight:700;cursor:default">▶ Resume (62%)</div>
+            <div style="background:#2a2a2a;color:#ccc;border-radius:4px;padding:7px 14px;font-size:.78rem;cursor:default">+ Watchlist</div>
+            <div style="background:#2a2a2a;color:#ccc;border-radius:4px;padding:7px 14px;font-size:.78rem;cursor:default">⋯</div>
+          </div>
+          <div style="font-size:.78rem;color:#aaa;line-height:1.6;max-width:520px">Paul Atreides unites with the Fremen while on a path of revenge against the conspirators who destroyed his family. As he faces a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.</div>
+          <div style="margin-top:14px;display:flex;gap:20px;font-size:.7rem;color:#666">
+            <span>Director: Denis Villeneuve</span>
+            <span>⭐ 8.5 / 10</span>
+            <span>🎞 4K HDR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── UI Notes ── -->
+  <div class="section" style="margin-top:20px">
+    <div class="section-title">📝 UI Notes &amp; Iteration Log</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;color:var(--text-dim)">
+        <li>[ ] Confirm the purple (#aa5cc3) accent color matches the live Jellyfin theme or update to match</li>
+        <li>[ ] The "Continue Watching" row may show TV episodes too — verify card subtitle format for episodes vs movies</li>
+        <li>[ ] Test mobile layout — the poster row should scroll horizontally on small screens</li>
+        <li>[✓] Admin dashboard is LAN-only — not shown in user-facing preview (correct)</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-uipreview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+     ───────────────────────────────────────────────────────────────
+     Copy verbatim to every service page.
+     Only change: STORAGE_KEY (must be unique per service page).
+═══════════════════════════════════════════════════════════════ -->
 <script>
   // ── Sub-tab switching ──
   function switchTab(id, btn) {
@@ -1060,21 +1469,21 @@ Invoke-WebRequest -Uri "http://localhost:9003/api/achievement/trigger" -Method P
   }
 
   // ── Setup complete checkbox ──
+  // Unique per service — prevents localStorage key collisions across pages.
   const STORAGE_KEY = 'jellyfin_setup_complete';
+
   let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
 
   function renderComplete() {
-    const bar      = document.getElementById('setup-complete-bar');
-    const checkbox = document.getElementById('setup-checkbox');
-    const sub      = document.getElementById('complete-sub');
-    const setupBtn = document.querySelector('[onclick*="setup"]');
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
     const overviewBtn = document.querySelector('[onclick*="overview"]');
 
     if (isComplete) {
       bar.classList.add('done');
       checkbox.textContent = '✓';
       sub.textContent = '✅ Setup complete — Overview is now the default tab';
-      // Make overview the first/prominent tab
       overviewBtn.style.fontWeight = '700';
       overviewBtn.style.color = 'var(--accent3)';
     } else {
@@ -1090,15 +1499,12 @@ Invoke-WebRequest -Uri "http://localhost:9003/api/achievement/trigger" -Method P
     isComplete = !isComplete;
     localStorage.setItem(STORAGE_KEY, isComplete);
     renderComplete();
-
-    // If just completed, switch to overview tab
     if (isComplete) {
       const overviewBtn = document.querySelector('[onclick*="overview"]');
       switchTab('overview', overviewBtn);
     }
   }
 
-  // On load: if previously marked complete, show overview by default
   window.addEventListener('DOMContentLoaded', () => {
     renderComplete();
     if (isComplete) {
