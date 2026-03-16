@@ -7,9 +7,10 @@
   <script src="config.js"></script>
   <style>
     /* ═══════════════════════════════════════════════
-       SUB-TAB NAVIGATION
-       Copy this style block into every service page.
-       Do not modify — it matches the shared design system.
+       SUB-TAB NAVIGATION STYLES
+       Copy this entire style block verbatim to every
+       service page. Do not modify — it must match the
+       shared design system across all service tabs.
     ═══════════════════════════════════════════════ */
     .subtab-nav {
       display: flex;
@@ -149,6 +150,73 @@
     .trouble-item.ok    { border-left-color: #4caf7d; }
     .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
     .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+
+    /* ── UI Preview styles ──
+       They create a realistic-looking mock of a logged-in user's interface.
+       The preview is entirely static dummy data — no real server calls made.
+    ═══════════════════════════════════════════════════════════ */
+    .preview-chrome {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .preview-bar {
+      background: #161b22;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .65rem;
+      color: var(--text-dim);
+    }
+    .preview-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .preview-url {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+      flex: 1;
+      max-width: 380px;
+    }
+    .preview-user-badge {
+      margin-left: auto;
+      background: rgba(200,168,75,.12);
+      border: 1px solid rgba(200,168,75,.25);
+      border-radius: 3px;
+      padding: 2px 8px;
+      color: var(--accent);
+      font-size: .6rem;
+    }
+    .preview-body {
+      padding: 20px;
+      min-height: 300px;
+    }
+    .preview-note {
+      background: rgba(200,168,75,.08);
+      border: 1px solid rgba(200,168,75,.22);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .preview-todo {
+      background: rgba(224,92,92,.07);
+      border: 1px dashed rgba(224,92,92,.35);
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-size: .8rem;
+      color: rgba(224,92,92,.8);
+      text-align: center;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -159,6 +227,8 @@
      ║  ✅ USE config.js FOR ALL VALUES via data-cfg attributes.        ║
      ║  📋 VERSIONS — Record in versions.json, not in HTML.             ║
      ║  🌐 SSO IS REQUIRED — Authentik OIDC via user_oidc app.          ║
+     ║  🖥️  UI PREVIEW TAB — Include a UI Preview pane with dummy data. ║
+     ║     Mark incomplete sections with .preview-todo boxes.           ║
      ╚══════════════════════════════════════════════════════════════════╝ -->
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -189,6 +259,8 @@
   <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
   <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
   <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <!-- UI Preview is last — it's a design/iteration tool, not a reference tab -->
+  <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
 </div>
 
 
@@ -924,6 +996,181 @@ php occ upgrade                                # run after Nextcloud update
   </div>
 
 </div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 7 — UI PREVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-uipreview">
+
+  <div class="preview-note">
+    <span>🖥️</span>
+    <div>
+      <strong>UI Preview — Dummy Data</strong><br>
+      Static mockup of what Nextcloud looks like to a logged-in user.
+      Logged in as: <strong>alex</strong> (demo user). No real server calls are made.
+      Incomplete sections are marked with red dashed boxes.
+    </div>
+  </div>
+
+  <!-- ── Main View: Files ── -->
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">cloud.<span data-cfg="domain"></span>/apps/files</div>
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body">
+      <!-- Nextcloud files layout: left nav + file grid -->
+      <div style="display:grid;grid-template-columns:180px 1fr;gap:0;height:400px;font-size:.82rem">
+
+        <!-- Left sidebar nav -->
+        <div style="background:#1c2128;border-right:1px solid var(--border);padding:12px 0">
+          <div style="padding:6px 16px;color:var(--accent);font-weight:700;font-size:.75rem;letter-spacing:.06em">☁️ NEXTCLOUD</div>
+          <div style="margin-top:10px">
+            <div style="padding:8px 16px;background:rgba(200,168,75,.1);color:var(--accent);border-left:2px solid var(--accent)">📁 All files</div>
+            <div style="padding:8px 16px;color:var(--text-dim)">⭐ Favorites</div>
+            <div style="padding:8px 16px;color:var(--text-dim)">🕐 Recent</div>
+            <div style="padding:8px 16px;color:var(--text-dim)">🔗 Shares</div>
+            <div style="padding:8px 16px;color:var(--text-dim)">🗑️ Deleted files</div>
+            <div style="margin-top:12px;padding:6px 16px;font-size:.65rem;letter-spacing:.08em;color:var(--text-dim);text-transform:uppercase">External</div>
+            <div style="padding:8px 16px;color:var(--text-dim)">📂 App Data</div>
+          </div>
+        </div>
+
+        <!-- File list area -->
+        <div style="padding:16px;overflow:auto">
+          <!-- Breadcrumb + actions bar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <div style="font-size:.8rem;color:var(--text-dim)">
+              <span style="color:var(--text)">📁 Home</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button style="background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.3);color:var(--accent);padding:4px 12px;border-radius:3px;font-size:.72rem;cursor:pointer">+ New</button>
+              <button style="background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:3px;font-size:.72rem;cursor:pointer">⬆ Upload</button>
+            </div>
+          </div>
+
+          <!-- File table header -->
+          <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+            <thead>
+              <tr style="color:var(--text-dim);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase">
+                <th style="text-align:left;padding:4px 8px;font-weight:400">Name</th>
+                <th style="text-align:right;padding:4px 8px;font-weight:400">Size</th>
+                <th style="text-align:right;padding:4px 8px;font-weight:400">Modified</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid rgba(37,45,61,.5)">
+                <td style="padding:8px 8px;color:var(--text)">📁 Documents</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">—</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">2 days ago</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(37,45,61,.5)">
+                <td style="padding:8px 8px;color:var(--text)">📁 Photos</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">—</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">Today</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(37,45,61,.5)">
+                <td style="padding:8px 8px;color:var(--text)">📂 App Data <span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">(external)</span></td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">12.4 GB</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">Just now</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(37,45,61,.5)">
+                <td style="padding:8px 8px;color:var(--text)">📄 notes.md</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">4 KB</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">3 days ago</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(37,45,61,.5)">
+                <td style="padding:8px 8px;color:var(--text)">📄 budget-2025.xlsx</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">28 KB</td>
+                <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">1 week ago</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Quota bar -->
+          <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);margin-bottom:5px">
+              <span>Storage used</span>
+              <span style="color:var(--text)">14.1 GB / 50 GB</span>
+            </div>
+            <div style="background:var(--bg3);border-radius:3px;height:5px;overflow:hidden">
+              <div style="background:var(--accent);width:28%;height:100%;border-radius:3px"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Secondary View: App Data folder ── -->
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin:16px 0 8px">
+    App Data — External Storage View (D:\Users\alex\)
+  </div>
+
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">cloud.<span data-cfg="domain"></span>/apps/files?dir=/App%20Data</div>
+      <div class="preview-user-badge">👤 alex</div>
+    </div>
+    <div class="preview-body">
+      <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:12px">
+        📁 Home / <span style="color:var(--text)">📂 App Data</span>
+        <span style="margin-left:10px;font-size:.7rem;color:var(--accent3)">(external · D:\Users\alex\)</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+        <thead>
+          <tr style="color:var(--text-dim);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase">
+            <th style="text-align:left;padding:4px 8px;font-weight:400">Name</th>
+            <th style="text-align:right;padding:4px 8px;font-weight:400">Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-top:1px solid rgba(37,45,61,.5)">
+            <td style="padding:8px 8px;color:var(--text)">📁 emulation</td>
+            <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">8.2 GB</td>
+          </tr>
+          <tr style="border-top:1px solid rgba(37,45,61,.5)">
+            <td style="padding:8px 8px;color:var(--text)">📁 calibre</td>
+            <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">1.1 GB</td>
+          </tr>
+          <tr style="border-top:1px solid rgba(37,45,61,.5)">
+            <td style="padding:8px 8px;color:var(--text)">📁 audiobooks</td>
+            <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">2.6 GB</td>
+          </tr>
+          <tr style="border-top:1px solid rgba(37,45,61,.5)">
+            <td style="padding:8px 8px;color:var(--text)">📁 mtg</td>
+            <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">120 KB</td>
+          </tr>
+          <tr style="border-top:1px solid rgba(37,45,61,.5)">
+            <td style="padding:8px 8px;color:var(--text)">📁 recommendations</td>
+            <td style="padding:8px 8px;text-align:right;color:var(--text-dim)">44 KB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── UI Notes ── -->
+  <div class="section" style="margin-top:20px">
+    <div class="section-title">📝 UI Notes</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;color:var(--text-dim)">
+        <li>The "App Data" external mount appears alongside regular Nextcloud folders — users may not know it points to <code>D:\Users\alex\</code> on disk</li>
+        <li>Quota bar in the file browser reflects combined Nextcloud + App Data usage (once <code>quota_include_external_storage</code> is set)</li>
+        <li>Mobile auto-upload lands in the Photos folder — the App Data mount is read/write but not auto-synced from the mobile app</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-uipreview -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════
