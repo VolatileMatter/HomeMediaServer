@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>All Services</title><link rel="stylesheet" href="shared.css">
+<head><meta charset="UTF-8"><title>All Services</title><link rel="stylesheet" href="shared.css"><script src="config.js"></script>
 <style>
   .svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
   .svc-card{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:14px 16px;transition:all .17s;position:relative;}
@@ -98,18 +98,9 @@ function adapt(s) {
 }
 
 async function loadServices() {
-  try {
-    const res = await fetch('services.json');
-    const raw = await res.json();
-    // Filter out comment/meta objects (they have no "id"), adapt, then sort A–Z
-    SVCS = raw
-      .filter(s => s.id)
-      .map(adapt)
-      .sort((a, b) => a.name.localeCompare(b.name));
-  } catch (e) {
-    console.error('Failed to load services.json:', e);
-    SVCS = [];
-  }
+  // CFG.loadServices() is defined in config.js — filters meta objects, caches result
+  const raw = await CFG.loadServices();
+  SVCS = raw.map(adapt).sort((a, b) => a.name.localeCompare(b.name));
   render();
 }
 
