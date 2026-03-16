@@ -1,87 +1,350 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Audiobookshelf</title>
-<link rel="stylesheet" href="shared.css">
+  <meta charset="UTF-8">
+  <title>Audiobookshelf</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION
+       Copy this style block into every service page.
+       Do not modify — it matches the shared design system.
+    ═══════════════════════════════════════════════ */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+
+    /* ── Achievement cards ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    .ach-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      transition: border-color .15s;
+    }
+    .ach-card:hover { border-color: rgba(200,168,75,.3); }
+    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+    .ach-footer { display: flex; gap: 6px; align-items: center; }
+    .ach-pts {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(200,168,75,.1);
+      color: var(--accent);
+      border: 1px solid rgba(200,168,75,.2);
+    }
+    .ach-method {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(78,205,196,.08);
+      color: var(--accent3);
+      border: 1px solid rgba(78,205,196,.18);
+    }
+
+    /* ── Storage breakdown grid ── */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* ── Troubleshooting items ── */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+  </style>
 </head>
 <body>
 
+<!-- ╔══════════════════════════════════════════════════════════════════╗
+     ║               REWRITE RULES — READ BEFORE EDITING               ║
+     ║  These are global decisions that apply to EVERY service page.   ║
+     ╠══════════════════════════════════════════════════════════════════╣
+     ║  ❌ NO TAILSCALE — Server is home-only. Admin tools are          ║
+     ║     LAN-accessible directly.                                     ║
+     ║  ✅ USE config.js FOR ALL VALUES — No hardcoded ports, domains,  ║
+     ║     or paths. Use data-cfg attributes.                           ║
+     ║  🔐 ADMIN vs USER steps — Mark admin-only steps with 🔐.        ║
+     ║  🌐 SSO IS REQUIRED — Every service tab must have an SSO        ║
+     ║     section in First Time Setup.                                 ║
+     ╚══════════════════════════════════════════════════════════════════╝ -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════════════ -->
 <div class="page-header">
   <div class="page-icon">🎧</div>
   <div>
-    <h1>Audiobookshelf Server</h1>
-    <div class="subtitle">// Self-Hosted Audiobooks &amp; Podcasts · No Docker Required //</div>
-    <p class="desc">Audiobookshelf is the gold standard for self-hosted audiobook and podcast management. It streams to mobile apps, tracks listening progress, and syncs across devices.</p>
+    <h1>Audiobookshelf</h1>
+    <div class="subtitle">
+      // Audiobooks &amp; Podcasts · Port <span data-cfg="port:audiobooks"></span> · Native Windows · Caddy forward_auth //
+    </div>
+    <p class="desc">
+      Audiobookshelf is the gold standard for self-hosted audiobook and podcast management. It streams to mobile apps, tracks per-device listening progress, and syncs chapters across sessions. Runs as a native Windows Service — no Docker required.
+    </p>
   </div>
 </div>
 
-<div class="v1-banner">
-  🐉 V1 Goal: Audiobookshelf running as a Windows Service on port 13378, serving your audiobook collection from an internal drive. Mobile apps connecting over local network (and Tailscale/VPN for remote).
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
 </div>
 
-<!-- Installation -->
-<div class="section">
-  <div class="section-title">⚙️ Installation — Windows Native <span class="tag tag-native">NATIVE · NO DOCKER</span></div>
 
-  <div class="card">
-    <div class="card-title">What You Need</div>
-    <ul>
-      <li>Windows 10 64-bit</li>
-      <li>Your audiobooks on an internal drive (e.g. <code>D:\Audiobooks</code>)</li>
-      <li>A free port — default is <code>13378</code></li>
-    </ul>
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Check when Audiobookshelf is fully installed, configured, and SSO is connected.
+      </div>
+    </div>
   </div>
 
-  <div class="steps">
-    <div class="step">
-      <div class="step-content">
-        <strong>Download the Windows installer</strong>
-        <p>Go to <a href="https://github.com/advplyr/audiobookshelf/releases" target="_blank">github.com/advplyr/audiobookshelf/releases</a> and download the latest <code>.exe</code> installer (e.g. <code>audiobookshelf-win-x64-installer.exe</code>).</p>
-      </div>
+  <div class="v1-banner">
+    🐉 V1 Goal: Audiobookshelf running as a Windows Service on port <span data-cfg="port:audiobooks"></span>, serving your audiobook collection from <code data-cfg="path:audiobooks"></code>. Mobile apps connecting over LAN (or VPN for remote).
+  </div>
+
+  <!-- Part A: Installation -->
+  <div class="section">
+    <div class="section-title">⚙️ Part A — Install Audiobookshelf <span class="tag tag-native">NATIVE · NO DOCKER</span></div>
+
+    <div class="card">
+      <div class="card-title">What You Need</div>
+      <ul>
+        <li>Windows 10 64-bit</li>
+        <li>Your audiobooks already on an internal drive at <code data-cfg="path:audiobooks"></code></li>
+        <li>Port <span data-cfg="port:audiobooks"></span> free (default — do not change)</li>
+      </ul>
     </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Run the installer as Administrator</strong>
-        <p>Right-click → Run as administrator. The installer sets up Audiobookshelf as a <strong>Windows Service</strong> automatically — it will start on boot without any extra configuration.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Download the Windows installer</strong>
+          <p>Go to <a href="https://github.com/advplyr/audiobookshelf/releases" target="_blank">github.com/advplyr/audiobookshelf/releases</a> and download the latest <code>.exe</code> installer (e.g. <code>audiobookshelf-win-x64-installer.exe</code>).</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Verify the service is running</strong>
-        <pre># In PowerShell (admin):
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Run the installer as Administrator</strong>
+          <p>Right-click → Run as administrator. The installer sets up Audiobookshelf as a <strong>Windows Service</strong> automatically — it starts on boot with no extra configuration.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Verify the service is running</strong>
+          <pre># In PowerShell (admin):
 Get-Service -Name "AudioBookshelf"
 
-# Or in Task Manager → Services tab → look for "AudioBookshelf"</pre>
+# Or: Task Manager → Services tab → look for "AudioBookshelf"</pre>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Open the web interface</strong>
-        <p>Navigate to <code>http://localhost:13378</code>. On first launch you'll be prompted to create an admin account.</p>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Open the web interface and create an admin account</strong>
+          <p>Navigate to <code>http://localhost:<span data-cfg="port:audiobooks"></span></code>. On first launch you'll be prompted to create an admin account.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Open Windows Firewall for port 13378</strong>
-        <pre>netsh advfirewall firewall add rule name="Audiobookshelf" dir=in action=allow protocol=TCP localport=13378</pre>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Open Windows Firewall for port <span data-cfg="port:audiobooks"></span></strong>
+          <pre>netsh advfirewall firewall add rule name="Audiobookshelf" dir=in action=allow protocol=TCP localport=<span data-cfg="port:audiobooks"></span></pre>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Add your library</strong>
-        <p>In the web UI: <strong>Settings → Libraries → Add Library</strong>. Set type to "Audiobooks" and point it at your folder, e.g. <code>D:\Audiobooks</code>. Do the same for Podcasts if you have a podcast folder.</p>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Add your library</strong>
+          <p>In the web UI: <strong>Settings → Libraries → Add Library</strong>. Set type to <strong>Audiobooks</strong> and point it at <code data-cfg="path:audiobooks"></code>. Repeat for Podcasts if you have a podcast folder (e.g. <code>D:\Podcasts</code>).</p>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Folder structure -->
-<div class="section">
-  <div class="section-title">📁 Recommended Folder Structure</div>
-  <div class="card">
-    <p>Audiobookshelf works best when each audiobook is in its own folder, named <code>Author - Title</code> or just <code>Title</code>.</p>
-    <pre>D:\Audiobooks\
+  <!-- Part B: SSO -->
+  <div class="section">
+    <div class="section-title">🔐 Part B — SSO via Authentik (OIDC)</div>
+
+    <div class="card">
+      <p>Audiobookshelf supports <strong>OpenID Connect (OIDC)</strong> natively. Once configured, users click "Sign in with Google" (via Authentik) on the Audiobookshelf login page — no separate ABS passwords needed.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Step 1 — Create the Audiobookshelf provider in Authentik</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Authentik Admin → Applications → Providers → Create → OAuth2/OpenID Provider</strong>
+            <pre>Name:            Audiobookshelf
+Client type:     Confidential
+Client ID:       (auto-generated — copy into ABS)
+Client Secret:   (auto-generated — copy into ABS)
+Redirect URIs:   <span data-cfg="url:audiobooks"></span>/auth/openid/callback
+Signing Key:     (your Authentik signing key)</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Create the Application</strong>
+            <pre>Authentik Admin → Applications → Applications → Create
+Name:        Audiobookshelf
+Slug:        audiobookshelf
+Provider:    (the provider above)
+Launch URL:  <span data-cfg="url:audiobooks"></span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Assign users / groups</strong>
+            <p>In the Application's Policy/Binding tab, add a group binding for the group that should have ABS access (e.g. <code>authentik-family</code>). Users not in this group will be denied even with an Authentik account.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Step 2 — Configure OIDC in Audiobookshelf</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Settings → Authentication → OpenID Connect</strong>
+            <pre>Issuer URL:          <span data-cfg="oidc-issuer:audiobookshelf"></span>
+Client ID:           (from Authentik — Step 1)
+Client Secret:       (from Authentik — Step 1)
+Redirect URI:        <span data-cfg="url:audiobooks"></span>/auth/openid/callback
+Auto Register:       ✅  (creates ABS accounts on first SSO login)
+Match existing users by: Email
+Button Text:         Sign in with Google</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Step 3 — Caddy reverse proxy config</div>
+      <p>Audiobookshelf uses native OIDC, so Caddy does <strong>not</strong> use <code>forward_auth</code> here. Just a plain reverse proxy:</p>
+      <pre># In <span data-cfg="path:caddyfile"></span>:
+audio.<span data-cfg="domain"></span> {
+    reverse_proxy localhost:<span data-cfg="port:audiobooks"></span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- Part C: Library & folder structure -->
+  <div class="section">
+    <div class="section-title">📁 Part C — Folder Structure</div>
+    <div class="card">
+      <p>Audiobookshelf works best when each audiobook is in its own folder, named <code>Author - Title</code> or just <code>Title</code>.</p>
+      <pre><span data-cfg="path:audiobooks"></span>\
   ├── Fiction\
   │   ├── Brandon Sanderson - The Way of Kings\
   │   │   ├── part1.mp3
@@ -97,113 +360,520 @@ D:\Podcasts\
   └── My Favorite Murder\
       ├── episode_001.mp3
       └── episode_002.mp3</pre>
-    <div class="callout callout-tip">
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>.m4b files</strong> (audiobook format) store chapters, cover art, and metadata internally — ABS reads all of this automatically. For multi-file audiobooks in a folder, add a <code>cover.jpg</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Part D: Metadata -->
+  <div class="section">
+    <div class="section-title">🔎 Part D — Metadata &amp; Cover Art</div>
+    <div class="card">
+      <p>Go to <strong>Settings → Item Metadata Utils → Match Library Items</strong> to batch-fetch metadata from Audible, Google Books, Open Library, and others. You can also right-click individual books → "Match" to search manually.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">✨</div>
+        <div class="callout-body">If you use <code>tone</code> (a free CLI audiobook tagger), pre-tag files before adding them to ABS for perfect metadata from the start.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">
+    🎧 Audiobookshelf running as a native Windows Service. Audiobooks and podcasts available on LAN and via VPN. SSO via Authentik OIDC. Mobile apps sync listening progress across devices.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:audiobooks"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:audiobooks"></span></code></td></tr>
+          <tr><td>Admin panel</td><td><code>http://localhost:<span data-cfg="port:audiobooks"></span></code> → Settings</td></tr>
+          <tr><td>Mobile app server URL</td><td><code>http://[server-ip]:<span data-cfg="port:audiobooks"></span></code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:audiobooks"></span></td></tr>
+          <tr><td>Install type</td><td>Native Windows Service</td></tr>
+          <tr><td>Service name</td><td><code>AudioBookshelf</code></td></tr>
+          <tr><td>Auth method</td><td>Native OIDC (Authentik)</td></tr>
+          <tr><td>Config / DB path</td><td><code>C:\ProgramData\audiobookshelf\</code></td></tr>
+          <tr><td>Audiobook library</td><td><code data-cfg="path:audiobooks"></code></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Apps &amp; Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Browser</td><td>Go to <code data-cfg="url:audiobooks"></code> — full-featured web player</td></tr>
+        <tr><td>iOS / Android (official app)</td><td>Free. Connect by entering <code>http://[server-ip]:<span data-cfg="port:audiobooks"></span></code>. Tracks progress, background playback, sleep timers, variable speed.</td></tr>
+        <tr><td>Any OPDS client</td><td>ABS exposes an OPDS feed for compatible audiobook apps</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎙️ Podcast Management</div>
+    <div class="card">
+      <p>Audiobookshelf is also a full podcast manager. It can <strong>auto-download new episodes</strong> from any RSS feed. Configure under <strong>Settings → Podcasts → Add RSS Feed</strong>. Episode files are stored in <code>D:\Podcasts\</code> alongside audiobooks.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p data-cfg="version:audiobooks">Check versions.json</p>
+      <div class="card-title" style="margin-top:14px">How to update</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Download the new installer from GitHub Releases</strong>
+            <p><a href="https://github.com/advplyr/audiobookshelf/releases" target="_blank">github.com/advplyr/audiobookshelf/releases</a> — download the latest <code>.exe</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Run the installer over the existing installation</strong>
+            <p>Right-click → Run as administrator. The installer upgrades the service in-place. Your data in <code>C:\ProgramData\audiobookshelf\</code> is not touched.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify the service restarted and test SSO</strong>
+            <pre>Get-Service -Name "AudioBookshelf"
+# Then test login at <span data-cfg="url:audiobooks"></span> in an incognito window</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Record the confirmed working version in versions.json</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 Windows installer fails silently if an older version is still running</div>
+      <div class="trouble-a">Stop the service before running the installer: <code>Stop-Service AudioBookshelf</code>. Then run the installer, then <code>Start-Service AudioBookshelf</code>.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 OIDC redirect URI breaks after a domain change</div>
+      <div class="trouble-a">If you change your domain, update the Redirect URI in both: (1) Authentik provider settings → Redirect URIs, and (2) ABS Settings → Authentication → Redirect URI. Both must match exactly.</div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">🟢 Podcast episode metadata occasionally fails to fetch</div>
+      <div class="trouble-a">Right-click the podcast → "Re-fetch RSS" to force a refresh. This is cosmetic and doesn't affect playback.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Check for new releases on GitHub</td></tr>
+        <tr><td>Monthly</td><td>Review logs at <code>C:\ProgramData\audiobookshelf\log\</code></td></tr>
+        <tr><td>Monthly</td><td>Settings → Item Metadata Utils → Match Library Items (re-fetch stale metadata)</td></tr>
+        <tr><td>After any update</td><td>Test SSO login in incognito window</td></tr>
+        <tr><td>After any update</td><td>Record confirmed working version in <code>versions.json</code></td></tr>
+        <tr><td>After any domain change</td><td>Update Redirect URIs in Authentik (<code data-cfg="authentik-admin"></code>) AND in ABS OIDC settings</td></tr>
+        <tr><td>After any domain change</td><td>Update Caddyfile at <code data-cfg="path:caddyfile"></code></td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🎯 How Audiobookshelf Achievements Work</div>
+    <div class="card">
+      <p>Audiobookshelf does not have native outbound webhooks. Achievements are driven by <strong>database polling</strong> — the achievement server periodically queries the ABS API for listening progress and fires triggers when thresholds are crossed (e.g. a book reaches 95% finished).</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>ABS Admin Token required:</strong> Generate a token in ABS Settings → Users → [admin user] → API Token. Store it as <code>ABS_ADMIN_TOKEN</code> in <code>stats_server.py</code>. The server polls <code>http://localhost:<span data-cfg="port:audiobooks"></span>/api/users</code> to map usernames to progress data.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">API Polling Pattern (stats_server.py)</div>
+      <pre># Poll ABS for per-user listening progress:
+import requests
+
+ABS_ADMIN_TOKEN = "your-admin-token-here"
+ABS_BASE = "http://localhost:<span data-cfg="port:audiobooks"></span>"
+HEADERS  = {"Authorization": f"Bearer {ABS_ADMIN_TOKEN}"}
+
+def get_abs_users():
+    r = requests.get(f"{ABS_BASE}/api/users", headers=HEADERS)
+    return r.json().get("users", [])
+
+def check_audiobook_progress(username, user_token):
+    headers = {"Authorization": f"Bearer {user_token}"}
+    r = requests.get(f"{ABS_BASE}/api/me/progress", headers=headers)
+    for item in r.json():
+        if item.get("progress", 0) >= 0.95:
+            trigger_achievement(username, "audiobook_finished", {
+                "title": item.get("libraryItemId")
+            })
+
+# Run this on a schedule (e.g. every 30 minutes via Task Scheduler)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 Available Achievements</div>
+    <div class="ach-grid">
+
+      <div class="ach-card">
+        <div class="ach-icon">📖</div>
+        <div class="ach-name">First Chapter</div>
+        <div class="ach-desc">Finish your first audiobook (95%+ progress)</div>
+        <div class="ach-footer">
+          <span class="ach-pts">25 XP</span>
+          <span class="ach-method">db poll</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📚</div>
+        <div class="ach-name">Voracious Reader</div>
+        <div class="ach-desc">Finish 10 audiobooks</div>
+        <div class="ach-footer">
+          <span class="ach-pts">75 XP</span>
+          <span class="ach-method">db poll (count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🎙️</div>
+        <div class="ach-name">Pod Person</div>
+        <div class="ach-desc">Listen to 5 podcast episodes</div>
+        <div class="ach-footer">
+          <span class="ach-pts">20 XP</span>
+          <span class="ach-method">db poll (count)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🌙</div>
+        <div class="ach-name">Night Owl</div>
+        <div class="ach-desc">Start a listening session after midnight</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 XP</span>
+          <span class="ach-method">db poll (timestamp)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">⚡</div>
+        <div class="ach-name">Speed Demon</div>
+        <div class="ach-desc">Listen at 2× speed for a full session</div>
+        <div class="ach-footer">
+          <span class="ach-pts">10 XP</span>
+          <span class="ach-method">db poll (speed field)</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🔖</div>
+        <div class="ach-name">Bookmark Hoarder</div>
+        <div class="ach-desc">Create 20 bookmarks across any books</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 XP</span>
+          <span class="ach-method">db poll (bookmarks count)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout callout-tip" style="margin-top:16px">
       <div class="callout-icon">💡</div>
-      <div class="callout-body"><strong>.m4b files</strong> (audiobook format) store chapters, cover art, and metadata internally. Audiobookshelf reads all of this automatically. For multi-file audiobooks, add a <code>cover.jpg</code> in the folder.</div>
+      <div class="callout-body"><strong>Testing achievements manually:</strong>
+      <code>curl -X POST http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger -H "Content-Type: application/json" -d '{"username":"alice","trigger":"audiobook_finished","metadata":{"title":"Test Book"}}'</code></div>
     </div>
   </div>
-</div>
 
-<!-- Mobile apps -->
-<div class="section">
-  <div class="section-title">📱 Mobile Apps</div>
-  <div class="grid-2">
+  <!-- AI Recommendation Engine -->
+  <div class="section">
+    <div class="section-title">🤖 Feeding the AI Recommendation Engine</div>
     <div class="card">
-      <div class="card-title">📱 Official Audiobookshelf App</div>
-      <p>Available on iOS and Android. Free. Connect it by entering your server URL: <code>http://[server-IP]:13378</code>. It tracks progress across devices and supports background playback, sleep timers, and variable speed.</p>
+      <p>Audiobooks finished at 95%+ are a strong taste signal. The polling script can also post completed items to the recommendation server to build a listening history profile per user.</p>
     </div>
     <div class="card">
-      <div class="card-title">🎙️ Podcast Management</div>
-      <p>Audiobookshelf also acts as a full podcast manager. It can <strong>auto-download new episodes</strong> of any RSS feed you subscribe to. Configure under Settings → Podcasts → add RSS feed URL.</p>
+      <div class="card-title">Record completed audiobooks to rec_server.py</div>
+      <pre># POST to recommendation server when a book is finished:
+# POST http://localhost:<span data-cfg="port:recommendation"></span>/api/history/record
+{
+  "user":  "username",
+  "type":  "audiobook",
+  "id":    "libraryItemId",
+  "title": "Book Title"
+}
+
+# rec_server.py lives at:
+# <span data-cfg="path:recommendations"></span>\rec_server.py</pre>
     </div>
   </div>
-</div>
 
-<!-- Metadata -->
-<div class="section">
-  <div class="section-title">🔎 Metadata &amp; Cover Art</div>
-  <div class="card">
-    <div class="card-title">Auto-fetching Metadata</div>
-    <p>Audiobookshelf can fetch metadata from Audible, Google Books, Open Library, and others. Go to <strong>Settings → Item Metadata Utils → Match Library Items</strong> to batch-update everything. You can also right-click individual books → "Match" to manually search.</p>
-    <div class="callout callout-tip">
-      <div class="callout-icon">✨</div>
-      <div class="callout-body"><strong>Tone2 / Tonal integration:</strong> If you use <code>tone</code> (a free CLI tool for audiobook tagging), you can pre-tag all your files before adding them to Audiobookshelf for perfect metadata from the start.</div>
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Storage Overview</div>
+    <div class="storage-breakdown">
+      <div class="storage-cell">
+        <div class="storage-cell-label">App Install</div>
+        <div class="storage-cell-val">~150 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Config / DB</div>
+        <div class="storage-cell-val">~20–50 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Per-User Data</div>
+        <div class="storage-cell-val">Minimal (DB rows)</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Audiobook Library</div>
+        <div class="storage-cell-val">Shared — <span data-cfg="path:audiobooks"></span></div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Progress Exports</div>
+        <div class="storage-cell-val"><span data-cfg="path:users"></span>\[user]\audiobooks\</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Remote access -->
-<div class="section">
-  <div class="section-title">🌍 Remote Access (Outside Your Home)</div>
-  <div class="card">
-    <div class="card-title">Option A: Tailscale (Easiest, Free) <span class="tag tag-native">RECOMMENDED</span></div>
-    <p>Install Tailscale on your server and your phone. Your server gets a permanent private IP like <code>100.x.x.x</code>. The mobile app connects to <code>http://100.x.x.x:13378</code> from anywhere, securely, without opening ports.</p>
-    <p>Download: <a href="https://tailscale.com" target="_blank">tailscale.com</a> — free for personal use, up to 100 devices.</p>
-  </div>
-  <div class="card">
-    <div class="card-title">Option B: Port Forward (Router Config Required)</div>
-    <p>Log into your router (usually <code>192.168.1.1</code>), find "Port Forwarding," and forward external port <code>13378</code> to your server's local IP on port <code>13378</code>. Then access via your public IP. <strong>Recommend adding a username/password</strong> in Audiobookshelf admin settings before doing this.</p>
-  </div>
-</div>
+  <div class="section">
+    <div class="section-title">📂 Where Everything Lives</div>
+    <div class="card">
+      <pre>C:\ProgramData\audiobookshelf\   ← all config and database
+  absdatabase.sqlite              ← main database (users, progress, bookmarks)
+  config\                         ← server configuration files
+  metadata\                       ← cover art and metadata cache
+  log\                            ← log files
 
-<!-- Backup -->
-<div class="section">
-  <div class="section-title">💾 Backups</div>
-  <div class="card">
-    <p>Audiobookshelf stores its database and metadata in <code>C:\ProgramData\audiobookshelf</code> (the default config path). Back this up regularly — it contains all your listening progress, user accounts, and podcast subscriptions. Your actual audio files are stored wherever you pointed the library (e.g. <code>D:\Audiobooks</code>).</p>
-    <pre># Simple robocopy backup to another drive:
+<span data-cfg="path:audiobooks"></span>\              ← shared audiobook files (read by all users)
+  Fiction\
+  Non-Fiction\
+
+D:\Podcasts\                      ← shared podcast episode files
+
+<span data-cfg="path:users"></span>\[username]\audiobooks\  ← per-user data
+  listening_progress.json         ← nightly progress export snapshot</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Per-User Data</div>
+    <div class="card">
+      <div class="card-title">What Audiobookshelf stores per user</div>
+      <p>Audiobookshelf keeps all listening progress, bookmarks, and playback position in its own SQLite database (<code>C:\ProgramData\audiobookshelf\absdatabase.sqlite</code>), keyed per user account. The audio files are shared from <code data-cfg="path:audiobooks"></code>.</p>
+
+      <p><strong>What lives in <code data-cfg="path:users"></code>\[username]\audiobooks\:</strong></p>
+      <ul style="margin:6px 0 0 18px;font-size:.85rem">
+        <li><strong>listening_progress.json</strong> — nightly export of all listening positions and bookmarks, generated by the stats_server API export route</li>
+        <li>Any personal podcast feeds added by the user (if per-user custom RSS is enabled)</li>
+      </ul>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">This folder is visible in Nextcloud as "App Data" and counts toward the user's storage quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td>Database + config</td><td><code>C:\ProgramData\audiobookshelf\</code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>User progress exports</td><td><code data-cfg="path:users"></code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>Audiobook library</td><td><code data-cfg="path:audiobooks"></code></td><td>As acquired</td><td>🔴 High</td></tr>
+      </table>
+      <pre style="margin-top:12px"># Simple robocopy backup of config to another drive:
 robocopy "C:\ProgramData\audiobookshelf" "E:\Backups\abs-config" /E /MIR</pre>
+    </div>
   </div>
-</div>
 
-<!-- SSO teaser -->
-<div class="section">
-  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <p>Audiobookshelf supports <strong>OpenID Connect (OIDC)</strong> authentication. This means you can integrate it with Google OAuth or a self-hosted SSO like Authentik. See the <strong>SSO tab</strong> for full setup. Once configured, users click "Sign in with Google" on the Audiobookshelf login page.</p>
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Service won't start after Windows update or installer upgrade</div>
+      <div class="trouble-a">
+        Check the Windows Service Control Manager for an error code:
+        <ul style="margin:6px 0 0 18px">
+          <li><code>Get-Service AudioBookshelf</code> — if status is "Stopped", try <code>Start-Service AudioBookshelf</code></li>
+          <li>Check logs at <code>C:\ProgramData\audiobookshelf\log\</code> for startup errors</li>
+          <li>If the port is in use: <code>netstat -ano | findstr :<span data-cfg="port:audiobooks"></span></code> — kill the conflicting PID</li>
+          <li>Re-run the installer as Administrator to repair the service registration</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ SSO login fails / OIDC redirect error</div>
+      <div class="trouble-a">
+        Almost always a redirect URI mismatch. Check:
+        <ul style="margin:6px 0 0 18px">
+          <li>Authentik provider → Redirect URIs must exactly match: <code data-cfg="url:audiobooks"></code>/auth/openid/callback</li>
+          <li>ABS Settings → Authentication → Redirect URI must match the same value</li>
+          <li>Restart the ABS service after any config change: <code>Restart-Service AudioBookshelf</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Mobile app can't connect to server</div>
+      <div class="trouble-a">
+        <ul style="margin:6px 0 0 18px">
+          <li>Confirm the service is running: <code>Get-Service AudioBookshelf</code></li>
+          <li>Confirm the firewall rule is active: <code>netsh advfirewall firewall show rule name="Audiobookshelf"</code></li>
+          <li>Try connecting to <code>http://[server-LAN-IP]:<span data-cfg="port:audiobooks"></span></code> from the mobile app — use the LAN IP, not <code>localhost</code></li>
+          <li>For remote access outside the home, ensure VPN is connected before opening the app</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Books show as unrecognised / metadata not found</div>
+      <div class="trouble-a">
+        ABS is strict about folder naming. Check:
+        <ul style="margin:6px 0 0 18px">
+          <li>Each audiobook should be in its own folder: <code>Author - Title\</code> or <code>Title\</code></li>
+          <li>Go to <strong>Settings → Item Metadata Utils → Match Library Items</strong> to retry metadata fetching</li>
+          <li>Right-click a specific book → "Match" to search manually</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">💡 Listening progress not syncing between devices</div>
+      <div class="trouble-a">Progress syncs to the server continuously over the network. If a device is offline, it will sync on next connection. Force a sync by closing and reopening the mobile app with an active connection.</div>
+    </div>
+
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <div class="card-title">Where Audiobookshelf stores per-user data</div>
-    <p>Audiobookshelf maintains listening progress, bookmarks, and playback position in its own database (<code>C:\ProgramData\audiobookshelf\</code>), keyed per user account. The audio files themselves are shared across all users from <code>D:\Audiobooks\</code>.</p>
+  <div class="section">
+    <div class="section-title">🔍 Useful Admin Commands</div>
+    <div class="card">
+      <pre># Service management:
+Get-Service -Name "AudioBookshelf"          # check status
+Stop-Service AudioBookshelf                 # stop
+Start-Service AudioBookshelf                # start
+Restart-Service AudioBookshelf              # restart
 
-    <p><strong>What lives in <code>D:\Users\[username]\audiobooks\</code>:</strong></p>
-    <ul style="margin:6px 0 0 18px;font-size:.85rem">
-      <li>Progress export snapshots — a JSON file of all their listening positions and bookmarks</li>
-      <li>Any personal podcast feeds they've added (if ABS supports per-user custom RSS)</li>
-    </ul>
+# Check which process is using the port:
+netstat -ano | findstr :<span data-cfg="port:audiobooks"></span>
 
-    <div class="card-title" style="margin-top:14px">Export progress to user folder nightly</div>
-    <p>Audiobookshelf has an API that can export a user's progress. Add this to the stats server for nightly Task Scheduler runs:</p>
-    <pre># stats_server.py — nightly progress export per user:
-@app.route('/abs/export/&lt;username&gt;')
-def export_abs_progress(username):
-    import requests as req, json
+# View recent logs:
+Get-ChildItem "C:\ProgramData\audiobookshelf\log\" | Sort LastWriteTime -Desc | Select -First 1 | Get-Content -Tail 100
 
-    # Get ABS user ID from username
-    headers = {'Authorization': f'Bearer {ABS_ADMIN_TOKEN}'}
-    users_r = req.get('http://localhost:13378/api/users', headers=headers)
-    users   = users_r.json().get('users', [])
-    user    = next((u for u in users if u.get('username') == username), None)
-    if not user:
-        return jsonify({'error': 'user not found'}), 404
+# Backup config:
+robocopy "C:\ProgramData\audiobookshelf" "E:\Backups\abs-config" /E /MIR
 
-    # Export their media progress
-    prog_r = req.get(
-        f"http://localhost:13378/api/me/progress",
-        headers={'Authorization': f'Bearer {user.get(\"token\",\"\")}'}
-    )
-    out_path = f'D:/Users/{username}/audiobooks/listening_progress.json'
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    json.dump(prog_r.json(), open(out_path, 'w'), indent=2)
-    return jsonify({'ok': True})</pre>
-
-    <p>All data in <code>D:\Users\[username]\audiobooks\</code> counts toward their Nextcloud storage quota. See the <strong>SSO tab → User Data Storage</strong> for the full architecture.</p>
+# Test SSO webhook reachability:
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigger" `
+  -Method POST -ContentType "application/json" `
+  -Body '{"username":"test","trigger":"audiobook_finished","metadata":{"title":"Test"}}'</pre>
+    </div>
   </div>
-</div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+     Update STORAGE_KEY to be unique per service page.
+═══════════════════════════════════════════════════════════════ -->
+<script>
+const STORAGE_KEY = 'audiobooks_setup_complete';
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function toggleComplete() {
+  const bar = document.getElementById('setup-complete-bar');
+  const box = document.getElementById('setup-checkbox');
+  const isDone = bar.classList.toggle('done');
+  box.textContent = isDone ? '✓' : '';
+  localStorage.setItem(STORAGE_KEY, isDone ? '1' : '');
+  if (isDone) {
+    setTimeout(() => switchTab('overview',
+      document.querySelector('.subtab-btn:nth-child(2)')), 600);
+  }
+}
+
+// Restore state on load
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem(STORAGE_KEY) === '1') {
+    const bar = document.getElementById('setup-complete-bar');
+    const box = document.getElementById('setup-checkbox');
+    bar.classList.add('done');
+    box.textContent = '✓';
+    switchTab('overview', document.querySelector('.subtab-btn:nth-child(2)'));
+  }
+});
+</script>
 
 </body>
 </html>
