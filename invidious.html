@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invidious</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+    }
+    .setup-checkbox.checked { background: rgba(76,175,125,.4); }
+    .setup-complete-label { font-weight: 700; font-size: .88rem; color: var(--text-bright); }
+
+    /* Storage breakdown */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* Troubleshooting */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok     { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">📺</div>
+  <div>
+    <h1>Invidious</h1>
+    <div class="subtitle">
+      // YouTube Frontend · Port <span data-cfg="port:invidious"></span> · Docker WSL2 · Authentik forward_auth //
+    </div>
+    <p class="desc">
+      A privacy-respecting, self-hosted YouTube frontend. No Google tracking, no ads, no Shorts push.
+      Per-user subscription feeds backed by a Postgres database, SponsorBlock built in, and uBlock-style
+      content filtering via the proxy — all locked behind Authentik so only server members can access it.
+      Works on desktop and mobile browsers with no app install required.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Check when Invidious is running, accounts are locked to SSO, SponsorBlock is enabled, and at least one user has imported their subscriptions.
+      </div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <!-- ── STEP 1: Docker / WSL2 ── -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 1 — Confirm WSL2 + Docker <span class="tag tag-docker">WSL2 + Docker</span></div>
+    <div class="card">
+      <p>Invidious runs in Docker on WSL2 (same pattern as Immich and Authentik). If either of those are already running, WSL2 and Docker are ready — skip to Step 2.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Verify Docker is available inside WSL2</strong>
+          <pre>wsl -d Ubuntu -- docker ps</pre>
+          <p>If you see a table header (even empty), Docker is ready. If you get a connection error, start Docker: open the Ubuntu WSL2 terminal and run <code>sudo service docker start</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── STEP 2: Deploy Invidious ── -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 2 — Deploy Invidious <span class="tag tag-docker">Docker Compose</span></div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the directory and fetch the official compose file</strong>
+          <pre>mkdir ~/invidious && cd ~/invidious
+
+# Grab the official Docker Compose from the Invidious repo:
+wget -O docker-compose.yml \
+  https://raw.githubusercontent.com/iv-org/invidious/master/docker-compose.yml</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the Invidious config file</strong>
+          <p>Create <code>~/invidious/config/config.yml</code> (the directory must exist first):</p>
+          <pre>mkdir -p ~/invidious/config
+
+cat > ~/invidious/config/config.yml << 'EOF'
+# ── Database ─────────────────────────────────────────────────
+db:
+  user: kemal
+  password: CHANGE_THIS_STRONG_PASSWORD
+  host: invidious-db
+  port: 5432
+  dbname: invidious
+
+# ── Core settings ────────────────────────────────────────────
+check_tables: true
+external_port: 443
+domain: invidious.<span data-cfg="domain"></span>
+https_only: true
+
+# ── Authentication / Registration ────────────────────────────
+# Registration is disabled — accounts are created by the admin only.
+# Users authenticate via Authentik forward_auth at the Caddy layer;
+# their Invidious account is a thin record that stores subscriptions.
+registration_enabled: false
+
+# ── Homepage defaults ─────────────────────────────────────────
+# Every user's homepage shows their subscription feed, not trending.
+default_home: Subscriptions
+feed_menu:
+  - Subscriptions
+  - Playlists
+  - History
+
+# ── Privacy / Proxy ──────────────────────────────────────────
+# Route all media through the Invidious server so the client
+# never contacts Google. This is what makes adblock work:
+# no direct connection to googlevideo.com, no ad requests land.
+invidious_companion:
+  - private_url: http://invidious-companion:8282
+
+# ── SponsorBlock ─────────────────────────────────────────────
+# Built-in SponsorBlock integration — users can set their
+# skip preferences in account settings.
+sponsorblock_server: https://sponsor.ajay.app
+
+# ── Cosmetic defaults ─────────────────────────────────────────
+popular_enabled: false
+statistics_enabled: false
+EOF</pre>
+          <div class="callout callout-warn">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-body">Replace <code>CHANGE_THIS_STRONG_PASSWORD</code> with a real password. It must match the <code>POSTGRES_PASSWORD</code> you set in the environment below.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Edit the Docker Compose environment</strong>
+          <p>Open <code>~/invidious/docker-compose.yml</code> and set the Postgres password to match your config. The official compose file has a placeholder — find the <code>POSTGRES_PASSWORD</code> line under the <code>invidious-db</code> service and set it to the same value as above.</p>
+          <pre># Key environment vars to verify / set in docker-compose.yml:
+# Under service: invidious-db
+#   POSTGRES_PASSWORD: CHANGE_THIS_STRONG_PASSWORD   ← match config.yml
+#   POSTGRES_USER: kemal
+#   POSTGRES_DB: invidious
+#
+# Under service: invidious
+#   INVIDIOUS_CONFIG_FILE: /invidious/config/config.yml</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Add the config volume mount to the compose file</strong>
+          <p>The official compose file may not mount your config folder by default. Under the <code>invidious</code> service's <code>volumes:</code> section, ensure this line is present:</p>
+          <pre>    volumes:
+      - ./config/config.yml:/invidious/config/config.yml:ro</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Start Invidious</strong>
+          <pre>cd ~/invidious
+docker compose up -d
+
+# Watch startup logs — first run pulls images (~500 MB) and initialises the DB:
+docker compose logs -f invidious</pre>
+          <p>Ready when you see <code>Invidious is ready to serve</code> in the logs. Access it locally at <code>http://localhost:<span data-cfg="port:invidious"></span></code>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Open the firewall</strong>
+          <pre>netsh advfirewall firewall add rule name="Invidious" ^
+  dir=in action=allow protocol=TCP localport=<span data-cfg="port:invidious"></span></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Auto-start on Windows boot via Task Scheduler</strong>
+          <pre># Task Scheduler → Create Task:
+# Name:    Invidious
+# Trigger: At startup, delay 3 minutes
+# Action:  wsl -d Ubuntu -- bash -c "cd ~/invidious && docker compose up -d"
+# Run whether logged on or not: ☑</pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── STEP 3: Create user accounts ── -->
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Create Invidious Accounts for Each User</div>
+    <div class="card">
+      <p>Because <code>registration_enabled: false</code> is set in the config, users cannot self-register. The admin must create one Invidious account per server user, using a username that <strong>exactly matches their Authentik username</strong>. This is the link between SSO identity and their subscription database row.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">The Authentik forward_auth layer authenticates the user, but Invidious uses its own internal session once they land on the page. Matching usernames means you can later auto-login them via a proxy header script, or just have them log in once and stay logged in forever via cookie.</div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Temporarily enable registration to create accounts</strong>
+          <p>Edit <code>~/invidious/config/config.yml</code> and change:</p>
+          <pre>registration_enabled: true</pre>
+          <p>Then restart Invidious: <code>docker compose restart invidious</code></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create each user's account</strong>
+          <p>Go to <code>http://localhost:<span data-cfg="port:invidious"></span>/register</code> and create an account for each user. Use their <strong>Authentik username</strong> as the Invidious username. Password can be anything — users won't need it if they stay logged in via cookie, but record it somewhere secure (Vaultwarden).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Disable registration again</strong>
+          <pre># In ~/invidious/config/config.yml:
+registration_enabled: false
+
+docker compose restart invidious</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── STEP 4: Caddy + Authentik SSO ── -->
+  <div class="section">
+    <div class="section-title">🔐 Step 4 — Caddy Reverse Proxy + Authentik SSO <span class="tag tag-sso">→ SSO TAB</span></div>
+    <div class="card">
+      <div class="card-title">Auth pattern: Caddy forward_auth</div>
+      <p>Invidious has no native OIDC support. Caddy validates the Authentik session on every request <em>before</em> the request ever reaches Invidious. If you're not logged into Authentik, you get the Authentik login page — Invidious is completely invisible to unauthenticated users.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the Authentik application (Proxy Provider — forward auth)</strong>
+          <p>In Authentik Admin → Applications → Providers → Create → <strong>Proxy Provider</strong>:</p>
+          <pre>Name:            Invidious
+Authorization:   (your default authorization flow)
+Forward auth:    Single Application
+External Host:   https://invidious.<span data-cfg="domain"></span></pre>
+          <p>Then create the Application:</p>
+          <pre>Authentik Admin → Applications → Applications → Create
+Name:       Invidious
+Slug:       invidious
+Provider:   (the Proxy Provider above)
+Launch URL: https://invidious.<span data-cfg="domain"></span>
+Icon:       (optional — use a YouTube/Invidious logo)</pre>
+          <p>In the Application's <strong>Policy/Binding</strong> tab, bind your server user group so only your users can access it. Anyone not in that group gets denied at Authentik — Invidious never sees the request.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Add to your Caddyfile</strong>
+          <p>Open <code data-cfg="path:caddyfile"></code> and add:</p>
+          <pre>invidious.<span data-cfg="domain"></span> {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:<span data-cfg="port:invidious"></span>
+}</pre>
+          <p>Reload Caddy:</p>
+          <pre>caddy reload --config "<span data-cfg="path:caddyfile"></span>"</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Test the SSO gate</strong>
+          <p>Open an incognito window and navigate to <code>https://invidious.<span data-cfg="domain"></span></code>. You should be immediately redirected to the Authentik login page. Log in with a valid server account — you should land on the Invidious subscription feed. Try with a non-member Google account — it should be denied by Authentik.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── STEP 5: SponsorBlock & Adblock ── -->
+  <div class="section">
+    <div class="section-title">🛡️ Step 5 — Ad Blocking &amp; SponsorBlock</div>
+    <div class="card">
+      <div class="card-title">How ad blocking works in Invidious</div>
+      <p>Invidious proxies all video and media through your server — the client never makes a direct request to <code>googlevideo.com</code> or any Google ad infrastructure. Because the media proxy strips the connection to Google's ad servers entirely, ads never load. There's nothing extra to install — it's a consequence of how Invidious works when the companion proxy is enabled (which the config above does).</p>
+    </div>
+    <div class="card">
+      <div class="card-title">SponsorBlock — per-user configuration</div>
+      <p>SponsorBlock is enabled server-side via the <code>sponsorblock_server</code> config key. Each user controls what gets skipped in their account preferences:</p>
+      <ol style="margin:8px 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Log into Invidious → click your username (top right) → <strong>Preferences</strong></li>
+        <li>Scroll to the <strong>SponsorBlock</strong> section</li>
+        <li>Enable the segment types you want auto-skipped: Sponsor, Intro, Outro, Self-Promotion, Interaction Reminder, etc.</li>
+        <li>Save — SponsorBlock applies to every video you watch from that point on</li>
+      </ol>
+    </div>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Mobile tip:</strong> On mobile browsers, users can add the Invidious URL to their home screen (iOS: Share → Add to Home Screen; Android: browser menu → Add to Home Screen). It behaves like a PWA — full-screen playback, no browser chrome in the way.</div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── STEP 6: Import YouTube subscriptions ── -->
+  <div class="section">
+    <div class="section-title">📥 Step 6 — Import YouTube Subscriptions <span class="tag tag-sso">Per User</span></div>
+    <div class="card">
+      <div class="card-title">Method A — Import via Google Takeout (recommended)</div>
+      <p>This is the cleanest method. It exports your YouTube data directly from Google and imports it into Invidious in one click.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Export from Google Takeout</strong>
+          <ol style="margin:6px 0 0 18px;font-size:.85rem;line-height:1.8">
+            <li>Go to <a href="https://takeout.google.com" target="_blank">takeout.google.com</a></li>
+            <li>Click <strong>Deselect all</strong>, then scroll down and enable only <strong>YouTube and YouTube Music</strong></li>
+            <li>Click <strong>Next step</strong> → choose <em>Export once</em>, <em>.zip</em> format</li>
+            <li>Click <strong>Create export</strong> — Google will email you a download link (usually within a few minutes)</li>
+            <li>Download and unzip the archive</li>
+            <li>Navigate to: <code>Takeout / YouTube and YouTube Music / subscriptions /</code></li>
+            <li>You'll find a file named <code>subscriptions.csv</code></li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Import into Invidious</strong>
+          <ol style="margin:6px 0 0 18px;font-size:.85rem;line-height:1.8">
+            <li>Log into Invidious at <code data-cfg="url:invidious"></code></li>
+            <li>Click your username → <strong>Import/Export data</strong></li>
+            <li>Under <em>Import YouTube subscriptions</em>, click <strong>Choose file</strong></li>
+            <li>Select your <code>subscriptions.csv</code> file</li>
+            <li>Click <strong>Import</strong> — all your subscriptions appear immediately in your feed</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Method B — Subscribe manually inside Invidious</div>
+      <p>For users who don't want to go through Takeout, or who only want to subscribe to a few channels:</p>
+      <ol style="margin:6px 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Search for a channel by name in the Invidious search bar</li>
+        <li>Click through to the channel page</li>
+        <li>Click the <strong>Subscribe</strong> button (top of channel page)</li>
+        <li>Repeat for each channel. Subscriptions are stored in the Postgres DB immediately.</li>
+      </ol>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Method C — Import from an existing Invidious or NewPipe export</div>
+      <p>If a user already has an Invidious account on another instance, or uses NewPipe/FreeTube on their phone, those apps can export a subscription list in Invidious-compatible JSON format. Use the same <strong>Import/Export data</strong> page and choose the JSON import option instead of CSV.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">📺 Invidious is running. All video is proxied through your server. No ads, no tracking, no Google. Per-user subscription feeds are stored in Postgres.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:invidious"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://localhost:<span data-cfg="port:invidious"></span></code></td></tr>
+          <tr><td>Mobile</td><td>Same URL — add to home screen for app-like experience</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:invidious"></span></td></tr>
+          <tr><td>Install type</td><td>Docker Compose in WSL2</td></tr>
+          <tr><td>Database</td><td>PostgreSQL (Docker)</td></tr>
+          <tr><td>Auth method</td><td>Authentik forward_auth via Caddy</td></tr>
+          <tr><td>Data path</td><td><code>~/invidious/</code> (WSL2)</td></tr>
+          <tr><td>Ad blocking</td><td>Server-side proxy (no client extension needed)</td></tr>
+          <tr><td>SponsorBlock</td><td>Built in — per-user preference</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Desktop browser</td><td>Go to <code data-cfg="url:invidious"></code> — full feature set</td></tr>
+        <tr><td>Mobile browser</td><td>Same URL — responsive layout. Add to home screen for app feel.</td></tr>
+        <tr><td>NewPipe (Android)</td><td>Settings → Content → YouTube Frontend → custom instance → <code data-cfg="url:invidious"></code>. Note: NewPipe bypasses Authentik (direct API), so block the <code>/api</code> path in Caddy if you want full lockdown.</td></tr>
+        <tr><td>FreeTube (desktop)</td><td>Settings → Advanced Settings → Invidious Instance → <code data-cfg="url:invidious"></code></td></tr>
+        <tr><td>Clipious (Android)</td><td>Settings → add your instance URL. Full proxy + SponsorBlock support.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Key User Settings</div>
+    <div class="card">
+      <p>Each user has an account with their own preferences. The defaults set in <code>config.yml</code> apply to new logins, but users can override anything in their Preferences page:</p>
+      <table>
+        <tr><th>Setting</th><th>Where to find it</th><th>Recommended value</th></tr>
+        <tr><td>Default homepage</td><td>Preferences → General</td><td>Subscriptions</td></tr>
+        <tr><td>Proxy videos</td><td>Preferences → Player</td><td>Enabled (for ad blocking)</td></tr>
+        <tr><td>SponsorBlock</td><td>Preferences → SponsorBlock</td><td>Enable Sponsor, Intro, Outro at minimum</td></tr>
+        <tr><td>Default quality</td><td>Preferences → Player</td><td>1080p or dash (auto)</td></tr>
+        <tr><td>Autoplay</td><td>Preferences → Player</td><td>Off by default</td></tr>
+        <tr><td>Dark mode</td><td>Preferences → Appearance</td><td>Dark (matches server aesthetic)</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p><span data-cfg="version:invidious">check versions.json</span></p>
+      <p>Invidious releases frequently because YouTube regularly breaks the extraction layer. Check the <a href="https://github.com/iv-org/invidious/releases" target="_blank">GitHub releases page</a> when video playback stops working — this is almost always the cause.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Pull the latest image and restart</strong>
+          <pre>cd ~/invidious
+docker compose pull
+docker compose up -d
+
+# Verify it came back up cleanly:
+docker compose logs --tail=30 invidious</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Test a video plays after update</strong>
+          <p>Open <code data-cfg="url:invidious"></code>, search for any video, and confirm it streams through the proxy. If the video loads but shows a black screen, clear your browser cache and try again — stale JS sometimes causes this after updates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🗄️ Database Backup</div>
+    <div class="card">
+      <p>The Postgres database holds all user subscriptions, preferences, watch history, and playlists. Back it up regularly — it's small (&lt;50 MB typically) but irreplaceable.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Dump the database</strong>
+          <pre>cd ~/invidious
+docker compose exec invidious-db pg_dump -U kemal invidious \
+  > ~/backups/invidious_$(date +%Y-%m-%d).sql</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Restore from backup (if needed)</strong>
+          <pre>cd ~/invidious
+docker compose exec -T invidious-db psql -U kemal invidious \
+  < ~/backups/invidious_YYYY-MM-DD.sql</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>When videos break</td><td>Update Docker image — YouTube extraction breaks every few weeks</td></tr>
+        <tr><td>Weekly</td><td>Check <code>docker compose logs invidious</code> for repeated 429 / rate-limit errors</td></tr>
+        <tr><td>Monthly</td><td>Back up Postgres DB (subscriptions, preferences, history)</td></tr>
+        <tr><td>Monthly</td><td>Prune unused Docker images: <code>docker image prune -f</code></td></tr>
+        <tr><td>When adding a user</td><td>Create their Invidious account (admin only — registration is disabled)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li><strong>YouTube extraction breaks regularly:</strong> Invidious reverse-engineers YouTube's private API. Google changes it constantly. When video playback stops working entirely, pull the latest Docker image first — that's almost always the fix.</li>
+        <li><strong>Rate limiting (429 errors):</strong> If your instance gets heavy use, Google will throttle the server IP. Mitigation: the companion proxy helps spread load. If it persists, check the Invidious GitHub issues for workarounds.</li>
+        <li><strong>Shorts often don't work:</strong> YouTube Shorts use a different internal API and Invidious support for them is inconsistent. This is expected — direct users to the regular video link instead.</li>
+        <li><strong>Live streams are unreliable:</strong> Live stream support depends on Google's HLS endpoint being accessible. It works intermittently — don't rely on it for live content.</li>
+        <li><strong>Proxy increases server bandwidth:</strong> Every byte of video goes through your server. If multiple users are watching 1080p simultaneously, bandwidth usage is real. Monitor with <code>docker stats</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🏆 Milestones</div>
+    <div class="card">
+      <table>
+        <tr><th>Achievement</th><th>Condition</th></tr>
+        <tr><td>📺 <strong>Cut the Cord</strong></td><td>First video played through the Invidious proxy (no Google tracking)</td></tr>
+        <tr><td>🚫 <strong>Ad-Free Zone</strong></td><td>Video proxy confirmed working — ads structurally blocked</td></tr>
+        <tr><td>✂️ <strong>Skip It</strong></td><td>SponsorBlock enabled and first sponsor segment auto-skipped</td></tr>
+        <tr><td>📋 <strong>Feed Me</strong></td><td>Subscription feed populated with at least 10 channels</td></tr>
+        <tr><td>🔐 <strong>Members Only</strong></td><td>Authentik gate confirmed — non-member account denied access</td></tr>
+        <tr><td>📦 <strong>Migrated</strong></td><td>YouTube subscriptions imported via Takeout or CSV</td></tr>
+        <tr><td>📱 <strong>Home Screen Hero</strong></td><td>Invidious added to mobile home screen — used as app replacement</td></tr>
+        <tr><td>👥 <strong>Full House</strong></td><td>All server users have Invidious accounts and imported subscriptions</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Storage Overview</div>
+    <div class="storage-breakdown">
+      <div class="storage-cell">
+        <div class="storage-cell-label">Docker Images</div>
+        <div class="storage-cell-val">~500 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Postgres DB</div>
+        <div class="storage-cell-val">&lt;50 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Per-User Data</div>
+        <div class="storage-cell-val">&lt;1 MB / user</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Video Cache</div>
+        <div class="storage-cell-val">None (streamed live)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Where Everything Lives</div>
+    <div class="card">
+      <pre>~/invidious/                        ← WSL2 home directory
+  docker-compose.yml                 ← compose definition
+  config/
+    config.yml                       ← Invidious config (domain, DB, SponsorBlock, etc.)
+
+# Docker-managed volumes:
+# invidious_db-data                  ← Postgres data volume (subscriptions, preferences, history)
+#   → list with: docker volume ls | grep invidious
+#   → inspect with: docker volume inspect invidious_db-data
+
+D:\Users\[username]\                 ← No files here — Invidious is DB-only, no filesystem per-user data
+                                        (subscriptions live in Postgres, not in the user folder)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Per-User Data</div>
+    <div class="card">
+      <div class="card-title">What Invidious stores per user (all in Postgres)</div>
+      <table>
+        <tr><th>Data</th><th>Where</th><th>Notes</th></tr>
+        <tr><td>Subscriptions</td><td><code>users</code> table (channels column)</td><td>JSON array of channel IDs</td></tr>
+        <tr><td>Watch history</td><td><code>watch_history</code> table</td><td>If enabled in preferences</td></tr>
+        <tr><td>Playlists</td><td><code>playlists</code> table</td><td>User-created playlists</td></tr>
+        <tr><td>Preferences</td><td><code>users</code> table (preferences column)</td><td>JSON — SponsorBlock settings, quality, etc.</td></tr>
+        <tr><td>Session tokens</td><td><code>session_ids</code> table</td><td>Active login sessions</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Backup Priority</div>
+    <div class="card">
+      <table>
+        <tr><th>Data</th><th>Priority</th><th>Method</th></tr>
+        <tr><td>Postgres DB (subscriptions + prefs)</td><td>🔴 High</td><td><code>pg_dump</code> — see Maintenance tab</td></tr>
+        <tr><td><code>config/config.yml</code></td><td>🟡 Medium</td><td>Copy to <code>D:\Backups\Invidious\</code></td></tr>
+        <tr><td>Docker compose file</td><td>🟢 Low</td><td>Re-downloadable from GitHub, but back it up anyway</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">Videos won't play / black screen on all videos</div>
+      <div class="trouble-a">
+        YouTube broke the extraction API — this happens every few weeks. Fix: <code>cd ~/invidious && docker compose pull && docker compose up -d</code>. If the latest image doesn't fix it, check <a href="https://github.com/iv-org/invidious/issues" target="_blank">github.com/iv-org/invidious/issues</a> for an active issue thread — the community usually has a workaround or patched image within hours.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Getting redirected to Authentik login even when already logged in</div>
+      <div class="trouble-a">
+        Your Authentik session may have expired. Log into Authentik at <code data-cfg="url:auth"></code> directly and confirm you have an active session. If the session is valid but Caddy still redirects you, check that the Authentik outpost is running: <code>docker compose -f ~/authentik/docker-compose.yml logs outpost</code>.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Subscription feed is empty after logging in</div>
+      <div class="trouble-a">
+        The Invidious account exists but has no subscriptions yet. Import them via the Google Takeout CSV method (see First Time Setup → Step 6), or subscribe to channels manually. Make sure you're logged in — the feed only shows when authenticated.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">SponsorBlock segments aren't being skipped</div>
+      <div class="trouble-a">
+        Check Preferences → SponsorBlock — the categories must be individually enabled (they don't default to on for existing accounts). If they are enabled and still not skipping, check that <code>sponsorblock_server: https://sponsor.ajay.app</code> is in your <code>config.yml</code> and that the server can reach that URL: <code>docker compose exec invidious curl -s https://sponsor.ajay.app/api/skipSegments?videoID=dQw4w9WgXcQ | head -c 200</code>.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Ads are still appearing</div>
+      <div class="trouble-a">
+        If you're seeing ads, the video proxy is not active. Check Preferences → Player → Proxy videos is set to <em>Enabled</em>. If proxy is on and ads still appear, something is wrong with the companion container — check its logs: <code>docker compose logs invidious-companion</code>. The companion container must be running for the proxy to work.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">429 Too Many Requests errors in logs</div>
+      <div class="trouble-a">
+        Google is rate-limiting your server's IP. This usually clears within a few hours. If it's persistent, consider reducing concurrent users or checking if something is hammering the subscription feed refresh. The Invidious team tracks this in their issues — search for "429" to see current mitigation strategies.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">How do I add a new user after initial setup?</div>
+      <div class="trouble-a">
+        Temporarily set <code>registration_enabled: true</code> in config.yml, restart Invidious (<code>docker compose restart invidious</code>), create their account at <code>/register</code> using their Authentik username, then set <code>registration_enabled: false</code> and restart again. Also add them to the Authentik group binding on the Invidious application so they can pass the SSO gate.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">How do I check what's using bandwidth / if proxy is working?</div>
+      <div class="trouble-a">
+        Run <code>docker stats</code> in WSL2 while someone watches a video. The <code>invidious</code> container's network I/O should be climbing — that means video is flowing through your server. If network I/O is near zero while video plays, the proxy is not active.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Useful Commands</div>
+    <div class="card">
+      <pre># Check all containers are running:
+cd ~/invidious && docker compose ps
+
+# Tail live logs:
+docker compose logs -f invidious
+
+# Restart just Invidious (not the DB):
+docker compose restart invidious
+
+# Shell into the Invidious container:
+docker compose exec invidious sh
+
+# Shell into the Postgres DB:
+docker compose exec invidious-db psql -U kemal invidious
+
+# List all users in the DB:
+docker compose exec invidious-db psql -U kemal invidious \
+  -c "SELECT username, array_length(subscriptions, 1) as sub_count FROM users;"
+
+# Force-pull latest image:
+docker compose pull && docker compose up -d</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+═══════════════════════════════════════════════════════════════ -->
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'invidious_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar      = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub      = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      if (sub) sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (overviewBtn) {
+        overviewBtn.style.fontWeight = '700';
+        overviewBtn.style.color = 'var(--accent3)';
+      }
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      if (sub) sub.textContent = 'Mark as done → activates Overview tab';
+      if (overviewBtn) {
+        overviewBtn.style.fontWeight = '';
+        overviewBtn.style.color = '';
+      }
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
+
+</body>
+</html>
