@@ -1,54 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Flash Arcade</title><link rel="stylesheet" href="shared.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Flash Arcade</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+    }
+    .setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+    .setup-complete-sub { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+    .setup-complete-sub-wrap { flex: 1; }
+    .setup-complete-actions { margin-left: auto; }
+  </style>
+</head>
 <body>
 
 <div class="page-header">
   <div class="page-icon">🕹️</div>
   <div>
     <h1>Flash Arcade</h1>
-    <div class="subtitle">// Ruffle · .swf Preservation · Per-User Saves · Authentik SSO · nginx · Docker //</div>
-    <p class="desc">A private browser-based Flash game arcade powered by Ruffle (WebAssembly Flash emulator). Games load from a shared read-only library; save files (.sol) are stored per-user. Authentication is handled entirely by Authentik via the <code>X-authentik-username</code> header — no separate login needed.</p>
+    <div class="subtitle">
+      // Ruffle WASM · .swf Preservation · Per-User .sol Saves · Authentik Forward Auth · nginx · Docker //
+    </div>
+    <p class="desc">
+      A private browser-based Flash game arcade powered by Ruffle (WebAssembly Flash emulator). Games load from a shared read-only library; save files (.sol) are stored per-user under <code>userdata/{NAME}/arcade/saves/</code>. Authentication is handled by Authentik via the <code>X-authentik-username</code> header — no separate login screen.
+    </p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 V1 Goal: Serve .swf games via Ruffle in the browser with per-user .sol save file isolation. No Flash plugin required — Ruffle runs entirely in WebAssembly.</div>
+<!-- ── Sub-tab nav ── -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
 
-<div class="section">
-  <div class="section-title">🗺️ Architecture Overview</div>
-  <div class="card">
-    <p>The arcade has two layers: a shared read-only game library (common to all users) and a per-user writable saves directory. nginx serves both. The correct saves directory is mounted based on the authenticated Authentik username injected by Caddy at the proxy layer.</p>
-    <div class="callout callout-dragon">
-      <div class="callout-icon">🐉</div>
-      <div class="callout-body"><strong>Core principle:</strong> The game library is identical for every user. Only the saves mount changes. Caddy reads <code>X-authentik-username</code> from Authentik and passes it as an environment variable — the container mounts the correct saves path before serving.</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div class="setup-complete-sub-wrap">
+      <div class="setup-complete-label">Complete?</div>
+      <div class="setup-complete-sub" id="complete-sub">Check when Flash Arcade is running, Ruffle is loading games, SSO is connected, and per-user saves are working.</div>
     </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">🗂️ Directory Structure</div>
-  <div class="card">
-    <pre>userdata/
-  common/
-    arcade/
-      bin/              ← Ruffle WASM runtime files (ruffle.js, ruffle_bg.wasm, …)
-      library/          ← All .swf game files (shared, read-only for all users)
-        game1.swf
-        game2.swf
-        library.json    ← Game manifest (id, title, thumbnail, filename)
-  {NAME}/               ← Per-user directory — NAME = Authentik username
-    arcade/
-      saves/            ← User's .sol save files, one per game</pre>
-    <p>The <code>common/arcade/</code> directory is mounted read-only and is identical for every user. The <code>userdata/{NAME}/arcade/saves/</code> directory is writable and unique per user. Create it when provisioning a new user:</p>
-    <pre>mkdir -p userdata/{NAME}/arcade/saves</pre>
+  <div class="v1-banner">🐉 V1 Goal: Serve .swf games via Ruffle in the browser with per-user .sol save file isolation. No Flash plugin required — Ruffle runs entirely in WebAssembly.</div>
+
+  <!-- STEP 1: Directory structure -->
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Create Directory Structure</div>
+    <div class="card">
+      <p>Create the shared game library and a saves folder for each user. The common library is read-only for all users; only the saves directory is writable and per-user.</p>
+      <pre># Shared game library (read-only, all users)
+mkdir -p userdata/common/arcade/bin
+mkdir -p userdata/common/arcade/library
+
+# Per-user saves — repeat for each user (NAME = Authentik username)
+mkdir -p userdata/{NAME}/arcade/saves</pre>
+      <div class="callout callout-dragon">
+        <div class="callout-icon">🐉</div>
+        <div class="callout-body"><strong>Naming rule:</strong> <code>{NAME}</code> must exactly match the Authentik username. Caddy injects it via <code>X-authentik-username</code>. Mismatches = wrong saves directory.</div>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">🐳 Docker Compose</div>
-  <div class="card">
-    <div class="card-title">docker-compose.yml — arcade service block</div>
-    <pre>services:
+  <!-- STEP 2: Ruffle runtime -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 2 — Install Ruffle Runtime <span class="tag tag-docker">WASM</span></div>
+    <div class="card">
+      <p>Download the latest self-hosted build from <a href="https://ruffle.rs" target="_blank">ruffle.rs</a> and extract the files into <code>userdata/common/arcade/bin/</code>.</p>
+      <pre>userdata/common/arcade/bin/
+  ruffle.js
+  ruffle_bg.wasm        ← must be served as application/wasm
+  …</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>MIME type is mandatory:</strong> The <code>.wasm</code> file must be served with <code>Content-Type: application/wasm</code>. Browsers silently refuse to load it otherwise. Add this to your nginx config inside the arcade container's <code>server {}</code> block:</div>
+      </div>
+      <pre>location ~* \.wasm$ {
+    types { }
+    default_type application/wasm;
+    add_header Cache-Control "public, max-age=86400";
+}</pre>
+    </div>
+  </div>
+
+  <!-- STEP 3: Add games -->
+  <div class="section">
+    <div class="section-title">🎮 Step 3 — Add Games to the Library</div>
+    <div class="card">
+      <p>Drop <code>.swf</code> files into <code>userdata/common/arcade/library/</code> and register them in <code>library.json</code>. No service restart needed — nginx serves static files directly.</p>
+      <pre>userdata/common/arcade/library/
+  game1.swf
+  game1.png             ← thumbnail (optional)
+  library.json</pre>
+      <pre># library.json format:
+[
+  {
+    "id":    "game1",
+    "title": "My Flash Game",
+    "swf":   "library/game1.swf",
+    "thumb": "library/game1.png"
+  }
+]</pre>
+    </div>
+  </div>
+
+  <!-- STEP 4: Docker Compose -->
+  <div class="section">
+    <div class="section-title">🐳 Step 4 — Docker Compose <span class="tag tag-docker">DOCKER</span></div>
+    <div class="card">
+      <div class="card-title">docker-compose.yml — arcade service block</div>
+      <pre>services:
   arcade:
     image: nginx:alpine
     volumes:
@@ -57,63 +177,45 @@
     environment:
       - AUTHENTIK_USER=${USER}
     restart: unless-stopped</pre>
-    <p>The <code>${USER}</code> variable is resolved from the environment at container start. The shared library is read-only; only the <code>saves/</code> subdirectory is writable. When a different user logs in, restart the container (or re-up) with the new <code>USER</code> value to re-point the saves mount.</p>
-    <div class="callout callout-warn">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>Single-seat note:</strong> The standard Docker approach mounts one user's saves at a time. For true multi-user concurrency (multiple users playing simultaneously), run one container instance per user on separate ports, each with their own <code>USER</code> value, and route via Caddy subdomain or path prefix.</div>
+      <p>The <code>${USER}</code> variable is resolved from the environment at container start. The shared library is mounted read-only; only the <code>saves/</code> subdirectory is writable. When a different user logs in, restart the container (or re-up) with the new <code>USER</code> value to re-point the saves mount.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Single-seat note:</strong> The standard Docker approach mounts one user's saves at a time. For true multi-user concurrency, run one container instance per user on separate ports, each with their own <code>USER</code> value, and route via Caddy subdomain or path prefix.</div>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">🔐 Authentication — Authentik Forward Auth</div>
-  <div class="card">
-    <p>Caddy protects the arcade via Authentik forward auth. Every request is validated before reaching nginx. Authentik injects <code>X-authentik-username</code>, which is used to route save files to the correct user directory.</p>
-    <pre># Caddyfile entry:
-arcade.yourdomain.com {
+  <!-- STEP 5: Caddy / Authentik -->
+  <div class="section">
+    <div class="section-title">🔐 Step 5 — Authentik Forward Auth (SSO) <span class="tag tag-sso">SSO REQUIRED</span></div>
+    <div class="card">
+      <p>Caddy protects the arcade via Authentik forward auth. Every request is authenticated before reaching nginx. Authentik injects <code>X-authentik-username</code>, which routes save files to the correct user directory.</p>
+      <pre># Caddyfile entry:
+<span data-cfg="subdomain:flasharcade"></span>.<span data-cfg="domain"></span> {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username
         trusted_proxies private_ranges
     }
-    reverse_proxy localhost:[ARCADE_PORT]
+    reverse_proxy localhost:<span data-cfg="port:flasharcade"></span>
 }</pre>
-    <p>The save server reads the username from the header to determine which user's saves directory to read/write:</p>
-    <pre># Save routing logic (in save handler):
-# POST/PUT /saves/game_name.sol
+      <p>The save server reads <code>X-authentik-username</code> from the header to determine which user's saves directory to read/write.</p>
+      <pre># Save routing logic:
+# PUT /saves/game_name.sol
 #   → username = request.headers.get('X-authentik-username')
 #   → write to: userdata/{username}/arcade/saves/game_name.sol
 
 # GET /saves/game_name.sol
 #   → username = request.headers.get('X-authentik-username')
 #   → read from: userdata/{username}/arcade/saves/game_name.sol</pre>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">⚙️ Ruffle Runtime Setup</div>
-  <div class="card">
-    <div class="card-title">Installing Ruffle</div>
-    <p>Ruffle is a WebAssembly Flash emulator — no browser plugin required. Download the latest self-hosted build from <a href="https://ruffle.rs" target="_blank">ruffle.rs</a> and extract the files into <code>userdata/common/arcade/bin/</code>.</p>
-    <pre>userdata/common/arcade/bin/
-  ruffle.js
-  ruffle_bg.wasm        ← must be served as application/wasm
-  …</pre>
-    <div class="callout callout-warn">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>MIME type required:</strong> The <code>.wasm</code> file must be served with the <code>application/wasm</code> Content-Type. Browsers will refuse to load it otherwise. Add this to your nginx config inside the arcade container:</div>
     </div>
-    <pre># nginx.conf addition — add inside the server {} block:
-location ~* \.wasm$ {
-    types { }
-    default_type application/wasm;
-    add_header Cache-Control "public, max-age=86400";
-}
+  </div>
 
-# Or add to mime.types:
-application/wasm  wasm;</pre>
-    <div class="card-title" style="margin-top:16px">Embedding Ruffle in the game page</div>
-    <pre>&lt;!-- In your game player page --&gt;
+  <!-- STEP 6: Embed Ruffle -->
+  <div class="section">
+    <div class="section-title">🖥️ Step 6 — Embed Ruffle in the Game Player Page</div>
+    <div class="card">
+      <pre>&lt;!-- In your game player page --&gt;
 &lt;script&gt;
   window.RufflePlayer = window.RufflePlayer || {};
   window.RufflePlayer.config = {
@@ -128,95 +230,396 @@ application/wasm  wasm;</pre>
     const player = ruffle.createPlayer();
     document.getElementById("game-container").appendChild(player);
     player.load("/library/game1.swf");
+
+    // Per-user save hooks
+    player.addEventListener("savegame", async (e) =&gt; {
+      await fetch(`/saves/${e.detail.name}.sol`, {
+        method: 'PUT',
+        body: e.detail.data,
+        headers: { 'Content-Type': 'application/octet-stream' }
+      });
+    });
+
+    player.addEventListener("loadgame", async (e) =&gt; {
+      const res = await fetch(`/saves/${e.detail.name}.sol`);
+      if (res.ok) e.detail.resolve(await res.arrayBuffer());
+      else e.detail.resolve(null);
+    });
   });
 &lt;/script&gt;
 &lt;div id="game-container"&gt;&lt;/div&gt;</pre>
+      <p>Ruffle's <code>savegame</code> / <code>loadgame</code> events intercept Flash SharedObject writes and proxy them to <code>/saves/</code>, which nginx serves from the user's personal saves directory.</p>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">💾 Save File Architecture (.sol)</div>
-  <div class="card">
-    <p>Flash save files are <code>.sol</code> (SharedObject) files. By default Ruffle writes these to the browser's local storage. To get per-user server-side saves, the arcade frontend intercepts Ruffle's save/load events and proxies them to the save endpoint instead.</p>
-    <pre># Save write:
-PUT  /saves/game_name.sol
-     Host: nginx serving userdata/{NAME}/arcade/saves/game_name.sol
-
-# Save read:
-GET  /saves/game_name.sol
-     Host: nginx reading userdata/{NAME}/arcade/saves/game_name.sol</pre>
-    <p>Ruffle exposes a <code>callExternalInterface</code> hook and save callbacks. Wire them up in the player initialization:</p>
-    <pre>player.addEventListener("savegame", async (e) =&gt; {
-  await fetch(`/saves/${e.detail.name}.sol`, {
-    method: 'PUT',
-    body: e.detail.data,
-    headers: { 'Content-Type': 'application/octet-stream' }
-  });
-});
-
-player.addEventListener("loadgame", async (e) =&gt; {
-  const res = await fetch(`/saves/${e.detail.name}.sol`);
-  if (res.ok) e.detail.resolve(await res.arrayBuffer());
-  else e.detail.resolve(null);
-});</pre>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">🎮 Game Library</div>
-  <div class="card">
-    <p>All <code>.swf</code> files live in <code>userdata/common/arcade/library/</code>. They are shared read-only across all users. The arcade frontend reads <code>library.json</code> to build the game browser UI.</p>
-    <pre>userdata/common/arcade/library/
-  game1.swf
-  game2.swf
-  game1.png             ← thumbnail (optional)
-  library.json</pre>
-    <pre># library.json format:
-[
-  {
-    "id":    "game1",
-    "title": "My Flash Game",
-    "swf":   "library/game1.swf",
-    "thumb": "library/game1.png"
-  },
-  ...
-]</pre>
-    <p>To add a game: drop the <code>.swf</code> (and optional thumbnail) into <code>library/</code> and add an entry to <code>library.json</code>. No service restart required — static files are served directly by nginx.</p>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <p>Save files are stored at <code>userdata/{NAME}/arcade/saves/</code>, where <code>NAME</code> is the Authentik username injected by Caddy. Each user's saves are completely isolated. This path follows the same per-user convention as other services on the server.</p>
-    <pre>userdata/
-  alice/
-    arcade/
-      saves/
-        game1.sol
-        game2.sol
-  bob/
-    arcade/
-      saves/
-        game1.sol       ← Bob's separate save — never touches Alice's</pre>
-    <p>See the <strong>SSO tab → User Data Storage</strong> for the full cross-service user data architecture.</p>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">🔁 Auto-Start on Boot</div>
-  <div class="card">
-    <pre># Add to D:\Server\Scripts\start_docker_services.bat:
+  <!-- STEP 7: Auto-start -->
+  <div class="section">
+    <div class="section-title">🔁 Step 7 — Auto-Start on Boot</div>
+    <div class="card">
+      <pre># Add to D:\Server\Scripts\start_docker_services.bat:
 wsl -d Ubuntu -- bash -c "cd ~/arcade && docker-compose up -d >> ~/startup.log 2>&1"
 
 # In Task Scheduler:
 # Name: Flash Arcade
 # Trigger: At startup, delay 2 minutes
-# Action: Run start_docker_services.bat (or add the line above to your existing bat)</pre>
-    <pre># Open firewall for arcade port:
-netsh advfirewall firewall add rule name="Flash Arcade" dir=in action=allow protocol=TCP localport=[ARCADE_PORT]</pre>
+# Action: Run start_docker_services.bat</pre>
+      <pre># Open firewall for arcade port:
+netsh advfirewall firewall add rule name="Flash Arcade" dir=in action=allow protocol=TCP localport:<span data-cfg="port:flasharcade"></span></pre>
+    </div>
   </div>
-</div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">🐉 Ruffle WASM serving .swf games via nginx in Docker. Per-user .sol saves routed by Authentik username. No browser plugin required.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:flasharcade"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:flasharcade"></span></code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:flasharcade"></span></td></tr>
+          <tr><td>Install type</td><td>Docker (WSL2)</td></tr>
+          <tr><td>Base image</td><td><code>nginx:alpine</code></td></tr>
+          <tr><td>Auth method</td><td>Caddy <code>forward_auth</code></td></tr>
+          <tr><td>Auth header</td><td><code>X-authentik-username</code></td></tr>
+          <tr><td>Flash runtime</td><td>Ruffle (.wasm)</td></tr>
+          <tr><td>Game library</td><td><code>userdata/common/arcade/library/</code></td></tr>
+          <tr><td>Saves path</td><td><code>userdata/{NAME}/arcade/saves/</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Architecture Overview</div>
+    <div class="card">
+      <p>The arcade has two layers: a shared read-only game library (common to all users) and a per-user writable saves directory. nginx serves both. The correct saves directory is mounted based on the authenticated Authentik username injected by Caddy at the proxy layer.</p>
+      <div class="callout callout-dragon">
+        <div class="callout-icon">🐉</div>
+        <div class="callout-body"><strong>Core principle:</strong> The game library is identical for every user. Only the saves mount changes. Caddy reads <code>X-authentik-username</code> from Authentik and uses it to mount the correct user saves path before nginx serves anything.</div>
+      </div>
+      <pre>Request → Caddy → Authentik forward auth
+                        ↓ X-authentik-username: alice
+              nginx (arcade container)
+                ├── /library/   → userdata/common/arcade/library/  (read-only, shared)
+                ├── /bin/       → userdata/common/arcade/bin/       (Ruffle WASM)
+                └── /saves/     → userdata/alice/arcade/saves/      (writable, per-user)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 Adding Games</div>
+    <div class="card">
+      <p>Drop a <code>.swf</code> file and optional thumbnail into <code>userdata/common/arcade/library/</code>, then add an entry to <code>library.json</code>. No restart needed.</p>
+      <pre># library.json entry:
+{
+  "id":    "game1",
+  "title": "Game Title",
+  "swf":   "library/game1.swf",
+  "thumb": "library/game1.png"   ← optional
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Adding a New User</div>
+    <div class="card">
+      <p>When provisioning a new user, create their arcade saves directory. The session manager's <code>ensure_user_dirs()</code> does this automatically on first login, but you can pre-create it manually:</p>
+      <pre>mkdir -p userdata/{NAME}/arcade/saves</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updating Ruffle</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p><code data-cfg="version:flasharcade">— check versions.json —</code></p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Download new Ruffle build</strong>
+            <p>Go to <a href="https://ruffle.rs" target="_blank">ruffle.rs</a> → Downloads → Self-Hosted. Download the latest zip.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Replace files in <code>bin/</code></strong>
+            <p>Extract the zip contents into <code>userdata/common/arcade/bin/</code>, replacing the old files. No container restart needed — nginx serves them directly.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Test a game</strong>
+            <p>Load a game in the browser. Check DevTools → Network to confirm <code>ruffle_bg.wasm</code> loads with <code>Content-Type: application/wasm</code>. If it says <code>text/plain</code>, the nginx MIME type override is missing.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+    <div class="card">
+      <table>
+        <tr><th>What will break</th><th>Why</th><th>Fix</th></tr>
+        <tr>
+          <td>Games fail to load after Ruffle update</td>
+          <td>Ruffle API changes between versions</td>
+          <td>Check <a href="https://github.com/ruffle-rs/ruffle/releases" target="_blank">Ruffle releases</a> for breaking changes. May need to update player init code.</td>
+        </tr>
+        <tr>
+          <td>.wasm returns 404 or wrong MIME</td>
+          <td>nginx config missing MIME override</td>
+          <td>Ensure <code>application/wasm</code> MIME type is set in nginx config (see Setup → Step 2)</td>
+        </tr>
+        <tr>
+          <td>Saves go to wrong user</td>
+          <td><code>USER</code> env var not updated, or <code>X-authentik-username</code> header not forwarded</td>
+          <td>Check Caddyfile has <code>copy_headers X-authentik-username</code>. Confirm container was started with correct <code>USER</code>.</td>
+        </tr>
+        <tr>
+          <td>Game crashes / doesn't run</td>
+          <td>Flash game uses APIs Ruffle doesn't fully support yet</td>
+          <td>Check <a href="https://github.com/ruffle-rs/ruffle/issues" target="_blank">Ruffle compatibility tracker</a>. Some ActionScript 3 games have partial support.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Check Ruffle releases for new builds — compatibility improves frequently</td></tr>
+        <tr><td>When adding users</td><td>Run <code>mkdir -p userdata/{NAME}/arcade/saves</code></td></tr>
+        <tr><td>When adding games</td><td>Drop <code>.swf</code> into <code>library/</code> and update <code>library.json</code></td></tr>
+        <tr><td>After nginx image updates</td><td>Re-verify the <code>.wasm</code> MIME type override is still in effect</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🏆 Flash Arcade Achievements</div>
+    <div class="card">
+      <p>Flash Arcade runs entirely client-side via Ruffle — there's no built-in server-side playtime or achievement tracking. Achievements here are manual milestone markers for the server setup itself.</p>
+      <table>
+        <tr><th>Achievement</th><th>Condition</th></tr>
+        <tr><td>🕹️ <strong>Ruffle Ready</strong></td><td>First game loads successfully via Ruffle WASM</td></tr>
+        <tr><td>💾 <strong>Save Scummer</strong></td><td>Per-user .sol saves confirmed working for at least one game</td></tr>
+        <tr><td>👥 <strong>Multiplayer Arcade</strong></td><td>Two users simultaneously playing different games with isolated saves</td></tr>
+        <tr><td>📚 <strong>Librarian</strong></td><td>10+ games in the library with thumbnails and library.json entries</td></tr>
+        <tr><td>🔐 <strong>SSO Enforced</strong></td><td>Confirmed arcade is inaccessible without Authentik login</td></tr>
+        <tr><td>🧪 <strong>Compatibility Tester</strong></td><td>Tested and documented which games work / don't work with Ruffle</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
+    <div class="card">
+      <p>Save files are stored at <code>userdata/{NAME}/arcade/saves/</code>, where <code>NAME</code> is the Authentik username injected by Caddy. Each user's saves are completely isolated. This path follows the same per-user convention as other services on the server.</p>
+      <pre>userdata/
+  common/
+    arcade/
+      bin/              ← Ruffle WASM runtime (shared, read-only)
+      library/          ← All .swf game files (shared, read-only)
+        game1.swf
+        library.json
+  alice/
+    arcade/
+      saves/
+        game1.sol       ← Alice's save
+        game2.sol
+  bob/
+    arcade/
+      saves/
+        game1.sol       ← Bob's separate save — never touches Alice's</pre>
+      <p>See the <strong>SSO tab → User Data Storage</strong> for the full cross-service user data architecture.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Storage Estimates</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Approximate Size</th><th>Notes</th></tr>
+        <tr><td>nginx:alpine Docker image</td><td>~25 MB</td><td>Base container image</td></tr>
+        <tr><td>Ruffle WASM runtime (<code>bin/</code>)</td><td>~5–15 MB</td><td>Grows slightly with each Ruffle release</td></tr>
+        <tr><td>Game library (<code>library/</code>)</td><td>Varies</td><td>~1–10 MB per .swf; Flash games are small</td></tr>
+        <tr><td>Per-user saves (<code>saves/</code>)</td><td>~KB per user</td><td>.sol files are tiny; negligible quota impact</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔁 Backup</div>
+    <div class="card">
+      <p>The game library (<code>userdata/common/arcade/</code>) should be included in the server backup — especially <code>library.json</code> and any custom thumbnails. The <code>bin/</code> folder contains Ruffle and can be re-downloaded, but backing it up avoids version surprises.</p>
+      <p>Per-user <code>saves/</code> directories are covered by the standard per-user backup that runs nightly for all <code>userdata/{NAME}/</code> folders.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Game doesn't load — browser shows a blank area or spinner forever</div>
+      <div class="trouble-a">Open DevTools → Network. Check if <code>ruffle_bg.wasm</code> is being fetched. If it returns 404, the <code>bin/</code> directory isn't mounted correctly. If it returns 200 but the game still doesn't start, check the Console tab for Ruffle errors — the game may use unsupported ActionScript.</div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">.wasm file loads but browser refuses to run it</div>
+      <div class="trouble-a">The <code>application/wasm</code> MIME type is missing. Check nginx config: <code>location ~* \.wasm$ { default_type application/wasm; }</code>. The browser console will say something like "Failed to load WebAssembly: incorrect MIME type". This is the most common first-run issue.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Saves don't persist between sessions</div>
+      <div class="trouble-a">Verify the <code>saves/</code> volume is mounted writable (no <code>:ro</code> flag). Confirm the <code>PUT /saves/*.sol</code> request succeeds in DevTools → Network. If it returns 403, the saves directory may not be writable by the nginx user inside the container.</div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">User can see another user's saves</div>
+      <div class="trouble-a">The <code>${USER}</code> env variable was not set, or the container wasn't restarted after changing users. Check that Caddyfile has <code>copy_headers X-authentik-username</code> and that the save routing logic reads the header. This is a data isolation failure — confirm and fix before letting users play.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">Game library page is empty / shows no games</div>
+      <div class="trouble-a">Check that <code>library.json</code> is valid JSON and is in the correct location (<code>userdata/common/arcade/library/library.json</code>). The frontend reads this file to build the game list. Use <code>python3 -m json.tool library.json</code> to validate.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">403 or redirect loop when accessing the arcade</div>
+      <div class="trouble-a">Authentik forward auth is blocking the request. Check the Authentik admin panel to confirm the outpost is running and the arcade application is configured correctly. Also confirm Caddy's <code>trusted_proxies private_ranges</code> is set — without it, Caddy may reject the forward auth callback.</div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">Game works but audio is muted by default</div>
+      <div class="trouble-a">This is expected Ruffle behavior — browsers require a user interaction before allowing audio autoplay. The <code>unmuteOverlay: "hidden"</code> config hides the overlay but the user still needs to click the game area once to unmute. This is a browser security restriction, not a bug.</div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 Useful Debug Commands</div>
+    <div class="card">
+      <pre># Check container is running and mounts look right:
+docker inspect arcade_container | grep Mounts -A 30
+
+# Tail nginx access logs in real-time:
+docker logs -f arcade_container
+
+# Test MIME type of .wasm file being served:
+curl -I http://localhost:<span data-cfg="port:flasharcade"></span>/bin/ruffle_bg.wasm | grep content-type
+
+# Validate library.json:
+python3 -m json.tool userdata/common/arcade/library/library.json
+
+# List a user's save files:
+ls -lh userdata/{NAME}/arcade/saves/</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ── Sub-tab JS ── -->
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'flasharcade_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar      = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub      = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = '700'; overviewBtn.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Check when Flash Arcade is running, Ruffle is loading games, SSO is connected, and per-user saves are working.';
+      if (overviewBtn) { overviewBtn.style.fontWeight = ''; overviewBtn.style.color = ''; }
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
 
 </body>
 </html>
