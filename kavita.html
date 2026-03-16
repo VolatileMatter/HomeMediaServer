@@ -1,42 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Kavita</title><link rel="stylesheet" href="shared.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Kavita</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+    .setup-complete-sub {
+      font-size: .75rem;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    /* Achievement cards */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    .ach-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      position: relative;
+      transition: border-color .15s;
+    }
+    .ach-card:hover { border-color: rgba(200,168,75,.3); }
+    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+    .ach-footer { display: flex; gap: 6px; align-items: center; }
+    .ach-pts {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(200,168,75,.1);
+      color: var(--accent);
+      border: 1px solid rgba(200,168,75,.2);
+    }
+    .ach-method {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(78,205,196,.08);
+      color: var(--accent3);
+      border: 1px solid rgba(78,205,196,.18);
+    }
+
+    /* Storage breakdown */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* Troubleshooting */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+  </style>
+</head>
 <body>
 
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════════════ -->
 <div class="page-header">
   <div class="page-icon">📕</div>
   <div>
-    <h1>Kavita — Comics &amp; DnD Books</h1>
-    <div class="subtitle">// Two Separate Instances · Comics (5000) · DnD (5001) · FOSS //</div>
-    <p class="desc">Kavita is a self-hosted reading server for comics (CBZ/CBR), manga, PDFs, and ebooks. Running two separate instances keeps your DnD rulebooks completely separate from your comics library.</p>
+    <h1>Kavita — Comics &amp; TTRPG Guides</h1>
+    <div class="subtitle">
+      // One Instance · Two Libraries · Port <span data-cfg="port:kavita-comics"></span> · FOSS · Windows Native · Forward-Auth //
+    </div>
+    <p class="desc">
+      Kavita is a self-hosted reading server for comics (CBZ/CBR), manga, PDFs, and ebooks. A single instance runs two libraries — Comics and TTRPG Guides — with per-library access control, separate reading progress, and a native comic/PDF reader experience.
+    </p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 Best practice: Two Kavita instances on separate ports with separate data folders. Each has its own users, shelves, and reading progress. They share the same executable but nothing else.</div>
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
 
-<div class="section">
-  <div class="section-title">🤔 Why Two Instances?</div>
-  <div class="card">
-    <p>Kavita supports multiple "Libraries" within one instance, but they share users, settings, and the admin panel. Two separate instances means:</p>
-    <ul style="margin:6px 0 0 18px">
-      <li>Completely separate user accounts (your DnD group doesn't see comics)</li>
-      <li>Separate reading history and progress</li>
-      <li>Independent appearance and metadata settings</li>
-      <li>One can be updated/restarted without affecting the other</li>
-    </ul>
-    <div class="callout callout-tip">
-      <div class="callout-icon">💡</div>
-      <div class="callout-body"><strong>Alternatively:</strong> If your user base is the same people for both, use one instance with two Libraries (Comics + DnD Books). Libraries in Kavita are fully separate with per-library access permissions. But if you want different people to have access to different content, two instances is cleaner.</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Kavita is installed, both libraries are added and scanning, and forward-auth is wired up.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <!-- STEP 1: WHY ONE INSTANCE -->
+  <div class="section">
+    <div class="section-title">💡 One Instance, Two Libraries</div>
+    <div class="card">
+      <p>Kavita supports multiple Libraries within a single instance, each with its own format type, folder root, and per-user access permissions. This is the recommended approach when your user base overlaps — the same people accessing comics and TTRPG guides share one login, one admin panel, and one reading progress database.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>Library-level access control:</strong> In Kavita's admin panel you can restrict a Library to specific users. If you want your TTRPG group to see the guides but not the full comic collection (or vice versa), you can lock down access per-library without running separate instances.</div>
+      </div>
     </div>
   </div>
-</div>
 
-<hr>
+  <!-- STEP 2: DOWNLOAD -->
+  <div class="section">
+    <div class="section-title">📦 Step 1 — Download &amp; Extract Kavita <span class="tag tag-native">FOSS · Windows Native</span></div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Download the latest Kavita release</strong>
+          <p>Go to <a href="https://github.com/Kareadita/Kavita/releases" target="_blank">github.com/Kareadita/Kavita/releases</a> and download <code>kavita-win-x64.tar.gz</code>. Extract to <code>D:\Server\Kavita\</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure the port</strong>
+          <p>Open <code>D:\Server\Kavita\appsettings.json</code> and confirm the port:</p>
+          <pre>{
+  "Port": <span data-cfg="port:kavita-comics"></span>,
+  "IpAddresses": "",
+  "LoggingLevel": "Information",
+  "AllowStatCollection": false
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div class="section">
-  <div class="section-title">📁 Folder Structure</div>
-  <div class="card">
-    <pre>D:\Comics\
+  <!-- STEP 3: FOLDER STRUCTURE -->
+  <div class="section">
+    <div class="section-title">📁 Step 2 — Prepare Your Folder Structure</div>
+    <div class="card">
+      <pre>D:\Comics\
   ├── Marvel\
   │   ├── The Amazing Spider-Man\
   │   │   ├── The Amazing Spider-Man 001.cbz
@@ -45,138 +246,523 @@
   └── DC\
       └── Batman\
 
-D:\DnD\
+D:\TTRPGs\
   ├── Core Rules\
   │   ├── Players Handbook 5e.pdf
   │   ├── Dungeon Masters Guide 5e.pdf
   │   └── Monster Manual 5e.pdf
+  ├── Pathfinder\
   ├── Supplements\
   └── Adventures\</pre>
-    <div class="callout callout-tip">
-      <div class="callout-icon">📖</div>
-      <div class="callout-body"><strong>CBZ/CBR for comics:</strong> These are just zip/rar archives of images. If you have comics in other formats, use <strong>ComicTagger</strong> (free) to convert and tag them. Kavita reads CBZ natively and gives a proper manga/comic reader experience.</div>
-    </div>
-  </div>
-</div>
-
-<hr>
-
-<div class="section">
-  <div class="section-title">⚙️ Instance 1 — Comics (Port 5000) <span class="tag tag-native">FOSS · Windows Native</span></div>
-
-  <div class="steps">
-    <div class="step">
-      <div class="step-content">
-        <strong>Download Kavita</strong>
-        <p>From <a href="https://github.com/Kareadita/Kavita/releases" target="_blank">github.com/Kareadita/Kavita/releases</a> — download the latest <code>kavita-win-x64.tar.gz</code>. Extract to <code>D:\Server\Kavita-Comics\</code>.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Configure the Comics instance port</strong>
-        <p>Open <code>D:\Server\Kavita-Comics\appsettings.json</code> and set the port:</p>
-        <pre>{
-  "Port": 5000,
-  "IpAddresses": "",
-  "LoggingLevel": "Information",
-  "AllowStatCollection": false
-}</pre>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Run Kavita Comics for the first time</strong>
-        <pre>D:\Server\Kavita-Comics\Kavita.exe</pre>
-        <p>Open <code>http://localhost:5000</code> — create admin account. Add a Library → type "Comics" → folder <code>D:\Comics</code>.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Install as Windows Service (NSSM)</strong>
-        <pre>nssm install KavitaComics "D:\Server\Kavita-Comics\Kavita.exe"
-nssm set KavitaComics AppDirectory "D:\Server\Kavita-Comics"
-nssm start KavitaComics</pre>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Open firewall</strong>
-        <pre>netsh advfirewall firewall add rule name="Kavita Comics" dir=in action=allow protocol=TCP localport=5000</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">📖</div>
+        <div class="callout-body"><strong>CBZ/CBR for comics:</strong> These are just zip/rar archives of images. Use <strong>ComicTagger</strong> (free) to convert and tag comics in other formats. Kavita reads CBZ natively with a proper manga/comic reader experience. For TTRPG PDFs, Kavita's "Book" library type gives a clean two-page PDF reader.</div>
       </div>
     </div>
   </div>
-</div>
 
-<hr>
-
-<div class="section">
-  <div class="section-title">⚙️ Instance 2 — DnD Rulebooks (Port 5001)</div>
-
-  <div class="steps">
-    <div class="step">
-      <div class="step-content">
-        <strong>Extract a second copy to a separate folder</strong>
-        <p>Extract the same Kavita release zip to <code>D:\Server\Kavita-DnD\</code> — completely separate from the comics instance.</p>
-        <div class="callout callout-warn">
-          <div class="callout-icon">⚠️</div>
-          <div class="callout-body">Do NOT share the same Kavita folder for two instances. Each instance needs its own copy of the Kavita executable and its own <code>config/</code> folder so their databases don't conflict.</div>
+  <!-- STEP 4: FIRST RUN + LIBRARIES -->
+  <div class="section">
+    <div class="section-title">▶️ Step 3 — First Run &amp; Add Libraries</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Run Kavita for the first time</strong>
+          <pre>D:\Server\Kavita\Kavita.exe</pre>
+          <p>Open <code>http://localhost:<span data-cfg="port:kavita-comics"></span></code> and create your admin account.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add the Comics library</strong>
+          <p>Admin Panel → Libraries → Add Library. Set:</p>
+          <ul style="margin:6px 0 0 18px;font-size:.85rem">
+            <li><strong>Name:</strong> Comics</li>
+            <li><strong>Type:</strong> Comic</li>
+            <li><strong>Folder:</strong> <code>D:\Comics</code></li>
+          </ul>
+          <p>Save and let the initial scan complete.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add the TTRPG Guides library</strong>
+          <p>Admin Panel → Libraries → Add Library. Set:</p>
+          <ul style="margin:6px 0 0 18px;font-size:.85rem">
+            <li><strong>Name:</strong> TTRPG Guides</li>
+            <li><strong>Type:</strong> Book</li>
+            <li><strong>Folder:</strong> <code>D:\TTRPGs</code></li>
+          </ul>
+          <p>The "Book" type enables Kavita's PDF reader with page-turning and bookmarking. Save and let it scan.</p>
         </div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Set the DnD instance to port 5001</strong>
-        <p>Edit <code>D:\Server\Kavita-DnD\appsettings.json</code>:</p>
-        <pre>{
-  "Port": 5001,
-  "IpAddresses": "",
-  "LoggingLevel": "Information",
-  "AllowStatCollection": false
+  </div>
+
+  <!-- STEP 5: WINDOWS SERVICE -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 4 — Install as a Windows Service (NSSM)</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Register with NSSM</strong>
+          <pre>nssm install KavitaComics "D:\Server\Kavita\Kavita.exe"
+nssm set KavitaComics AppDirectory "D:\Server\Kavita"
+nssm start KavitaComics</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Open the firewall</strong>
+          <pre>netsh advfirewall firewall add rule name="Kavita" dir=in action=allow protocol=TCP localport=<span data-cfg="port:kavita-comics"></span></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Verify auto-start</strong>
+          <p>Reboot and confirm Kavita is reachable at <code>http://[server-ip]:<span data-cfg="port:kavita-comics"></span></code> before configuring the reverse proxy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6: REVERSE PROXY -->
+  <div class="section">
+    <div class="section-title">🌍 Step 5 — Reverse Proxy (Caddy)</div>
+    <div class="card">
+      <p>Add a single block to your Caddyfile — one subdomain covers both libraries since they're in the same instance:</p>
+      <pre><span data-cfg="url:kavita-comics"></span> {
+    reverse_proxy localhost:<span data-cfg="port:kavita-comics"></span>
 }</pre>
-      </div>
+      <p>Reload Caddy:</p>
+      <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
     </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>First-time setup at http://localhost:5001</strong>
-        <p>Create a separate admin account. Add a Library → type "Book" → folder <code>D:\DnD</code>. Kavita's "Book" library type supports PDF with a nice reader interface.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Install as a second Windows Service</strong>
-        <pre>nssm install KavitaDnD "D:\Server\Kavita-DnD\Kavita.exe"
-nssm set KavitaDnD AppDirectory "D:\Server\Kavita-DnD"
-nssm start KavitaDnD
+  </div>
 
-netsh advfirewall firewall add rule name="Kavita DnD" dir=in action=allow protocol=TCP localport=5001</pre>
+  <!-- STEP 7: SSO -->
+  <div class="section">
+    <div class="section-title">🔐 Step 6 — SSO / Forward Auth <span class="tag tag-sso">→ SSO TAB</span></div>
+    <div class="card">
+      <p>Kavita does not yet support OAuth/OIDC natively. Authentication is handled at the Caddy layer via Authentik forward auth — users log in through Authentik once and are passed through to Kavita. Kavita's own user accounts still exist underneath; create matching usernames in Kavita for any user who needs reading-progress tracking and shelves.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>🔐 Admin step:</strong> After SSO is wired up, verify that unauthenticated requests to <code><span data-cfg="url:kavita-comics"></span></code> are blocked at the Caddy/Authentik layer before sharing the URL with users.</div>
       </div>
     </div>
   </div>
-</div>
 
-<hr>
+</div><!-- /pane-setup -->
 
-<div class="section">
-  <div class="section-title">🌍 Remote Access &amp; Reverse Proxy</div>
-  <div class="card">
-    <pre># Caddyfile entries:
-comics.yourdomain.com {
-    reverse_proxy localhost:5000
-}
 
-dnd.yourdomain.com {
-    reverse_proxy localhost:5001
-}</pre>
-    <p>Or access both via Tailscale: <code>http://[tailscale-ip]:5000</code> and <code>http://[tailscale-ip]:5001</code>.</p>
+<!-- ═══════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">📕 Kavita running one instance with two libraries — Comics (CBZ/CBR) and TTRPG Guides (PDF). Both accessible at the same URL; library switcher is in the sidebar.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:kavita-comics"></code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:<span data-cfg="port:kavita-comics"></span></code></td></tr>
+          <tr><td>Admin panel</td><td><code data-cfg="url:kavita-comics"></code><code>/admin</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:kavita-comics"></span></td></tr>
+          <tr><td>Install type</td><td>Native Windows (NSSM service)</td></tr>
+          <tr><td>Service name</td><td><code>KavitaComics</code></td></tr>
+          <tr><td>Auth method</td><td>Caddy forward_auth (Authentik)</td></tr>
+          <tr><td>Comics path</td><td><code>D:\Comics\</code></td></tr>
+          <tr><td>TTRPG path</td><td><code>D:\TTRPGs\</code></td></tr>
+          <tr><td>App data path</td><td><code>D:\Server\Kavita\config\</code></td></tr>
+        </table>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">🔐 SSO Integration <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <p>Kavita does not yet support OAuth/OIDC natively. Put each instance behind Caddy with Authentik forward auth for a unified login experience. Alternatively, Kavita's own user system (username/password per instance) is sufficient for V1.</p>
+  <div class="section">
+    <div class="section-title">📚 Libraries at a Glance</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📕 Comics</div>
+        <p>Reads CBZ, CBR, and image-based formats. Kavita auto-detects series, volumes, and chapters from filenames and embedded metadata. ComicInfo.xml inside a CBZ is fully supported.</p>
+        <ul style="margin:8px 0 0 18px;font-size:.83rem">
+          <li>Page-by-page reader with zoom and fit modes</li>
+          <li>Reading direction (L→R, R→L for manga)</li>
+          <li>Progress tracked per issue</li>
+          <li>Reading lists and collections</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">⚔️ TTRPG Guides</div>
+        <p>Kavita's "Book" library type gives PDFs a clean two-page reader with bookmarks, highlights, and progress tracking per book. Great for rulebooks you dip in and out of.</p>
+        <ul style="margin:8px 0 0 18px;font-size:.83rem">
+          <li>PDF reader with two-page spread mode</li>
+          <li>Bookmark any page mid-session</li>
+          <li>Per-user reading progress</li>
+          <li>Organise by series (e.g. D&amp;D 5e, Pathfinder 2e)</li>
+        </ul>
+      </div>
+    </div>
   </div>
-</div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Apps &amp; Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Browser (any)</td><td>Go to <code data-cfg="url:kavita-comics"></code> — full reader works in browser</td></tr>
+        <tr><td>Kavita mobile app (Android/iOS)</td><td>Add server URL and your Kavita credentials in the app settings</td></tr>
+        <tr><td>OPDS clients (e.g. Moon+ Reader)</td><td>OPDS feed at <code data-cfg="url:kavita-comics"></code><code>/api/opds/[api-key]</code> — find your key in User Settings → API Key</td></tr>
+        <tr><td>Tachiyomi / Mihon</td><td>Add a Kavita source via the community extensions — allows offline download to phone</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p><span data-cfg="version:kavita-comics"></span></p>
+      <p>Kavita does <strong>not</strong> auto-update. Check <a href="https://github.com/Kareadita/Kavita/releases" target="_blank">GitHub releases</a> periodically, especially after any scanner or reader breakage.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Stop the service and back up config</strong>
+            <pre>nssm stop KavitaComics
+
+# Back up the database before updating:
+Copy-Item "D:\Server\Kavita\config" "D:\Backups\Kavita\config_$(Get-Date -Format 'yyyy-MM-dd')" -Recurse</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Download and extract the new release</strong>
+            <p>Download the new <code>kavita-win-x64.tar.gz</code> from GitHub. Extract to a staging folder, then copy all files except the <code>config/</code> folder into <code>D:\Server\Kavita\</code>. Do not overwrite <code>config/</code> — that's your database.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Restart and verify</strong>
+            <pre>nssm start KavitaComics</pre>
+            <p>Open <code>http://localhost:<span data-cfg="port:kavita-comics"></span></code>, confirm both libraries are visible and reading progress is intact.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>When adding content</td><td>Admin → Libraries → Scan Library (or Kavita picks it up automatically on a schedule)</td></tr>
+        <tr><td>Monthly</td><td>Check GitHub releases for new Kavita version</td></tr>
+        <tr><td>Monthly</td><td>Review Admin → Tasks → check for any stuck or failed scan jobs</td></tr>
+        <tr><td>Quarterly</td><td>Run Admin → Libraries → Analyze Files to catch corrupted CBZ/PDFs</td></tr>
+        <tr><td>After adding a new folder structure</td><td>Verify Kavita detects the new series/volumes correctly and metadata is populating</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li><strong>Filename changes break progress:</strong> Kavita tracks series by folder/filename structure. Renaming files outside of Kavita will reset reading progress for those items.</li>
+        <li><strong>Large PDF scan times:</strong> TTRPG PDFs with hundreds of pages slow the initial scan. This is normal — let the scan complete fully before testing the reader.</li>
+        <li><strong>CBR support requires an extraction tool:</strong> Kavita extracts CBR (RAR archives) at read time. If RAR extraction fails, convert to CBZ using ComicTagger or 7-Zip.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🎯 How Kavita Achievements Work</div>
+    <div class="card">
+      <p>Kavita exposes a REST API that the achievement server can poll on a schedule to check reading progress, completion status, and chapter counts per user. There are no native webhooks in Kavita, so all tracking is pull-based via the API.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Get your API key from Kavita: User menu (top-right) → User Settings → API Key. This key is used to authenticate poll requests from the achievement server.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 Achievement List</div>
+    <div class="ach-grid">
+
+      <div class="ach-card">
+        <div class="ach-icon">📖</div>
+        <div class="ach-name">First Issue</div>
+        <div class="ach-desc">Read your first comic issue to completion</div>
+        <div class="ach-footer">
+          <span class="ach-pts">5 XP</span>
+          <span class="ach-method">api poll</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📚</div>
+        <div class="ach-name">Arc Complete</div>
+        <div class="ach-desc">Finish an entire story arc or collected volume</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 XP</span>
+          <span class="ach-method">api poll</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🗺️</div>
+        <div class="ach-name">Prepared Adventurer</div>
+        <div class="ach-desc">Open your first TTRPG guide in the reader</div>
+        <div class="ach-footer">
+          <span class="ach-pts">5 XP</span>
+          <span class="ach-method">api poll</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">⚔️</div>
+        <div class="ach-name">Rules Lawyer</div>
+        <div class="ach-desc">Read 5 different TTRPG rulebooks cover-to-cover</div>
+        <div class="ach-footer">
+          <span class="ach-pts">30 XP</span>
+          <span class="ach-method">api poll</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🕸️</div>
+        <div class="ach-name">Web-Head</div>
+        <div class="ach-desc">Read 50 Spider-Man issues</div>
+        <div class="ach-footer">
+          <span class="ach-pts">25 XP</span>
+          <span class="ach-method">api poll</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🌙</div>
+        <div class="ach-name">Night Reader</div>
+        <div class="ach-desc">Read 100 issues total across all libraries</div>
+        <div class="ach-footer">
+          <span class="ach-pts">50 XP</span>
+          <span class="ach-method">api poll</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">📦 Storage Overview</div>
+    <div class="storage-breakdown">
+      <div class="storage-cell">
+        <div class="storage-cell-label">Comics Library</div>
+        <div class="storage-cell-val">D:\Comics\</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">TTRPG Guides Library</div>
+        <div class="storage-cell-val">D:\TTRPGs\</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">App Data / Database</div>
+        <div class="storage-cell-val">D:\Server\Kavita\config\</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">App Binary</div>
+        <div class="storage-cell-val">D:\Server\Kavita\ (~100 MB)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What lives where</div>
+      <p>The comic and TTRPG files themselves are <strong>shared</strong> — every user reads from the same folders. Kavita's <code>config/</code> folder holds the SQLite database (<code>kavita.db</code>) which stores all per-user data: reading progress, bookmarks, shelves, and user accounts. This database is small (typically under 50 MB) but is the most critical thing to back up.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>All per-user data is in the Kavita database.</strong> No per-user folder in <code data-cfg="path:users"></code> is needed for this service. Back up <code>D:\Server\Kavita\config\kavita.db</code> to preserve all reading progress and user accounts.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td>Kavita database</td><td><code>D:\Server\Kavita\config\kavita.db</code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>Full config folder</td><td><code>D:\Server\Kavita\config\</code></td><td>Before any update</td><td>🔴 High</td></tr>
+        <tr><td>Comics library</td><td><code>D:\Comics\</code></td><td>As acquired</td><td>🟡 Medium</td></tr>
+        <tr><td>TTRPG library</td><td><code>D:\TTRPGs\</code></td><td>As acquired</td><td>🟡 Medium</td></tr>
+      </table>
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Stop the NSSM service before backing up <code>kavita.db</code> for a clean copy — SQLite can have an open write lock while Kavita is running. A quick <code>nssm stop KavitaComics</code>, copy, <code>nssm start KavitaComics</code> takes about 30 seconds.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Kavita won't start / port already in use</div>
+      <div class="trouble-a">
+        Check whether the port is already bound by another process:
+        <pre>netstat -ano | findstr :<span data-cfg="port:kavita-comics"></span></pre>
+        If something else is on that port, either stop it or change Kavita's port in <code>appsettings.json</code>. Also check NSSM status:
+        <pre>nssm status KavitaComics</pre>
+        If it shows <code>SERVICE_STOPPED</code> with an error code, check <code>D:\Server\Kavita\config\logs\</code> for the startup error.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Library scan runs but no series appear</div>
+      <div class="trouble-a">
+        Kavita is strict about folder structure. Comics must be nested at least one folder deep: <code>Publisher\Series\Issue.cbz</code> or <code>Series\Issue.cbz</code>. PDFs in the TTRPG library should be in a named series folder. Loose files at the library root won't be detected. Check Admin → Libraries → [library name] → Scan for error messages.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ CBR files fail to open in the reader</div>
+      <div class="trouble-a">
+        Kavita needs to extract CBR (RAR) archives at read time. On Windows, this sometimes fails if the RAR version is too new. Convert problematic CBRs to CBZ using 7-Zip (extract, then re-zip as .cbz) or ComicTagger. CBZ is the recommended format going forward.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Reading progress reset after a library rescan</div>
+      <div class="trouble-a">
+        This happens when file or folder names change between scans. Kavita uses the file path to anchor progress. Never rename files outside of Kavita. If you restructured your library, reading progress for affected items will be lost — it cannot be migrated automatically.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">🟢 Metadata (covers, descriptions) is wrong or missing</div>
+      <div class="trouble-a">
+        Kavita reads metadata from embedded ComicInfo.xml (CBZ) or embedded PDF metadata. Run Admin → Libraries → Refresh Metadata after adding or correcting metadata files. For comics, ComicTagger can bulk-write correct ComicInfo.xml from ComicVine or other sources.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 Useful Commands</div>
+    <div class="card">
+      <pre># Service management:
+nssm status KavitaComics          # check service state
+nssm stop KavitaComics            # stop
+nssm start KavitaComics           # start
+nssm restart KavitaComics         # restart
+
+# Check logs (Kavita rotates these automatically):
+Get-ChildItem "D:\Server\Kavita\config\logs\" | Sort-Object LastWriteTime -Descending | Select-Object -First 5
+
+# Test the API is responding:
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:kavita-comics"></span>/api/health" -UseBasicParsing
+
+# Trigger a library scan via API (replace [api-key]):
+Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:kavita-comics"></span>/api/library/scan-all" `
+  -Method POST `
+  -Headers @{ "Authorization" = "Bearer [api-key]" }</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'kavita_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar      = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub      = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      overviewBtn.style.fontWeight = '700';
+      overviewBtn.style.color = 'var(--accent3)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      overviewBtn.style.fontWeight = '';
+      overviewBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
 
 </body>
 </html>
