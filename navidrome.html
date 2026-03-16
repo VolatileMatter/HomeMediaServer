@@ -154,7 +154,294 @@
     @media (max-width: 680px) {
       .storage-breakdown { grid-template-columns: 1fr 1fr; }
     }
-  </style>
+
+    /* ── Shared Playlists tab ── */
+    .pl-connect-bar {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .pl-connect-bar label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+    .pl-connect-bar input {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .78rem;
+      padding: 5px 10px;
+      width: 160px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .pl-connect-bar input:focus { border-color: rgba(200,168,75,.5); }
+    .pl-connect-bar input[type="password"] { width: 120px; letter-spacing: .15em; }
+    .pl-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(200,168,75,.4);
+      background: rgba(200,168,75,.08);
+      color: var(--accent);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .pl-btn:hover { background: rgba(200,168,75,.16); border-color: var(--accent); }
+    .pl-btn.danger { border-color: rgba(220,80,80,.4); background: rgba(220,80,80,.07); color: #e06060; }
+    .pl-btn.danger:hover { background: rgba(220,80,80,.14); }
+    .pl-btn.green { border-color: rgba(76,175,125,.4); background: rgba(76,175,125,.08); color: #4caf7d; }
+    .pl-btn.green:hover { background: rgba(76,175,125,.16); }
+    .pl-status {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .06em;
+      padding: 3px 10px;
+      border-radius: 2px;
+      margin-left: auto;
+    }
+    .pl-status.ok  { background: rgba(76,175,125,.12); color: #4caf7d; border: 1px solid rgba(76,175,125,.25); }
+    .pl-status.err { background: rgba(220,80,80,.1); color: #e06060; border: 1px solid rgba(220,80,80,.2); }
+    .pl-status.idle { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+
+    .pl-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .pl-filter-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .13s;
+    }
+    .pl-filter-btn:hover { border-color: rgba(200,168,75,.35); color: var(--text); }
+    .pl-filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.07); }
+    .pl-count { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--text-dim); margin-left: auto; }
+
+    .pl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .pl-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color .15s;
+      position: relative;
+    }
+    .pl-card:hover { border-color: rgba(200,168,75,.28); }
+    .pl-card.mine { border-left: 3px solid rgba(200,168,75,.45); }
+    .pl-card-top { display: flex; align-items: flex-start; gap: 10px; }
+    .pl-art {
+      width: 48px; height: 48px;
+      background: var(--bg3);
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      overflow: hidden;
+    }
+    .pl-art img { width: 100%; height: 100%; object-fit: cover; border-radius: 3px; }
+    .pl-info { flex: 1; min-width: 0; }
+    .pl-name {
+      font-family: 'Raleway', sans-serif;
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+    .pl-meta {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      color: var(--text-dim);
+      letter-spacing: .04em;
+    }
+    .pl-comment {
+      font-size: .78rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      font-style: italic;
+    }
+    .pl-footer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .pl-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+    .pl-badge.pub  { background: rgba(76,175,125,.1); color: #4caf7d; border: 1px solid rgba(76,175,125,.2); }
+    .pl-badge.priv { background: rgba(120,120,120,.1); color: var(--text-dim); border: 1px solid var(--border); }
+    .pl-badge.owner { background: rgba(200,168,75,.1); color: var(--accent); border: 1px solid rgba(200,168,75,.2); }
+    .pl-actions { display: flex; gap: 6px; margin-left: auto; }
+    .pl-action-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .13s;
+    }
+    .pl-action-btn:hover { border-color: rgba(200,168,75,.4); color: var(--accent); }
+    .pl-action-btn.toggle-pub { }
+    .pl-action-btn.toggle-pub.is-pub { border-color: rgba(76,175,125,.3); color: #4caf7d; }
+
+    .pl-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .08em;
+    }
+    .pl-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      color: var(--text-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .7rem;
+      letter-spacing: .1em;
+      animation: pl-pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes pl-pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+    .pl-track-list {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      margin-top: 8px;
+      max-height: 240px;
+      overflow-y: auto;
+      display: none;
+    }
+    .pl-track-list.open { display: block; }
+    .pl-track-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      font-size: .78rem;
+      color: var(--text);
+    }
+    .pl-track-row:last-child { border-bottom: none; }
+    .pl-track-num { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); width: 20px; text-align: right; flex-shrink: 0; }
+    .pl-track-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl-track-artist { font-size: .72rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+    .pl-track-dur { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); flex-shrink: 0; }
+
+    .pl-new-form {
+      background: var(--bg2);
+      border: 1px solid rgba(200,168,75,.2);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .pl-new-form.open { display: block; }
+    .pl-new-form h3 {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 12px 0;
+    }
+    .pl-field { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .pl-field label { font-family: 'Share Tech Mono', monospace; font-size: .63rem; letter-spacing: .07em; text-transform: uppercase; color: var(--text-dim); width: 80px; flex-shrink: 0; }
+    .pl-field input, .pl-field textarea, .pl-field select {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Raleway', sans-serif;
+      font-size: .82rem;
+      padding: 5px 10px;
+      flex: 1;
+      min-width: 180px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .pl-field input:focus, .pl-field textarea:focus { border-color: rgba(200,168,75,.4); }
+    .pl-field textarea { resize: vertical; min-height: 56px; font-size: .78rem; }
+    .pl-toggle-row { display: flex; align-items: center; gap: 10px; }
+    .pl-toggle {
+      position: relative;
+      width: 36px; height: 20px;
+      flex-shrink: 0;
+    }
+    .pl-toggle input { opacity: 0; width: 0; height: 0; }
+    .pl-toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .pl-toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      left: 2px; top: 2px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      transition: all .2s;
+    }
+    .pl-toggle input:checked + .pl-toggle-slider { background: rgba(76,175,125,.3); border-color: #4caf7d; }
+    .pl-toggle input:checked + .pl-toggle-slider::before { transform: translateX(16px); background: #4caf7d; }
+    .pl-toggle-label { font-size: .8rem; color: var(--text-dim); }
+    .pl-toggle input:checked ~ .pl-toggle-label { color: #4caf7d; }
 </head>
 <body>
 
@@ -184,6 +471,7 @@
   <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
   <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
   <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <button class="subtab-btn" onclick="switchTab('playlists', this)">🎶 Shared Playlists</button>
 </div>
 
 
@@ -766,6 +1054,78 @@ Invoke-WebRequest "http://localhost:<span data-cfg="port:navidrome"></span>/rest
 <!-- ═══════════════════════════════════════════════════════════════
      JAVASCRIPT — Sub-tab switching + setup-complete persistence
 ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 7 — SHARED PLAYLISTS
+     Live browser: calls the Navidrome Subsonic API directly.
+     Credentials stored in localStorage (per-user, browser-side).
+     Public/private toggle is stored server-side via updatePlaylist.
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-playlists">
+
+  <!-- ── Connect bar ── -->
+  <div class="pl-connect-bar" id="pl-connect-bar">
+    <label>Server</label>
+    <input type="text" id="pl-server" placeholder="http://localhost:4533" />
+    <label>Username</label>
+    <input type="text" id="pl-user" placeholder="alice" autocomplete="username" />
+    <label>Password</label>
+    <input type="password" id="pl-pass" placeholder="••••••••" autocomplete="current-password" />
+    <button class="pl-btn green" onclick="plConnect()">Connect</button>
+    <button class="pl-btn danger" onclick="plDisconnect()" style="display:none" id="pl-disconnect-btn">Disconnect</button>
+    <span class="pl-status idle" id="pl-status">Not connected</span>
+  </div>
+
+  <!-- ── New playlist form (hidden until connected) ── -->
+  <div class="pl-new-form" id="pl-new-form">
+    <h3>＋ New Playlist</h3>
+    <div class="pl-field">
+      <label>Name</label>
+      <input type="text" id="pl-new-name" placeholder="My awesome playlist" maxlength="100" />
+    </div>
+    <div class="pl-field">
+      <label>Comment</label>
+      <textarea id="pl-new-comment" placeholder="Optional description…" rows="2"></textarea>
+    </div>
+    <div class="pl-field">
+      <label>Visibility</label>
+      <div class="pl-toggle-row">
+        <label class="pl-toggle">
+          <input type="checkbox" id="pl-new-public" />
+          <span class="pl-toggle-slider"></span>
+        </label>
+        <span class="pl-toggle-label" id="pl-new-public-label">Private — only you can see this</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="pl-btn green" onclick="plCreatePlaylist()">Create playlist</button>
+      <button class="pl-btn" onclick="plToggleNewForm(false)">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="pl-toolbar" id="pl-toolbar" style="display:none">
+    <button class="pl-filter-btn active" id="plf-all"    onclick="plSetFilter('all',this)">All public</button>
+    <button class="pl-filter-btn"        id="plf-mine"   onclick="plSetFilter('mine',this)">My playlists</button>
+    <button class="pl-btn" onclick="plToggleNewForm(true)" style="margin-left:0">＋ New playlist</button>
+    <button class="pl-btn" onclick="plLoadPlaylists()" style="margin-left:0">↻ Refresh</button>
+    <span class="pl-count" id="pl-count"></span>
+  </div>
+
+  <!-- ── Playlist grid ── -->
+  <div class="pl-grid" id="pl-grid">
+    <div class="pl-empty">Connect with your Navidrome credentials above to browse playlists.</div>
+  </div>
+
+  <div class="callout callout-tip" style="margin-top:8px">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <strong>How visibility works:</strong> Navidrome stores the public/private flag on each playlist server-side via the Subsonic <code>updatePlaylist</code> API. Public playlists are visible to every user on the server when they browse this tab. Private playlists only appear under "My playlists" for their owner. Your credentials are saved in your browser only — they never leave your device.
+    </div>
+  </div>
+
+</div><!-- /pane-playlists -->
+
+
 <script>
   // ── Sub-tab switching ──
   function switchTab(id, btn) {
@@ -773,6 +1133,7 @@ Invoke-WebRequest "http://localhost:<span data-cfg="port:navidrome"></span>/rest
     document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('pane-' + id).classList.add('active');
     btn.classList.add('active');
+    if (id === 'playlists' && plState.connected) plLoadPlaylists();
   }
 
   // ── Setup complete checkbox ──
@@ -816,8 +1177,333 @@ Invoke-WebRequest "http://localhost:<span data-cfg="port:navidrome"></span>/rest
       const overviewBtn = document.querySelector('[onclick*="overview"]');
       switchTab('overview', overviewBtn);
     }
+    plInit();
   });
-</script>
+
+  // ════════════════════════════════════════════════════════════════
+  //  PLAYLIST FEATURE
+  // ════════════════════════════════════════════════════════════════
+
+  const PL_CREDS_KEY = 'navidrome_pl_creds';
+  const PL_VIS_KEY   = 'navidrome_pl_visibility'; // local override store
+
+  const plState = {
+    connected: false,
+    server: '',
+    user: '',
+    pass: '',
+    playlists: [],     // all playlists visible to this user
+    filter: 'all',
+    expanded: {},      // playlistId → bool
+    localVis: {},      // playlistId → 'public'|'private' (mirrors server state)
+  };
+
+  // ── Subsonic API helper ──
+  function plApiUrl(method, extra = '') {
+    const { server, user, pass } = plState;
+    const salt = Math.random().toString(36).slice(2);
+    // Subsonic API supports plain password with &p=enc:HEX or just &p=plaintext
+    const encodedPass = encodeURIComponent(pass);
+    return `${server}/rest/${method}?u=${encodeURIComponent(user)}&p=${encodedPass}&v=1.16.1&c=server-dashboard&f=json${extra}`;
+  }
+
+  async function plApiFetch(method, extra = '') {
+    const url = plApiUrl(method, extra);
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    const resp = data['subsonic-response'];
+    if (!resp || resp.status !== 'ok') {
+      throw new Error(resp?.error?.message || 'Subsonic API error');
+    }
+    return resp;
+  }
+
+  // ── Init: restore saved creds ──
+  function plInit() {
+    const saved = localStorage.getItem(PL_CREDS_KEY);
+    if (saved) {
+      try {
+        const c = JSON.parse(saved);
+        document.getElementById('pl-server').value = c.server || '';
+        document.getElementById('pl-user').value   = c.user   || '';
+        document.getElementById('pl-pass').value   = c.pass   || '';
+      } catch(e) {}
+    }
+    // Restore local visibility overrides
+    const vis = localStorage.getItem(PL_VIS_KEY);
+    if (vis) { try { plState.localVis = JSON.parse(vis); } catch(e) {} }
+    // Restore public toggle label behaviour
+    const pubCheck = document.getElementById('pl-new-public');
+    pubCheck.addEventListener('change', () => {
+      document.getElementById('pl-new-public-label').textContent =
+        pubCheck.checked ? 'Public — all server users can see this' : 'Private — only you can see this';
+    });
+  }
+
+  // ── Connect ──
+  async function plConnect() {
+    const server = document.getElementById('pl-server').value.trim().replace(/\/$/, '');
+    const user   = document.getElementById('pl-user').value.trim();
+    const pass   = document.getElementById('pl-pass').value;
+
+    if (!server || !user || !pass) {
+      plSetStatus('err', 'Fill in all fields');
+      return;
+    }
+
+    plSetStatus('idle', 'Connecting…');
+    plState.server = server;
+    plState.user   = user;
+    plState.pass   = pass;
+
+    try {
+      await plApiFetch('ping');
+      plState.connected = true;
+
+      localStorage.setItem(PL_CREDS_KEY, JSON.stringify({ server, user, pass }));
+
+      document.getElementById('pl-disconnect-btn').style.display = '';
+      document.getElementById('pl-toolbar').style.display = 'flex';
+      document.getElementById('pl-new-form').classList.remove('open');
+
+      // Lock the connect fields
+      ['pl-server','pl-user','pl-pass'].forEach(id => {
+        document.getElementById(id).disabled = true;
+        document.getElementById(id).style.opacity = '.5';
+      });
+      document.querySelector('#pl-connect-bar .pl-btn.green').style.display = 'none';
+
+      plSetStatus('ok', `Connected as ${user}`);
+      await plLoadPlaylists();
+    } catch(e) {
+      plSetStatus('err', `Failed: ${e.message}`);
+      plState.connected = false;
+    }
+  }
+
+  // ── Disconnect ──
+  function plDisconnect() {
+    plState.connected = false;
+    plState.playlists = [];
+    plState.expanded  = {};
+    localStorage.removeItem(PL_CREDS_KEY);
+
+    ['pl-server','pl-user','pl-pass'].forEach(id => {
+      document.getElementById(id).disabled = false;
+      document.getElementById(id).style.opacity = '1';
+      document.getElementById(id).value = '';
+    });
+    document.querySelector('#pl-connect-bar .pl-btn.green').style.display = '';
+    document.getElementById('pl-disconnect-btn').style.display = 'none';
+    document.getElementById('pl-toolbar').style.display = 'none';
+    document.getElementById('pl-new-form').classList.remove('open');
+    plSetStatus('idle', 'Not connected');
+    plRenderGrid([]);
+  }
+
+  // ── Load playlists ──
+  async function plLoadPlaylists() {
+    plRenderGrid(null); // show loading
+    try {
+      const resp = await plApiFetch('getPlaylists');
+      const raw = resp.playlists?.playlist || [];
+      plState.playlists = Array.isArray(raw) ? raw : [raw];
+      plRenderGrid(plState.playlists);
+    } catch(e) {
+      plSetStatus('err', `Load failed: ${e.message}`);
+      plRenderGrid([]);
+    }
+  }
+
+  // ── Filter ──
+  function plSetFilter(filter, btn) {
+    plState.filter = filter;
+    document.querySelectorAll('.pl-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    plRenderGrid(plState.playlists);
+  }
+
+  // ── Render grid ──
+  function plRenderGrid(playlists) {
+    const grid = document.getElementById('pl-grid');
+
+    if (playlists === null) {
+      grid.innerHTML = '<div class="pl-loading">Loading playlists…</div>';
+      return;
+    }
+
+    let filtered = playlists;
+    if (plState.filter === 'mine') {
+      filtered = playlists.filter(p => p.owner === plState.user);
+    } else {
+      // 'all' = public playlists from everyone + all of mine
+      filtered = playlists.filter(p => p.public || p.owner === plState.user);
+    }
+
+    document.getElementById('pl-count').textContent = `${filtered.length} playlist${filtered.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+      const msg = plState.filter === 'mine'
+        ? "You don't have any playlists yet. Create one above."
+        : "No public playlists yet. Be the first to share one!";
+      grid.innerHTML = `<div class="pl-empty">${msg}</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(p => plCardHTML(p)).join('');
+  }
+
+  // ── Card HTML ──
+  function plCardHTML(p) {
+    const isOwner  = p.owner === plState.user;
+    const isPublic = p.public;
+    const dur      = plFmtDuration(p.duration);
+    const updated  = p.changed ? new Date(p.changed).toLocaleDateString() : '—';
+    const expanded = plState.expanded[p.id] ? 'open' : '';
+
+    const ownerBadge  = isOwner  ? '<span class="pl-badge owner">Yours</span>' : `<span class="pl-badge priv" style="background:none">${plEsc(p.owner)}</span>`;
+    const visBadge    = isPublic ? '<span class="pl-badge pub">Public</span>' : '<span class="pl-badge priv">Private</span>';
+
+    const toggleLabel = isPublic ? 'Make private' : 'Make public';
+    const toggleClass = isPublic ? 'toggle-pub is-pub' : 'toggle-pub';
+    const ownerControls = isOwner ? `
+      <button class="pl-action-btn ${toggleClass}" onclick="plToggleVisibility('${p.id}', ${isPublic})" title="${toggleLabel}">${toggleLabel}</button>
+    ` : '';
+
+    const tracksLabel = plState.expanded[p.id] ? 'Hide tracks' : `Show tracks (${p.songCount})`;
+
+    return `<div class="pl-card ${isOwner ? 'mine' : ''}" id="plcard-${p.id}">
+      <div class="pl-card-top">
+        <div class="pl-art">🎵</div>
+        <div class="pl-info">
+          <div class="pl-name" title="${plEsc(p.name)}">${plEsc(p.name)}</div>
+          <div class="pl-meta">${p.songCount} track${p.songCount !== 1 ? 's' : ''} · ${dur} · updated ${updated}</div>
+        </div>
+      </div>
+      ${p.comment ? `<div class="pl-comment">${plEsc(p.comment)}</div>` : ''}
+      <div class="pl-footer">
+        ${visBadge}
+        ${ownerBadge}
+        <div class="pl-actions">
+          ${ownerControls}
+          <button class="pl-action-btn" onclick="plToggleTracks('${p.id}', ${p.songCount})">${tracksLabel}</button>
+        </div>
+      </div>
+      <div class="pl-track-list ${expanded}" id="pltracks-${p.id}">
+        <div style="padding:10px 12px;font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--text-dim);letter-spacing:.06em">Loading…</div>
+      </div>
+    </div>`;
+  }
+
+  // ── Toggle track list expansion ──
+  async function plToggleTracks(id, songCount) {
+    if (songCount === 0) return;
+    plState.expanded[id] = !plState.expanded[id];
+
+    const card = document.getElementById(`plcard-${id}`);
+    const list = document.getElementById(`pltracks-${id}`);
+
+    if (!plState.expanded[id]) {
+      list.classList.remove('open');
+      // Update button label
+      const btn = card.querySelector('.pl-action-btn:last-child');
+      if (btn) btn.textContent = `Show tracks (${songCount})`;
+      return;
+    }
+
+    list.classList.add('open');
+    const btn = card.querySelector('.pl-action-btn:last-child');
+    if (btn) btn.textContent = 'Hide tracks';
+
+    try {
+      const resp = await plApiFetch('getPlaylist', `&id=${id}`);
+      const songs = resp.playlist?.entry || [];
+      const rows = (Array.isArray(songs) ? songs : [songs]).map((s, i) => `
+        <div class="pl-track-row">
+          <span class="pl-track-num">${i + 1}</span>
+          <span class="pl-track-title">${plEsc(s.title || '—')}</span>
+          <span class="pl-track-artist">${plEsc(s.artist || '—')}</span>
+          <span class="pl-track-dur">${plFmtDuration(s.duration)}</span>
+        </div>`).join('');
+      list.innerHTML = rows || '<div style="padding:10px 12px;font-size:.78rem;color:var(--text-dim)">No tracks</div>';
+    } catch(e) {
+      list.innerHTML = `<div style="padding:10px 12px;font-size:.78rem;color:#e06060">Failed to load tracks: ${e.message}</div>`;
+    }
+  }
+
+  // ── Toggle visibility (public ↔ private) ──
+  async function plToggleVisibility(id, currentlyPublic) {
+    const newPublic = !currentlyPublic;
+    try {
+      await plApiFetch('updatePlaylist', `&playlistId=${id}&public=${newPublic}`);
+      // Update local state
+      const pl = plState.playlists.find(p => p.id === id);
+      if (pl) pl.public = newPublic;
+      plRenderGrid(plState.playlists);
+    } catch(e) {
+      alert(`Couldn't update visibility: ${e.message}`);
+    }
+  }
+
+  // ── Create new playlist ──
+  async function plCreatePlaylist() {
+    const name    = document.getElementById('pl-new-name').value.trim();
+    const comment = document.getElementById('pl-new-comment').value.trim();
+    const pub     = document.getElementById('pl-new-public').checked;
+
+    if (!name) { alert('Give your playlist a name.'); return; }
+
+    try {
+      // Create empty playlist
+      const resp = await plApiFetch('createPlaylist', `&name=${encodeURIComponent(name)}`);
+      const newId = resp.playlist?.id;
+
+      if (newId) {
+        // Set comment and public flag
+        const extras = `&playlistId=${newId}&public=${pub}${comment ? '&comment=' + encodeURIComponent(comment) : ''}`;
+        await plApiFetch('updatePlaylist', extras);
+      }
+
+      // Reset form
+      document.getElementById('pl-new-name').value    = '';
+      document.getElementById('pl-new-comment').value = '';
+      document.getElementById('pl-new-public').checked = false;
+      document.getElementById('pl-new-public-label').textContent = 'Private — only you can see this';
+      plToggleNewForm(false);
+
+      await plLoadPlaylists();
+    } catch(e) {
+      alert(`Couldn't create playlist: ${e.message}`);
+    }
+  }
+
+  // ── Toggle new-playlist form ──
+  function plToggleNewForm(open) {
+    document.getElementById('pl-new-form').classList.toggle('open', open);
+    if (open) document.getElementById('pl-new-name').focus();
+  }
+
+  // ── Status indicator ──
+  function plSetStatus(type, msg) {
+    const el = document.getElementById('pl-status');
+    el.className = `pl-status ${type}`;
+    el.textContent = msg;
+  }
+
+  // ── Helpers ──
+  function plFmtDuration(secs) {
+    if (!secs) return '0:00';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = Math.floor(secs % 60);
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  function plEsc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
 </body>
 </html>

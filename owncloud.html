@@ -1,233 +1,366 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Nextcloud</title><link rel="stylesheet" href="shared.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Nextcloud</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION
+       Copy this style block into every service page.
+       Do not modify — it matches the shared design system.
+    ═══════════════════════════════════════════════ */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+
+    /* ── Achievement cards ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    .ach-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      transition: border-color .15s;
+    }
+    .ach-card:hover { border-color: rgba(200,168,75,.3); }
+    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+    .ach-footer { display: flex; gap: 6px; align-items: center; }
+    .ach-pts {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(200,168,75,.1);
+      color: var(--accent);
+      border: 1px solid rgba(200,168,75,.2);
+    }
+    .ach-method {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(78,205,196,.08);
+      color: var(--accent3);
+      border: 1px solid rgba(78,205,196,.18);
+    }
+
+    /* ── Storage breakdown grid ── */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* ── Troubleshooting items ── */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+  </style>
+</head>
 <body>
 
+<!-- ╔══════════════════════════════════════════════════════════════════╗
+     ║               REWRITE RULES — READ BEFORE EDITING               ║
+     ║  ❌ NO TAILSCALE — Server is home-only. LAN access directly.     ║
+     ║  ✅ USE config.js FOR ALL VALUES via data-cfg attributes.        ║
+     ║  📋 VERSIONS — Record in versions.json, not in HTML.             ║
+     ║  🌐 SSO IS REQUIRED — Authentik OIDC via user_oidc app.          ║
+     ╚══════════════════════════════════════════════════════════════════╝ -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════════════ -->
 <div class="page-header">
   <div class="page-icon">☁️</div>
   <div>
     <h1>Nextcloud</h1>
-    <div class="subtitle">// Self-Hosted Google Drive · XAMPP on Windows · FOSS //</div>
-    <p class="desc">Nextcloud is the gold standard for self-hosted cloud storage. Your own Google Drive: file sync, sharing, calendar, contacts, photos — all on hardware you control.</p>
+    <div class="subtitle">
+      // Self-Hosted Google Drive · Port <span data-cfg="port:nextcloud"></span> · XAMPP on Windows · OIDC Native //
+    </div>
+    <p class="desc">
+      Nextcloud is the gold standard for self-hosted cloud storage — your own Google Drive for file sync,
+      sharing, calendar, contacts, and photos, all on hardware you control. It also serves as the unified
+      storage quota system for every per-user app on this server.
+    </p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 V1 Goal: Nextcloud running on Windows via XAMPP, accessible on your local network, with desktop sync clients on all your devices. Remote access via Cloudflare Tunnel or Tailscale.</div>
+<!-- ═══════════════════════════════════════════════════════════
+     SUB-TAB NAVIGATION
+═══════════════════════════════════════════════════════════ -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
 
-<div class="section">
-  <div class="section-title">⚙️ Installation on Windows (XAMPP) <span class="tag tag-native">NO DOCKER</span></div>
 
-  <div class="steps">
-    <div class="step">
-      <div class="step-content">
-        <strong>Install XAMPP</strong>
-        <p>Download from <a href="https://apachefriends.org" target="_blank">apachefriends.org</a>. During install, select: <strong>Apache, MySQL, PHP, phpMyAdmin</strong>. Install to <code>C:\xampp</code>.</p>
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
+        Check when Nextcloud is installed via XAMPP, SSO is connected, desktop clients are syncing,
+        and the External Storage mount for <code>D:\Users\</code> is active.
       </div>
     </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Start Apache and MySQL in XAMPP Control Panel</strong>
-        <p>Open XAMPP Control Panel → click Start next to Apache and MySQL. Check the "Svc" checkbox for both — this makes them Windows Services that auto-start on boot.</p>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <!-- STEP 1: XAMPP + NEXTCLOUD INSTALL -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 1 — Install XAMPP &amp; Nextcloud <span class="tag tag-native">NATIVE WINDOWS · NO DOCKER</span></div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Install XAMPP</strong>
+          <p>Download from <a href="https://apachefriends.org" target="_blank">apachefriends.org</a>.
+          During install, select: <strong>Apache, MySQL, PHP, phpMyAdmin</strong>. Install to <code>C:\xampp</code>.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Create a Nextcloud database</strong>
-        <p>Open <code>http://localhost/phpmyadmin</code>. Click "New" → database name <code>nextcloud</code>, collation <code>utf8mb4_general_ci</code> → Create.</p>
-        <p>Go to User accounts → Add user account → username <code>nextcloud</code>, host <code>localhost</code>, set a strong password → check "Grant all privileges on database nextcloud" → Go.</p>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Start Apache and MySQL — enable as Windows Services</strong>
+          <p>Open XAMPP Control Panel → click Start next to <strong>Apache</strong> and <strong>MySQL</strong>.
+          Check the "Svc" checkbox for both so they auto-start on boot.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Configure PHP for large file uploads</strong>
-        <p>Edit <code>C:\xampp\php\php.ini</code>:</p>
-        <pre>memory_limit = 512M
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create the Nextcloud database</strong>
+          <p>Open <code>http://localhost/phpmyadmin</code> → Click "New" → database name <code>nextcloud</code>,
+          collation <code>utf8mb4_general_ci</code> → Create.</p>
+          <p>Go to <strong>User accounts → Add user account</strong> → username <code>nextcloud</code>,
+          host <code>localhost</code>, strong password → check "Grant all privileges on database nextcloud" → Go.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Configure PHP for large file uploads</strong>
+          <p>Edit <code>C:\xampp\php\php.ini</code>:</p>
+          <pre>memory_limit = 512M
 upload_max_filesize = 16G
 post_max_size = 16G
 max_execution_time = 3600
 date.timezone = America/Los_Angeles</pre>
-        <p>Enable extensions (remove semicolon):</p>
-        <pre>extension=intl
+          <p>Enable extensions (remove the leading semicolon):</p>
+          <pre>extension=intl
 extension=gd
 extension=exif</pre>
-        <p>Restart Apache after saving.</p>
+          <p>Restart Apache after saving.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Download and install Nextcloud</strong>
-        <p>Get the zip from <a href="https://nextcloud.com/install/#instructions-server" target="_blank">nextcloud.com/install</a>. Extract the <code>nextcloud</code> folder to <code>C:\xampp\htdocs\nextcloud</code>.</p>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Download and install Nextcloud</strong>
+          <p>Get the zip from <a href="https://nextcloud.com/install/#instructions-server" target="_blank">nextcloud.com/install</a>.
+          Extract the <code>nextcloud</code> folder to <code>C:\xampp\htdocs\nextcloud</code>.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Run the installer at http://localhost/nextcloud</strong>
-        <pre>Admin username:   your-admin-name
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Run the installer at <code>http://localhost/nextcloud</code></strong>
+          <pre>Admin username:   your-admin-name
 Admin password:   (strong password)
-Data folder:      D:\NextcloudData   ← on your big internal drive!
+Data folder:      D:\NextcloudData   ← your large internal drive
 Database:         MySQL
 DB user:          nextcloud
-DB password:      (from step 3)
+DB password:      (from step above)
 DB name:          nextcloud
 DB host:          localhost</pre>
-        <p>Click Install — takes 1–2 minutes.</p>
+          <p>Click Install — takes 1–2 minutes.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Open firewall</strong>
-        <pre>netsh advfirewall firewall add rule name="Nextcloud" dir=in action=allow protocol=TCP localport=80</pre>
-        <p>Access from other devices: <code>http://[server-ip]/nextcloud</code></p>
+
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Open Windows Firewall for LAN access</strong>
+          <pre>netsh advfirewall firewall add rule name="Nextcloud" dir=in action=allow protocol=TCP localport=80</pre>
+          <p>Access from other devices on the LAN: <code>http://[server-ip]/nextcloud</code></p>
+        </div>
       </div>
+
     </div>
   </div>
-</div>
 
-<hr>
-
-<div class="section">
-  <div class="section-title">💻 Desktop &amp; Mobile Sync Clients</div>
-  <div class="grid-2">
+  <!-- STEP 2: CADDY REVERSE PROXY -->
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Reverse Proxy + HTTPS</div>
     <div class="card">
-      <div class="card-title">Windows Desktop Client</div>
-      <p>Download from <a href="https://nextcloud.com/install/#install-clients" target="_blank">nextcloud.com/install</a>. Enter server URL <code>http://[server-ip]/nextcloud</code>. Creates a local sync folder — works identically to Google Drive on the desktop.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">Mobile Apps</div>
-      <p>Official Nextcloud apps for iOS and Android (free). Enable "Auto Upload" for automatic camera roll backup. The files app on iOS can also mount Nextcloud as a Files location.</p>
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">📱 Nextcloud Apps Worth Installing</div>
-  <div class="card">
-    <p>Nextcloud has an app store (Admin → Apps) with hundreds of add-ons. Recommended:</p>
-    <table>
-      <tr><th>App</th><th>What it does</th></tr>
-      <tr><td>Calendar</td><td>CalDAV calendar — syncs with iOS/Android/Thunderbird</td></tr>
-      <tr><td>Contacts</td><td>CardDAV contacts — syncs with phone address book</td></tr>
-      <tr><td>Photos</td><td>Photo gallery with face/object recognition</td></tr>
-      <tr><td>Notes</td><td>Markdown notes app, syncs to mobile</td></tr>
-      <tr><td>Social Login</td><td>Google OAuth (see SSO tab)</td></tr>
-      <tr><td>External Storage</td><td>Mount local Windows folders as Nextcloud shares</td></tr>
-      <tr><td>OnlyOffice / Collabora</td><td>Online document editing (Word/Excel/Powerpoint in browser)</td></tr>
-    </table>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">🌍 Remote Access Options</div>
-
-  <div class="card">
-    <div class="card-title">Option A: Cloudflare Tunnel (Best for Public Access) <span class="tag tag-native">RECOMMENDED</span></div>
-    <p>No port forwarding, no exposed home IP. Cloudflare proxies HTTPS traffic directly to your server through an outbound tunnel.</p>
-    <pre># Install cloudflared:
-winget install Cloudflare.cloudflared
-
-# Authenticate:
-cloudflared tunnel login
-
-# Create tunnel:
-cloudflared tunnel create nextcloud
-
-# Configure C:\Users\[you]\.cloudflared\config.yml:
-tunnel: [your-tunnel-id]
-credentials-file: C:\Users\[you]\.cloudflared\[id].json
-ingress:
-  - hostname: cloud.yourdomain.com
-    service: http://localhost:80
-  - service: http_status:404
-
-# Run as Windows service:
-cloudflared service install</pre>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Option B: Tailscale (Best for Private Access)</div>
-    <p>Install Tailscale on your server and your devices. Access at <code>http://[tailscale-ip]/nextcloud</code> from anywhere. No public exposure.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Option C: HTTPS with Caddy Reverse Proxy</div>
-    <pre># Caddyfile:
-cloud.yourdomain.com {
-    reverse_proxy localhost:80
-    # Caddy auto-handles TLS via Let's Encrypt
+      <p>Add the following block to <code data-cfg="path:caddyfile"></code>. Caddy handles TLS automatically via Let's Encrypt / Cloudflare.</p>
+      <pre><span data-cfg="url:nextcloud"></span> {
+    reverse_proxy localhost:<span data-cfg="port:nextcloud"></span>
+    # Caddy auto-manages TLS
 }</pre>
-    <p>Requires port 80/443 open on your router pointing to your server. Your home IP will be in DNS (unless behind Cloudflare proxy).</p>
+      <p>Reload Caddy after saving:</p>
+      <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">⚡ Performance Tuning</div>
-  <div class="card">
-    <p>After initial setup, run the Nextcloud background job (improves performance for large libraries):</p>
-    <pre># In XAMPP terminal or Windows PowerShell:
-cd C:\xampp\htdocs\nextcloud
+  <!-- STEP 3: PHP PERFORMANCE -->
+  <div class="section">
+    <div class="section-title">⚡ Step 3 — Performance Tuning</div>
+    <div class="card">
+      <p>After initial setup, run these database maintenance commands to improve performance for large libraries:</p>
+      <pre>cd C:\xampp\htdocs\nextcloud
 php occ maintenance:mode --on
 php occ db:add-missing-indices
 php occ maintenance:mode --off</pre>
-    <p>For large files, consider enabling chunked uploads in the desktop client (Settings → Advanced → Chunked uploads).</p>
+      <p>For large file transfers, enable chunked uploads in the desktop client: Settings → Advanced → Chunked uploads.</p>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">🔐 SSO / Google Login <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <p>See the SSO tab for full Google OAuth setup for Nextcloud. Short version: install the "Social Login" app and configure a Custom OpenID Connect provider pointing to Google's OIDC endpoint with your Google OAuth credentials.</p>
-  </div>
-</div>
+  <!-- STEP 4: EXTERNAL STORAGE MOUNT -->
+  <div class="section">
+    <div class="section-title">🗂️ Step 4 — External Storage Mount (<code data-cfg="path:users"></code>)</div>
+    <div class="card">
+      <p>Every per-user app on this server stores data in <code data-cfg="path:users"></code>\[username]\. Mount this into
+      Nextcloud so users can see their app data in the file browser and it counts toward their quota.</p>
 
-<div class="section">
-  <div class="section-title">🗂️ Unified User Data — External Storage Mount</div>
-  <div class="card">
-    <div class="card-title">How D:\Users\[username]\ ties into Nextcloud quotas</div>
-    <p>Every per-user app on this server (emulators, Calibre, ABS, MTG decks, recommendations history) stores its data in <code>D:\Users\[username]\</code>. This folder is mounted into Nextcloud as <strong>External Storage</strong> for each user, which means:</p>
-    <ul style="margin:6px 0 0 18px;font-size:.85rem">
-      <li>Users can see and download their app data from Nextcloud's file browser</li>
-      <li>The size counts toward their storage quota alongside regular Nextcloud files</li>
-      <li>One backup of <code>D:\Users\</code> covers all app data for all users</li>
-      <li>If you delete a user's Nextcloud account, you can optionally also wipe <code>D:\Users\[username]\</code></li>
-    </ul>
-
-    <div class="card-title" style="margin-top:14px">Step 1: Enable External Storage app</div>
-    <pre>cd C:\xampp\htdocs\nextcloud
+      <div class="card-title">Enable the External Storage app</div>
+      <pre>cd C:\xampp\htdocs\nextcloud
 php occ app:enable files_external</pre>
 
-    <div class="card-title" style="margin-top:14px">Step 2: Add a local mount for each user's app data folder</div>
-    <p>Nextcloud's External Storage app supports a <code>%user%</code> template variable that automatically resolves to the current user's name:</p>
-    <pre># Add via occ (applies to ALL users using the %user% template):
+      <div class="card-title" style="margin-top:14px">Add the per-user mount using the <code>%user%</code> template</div>
+      <pre># Creates an "App Data" folder in every user's Nextcloud
+# that maps to D:\Users\[their-username]\ on disk:
 php occ files_external:create \
-  --config=datadir="D:\Users\%user%" \
+  --config=datadir="<span data-cfg="path:users"></span>\%user%" \
   --apply-to-all-users \
   "App Data" local null
 
-# This creates a folder called "App Data" in every user's Nextcloud
-# that maps to D:\Users\[their-username]\ on disk.
-
-# Verify the mount was created:
+# Verify:
 php occ files_external:list</pre>
 
-    <div class="callout callout-warn">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>Username matching:</strong> Nextcloud resolves <code>%user%</code> to the user's Nextcloud login name. This must exactly match the folder name in <code>D:\Users\</code>, which in turn must match their Authentik username (Gmail prefix). All three must be consistent: Authentik username = <code>alice</code>, Nextcloud username = <code>alice</code>, folder = <code>D:\Users\alice\</code>.</div>
-    </div>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Username matching:</strong> Nextcloud resolves <code>%user%</code> to the user's
+        Nextcloud login name. This must exactly match the folder name in <code data-cfg="path:users"></code>\,
+        which in turn must match their Authentik username (Gmail prefix).
+        All three must be consistent: Authentik username = <code>alice</code>,
+        Nextcloud username = <code>alice</code>, folder = <code data-cfg="path:users"></code>\alice\.</div>
+      </div>
 
-    <div class="card-title" style="margin-top:14px">Step 3: Enable quota counting for external storage</div>
-    <pre># In Nextcloud admin → External Storage → edit the App Data mount:
+      <div class="card-title" style="margin-top:14px">Enable quota counting for external storage</div>
+      <pre># In Nextcloud admin → External Storage → edit the App Data mount:
 # ☑ Enable sharing
 # ☑ Enable encryption
-# ☑ Previews
-# ☑ Check changes: "Once every direct access" (so quota updates when files change)
+# ☑ Check changes: "Once every direct access"
 
-# Or via config.php — force quota to include external storage:
+# Force quota to include external storage:
 php occ config:app:set files_external allow_user_mounting --value=yes
 php occ config:system:set quota_include_external_storage --value=true --type=boolean</pre>
 
-    <div class="card-title" style="margin-top:14px">Step 4: Individual user quota overrides</div>
-    <p>Group defaults (set in Authentik → Nextcloud group mapping) apply first, but you can override any individual user:</p>
-    <pre># Set a specific quota for one user (covers BOTH Nextcloud files AND App Data):
+      <div class="card-title" style="margin-top:14px">Set per-user quotas</div>
+      <pre># Set quota for individual users (covers Nextcloud files + App Data):
 php occ user:setting alice files quota "50 GB"
 php occ user:setting bob   files quota "10 GB"
 php occ user:setting dave  files quota "1 GB"
@@ -235,9 +368,181 @@ php occ user:setting john  files quota "5 GB"
 
 # Check current usage for all users:
 php occ user:report</pre>
+    </div>
+  </div>
 
-    <div class="card-title" style="margin-top:14px">Result: what users see in Nextcloud</div>
-    <pre>alice's Nextcloud file browser:
+  <!-- STEP 5: SSO -->
+  <div class="section">
+    <div class="section-title">🔐 Step 5 — SSO via Authentik (OIDC Native)</div>
+    <div class="card">
+      <p>Nextcloud uses the <strong>user_oidc</strong> app for native OpenID Connect integration with Authentik.
+      This is a full OIDC flow — not Caddy forward_auth — so users get a proper "Sign in with Authentik" button.</p>
+
+      <div class="card-title">In Authentik: create an OAuth2/OIDC provider</div>
+      <pre># Authentik admin → Applications → Providers → Create
+# Type: OAuth2/OpenID Provider
+# Name: Nextcloud
+# Client type: Confidential
+# Redirect URIs: <span data-cfg="url:nextcloud"></span>/apps/user_oidc/code
+# Scopes: openid, profile, email</pre>
+
+      <div class="card-title" style="margin-top:14px">In Authentik: create an Application</div>
+      <pre># Applications → Create
+# Name: Nextcloud
+# Slug: nextcloud
+# Provider: (the one you just created)
+# Launch URL: <span data-cfg="url:nextcloud"></span></pre>
+
+      <div class="card-title" style="margin-top:14px">In Nextcloud: install and configure user_oidc</div>
+      <pre># Install the app:
+php occ app:enable user_oidc
+
+# Or install via: Nextcloud admin → Apps → search "OpenID Connect user backend"</pre>
+      <p>Then go to <strong>Admin → OpenID Connect</strong> → Add provider:</p>
+      <table style="margin-top:8px">
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Identifier</td><td><code>authentik</code></td></tr>
+        <tr><td>Client ID</td><td>(from Authentik provider)</td></tr>
+        <tr><td>Client Secret</td><td>(from Authentik provider)</td></tr>
+        <tr><td>Discovery endpoint</td><td><code data-cfg="oidc-issuer:nextcloud"></code>/.well-known/openid-configuration</td></tr>
+        <tr><td>Scope</td><td><code>openid profile email</code></td></tr>
+        <tr><td>Use unique UID</td><td>☑ (maps to Authentik username)</td></tr>
+      </table>
+
+      <div class="callout callout-warn" style="margin-top:14px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Username mapping:</strong> Ensure the "Unique identifier claim" is set to
+        <code>preferred_username</code> so Nextcloud usernames match Authentik usernames,
+        which must also match <code data-cfg="path:users"></code>\[username]\ folder names.</div>
+      </div>
+    </div>
+
+    <div class="steps" style="margin-top:16px">
+      <div class="step">
+        <div class="step-content">
+          <strong>Test SSO login in an incognito window</strong>
+          <p>Open <code data-cfg="url:nextcloud"></code> in a private browser tab → click
+          "Log in with Authentik" → sign in with a Google account that has been provisioned in Authentik.
+          You should land in Nextcloud as an authenticated user.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Verify user provisioning and quota</strong>
+          <p>Confirm the user account was auto-created in Nextcloud with the correct username
+          (matching their Authentik username). Check in Authentik admin at
+          <code data-cfg="authentik-admin"></code> → Directory → Users if needed.
+          Then confirm their App Data external mount shows their <code data-cfg="path:users"></code>\[username]\ folder.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Verify the Caddyfile entry</strong>
+          <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+          <p>Confirm <code data-cfg="url:nextcloud"></code> loads over HTTPS with a valid certificate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6: DESKTOP / MOBILE CLIENTS -->
+  <div class="section">
+    <div class="section-title">💻 Step 6 — Install Desktop &amp; Mobile Sync Clients</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Windows Desktop Client</div>
+        <p>Download from <a href="https://nextcloud.com/install/#install-clients" target="_blank">nextcloud.com/install</a>.
+        Enter server URL <code data-cfg="url:nextcloud"></code>. Creates a local sync folder — works
+        identically to Google Drive on the desktop.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Mobile Apps (iOS / Android)</div>
+        <p>Official Nextcloud apps available free on both platforms. Enable <strong>Auto Upload</strong>
+        for automatic camera roll backup. On iOS, Nextcloud also mounts as a Files app location.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 7: RECOMMENDED APPS -->
+  <div class="section">
+    <div class="section-title">📱 Step 7 — Recommended Nextcloud Apps</div>
+    <div class="card">
+      <p>Install via <strong>Admin → Apps</strong>:</p>
+      <table>
+        <tr><th>App</th><th>What it does</th></tr>
+        <tr><td>Calendar</td><td>CalDAV calendar — syncs with iOS/Android/Thunderbird</td></tr>
+        <tr><td>Contacts</td><td>CardDAV contacts — syncs with phone address book</td></tr>
+        <tr><td>Photos</td><td>Photo gallery view with face/object recognition</td></tr>
+        <tr><td>Notes</td><td>Markdown notes app, syncs to mobile</td></tr>
+        <tr><td>OpenID Connect user backend</td><td>Authentik SSO (required — see Step 5)</td></tr>
+        <tr><td>External Storage Support</td><td>Mount <code data-cfg="path:users"></code> shares (required — see Step 4)</td></tr>
+        <tr><td>OnlyOffice / Collabora</td><td>Online document editing (Word/Excel/PowerPoint in browser)</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">
+    ☁️ V1 Goal: Nextcloud running on Windows via XAMPP, accessible externally via Cloudflare Tunnel through Caddy,
+    with desktop sync clients on all devices and External Storage quotas covering all per-user app data.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code data-cfg="url:nextcloud"></code></td></tr>
+          <tr><td>Web (LAN)</td><td><code>http://[server-ip]/nextcloud</code></td></tr>
+          <tr><td>Admin panel</td><td><code data-cfg="url:nextcloud"></code>/settings/admin</td></tr>
+          <tr><td>phpMyAdmin (LAN only)</td><td><code>http://localhost/phpmyadmin</code></td></tr>
+          <tr><td>Desktop client server URL</td><td><code data-cfg="url:nextcloud"></code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:nextcloud"></span> (Apache/XAMPP)</td></tr>
+          <tr><td>Install type</td><td>Native Windows (XAMPP)</td></tr>
+          <tr><td>Service names</td><td><code>Apache2.4</code>, <code>mysql</code></td></tr>
+          <tr><td>Auth method</td><td>Authentik OIDC (user_oidc app)</td></tr>
+          <tr><td>Data path</td><td><code>D:\NextcloudData</code></td></tr>
+          <tr><td>App path</td><td><code>C:\xampp\htdocs\nextcloud</code></td></tr>
+          <tr><td>php.ini</td><td><code>C:\xampp\php\php.ini</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Apps &amp; Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Device / App</th><th>How to use it</th></tr>
+        <tr><td>Browser</td><td>Go to <code data-cfg="url:nextcloud"></code> — works on any browser</td></tr>
+        <tr><td>Windows Desktop</td><td>Nextcloud desktop client → server URL <code data-cfg="url:nextcloud"></code></td></tr>
+        <tr><td>iOS</td><td>Nextcloud app (App Store) — also mounts as Files app location</td></tr>
+        <tr><td>Android</td><td>Nextcloud app (Play Store) — Auto Upload for camera roll backup</td></tr>
+        <tr><td>macOS / Linux</td><td>Nextcloud desktop client (same download page)</td></tr>
+        <tr><td>WebDAV (any client)</td><td><code data-cfg="url:nextcloud"></code>/remote.php/dav/files/[username]/</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗂️ What Users See in Their File Browser</div>
+    <div class="card">
+      <pre>alice's Nextcloud file browser:
   📁 Documents/       ← regular Nextcloud sync
   📁 Photos/          ← Nextcloud photos
   📁 App Data/        ← D:\Users\alice\ (external mount)
@@ -250,8 +555,430 @@ php occ user:report</pre>
       📁 mtg/decks/       ← personal MTG decks
       📁 recommendations/ ← recommendation history
   💾 50 GB total quota (shared across all folders above)</pre>
+    </div>
   </div>
-</div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version</div>
+      <p><span data-cfg="version:nextcloud"></span></p>
+
+      <div class="card-title" style="margin-top:14px">How to update Nextcloud</div>
+      <p>Nextcloud's built-in updater is the safest upgrade path for XAMPP installs:</p>
+      <pre># Option A — Web updater (easiest):
+# Go to Admin → Overview → there will be an update notification
+# Click "Open updater" and follow the wizard
+
+# Option B — CLI updater:
+cd C:\xampp\htdocs\nextcloud
+php updater\updater.phar
+
+# After any update, run:
+php occ upgrade
+php occ db:add-missing-indices
+php occ maintenance:mode --off</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Never skip major versions.</strong> Nextcloud must be upgraded sequentially
+        through each major version (e.g. 27 → 28 → 29, not 27 → 29 directly).
+        Check the release notes before upgrading.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 PHP version mismatch after XAMPP update</div>
+      <div class="trouble-a">
+        If you update XAMPP independently of Nextcloud, the new PHP version may not be compatible
+        with the currently installed Nextcloud version. Always check Nextcloud's PHP requirements
+        before updating XAMPP. Recovery: downgrade PHP in XAMPP or upgrade Nextcloud to a compatible version.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 External Storage mount breaks after folder restructure</div>
+      <div class="trouble-a">
+        If <code data-cfg="path:users"></code>\ is ever moved or renamed, the External Storage mounts
+        will silently fail — users will see an empty "App Data" folder with no error.
+        Re-run <code>php occ files_external:list</code> and update the <code>datadir</code> config
+        to the new path.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">🟡 SSO redirect URI breaks after domain change</div>
+      <div class="trouble-a">
+        If you change your domain, update the redirect URI in both the Authentik provider
+        (<code data-cfg="authentik-admin"></code> → Applications → Nextcloud → Provider) and in
+        Nextcloud's user_oidc settings (Admin → OpenID Connect → Discovery endpoint).
+        The callback URI must be exactly: <code data-cfg="url:nextcloud"></code>/apps/user_oidc/code
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">🟢 Background jobs warning in admin Overview</div>
+      <div class="trouble-a">
+        Nextcloud may warn that background jobs haven't run recently. Set up a Windows Scheduled Task
+        to run <code>php C:\xampp\htdocs\nextcloud\cron.php</code> every 5 minutes under the SYSTEM account.
+        This handles thumbnail generation, notifications, and file scans.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Check for Nextcloud updates (Admin → Overview)</td></tr>
+        <tr><td>Monthly</td><td>Review Admin → Logging for errors</td></tr>
+        <tr><td>Monthly</td><td>Run <code>php occ files:scan --all</code> if any files were added to the data folder directly</td></tr>
+        <tr><td>After any update</td><td>Test SSO login in an incognito window</td></tr>
+        <tr><td>After any update</td><td>Record confirmed working version in <code>versions.json</code></td></tr>
+        <tr><td>After any domain change</td><td>Update redirect URIs in Authentik (<code data-cfg="authentik-admin"></code>) AND in user_oidc settings</td></tr>
+        <tr><td>After any domain change</td><td>Update Caddy config at <code data-cfg="path:caddyfile"></code> with new subdomain</td></tr>
+        <tr><td>After adding a new user</td><td>Verify their <code data-cfg="path:users"></code>\[username]\ folder exists and quota is set</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🎯 How Nextcloud Achievements Work</div>
+    <div class="card">
+      <p>Nextcloud does not have a native webhook system for file events, so achievements are tracked via
+      <strong>polling</strong> — the achievement server periodically queries the Nextcloud database or
+      <code>occ</code> CLI to check quota usage and file counts per user. There are no real-time triggers;
+      achievements are awarded on the next polling cycle after a threshold is crossed.</p>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>Quota data source:</strong> Use <code>php occ user:report</code>
+        or query the <code>oc_accounts_data</code> table directly in MySQL for per-user used/quota values.
+        The achievement server can run this on a schedule and fire award events when thresholds are met.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 Available Achievements</div>
+    <div class="ach-grid">
+
+      <div class="ach-card">
+        <div class="ach-icon">☁️</div>
+        <div class="ach-name">First Upload</div>
+        <div class="ach-desc">Sync your first file to your personal cloud storage.</div>
+        <div class="ach-footer">
+          <span class="ach-pts">10 pts</span>
+          <span class="ach-method">polling</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📦</div>
+        <div class="ach-name">1 GB Club</div>
+        <div class="ach-desc">Use 1 GB of your cloud storage quota.</div>
+        <div class="ach-footer">
+          <span class="ach-pts">20 pts</span>
+          <span class="ach-method">polling</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🗄️</div>
+        <div class="ach-name">Hoarder</div>
+        <div class="ach-desc">Use 10 GB of your cloud storage quota.</div>
+        <div class="ach-footer">
+          <span class="ach-pts">40 pts</span>
+          <span class="ach-method">polling</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📷</div>
+        <div class="ach-name">Shutterbug</div>
+        <div class="ach-desc">Enable Auto Upload from the mobile app and sync your camera roll.</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 pts</span>
+          <span class="ach-method">polling</span>
+        </div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🔗</div>
+        <div class="ach-name">Sharer</div>
+        <div class="ach-desc">Create your first public share link.</div>
+        <div class="ach-footer">
+          <span class="ach-pts">10 pts</span>
+          <span class="ach-method">polling</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Recommendation engine integration: Nextcloud doesn't produce content history,
+       so this section is intentionally omitted per the template guidance. -->
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Where Data Lives</div>
+    <div class="card">
+      <p>Nextcloud data is split across two locations: the app itself in XAMPP, and user files on the
+      data drive. The External Storage mount adds a third logical location — but it's just a pointer
+      to <code data-cfg="path:users"></code>\ which is already the source of truth for all per-user app data.</p>
+
+      <div class="storage-breakdown">
+        <div class="storage-cell">
+          <div class="storage-cell-label">App files</div>
+          <div class="storage-cell-val">C:\xampp\htdocs\nextcloud</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">PHP + XAMPP</div>
+          <div class="storage-cell-val">C:\xampp\</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">Nextcloud data</div>
+          <div class="storage-cell-val">D:\NextcloudData</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">MySQL database</div>
+          <div class="storage-cell-val">C:\xampp\mysql\data\nextcloud</div>
+        </div>
+        <div class="storage-cell">
+          <div class="storage-cell-label">User app data (ext. mount)</div>
+          <div class="storage-cell-val"><span data-cfg="path:users"></span>\[username]\</div>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>External Storage is read-through, not a copy.</strong>
+        The "App Data" folder visible in each user's Nextcloud is a live mount of
+        <code data-cfg="path:users"></code>\[username]\. Files aren't duplicated.
+        Backing up <code data-cfg="path:users"></code>\ covers all app data for all users.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td>Nextcloud database</td><td><code>C:\xampp\mysql\data\nextcloud</code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>Nextcloud data folder</td><td><code>D:\NextcloudData</code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>User app data</td><td><code data-cfg="path:users"></code></td><td>Daily</td><td>🔴 High</td></tr>
+        <tr><td>XAMPP PHP config</td><td><code>C:\xampp\php\php.ini</code></td><td>After any change</td><td>🟡 Medium</td></tr>
+        <tr><td>Nextcloud config.php</td><td><code>C:\xampp\htdocs\nextcloud\config\config.php</code></td><td>After any change</td><td>🟡 Medium</td></tr>
+      </table>
+
+      <div class="card-title" style="margin-top:14px">Backup script (put Nextcloud in maintenance mode first)</div>
+      <pre># Put Nextcloud into maintenance mode before backing up the DB:
+cd C:\xampp\htdocs\nextcloud
+php occ maintenance:mode --on
+
+# Backup database:
+C:\xampp\mysql\bin\mysqldump -u nextcloud -p nextcloud > D:\Backups\nextcloud-db.sql
+
+# Turn maintenance mode off:
+php occ maintenance:mode --off</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 "Service unavailable" / 503 after Windows restart</div>
+      <div class="trouble-a">
+        Apache or MySQL didn't start automatically. Check that both are registered as Windows Services
+        (the "Svc" checkbox in XAMPP Control Panel). Fix:
+        <ul style="margin:6px 0 0 18px">
+          <li>Open XAMPP Control Panel → start Apache and MySQL manually</li>
+          <li>If the "Svc" checkbox is unchecked, check it to re-register as a service</li>
+          <li>Or from PowerShell: <code>Start-Service Apache2.4; Start-Service mysql</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">🔴 Large file upload fails / times out</div>
+      <div class="trouble-a">
+        PHP limits weren't applied or Apache didn't restart after the php.ini change.
+        Verify <code>C:\xampp\php\php.ini</code> has <code>upload_max_filesize = 16G</code>,
+        <code>post_max_size = 16G</code>, and <code>max_execution_time = 3600</code>.
+        Then restart Apache from the XAMPP Control Panel and try again.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ SSO login fails / redirect error</div>
+      <div class="trouble-a">
+        Almost always a redirect URI mismatch. Check:
+        <ul style="margin:6px 0 0 18px">
+          <li>Authentik provider → Redirect URIs matches exactly: <code data-cfg="url:nextcloud"></code>/apps/user_oidc/code</li>
+          <li>Nextcloud user_oidc → Discovery endpoint is reachable from the server</li>
+          <li>Restart Apache after any config change: <code>Stop-Service Apache2.4; Start-Service Apache2.4</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ "App Data" external mount shows empty for a user</div>
+      <div class="trouble-a">
+        Either the user's <code data-cfg="path:users"></code>\[username]\ folder doesn't exist yet,
+        or there's a username mismatch. Check:
+        <ul style="margin:6px 0 0 18px">
+          <li>Verify the folder exists: <code>Test-Path "<span data-cfg="path:users"></span>\[username]"</code></li>
+          <li>Verify Nextcloud username matches Authentik username exactly (case-sensitive)</li>
+          <li>Run <code>php occ files:scan [username]</code> to force a rescan</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Nextcloud not accessible from outside the LAN</div>
+      <div class="trouble-a">
+        Check in order:
+        <ul style="margin:6px 0 0 18px">
+          <li>Is Apache running? → XAMPP Control Panel or <code>Get-Service Apache2.4</code></li>
+          <li>Is Caddy running and routing to <code>localhost:80</code>?</li>
+          <li>Is the Cloudflare DNS record correct for <code data-cfg="url:nextcloud"></code>?</li>
+          <li>Check Caddy logs: <code>Get-Content C:\caddy\caddy.log -Tail 50</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">💡 Admin overview shows warnings about missing indices or background jobs</div>
+      <div class="trouble-a">
+        Run <code>php occ db:add-missing-indices</code> for index warnings.
+        For background job warnings, create a Windows Scheduled Task to run
+        <code>php C:\xampp\htdocs\nextcloud\cron.php</code> every 5 minutes as SYSTEM.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 Useful Admin Commands</div>
+    <div class="card">
+      <pre># Service management:
+Get-Service Apache2.4                          # check Apache status
+Get-Service mysql                              # check MySQL status
+Stop-Service Apache2.4; Start-Service Apache2.4   # restart Apache
+Stop-Service mysql; Start-Service mysql           # restart MySQL
+
+# Nextcloud occ commands (run from C:\xampp\htdocs\nextcloud):
+php occ status                                 # Nextcloud version + status
+php occ maintenance:mode --on                  # enable maintenance mode
+php occ maintenance:mode --off                 # disable maintenance mode
+php occ db:add-missing-indices                 # fix index warnings
+php occ files:scan --all                       # rescan all files
+php occ files:scan [username]                  # rescan one user
+php occ user:report                            # quota usage per user
+php occ user:setting alice files quota "50 GB" # set user quota
+php occ files_external:list                    # list external mounts
+php occ app:list                               # list installed apps
+php occ upgrade                                # run after Nextcloud update
+
+# MySQL — direct DB access (LAN only):
+# Open http://localhost/phpmyadmin
+# Or: C:\xampp\mysql\bin\mysql -u nextcloud -p nextcloud</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+═══════════════════════════════════════════════════════════════ -->
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'nextcloud_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar      = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub      = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      overviewBtn.style.fontWeight = '700';
+      overviewBtn.style.color = 'var(--accent3)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      overviewBtn.style.fontWeight = '';
+      overviewBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
 
 </body>
 </html>
