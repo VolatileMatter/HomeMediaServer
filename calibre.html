@@ -1,182 +1,1107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Calibre</title>
-<link rel="stylesheet" href="shared.css">
+  <meta charset="UTF-8">
+  <title>Books — Calibre-Web</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ── Sub-tab navigation ── */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox {
+      background: #4caf7d;
+      border-color: #4caf7d;
+    }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+    .setup-complete-sub {
+      font-size: .75rem;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    /* ── Achievement cards ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-top: 14px; }
+    .ach-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      position: relative;
+      transition: border-color .15s;
+    }
+    .ach-card:hover { border-color: rgba(200,168,75,.3); }
+    .ach-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .ach-name { font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .ach-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+    .ach-footer { display: flex; gap: 6px; align-items: center; }
+    .ach-pts {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(200,168,75,.1);
+      color: var(--accent);
+      border: 1px solid rgba(200,168,75,.2);
+    }
+    .ach-method {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: rgba(78,205,196,.08);
+      color: var(--accent3);
+      border: 1px solid rgba(78,205,196,.18);
+    }
+
+    /* ── Storage breakdown ── */
+    .storage-breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .storage-cell {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+    }
+    .storage-cell-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .57rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    .storage-cell-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .85rem;
+      color: var(--text-bright);
+    }
+
+    /* ── Trouble items ── */
+    .trouble-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warning);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .trouble-q {
+      font-weight: 700;
+      font-size: .88rem;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+
+    @media (max-width: 680px) {
+      .storage-breakdown { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 <body>
 
 <div class="page-header">
   <div class="page-icon">📚</div>
   <div>
-    <h1>Calibre Book Library Server</h1>
-    <div class="subtitle">// Calibre-Web · Content Server · No Docker Required //</div>
-    <p class="desc">Set up a self-hosted ebook library accessible from any device on your network (and beyond). Supports EPUB, MOBI, PDF, and syncs with Kindle.</p>
+    <h1>Books — Calibre-Web</h1>
+    <div class="subtitle">// Calibre-Web · Port 8083 · Native Windows · Authentik OIDC · Readarr Auto-Downloads //</div>
+    <p class="desc">Self-hosted ebook library via Calibre-Web. Browse, read, and manage your entire book collection from any browser. Supports EPUB, MOBI, PDF, and wireless Kindle delivery.</p>
   </div>
 </div>
 
-<div class="v1-banner">
-  🐉 V1 Goal: Calibre running as a background service, accessible from your browser at <code>http://[your-PC-IP]:8083</code>. SSO integration documented in the SSO tab.
+<!-- ── Sub-tab nav ── -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
 </div>
 
-<!-- Option 1: Calibre Desktop + Content Server (simplest) -->
-<div class="section">
-  <div class="section-title">📖 Option 1 — Calibre Desktop Built-in Content Server <span class="tag tag-native">NATIVE · EASIEST</span></div>
 
-  <div class="card">
-    <div class="card-title">What This Is</div>
-    <p>Calibre's desktop app includes a built-in content server that works in any browser. It's the simplest option — no extra software needed. The downside is that the Calibre GUI needs to stay open (or you set it to minimize to tray).</p>
+<!-- ═══════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Calibre-Web is installed, library imported, SSO connected, and Readarr linked.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <div class="steps">
-    <div class="step">
-      <div class="step-content">
-        <strong>Install Calibre</strong>
-        <p>Download from <a href="https://calibre-ebook.com/download_windows" target="_blank">calibre-ebook.com</a>. Install normally. When it asks, point your library to your new internal drive, e.g. <code>D:\Books</code>.</p>
-      </div>
+  <!-- STEP 1: CALIBRE DESKTOP -->
+  <div class="section">
+    <div class="section-title">📦 Step 1 — Install Calibre Desktop <span class="tag tag-native">NATIVE · REQUIRED</span></div>
+    <div class="card">
+      <div class="card-title">Why Calibre Desktop is required</div>
+      <p>Calibre-Web is a browser frontend — it does <em>not</em> manage the library itself. Calibre Desktop creates and maintains <code>metadata.db</code>, which is the database Calibre-Web reads from. You need both installed.</p>
     </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Enable the content server</strong>
-        <p>In Calibre: <strong>Preferences → Sharing → Sharing over the net</strong>. Check "Start the content server when Calibre starts." Set port to <code>8083</code>. Optionally set a username/password here.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Download and install Calibre</strong>
+          <p>Download from <a href="https://calibre-ebook.com/download_windows" target="_blank">calibre-ebook.com</a>. Install normally. When it asks where your library is, point it at your internal drive: <code>D:\Books</code>. This is where <code>metadata.db</code> will live.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Open Windows Firewall for port 8083</strong>
-        <pre>netsh advfirewall firewall add rule name="Calibre Server" dir=in action=allow protocol=TCP localport=8083</pre>
+      <div class="step">
+        <div class="step-content">
+          <strong>Import your existing ebooks</strong>
+          <p>In Calibre: <strong>Add books</strong> → select your ebook folder. Calibre will copy/link them into the library structure and update <code>metadata.db</code>. Run <strong>Edit Metadata → Download Metadata and Covers</strong> to auto-fill author, description, and cover art from online sources.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Access from any device</strong>
-        <p>Open a browser on your phone/laptop/TV and go to <code>http://[your-server-IP]:8083</code>. You'll see your full library.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Auto-launch Calibre on Windows startup</strong>
-        <p>Press <code>Win + R</code> → type <code>shell:startup</code> → drag a shortcut to Calibre into that folder. Calibre can be configured to start minimized: right-click the desktop shortcut → Properties → add <code>--hide-windowed</code> to the target.</p>
-        <pre>Target example:
-"C:\Program Files\Calibre2\calibredb.exe" --with-library "D:\Books"</pre>
+      <div class="step">
+        <div class="step-content">
+          <strong>Set Calibre to auto-start minimized to tray</strong>
+          <p>Calibre Preferences → Behavior → check <strong>"Minimize to system tray"</strong>. Then add a shortcut to <code>shell:startup</code> so it launches on boot. Calibre-Web needs Calibre's library to remain accessible — keeping Calibre open ensures <code>metadata.db</code> doesn't get locked.</p>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body"><strong>Alternative:</strong> If Calibre Desktop in the background bothers you, just close it after any library changes. Calibre-Web reads <code>metadata.db</code> directly — Calibre doesn't need to be running for Calibre-Web to serve books. Just open Calibre whenever you want to add or edit books.</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<hr>
+  <hr>
 
-<!-- Option 2: Calibre-Web -->
-<div class="section">
-  <div class="section-title">🌐 Option 2 — Calibre-Web (Better UI, More Features) <span class="tag tag-native">NATIVE · RECOMMENDED</span></div>
+  <!-- STEP 2: CALIBRE-WEB -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 2 — Install Calibre-Web <span class="tag tag-native">NATIVE · NO DOCKER</span></div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install Python and Calibre-Web via pip</strong>
+          <pre># Requires Python 3.8+. Check: python --version
+# If not installed, download from python.org
 
-  <div class="card">
-    <div class="card-title">What Calibre-Web Adds</div>
-    <p>Calibre-Web is a separate web application that reads your Calibre library folder directly and provides a much nicer UI with user accounts, reading progress sync, Kindle send-to-email, and OPDS catalog support. It does NOT require Docker.</p>
-  </div>
+pip install calibreweb
 
-  <div class="steps">
-    <div class="step">
-      <div class="step-content">
-        <strong>Install Python 3.11+ (if not already)</strong>
-        <p>Download from <a href="https://python.org" target="_blank">python.org</a>. During install, check <strong>"Add Python to PATH."</strong></p>
+# Or if the above doesn't work:
+pip install --upgrade calibreweb</pre>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Install Calibre-Web via pip</strong>
-        <pre>pip install calibreweb</pre>
+      <div class="step">
+        <div class="step-content">
+          <strong>First launch</strong>
+          <pre>cps</pre>
+          <p>Open <code>http://localhost:8083</code>. You'll see the initial setup wizard.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Run it for the first time</strong>
-        <pre>cps</pre>
-        <p>This starts Calibre-Web. Open <code>http://localhost:8083</code> in your browser. You'll see first-time setup.</p>
+      <div class="step">
+        <div class="step-content">
+          <strong>Point Calibre-Web at your library</strong>
+          <p>In the setup wizard, enter the path to your Calibre library folder — the folder that contains <code>metadata.db</code>:</p>
+          <pre>D:\Books</pre>
+          <p>Set an admin username and password. Store this in Vaultwarden. <strong>Do not use your SSO account for the admin account</strong> — keep a local fallback.</p>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Point it at your Calibre library</strong>
-        <p>In setup, enter the path to your Calibre library folder (the folder that contains <code>metadata.db</code>), e.g.: <code>D:\Books</code>. Set an admin username/password.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Run Calibre-Web as a Windows Service (auto-start)</strong>
-        <p>Use <strong>NSSM</strong> (Non-Sucking Service Manager) — a free tool that turns any EXE into a Windows service.</p>
-        <pre># Download nssm from nssm.cc/download
-# Extract to C:\tools\nssm\
-
-# Run in admin PowerShell:
+      <div class="step">
+        <div class="step-content">
+          <strong>Run Calibre-Web as a Windows Service (NSSM)</strong>
+          <p>Download NSSM from <a href="https://nssm.cc/download" target="_blank">nssm.cc</a>. Extract to <code>C:\tools\nssm\</code>. Then run in an admin PowerShell:</p>
+          <pre># Install the service:
 C:\tools\nssm\win64\nssm.exe install CalibreWeb
 
-# In the dialog:
-# Path: C:\Users\[you]\AppData\Local\Programs\Python\Python311\Scripts\cps.exe
+# In the NSSM dialog:
+# Path:       C:\Users\[you]\AppData\Local\Programs\Python\Python3xx\Scripts\cps.exe
 # Start Type: Automatic
-# Then: nssm start CalibreWeb</pre>
+
+# Start it:
+nssm start CalibreWeb</pre>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">Find the exact path to <code>cps.exe</code> with: <code>where cps</code> in a normal (non-admin) PowerShell window.</div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Open the firewall</strong>
-        <pre>netsh advfirewall firewall add rule name="Calibre-Web" dir=in action=allow protocol=TCP localport=8083</pre>
+      <div class="step">
+        <div class="step-content">
+          <strong>Open Windows Firewall for port 8083</strong>
+          <pre>netsh advfirewall firewall add rule name="Calibre-Web" dir=in action=allow protocol=TCP localport=8083</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Verify it's running</strong>
+          <p>Open <code>http://[server-ip]:8083</code> from another device on your network. You should see the Calibre-Web login page with your library.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="callout callout-tip">
-    <div class="callout-icon">📱</div>
-    <div class="callout-body">
-      <strong>OPDS for e-readers</strong>
-      Calibre-Web exposes an OPDS catalog at <code>http://[IP]:8083/opds</code>. Apps like Moon+ Reader, KyBook, or Kyōbō can subscribe to this and browse/download books directly.
+  <hr>
+
+  <!-- STEP 3: SSO -->
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Authentik SSO Integration <span class="tag tag-sso">AUTHENTIK OIDC</span></div>
+    <div class="card">
+      <p>Calibre-Web supports OAuth2/OIDC natively. Hook it into Authentik so users log in with the same Google account they use for everything else on the server.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Create an Authentik Application for Calibre-Web</strong>
+          <p>In Authentik Admin → Applications → Create:</p>
+          <pre>Name:        Calibre-Web
+Slug:        calibre-web
+Launch URL:  https://books.yourdomain.com
+Provider:    Create new → OAuth2/OIDC Provider
+
+Provider settings:
+  Client type:     Confidential
+  Redirect URIs:   https://books.yourdomain.com/oauth/authorize/google/callback
+  Signing Key:     [your Authentik signing key]
+  Scopes:          openid, profile, email
+  Access:          authentik-family + authentik-admins groups
+
+→ Copy the Client ID and Client Secret</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Enable OAuth in Calibre-Web admin</strong>
+          <p>In Calibre-Web: <strong>Admin → Edit Basic Configuration → Feature Configuration</strong>:</p>
+          <pre>☑ Enable OAuth Authentication
+☑ Enable Login with Google
+
+# Fill in the Google OAuth section:
+# (Authentik acts as Google-compatible OAuth here)
+Client ID:     [from Authentik]
+Client Secret: [from Authentik]
+
+# Authentik OIDC discovery URL:
+# https://auth.yourdomain.com/application/o/calibre-web/.well-known/openid-configuration</pre>
+          <div class="callout callout-warn">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-body">Calibre-Web's native OAuth integration uses "Login with Google" as the OAuth flow. Authentik serves as the OAuth provider. The redirect URI <strong>must</strong> match exactly what's set in Authentik.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Alternative: Caddy forward_auth (simpler)</strong>
+          <p>If the native OAuth approach is fiddly, put Calibre-Web behind Caddy with Authentik forward auth instead. This gates access at the proxy layer without touching Calibre-Web's internal auth:</p>
+          <pre># Caddyfile:
+books.yourdomain.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:8083
+}</pre>
+          <p>With this approach, users are already authenticated by the time they reach Calibre-Web. Calibre-Web's own login page is bypassed. Create matching Calibre-Web accounts for each user with their Google username.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Link existing Calibre-Web accounts to Authentik users</strong>
+          <p>If users already have Calibre-Web accounts (with reading progress), match them to their Google email so progress is preserved when they switch to SSO login:</p>
+          <pre># In Calibre-Web Admin → Users → edit each user:
+# Set the Email field to their exact Gmail address.
+# Calibre-Web matches on email when an OAuth login comes in.
+
+# Or via SQLite if you need to bulk-update:
+import sqlite3
+db = sqlite3.connect('D:/Books/app.db')
+db.execute("UPDATE user SET email=? WHERE name=?",
+           ('alice@gmail.com', 'alice_old'))
+db.commit()</pre>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<hr>
+  <hr>
 
-<!-- Kindle integration -->
-<div class="section">
-  <div class="section-title">📬 Kindle Send-to-Email Setup</div>
-  <div class="card">
-    <div class="card-title">Send Books Wirelessly to Kindle</div>
-    <p>In Calibre-Web: <strong>Admin → Edit E-Mail settings</strong>. Enter your Gmail SMTP settings, then enable "Send to Kindle" per user. Each user sets their <code>@kindle.com</code> address in their profile. You'll also need to whitelist your Gmail address in your Amazon account's "Approved Personal Document E-mail List."</p>
-    <pre>SMTP Server: smtp.gmail.com
+  <!-- STEP 4: REVERSE PROXY -->
+  <div class="section">
+    <div class="section-title">🌍 Step 4 — Reverse Proxy &amp; Remote Access</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add Calibre-Web to your Caddyfile</strong>
+          <pre># Caddyfile — add this block:
+books.yourdomain.com {
+    reverse_proxy localhost:8083
+}
+
+# If using forward_auth for SSO (see Step 3 above), use the forward_auth block instead.</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Or access via Tailscale (no port forwarding needed)</strong>
+          <p>If you're using Tailscale for remote access, just connect to <code>http://[tailscale-ip]:8083</code> from anywhere. No Caddy config changes needed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 5: READARR -->
+  <div class="section">
+    <div class="section-title">📥 Step 5 — Readarr Auto-Downloads <span class="tag tag-native">OPTIONAL · FOSS</span></div>
+    <div class="card">
+      <div class="card-title">What Readarr does</div>
+      <p>Readarr monitors for new ebook releases and automatically downloads them into your Calibre library folder. Add an author once, get every future release. Add a series and it monitors for books you don't have yet.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install Readarr for Windows</strong>
+          <p>Download from <a href="https://readarr.com" target="_blank">readarr.com</a> — Windows installer, runs as a service. Access at <code>http://localhost:8787</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add qBittorrent as download client</strong>
+          <pre>Settings → Download Clients → + → qBittorrent:
+Host:     localhost
+Port:     8090
+Username: [your qbit username]
+Password: [your qbit password]
+Category: readarr</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Set root folder to your Calibre library</strong>
+          <pre>Settings → Media Management → Root Folders → Add → D:\Books</pre>
+          <p>This is the same folder Calibre reads from. New downloads land here and Calibre-Web picks them up automatically after a library scan.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Connect Prowlarr indexers</strong>
+          <pre>Settings → Apps → + → Readarr
+# All your Prowlarr indexers sync to Readarr automatically.</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Trigger a Calibre-Web library refresh after downloads</strong>
+          <p>In Readarr: <strong>Settings → Connect → + → Custom Script</strong>. Create a script that refreshes Calibre-Web's metadata cache when a new book arrives:</p>
+          <pre># calibre_refresh.ps1
+Invoke-WebRequest -Uri "http://localhost:8083/api/admin/libraries/scan" `
+  -Method POST -Headers @{"X-Api-Key"="your-calibre-web-api-key"}
+
+# Or trigger a full library refresh:
+Invoke-WebRequest -Uri "http://localhost:8083/admin/recreatedb" -Method GET</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- STEP 6: KINDLE -->
+  <div class="section">
+    <div class="section-title">📬 Step 6 — Kindle Send-to-Email Setup <span class="tag tag-native">OPTIONAL</span></div>
+    <div class="card">
+      <div class="card-title">Send books wirelessly to Kindle devices</div>
+      <p>In Calibre-Web: <strong>Admin → Edit E-Mail Settings</strong>. Enter your Gmail SMTP settings, then enable "Send to Kindle" per user. Each user sets their <code>@kindle.com</code> address in their profile. You'll also need to whitelist your Gmail address in your Amazon account's "Approved Personal Document E-mail List."</p>
+      <pre>SMTP Server: smtp.gmail.com
 SMTP Port:   587
-From:        <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2950465c5b044e44484045694e44484045074a4644">[email&#160;protected]</a>
+From:        yourserver@gmail.com
 (use a Gmail App Password, not your main password)</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">📱</div>
+        <div class="callout-body">After setup, any user can click "Send to Kindle" on any book in Calibre-Web and it will appear on their Kindle within seconds (Wi-Fi required on the Kindle).</div>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- SSO teaser -->
-<div class="section">
-  <div class="section-title">🔐 SSO Integration (See SSO Tab) <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <p>Calibre-Web supports <strong>OAuth via Google</strong> natively. You can enable "Login with Google" in Admin settings and restrict access to specific Gmail accounts. Full walkthrough is in the <strong>SSO tab</strong>.</p>
-    <p>It also supports <strong>LDAP/Active Directory</strong> and Authentik OIDC — connect via the user_oidc app. When a user authenticates via Authentik with their Google account, Calibre-Web matches on email address and logs them into their existing account (preserving all reading progress). See the <strong>SSO tab → Save Migration</strong> for the script that links existing Calibre-Web accounts to Gmail addresses.</p>
+  <hr>
+
+  <!-- STEP 7: OPDS -->
+  <div class="section">
+    <div class="section-title">📱 Step 7 — OPDS for E-Readers <span class="tag tag-native">OPTIONAL</span></div>
+    <div class="card">
+      <p>Calibre-Web exposes an OPDS catalog at <code>http://[server-ip]:8083/opds</code>. Apps like <strong>Moon+ Reader</strong>, <strong>KyBook</strong>, and <strong>Librera</strong> can subscribe to this and browse/download books directly onto the device — no web browser needed. This is the best experience for dedicated e-reader apps on tablets and phones.</p>
+      <pre># OPDS endpoint:
+http://[server-ip]:8083/opds
+
+# For external access (via Caddy):
+https://books.yourdomain.com/opds</pre>
+    </div>
   </div>
-</div>
 
-<div class="section">
-  <div class="section-title">💾 User Data Storage <span class="tag tag-sso">→ SSO TAB</span></div>
-  <div class="card">
-    <div class="card-title">Where Calibre-Web stores per-user data</div>
-    <p>Calibre-Web stores reading progress, bookmarks, and shelf data in its own SQLite database (<code>D:\Books\app.db</code>), keyed per user account. This is distinct from the book files themselves (which are shared). The database is lightweight (~1–10 MB) and does <em>not</em> need to live in the user's personal folder — it stays where it is.</p>
+</div><!-- /pane-setup -->
 
-    <p><strong>What lives in <code>D:\Users\[username]\calibre\</code>:</strong></p>
-    <ul style="margin:6px 0 0 18px;font-size:.85rem">
-      <li>Exported reading progress snapshots (JSON exports for backup/portability)</li>
-      <li>Custom book uploads the user adds to the shared library</li>
-      <li>Personal reading lists exported from Calibre-Web</li>
-    </ul>
 
-    <p>The reading progress <em>inside</em> Calibre-Web's own database counts toward quota via Nextcloud External Storage, but it's negligible in size. The main quota item here is any books they upload.</p>
+<!-- ═══════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
 
-    <div class="card-title" style="margin-top:14px">Calibre-Web + Nextcloud External Storage</div>
-    <p>The stats server exposes an endpoint that exports a user's Calibre-Web reading progress to their personal folder, enabling it to be backed up with everything else:</p>
-    <pre># Add to stats_server.py:
+  <div class="v1-banner">📚 Calibre-Web is your self-hosted ebook library. Calibre Desktop manages the library file; Calibre-Web serves it to every device. All books stored on internal storage at D:\Books\. Readarr auto-downloads new releases.</div>
+
+  <!-- ── WHAT IS CALIBRE ── -->
+  <div class="section">
+    <div class="section-title">🐉 What Is Calibre, and How Does It Work?</div>
+    <div class="card">
+      <div class="card-title">The two-piece setup: Calibre Desktop + Calibre-Web</div>
+      <p>This server runs <strong>two separate programs</strong> that work together. <strong>Calibre Desktop</strong> is the library manager — it's the app you open to add books, fix metadata, convert file formats, and keep everything organized. It stores everything about your library in a single file called <code>metadata.db</code>. <strong>Calibre-Web</strong> is the web server — it reads that same <code>metadata.db</code> file and turns your library into a website that anyone on the server can browse, read, and download from. You manage books in Calibre Desktop; everyone reads them through Calibre-Web.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Calibre Desktop — what it does</div>
+      <table>
+        <tr><th>Feature</th><th>What it means in plain language</th></tr>
+        <tr><td>Library management</td><td>Keeps all your books in an organized folder structure with a searchable database. You add a book once and it's tracked forever — author, title, series, tags, rating, publication date, cover art, description.</td></tr>
+        <tr><td>Metadata editing</td><td>You can fix any book's info — correct a misspelled author name, add series info (e.g. "Book 3 of The Stormlight Archive"), add genre tags, swap out the cover art. Changes apply immediately across the whole library.</td></tr>
+        <tr><td>Download metadata &amp; covers</td><td>Right-click any book → "Download metadata and covers" and Calibre will look it up online (Amazon, Goodreads, OpenLibrary, etc.) and fill in everything automatically. Works for most books instantly.</td></tr>
+        <tr><td>Format conversion</td><td>Convert any book from one format to another — EPUB to MOBI for Kindle, PDF to EPUB for better reading, etc. Calibre handles ~20 input and output formats. Quality varies but it works well for most ebooks.</td></tr>
+        <tr><td>Send to Kindle</td><td>Right-click a book → "Send to device" or "Send by email" and it goes wirelessly to a connected Kindle. Calibre handles the conversion to the right format automatically.</td></tr>
+        <tr><td>Catalog &amp; search</td><td>Full-text search across your entire library, filter by tag/series/author/rating/format, build smart saved searches. You can find "all unread Brandon Sanderson books tagged fantasy that I've rated 4+ stars" in seconds.</td></tr>
+        <tr><td>News download</td><td>Calibre can download news articles from hundreds of sources (NYT, BBC, etc.) and package them as an ebook to send to your Kindle daily. Optional feature.</td></tr>
+        <tr><td>Plugin system</td><td>Calibre has hundreds of community plugins — DRM removal (for books you own), better metadata sources, store integrations, reading progress sync, and more.</td></tr>
+        <tr><td>Content server (built-in)</td><td>Calibre Desktop has its own basic web server built in, but it requires the GUI to stay open. This is why we use Calibre-Web instead — it runs as a proper background service.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Calibre-Web — what it adds on top</div>
+      <table>
+        <tr><th>Feature</th><th>What it means in plain language</th></tr>
+        <tr><td>Browser-based reading</td><td>Read EPUBs and PDFs directly in any web browser — no app download needed. The built-in reader supports bookmarks, progress tracking, font size changes, and dark mode.</td></tr>
+        <tr><td>Per-user accounts</td><td>Each person has their own account with their own reading progress, bookmarks, and shelves. Your "currently reading" list doesn't mix with anyone else's.</td></tr>
+        <tr><td>Shelves</td><td>Personal reading lists that live in Calibre-Web only — they don't touch the master library. You can make a "Want to Read" shelf, a "Favorites" shelf, anything. Shelves can be public (visible to others) or private.</td></tr>
+        <tr><td>OPDS catalog</td><td>Exposes your library as an OPDS feed — a standard format that e-reader apps (Moon+ Reader, KyBook, Librera, etc.) can connect to directly and browse/download from, without ever opening a browser.</td></tr>
+        <tr><td>Kobo sync</td><td>Kobo e-readers can sync directly with Calibre-Web over the network — reading progress, bookmarks, and sideloaded books stay in sync automatically.</td></tr>
+        <tr><td>Send to Kindle</td><td>Any user can click "Send to Kindle" on any book and it gets emailed to their Kindle address automatically. Calibre-Web handles the conversion and delivery.</td></tr>
+        <tr><td>User permissions</td><td>Each user account has granular permission settings — you can allow browsing and shelves but prevent uploading or editing, which is exactly how the family accounts are configured on this server.</td></tr>
+        <tr><td>Reading stats</td><td>Tracks when you started a book, your current progress, and when you finished. This is the data the achievement polling script reads to award XP.</td></tr>
+        <tr><td>Virtual library restrictions</td><td>You can limit what a user sees to a subset of the library — e.g. show only books tagged "Family Friendly" or only a specific author's works. Used on this server to prevent users from being overwhelmed by the full library.</td></tr>
+      </table>
+    </div>
+
+    <div class="callout callout-dragon">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body"><strong>The key thing to understand:</strong> Calibre Desktop owns the library. Calibre-Web only reads it. If you add a book in Calibre Desktop, it shows up in Calibre-Web after a database reconnect. If someone "adds a book to a shelf" in Calibre-Web, that only changes Calibre-Web's own <code>app.db</code> — the master library and <code>metadata.db</code> are never touched.</div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── SECURE MULTI-USER ARCHITECTURE ── -->
+  <div class="section">
+    <div class="section-title">🔐 Secure Multi-User Architecture</div>
+    <div class="card">
+      <div class="card-title">How the family setup works — the full picture</div>
+      <p>The goal is to let family members browse the library and keep personal reading lists without any risk of accidentally changing or deleting books. This is achieved through three layers of protection working together:</p>
+      <table>
+        <tr><th>Layer</th><th>What it does</th><th>Where it's configured</th></tr>
+        <tr><td><strong>1. Read-only filesystem</strong></td><td>The <code>D:\Books\</code> folder is mounted into Calibre-Web's service account with read-only permissions. Even if someone found a way to trigger a file operation, the OS would reject it. The master library files cannot be deleted or modified by Calibre-Web.</td><td>Windows folder permissions / NSSM service account</td></tr>
+        <tr><td><strong>2. Authentik SSO + reverse proxy headers</strong></td><td>Authentik authenticates the user (via Google). Caddy passes the verified username to Calibre-Web as a trusted HTTP header (<code>X-Remote-User</code>). Calibre-Web trusts this header instead of its own login form — users never see a Calibre-Web password prompt.</td><td>Caddy → <code>copy_headers X-authentik-username</code>; Calibre-Web Admin → Reverse Proxy Authentication</td></tr>
+        <tr><td><strong>3. Calibre-Web user permissions</strong></td><td>Each user account has a specific permission set that allows reading and shelf management but blocks everything destructive.</td><td>Calibre-Web Admin → User Management</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">User permissions — what's enabled and disabled for family accounts</div>
+      <table>
+        <tr><th>Permission</th><th>Family users</th><th>Why</th></tr>
+        <tr><td>View books / browse library</td><td>✅ Enabled</td><td>Core function</td></tr>
+        <tr><td>Download books</td><td>✅ Enabled</td><td>Users can save books to their devices</td></tr>
+        <tr><td>Read in-browser</td><td>✅ Enabled</td><td>Core function</td></tr>
+        <tr><td>Access to Shelves</td><td>✅ Enabled</td><td>Personal reading lists</td></tr>
+        <tr><td>Add / remove books to Shelves</td><td>✅ Enabled</td><td>Users can curate their own lists</td></tr>
+        <tr><td>Send to Kindle</td><td>✅ Enabled</td><td>Each user sets their own Kindle address</td></tr>
+        <tr><td>Edit book metadata</td><td>❌ Disabled</td><td>Would alter the shared library for everyone</td></tr>
+        <tr><td>Delete books</td><td>❌ Disabled</td><td>Permanent and irreversible</td></tr>
+        <tr><td>Upload books</td><td>❌ Disabled</td><td>Keeps the master library owner-controlled</td></tr>
+        <tr><td>Admin panel access</td><td>❌ Disabled</td><td>Admin is owner-only</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Virtual Libraries — keeping the library manageable</div>
+      <p>The full library may have 1,000+ books. Rather than showing every user everything, each user's Calibre-Web profile can be restricted to a <strong>Virtual Library</strong> — a filtered view of the library based on tags, authors, or any other Calibre metadata. This is set per-user in <strong>Admin → Users → [user] → Restriction</strong>.</p>
+      <table>
+        <tr><th>Example restriction</th><th>What the user sees</th></tr>
+        <tr><td><code>tags:"Family Friendly"</code></td><td>Only books tagged "Family Friendly" in Calibre Desktop</td></tr>
+        <tr><td><code>series:"Stormlight Archive"</code></td><td>Only books in that specific series</td></tr>
+        <tr><td><code>rating:&gt;=4</code></td><td>Only books rated 4 stars or higher</td></tr>
+        <tr><td><em>(no restriction)</em></td><td>Full library — for admin / owner accounts</td></tr>
+      </table>
+      <p style="margin-top:10px">Users can always toggle between their restricted view and their personal Shelves in the Calibre-Web sidebar. Shelves are completely personal and don't affect the library view or anyone else's data.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">How a typical family member uses it — the workflow</div>
+      <table>
+        <tr><th>Step</th><th>What they do</th><th>What actually changes</th></tr>
+        <tr><td>1</td><td>Log in via Google (Authentik SSO)</td><td>Nothing — Caddy passes their username to Calibre-Web via header</td></tr>
+        <tr><td>2</td><td>Browse the library (or their restricted Virtual Library view)</td><td>Nothing — read-only access</td></tr>
+        <tr><td>3</td><td>Click "Add to Shelf" on a book they want to read later</td><td>Only <code>app.db</code> — their personal shelf entry. <code>metadata.db</code> and the book files are untouched.</td></tr>
+        <tr><td>4</td><td>Click "Read" to open the in-browser reader</td><td>Only <code>app.db</code> — their reading progress is saved</td></tr>
+        <tr><td>5</td><td>Click "Send to Kindle"</td><td>An email is sent; the book file is read and attached but not modified</td></tr>
+        <tr><td>6</td><td>Download the EPUB/PDF to their device</td><td>Nothing on the server — they get a copy</td></tr>
+      </table>
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>The master library is always safe.</strong> Every action a family member can take either reads from the library (no changes) or writes only to their personal area in <code>app.db</code>. The book files and <code>metadata.db</code> are never written to by Calibre-Web under any normal operation.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web (external)</td><td><code>books.yourdomain.com</code></td></tr>
+          <tr><td>Web (local)</td><td><code>http://[server-ip]:8083</code></td></tr>
+          <tr><td>Admin panel</td><td><code>http://localhost:8083/admin</code></td></tr>
+          <tr><td>OPDS catalog</td><td><code>http://[server-ip]:8083/opds</code></td></tr>
+          <tr><td>Readarr</td><td><code>http://localhost:8787</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td>8083 (Calibre-Web), 8787 (Readarr)</td></tr>
+          <tr><td>Install type</td><td>Native Windows (no Docker)</td></tr>
+          <tr><td>Service name</td><td><code>CalibreWeb</code> (NSSM)</td></tr>
+          <tr><td>Auth method</td><td>Authentik OIDC / Caddy forward_auth</td></tr>
+          <tr><td>Library database</td><td><code>D:\Books\metadata.db</code></td></tr>
+          <tr><td>App database</td><td><code>D:\Books\app.db</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📱 Supported Formats &amp; Clients</div>
+    <div class="card">
+      <table>
+        <tr><th>Format</th><th>Support</th><th>Notes</th></tr>
+        <tr><td>EPUB</td><td>✅ Full</td><td>Read in-browser or download to any e-reader app</td></tr>
+        <tr><td>MOBI / AZW3</td><td>✅ Full</td><td>Kindle native format — send via email or download</td></tr>
+        <tr><td>PDF</td><td>✅ Full</td><td>In-browser reader; also downloadable</td></tr>
+        <tr><td>CBZ / CBR</td><td>⚠️ Limited</td><td>Calibre can store them, but use Kavita for comic reading</td></tr>
+        <tr><td>FB2 / LIT / LRF</td><td>✅ Download only</td><td>Calibre can convert these via the desktop app</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Best Client Apps per Device</div>
+      <table>
+        <tr><th>Device</th><th>Recommended App</th><th>Notes</th></tr>
+        <tr><td>Browser (any)</td><td>Calibre-Web built-in reader</td><td>Great for EPUB; decent for PDF</td></tr>
+        <tr><td>Android phone/tablet</td><td>Moon+ Reader + OPDS</td><td>Subscribe to the OPDS feed for browsing; download and read locally</td></tr>
+        <tr><td>iPhone / iPad</td><td>Librera or KyBook via OPDS</td><td>OPDS support varies by app; KyBook has reliable support</td></tr>
+        <tr><td>Kindle</td><td>Send-to-Kindle email</td><td>Best Kindle experience — books appear natively in the Kindle library</td></tr>
+        <tr><td>Kobo e-reader</td><td>Kobo OPDS / download EPUB</td><td>Kobo reads EPUB natively — download and sideload via USB or send over Wi-Fi</td></tr>
+        <tr><td>Windows PC</td><td>Calibre-Web in browser</td><td>Full library access; download for offline reading in Calibre Desktop</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Library Structure</div>
+    <div class="card">
+      <pre>D:\Books\
+  metadata.db             ← Calibre's library index (never edit directly)
+  app.db                  ← Calibre-Web's user data (progress, shelves, bookmarks)
+  Author Name\
+    Book Title (Year)\
+      Book Title.epub
+      Book Title.mobi
+      cover.jpg
+      metadata.opf
+  Brandon Sanderson\
+    The Way of Kings (2010)\
+      The Way of Kings.epub
+      cover.jpg
+      metadata.opf</pre>
+      <p>Calibre Desktop manages this structure automatically. Never move or rename files manually — always use Calibre to add, edit, or remove books.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updates</div>
+    <div class="card">
+      <div class="card-title">How to update Calibre-Web</div>
+      <p>Calibre-Web does <strong>not</strong> auto-update. Check periodically, especially if the login flow or reading experience breaks.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Check current version and stop the service</strong>
+            <pre>nssm stop CalibreWeb
+
+# Check current version in the Calibre-Web Admin panel:
+# Admin → About</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Update via pip</strong>
+            <pre>pip install --upgrade calibreweb</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Restart the service and verify</strong>
+            <pre>nssm start CalibreWeb</pre>
+            <p>Open <code>http://localhost:8083</code> and confirm the new version is running. Test SSO login with an incognito window.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>How to update Calibre Desktop</strong>
+            <p>Calibre shows an update notification in the toolbar when a new version is available. Click it or download from calibre-ebook.com. Calibre updates preserve your library and <code>metadata.db</code> completely — no migration needed.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>How to update Readarr</strong>
+            <p>Readarr has a built-in updater: <strong>System → Updates → Check for Updates</strong>. It will download and apply the update, then restart itself automatically.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Potential Breakpoints — Watch For These</div>
+
+    <div class="trouble-item" style="border-left-color: var(--danger)">
+      <div class="trouble-q">🔴 SSO / OAuth login breaks after a Calibre-Web update</div>
+      <div class="trouble-a">Calibre-Web's OAuth implementation can shift between versions. After any update, test the SSO login from an incognito window before assuming everything is fine. If it breaks, the fallback is the local admin account. Check the Calibre-Web GitHub issues for OAuth-related regressions in the release notes.</div>
+    </div>
+
+    <div class="trouble-item" style="border-left-color: var(--warning)">
+      <div class="trouble-q">🟡 Calibre-Web loses track of the library after a Calibre update</div>
+      <div class="trouble-a">If Calibre Desktop updates and moves or rebuilds <code>metadata.db</code>, Calibre-Web may fail to find the library. Go to <strong>Admin → Edit Basic Configuration</strong> and re-confirm the library path is still <code>D:\Books</code>. If <code>metadata.db</code> moved, point Calibre-Web to the new location.</div>
+    </div>
+
+    <div class="trouble-item" style="border-left-color: var(--warning)">
+      <div class="trouble-q">🟡 Readarr downloads land in the library but don't appear in Calibre-Web</div>
+      <div class="trouble-a">Calibre-Web doesn't watch the filesystem in real time. After Readarr downloads a book, you need to trigger a library scan in Calibre-Web: <strong>Admin → Reconnect Database</strong>. Or set up the Readarr post-download script (see First Time Setup) to trigger this automatically via API.</div>
+    </div>
+
+    <div class="trouble-item" style="border-left-color: var(--warning)">
+      <div class="trouble-q">🟡 Authentik redirect URI mismatch after a domain change</div>
+      <div class="trouble-a">If you change your domain name, update the Redirect URI in both Authentik (the provider config) and Calibre-Web's OAuth settings simultaneously. The exact URI format must match: <code>https://books.yourdomain.com/oauth/authorize/google/callback</code>. Mismatches cause a silent redirect error.</div>
+    </div>
+
+    <div class="trouble-item" style="border-left-color: var(--warning)">
+      <div class="trouble-q">🟡 metadata.db gets locked when both Calibre Desktop and Calibre-Web try to access it</div>
+      <div class="trouble-a">SQLite has limited concurrent write support. If Calibre Desktop is actively doing a large metadata update while Calibre-Web is serving requests, you may see brief errors. The solution is to close Calibre Desktop before doing bulk edits, or do large library operations during off-hours. Calibre-Web is read-mostly so this is rarely a problem in practice.</div>
+    </div>
+
+    <div class="trouble-item" style="border-left-color: #4caf7d">
+      <div class="trouble-q">🟢 app.db grows over time with reading history</div>
+      <div class="trouble-a">Calibre-Web's <code>app.db</code> accumulates reading progress, bookmark data, and activity logs. It stays under 50 MB in almost all cases and doesn't need manual maintenance. If you ever need to clean it, export user reading lists first, then use the admin panel's database tools.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Recommended Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Check for Calibre-Web updates (<code>pip install --upgrade calibreweb</code>)</td></tr>
+        <tr><td>Monthly</td><td>Check for Readarr updates (System → Updates in Readarr UI)</td></tr>
+        <tr><td>Monthly</td><td>Review Readarr → Activity → History for failed downloads</td></tr>
+        <tr><td>Quarterly</td><td>Run Calibre Desktop → Check Library → Fix broken entries or duplicate metadata</td></tr>
+        <tr><td>Quarterly</td><td>Back up <code>D:\Books\app.db</code> (contains all reading progress)</td></tr>
+        <tr><td>After any domain change</td><td>Update Redirect URIs in Authentik and Calibre-Web OAuth config</td></tr>
+        <tr><td>After any major update</td><td>Test SSO login from incognito window</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🎯 How Book Achievements Work</div>
+    <div class="card">
+      <p>Calibre-Web does <strong>not</strong> have a built-in webhook system like Jellyfin. Reading progress and completion events must be detected by polling Calibre-Web's SQLite database (<code>app.db</code>) or by adding a lightweight middleware layer that watches for status changes. The recommended approach is a scheduled polling script that runs every few minutes and calls the achievement server when milestones are hit.</p>
+      <pre>Polling script checks app.db every 5 minutes
+  → Finds user "alice" has read_status=1 (finished) for a new book
+  → POST http://localhost:9003/api/achievement/trigger
+    { "username": "alice", "trigger": "book_finished", "metadata": { "title": "..." } }
+  → Achievement server grants "Bookworm" achievement + 10 XP
+  → Stored in D:\Users\alice\achievements.json
+  → Appears in homepage community feed</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔌 Polling Script Setup</div>
+    <div class="card">
+      <div class="card-title">Step 1 — Create the polling script</div>
+      <pre># D:\Server\Achievements\calibre_poll.py
+import sqlite3, requests, json, os, time
+from datetime import datetime
+
+DB_PATH      = 'D:/Books/app.db'
+ACH_ENDPOINT = 'http://localhost:9003/api/achievement/trigger'
+STATE_FILE   = 'D:/Server/Achievements/calibre_state.json'
+
+def load_state():
+    if os.path.exists(STATE_FILE):
+        return json.load(open(STATE_FILE))
+    return {}
+
+def save_state(state):
+    json.dump(state, open(STATE_FILE, 'w'))
+
+def poll():
+    state = load_state()
+    conn  = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+
+    rows = conn.execute('''
+        SELECT u.name, b.title, b.author_sort, brl.read_status, brl.last_modified
+        FROM book_read_link brl
+        JOIN books b ON b.id = brl.book_id
+        JOIN user  u ON u.id = brl.user_id
+        WHERE brl.read_status = 1
+    ''').fetchall()
+
+    for row in rows:
+        key = f"{row['name']}::{row['title']}"
+        if key not in state:
+            # New completion — trigger achievement
+            requests.post(ACH_ENDPOINT, json={
+                'username': row['name'],
+                'trigger':  'book_finished',
+                'metadata': {
+                    'title':  row['title'],
+                    'author': row['author_sort'],
+                }
+            }, timeout=5)
+            state[key] = str(datetime.now())
+            print(f"Triggered: {row['name']} finished '{row['title']}'")
+
+    save_state(state)
+    conn.close()
+
+if __name__ == '__main__':
+    while True:
+        poll()
+        time.sleep(300)  # poll every 5 minutes</pre>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Step 2 — Run as a Windows Service (NSSM)</div>
+      <pre>nssm install CalibreAchievements python "D:\Server\Achievements\calibre_poll.py"
+nssm set CalibreAchievements AppDirectory "D:\Server\Achievements"
+nssm start CalibreAchievements</pre>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Step 3 — Add achievement definitions to definitions.json</div>
+      <pre># D:\Server\Achievements\definitions.json — add these entries:
+{
+  "bookworm": {
+    "name":     "Bookworm",
+    "icon":     "📖",
+    "desc":     "Finish your first book in Calibre-Web",
+    "triggers": ["book_finished"],
+    "xp":       10,
+    "once":     true
+  },
+  "well_read": {
+    "name":     "Well Read",
+    "icon":     "📚",
+    "desc":     "Finish 10 books total",
+    "triggers": ["book_finished"],
+    "requires": { "total_books_finished": 10 },
+    "xp":       75,
+    "once":     true
+  },
+  "bibliophile": {
+    "name":     "Bibliophile",
+    "icon":     "🏛️",
+    "desc":     "Finish 50 books total",
+    "triggers": ["book_finished"],
+    "requires": { "total_books_finished": 50 },
+    "xp":       250,
+    "once":     true
+  },
+  "series_finisher": {
+    "name":     "Series Finisher",
+    "icon":     "🏁",
+    "desc":     "Finish every book in a series",
+    "triggers": ["book_finished"],
+    "requires": { "complete_series": true },
+    "xp":       100
+  },
+  "page_turner": {
+    "name":     "Page Turner",
+    "icon":     "⚡",
+    "desc":     "Finish a book in under 3 days of starting it",
+    "triggers": ["book_finished"],
+    "requires": { "days_to_finish_lte": 3 },
+    "xp":       40
+  },
+  "night_reader": {
+    "name":     "Night Reader",
+    "icon":     "🌙",
+    "desc":     "Open a book after midnight 5 times",
+    "triggers": ["book_opened"],
+    "requires": { "hour_gte": 0, "hour_lt": 4, "count": 5 },
+    "xp":       20
+  },
+  "genre_explorer": {
+    "name":     "Genre Explorer",
+    "icon":     "🗺️",
+    "desc":     "Finish books from 5 different genres",
+    "triggers": ["book_finished"],
+    "requires": { "unique_genres": 5 },
+    "xp":       60
+  },
+  "kindle_sender": {
+    "name":     "Wireless Delivery",
+    "icon":     "📬",
+    "desc":     "Send your first book to a Kindle",
+    "triggers": ["book_sent_to_kindle"],
+    "xp":       15,
+    "once":     true
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏅 Available Achievements</div>
+    <div class="ach-grid">
+      <div class="ach-card">
+        <div class="ach-icon">📖</div>
+        <div class="ach-name">Bookworm</div>
+        <div class="ach-desc">Finish your first book in Calibre-Web</div>
+        <div class="ach-footer">
+          <span class="ach-pts">10 XP</span>
+          <span class="ach-method">db poll</span>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">📚</div>
+        <div class="ach-name">Well Read</div>
+        <div class="ach-desc">Finish 10 books total</div>
+        <div class="ach-footer">
+          <span class="ach-pts">75 XP</span>
+          <span class="ach-method">db poll + counter</span>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">🏛️</div>
+        <div class="ach-name">Bibliophile</div>
+        <div class="ach-desc">Finish 50 books total (lifetime)</div>
+        <div class="ach-footer">
+          <span class="ach-pts">250 XP</span>
+          <span class="ach-method">db poll + lifetime counter</span>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">🏁</div>
+        <div class="ach-name">Series Finisher</div>
+        <div class="ach-desc">Finish every book in a series</div>
+        <div class="ach-footer">
+          <span class="ach-pts">100 XP</span>
+          <span class="ach-method">db poll + series check</span>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">⚡</div>
+        <div class="ach-name">Page Turner</div>
+        <div class="ach-desc">Finish a book in under 3 days of starting it</div>
+        <div class="ach-footer">
+          <span class="ach-pts">40 XP</span>
+          <span class="ach-method">db poll + timestamp diff</span>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">🌙</div>
+        <div class="ach-name">Night Reader</div>
+        <div class="ach-desc">Open a book after midnight 5 times</div>
+        <div class="ach-footer">
+          <span class="ach-pts">20 XP</span>
+          <span class="ach-method">db poll + hour check</span>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">🗺️</div>
+        <div class="ach-name">Genre Explorer</div>
+        <div class="ach-desc">Finish books from 5 different genres</div>
+        <div class="ach-footer">
+          <span class="ach-pts">60 XP</span>
+          <span class="ach-method">db poll + genre tracking</span>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">📬</div>
+        <div class="ach-name">Wireless Delivery</div>
+        <div class="ach-desc">Send your first book to a Kindle</div>
+        <div class="ach-footer">
+          <span class="ach-pts">15 XP</span>
+          <span class="ach-method">db poll (email log)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-tip" style="margin-top:16px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Testing achievements manually:</strong> Use curl to fire a trigger directly to the achievement server without waiting for the poll cycle.<br>
+      <code>curl -X POST http://localhost:9003/api/achievement/trigger -H "Content-Type: application/json" -d '{"username":"alice","trigger":"book_finished","metadata":{"title":"Test Book"}}'</code></div>
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">📦 Storage Overview</div>
+    <div class="storage-breakdown">
+      <div class="storage-cell">
+        <div class="storage-cell-label">Book Library (shared)</div>
+        <div class="storage-cell-val">D:\Books\</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">App Database</div>
+        <div class="storage-cell-val">D:\Books\app.db</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Per-User Folder</div>
+        <div class="storage-cell-val">D:\Users\[name]\calibre\</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">What lives where</div>
+      <p>The book files themselves (<code>D:\Books\</code>) are <strong>shared</strong> — every user reads from the same library. Calibre-Web's <code>app.db</code> is also shared but stores data <em>per user account</em> inside it (reading progress, bookmarks, shelves). Per-user personal data (exports, backups, uploaded books) lives in each user's own folder under <code>D:\Users\</code>.</p>
+      <pre>D:\Books\
+  metadata.db            ← Calibre's library index (~50–500 MB depending on library size)
+  app.db                 ← Calibre-Web users, progress, bookmarks (~1–50 MB)
+  [Author]\[Book]\       ← The actual ebook files (as large as your library is)
+
+D:\Users\alice\calibre\
+  progress_export.json   ← Reading progress snapshot (exportable for backup)
+  uploads\               ← Books alice has personally uploaded to the shared library
+  reading_lists\         ← Exported shelves / reading lists</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Per-User Data Breakdown</div>
+    <div class="card">
+      <div class="card-title">What Calibre-Web stores per user (in app.db)</div>
+      <table>
+        <tr><th>Data Type</th><th>Storage Location</th><th>Approximate Size</th></tr>
+        <tr><td>Reading progress (% complete, last page)</td><td><code>app.db → book_read_link</code></td><td>~1 KB per book</td></tr>
+        <tr><td>Bookmarks</td><td><code>app.db → bookmarks</code></td><td>~1 KB per bookmark</td></tr>
+        <tr><td>Shelves / reading lists</td><td><code>app.db → shelf</code></td><td>~1 KB per shelf</td></tr>
+        <tr><td>Kobo sync state</td><td><code>app.db → kobo_reading_state</code></td><td>~2 KB per synced book</td></tr>
+        <tr><td>Account preferences</td><td><code>app.db → user</code></td><td>Negligible</td></tr>
+      </table>
+      <p style="margin-top:10px">A power user who reads 500 books with full bookmarks and shelves will have under <strong>5 MB</strong> of personal data in <code>app.db</code>. The database as a whole is tiny relative to the book library.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Counts toward Nextcloud quota?</div>
+      <p>The shared <code>app.db</code> and <code>metadata.db</code> do <em>not</em> count toward any individual user's Nextcloud quota — they're server-side shared files. What <em>does</em> count toward a user's quota is anything they store in <code>D:\Users\[name]\calibre\</code>: personal progress exports, uploaded books, and reading list exports. These are typically negligible in size unless a user is uploading large PDF books.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Exporting Reading Progress to the User Folder</div>
+    <div class="card">
+      <div class="card-title">Progress export endpoint (add to stats_server.py)</div>
+      <p>This lets reading progress be backed up alongside everything else in the user's Nextcloud-synced folder:</p>
+      <pre># Add to D:\Server\Dashboard\stats_server.py:
 @app.route('/calibre/export/&lt;username&gt;')
 def export_calibre_progress(username):
     import sqlite3, json
@@ -187,19 +1112,218 @@ def export_calibre_progress(username):
                brl.read_pos_epub_cfi, brl.kobo_reading_state_id
         FROM book_read_link brl
         JOIN books b ON b.id = brl.book_id
-        JOIN user u ON u.id = brl.user_id
+        JOIN user  u ON u.id = brl.user_id
         WHERE u.name = ?
     ''', (username,)).fetchall()
-    conn.close()
-    export = [dict(r) for r in progress]
-    # Write to user's personal folder:
-    out_path = f'D:/Users/{username}/calibre/reading_progress.json'
+
+    out_path = f'D:/Users/{username}/calibre/progress_export.json'
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    json.dump(export, open(out_path, 'w'), indent=2, default=str)
-    return jsonify({'ok': True, 'books': len(export)})</pre>
-    <p>Call this nightly via Task Scheduler per user to keep their <code>D:\Users\[username]\calibre\</code> folder current. Counts toward their Nextcloud quota.</p>
+    with open(out_path, 'w') as f:
+        json.dump([dict(r) for r in progress], f, indent=2, default=str)
+    return jsonify({'ok': True, 'books': len(progress)})</pre>
+      <p>Call this endpoint from a nightly scheduled task to keep each user's progress export up to date: <code>http://localhost:[stats-port]/calibre/export/alice</code></p>
+    </div>
   </div>
-</div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td>Calibre-Web app database</td><td><code>D:\Books\app.db</code></td><td>Daily</td><td>🔴 High — all user reading progress</td></tr>
+        <tr><td>Calibre library index</td><td><code>D:\Books\metadata.db</code></td><td>Daily</td><td>🔴 High — the library structure</td></tr>
+        <tr><td>Book files</td><td><code>D:\Books\[Author]\</code></td><td>As acquired</td><td>🔴 High — the actual books</td></tr>
+        <tr><td>Achievement poll state</td><td><code>D:\Server\Achievements\calibre_state.json</code></td><td>Daily</td><td>🟡 Medium — prevents re-triggering</td></tr>
+        <tr><td>User progress exports</td><td><code>D:\Users\[name]\calibre\</code></td><td>Via Nextcloud sync</td><td>🟢 Low — auto-exported nightly</td></tr>
+      </table>
+      <pre># Simple backup script (run via Task Scheduler, daily):
+$src1 = "D:\Books\app.db"
+$src2 = "D:\Books\metadata.db"
+$dst  = "D:\Backups\Calibre\$(Get-Date -f yyyy-MM-dd)"
+New-Item -Path $dst -ItemType Directory -Force
+Copy-Item $src1 $dst
+Copy-Item $src2 $dst
+# Keep last 30 days:
+Get-ChildItem "D:\Backups\Calibre\" |
+  Sort-Object Name -Descending |
+  Select-Object -Skip 30 |
+  Remove-Item -Recurse -Force</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">❌ Calibre-Web shows a blank library or "No books found"</div>
+      <div class="trouble-a">
+        <ul style="margin:0 0 0 18px">
+          <li>Verify the library path is correct: <strong>Admin → Edit Basic Configuration</strong> → confirm the path is <code>D:\Books</code> (or wherever <code>metadata.db</code> lives)</li>
+          <li>Confirm <code>metadata.db</code> exists in that folder and is not zero bytes</li>
+          <li>Check that the CalibreWeb service account has read permission on <code>D:\Books</code></li>
+          <li>Try <strong>Admin → Reconnect Database</strong> to force a re-read</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">❌ "Sign in with Authentik / Google" button doesn't appear or fails</div>
+      <div class="trouble-a">
+        Check in order:
+        <ul style="margin:6px 0 0 18px">
+          <li><strong>Admin → Edit Basic Configuration → Feature Configuration</strong> — confirm OAuth is enabled and the Client ID/Secret are filled in</li>
+          <li>Confirm the Redirect URI in Authentik exactly matches <code>https://books.yourdomain.com/oauth/authorize/google/callback</code></li>
+          <li>If using Caddy forward_auth instead of native OAuth, the "Sign in" button won't appear — users are redirected automatically by Caddy</li>
+          <li>Restart the CalibreWeb service after any OAuth config change: <code>nssm restart CalibreWeb</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">❌ Calibre-Web service won't start</div>
+      <div class="trouble-a">
+        Check the NSSM service log:
+        <pre>nssm status CalibreWeb
+# Look in: C:\ProgramData\nssm\ or wherever NSSM writes output
+# Or check Windows Event Log → Application → source: CalibreWeb</pre>
+        Common causes: Python path changed after an update (re-check the NSSM service path with <code>where cps</code>), or a pip dependency conflict (<code>pip install --upgrade calibreweb</code> to fix).
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ New books downloaded by Readarr don't appear in Calibre-Web</div>
+      <div class="trouble-a">
+        Calibre-Web doesn't auto-scan. Trigger a manual refresh:
+        <ul style="margin:6px 0 0 18px">
+          <li><strong>Admin → Reconnect Database</strong> — reloads <code>metadata.db</code></li>
+          <li>Or call the API: <code>POST http://localhost:8083/api/admin/libraries/scan</code> with your API key</li>
+          <li>Note: Readarr downloads to <code>D:\Books</code>, but Calibre-Web reads from <code>metadata.db</code>. The file being on disk isn't enough — Calibre Desktop must also have imported/indexed it first. Run Calibre Desktop → Add Books to pick up the file, then reconnect in Calibre-Web.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Reading progress is lost after SSO migration</div>
+      <div class="trouble-a">
+        When switching from local Calibre-Web accounts to Authentik SSO, progress is tied to the old username. To preserve it:
+        <ul style="margin:6px 0 0 18px">
+          <li>In <strong>Admin → Users</strong>, edit each existing user and set their Email to their exact Gmail address</li>
+          <li>When they log in via Authentik, Calibre-Web matches on email and uses the existing account</li>
+          <li>If the username format changed, use the SQLite migration script in the SSO tab → Save Migration section</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Send-to-Kindle fails silently</div>
+      <div class="trouble-a">
+        Check in order:
+        <ul style="margin:6px 0 0 18px">
+          <li>Verify the Gmail App Password is still valid (Google occasionally revokes these)</li>
+          <li>Confirm the sender Gmail address is in the Amazon "Approved Personal Document E-mail List" for the user's Kindle account</li>
+          <li>Check that the user's <code>@kindle.com</code> address is set correctly in their Calibre-Web profile</li>
+          <li>Test SMTP manually: <strong>Admin → Edit E-Mail Settings → Test E-Mail</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trouble-item" style="border-left-color: #4caf7d">
+      <div class="trouble-q">🟢 In-browser EPUB reader is slow or doesn't load</div>
+      <div class="trouble-a">The built-in reader (Read Online) works best for EPUBs under ~50 MB. Very large EPUBs with heavy images may time out. For large books, download the file and read in a dedicated app instead. PDFs always perform better downloaded than read in-browser.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 Useful Commands</div>
+    <div class="card">
+      <pre># Service management:
+nssm status CalibreWeb          # check status
+nssm stop CalibreWeb            # stop
+nssm start CalibreWeb           # start
+nssm restart CalibreWeb         # restart
+
+# Check pip version:
+pip show calibreweb
+
+# Upgrade:
+nssm stop CalibreWeb
+pip install --upgrade calibreweb
+nssm start CalibreWeb
+
+# Manually trigger a library reconnect via API:
+Invoke-WebRequest -Uri "http://localhost:8083/api/admin/libraries/scan" `
+  -Method POST -Headers @{"X-Api-Key"="[your-api-key]"}
+
+# Quick SQLite check on app.db:
+sqlite3 D:\Books\app.db "SELECT u.name, COUNT(*) as books_read FROM book_read_link brl JOIN user u ON u.id=brl.user_id WHERE brl.read_status=1 GROUP BY u.name;"</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<script>
+  // ── Sub-tab switching ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Setup complete checkbox ──
+  const STORAGE_KEY = 'calibre_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar      = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub      = document.getElementById('complete-sub');
+    const setupBtn = document.querySelector('[onclick*="setup"]');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      overviewBtn.style.fontWeight = '700';
+      overviewBtn.style.color = 'var(--accent3)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      overviewBtn.style.fontWeight = '';
+      overviewBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  // On load: if previously marked complete, show overview by default
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
 
 </body>
 </html>
