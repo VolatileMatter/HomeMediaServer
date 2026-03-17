@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>8 — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = '<div class="acquire-group" id="group-mon-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-mon-primeval" onclick="toggleAcq('mon-primeval')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Primeval</div>
+          <div class="acq-meta">2007–2011 · 5 seasons · ITV · ESSENTIAL · ~28hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">168 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-monarch" onclick="toggleAcq('mon-monarch')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Monarch: Legacy of Monsters</div>
+          <div class="acq-meta">2023–present · 2 seasons · Apple TV+ · ~10hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">60 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-mon-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-mon-f-Godzilla" onclick="toggleAcq('mon-f-Godzilla')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Godzilla</div>
+          <div class="acq-meta">2014</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-Godzilla" onclick="toggleAcq('mon-f-Godzilla')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Godzilla: King of the Monsters</div>
+          <div class="acq-meta">2019</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-Godzilla" onclick="toggleAcq('mon-f-Godzilla')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Godzilla vs Kong</div>
+          <div class="acq-meta">2021</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-Godzilla" onclick="toggleAcq('mon-f-Godzilla')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Godzilla Minus One</div>
+          <div class="acq-meta">2023</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-Kong:Sk" onclick="toggleAcq('mon-f-Kong:Sk')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Kong: Skull Island</div>
+          <div class="acq-meta">2017</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-Cloverfi" onclick="toggleAcq('mon-f-Cloverfi')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Cloverfield</div>
+          <div class="acq-meta">2008</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-TheHost" onclick="toggleAcq('mon-f-TheHost')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Host</div>
+          <div class="acq-meta">2006</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-Tremors" onclick="toggleAcq('mon-f-Tremors')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Tremors</div>
+          <div class="acq-meta">1990</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-AQuiet" onclick="toggleAcq('mon-f-AQuiet')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">A Quiet Place</div>
+          <div class="acq-meta">2018</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-AQuiet" onclick="toggleAcq('mon-f-AQuiet')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">A Quiet Place Part II</div>
+          <div class="acq-meta">2020</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-f-TheMist" onclick="toggleAcq('mon-f-TheMist')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Mist</div>
+          <div class="acq-meta">2007</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-mon-yt">
+      <div class="acquire-group-title">
+        YouTube Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-mon-yt-wwd" onclick="toggleAcq('mon-yt-wwd')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Walking With Dinosaurs (BBC)</div>
+          <div class="acq-meta">Search: "Walking With Dinosaurs full episode BBC" · 6 episodes · free · ~6hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">9 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-yt-deep" onclick="toggleAcq('mon-yt-deep')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Deep sea creature footage</div>
+          <div class="acq-meta">Search: "BBC deep sea creature footage" · ~5hr filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">8 GB</div>
+      </div>
+<div class="acq-item" id="acq-mon-yt-b" onclick="toggleAcq('mon-yt-b')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">B-movie creature trailers 1950s-60s</div>
+          <div class="acq-meta">Search: "creature feature trailer 1960s" · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">3 GB</div>
+      </div>
+
+    </div>
+';
+    const ACQ_KEY  = 'mon_slots';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🦕</div>
+  <div>
+    <h1>8</h1>
+    <div class="subtitle">// Monster Channel //</div>
+    <p class="desc">Ch 8 · Kaiju · Dinosaurs · Creature Features · Spectacle</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+Primeval and Monarch anchor TV runtime. Every Saturday is Dinosaur Saturday. Every Sunday is Kaiju Sunday with the full MonsterVerse. B-movie creature nights embrace the badness.
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Walking With Dinosaurs (BBC — YouTube)</span></td><td class="col-notes">Morning educational — free on YouTube</td></tr>
+<tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Primeval</span></td><td class="col-notes">Morning creature TV — acquire</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Monarch: Legacy of Monsters</span></td><td class="col-notes">Mid-morning — acquire</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Prehistoric Planet</span></td><td class="col-notes">Nature doc morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">Primeval</span></td><td class="col-notes">Late morning continues</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">Monarch: Legacy of Monsters</span></td><td class="col-notes">Pre-lunch</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-film-wd1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-film-wd1">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">19 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-film-wd1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jurassic Park</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Jurassic Park III</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Pacific Rim</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Pacific Rim: Uprising</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Love and Monsters</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Q: The Winged Serpent</span>
+          <span class="slot-year">1982</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Aliens</span>
+          <span class="slot-year">1986</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Land Before Time</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Godzilla</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Godzilla: King of the Monsters</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Godzilla vs Kong</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Godzilla Minus One</span>
+          <span class="slot-year">2023</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Kong: Skull Island</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Cloverfield</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Host</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Tremors</span>
+          <span class="slot-year">1990</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">A Quiet Place</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">A Quiet Place Part II</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">The Mist</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">3:00pm</td><td class="col-content"><span class="slot-single">Primeval</span></td><td class="col-notes">Post-film TV</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">Prehistoric Planet</span></td><td class="col-notes">Pre-evening nature</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><span class="slot-single">Monarch: Legacy of Monsters</span></td><td class="col-notes">Evening continues</td></tr>
+<tr><td class="col-time">6:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-film-wd2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-film-wd2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">19 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-film-wd2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jurassic Park</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Jurassic Park III</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Pacific Rim</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Pacific Rim: Uprising</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Love and Monsters</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Q: The Winged Serpent</span>
+          <span class="slot-year">1982</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Aliens</span>
+          <span class="slot-year">1986</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Land Before Time</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Godzilla</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Godzilla: King of the Monsters</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Godzilla vs Kong</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Godzilla Minus One</span>
+          <span class="slot-year">2023</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Kong: Skull Island</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Cloverfield</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Host</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Tremors</span>
+          <span class="slot-year">1990</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">A Quiet Place</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">A Quiet Place Part II</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">The Mist</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr evening</span></td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">Primeval</span></td><td class="col-notes">Primetime TV anchor</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Walking With Dinosaurs (YouTube)</span></td><td class="col-notes">Late night nature</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Prehistoric Planet</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: The Dinosaur Experiment, Dinosaur Island, The Dinosaur Project, Dinosaur World...</span></td><td class="col-notes">Low-rated monster + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">SATURDAY — DINOSAUR SATURDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Walking With Dinosaurs (YouTube)</span></td><td class="col-notes">🦕 DINOSAUR SATURDAY</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Prehistoric Planet</span></td><td class="col-notes">Attenborough morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-lbt')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-lbt">▶</span>
+          <span class="slot-expand-title">🎬 The Land Before Time</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-lbt">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">The Land Before Time</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> + filler pad</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-jp')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-jp">▶</span>
+          <span class="slot-expand-title">🎬 Jurassic Park</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-jp">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jurassic Park</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">Main event</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-jp3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-jp3">▶</span>
+          <span class="slot-expand-title">🎬 Jurassic Park III</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-jp3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jurassic Park III</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> + filler pad</td></tr>
+<tr><td class="col-time">6:30pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-dino-attenborough')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-dino-attenborough">▶</span>
+          <span class="slot-expand-title">🎬 Dinosaurs: The Final Day</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-dino-attenborough">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Dinosaurs: The Final Day with David Attenborough</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">Attenborough feature</td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-bmovie')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-bmovie">▶</span>
+          <span class="slot-expand-title">🎉 B-Movie Dinosaur Night</span>
+          <span class="slot-count">5 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-bmovie">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">The Dinosaur Experiment</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Dinosaur Island</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Dinosaur Project</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Dinosaur World</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">My Pet Dinosaur</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">ROTATING WEEKLY — EMBRACE THE BADNESS</span></td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Primeval</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: The Dinosaur Experiment, Dinosaur Island, The Dinosaur Project, Dinosaur World...</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">SUNDAY — KAIJU SUNDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Primeval</span></td><td class="col-notes">☁ KAIJU SUNDAY — Morning TV</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-g1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-g1">▶</span>
+          <span class="slot-expand-title">🎬 Godzilla (2014)</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-g1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Godzilla</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-g2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-g2">▶</span>
+          <span class="slot-expand-title">🎬 Godzilla: King of the Monsters</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-g2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Godzilla: King of the Monsters</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-g3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-g3">▶</span>
+          <span class="slot-expand-title">🎬 Godzilla vs Kong</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-g3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Godzilla vs Kong</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-g4')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-g4">▶</span>
+          <span class="slot-expand-title">🎬 Godzilla Minus One / Pacific Rim</span>
+          <span class="slot-count">3 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-g4">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Godzilla Minus One</span>
+          <span class="slot-year">2023</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Pacific Rim</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Pacific Rim: Uprising</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr primetime</span></td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('mon-pacrim')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-mon-pacrim">▶</span>
+          <span class="slot-expand-title">🎬 Pacific Rim</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-mon-pacrim">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Pacific Rim</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: The Dinosaur Experiment, Dinosaur Island, The Dinosaur Project, Dinosaur World...</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="section"><div class="section-title">⭐ Recurring Events</div>
+<div class="event-block"><strong>Dinosaur Saturday</strong> — Every Saturday. Land Before Time → Jurassic Park → JP3 → Dinosaurs: Final Day → B-Movie slot.</div>
+<div class="event-block"><strong>Kaiju Sunday</strong> — Every Sunday. Full MonsterVerse marathon: Godzilla (2014) → King of Monsters → vs Kong → Minus One.</div>
+<div class="event-block"><strong>B-Movie Creature Night</strong> — Saturday 8pm rotating. The Dinosaur Experiment / Dinosaur Island / My Pet Dinosaur. Embrace the badness.</div>
+</div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

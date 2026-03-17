@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Documentary Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'doc_slots';
+    const ACQ_KEY  = 'doc_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">📡</div>
+  <div>
+    <h1>Documentary Channel</h1>
+    <div class="subtitle">// Ch 11 · Serious Documentaries · Nature · Science · Investigative //</div>
+    <p class="desc">Movie-heavy by design. MythBusters and How It's Made anchor the TV slots between films. Minimum 1hr TV buffer between each film block. PBS Frontline and DW Documentary provide free ongoing mainline content.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">How It's Made</span></td><td class="col-notes">Morning educational anchor</td></tr>
+<tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">How It's Made</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">MythBusters</span></td><td class="col-notes">Morning science entertainment</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">MythBusters</span></td><td class="col-notes">Continues — 1hr buffer before first film</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('doc-nat-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-doc-nat-wd">▶</span>
+          <span class="slot-expand-title">🎬 Nature / Science Documentary</span>
+          <span class="slot-count">8 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-doc-nat-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jane</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">A Plastic Ocean</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Attenborough's Life That Glows</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Attenborough and the Sea Dragon</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Dinosaurs: The Final Day with David Attenborough</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Hubble's Cosmic Journey</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Blackfish</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Won't You Be My Neighbor</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><span class="slot-single">Connections (James Burke)</span></td><td class="col-notes">1hr TV buffer — acquire</td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('doc-feat-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-doc-feat-wd">▶</span>
+          <span class="slot-expand-title">🎬 Feature Documentary</span>
+          <span class="slot-count">27 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-doc-feat-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jane</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">A Plastic Ocean</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Memory: The Origins of Alien</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Attenborough's Life That Glows</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Attenborough and the Sea Dragon</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Dinosaurs: The Final Day with David Attenborough</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Hubble's Cosmic Journey</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">I Love You Now Die</span>
+          <span class="slot-year"></span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Inside the Manson Cult: The Lost Tapes</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Woman in Motion</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">HyperNormalisation</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Psywar</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Man with a Movie Camera</span>
+          <span class="slot-year">1929</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Sex Lies and Butterflies</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Mea Maxima Culpa: Silence in the House of God</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">All the President's Men</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Snowden</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Blackfish</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Won't You Be My Neighbor</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Free Solo</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">13th</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Act of Killing</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Searching for Sugar Man</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Amy</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">The Imposter</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">Missing 411: The Hunted</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Missing 411: The UFO Connection</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><span class="slot-single">The Mechanical Universe</span></td><td class="col-notes">1hr TV buffer — acquire</td></tr>
+<tr><td class="col-time">6:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('doc-pres-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-doc-pres-wd">▶</span>
+          <span class="slot-expand-title">🎬 Prestige Documentary</span>
+          <span class="slot-count">6 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-doc-pres-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Mea Maxima Culpa: Silence in the House of God</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">All the President's Men</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Snowden</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Free Solo</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">13th</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Act of Killing</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr primetime</span></td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">MythBusters</span></td><td class="col-notes">1hr TV buffer</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">How It's Made</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">PBS Frontline (YouTube)</span></td><td class="col-notes">Late night investigative — free</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: UFO Conspiracies: The Hidden Truth, Alien Encounters Disney UFO Doc, Contact: CE-5 Experience, Above Majestic...</span></td><td class="col-notes">Low-rated UFO/conspiracy docs + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">How It's Made</span></td><td class="col-notes">Morning</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">MythBusters</span></td><td class="col-notes">Morning science — 1hr buffer</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('doc-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-doc-we1">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">27 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-doc-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jane</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">A Plastic Ocean</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Memory: The Origins of Alien</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Attenborough's Life That Glows</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Attenborough and the Sea Dragon</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Dinosaurs: The Final Day with David Attenborough</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Hubble's Cosmic Journey</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">I Love You Now Die</span>
+          <span class="slot-year"></span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Inside the Manson Cult: The Lost Tapes</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Woman in Motion</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">HyperNormalisation</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Psywar</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Man with a Movie Camera</span>
+          <span class="slot-year">1929</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Sex Lies and Butterflies</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Mea Maxima Culpa: Silence in the House of God</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">All the President's Men</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Snowden</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Blackfish</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Won't You Be My Neighbor</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Free Solo</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">13th</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Act of Killing</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Searching for Sugar Man</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Amy</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">The Imposter</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">Missing 411: The Hunted</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Missing 411: The UFO Connection</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><span class="slot-single">Connections (James Burke)</span></td><td class="col-notes">1hr TV buffer</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('doc-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-doc-we2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">27 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-doc-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jane</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">A Plastic Ocean</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Memory: The Origins of Alien</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Attenborough's Life That Glows</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Attenborough and the Sea Dragon</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Dinosaurs: The Final Day with David Attenborough</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Hubble's Cosmic Journey</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">I Love You Now Die</span>
+          <span class="slot-year"></span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Inside the Manson Cult: The Lost Tapes</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Woman in Motion</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">HyperNormalisation</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Psywar</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Man with a Movie Camera</span>
+          <span class="slot-year">1929</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Sex Lies and Butterflies</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Mea Maxima Culpa: Silence in the House of God</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">All the President's Men</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Snowden</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Blackfish</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Won't You Be My Neighbor</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Free Solo</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">13th</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Act of Killing</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Searching for Sugar Man</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Amy</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">The Imposter</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">Missing 411: The Hunted</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Missing 411: The UFO Connection</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">DW Documentary (YouTube)</span></td><td class="col-notes">1hr free buffer</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('doc-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-doc-we3">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">27 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-doc-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jane</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">A Plastic Ocean</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Memory: The Origins of Alien</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Attenborough's Life That Glows</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Attenborough and the Sea Dragon</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Dinosaurs: The Final Day with David Attenborough</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Hubble's Cosmic Journey</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">I Love You Now Die</span>
+          <span class="slot-year"></span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Inside the Manson Cult: The Lost Tapes</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Woman in Motion</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">HyperNormalisation</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Psywar</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Man with a Movie Camera</span>
+          <span class="slot-year">1929</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Sex Lies and Butterflies</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Mea Maxima Culpa: Silence in the House of God</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">All the President's Men</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Snowden</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Blackfish</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Won't You Be My Neighbor</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Free Solo</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">13th</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Act of Killing</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Searching for Sugar Man</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Amy</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">The Imposter</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">Missing 411: The Hunted</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Missing 411: The UFO Connection</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><span class="slot-single">PBS Frontline (YouTube)</span></td><td class="col-notes">1hr free buffer</td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('doc-we4')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-doc-we4">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">27 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-doc-we4">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Jane</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">A Plastic Ocean</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Memory: The Origins of Alien</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Attenborough's Life That Glows</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Attenborough and the Sea Dragon</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Dinosaurs: The Final Day with David Attenborough</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Hubble's Cosmic Journey</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">I Love You Now Die</span>
+          <span class="slot-year"></span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Inside the Manson Cult: The Lost Tapes</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Woman in Motion</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">HyperNormalisation</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Psywar</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Man with a Movie Camera</span>
+          <span class="slot-year">1929</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Sex Lies and Butterflies</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Mea Maxima Culpa: Silence in the House of God</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">All the President's Men</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Snowden</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Blackfish</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Won't You Be My Neighbor</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Free Solo</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">13th</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Act of Killing</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Searching for Sugar Man</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Amy</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">The Imposter</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">Missing 411: The Hunted</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Missing 411: The UFO Connection</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr late night</span></td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: UFO Conspiracies: The Hidden Truth, Alien Encounters Disney UFO Doc, Contact: CE-5 Experience, Above Majestic...</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-documentary-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-doc-connections" onclick="toggleAcq('doc-connections')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Connections (James Burke)</div>
+          <div class="acq-meta">1978 · 10 episodes · BBC · intellectual · ~8hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">48 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-mech" onclick="toggleAcq('doc-mech')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Mechanical Universe</div>
+          <div class="acq-meta">1985 · 52 episodes · Caltech physics · ~30hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">180 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-planet1" onclick="toggleAcq('doc-planet1')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Planet Earth</div>
+          <div class="acq-meta">2006 · 11 episodes · BBC · ~5hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">30 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-planet2" onclick="toggleAcq('doc-planet2')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Planet Earth II</div>
+          <div class="acq-meta">2016 · 6 episodes · BBC · ~3hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">18 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-blue1" onclick="toggleAcq('doc-blue1')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Blue Planet</div>
+          <div class="acq-meta">2001 · 8 episodes · BBC · ~5hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">30 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-blue2" onclick="toggleAcq('doc-blue2')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Blue Planet II</div>
+          <div class="acq-meta">2017 · 7 episodes · BBC · ~4hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">24 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-ourplanet" onclick="toggleAcq('doc-ourplanet')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Our Planet</div>
+          <div class="acq-meta">2019 · 8 episodes · Netflix/Attenborough · ~4hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">24 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-documentary-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-doc-f-Blackfis" onclick="toggleAcq('doc-f-Blackfis')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Blackfish</div>
+          <div class="acq-meta">2013</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-f-Won'tYo" onclick="toggleAcq('doc-f-Won'tYo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Won't You Be My Neighbor</div>
+          <div class="acq-meta">2018</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-f-FreeSol" onclick="toggleAcq('doc-f-FreeSol')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Free Solo</div>
+          <div class="acq-meta">2018</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-f-13th" onclick="toggleAcq('doc-f-13th')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">13th</div>
+          <div class="acq-meta">2016</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-f-TheAct" onclick="toggleAcq('doc-f-TheAct')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Act of Killing</div>
+          <div class="acq-meta">2012</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-f-Searchin" onclick="toggleAcq('doc-f-Searchin')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Searching for Sugar Man</div>
+          <div class="acq-meta">2012</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-f-Amy" onclick="toggleAcq('doc-f-Amy')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Amy</div>
+          <div class="acq-meta">2015</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-f-TheImpo" onclick="toggleAcq('doc-f-TheImpo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Imposter</div>
+          <div class="acq-meta">2012</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-documentary-yt">
+      <div class="acquire-group-title">
+        YouTube / Filler Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-doc-yt-frontline" onclick="toggleAcq('doc-yt-frontline')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">PBS Frontline (full episodes)</div>
+          <div class="acq-meta">Official YouTube channel · enormous free archive · ~100hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">150 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-yt-dw" onclick="toggleAcq('doc-yt-dw')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">DW Documentary</div>
+          <div class="acq-meta">DW Documentary YouTube channel · uploads daily · ~200hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">300 GB</div>
+      </div>
+<div class="acq-item" id="acq-doc-yt-bbc" onclick="toggleAcq('doc-yt-bbc')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">BBC Documentary YouTube uploads</div>
+          <div class="acq-meta">Search BBC Earth YouTube · official uploads · ~10hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">15 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

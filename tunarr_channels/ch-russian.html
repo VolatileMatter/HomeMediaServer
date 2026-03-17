@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Русский канал — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'rus_slots';
+    const ACQ_KEY  = 'rus_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🇷🇺</div>
+  <div>
+    <h1>Русский канал</h1>
+    <div class="subtitle">// Ch 9 · Russian Language · Soviet · Tarkovsky · Modern Russian //</div>
+    <p class="desc">All Russian-language content regardless of genre. Tarkovsky holds Sunday nights. Soviet comedies anchor Saturday afternoons. Союзмультфильм is the free morning workhorse.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Союзмультфильм shorts (YouTube)</span></td><td class="col-notes">Morning Soviet animation — free</td></tr>
+<tr><td class="col-time">7:30am</td><td class="col-content"><span class="slot-single">Вампиры средней полосы</span></td><td class="col-notes">Morning Russian TV</td></tr>
+<tr><td class="col-time">8:30am</td><td class="col-content"><span class="slot-single">Перевал Дятлова</span></td><td class="col-notes">Mid-morning drama — acquire</td></tr>
+<tr><td class="col-time">9:30am</td><td class="col-content"><span class="slot-single">Слово пацана</span></td><td class="col-notes">Late morning crime drama — acquire</td></tr>
+<tr><td class="col-time">10:30am</td><td class="col-content"><span class="slot-single">Союзмультфильм (YouTube)</span></td><td class="col-notes">Pre-lunch animation</td></tr>
+<tr><td class="col-time">11:30am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('rus-comedy-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-rus-comedy-wd">▶</span>
+          <span class="slot-expand-title">🎬 Soviet Comedy</span>
+          <span class="slot-count">4 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-rus-comedy-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Kin-dza-dza!</span>
+          <span class="slot-year">1986</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Operation Y and Other Shurik's Adventures</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Diamond Arm</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Ivan Vasilyevich Changes His Profession</span>
+          <span class="slot-year">1973</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">2:30pm</td><td class="col-content"><span class="slot-single">Вампиры средней полосы</span></td><td class="col-notes">Afternoon continues</td></tr>
+<tr><td class="col-time">3:30pm</td><td class="col-content"><span class="slot-single">Soviet history documentary (YouTube)</span></td><td class="col-notes">Afternoon documentary — free</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><span class="slot-single">Слово пацана</span></td><td class="col-notes">Evening crime drama</td></tr>
+<tr><td class="col-time">6:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('rus-modern-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-rus-modern-wd">▶</span>
+          <span class="slot-expand-title">🎬 Modern Russian Film</span>
+          <span class="slot-count">5 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-rus-modern-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Brother</span>
+          <span class="slot-year">1997</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Brother 2</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Generation P</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Why Don't You Just Die!</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Leto</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('rus-prestige-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-rus-prestige-wd">▶</span>
+          <span class="slot-expand-title">🎬 Prestige Russian Film</span>
+          <span class="slot-count">6 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-rus-prestige-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Stalker</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Mirror</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Andrei Rublev</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Come and See</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Leviathan</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Loveless</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Kalashnikov AK-47, At Another People's Holiday, On the Wave</span></td><td class="col-notes">Low-rated Russian-adjacent + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Союзмультфильм (YouTube)</span></td><td class="col-notes">Morning animation</td></tr>
+<tr><td class="col-time">9:30am</td><td class="col-content"><span class="slot-single">Soviet space documentary (YouTube)</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('rus-comedy-we')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-rus-comedy-we">▶</span>
+          <span class="slot-expand-title">🎉 Soviet Comedy Block</span>
+          <span class="slot-count">3 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-rus-comedy-we">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Operation Y and Other Shurik's Adventures</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Diamond Arm</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Ivan Vasilyevich Changes His Profession</span>
+          <span class="slot-year">1973</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">Back to back Soviet comedy</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('rus-film-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-rus-film-we1">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">38 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-rus-film-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Brother</span>
+          <span class="slot-year">1997</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Brother 2</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Stalker</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Mirror</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Nostalgia</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Andrei Rublev</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Ivan's Childhood</span>
+          <span class="slot-year">1962</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Cranes Are Flying</span>
+          <span class="slot-year">1957</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">The Ascent</span>
+          <span class="slot-year">1977</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Dersu Uzala</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">I Am Cuba</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">War and Peace Part II: Natasha Rostova</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Kin-dza-dza!</span>
+          <span class="slot-year">1986</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Operation Y and Other Shurik's Adventures</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">At Another People's Holiday</span>
+          <span class="slot-year">1981</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Heart of a Dog</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">The Cuckoo</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Generation P</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Why Don't You Just Die!</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Putin's Witnesses</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Kalashnikov AK-47</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Leto</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Gagarin: First in Space</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Treasure Island: Part II</span>
+          <span class="slot-year">1987</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">I Am Dragon</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">The Vanquishing of the Witch Baba Yaga</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Viy</span>
+          <span class="slot-year">1967</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">28</span>
+          <span class="slot-title">On the Wave</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">29</span>
+          <span class="slot-title">Come and See</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">30</span>
+          <span class="slot-title">Leviathan</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">31</span>
+          <span class="slot-title">Loveless</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">32</span>
+          <span class="slot-title">The Return</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">33</span>
+          <span class="slot-title">Night Watch</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">34</span>
+          <span class="slot-title">Day Watch</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">35</span>
+          <span class="slot-title">9th Company</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">36</span>
+          <span class="slot-title">Burnt by the Sun</span>
+          <span class="slot-year">1994</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">37</span>
+          <span class="slot-title">The Diamond Arm</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">38</span>
+          <span class="slot-title">Ivan Vasilyevich Changes His Profession</span>
+          <span class="slot-year">1973</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('rus-film-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-rus-film-we2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">38 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-rus-film-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Brother</span>
+          <span class="slot-year">1997</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Brother 2</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Stalker</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Mirror</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Nostalgia</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Andrei Rublev</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Ivan's Childhood</span>
+          <span class="slot-year">1962</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Cranes Are Flying</span>
+          <span class="slot-year">1957</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">The Ascent</span>
+          <span class="slot-year">1977</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Dersu Uzala</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">I Am Cuba</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">War and Peace Part II: Natasha Rostova</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Kin-dza-dza!</span>
+          <span class="slot-year">1986</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Operation Y and Other Shurik's Adventures</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">At Another People's Holiday</span>
+          <span class="slot-year">1981</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Heart of a Dog</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">The Cuckoo</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Generation P</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Why Don't You Just Die!</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Putin's Witnesses</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Kalashnikov AK-47</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Leto</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Gagarin: First in Space</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Treasure Island: Part II</span>
+          <span class="slot-year">1987</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">I Am Dragon</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">The Vanquishing of the Witch Baba Yaga</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Viy</span>
+          <span class="slot-year">1967</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">28</span>
+          <span class="slot-title">On the Wave</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">29</span>
+          <span class="slot-title">Come and See</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">30</span>
+          <span class="slot-title">Leviathan</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">31</span>
+          <span class="slot-title">Loveless</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">32</span>
+          <span class="slot-title">The Return</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">33</span>
+          <span class="slot-title">Night Watch</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">34</span>
+          <span class="slot-title">Day Watch</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">35</span>
+          <span class="slot-title">9th Company</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">36</span>
+          <span class="slot-title">Burnt by the Sun</span>
+          <span class="slot-year">1994</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">37</span>
+          <span class="slot-title">The Diamond Arm</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">38</span>
+          <span class="slot-title">Ivan Vasilyevich Changes His Profession</span>
+          <span class="slot-year">1973</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('rus-tarkovsky')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-rus-tarkovsky">▶</span>
+          <span class="slot-expand-title">🎉 Tarkovsky Sunday</span>
+          <span class="slot-count">4 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-rus-tarkovsky">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Mirror</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Stalker</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Nostalgia</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Andrei Rublev</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">ONE FILM ROTATING — SUNDAY ONLY</span></td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Kalashnikov AK-47, At Another People's Holiday, On the Wave</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="section"><div class="section-title">⭐ Recurring Events</div>
+<div class="event-block"><strong>Tarkovsky Sunday</strong> — One Tarkovsky film every Sunday 10pm. Mirror / Stalker / Nostalgia / Andrei Rublev rotating.</div>
+<div class="event-block"><strong>Soviet Comedy Block</strong> — Saturday 11am. Operation Y → Diamond Arm → Ivan Vasilyevich. Once the Diamond Arm and Ivan Vasilyevich are acquired.</div>
+<div class="event-block"><strong>Brother Double Bill</strong> — Brother (1997) → Brother 2 (2000). Friday night.</div>
+</div>
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-russian-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-rus-slovo" onclick="toggleAcq('rus-slovo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Слово пацана (Slovo Patsana)</div>
+          <div class="acq-meta">2023 · Russian crime drama · very popular · ~8hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">48 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-dyatlov" onclick="toggleAcq('rus-dyatlov')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Перевал Дятлова (Dyatlov Pass)</div>
+          <div class="acq-meta">2020 · Russian mystery drama · ~8hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">48 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-russian-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-rus-f-Comeand" onclick="toggleAcq('rus-f-Comeand')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Come and See</div>
+          <div class="acq-meta">1985</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-Leviatha" onclick="toggleAcq('rus-f-Leviatha')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Leviathan</div>
+          <div class="acq-meta">2014</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-Loveless" onclick="toggleAcq('rus-f-Loveless')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Loveless</div>
+          <div class="acq-meta">2017</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-TheRetu" onclick="toggleAcq('rus-f-TheRetu')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Return</div>
+          <div class="acq-meta">2003</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-NightWa" onclick="toggleAcq('rus-f-NightWa')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Night Watch</div>
+          <div class="acq-meta">2004</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-DayWatc" onclick="toggleAcq('rus-f-DayWatc')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Day Watch</div>
+          <div class="acq-meta">2006</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-9thComp" onclick="toggleAcq('rus-f-9thComp')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">9th Company</div>
+          <div class="acq-meta">2005</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-Burntby" onclick="toggleAcq('rus-f-Burntby')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Burnt by the Sun</div>
+          <div class="acq-meta">1994</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-TheDiam" onclick="toggleAcq('rus-f-TheDiam')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Diamond Arm</div>
+          <div class="acq-meta">1969</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-f-IvanVas" onclick="toggleAcq('rus-f-IvanVas')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Ivan Vasilyevich Changes His Profession</div>
+          <div class="acq-meta">1973</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-russian-yt">
+      <div class="acquire-group-title">
+        YouTube / Filler Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-rus-yt-soyu" onclick="toggleAcq('rus-yt-soyu')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Союзмультфильм (Soyuzmultfilm) collection</div>
+          <div class="acq-meta">Official YouTube channel — enormous free archive of Soviet animation · ~40hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">60 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-yt-history" onclick="toggleAcq('rus-yt-history')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Soviet history documentary (English)</div>
+          <div class="acq-meta">Search: "Soviet Union history documentary full" · DW and BBC free uploads · ~30hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">45 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-yt-space" onclick="toggleAcq('rus-yt-space')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Soviet space program documentary</div>
+          <div class="acq-meta">Search: "Soviet space program documentary feature" · ~10hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">15 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-yt-music" onclick="toggleAcq('rus-yt-music')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Russian folk and classical music</div>
+          <div class="acq-meta">Search: "Russian folk music traditional", "balalaika music" · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">5 GB</div>
+      </div>
+<div class="acq-item" id="acq-rus-yt-trans" onclick="toggleAcq('rus-yt-trans')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Trans-Siberian railway footage</div>
+          <div class="acq-meta">Search: "Trans-Siberian railway footage" · atmospheric filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">3 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

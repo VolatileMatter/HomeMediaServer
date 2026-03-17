@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>19 — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = '<div class="acquire-group" id="group-dra-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-dra-hotd" onclick="toggleAcq('dra-hotd')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">House of the Dragon</div>
+          <div class="acq-meta">2022–present · 2 seasons · HBO · ESSENTIAL · ~16hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">96 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-httyd-rob" onclick="toggleAcq('dra-httyd-rob')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">HTTYD: Riders of Berk</div>
+          <div class="acq-meta">2012–2013 · first HTTYD TV series · ~26hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">156 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-httyd-rtte" onclick="toggleAcq('dra-httyd-rtte')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">HTTYD: Race to the Edge</div>
+          <div class="acq-meta">2015–2018 · Netflix · 6 seasons · ~26hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">156 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-dragon-prince" onclick="toggleAcq('dra-dragon-prince')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Dragon Prince</div>
+          <div class="acq-meta">2018–present · 5 seasons · Netflix · ~24hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">144 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-dragon-tales" onclick="toggleAcq('dra-dragon-tales')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Dragon Tales</div>
+          <div class="acq-meta">1999–2005 · PBS Kids · ~8hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">48 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-wings" onclick="toggleAcq('dra-wings')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Wings of Fire</div>
+          <div class="acq-meta">2024 · Netflix animated · ~6hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">36 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-dra-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-dra-f-HowtoT" onclick="toggleAcq('dra-f-HowtoT')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">How to Train Your Dragon</div>
+          <div class="acq-meta">2010</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-HowtoT" onclick="toggleAcq('dra-f-HowtoT')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">How to Train Your Dragon 2</div>
+          <div class="acq-meta">2014</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-HowtoT" onclick="toggleAcq('dra-f-HowtoT')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">How to Train Your Dragon: The Hidden World</div>
+          <div class="acq-meta">2019</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-Dragonhe" onclick="toggleAcq('dra-f-Dragonhe')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Dragonheart</div>
+          <div class="acq-meta">1996</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-Reignof" onclick="toggleAcq('dra-f-Reignof')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Reign of Fire</div>
+          <div class="acq-meta">2002</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-Pete'sD" onclick="toggleAcq('dra-f-Pete'sD')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Pete's Dragon</div>
+          <div class="acq-meta">1977</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-Pete'sD" onclick="toggleAcq('dra-f-Pete'sD')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Pete's Dragon</div>
+          <div class="acq-meta">2016</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-Beowulf" onclick="toggleAcq('dra-f-Beowulf')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Beowulf</div>
+          <div class="acq-meta">2007</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-DragonR" onclick="toggleAcq('dra-f-DragonR')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Dragon Rider</div>
+          <div class="acq-meta">2020</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-Sleeping" onclick="toggleAcq('dra-f-Sleeping')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Sleeping Beauty</div>
+          <div class="acq-meta">1959</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-f-Rayaand" onclick="toggleAcq('dra-f-Rayaand')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Raya and the Last Dragon</div>
+          <div class="acq-meta">2021</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-dra-yt">
+      <div class="acquire-group-title">
+        YouTube Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-dra-yt-myth" onclick="toggleAcq('dra-yt-myth')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Dragon mythology history documentary</div>
+          <div class="acq-meta">Search: "dragon mythology history documentary feature" · mainline content · ~6hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">9 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-yt-komodo" onclick="toggleAcq('dra-yt-komodo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Komodo dragon documentary BBC</div>
+          <div class="acq-meta">Search: "Komodo dragon documentary BBC" · real dragons as filler · ~3hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">4 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-yt-httyd-make" onclick="toggleAcq('dra-yt-httyd-make')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">HTTYD making-of documentary</div>
+          <div class="acq-meta">Search: "How to Train Your Dragon making of documentary" · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">2 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-yt-got-dragon" onclick="toggleAcq('dra-yt-got-dragon')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">GoT dragon CGI making-of</div>
+          <div class="acq-meta">Search: "Game of Thrones dragon CGI making of feature" · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">2 GB</div>
+      </div>
+<div class="acq-item" id="acq-dra-yt-folklore" onclick="toggleAcq('dra-yt-folklore')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Dragon folklore video essays</div>
+          <div class="acq-meta">Search: "dragon folklore history explained" · 20-40min each · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">4 GB</div>
+      </div>
+
+    </div>
+';
+    const ACQ_KEY  = 'dra_slots';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🐉</div>
+  <div>
+    <h1>19</h1>
+    <div class="subtitle">// Dragon Channel //</div>
+    <p class="desc">Ch 19 · Dragons · Fantasy Action · Kaiju-Adjacent</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+HTTYD TV series anchors the daytime with ~52 hours of content. House of the Dragon owns primetime. The GoT Dragon Episodes midday slot uses a Jellyfin collection of ~17 specific episodes. Weekend marathons built around the HTTYD film trilogy.
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Dragon Tales</span></td><td class="col-notes">Morning kids dragon show — acquire</td></tr>
+<tr><td class="col-time">6:30am</td><td class="col-content"><span class="slot-single">HTTYD: Riders of Berk</span></td><td class="col-notes">Morning adventure anchor — acquire</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Dragon Booster</span></td><td class="col-notes">Mid-morning</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Dragon Prince</span></td><td class="col-notes">Late morning prestige animation — acquire</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">HTTYD: Race to the Edge</span></td><td class="col-notes">Late morning continues — acquire</td></tr>
+<tr><td class="col-time">11:30am</td><td class="col-content"><span class="slot-single">Wings of Fire</span></td><td class="col-notes">Pre-lunch newer animation — acquire</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dra-got-midday')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dra-got-midday">▶</span>
+          <span class="slot-expand-title">📺 Game of Thrones — Dragon Episodes (Jellyfin Collection)</span>
+          <span class="slot-count">17 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dra-got-midday">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">S02E10 — Valar Morghulis</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">S04E02 — The Lion and the Rose</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">S04E10 — The Children</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">S05E02 — The House of Black and White</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">S05E09 — The Dance of Dragons</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">S06E02 — Home</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">S06E09 — Battle of the Bastards</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">S06E10 — The Winds of Winter</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">S07E01 — Dragonstone</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">S07E04 — The Spoils of War</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">S07E06 — Beyond the Wall</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">S07E07 — The Dragon and the Wolf</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">S08E01 — Winterfell</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">S08E03 — The Long Night</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">S08E04 — The Last of the Starks</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">S08E05 — The Bells</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">S08E06 — The Iron Throne</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">MIDDAY SLOT — Create "GoT Dragon Episodes" collection in Jellyfin · sequential</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><span class="slot-single">House of the Dragon</span></td><td class="col-notes">Early afternoon prestige — acquire</td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><span class="slot-single">HTTYD: Riders of Berk</span></td><td class="col-notes">Afternoon continues</td></tr>
+<tr><td class="col-time">3:30pm</td><td class="col-content"><span class="slot-single">Dragon Prince</span></td><td class="col-notes">Pre-evening continues</td></tr>
+<tr><td class="col-time">4:30pm</td><td class="col-content"><span class="slot-single">Dragon Booster</span></td><td class="col-notes">Pre-evening</td></tr>
+<tr><td class="col-time">5:30pm</td><td class="col-content"><span class="slot-single">HTTYD: Race to the Edge</span></td><td class="col-notes">Early evening</td></tr>
+<tr><td class="col-time">6:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dra-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dra-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">24 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dra-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">How to Train Your Dragon</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">How to Train Your Dragon 2</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">How to Train Your Dragon: The Hidden World</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Dragonheart</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Reign of Fire</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">1977</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Beowulf</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Dragon Rider</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">The Flight of Dragons</span>
+          <span class="slot-year">1982</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Dragonslayer</span>
+          <span class="slot-year">1981</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Dragonheart 3: The Sorcerer's Curse</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Dragonheart Vengeance</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Dragonheart: A New Beginning</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Curse of the Dragon Slayer</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Dragon Soldiers</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Eragon</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Sleeping Beauty</span>
+          <span class="slot-year">1959</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Raya and the Last Dragon</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">The Hobbit: An Unexpected Journey</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">The Hobbit: The Desolation of Smaug</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Hobbit: The Battle of the Five Armies</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Dungeons & Dragons</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Dungeons & Dragons: Wrath of the Dragon God</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">House of the Dragon</span></td><td class="col-notes">Primetime prestige anchor</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">HTTYD: Race to the Edge</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Dragon Prince</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Eragon, Curse of the Dragon Slayer, Dungeons & Dragons, Dungeons & Dragons: Wrath of the Dragon God...</span></td><td class="col-notes">Low-rated dragon films + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Dragon Tales</span></td><td class="col-notes">Morning kids — acquire</td></tr>
+<tr><td class="col-time">7:30am</td><td class="col-content"><span class="slot-single">HTTYD: Riders of Berk</span></td><td class="col-notes">Saturday morning adventure</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Wings of Fire</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dra-httyd-marathon')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dra-httyd-marathon">▶</span>
+          <span class="slot-expand-title">🎉 HTTYD Movie Marathon</span>
+          <span class="slot-count">3 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dra-httyd-marathon">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">How to Train Your Dragon</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">How to Train Your Dragon 2</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">How to Train Your Dragon: The Hidden World</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">3 FILMS BACK TO BACK — ACQUIRE ALL THREE</span></td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dra-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dra-we1">▶</span>
+          <span class="slot-expand-title">🎬 Dragon Film</span>
+          <span class="slot-count">24 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dra-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">How to Train Your Dragon</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">How to Train Your Dragon 2</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">How to Train Your Dragon: The Hidden World</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Dragonheart</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Reign of Fire</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">1977</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Beowulf</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Dragon Rider</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">The Flight of Dragons</span>
+          <span class="slot-year">1982</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Dragonslayer</span>
+          <span class="slot-year">1981</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Dragonheart 3: The Sorcerer's Curse</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Dragonheart Vengeance</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Dragonheart: A New Beginning</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Curse of the Dragon Slayer</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Dragon Soldiers</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Eragon</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Sleeping Beauty</span>
+          <span class="slot-year">1959</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Raya and the Last Dragon</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">The Hobbit: An Unexpected Journey</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">The Hobbit: The Desolation of Smaug</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Hobbit: The Battle of the Five Armies</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Dungeons & Dragons</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Dungeons & Dragons: Wrath of the Dragon God</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dra-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dra-we2">▶</span>
+          <span class="slot-expand-title">🎬 Dragon Film</span>
+          <span class="slot-count">24 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dra-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">How to Train Your Dragon</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">How to Train Your Dragon 2</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">How to Train Your Dragon: The Hidden World</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Dragonheart</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Reign of Fire</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">1977</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Beowulf</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Dragon Rider</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">The Flight of Dragons</span>
+          <span class="slot-year">1982</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Dragonslayer</span>
+          <span class="slot-year">1981</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Dragonheart 3: The Sorcerer's Curse</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Dragonheart Vengeance</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Dragonheart: A New Beginning</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Curse of the Dragon Slayer</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Dragon Soldiers</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Eragon</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Sleeping Beauty</span>
+          <span class="slot-year">1959</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Raya and the Last Dragon</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">The Hobbit: An Unexpected Journey</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">The Hobbit: The Desolation of Smaug</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Hobbit: The Battle of the Five Armies</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Dungeons & Dragons</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Dungeons & Dragons: Wrath of the Dragon God</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dra-hotd-we')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dra-hotd-we">▶</span>
+          <span class="slot-expand-title">🎉 House of the Dragon Event</span>
+          <span class="slot-count">1 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dra-hotd-we">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">House of the Dragon</span>
+          <span class="slot-year">2022-present</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">2 EPISODES BACK TO BACK</span></td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dra-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dra-we3">▶</span>
+          <span class="slot-expand-title">🎬 Dragon Film</span>
+          <span class="slot-count">24 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dra-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">How to Train Your Dragon</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">How to Train Your Dragon 2</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">How to Train Your Dragon: The Hidden World</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Dragonheart</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Reign of Fire</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">1977</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Pete's Dragon</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Beowulf</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Dragon Rider</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">The Flight of Dragons</span>
+          <span class="slot-year">1982</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Dragonslayer</span>
+          <span class="slot-year">1981</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Dragonheart 3: The Sorcerer's Curse</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Dragonheart Vengeance</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Dragonheart: A New Beginning</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Curse of the Dragon Slayer</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Dragon Soldiers</span>
+          <span class="slot-year">2020</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Eragon</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Sleeping Beauty</span>
+          <span class="slot-year">1959</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Raya and the Last Dragon</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">The Hobbit: An Unexpected Journey</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">The Hobbit: The Desolation of Smaug</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">The Hobbit: The Battle of the Five Armies</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">Dungeons & Dragons</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">Dungeons & Dragons: Wrath of the Dragon God</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Eragon, Curse of the Dragon Slayer, Dungeons & Dragons, Dungeons & Dragons: Wrath of the Dragon God...</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="event-block">
+      <strong>Game of Thrones — Dragon Episodes Setup</strong><br>
+      Create a Jellyfin collection called <code>GoT Dragon Episodes</code> containing only the ~17 episodes listed in the 12pm midday slot above. In Tunarr, set the midday slot to draw from this collection in Sequential mode. Do NOT add the full Game of Thrones series to this channel — only the curated dragon episodes. See the Tunarr setup tab for collection creation instructions.
+    </div><div class="section"><div class="section-title">⭐ Recurring Events</div>
+<div class="event-block"><strong>HTTYD Movie Marathon</strong> — Saturday 10am. All three films back to back once acquired. ~6 hours.</div>
+<div class="event-block"><strong>Hobbit Dragon Weekend</strong> — Alternate monthly: Unexpected Journey → Desolation of Smaug → Battle of Five Armies for the Smaug arc.</div>
+<div class="event-block"><strong>Dragonheart Legacy Night</strong> — All 4 Dragonheart films in order. Intentionally decreasing quality. Friday late night.</div>
+</div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

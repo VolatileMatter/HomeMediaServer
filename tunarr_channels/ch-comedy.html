@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comedy Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'comedy_slots';
+    const ACQ_KEY  = 'comedy_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">😂</div>
+  <div>
+    <h1>Comedy Channel</h1>
+    <div class="subtitle">// Ch 1 · Sitcoms · Comfort TV · Stand-up //</div>
+    <p class="desc">The server's bread-and-butter channel. The Office, Parks & Rec, Friends, and Brooklyn Nine-Nine anchor the daily schedule. Deep film library for evenings.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">5:00am</td><td class="col-content"><span class="slot-single">Friends</span></td><td class="col-notes">Early morning anchor — sequential</td></tr>
+<tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Parks & Recreation</span></td><td class="col-notes">Morning anchor — sequential</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">The Office (US)</span></td><td class="col-notes">Mid-morning anchor — sequential</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">Brooklyn Nine-Nine</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">Schitt's Creek</span></td><td class="col-notes">Pre-lunch</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><span class="slot-single">Community</span></td><td class="col-notes">Lunch</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><span class="slot-single">Arrested Development</span></td><td class="col-notes">Early afternoon</td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><span class="slot-single">Better Off Ted</span></td><td class="col-notes">Afternoon</td></tr>
+<tr><td class="col-time">2:30pm</td><td class="col-content"><span class="slot-single">Bob's Burgers</span></td><td class="col-notes">Afternoon</td></tr>
+<tr><td class="col-time">3:30pm</td><td class="col-content"><span class="slot-single">Modern Family</span></td><td class="col-notes">Pre-evening</td></tr>
+<tr><td class="col-time">4:30pm</td><td class="col-content"><span class="slot-single">Letterkenny</span></td><td class="col-notes">Pre-evening</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><span class="slot-single">Frasier</span></td><td class="col-notes">Evening — acquire needed</td></tr>
+<tr><td class="col-time">6:00pm</td><td class="col-content"><span class="slot-single">Seinfeld</span></td><td class="col-notes">Pre-primetime — acquire needed</td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><span class="slot-single">Curb Your Enthusiasm</span></td><td class="col-notes">Pre-primetime — acquire needed</td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('com-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-com-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Comedy Film</span>
+          <span class="slot-count">19 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-com-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">The Blues Brothers</span>
+          <span class="slot-year">1980</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">This Is Spinal Tap</span>
+          <span class="slot-year">1984</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Shaun of the Dead</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Hot Fuzz</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The World's End</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Clue</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Office Space</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Anchorman</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Superbad</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Game Night</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Bob's Burgers Movie</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Barbie</span>
+          <span class="slot-year">2023</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">John Mulaney: The Comeback Kid</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Kung Pow: Enter the Fist</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">FDR: American Badass!</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Monty Python and the Holy Grail</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Monty Python's Life of Brian</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Monty Python's Meaning of Life</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span> rotating</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Malcolm in the Middle</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Batman & Robin, Bruce Almighty, FDR: American Badass!, Kung Pow: Enter the Fist...</span></td><td class="col-notes">Low priority overnight</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">5:00am</td><td class="col-content"><span class="slot-single">Friends</span></td><td class="col-notes">Early morning</td></tr>
+<tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Parks & Recreation</span></td><td class="col-notes">Morning</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">The Office (US)</span></td><td class="col-notes">Mid-morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">Brooklyn Nine-Nine</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('com-film-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-com-film-we1">▶</span>
+          <span class="slot-expand-title">🎬 Comedy Film</span>
+          <span class="slot-count">19 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-com-film-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">The Blues Brothers</span>
+          <span class="slot-year">1980</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">This Is Spinal Tap</span>
+          <span class="slot-year">1984</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Shaun of the Dead</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Hot Fuzz</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The World's End</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Clue</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Office Space</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Anchorman</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Superbad</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Game Night</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Bob's Burgers Movie</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Barbie</span>
+          <span class="slot-year">2023</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">John Mulaney: The Comeback Kid</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Kung Pow: Enter the Fist</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">FDR: American Badass!</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Monty Python and the Holy Grail</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Monty Python's Life of Brian</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Monty Python's Meaning of Life</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('com-film-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-com-film-we2">▶</span>
+          <span class="slot-expand-title">🎬 Comedy Film</span>
+          <span class="slot-count">19 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-com-film-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">The Blues Brothers</span>
+          <span class="slot-year">1980</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">This Is Spinal Tap</span>
+          <span class="slot-year">1984</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Shaun of the Dead</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Hot Fuzz</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The World's End</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Clue</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Office Space</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Anchorman</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Superbad</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Game Night</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Bob's Burgers Movie</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Barbie</span>
+          <span class="slot-year">2023</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">John Mulaney: The Comeback Kid</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Kung Pow: Enter the Fist</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">FDR: American Badass!</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Monty Python and the Holy Grail</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Monty Python's Life of Brian</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Monty Python's Meaning of Life</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('com-film-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-com-film-we3">▶</span>
+          <span class="slot-expand-title">🎬 Comedy Film</span>
+          <span class="slot-count">19 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-com-film-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">The Blues Brothers</span>
+          <span class="slot-year">1980</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">This Is Spinal Tap</span>
+          <span class="slot-year">1984</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Shaun of the Dead</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Hot Fuzz</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The World's End</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Clue</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Office Space</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Anchorman</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Superbad</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Game Night</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Bob's Burgers Movie</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Barbie</span>
+          <span class="slot-year">2023</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">John Mulaney: The Comeback Kid</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Kung Pow: Enter the Fist</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">FDR: American Badass!</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Monty Python and the Holy Grail</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Monty Python's Life of Brian</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Monty Python's Meaning of Life</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('com-event')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-com-event">▶</span>
+          <span class="slot-expand-title">🎉 Comedy Event</span>
+          <span class="slot-count">5 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-com-event">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Shaun of the Dead</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Hot Fuzz</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The World's End</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Monty Python and the Holy Grail</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Monty Python's Life of Brian</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">CORNETTO / PYTHON ROTATING</span></td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Malcolm in the Middle</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Batman & Robin, Bruce Almighty, FDR: American Badass!, Kung Pow: Enter the Fist...</span></td><td class="col-notes">Low priority overnight</td></tr>
+
+      </tbody>
+    </table>
+
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-com-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-com-frasier" onclick="toggleAcq('com-frasier')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Frasier</div>
+          <div class="acq-meta">1993–2004 · 11 seasons · ~66hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">396 GB</div>
+      </div>
+<div class="acq-item" id="acq-com-seinfeld" onclick="toggleAcq('com-seinfeld')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Seinfeld</div>
+          <div class="acq-meta">1989–1998 · 9 seasons · ~46hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">276 GB</div>
+      </div>
+<div class="acq-item" id="acq-com-curb" onclick="toggleAcq('com-curb')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Curb Your Enthusiasm</div>
+          <div class="acq-meta">2000–2024 · 12 seasons · ~34hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">204 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-com-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-com-film-Clue" onclick="toggleAcq('com-film-Clue')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Clue</div>
+          <div class="acq-meta">1985 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-com-film-OfficeS" onclick="toggleAcq('com-film-OfficeS')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Office Space</div>
+          <div class="acq-meta">1999 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-com-film-Anchorma" onclick="toggleAcq('com-film-Anchorma')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Anchorman</div>
+          <div class="acq-meta">2004 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-com-film-Superbad" onclick="toggleAcq('com-film-Superbad')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Superbad</div>
+          <div class="acq-meta">2007 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-com-film-GameNig" onclick="toggleAcq('com-film-GameNig')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Game Night</div>
+          <div class="acq-meta">2018 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

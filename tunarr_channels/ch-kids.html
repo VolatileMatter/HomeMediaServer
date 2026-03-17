@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kids Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'kids_slots';
+    const ACQ_KEY  = 'kids_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🐾</div>
+  <div>
+    <h1>Kids Channel</h1>
+    <div class="subtitle">// Ch 4 · Scooby-Doo · Nickelodeon · Disney · Saturday Morning //</div>
+    <p class="desc">Scooby-Doo anchors mornings (max 2hrs/day, rotating all series). Classic Disney and Nickelodeon afternoons. Gravity Falls and Owl House hold the after-school prestige slot.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Magic School Bus</span></td><td class="col-notes">Educational morning</td></tr>
+<tr><td class="col-time">6:30am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-scooby-am')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-scooby-am">▶</span>
+          <span class="slot-expand-title">📺 Scooby-Doo (rotating series)</span>
+          <span class="slot-count">10 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-scooby-am">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Scooby-Doo, Where Are You!</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Scooby-Doo Show</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">New Scooby-Doo Movies</span>
+          <span class="slot-year">1972</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Scooby's All Star Laff-A-Lympics</span>
+          <span class="slot-year">1977</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Scooby-Doo and Scrappy-Doo</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The 13 Ghosts of Scooby-Doo</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">A Pup Named Scooby-Doo</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Scooby-Doo! Mystery Incorporated</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Be Cool, Scooby-Doo!</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">LEGO Scooby-Doo Shorts</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">Scooby rotation: Where Are You → Scooby-Doo Show → New Scooby-Doo Movies → Laff-A-Lympics → Scrappy-Doo → 13 Ghosts → A Pup Named Scooby-Doo → Mystery Incorporated → Be Cool → LEGO Shorts → repeat</td></tr>
+<tr><td class="col-time">7:30am</td><td class="col-content"><span class="slot-single">SpongeBob SquarePants</span></td><td class="col-notes">Morning energy</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Phineas and Ferb</span></td><td class="col-notes">Pre-school</td></tr>
+<tr><td class="col-time">8:30am</td><td class="col-content"><span class="slot-single">Gravity Falls</span></td><td class="col-notes">Late morning prestige — acquire</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">The Amazing World of Gumball</span></td><td class="col-notes">Mid-morning</td></tr>
+<tr><td class="col-time">9:30am</td><td class="col-content"><span class="slot-single">Kim Possible</span></td><td class="col-notes">Action morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">Invader ZIM</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">10:30am</td><td class="col-content"><span class="slot-single">Totally Spies!</span></td><td class="col-notes">Pre-lunch action</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">Lilo & Stitch: The Series</span></td><td class="col-notes">Pre-lunch</td></tr>
+<tr><td class="col-time">11:30am</td><td class="col-content"><span class="slot-single">DuckTales (1987)</span></td><td class="col-notes">Lunch classic — acquire</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><span class="slot-single">Chip 'n Dale Rescue Rangers</span></td><td class="col-notes">Afternoon classic — acquire</td></tr>
+<tr><td class="col-time">12:30pm</td><td class="col-content"><span class="slot-single">Animaniacs (1993)</span></td><td class="col-notes">Afternoon — acquire</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><span class="slot-single">Danny Phantom</span></td><td class="col-notes">Early afternoon</td></tr>
+<tr><td class="col-time">1:30pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-scooby-pm')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-scooby-pm">▶</span>
+          <span class="slot-expand-title">📺 Scooby-Doo (rotating series, continued)</span>
+          <span class="slot-count">2 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-scooby-pm">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Scooby-Doo, Where Are You!</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Scooby-Doo Show</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">Max 2hrs total Scooby per day</td></tr>
+<tr><td class="col-time">2:30pm</td><td class="col-content"><span class="slot-single">The Owl House</span></td><td class="col-notes">After school — acquire</td></tr>
+<tr><td class="col-time">3:00pm</td><td class="col-content"><span class="slot-single">Amphibia</span></td><td class="col-notes">After school — acquire</td></tr>
+<tr><td class="col-time">3:30pm</td><td class="col-content"><span class="slot-single">Over the Garden Wall</span></td><td class="col-notes">Short prestige — acquire</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">Kim Possible</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">4:30pm</td><td class="col-content"><span class="slot-single">Phineas and Ferb</span></td><td class="col-notes">Pre-dinner</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><span class="slot-single">SpongeBob SquarePants</span></td><td class="col-notes">Pre-dinner</td></tr>
+<tr><td class="col-time">5:30pm</td><td class="col-content"><span class="slot-single">Gravity Falls</span></td><td class="col-notes">Family evening</td></tr>
+<tr><td class="col-time">6:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Kids Film</span>
+          <span class="slot-count">36 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spy Kids</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spy Kids 2: Island of Lost Dreams</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spy Kids 4: All the Time in the World</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">High School Musical</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">High School Musical 2</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">High School Musical 3: Senior Year</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Ice Age</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Ice Age: The Meltdown</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Ice Age: Dawn of the Dinosaurs</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Shrek</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Shrek 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Road to El Dorado</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Atlantis: The Lost Empire</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Treasure Planet</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Emperor's New Groove</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Brother Bear</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Mulan</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Snow White and the Seven Dwarfs</span>
+          <span class="slot-year">1937</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">The Hunchback of Notre Dame</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Kung Fu Panda</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Megamind</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Monsters, Inc.</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">WALL·E</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">A Bug's Life</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">Surf's Up</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">The Iron Giant</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Coraline</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">28</span>
+          <span class="slot-title">Chicken Run</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">29</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">30</span>
+          <span class="slot-title">Up</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">31</span>
+          <span class="slot-title">Finding Nemo</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">32</span>
+          <span class="slot-title">Finding Dory</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">33</span>
+          <span class="slot-title">Moana</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">34</span>
+          <span class="slot-title">Coco</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">35</span>
+          <span class="slot-title">The Land Before Time</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">36</span>
+          <span class="slot-title">Scooby-Doo</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">9:30pm</td><td class="col-content"><span class="slot-filler">🎞 Filler</span></td><td class="col-notes">Disney shorts / gap pad</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Magic School Bus</span></td><td class="col-notes">Late educational</td></tr>
+<tr><td class="col-time">10:30pm</td><td class="col-content"><span class="slot-single">Animaniacs</span></td><td class="col-notes">Late comfort</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-filler">🎞 Classic Disney Shorts (YouTube)</span></td><td class="col-notes">Overnight start</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Spy Kids 3: Game Over, Night at the Museum: Kahmunrah Rises Again, Ice Age: Collision Course, Dinosaur World...</span></td><td class="col-notes">Low-rated kids films + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Magic School Bus</span></td><td class="col-notes">Educational start</td></tr>
+<tr><td class="col-time">7:30am</td><td class="col-content"><span class="slot-single">Mister Rogers' Neighborhood (YouTube)</span></td><td class="col-notes">Gentle Saturday morning</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-scooby-we')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-scooby-we">▶</span>
+          <span class="slot-expand-title">📺 Scooby-Doo Saturday (2hrs)</span>
+          <span class="slot-count">4 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-scooby-we">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Scooby-Doo, Where Are You!</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Scooby-Doo Show</span>
+          <span class="slot-year">1976</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Mystery Incorporated</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Be Cool, Scooby-Doo!</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes">Max 2hrs</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-we1">▶</span>
+          <span class="slot-expand-title">🎬 Kids Film</span>
+          <span class="slot-count">36 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spy Kids</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spy Kids 2: Island of Lost Dreams</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spy Kids 4: All the Time in the World</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">High School Musical</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">High School Musical 2</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">High School Musical 3: Senior Year</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Ice Age</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Ice Age: The Meltdown</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Ice Age: Dawn of the Dinosaurs</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Shrek</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Shrek 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Road to El Dorado</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Atlantis: The Lost Empire</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Treasure Planet</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Emperor's New Groove</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Brother Bear</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Mulan</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Snow White and the Seven Dwarfs</span>
+          <span class="slot-year">1937</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">The Hunchback of Notre Dame</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Kung Fu Panda</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Megamind</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Monsters, Inc.</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">WALL·E</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">A Bug's Life</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">Surf's Up</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">The Iron Giant</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Coraline</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">28</span>
+          <span class="slot-title">Chicken Run</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">29</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">30</span>
+          <span class="slot-title">Up</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">31</span>
+          <span class="slot-title">Finding Nemo</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">32</span>
+          <span class="slot-title">Finding Dory</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">33</span>
+          <span class="slot-title">Moana</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">34</span>
+          <span class="slot-title">Coco</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">35</span>
+          <span class="slot-title">The Land Before Time</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">36</span>
+          <span class="slot-title">Scooby-Doo</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-we2">▶</span>
+          <span class="slot-expand-title">🎬 Kids Film</span>
+          <span class="slot-count">36 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spy Kids</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spy Kids 2: Island of Lost Dreams</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spy Kids 4: All the Time in the World</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">High School Musical</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">High School Musical 2</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">High School Musical 3: Senior Year</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Ice Age</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Ice Age: The Meltdown</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Ice Age: Dawn of the Dinosaurs</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Shrek</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Shrek 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Road to El Dorado</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Atlantis: The Lost Empire</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Treasure Planet</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Emperor's New Groove</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Brother Bear</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Mulan</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Snow White and the Seven Dwarfs</span>
+          <span class="slot-year">1937</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">The Hunchback of Notre Dame</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Kung Fu Panda</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Megamind</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Monsters, Inc.</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">WALL·E</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">A Bug's Life</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">Surf's Up</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">The Iron Giant</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Coraline</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">28</span>
+          <span class="slot-title">Chicken Run</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">29</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">30</span>
+          <span class="slot-title">Up</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">31</span>
+          <span class="slot-title">Finding Nemo</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">32</span>
+          <span class="slot-title">Finding Dory</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">33</span>
+          <span class="slot-title">Moana</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">34</span>
+          <span class="slot-title">Coco</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">35</span>
+          <span class="slot-title">The Land Before Time</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">36</span>
+          <span class="slot-title">Scooby-Doo</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-we3">▶</span>
+          <span class="slot-expand-title">🎬 Kids Film</span>
+          <span class="slot-count">36 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spy Kids</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spy Kids 2: Island of Lost Dreams</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spy Kids 4: All the Time in the World</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">High School Musical</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">High School Musical 2</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">High School Musical 3: Senior Year</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Ice Age</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Ice Age: The Meltdown</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Ice Age: Dawn of the Dinosaurs</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Shrek</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Shrek 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">The Road to El Dorado</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Atlantis: The Lost Empire</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Treasure Planet</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Emperor's New Groove</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Brother Bear</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">Mulan</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Snow White and the Seven Dwarfs</span>
+          <span class="slot-year">1937</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">The Hunchback of Notre Dame</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Kung Fu Panda</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Megamind</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Monsters, Inc.</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">23</span>
+          <span class="slot-title">WALL·E</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">24</span>
+          <span class="slot-title">A Bug's Life</span>
+          <span class="slot-year">1998</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">25</span>
+          <span class="slot-title">Surf's Up</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">26</span>
+          <span class="slot-title">The Iron Giant</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">27</span>
+          <span class="slot-title">Coraline</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">28</span>
+          <span class="slot-title">Chicken Run</span>
+          <span class="slot-year">2000</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">29</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">30</span>
+          <span class="slot-title">Up</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">31</span>
+          <span class="slot-title">Finding Nemo</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">32</span>
+          <span class="slot-title">Finding Dory</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">33</span>
+          <span class="slot-title">Moana</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">34</span>
+          <span class="slot-title">Coco</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">35</span>
+          <span class="slot-title">The Land Before Time</span>
+          <span class="slot-year">1988</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">36</span>
+          <span class="slot-title">Scooby-Doo</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('kids-family')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-kids-family">▶</span>
+          <span class="slot-expand-title">🎉 Family Movie Event</span>
+          <span class="slot-count">7 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-kids-family">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Ice Age</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ice Age: The Meltdown</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Ice Age: Dawn of the Dinosaurs</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Shrek</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Shrek 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Monsters, Inc.</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">WALL·E</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">ROTATING</span></td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Gravity Falls</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">10:30pm</td><td class="col-content"><span class="slot-single">Owl House</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Animaniacs</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Spy Kids 3: Game Over, Night at the Museum: Kahmunrah Rises Again, Ice Age: Collision Course, Dinosaur World...</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-kids-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-kids-gravity" onclick="toggleAcq('kids-gravity')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Gravity Falls</div>
+          <div class="acq-meta">2012–2016 · 2 seasons · ~10hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">60 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-ducktales" onclick="toggleAcq('kids-ducktales')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">DuckTales (1987)</div>
+          <div class="acq-meta">1987–1990 · 3 seasons · confirm 1987 original · ~16hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">96 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-chip" onclick="toggleAcq('kids-chip')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Chip 'n Dale Rescue Rangers</div>
+          <div class="acq-meta">1989–1990 · 3 seasons · ~12hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">72 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-animaniacs" onclick="toggleAcq('kids-animaniacs')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Animaniacs (1993)</div>
+          <div class="acq-meta">1993–1998 · 5 seasons · confirm 1993 original · ~28hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">168 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-owlhouse" onclick="toggleAcq('kids-owlhouse')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Owl House</div>
+          <div class="acq-meta">2020–2023 · 3 seasons · ~18hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">108 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-amphibia" onclick="toggleAcq('kids-amphibia')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Amphibia</div>
+          <div class="acq-meta">2019–2022 · 3 seasons · ~16hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">96 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-otgw" onclick="toggleAcq('kids-otgw')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Over the Garden Wall</div>
+          <div class="acq-meta">2014 · miniseries 10 episodes · ~2hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-kids-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-kids-f-TheIron" onclick="toggleAcq('kids-f-TheIron')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Iron Giant</div>
+          <div class="acq-meta">1999</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Coraline" onclick="toggleAcq('kids-f-Coraline')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Coraline</div>
+          <div class="acq-meta">2009</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Chicken" onclick="toggleAcq('kids-f-Chicken')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Chicken Run</div>
+          <div class="acq-meta">2000</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Ratatoui" onclick="toggleAcq('kids-f-Ratatoui')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Ratatouille</div>
+          <div class="acq-meta">2007</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Up" onclick="toggleAcq('kids-f-Up')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Up</div>
+          <div class="acq-meta">2009</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Finding" onclick="toggleAcq('kids-f-Finding')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Finding Nemo</div>
+          <div class="acq-meta">2003</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Finding" onclick="toggleAcq('kids-f-Finding')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Finding Dory</div>
+          <div class="acq-meta">2016</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Moana" onclick="toggleAcq('kids-f-Moana')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Moana</div>
+          <div class="acq-meta">2016</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-f-Coco" onclick="toggleAcq('kids-f-Coco')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Coco</div>
+          <div class="acq-meta">2017</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-kids-yt">
+      <div class="acquire-group-title">
+        YouTube / Filler Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-kids-yt-cn" onclick="toggleAcq('kids-yt-cn')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Cartoon Network City bumpers</div>
+          <div class="acq-meta">Search: "Cartoon Network city bumpers compilation" — iconic nostalgia filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">3 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-yt-nick" onclick="toggleAcq('kids-yt-nick')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Nickelodeon 90s bumpers</div>
+          <div class="acq-meta">Search: "Nickelodeon 90s bumpers compilation"</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">3 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-yt-toys" onclick="toggleAcq('kids-yt-toys')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">90s toy commercials compilation</div>
+          <div class="acq-meta">Search: "90s toy commercials compilation"</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">3 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-yt-mr" onclick="toggleAcq('kids-yt-mr')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Mister Rogers' Neighborhood</div>
+          <div class="acq-meta">PBS official YouTube — full episodes · ~40hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">60 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-yt-rr" onclick="toggleAcq('kids-yt-rr')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Reading Rainbow</div>
+          <div class="acq-meta">PBS official YouTube — full episodes · ~20hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">30 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-yt-looney" onclick="toggleAcq('kids-yt-looney')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Looney Tunes official</div>
+          <div class="acq-meta">Official WB YouTube · ~30hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">45 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-yt-disney" onclick="toggleAcq('kids-yt-disney')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Classic Disney Shorts</div>
+          <div class="acq-meta">Official Disney YouTube uploads · ~10hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">15 GB</div>
+      </div>
+<div class="acq-item" id="acq-kids-yt-schoolhouse" onclick="toggleAcq('kids-yt-schoolhouse')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Schoolhouse Rock</div>
+          <div class="acq-meta">Search: "Schoolhouse Rock full collection" · ~3hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">4 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

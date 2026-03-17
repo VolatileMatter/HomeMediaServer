@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Western Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'wes_slots';
+    const ACQ_KEY  = 'wes_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🤠</div>
+  <div>
+    <h1>Western Channel</h1>
+    <div class="subtitle">// Ch 17 · Classic Western · Neo-Western · Spaghetti Western //</div>
+    <p class="desc">Gunsmoke anchors classic mornings. Yellowstone and Deadwood are the non-negotiable TV acquisitions. The Good the Bad and the Ugly is the essential film. Do not launch without these three.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Gunsmoke</span></td><td class="col-notes">Classic morning anchor</td></tr>
+<tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Gunsmoke</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Yellowstone</span></td><td class="col-notes">Mid-morning modern western — acquire</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Yellowstone</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">Justified</span></td><td class="col-notes">Late morning neo-western — acquire</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">Justified</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('wes-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-wes-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">17 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-wes-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Django Unchained</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Hateful Eight</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Butch Cassidy and the Sundance Kid</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">A Fistful of Dollars</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Good the Bad and the Ugly</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">For a Few Dollars More</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Once Upon a Time in the West</span>
+          <span class="slot-year">1968</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Unforgiven</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Tombstone</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">True Grit</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">High Noon</span>
+          <span class="slot-year">1952</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Shane</span>
+          <span class="slot-year">1953</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">3:10 to Yuma</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Revenant</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Bone Tomahawk</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">No Country for Old Men</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">3:00pm</td><td class="col-content"><span class="slot-single">1883</span></td><td class="col-notes">Mid-afternoon Yellowstone prequel — acquire</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">Deadwood</span></td><td class="col-notes">Pre-evening prestige — acquire</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('wes-film-wd2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-wes-film-wd2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">17 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-wes-film-wd2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Django Unchained</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Hateful Eight</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Butch Cassidy and the Sundance Kid</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">A Fistful of Dollars</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Good the Bad and the Ugly</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">For a Few Dollars More</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Once Upon a Time in the West</span>
+          <span class="slot-year">1968</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Unforgiven</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Tombstone</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">True Grit</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">High Noon</span>
+          <span class="slot-year">1952</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Shane</span>
+          <span class="slot-year">1953</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">3:10 to Yuma</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Revenant</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Bone Tomahawk</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">No Country for Old Men</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr evening</span></td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><span class="slot-single">Yellowstone</span></td><td class="col-notes">Primetime anchor</td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">Deadwood</span></td><td class="col-notes">Late primetime</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Justified</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Lonesome Dove</span></td><td class="col-notes">Late night classic — acquire</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Western YouTube / Ken Burns clips, Ghost town documentary YouTube, Outlaw history YouTube</span></td><td class="col-notes">Western YouTube + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Gunsmoke</span></td><td class="col-notes">Classic morning</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Ken Burns' The West (YouTube — PBS)</span></td><td class="col-notes">Saturday history — free</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('wes-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-wes-we1">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">17 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-wes-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Django Unchained</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Hateful Eight</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Butch Cassidy and the Sundance Kid</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">A Fistful of Dollars</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Good the Bad and the Ugly</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">For a Few Dollars More</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Once Upon a Time in the West</span>
+          <span class="slot-year">1968</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Unforgiven</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Tombstone</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">True Grit</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">High Noon</span>
+          <span class="slot-year">1952</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Shane</span>
+          <span class="slot-year">1953</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">3:10 to Yuma</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Revenant</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Bone Tomahawk</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">No Country for Old Men</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('wes-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-wes-we2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">17 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-wes-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Django Unchained</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Hateful Eight</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Butch Cassidy and the Sundance Kid</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">A Fistful of Dollars</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Good the Bad and the Ugly</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">For a Few Dollars More</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Once Upon a Time in the West</span>
+          <span class="slot-year">1968</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Unforgiven</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Tombstone</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">True Grit</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">High Noon</span>
+          <span class="slot-year">1952</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Shane</span>
+          <span class="slot-year">1953</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">3:10 to Yuma</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Revenant</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Bone Tomahawk</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">No Country for Old Men</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('wes-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-wes-we3">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">17 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-wes-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Django Unchained</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">The Hateful Eight</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Butch Cassidy and the Sundance Kid</span>
+          <span class="slot-year">1969</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">A Fistful of Dollars</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Blazing Saddles</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Good the Bad and the Ugly</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">For a Few Dollars More</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Once Upon a Time in the West</span>
+          <span class="slot-year">1968</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Unforgiven</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Tombstone</span>
+          <span class="slot-year">1993</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">True Grit</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">High Noon</span>
+          <span class="slot-year">1952</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">Shane</span>
+          <span class="slot-year">1953</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">3:10 to Yuma</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Revenant</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Bone Tomahawk</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">No Country for Old Men</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('wes-spaghetti')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-wes-spaghetti">▶</span>
+          <span class="slot-expand-title">🎉 Spaghetti Western Saturday</span>
+          <span class="slot-count">3 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-wes-spaghetti">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">A Fistful of Dollars</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">For a Few Dollars More</span>
+          <span class="slot-year">1965</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Good the Bad and the Ugly</span>
+          <span class="slot-year">1966</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">LEONE TRILOGY — SEQUENTIAL</span></td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Western YouTube / Ken Burns clips, Ghost town documentary YouTube, Outlaw history YouTube</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="section"><div class="section-title">⭐ Recurring Events</div>
+<div class="event-block"><strong>Spaghetti Western Saturday</strong> — Fistful of Dollars → For a Few Dollars More → The Good the Bad and the Ugly. Once all three acquired.</div>
+<div class="event-block"><strong>Django Night</strong> — Django Unchained as Saturday 8pm anchor until GBU is acquired.</div>
+<div class="event-block"><strong>CHANNEL NOT READY TO LAUNCH</strong> without Yellowstone + Deadwood + The Good the Bad and the Ugly. Currently loops in ~2.5 days.</div>
+</div>
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-western-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-wes-yellowstone" onclick="toggleAcq('wes-yellowstone')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Yellowstone</div>
+          <div class="acq-meta">2018–present · 5 seasons · Paramount+ · ESSENTIAL · ~57hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">342 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-deadwood" onclick="toggleAcq('wes-deadwood')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Deadwood</div>
+          <div class="acq-meta">2004–2006 · 3 seasons + film · ESSENTIAL · ~36hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">216 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-justified" onclick="toggleAcq('wes-justified')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Justified</div>
+          <div class="acq-meta">2010–2015 · 6 seasons · ~39hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">234 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-1883" onclick="toggleAcq('wes-1883')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">1883</div>
+          <div class="acq-meta">2021–2022 · Yellowstone prequel · Paramount+ · ~12hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">72 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-lonesomedog" onclick="toggleAcq('wes-lonesomedog')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Lonesome Dove</div>
+          <div class="acq-meta">1989 · miniseries · 4 episodes · foundational western TV · ~6hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">36 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-western-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-wes-f-TheGood" onclick="toggleAcq('wes-f-TheGood')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Good the Bad and the Ugly</div>
+          <div class="acq-meta">1966</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-ForaFe" onclick="toggleAcq('wes-f-ForaFe')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">For a Few Dollars More</div>
+          <div class="acq-meta">1965</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-OnceUpo" onclick="toggleAcq('wes-f-OnceUpo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Once Upon a Time in the West</div>
+          <div class="acq-meta">1968</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-Unforgiv" onclick="toggleAcq('wes-f-Unforgiv')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Unforgiven</div>
+          <div class="acq-meta">1992</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-Tombston" onclick="toggleAcq('wes-f-Tombston')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Tombstone</div>
+          <div class="acq-meta">1993</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-TrueGri" onclick="toggleAcq('wes-f-TrueGri')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">True Grit</div>
+          <div class="acq-meta">2010</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-HighNoo" onclick="toggleAcq('wes-f-HighNoo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">High Noon</div>
+          <div class="acq-meta">1952</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-Shane" onclick="toggleAcq('wes-f-Shane')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Shane</div>
+          <div class="acq-meta">1953</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-3:10to" onclick="toggleAcq('wes-f-3:10to')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">3:10 to Yuma</div>
+          <div class="acq-meta">2007</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-TheReve" onclick="toggleAcq('wes-f-TheReve')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Revenant</div>
+          <div class="acq-meta">2015</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-f-BoneTom" onclick="toggleAcq('wes-f-BoneTom')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Bone Tomahawk</div>
+          <div class="acq-meta">2015</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-western-yt">
+      <div class="acquire-group-title">
+        YouTube / Filler Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-wes-yt-burns" onclick="toggleAcq('wes-yt-burns')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Ken Burns' The West</div>
+          <div class="acq-meta">PBS YouTube · Search: "Ken Burns The West full episode" · free · ~9hr mainline content</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">13 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-yt-drone" onclick="toggleAcq('wes-yt-drone')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">American West drone / landscape footage</div>
+          <div class="acq-meta">Search: "Monument Valley drone footage", "American West landscape 4K" · ~5hr filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">8 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-yt-morricone" onclick="toggleAcq('wes-yt-morricone')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Ennio Morricone western themes</div>
+          <div class="acq-meta">Search: "Ennio Morricone western theme compilation" · ~4hr filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">6 GB</div>
+      </div>
+<div class="acq-item" id="acq-wes-yt-ghost" onclick="toggleAcq('wes-yt-ghost')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Ghost town documentary shorts</div>
+          <div class="acq-meta">Search: "American ghost town documentary feature" · ~4hr filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">6 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

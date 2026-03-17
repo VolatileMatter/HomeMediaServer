@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crime Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'cri_slots';
+    const ACQ_KEY  = 'cri_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🔍</div>
+  <div>
+    <h1>Crime Channel</h1>
+    <div class="subtitle">// Ch 15 · Mystery · Thriller · Police · True Crime //</div>
+    <p class="desc">Death in Paradise and The Blacklist anchor the daytime with cozy and procedural energy. Peaky Blinders and True Detective own primetime. Bond Marathon runs monthly on Saturdays.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Death in Paradise</span></td><td class="col-notes">Gentle cozy morning</td></tr>
+<tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Death in Paradise</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Forensic Files (YouTube — full episodes)</span></td><td class="col-notes">Mid-morning true crime — free</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Forensic Files (YouTube)</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">The Blacklist</span></td><td class="col-notes">Late morning procedural</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">The Blacklist</span></td><td class="col-notes">Continues</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><span class="slot-single">Beyond Paradise</span></td><td class="col-notes">Lunch cozy crime</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><span class="slot-single">Mindhunter</span></td><td class="col-notes">Afternoon prestige — acquire</td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><span class="slot-single">Fargo (TV)</span></td><td class="col-notes">Mid-afternoon anthology — acquire</td></tr>
+<tr><td class="col-time">3:00pm</td><td class="col-content"><span class="slot-single">Sherlock</span></td><td class="col-notes">Pre-evening cinematic</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">House of Cards</span></td><td class="col-notes">Pre-evening political</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('cri-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-cri-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">22 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-cri-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Ocean's Eleven</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ocean's Thirteen</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Da Vinci Code</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Knives Out</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Bad Times at the El Royale</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Casino Royale</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Skyfall</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">No Time to Die</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Sherlock Holmes</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Sherlock Holmes: A Game of Shadows</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">In Bruges</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">The Girl in the Spider's Web</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Se7en</span>
+          <span class="slot-year">1995</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Chinatown</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">L.A. Confidential</span>
+          <span class="slot-year">1997</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Zodiac</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Prisoners</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Memories of Murder</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Sicario</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Wind River</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><span class="slot-single">Peaky Blinders</span></td><td class="col-notes">Primetime prestige</td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">True Detective</span></td><td class="col-notes">Late primetime — acquire Season 1 ONLY</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Line of Duty</span></td><td class="col-notes">Late night British — acquire</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Fargo (TV)</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: The Purge, The Forever Purge, The Girl in the Spider's Web, Resident Evil...</span></td><td class="col-notes">Low-rated crime-adjacent + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Death in Paradise</span></td><td class="col-notes">Cozy morning</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Beyond Paradise</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('cri-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-cri-we1">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">22 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-cri-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Ocean's Eleven</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ocean's Thirteen</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Da Vinci Code</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Knives Out</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Bad Times at the El Royale</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Casino Royale</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Skyfall</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">No Time to Die</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Sherlock Holmes</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Sherlock Holmes: A Game of Shadows</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">In Bruges</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">The Girl in the Spider's Web</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Se7en</span>
+          <span class="slot-year">1995</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Chinatown</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">L.A. Confidential</span>
+          <span class="slot-year">1997</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Zodiac</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Prisoners</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Memories of Murder</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Sicario</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Wind River</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('cri-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-cri-we2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">22 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-cri-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Ocean's Eleven</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ocean's Thirteen</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Da Vinci Code</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Knives Out</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Bad Times at the El Royale</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Casino Royale</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Skyfall</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">No Time to Die</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Sherlock Holmes</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Sherlock Holmes: A Game of Shadows</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">In Bruges</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">The Girl in the Spider's Web</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Se7en</span>
+          <span class="slot-year">1995</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Chinatown</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">L.A. Confidential</span>
+          <span class="slot-year">1997</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Zodiac</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Prisoners</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Memories of Murder</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Sicario</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Wind River</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('cri-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-cri-we3">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">22 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-cri-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Ocean's Eleven</span>
+          <span class="slot-year">2001</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ocean's Thirteen</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Da Vinci Code</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Knives Out</span>
+          <span class="slot-year">2019</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Bad Times at the El Royale</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Casino Royale</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Skyfall</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">No Time to Die</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Sherlock Holmes</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Sherlock Holmes: A Game of Shadows</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Murder on the Orient Express</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">In Bruges</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">The Girl in the Spider's Web</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">Se7en</span>
+          <span class="slot-year">1995</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">Chinatown</span>
+          <span class="slot-year">1974</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">17</span>
+          <span class="slot-title">L.A. Confidential</span>
+          <span class="slot-year">1997</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">18</span>
+          <span class="slot-title">Zodiac</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">19</span>
+          <span class="slot-title">Prisoners</span>
+          <span class="slot-year">2013</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">20</span>
+          <span class="slot-title">Memories of Murder</span>
+          <span class="slot-year">2003</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">21</span>
+          <span class="slot-title">Sicario</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">22</span>
+          <span class="slot-title">Wind River</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('cri-bond')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-cri-bond">▶</span>
+          <span class="slot-expand-title">🎉 Bond Marathon Saturday</span>
+          <span class="slot-count">4 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-cri-bond">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Casino Royale</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Quantum of Solace</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Skyfall</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">No Time to Die</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">CRAIG ERA SEQUENTIAL — MONTHLY</span></td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">True Detective</span></td><td class="col-notes">Late night S1</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: The Purge, The Forever Purge, The Girl in the Spider's Web, Resident Evil...</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="section"><div class="section-title">⭐ Recurring Events</div>
+<div class="event-block"><strong>Bond Marathon Saturday</strong> — Monthly. Craig era: Casino Royale → Quantum of Solace → Skyfall → No Time to Die.</div>
+<div class="event-block"><strong>Heist Night</strong> — Ocean's Eleven (2001) → Ocean's Thirteen → Knives Out. Saturday evening.</div>
+<div class="event-block"><strong>Sherlock Binge</strong> — Each season is ~3 ninety-minute episodes. Weekend event.</div>
+</div>
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-crime-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-cri-mindhunter" onclick="toggleAcq('cri-mindhunter')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Mindhunter</div>
+          <div class="acq-meta">2017–2019 · 2 seasons · Netflix · ~18hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">108 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-fargo" onclick="toggleAcq('cri-fargo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Fargo (TV)</div>
+          <div class="acq-meta">2014–present · 5 seasons · anthology · NOT the 1996 film · ~32hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">192 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-line" onclick="toggleAcq('cri-line')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Line of Duty</div>
+          <div class="acq-meta">2012–2021 · 6 seasons · BBC · ~28hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">168 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-luther" onclick="toggleAcq('cri-luther')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Luther</div>
+          <div class="acq-meta">2010–2019 · 5 seasons · BBC · ~15hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">90 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-broadchurch" onclick="toggleAcq('cri-broadchurch')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Broadchurch</div>
+          <div class="acq-meta">2013–2017 · 3 seasons · ITV · ~12hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">72 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-truedet" onclick="toggleAcq('cri-truedet')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">True Detective</div>
+          <div class="acq-meta">2014 · Season 1 ONLY · 8 episodes · ~8hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">48 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-crime-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-cri-f-Se7en" onclick="toggleAcq('cri-f-Se7en')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Se7en</div>
+          <div class="acq-meta">1995</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-f-Chinatow" onclick="toggleAcq('cri-f-Chinatow')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Chinatown</div>
+          <div class="acq-meta">1974</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-f-L.A.Con" onclick="toggleAcq('cri-f-L.A.Con')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">L.A. Confidential</div>
+          <div class="acq-meta">1997</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-f-Zodiac" onclick="toggleAcq('cri-f-Zodiac')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Zodiac</div>
+          <div class="acq-meta">2007</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-f-Prisoner" onclick="toggleAcq('cri-f-Prisoner')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Prisoners</div>
+          <div class="acq-meta">2013</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-f-Memories" onclick="toggleAcq('cri-f-Memories')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Memories of Murder</div>
+          <div class="acq-meta">2003</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-f-Sicario" onclick="toggleAcq('cri-f-Sicario')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Sicario</div>
+          <div class="acq-meta">2015</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-f-WindRiv" onclick="toggleAcq('cri-f-WindRiv')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Wind River</div>
+          <div class="acq-meta">2017</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-crime-yt">
+      <div class="acquire-group-title">
+        YouTube / Filler Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-cri-yt-forensic" onclick="toggleAcq('cri-yt-forensic')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Forensic Files (full episodes)</div>
+          <div class="acq-meta">Enormous free archive · ~80hr mainline content · search "Forensic Files full episode"</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">120 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-yt-hitchcock" onclick="toggleAcq('cri-yt-hitchcock')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Hitchcock trailer compilations</div>
+          <div class="acq-meta">Search: "Hitchcock trailer compilation" · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">2 GB</div>
+      </div>
+<div class="acq-item" id="acq-cri-yt-noir" onclick="toggleAcq('cri-yt-noir')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Film noir atmospheric music</div>
+          <div class="acq-meta">Search: "film noir music atmospheric" · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">3 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

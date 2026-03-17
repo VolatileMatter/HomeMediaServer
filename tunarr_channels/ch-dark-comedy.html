@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dark Comedy Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'dark_slots';
+    const ACQ_KEY  = 'dark_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">😈</div>
+  <div>
+    <h1>Dark Comedy Channel</h1>
+    <div class="subtitle">// Ch 2 · Irreverent · Satirical · Dark //</div>
+    <p class="desc">MASH, Monty Python, Silicon Valley, and the adult animation block. Succession as prestige primetime anchor.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">MASH</span></td><td class="col-notes">Morning anchor — long daily run</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Monty Python's Flying Circus</span></td><td class="col-notes">Mid-morning absurdism</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Silicon Valley</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">The Thick of It</span></td><td class="col-notes">Pre-lunch British satire — acquire needed</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">Veep</span></td><td class="col-notes">Lunch political comedy — acquire needed</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><span class="slot-single">Succession</span></td><td class="col-notes">Early afternoon prestige — acquire needed</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><span class="slot-single">Peep Show</span></td><td class="col-notes">Afternoon cringe — acquire needed</td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><span class="slot-single">The Venture Bros.</span></td><td class="col-notes">Afternoon animation</td></tr>
+<tr><td class="col-time">3:00pm</td><td class="col-content"><span class="slot-single">Metalocalypse</span></td><td class="col-notes">Pre-evening metal comedy</td></tr>
+<tr><td class="col-time">3:30pm</td><td class="col-content"><span class="slot-single">Xavier: Renegade Angel</span></td><td class="col-notes">Pre-evening surreal</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">BoJack Horseman</span></td><td class="col-notes">1hr MAX — acquire needed</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dark-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dark-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Dark Comedy Film</span>
+          <span class="slot-count">10 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dark-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Dr. Strangelove</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">In Bruges</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Grand Budapest Hotel</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Four Lions</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Burn After Reading</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Death of Stalin</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Thank You for Smoking</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Election</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Sorry to Bother You</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Fargo</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><span class="slot-single">Succession</span></td><td class="col-notes">Primetime — continues from 12pm slot</td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">Veep</span></td><td class="col-notes">Primetime</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">The Thick of It</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">MASH</span></td><td class="col-notes">Late night continues</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Bruce Almighty, Demolition, FDR: American Badass!, This Must Be the Place...</span></td><td class="col-notes">Low-rated films + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">MASH</span></td><td class="col-notes">Morning</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Monty Python's Flying Circus</span></td><td class="col-notes">Late morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dark-python')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dark-python">▶</span>
+          <span class="slot-expand-title">🎉 Python Marathon</span>
+          <span class="slot-count">3 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dark-python">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Monty Python and the Holy Grail</span>
+          <span class="slot-year">1975</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Monty Python's Life of Brian</span>
+          <span class="slot-year">1979</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Monty Python's Meaning of Life</span>
+          <span class="slot-year">1983</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">MARATHON EVENT</span></td></tr>
+<tr><td class="col-time">3:30pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dark-film-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dark-film-we1">▶</span>
+          <span class="slot-expand-title">🎬 Dark Comedy Film</span>
+          <span class="slot-count">10 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dark-film-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Dr. Strangelove</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">In Bruges</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Grand Budapest Hotel</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Four Lions</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Burn After Reading</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Death of Stalin</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Thank You for Smoking</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Election</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Sorry to Bother You</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Fargo</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">6:30pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('dark-film-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-dark-film-we2">▶</span>
+          <span class="slot-expand-title">🎬 Dark Comedy Film</span>
+          <span class="slot-count">10 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-dark-film-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Dr. Strangelove</span>
+          <span class="slot-year">1964</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">In Bruges</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">The Grand Budapest Hotel</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Four Lions</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Burn After Reading</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Death of Stalin</span>
+          <span class="slot-year">2017</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Thank You for Smoking</span>
+          <span class="slot-year">2005</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">Election</span>
+          <span class="slot-year">1999</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Sorry to Bother You</span>
+          <span class="slot-year">2018</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Fargo</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">9:30pm</td><td class="col-content"><span class="slot-single">Succession</span></td><td class="col-notes">Late night prestige</td></tr>
+<tr><td class="col-time">10:30pm</td><td class="col-content"><span class="slot-single">BoJack Horseman</span></td><td class="col-notes">1hr MAX</td></tr>
+<tr><td class="col-time">11:30pm</td><td class="col-content"><span class="slot-single">Silicon Valley</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Bruce Almighty, Demolition, FDR: American Badass!, This Must Be the Place...</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-dark-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-dark-tv-TheTh" onclick="toggleAcq('dark-tv-TheTh')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Thick of It</div>
+          <div class="acq-meta">2005–2012 · 4 seasons · BBC · ~10hr · 60 GB</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">60 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-tv-Veep" onclick="toggleAcq('dark-tv-Veep')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Veep</div>
+          <div class="acq-meta">2012–2019 · 7 seasons · ~28hr · 168 GB</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">168 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-tv-Succes" onclick="toggleAcq('dark-tv-Succes')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Succession</div>
+          <div class="acq-meta">2018–2023 · 4 seasons · ~34hr · 204 GB</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">204 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-tv-PeepS" onclick="toggleAcq('dark-tv-PeepS')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Peep Show</div>
+          <div class="acq-meta">2003–2015 · 9 seasons · BBC · ~18hr · 108 GB</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">108 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-tv-BoJack" onclick="toggleAcq('dark-tv-BoJack')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">BoJack Horseman</div>
+          <div class="acq-meta">2014–2020 · 6 seasons · Netflix · ~33hr · 198 GB</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">198 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-dark-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-dark-f-FourLio" onclick="toggleAcq('dark-f-FourLio')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Four Lions</div>
+          <div class="acq-meta">2010 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-f-BurnAft" onclick="toggleAcq('dark-f-BurnAft')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Burn After Reading</div>
+          <div class="acq-meta">2008 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-f-TheDeat" onclick="toggleAcq('dark-f-TheDeat')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Death of Stalin</div>
+          <div class="acq-meta">2017 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-f-ThankYo" onclick="toggleAcq('dark-f-ThankYo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Thank You for Smoking</div>
+          <div class="acq-meta">2005 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-f-Election" onclick="toggleAcq('dark-f-Election')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Election</div>
+          <div class="acq-meta">1999 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-f-Sorryto" onclick="toggleAcq('dark-f-Sorryto')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Sorry to Bother You</div>
+          <div class="acq-meta">2018 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-dark-f-Fargo" onclick="toggleAcq('dark-f-Fargo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Fargo</div>
+          <div class="acq-meta">1996 · Film</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

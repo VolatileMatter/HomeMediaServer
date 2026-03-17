@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Superhero Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'sup_slots';
+    const ACQ_KEY  = 'sup_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🦸</div>
+  <div>
+    <h1>Superhero Channel</h1>
+    <div class="subtitle">// Ch 3 · DC Animated Universe · Marvel · Animation //</div>
+    <p class="desc">The full DCAU in continuity order anchors the daytime. Young Justice and Justice League hold primetime. Weekend marathons rotate through Batman, Spider-Man, and the MCU.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">Batman: The Animated Series</span></td><td class="col-notes">Classic DCAU morning</td></tr>
+<tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Superman: The Animated Series</span></td><td class="col-notes">DCAU continues</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Batman Beyond</span></td><td class="col-notes">DCAU continues</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Teen Titans</span></td><td class="col-notes">Mid-morning</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">X-Men (1992)</span></td><td class="col-notes">Late morning — acquire</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">Spectacular Spider-Man</span></td><td class="col-notes">Pre-lunch — acquire</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><span class="slot-single">The Avengers: Earth's Mightiest Heroes</span></td><td class="col-notes">Lunch Marvel</td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><span class="slot-single">Young Justice</span></td><td class="col-notes">Early afternoon prestige — acquire</td></tr>
+<tr><td class="col-time">2:00pm</td><td class="col-content"><span class="slot-single">Justice League</span></td><td class="col-notes">Afternoon anchor — acquire</td></tr>
+<tr><td class="col-time">3:00pm</td><td class="col-content"><span class="slot-single">Justice League Unlimited</span></td><td class="col-notes">Continues — acquire</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">The Batman</span></td><td class="col-notes">Pre-evening</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><span class="slot-single">Dragon Booster</span></td><td class="col-notes">Pre-evening</td></tr>
+<tr><td class="col-time">6:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('sup-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-sup-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">16 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-sup-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spider-Man</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spider-Man 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spider-Man 3</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Superman</span>
+          <span class="slot-year">1978</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Iron Man</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Avengers</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">The Dark Knight</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Dark Knight Rises</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">The Batman</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Batman: Under the Red Hood</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Hellboy</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Hellboy II: The Golden Army</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">V for Vendetta</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Deadpool</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Suicide Squad</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">X-Men: Days of Future Past</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">Young Justice</span></td><td class="col-notes">Primetime continues</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Justice League</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">X-Men (1992)</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-single">Batman: The Animated Series</span></td><td class="col-notes">Overnight — full programming</td></tr>
+<tr class="overnight"><td class="col-time">2:00am</td><td class="col-content"><span class="slot-single">Superman: The Animated Series</span></td><td class="col-notes">Overnight</td></tr>
+<tr class="overnight"><td class="col-time">4:00am</td><td class="col-content"><span class="slot-single">Teen Titans</span></td><td class="col-notes">Pre-dawn</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Batman: The Animated Series</span></td><td class="col-notes">Classic Saturday morning</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Superman: The Animated Series</span></td><td class="col-notes">DCAU morning</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">X-Men (1992)</span></td><td class="col-notes">Saturday morning action</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('sup-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-sup-we1">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">16 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-sup-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spider-Man</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spider-Man 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spider-Man 3</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Superman</span>
+          <span class="slot-year">1978</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Iron Man</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Avengers</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">The Dark Knight</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Dark Knight Rises</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">The Batman</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Batman: Under the Red Hood</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Hellboy</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Hellboy II: The Golden Army</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">V for Vendetta</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Deadpool</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Suicide Squad</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">X-Men: Days of Future Past</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('sup-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-sup-we2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">16 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-sup-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spider-Man</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spider-Man 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spider-Man 3</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Superman</span>
+          <span class="slot-year">1978</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Iron Man</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Avengers</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">The Dark Knight</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Dark Knight Rises</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">The Batman</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Batman: Under the Red Hood</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Hellboy</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Hellboy II: The Golden Army</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">V for Vendetta</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Deadpool</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Suicide Squad</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">X-Men: Days of Future Past</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('sup-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-sup-we3">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">16 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-sup-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spider-Man</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spider-Man 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spider-Man 3</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Superman</span>
+          <span class="slot-year">1978</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Iron Man</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">The Avengers</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">The Dark Knight</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Dark Knight Rises</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">The Batman</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">10</span>
+          <span class="slot-title">Batman: Under the Red Hood</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">11</span>
+          <span class="slot-title">Hellboy</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">12</span>
+          <span class="slot-title">Hellboy II: The Golden Army</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">13</span>
+          <span class="slot-title">V for Vendetta</span>
+          <span class="slot-year">2006</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">14</span>
+          <span class="slot-title">Deadpool</span>
+          <span class="slot-year">2016</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">15</span>
+          <span class="slot-title">The Suicide Squad</span>
+          <span class="slot-year">2021</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">16</span>
+          <span class="slot-title">X-Men: Days of Future Past</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('sup-event')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-sup-event">▶</span>
+          <span class="slot-expand-title">🎉 Batman / Spider-Man Marathon</span>
+          <span class="slot-count">7 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-sup-event">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Spider-Man</span>
+          <span class="slot-year">2002</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Spider-Man 2</span>
+          <span class="slot-year">2004</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Spider-Man 3</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">The Dark Knight</span>
+          <span class="slot-year">2008</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">The Dark Knight Rises</span>
+          <span class="slot-year">2012</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Batman: Under the Red Hood</span>
+          <span class="slot-year">2010</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">The Batman</span>
+          <span class="slot-year">2022</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-event">ROTATING MARATHON</span></td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Young Justice</span></td><td class="col-notes">Late night</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Justice League Unlimited</span></td><td class="col-notes">Late night</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-single">Batman: The Animated Series</span></td><td class="col-notes">Overnight — full programming</td></tr>
+<tr class="overnight"><td class="col-time">2:00am</td><td class="col-content"><span class="slot-single">Teen Titans</span></td><td class="col-notes">Overnight</td></tr>
+<tr class="overnight"><td class="col-time">4:00am</td><td class="col-content"><span class="slot-single">Superman: The Animated Series</span></td><td class="col-notes">Pre-dawn</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="section"><div class="section-title">⭐ Recurring Events</div>
+<div class="event-block"><strong>Spider-Man Saturday</strong> — Raimi trilogy back to back. Rotating monthly with Batman marathon.</div>
+<div class="event-block"><strong>Batman Marathon</strong> — Under the Red Hood → The Dark Knight → The Batman (2022). Monthly.</div>
+<div class="event-block"><strong>DCAU Weekend</strong> — Batman TAS → Superman TAS → Batman Beyond → Justice League in order. Quarterly.</div>
+</div>
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-superhero-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-sup-jl" onclick="toggleAcq('sup-jl')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Justice League</div>
+          <div class="acq-meta">2001–2004 · 2 seasons · DCAU · ~16hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">96 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-jlu" onclick="toggleAcq('sup-jlu')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Justice League Unlimited</div>
+          <div class="acq-meta">2004–2006 · 3 seasons · DCAU · ~12hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">72 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-yj" onclick="toggleAcq('sup-yj')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Young Justice</div>
+          <div class="acq-meta">2010–2022 · 4 seasons · ~37hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">222 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-xmen" onclick="toggleAcq('sup-xmen')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">X-Men (1992)</div>
+          <div class="acq-meta">1992–1997 · 5 seasons · confirm 1992 version · ~22hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">132 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-spidey" onclick="toggleAcq('sup-spidey')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Spectacular Spider-Man</div>
+          <div class="acq-meta">2008–2009 · 2 seasons · ~9hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">54 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-superhero-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-sup-f-Spider" onclick="toggleAcq('sup-f-Spider')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Spider-Man</div>
+          <div class="acq-meta">2002</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-f-Spider" onclick="toggleAcq('sup-f-Spider')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Spider-Man 2</div>
+          <div class="acq-meta">2004</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-f-Spider" onclick="toggleAcq('sup-f-Spider')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Spider-Man 3</div>
+          <div class="acq-meta">2007</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-f-Superm" onclick="toggleAcq('sup-f-Superm')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Superman</div>
+          <div class="acq-meta">1978</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-f-IronM" onclick="toggleAcq('sup-f-IronM')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Iron Man</div>
+          <div class="acq-meta">2008</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-f-TheAv" onclick="toggleAcq('sup-f-TheAv')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Avengers</div>
+          <div class="acq-meta">2012</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-f-TheDa" onclick="toggleAcq('sup-f-TheDa')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Dark Knight</div>
+          <div class="acq-meta">2008</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">16 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-superhero-yt">
+      <div class="acquire-group-title">
+        YouTube / Filler Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-sup-yt-toonami" onclick="toggleAcq('sup-yt-toonami')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Toonami bumpers 2000s</div>
+          <div class="acq-meta">Search: "Toonami bumpers compilation 2000s" — ~3hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">6 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-yt-kidswb" onclick="toggleAcq('sup-yt-kidswb')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Kids WB promo compilation</div>
+          <div class="acq-meta">Search: "Kids WB interstitials compilation" — ~3hr</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">6 GB</div>
+      </div>
+<div class="acq-item" id="acq-sup-yt-batman" onclick="toggleAcq('sup-yt-batman')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Batman TAS making-of / retrospective</div>
+          <div class="acq-meta">Search: "Batman Animated Series documentary" — feature length</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">4 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>

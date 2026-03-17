@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food Network Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'food_slots';
+    const ACQ_KEY  = 'food_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🍳</div>
+  <div>
+    <h1>Food Network Channel</h1>
+    <div class="subtitle">// Ch 16 · Cooking · Competition · Food Travel · Chef Profiles //</div>
+    <p class="desc">GBBO anchors mornings. Hell's Kitchen and Kitchen Nightmares own primetime. Bourdain No Reservations is a massive free content anchor for evenings. Weekend is almost entirely food films.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="subtab-pane active" id="pane-schedule">
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">6:00am</td><td class="col-content"><span class="slot-single">James May: Oh Cook!</span></td><td class="col-notes">Gentle morning</td></tr>
+<tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Great British Bake Off</span></td><td class="col-notes">Morning comfort</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">Easy-Bake Battle</span></td><td class="col-notes">Mid-morning lighter</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Sugar Rush</span></td><td class="col-notes">Late morning sweet</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><span class="slot-single">Chopped</span></td><td class="col-notes">Mid-morning competition</td></tr>
+<tr><td class="col-time">11:00am</td><td class="col-content"><span class="slot-single">Crime Scene Kitchen</span></td><td class="col-notes">Pre-lunch novelty</td></tr>
+<tr><td class="col-time">12:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('food-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-food-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">9 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-food-film-wd">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Chef</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Jiro Dreams of Sushi</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Julie & Julia</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Big Night</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Tampopo</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Burnt</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Hundred-Foot Journey</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Like Water for Chocolate</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">3:00pm</td><td class="col-content"><span class="slot-single">Iron Chef America</span></td><td class="col-notes">1hr buffer + afternoon prestige</td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><span class="slot-single">Top Chef Masters</span></td><td class="col-notes">Pre-evening</td></tr>
+<tr><td class="col-time">5:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('food-film-wd2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-food-film-wd2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">9 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-food-film-wd2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Chef</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Jiro Dreams of Sushi</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Julie & Julia</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Big Night</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Tampopo</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Burnt</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Hundred-Foot Journey</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Like Water for Chocolate</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">8:00pm</td><td class="col-content"><span class="slot-single">Kitchen Nightmares (US)</span></td><td class="col-notes">Primetime Ramsay chaos</td></tr>
+<tr><td class="col-time">9:00pm</td><td class="col-content"><span class="slot-single">Hell's Kitchen (US)</span></td><td class="col-notes">Primetime Ramsay continues</td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Gordon Ramsay: Uncharted</span></td><td class="col-notes">Late night travel</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Anthony Bourdain: No Reservations (YouTube)</span></td><td class="col-notes">Late night travel food — free</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Cooking ASMR YouTube, Le meilleur pâtissier du Québec</span></td><td class="col-notes">ASMR cooking / food YouTube + filler</td></tr>
+
+      </tbody>
+    </table>
+
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+      <thead><tr>
+        <th>Time</th><th>Content</th><th>Notes</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="col-time">7:00am</td><td class="col-content"><span class="slot-single">Great British Bake Off</span></td><td class="col-notes">Lazy morning</td></tr>
+<tr><td class="col-time">8:00am</td><td class="col-content"><span class="slot-single">James May: Oh Cook!</span></td><td class="col-notes">Late morning gentle</td></tr>
+<tr><td class="col-time">9:00am</td><td class="col-content"><span class="slot-single">Somebody Feed Phil (YouTube / Netflix)</span></td><td class="col-notes">Travel food morning — acquire</td></tr>
+<tr><td class="col-time">10:00am</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('food-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-food-we1">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">9 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-food-we1">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Chef</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Jiro Dreams of Sushi</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Julie & Julia</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Big Night</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Tampopo</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Burnt</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Hundred-Foot Journey</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Like Water for Chocolate</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">1:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('food-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-food-we2">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">9 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-food-we2">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Chef</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Jiro Dreams of Sushi</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Julie & Julia</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Big Night</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Tampopo</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Burnt</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Hundred-Foot Journey</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Like Water for Chocolate</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">4:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('food-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-food-we3">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">9 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-food-we3">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Chef</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Jiro Dreams of Sushi</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Julie & Julia</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Big Night</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Tampopo</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Burnt</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Hundred-Foot Journey</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Like Water for Chocolate</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">7:00pm</td><td class="col-content"><div class="slot-expand" onclick="toggleSlot('food-we4')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-food-we4">▶</span>
+          <span class="slot-expand-title">🎬 Film Block</span>
+          <span class="slot-count">9 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-food-we4">
+          <div class="slot-item">
+          <span class="slot-num">01</span>
+          <span class="slot-title">Chef</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">02</span>
+          <span class="slot-title">Ratatouille</span>
+          <span class="slot-year">2007</span>
+          <span class="slot-have">✓ owned</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">03</span>
+          <span class="slot-title">Jiro Dreams of Sushi</span>
+          <span class="slot-year">2011</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">04</span>
+          <span class="slot-title">Julie & Julia</span>
+          <span class="slot-year">2009</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">05</span>
+          <span class="slot-title">Big Night</span>
+          <span class="slot-year">1996</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">06</span>
+          <span class="slot-title">Tampopo</span>
+          <span class="slot-year">1985</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">07</span>
+          <span class="slot-title">Burnt</span>
+          <span class="slot-year">2015</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">08</span>
+          <span class="slot-title">The Hundred-Foot Journey</span>
+          <span class="slot-year">2014</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+<div class="slot-item">
+          <span class="slot-num">09</span>
+          <span class="slot-title">Like Water for Chocolate</span>
+          <span class="slot-year">1992</span>
+          <span class="slot-need">⚠ need</span>
+        </div>
+
+        </div>
+      </div></td><td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">3hr</span></td></tr>
+<tr><td class="col-time">10:00pm</td><td class="col-content"><span class="slot-single">Chef's Table (Netflix)</span></td><td class="col-notes">Late night prestige — acquire</td></tr>
+<tr><td class="col-time">11:00pm</td><td class="col-content"><span class="slot-single">Anthony Bourdain: No Reservations (YouTube)</span></td><td class="col-notes">Late night travel</td></tr>
+<tr class="overnight"><td class="col-time">12:00am</td><td class="col-content"><span class="slot-filler">🌙 Low-rated: Cooking ASMR YouTube, Le meilleur pâtissier du Québec</span></td><td class="col-notes">Overnight</td></tr>
+
+      </tbody>
+    </table>
+
+
+</div>
+
+<!-- ACQUIRE PANE -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+<div class="acquire-group" id="group-food-tv">
+      <div class="acquire-group-title">
+        TV Shows to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-food-chefstable" onclick="toggleAcq('food-chefstable')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Chef's Table</div>
+          <div class="acq-meta">2015–present · 6 seasons · Netflix · ~12hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">72 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-sfah" onclick="toggleAcq('food-sfah')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Salt Fat Acid Heat</div>
+          <div class="acq-meta">2018 · 4 episodes · Netflix · ~4hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">24 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-ugly" onclick="toggleAcq('food-ugly')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Ugly Delicious</div>
+          <div class="acq-meta">2018–2020 · 2 seasons · Netflix · ~6hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">36 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-finaltable" onclick="toggleAcq('food-finaltable')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Final Table</div>
+          <div class="acq-meta">2018 · 1 season · Netflix · ~8hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">48 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-nailedit" onclick="toggleAcq('food-nailedit')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Nailed It</div>
+          <div class="acq-meta">2018–present · 6 seasons · Netflix · lighter tone · ~8hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">48 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-somebody" onclick="toggleAcq('food-somebody')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Somebody Feed Phil</div>
+          <div class="acq-meta">2017–present · 6 seasons · Netflix · ~10hr</div>
+          <div class="acq-tags"><span class="tag tag-tv">TV</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">60 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-food-films">
+      <div class="acquire-group-title">
+        Films to Acquire
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-food-f-JiroDre" onclick="toggleAcq('food-f-JiroDre')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Jiro Dreams of Sushi</div>
+          <div class="acq-meta">2011</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-f-Julie&" onclick="toggleAcq('food-f-Julie&')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Julie & Julia</div>
+          <div class="acq-meta">2009</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-f-BigNigh" onclick="toggleAcq('food-f-BigNigh')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Big Night</div>
+          <div class="acq-meta">1996</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-f-Tampopo" onclick="toggleAcq('food-f-Tampopo')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Tampopo</div>
+          <div class="acq-meta">1985</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-f-Burnt" onclick="toggleAcq('food-f-Burnt')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Burnt</div>
+          <div class="acq-meta">2015</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-f-TheHund" onclick="toggleAcq('food-f-TheHund')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">The Hundred-Foot Journey</div>
+          <div class="acq-meta">2014</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-f-LikeWat" onclick="toggleAcq('food-f-LikeWat')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Like Water for Chocolate</div>
+          <div class="acq-meta">1992</div>
+          <div class="acq-tags"><span class="tag tag-film">FILM</span><span class="tag tag-film">1080p</span></div>
+        </div>
+        <div class="acq-size">12 GB</div>
+      </div>
+
+    </div>
+<div class="acquire-group" id="group-food-yt">
+      <div class="acquire-group-title">
+        YouTube / Filler Content
+        <span class="acquire-count"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+      <div class="acq-item" id="acq-food-yt-bourdain" onclick="toggleAcq('food-yt-bourdain')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Anthony Bourdain: No Reservations (full episodes)</div>
+          <div class="acq-meta">Search: "Anthony Bourdain No Reservations full episode" · ~90hr free · ESSENTIAL</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">135 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-yt-asmr" onclick="toggleAcq('food-yt-asmr')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">ASMR cooking (no talking)</div>
+          <div class="acq-meta">Search: "cooking ASMR no talking", "satisfying cooking video" · ~6hr filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">9 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-yt-kitchen" onclick="toggleAcq('food-yt-kitchen')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Michelin star kitchen footage</div>
+          <div class="acq-meta">Search: "professional kitchen service footage" · ~4hr filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">6 GB</div>
+      </div>
+<div class="acq-item" id="acq-food-yt-babish" onclick="toggleAcq('food-yt-babish')">
+        <div class="acq-cb"></div>
+        <div class="acq-body">
+          <div class="acq-title">Binging with Babish / Tasty short clips</div>
+          <div class="acq-meta">Search: "Binging with Babish short clip" · filler</div>
+          <div class="acq-tags"><span class="tag tag-yt">YOUTUBE</span><span class="tag tag-filler">720p</span></div>
+        </div>
+        <div class="acq-size">5 GB</div>
+      </div>
+
+    </div>
+
+</div>
+
+<script src="ch-shared.js"></script>
+</body>
+</html>
