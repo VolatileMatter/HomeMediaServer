@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tunarr — Fake Cable TV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+  <style>
+    :root {
+      --bg:#0d1117; --bg2:#111820; --bg3:#161d27; --border:#1e2d3d;
+      --text:#c9d1d9; --text-dim:#6e7681; --text-bright:#e6edf3;
+      --accent:#c8a84b; --accent2:#4caf7d; --accent3:#58a6ff;
+      --danger:#e05c5c; --warning:#e09e3a;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
+         font-size:.88rem;line-height:1.6;padding:20px;max-width:1400px;margin:0 auto;}
+    a{color:var(--accent3);text-decoration:none;}
+    a:hover{text-decoration:underline;}
+
+    /* header */
+    .page-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;
+                 padding-bottom:20px;border-bottom:1px solid var(--border);}
+    .page-icon{font-size:2.4rem;line-height:1;}
+    .page-header h1{font-size:1.6rem;color:var(--text-bright);margin-bottom:4px;}
+    .subtitle{font-family:'Share Tech Mono',monospace;font-size:.65rem;
+              color:var(--text-dim);letter-spacing:.1em;}
+    .desc{font-size:.84rem;color:var(--text-dim);margin-top:6px;max-width:800px;}
+
+    /* back nav */
+    .back-nav{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+    .back-btn{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.08em;
+              text-transform:uppercase;background:var(--bg2);border:1px solid var(--border);
+              padding:5px 12px;border-radius:3px;color:var(--text-dim);text-decoration:none;
+              transition:all .15s;}
+    .back-btn:hover{color:var(--accent);border-color:rgba(200,168,75,.4);text-decoration:none;}
+
+    /* tab nav */
+    .tab-nav{display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid var(--border);
+             flex-wrap:wrap;}
+    .tab-btn{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.08em;
+             text-transform:uppercase;padding:10px 18px;background:transparent;border:none;
+             border-bottom:2px solid transparent;color:var(--text-dim);cursor:pointer;
+             transition:all .16s;margin-bottom:-1px;white-space:nowrap;}
+    .tab-btn:hover{color:var(--text);border-bottom-color:rgba(200,168,75,.35);}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab-pane{display:none;}
+    .tab-pane.active{display:block;}
+
+    /* section / card */
+    .section{margin-bottom:28px;}
+    .section-title{font-family:'Share Tech Mono',monospace;font-size:.62rem;
+                   letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);
+                   margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;
+          padding:16px 18px;margin-bottom:10px;}
+    .card-title{font-weight:700;font-size:.84rem;color:var(--text-bright);margin-bottom:8px;}
+    table{width:100%;border-collapse:collapse;}
+    table th,table td{padding:7px 12px;text-align:left;border-bottom:1px solid var(--border);
+                      font-size:.82rem;}
+    table th{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--text-dim);}
+    pre{background:var(--bg3);border:1px solid var(--border);border-radius:4px;
+        padding:14px 16px;overflow-x:auto;font-size:.78rem;line-height:1.7;
+        color:#a0cfbf;font-family:'Share Tech Mono',monospace;}
+    code{background:var(--bg3);border:1px solid var(--border);padding:1px 6px;
+         border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:.8em;color:#a0cfbf;}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media(max-width:860px){.grid-2{grid-template-columns:1fr;}}
+
+    /* banner */
+    .v1-banner{background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.22);
+               border-radius:4px;padding:10px 16px;font-size:.82rem;color:var(--text-dim);
+               margin-bottom:20px;}
+
+    /* callout */
+    .callout{display:flex;gap:12px;padding:12px 16px;border-radius:4px;
+             margin-bottom:16px;align-items:flex-start;}
+    .callout-warn{background:rgba(224,158,58,.08);border:1px solid rgba(224,158,58,.25);}
+    .callout-info{background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.2);}
+    .callout-ok  {background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.2);}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+    .callout-body{font-size:.82rem;color:var(--text-dim);}
+    .callout-body strong{color:var(--text);}
+
+    /* tag */
+    .tag{font-family:'Share Tech Mono',monospace;font-size:.56rem;padding:1px 5px;
+         border-radius:2px;display:inline-block;vertical-align:middle;}
+    .tag-ok     {background:rgba(76,175,125,.1);color:var(--accent2);border:1px solid rgba(76,175,125,.2);}
+    .tag-warn   {background:rgba(224,158,58,.1);color:var(--warning);border:1px solid rgba(224,158,58,.2);}
+    .tag-need   {background:rgba(224,92,92,.1); color:var(--danger); border:1px solid rgba(224,92,92,.2);}
+    .tag-info   {background:rgba(88,166,255,.1);color:var(--accent3);border:1px solid rgba(88,166,255,.2);}
+    .tag-docker {background:rgba(30,130,210,.1);color:#4ca8f0;border:1px solid rgba(30,130,210,.2);}
+    .tag-event  {background:rgba(200,168,75,.1);color:var(--accent);border:1px solid rgba(200,168,75,.22);}
+
+    /* channel grid */
+    .channel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+    .ch-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;
+             padding:14px 16px;text-decoration:none;color:var(--text);
+             transition:border-color .15s,background .15s;display:block;}
+    .ch-card:hover{border-color:rgba(200,168,75,.4);background:rgba(200,168,75,.03);
+                   text-decoration:none;}
+    .ch-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+    .ch-num{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);
+            background:var(--bg3);border:1px solid var(--border);padding:1px 6px;
+            border-radius:2px;flex-shrink:0;}
+    .ch-icon{font-size:1.3rem;}
+    .ch-name{font-weight:700;font-size:.9rem;color:var(--text-bright);}
+    .ch-meta{font-size:.76rem;color:var(--text-dim);margin-bottom:6px;}
+    .ch-tags{display:flex;gap:5px;flex-wrap:wrap;}
+    .ch-anchor{font-size:.78rem;color:var(--text-dim);margin-top:6px;}
+
+    /* status dot */
+    .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
+    .dot-green{background:#4caf7d;box-shadow:0 0 6px rgba(76,175,125,.5);}
+    .dot-yellow{background:#c8a84b;box-shadow:0 0 6px rgba(200,168,75,.5);}
+    .dot-red{background:#e05c5c;box-shadow:0 0 6px rgba(224,92,92,.5);}
+
+    /* step */
+    .step{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;}
+    .step-num{font-family:'Share Tech Mono',monospace;font-size:.72rem;
+              color:var(--accent);background:rgba(200,168,75,.1);
+              border:1px solid rgba(200,168,75,.25);border-radius:50%;
+              width:26px;height:26px;display:flex;align-items:center;
+              justify-content:center;flex-shrink:0;margin-top:1px;}
+    .step-body{flex:1;font-size:.84rem;}
+    .step-body strong{color:var(--text-bright);}
+
+    /* live tv widget */
+    .livetv-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-top:8px;}
+    .livetv-ch{background:var(--bg3);border:1px solid var(--border);border-radius:3px;
+               padding:8px 12px;flex-shrink:0;min-width:160px;cursor:pointer;
+               transition:border-color .15s;}
+    .livetv-ch:hover{border-color:rgba(200,168,75,.4);}
+    .livetv-ch-header{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+    .livetv-ch-num{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);}
+    .livetv-ch-icon{font-size:.9rem;}
+    .livetv-ch-name{font-size:.75rem;font-weight:700;color:var(--text-bright);}
+    .livetv-now{font-size:.72rem;color:var(--text-dim);}
+    .livetv-bar-wrap{background:#0a1520;height:3px;border-radius:2px;margin-top:6px;}
+    .livetv-bar-fill{height:100%;background:var(--accent);border-radius:2px;}
+
+    /* schedule overview table */
+    .overview-time{font-family:'Share Tech Mono',monospace;font-size:.68rem;
+                   color:var(--accent);white-space:nowrap;width:70px;}
+  </style>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="homepage.html">← Homepage</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">📺</div>
+  <div>
+    <h1>Tunarr</h1>
+    <div class="subtitle">// Fake Cable TV · Port 8200 · Docker WSL2 · No Auth Required //</div>
+    <p class="desc">
+      Tunarr creates fake cable TV channels from your Jellyfin library. Each channel runs a 24-hour schedule of TV episodes, movies, and filler content — exposed as M3U + XMLTV so Jellyfin Live TV sees it as a real cable provider. Nineteen channels, each with its own genre identity, recurring events, and rotating film library.
+    </p>
+  </div>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview',   this)">📋 Overview</button>
+  <button class="tab-btn"        onclick="switchTab('channels',   this)" id="btn-channels">📺 Channels</button>
+  <button class="tab-btn"        onclick="switchTab('setup',      this)">🚀 Setup</button>
+  <button class="tab-btn"        onclick="switchTab('scheduling', this)">🕐 Scheduling</button>
+  <button class="tab-btn"        onclick="switchTab('filler',     this)">🎞 Filler</button>
+  <button class="tab-btn"        onclick="switchTab('maintenance',this)">🔧 Maintenance</button>
+  <button class="tab-btn"        onclick="switchTab('trouble',    this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE — OVERVIEW
+══════════════════════════════════════════════════════════ -->
+<div class="tab-pane active" id="pane-overview">
+
+  <div class="v1-banner">
+    📺 Tunarr is running on port 8200. Jellyfin Live TV is pointed at the M3U and XMLTV endpoints below. 19 channels defined. Filler sync is on a weekly Sunday 3am Task Scheduler job.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Tunarr Admin UI</td><td><code>http://localhost:8200</code></td></tr>
+          <tr><td>M3U Playlist</td><td><code>http://localhost:8200/api/channels.m3u</code></td></tr>
+          <tr><td>XMLTV Guide</td><td><code>http://localhost:8200/api/xmltv.xml</code></td></tr>
+          <tr><td>HDHR Discovery</td><td><code>http://localhost:8200/device.xml</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><code>8200</code></td></tr>
+          <tr><td>Install type</td><td>Docker WSL2</td></tr>
+          <tr><td>Container</td><td><code>tunarr</code></td></tr>
+          <tr><td>Compose path</td><td><code>~/services/tunarr/docker-compose.yml</code></td></tr>
+          <tr><td>Config / data</td><td><code>~/services/tunarr/data/</code></td></tr>
+          <tr><td>Timezone</td><td><code>TZ=Australia/Sydney</code></td></tr>
+          <tr><td>Jellyfin integration</td><td>Live TV → DVR → HDHR tuner</td></tr>
+          <tr><td>Filler sync</td><td><code>D:\Scripts\filler_sync.py</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Live TV Preview</div>
+    <div class="card">
+      <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:10px;">
+        The 19 channels below are visible in Jellyfin under Live TV. Click any channel to open its schedule and acquisition page.
+      </p>
+      <div class="livetv-strip">
+        <a href="ch-comedy.html"      class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 1</span><span class="livetv-ch-icon">😂</span><span class="livetv-ch-name">Comedy</span></div><div class="livetv-now">Friends / Parks / Office</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:42%"></div></div></a>
+        <a href="ch-dark-comedy.html" class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 2</span><span class="livetv-ch-icon">😈</span><span class="livetv-ch-name">Dark Comedy</span></div><div class="livetv-now">MASH / Succession / Monty Python</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:30%"></div></div></a>
+        <a href="ch-superhero.html"   class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 3</span><span class="livetv-ch-icon">🦸</span><span class="livetv-ch-name">Superhero</span></div><div class="livetv-now">Batman TAS / DCAU / Young Justice</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:65%"></div></div></a>
+        <a href="ch-kids.html"        class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 4</span><span class="livetv-ch-icon">🐾</span><span class="livetv-ch-name">Kids</span></div><div class="livetv-now">Scooby-Doo / SpongeBob / Gravity Falls</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:55%"></div></div></a>
+        <a href="ch-scifi.html"       class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 5</span><span class="livetv-ch-icon">🚀</span><span class="livetv-ch-name">Sci-Fi</span></div><div class="livetv-now">Futurama / Stargate / The Expanse</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:77%"></div></div></a>
+        <a href="ch-fantasy.html"     class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 6</span><span class="livetv-ch-icon">🧙</span><span class="livetv-ch-name">Fantasy</span></div><div class="livetv-now">Merlin / Game of Thrones / LOTR</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:48%"></div></div></a>
+        <a href="ch-gothic.html"      class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 7</span><span class="livetv-ch-icon">🧛</span><span class="livetv-ch-name">Gothic</span></div><div class="livetv-now">Penny Dreadful / Castlevania / Hannibal</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:22%"></div></div></a>
+        <a href="ch-monster.html"     class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 8</span><span class="livetv-ch-icon">🦕</span><span class="livetv-ch-name">Monster</span></div><div class="livetv-now">Primeval / Dinosaur Saturday</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:35%"></div></div></a>
+        <a href="ch-russian.html"     class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 9</span><span class="livetv-ch-icon">🇷🇺</span><span class="livetv-ch-name">Русский канал</span></div><div class="livetv-now">Союзмультфильм / Brother / Tarkovsky</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:60%"></div></div></a>
+        <a href="ch-anime.html"       class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 10</span><span class="livetv-ch-icon">⛩️</span><span class="livetv-ch-name">Anime</span></div><div class="livetv-now">FMA:B / Attack on Titan / Ghibli Films</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:52%"></div></div></a>
+        <a href="ch-documentary.html" class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 11</span><span class="livetv-ch-icon">📡</span><span class="livetv-ch-name">Documentary</span></div><div class="livetv-now">MythBusters / Planet Earth / Frontline</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:40%"></div></div></a>
+        <a href="ch-conspiracy.html"  class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 12</span><span class="livetv-ch-icon">🕵️</span><span class="livetv-ch-name">Conspiracy</span></div><div class="livetv-now">Ancient Aliens / The X-Files / UFO Docs</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:70%"></div></div></a>
+        <a href="ch-martial.html"     class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 13</span><span class="livetv-ch-icon">🥋</span><span class="livetv-ch-name">Martial Arts</span></div><div class="livetv-now">Cobra Kai / Jackie Chan Saturday</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:25%"></div></div></a>
+        <a href="ch-drama.html"       class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 14</span><span class="livetv-ch-icon">🎭</span><span class="livetv-ch-name">Drama</span></div><div class="livetv-now">The Wire / Mad Men / Late Night Classics</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:18%"></div></div></a>
+        <a href="ch-crime.html"       class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 15</span><span class="livetv-ch-icon">🔍</span><span class="livetv-ch-name">Crime</span></div><div class="livetv-now">Peaky Blinders / Forensic Files / Bond</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:80%"></div></div></a>
+        <a href="ch-food.html"        class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 16</span><span class="livetv-ch-icon">🍳</span><span class="livetv-ch-name">Food Network</span></div><div class="livetv-now">GBBO / Hell's Kitchen / Bourdain</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:63%"></div></div></a>
+        <a href="ch-western.html"     class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 17</span><span class="livetv-ch-icon">🤠</span><span class="livetv-ch-name">Western</span></div><div class="livetv-now">Yellowstone / Spaghetti Western Sat</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:15%"></div></div></a>
+        <a href="ch-unicorn.html"     class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 18</span><span class="livetv-ch-icon">🦄</span><span class="livetv-ch-name">Unicorn</span></div><div class="livetv-now">MLP / Sailor Moon / Ghibli Evening</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:10%"></div></div></a>
+        <a href="ch-dragon.html"      class="livetv-ch"><div class="livetv-ch-header"><span class="livetv-ch-num">Ch 19</span><span class="livetv-ch-icon">🐉</span><span class="livetv-ch-name">Dragon</span></div><div class="livetv-now">HTTYD / House of the Dragon / GoT Dragons</div><div class="livetv-bar-wrap"><div class="livetv-bar-fill" style="width:45%"></div></div></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Design Rules (Apply to All Channels)</div>
+    <div class="card">
+      <table>
+        <tr><th>Rule</th><th>Detail</th></tr>
+        <tr><td>No show in two separate timeslots same day</td><td>A show can only appear once per day across all slots</td></tr>
+        <tr><td>Movies get 3-hour slots</td><td>Pad remainder with filler or episode to reach slot boundary</td></tr>
+        <tr><td>12am–5am = overnight slot</td><td>Low-rated films (&lt;70% audience score) + filler. Comedy and Superhero run full programming overnight.</td></tr>
+        <tr><td>BoJack Horseman max 1hr/day</td><td>Dark Comedy channel only</td></tr>
+        <tr><td>Movies can duplicate across channels</td><td>TV shows cannot appear on more than one channel</td></tr>
+        <tr><td>Weekends prioritise movies</td><td>Big movie blocks replace most TV slots on Sat/Sun</td></tr>
+        <tr><td>Scooby-Doo max 2hrs/day</td><td>Kids channel — rotating through all series sequentially</td></tr>
+        <tr><td>Filler fills any gap</td><td>Tunarr pad mode: filler fills gap before next scheduled slot</td></tr>
+        <tr><td>Use filler for: Black Mirror, Hey Arnold, Recess, Dark (German)</td><td>These are removed from schedules — replace any slot they were in with filler</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⭐ Recurring Events Summary</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Weekly Events</div>
+        <table>
+          <tr><th>Channel</th><th>Event</th><th>When</th></tr>
+          <tr><td>🥋 Martial Arts</td><td>Jackie Chan Saturday</td><td>Every Sat — 3 films in release order</td></tr>
+          <tr><td>🦕 Monster</td><td>Dinosaur Saturday</td><td>Every Sat — Land Before Time → Jurassic Park block</td></tr>
+          <tr><td>🦕 Monster</td><td>Kaiju Sunday</td><td>Every Sun — full MonsterVerse</td></tr>
+          <tr><td>🇷🇺 Russian</td><td>Tarkovsky Sunday</td><td>Every Sun 10pm — one Tarkovsky film</td></tr>
+          <tr><td>🦄 Unicorn</td><td>Unicorn Block</td><td>Every Sat 11am — unicorn content only</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Monthly Events</div>
+        <table>
+          <tr><th>Channel</th><th>Event</th><th>When</th></tr>
+          <tr><td>🧙 Fantasy</td><td>LOTR Marathon Weekend</td><td>Monthly — all 3 extended editions</td></tr>
+          <tr><td>🔍 Crime</td><td>Bond Marathon Saturday</td><td>Monthly — Craig era sequential</td></tr>
+          <tr><td>🥋 Martial Arts</td><td>John Wick Marathon</td><td>Monthly Friday — all 4 films</td></tr>
+          <tr><td>⛩️ Anime</td><td>Ghost in the Shell Marathon</td><td>Monthly Sat — all GiTS films</td></tr>
+          <tr><td>⛩️ Anime</td><td>Satoshi Kon Saturday</td><td>Monthly — Perfect Blue → Millennium Actress → Paprika</td></tr>
+          <tr><td>🦄 Unicorn</td><td>Ghibli Evening</td><td>Monthly Sat — double Ghibli feature</td></tr>
+          <tr><td>😈 Dark Comedy</td><td>Python Marathon</td><td>Monthly — Holy Grail + Life of Brian + Meaning of Life</td></tr>
+          <tr><td>🎭 Drama</td><td>Godfather Marathon</td><td>Monthly Sat — all 3 films</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE — CHANNELS
+══════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-channels">
+
+  <div class="v1-banner">
+    Click any channel card to open its full schedule and acquisition checklist. Each channel page has a 📅 Schedule tab and a ✅ To Acquire tab. Checkboxes persist in your browser via localStorage.
+  </div>
+
+  <div class="channel-grid">
+
+    <a href="ch-comedy.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 1</span>
+        <span class="ch-icon">😂</span>
+        <span class="ch-name">Comedy</span>
+      </div>
+      <div class="ch-meta">Friends · Parks & Rec · The Office · Brooklyn Nine-Nine · Frasier</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Frasier needed</span>
+        <span class="tag tag-warn">Seinfeld needed</span>
+        <span class="tag tag-info">Large film library</span>
+      </div>
+    </a>
+
+    <a href="ch-dark-comedy.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 2</span>
+        <span class="ch-icon">😈</span>
+        <span class="ch-name">Dark Comedy</span>
+      </div>
+      <div class="ch-meta">MASH · Monty Python · Silicon Valley · Succession · Veep</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Succession needed</span>
+        <span class="tag tag-warn">Veep needed</span>
+        <span class="tag tag-warn">Thick of It needed</span>
+      </div>
+    </a>
+
+    <a href="ch-superhero.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 3</span>
+        <span class="ch-icon">🦸</span>
+        <span class="ch-name">Superhero</span>
+      </div>
+      <div class="ch-meta">Batman TAS · Superman TAS · Justice League · Young Justice · X-Men</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Justice League needed</span>
+        <span class="tag tag-warn">Young Justice needed</span>
+        <span class="tag tag-ok">Full overnight — no dead air</span>
+      </div>
+    </a>
+
+    <a href="ch-kids.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 4</span>
+        <span class="ch-icon">🐾</span>
+        <span class="ch-name">Kids</span>
+      </div>
+      <div class="ch-meta">Scooby-Doo (all series) · SpongeBob · Gravity Falls · DuckTales (1987)</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Gravity Falls needed</span>
+        <span class="tag tag-warn">DuckTales 1987 needed</span>
+        <span class="tag tag-ok">Scooby-Doo fully owned</span>
+      </div>
+    </a>
+
+    <a href="ch-scifi.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 5</span>
+        <span class="ch-icon">🚀</span>
+        <span class="ch-name">Sci-Fi</span>
+      </div>
+      <div class="ch-meta">Futurama · Stargate SG-1 · The Expanse · BSG · Cowboy Bebop</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">The Expanse needed</span>
+        <span class="tag tag-need">BSG needed</span>
+        <span class="tag tag-warn">Stargate SG-1 needed</span>
+      </div>
+    </a>
+
+    <a href="ch-fantasy.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 6</span>
+        <span class="ch-icon">🧙</span>
+        <span class="ch-name">Fantasy</span>
+      </div>
+      <div class="ch-meta">Merlin BBC · His Dark Materials · The Witcher · Game of Thrones</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Merlin needed</span>
+        <span class="tag tag-warn">His Dark Materials needed</span>
+        <span class="tag tag-event">LOTR Marathon monthly</span>
+      </div>
+    </a>
+
+    <a href="ch-gothic.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 7</span>
+        <span class="ch-icon">🧛</span>
+        <span class="ch-name">Gothic</span>
+      </div>
+      <div class="ch-meta">Penny Dreadful · AHS · Hannibal · Gargoyles · Castlevania</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">Penny Dreadful needed</span>
+        <span class="tag tag-need">AHS needed</span>
+        <span class="tag tag-warn">Hannibal needed</span>
+      </div>
+    </a>
+
+    <a href="ch-monster.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 8</span>
+        <span class="ch-icon">🦕</span>
+        <span class="ch-name">Monster</span>
+      </div>
+      <div class="ch-meta">Primeval · Monarch · Jurassic Park · MonsterVerse · Kaiju</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">Primeval ESSENTIAL</span>
+        <span class="tag tag-warn">Monarch needed</span>
+        <span class="tag tag-event">Dinosaur Sat / Kaiju Sun</span>
+      </div>
+    </a>
+
+    <a href="ch-russian.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 9</span>
+        <span class="ch-icon">🇷🇺</span>
+        <span class="ch-name">Русский канал</span>
+      </div>
+      <div class="ch-meta">Союзмультфильм · Brother · Tarkovsky · Слово пацана · Soviet comedy</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Come and See needed</span>
+        <span class="tag tag-warn">Diamond Arm needed</span>
+        <span class="tag tag-ok">Союзмультфильм free on YT</span>
+      </div>
+    </a>
+
+    <a href="ch-anime.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 10</span>
+        <span class="ch-icon">⛩️</span>
+        <span class="ch-name">Anime</span>
+      </div>
+      <div class="ch-meta">FMA:Brotherhood · Hunter x Hunter · Demon Slayer · NGE · Ghibli films</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">Demon Slayer needed</span>
+        <span class="tag tag-need">NGE needed</span>
+        <span class="tag tag-warn">HxH 2011 needed</span>
+      </div>
+    </a>
+
+    <a href="ch-documentary.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 11</span>
+        <span class="ch-icon">📡</span>
+        <span class="ch-name">Documentary</span>
+      </div>
+      <div class="ch-meta">MythBusters · Planet Earth · PBS Frontline · DW Documentary</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Planet Earth I+II needed</span>
+        <span class="tag tag-warn">Connections needed</span>
+        <span class="tag tag-ok">Frontline free on YouTube</span>
+      </div>
+    </a>
+
+    <a href="ch-conspiracy.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 12</span>
+        <span class="ch-icon">🕵️</span>
+        <span class="ch-name">Conspiracy</span>
+      </div>
+      <div class="ch-meta">Ancient Aliens · The X-Files · UFO docs · Unsolved Mysteries</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">X-Files ESSENTIAL</span>
+        <span class="tag tag-ok">Ancient Aliens owned</span>
+        <span class="tag tag-event">UFO Marathon Sat</span>
+      </div>
+    </a>
+
+    <a href="ch-martial.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 13</span>
+        <span class="ch-icon">🥋</span>
+        <span class="ch-name">Martial Arts</span>
+      </div>
+      <div class="ch-meta">Cobra Kai · Into the Badlands · Jackie Chan · John Wick · Spartacus</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">Cobra Kai ESSENTIAL</span>
+        <span class="tag tag-need">Into the Badlands ESSENTIAL</span>
+        <span class="tag tag-event">Jackie Chan Sat (weekly)</span>
+      </div>
+    </a>
+
+    <a href="ch-drama.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 14</span>
+        <span class="ch-icon">🎭</span>
+        <span class="ch-name">Drama</span>
+      </div>
+      <div class="ch-meta">The Wire · The Sopranos · Breaking Bad · Mad Men · Late Night Classics</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">The Wire ESSENTIAL</span>
+        <span class="tag tag-need">The Sopranos needed</span>
+        <span class="tag tag-event">Late Night Classics nightly 11pm</span>
+      </div>
+    </a>
+
+    <a href="ch-crime.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 15</span>
+        <span class="ch-icon">🔍</span>
+        <span class="ch-name">Crime</span>
+      </div>
+      <div class="ch-meta">Peaky Blinders · True Detective S1 · Mindhunter · Sherlock · Bond</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Mindhunter needed</span>
+        <span class="tag tag-warn">True Detective S1 needed</span>
+        <span class="tag tag-event">Bond Marathon monthly Sat</span>
+      </div>
+    </a>
+
+    <a href="ch-food.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 16</span>
+        <span class="ch-icon">🍳</span>
+        <span class="ch-name">Food Network</span>
+      </div>
+      <div class="ch-meta">GBBO · Hell's Kitchen · Bourdain No Reservations · Chef's Table</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">Chef's Table needed</span>
+        <span class="tag tag-ok">Bourdain free on YouTube</span>
+        <span class="tag tag-ok">GBBO owned</span>
+      </div>
+    </a>
+
+    <a href="ch-western.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 17</span>
+        <span class="ch-icon">🤠</span>
+        <span class="ch-name">Western</span>
+      </div>
+      <div class="ch-meta">Yellowstone · Deadwood · Justified · Gunsmoke · Spaghetti Westerns</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">Yellowstone ESSENTIAL</span>
+        <span class="tag tag-need">Deadwood ESSENTIAL</span>
+        <span class="tag tag-need">GBU ESSENTIAL — do not launch</span>
+      </div>
+    </a>
+
+    <a href="ch-unicorn.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 18</span>
+        <span class="ch-icon">🦄</span>
+        <span class="ch-name">Unicorn</span>
+      </div>
+      <div class="ch-meta">MLP · Sailor Moon · She-Ra · Ghibli · Disney Princess films</div>
+      <div class="ch-tags">
+        <span class="tag tag-warn">MLP:FiM needed</span>
+        <span class="tag tag-warn">Sailor Moon needed</span>
+        <span class="tag tag-event">Unicorn Block every Sat 11am</span>
+      </div>
+    </a>
+
+    <a href="ch-dragon.html" class="ch-card">
+      <div class="ch-header">
+        <span class="ch-num">Ch 19</span>
+        <span class="ch-icon">🐉</span>
+        <span class="ch-name">Dragon</span>
+      </div>
+      <div class="ch-meta">HTTYD series · House of the Dragon · GoT Dragon Episodes · Dragon Prince</div>
+      <div class="ch-tags">
+        <span class="tag tag-need">House of the Dragon ESSENTIAL</span>
+        <span class="tag tag-need">HTTYD films needed</span>
+        <span class="tag tag-info">GoT Dragon Episodes: Jellyfin collection</span>
+      </div>
+    </a>
+
+  </div><!-- /channel-grid -->
+</div><!-- /pane-channels -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE — SETUP
+══════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-setup">
+
+  <div class="section">
+    <div class="section-title">🐳 Docker Compose</div>
+    <div class="card">
+      <pre>services:
+  tunarr:
+    image: ghcr.io/chrisbenincasa/tunarr:latest
+    container_name: tunarr
+    restart: unless-stopped
+    ports:
+      - "8200:8000"
+    environment:
+      - TZ=Australia/Sydney
+    volumes:
+      - ./data:/home/node/app/.tunarr
+      - /mnt/d/Media:/media:ro   # read-only mount of media drive
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Jellyfin Live TV Integration</div>
+    <div class="card">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Open Jellyfin Admin</strong> → Dashboard → Live TV</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>Add Tuner Device</strong> → Type: HD Homerun → URL: <code>http://localhost:8200</code></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Add TV Guide Data</strong> → Type: XMLTV → Path: <code>http://localhost:8200/api/xmltv.xml</code></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>Refresh Guide</strong> → Dashboard → Live TV → Refresh Guide. All 19 channels appear.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><strong>Map channels</strong> → Guide Data Mapping → assign each Tunarr channel to its guide entry.</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Creating a GoT Dragon Episodes Jellyfin Collection</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:10px;">The Dragon channel (Ch 19) plays only specific GoT episodes with dragon scenes at the midday slot. Create a Jellyfin collection to group them:</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body">In Jellyfin, go to <strong>Collections → New Collection</strong> → Name: <em>GoT Dragon Episodes</em></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Add these episodes: S2E10, S4E02, S4E10, S5E02, S5E09, S6E02, S6E09, S6E10, S7E01, S7E04, S7E06, S7E07, S8E01, S8E03, S8E04, S8E05, S8E06</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">In Tunarr → Dragon Channel → 12pm slot → Source: <strong>Jellyfin Collection</strong> → select <em>GoT Dragon Episodes</em> → Mode: Sequential</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">Do <strong>not</strong> add the full GoT series to this channel — only the curated dragon episodes collection.</div></div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE — SCHEDULING
+══════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-scheduling">
+
+  <div class="section">
+    <div class="section-title">🕐 How Tunarr Schedules Content</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Time Slot Types</div>
+        <table>
+          <tr><th>Type</th><th>Behaviour</th></tr>
+          <tr><td>TV Episode</td><td>Sequential — plays next unwatched episode, wraps</td></tr>
+          <tr><td>Movie Slot</td><td>3-hour block — one film from pool, rotating</td></tr>
+          <tr><td>Filler Pad</td><td>Fills time between a short slot and next fixed slot</td></tr>
+          <tr><td>Random</td><td>Picks randomly from a Jellyfin library or collection</td></tr>
+          <tr><td>Flex</td><td>Empty — Tunarr fills with channel filler automatically</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Pad Mode (Recommended Setting)</div>
+        <p style="font-size:.82rem;color:var(--text-dim)">
+          Set each slot to <strong>Pad</strong> mode. When a TV episode ends early (e.g. a 22-minute episode in a 30-minute slot), Tunarr automatically fills the gap with a filler clip before the next slot starts.
+          <br><br>
+          This prevents the schedule from drifting and keeps content feeling like real TV with ad breaks replaced by ambient clips.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Slot Timing Conventions Used in This Setup</div>
+    <div class="card">
+      <table>
+        <tr><th>Slot length</th><th>Content type</th><th>Notes</th></tr>
+        <tr><td>3 hours</td><td>Feature film</td><td>Most films are under 2.5hrs; pad fills remainder</td></tr>
+        <tr><td>30–60 min</td><td>TV episode (standard)</td><td>Sitcoms 22–30min, dramas 42–60min</td></tr>
+        <tr><td>90 min</td><td>TV episode (prestige)</td><td>GoT, Westworld, Sherlock</td></tr>
+        <tr><td>5–10 min</td><td>Filler clip</td><td>Max duration set per filler playlist</td></tr>
+        <tr><td>12am–5am</td><td>Overnight block</td><td>Low-rated films (under 70% audience score) + filler</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Timezone Note</div>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>TZ=Australia/Sydney</strong> is set in the Docker container. All schedules are authored in Sydney time. If you change the TZ variable, all time slots shift. Do not change it without re-authoring every channel schedule.</div>
+    </div>
+  </div>
+
+</div><!-- /pane-scheduling -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE — FILLER
+══════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-filler">
+
+  <div class="section">
+    <div class="section-title">🎞 Filler System Overview</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:10px;">
+        Filler clips are short videos (under 10 minutes) that Tunarr automatically inserts to pad gaps between scheduled content. Each channel has its own curated filler playlist stored in <code>D:\Media\Filler\[channel]\</code>.
+      </p>
+      <table>
+        <tr><th>File</th><th>Location</th><th>Purpose</th></tr>
+        <tr><td><code>filler_sync.py</code></td><td><code>D:\Scripts\</code></td><td>Downloads YouTube filler via yt-dlp and splits clips</td></tr>
+        <tr><td><code>filler_config.json</code></td><td><code>D:\Scripts\</code></td><td>Config for each filler playlist — URL, split mode, clip length</td></tr>
+        <tr><td>Filler clips</td><td><code>D:\Media\Filler\[channel]\</code></td><td>Actual MP4 files served to Tunarr</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔪 Split Modes</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><code>scene</code> — PySceneDetect</div>
+        <p style="font-size:.82rem;color:var(--text-dim)">For compilation videos. Detects scene transitions and splits at each cut. Use for AMV compilations, toy commercial compilations, trailer reels. Discards transitions shorter than 4 seconds (<code>scene_min_seconds: 4</code>).</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><code>chunk</code> — Fixed ffmpeg segments</div>
+        <p style="font-size:.82rem;color:var(--text-dim)">For ambient/continuous footage. Splits into fixed-length chunks. Use for NASA footage, castle drone footage, rain ambience, lo-fi music streams. Set <code>chunk_seconds</code> to desired clip length.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-title"><code>none</code> — Download as-is</div>
+      <p style="font-size:.82rem;color:var(--text-dim)">No splitting. Use for shorts, stand-up clips, and content already the right length (&lt;10 minutes).</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ filler_config.json structure</div>
+    <div class="card">
+      <pre>{
+  "playlists": [
+    {
+      "name":              "comedy-standups",
+      "folder":            "D:\\Media\\Filler\\comedy",
+      "url":               "https://www.youtube.com/playlist?list=...",
+      "max_duration":      300,       // max clip seconds kept
+      "split_mode":        "none",    // none | chunk | scene
+      "chunk_seconds":     60,        // used when split_mode=chunk
+      "scene_min_seconds": 4,         // used when split_mode=scene
+      "scene_max_seconds": 120,       // discard scenes over this length
+      "scene_threshold":   30.0       // PySceneDetect sensitivity
+    },
+    {
+      "name":              "nasa-footage",
+      "folder":            "D:\\Media\\Filler\\scifi",
+      "url":               "https://www.youtube.com/playlist?list=...",
+      "split_mode":        "chunk",
+      "chunk_seconds":     90,
+      "max_duration":      120
+    }
+  ]
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🕒 Automatic Sync Schedule</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim)">Task Scheduler job runs <code>python D:\Scripts\filler_sync.py</code> every Sunday at 3am. After downloads complete, the script hits the Jellyfin API to trigger a library rescan so new filler clips appear immediately.</p>
+      <pre># Manual run:
+python D:\Scripts\filler_sync.py
+
+# Force re-download all (ignore cache):
+python D:\Scripts\filler_sync.py --force</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-filler -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE — MAINTENANCE
+══════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Updating Tunarr</div>
+    <div class="card">
+      <pre># Pull latest image and restart:
+cd ~/services/tunarr
+docker compose pull
+docker compose down
+docker compose up -d
+docker compose logs -f --tail=50</pre>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-top:10px;">⚠️ After updating, verify channel schedules are intact. Tunarr updates have occasionally reset filler assignments.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Backup</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:10px;">The entire Tunarr configuration lives in <code>~/services/tunarr/data/</code> — this is what needs to be backed up.</p>
+      <pre># Backup Tunarr config:
+cp -r ~/services/tunarr/data ~/backups/tunarr-$(date +%Y%m%d)
+
+# Restore from backup:
+docker compose down
+cp -r ~/backups/tunarr-YYYYMMDD ~/services/tunarr/data
+docker compose up -d</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Known Maintenance Points</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Frequency</th><th>Fix</th></tr>
+        <tr><td>XMLTV guide goes stale</td><td>Weekly</td><td>Jellyfin → Live TV → Refresh Guide</td></tr>
+        <tr><td>Filler clips run out for a channel</td><td>Monthly</td><td>Run <code>filler_sync.py</code> manually</td></tr>
+        <tr><td>New Jellyfin content not appearing in Tunarr</td><td>On new acquisitions</td><td>Tunarr → Settings → Sync Jellyfin Libraries</td></tr>
+        <tr><td>Channel drifts ahead of schedule</td><td>Occasionally</td><td>Edit channel → Reset schedule to next clean hour</td></tr>
+        <tr><td>Docker container fails to start</td><td>Rare</td><td>Check <code>docker compose logs tunarr</code> — usually port conflict or volume permission</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE — TROUBLESHOOTING
+══════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-trouble">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+    <div class="card">
+      <table>
+        <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+        <tr><td>Jellyfin Live TV shows no channels</td><td>Tunarr container not running, or wrong tuner URL</td><td>Check <code>docker ps | grep tunarr</code> — verify URL is <code>http://localhost:8200</code> (not 127.0.0.1 in WSL context)</td></tr>
+        <tr><td>Guide data shows wrong times</td><td>Timezone mismatch</td><td>Verify <code>TZ=Australia/Sydney</code> in docker-compose.yml and restart</td></tr>
+        <tr><td>Channel plays filler all day</td><td>Jellyfin library not synced to Tunarr</td><td>Tunarr Admin → Settings → Sync Jellyfin</td></tr>
+        <tr><td>Specific show not appearing in Tunarr slot editor</td><td>Not scraped yet, or metadata mismatch</td><td>Force Jellyfin library scan, then re-sync Tunarr</td></tr>
+        <tr><td>Filler not working</td><td>Filler folder empty or wrong path in Tunarr</td><td>Check <code>D:\Media\Filler\[channel]\</code> has MP4 files — verify Tunarr filler playlist path</td></tr>
+        <tr><td>Container crashes on startup</td><td>Port 8200 in use by another process</td><td><code>netstat -ano | findstr :8200</code> on Windows host — kill conflicting process</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Admin Commands</div>
+    <div class="card">
+      <pre># Check container status:
+docker ps -a | grep tunarr
+
+# View logs:
+docker compose -f ~/services/tunarr/docker-compose.yml logs -f --tail=100
+
+# Restart:
+docker compose -f ~/services/tunarr/docker-compose.yml restart
+
+# Shell into container:
+docker exec -it tunarr sh
+
+# Check M3U is working:
+curl http://localhost:8200/api/channels.m3u | head -50
+
+# Check XMLTV is working:
+curl http://localhost:8200/api/xmltv.xml | head -80</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-trouble -->
+
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Support deep-linking via hash: tunarr.html#pane-channels
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    const pane = document.getElementById(hash);
+    if (pane) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      pane.classList.add('active');
+      // find matching button by its onclick
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(hash.replace('pane-',''))) {
+          b.classList.add('active');
+        }
+      });
+    }
+  }
+});
+</script>
+
+</body>
+</html>
