@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Silent Hill</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.fn-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era group header rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media crossover rows — purple italic */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Canceled / defunct rows — red tint */
+.fn-canceled td {
+  background: rgba(239,83,80,.04) !important;
+  opacity: .6;
+}
+.fn-canceled td:first-child { border-left: 3px solid #ef5350 !important; }
+
+/* Platform left-border colour stripes */
+.fn-ps1    td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps2    td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps3    td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-ps5    td:first-child { border-left: 3px solid #fff176; }
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-xbox360 td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-pc     td:first-child { border-left: 3px solid #90a4ae; }
+.fn-mobile td:first-child { border-left: 3px solid #80cbc4; }
+.fn-arcade td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-wii    td:first-child { border-left: 3px solid #b0bec5; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-anime  td:first-child { border-left: 3px solid #ce93d8; }
+.fn-tv     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-movie  td:first-child { border-left: 3px solid #ffb74d; }
+.fn-merch-toy     td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-merch-statue  td:first-child { border-left: 3px solid #ffcc02; }
+.fn-merch-card    td:first-child { border-left: 3px solid #80cbc4; }
+.fn-merch-book    td:first-child { border-left: 3px solid #90a4ae; }
+.fn-merch-apparel td:first-child { border-left: 3px solid #ce93d8; }
+.fn-merch-board   td:first-child { border-left: 3px solid #a5d6a7; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes     { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no      { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies  { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt     { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-cancel  { background: rgba(239,83,80,.15);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.3); }
+.fn-tag-defunct { background: rgba(180,50,50,.2);    color: #ff8a80; border: 1px solid rgba(180,50,50,.4); }
+.fn-star        { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   TIMELINE (History tab)
+════════════════════════════════════════════════════ */
+.fn-timeline { display: flex; flex-direction: column; gap: 0; }
+.fn-era {
+  border-left: 3px solid var(--border);
+  padding: 0 0 24px 20px;
+  position: relative;
+}
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 6px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+}
+.fn-era-year  { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--accent); margin-bottom: 4px; letter-spacing: .05em; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .92rem; color: var(--text-bright); margin-bottom: 8px; }
+.fn-era-body  { font-size: .83rem; color: var(--text-dim); line-height: 1.75; }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.fn-filler-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.fn-filler-type {
+  display: inline-block;
+  font-size: .6rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+.fn-filler-trailer     { background: rgba(239,83,80,.12);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.3); }
+.fn-filler-music       { background: rgba(100,181,246,.12); color: #90caf9; border: 1px solid rgba(100,181,246,.3); }
+.fn-filler-documentary { background: rgba(255,183,77,.12); color: #ffcc80; border: 1px solid rgba(255,183,77,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc; border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-bumper      { background: rgba(76,175,80,.12);  color: #81c784; border: 1px solid rgba(76,175,80,.3); }
+.fn-filler-hype        { background: rgba(200,168,75,.12); color: #c8a84b; border: 1px solid rgba(200,168,75,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin: 0 0 24px; }
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🌫️</div>
+  <div>
+    <h1>Silent Hill</h1>
+    <div class="subtitle">// PS1 · PS2 · PS3 · Xbox 360 · Wii · GBA · Mobile · PC · EmulatorJS · Jellyfin //</div>
+    <p class="desc">
+      Silent Hill is Konami's psychological survival-horror franchise (1999–present), set in a fog-shrouded American town that warps into a nightmare dimension tailored to each visitor's guilt and trauma. The Team Silent era (SH1–SH4) defines the canon; the western-developed era (SH5–Downpour) is divisive; and the franchise has seen a major revival from 2022 onward with Bloober Team's SH2 remake and multiple new projects. Use the Library tab to sort by release order, story priority, or emulation accessibility. The other tabs cover the films, merch, Tunarr filler, and franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">12</div><div class="fn-stat-label">Main Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">6</div><div class="fn-stat-label">Spin-offs / Mobile</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2</div><div class="fn-stat-label">Movies</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">4+</div><div class="fn-stat-label">Canceled Projects</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1999</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">🌫️ The Silent Hill Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','priority',  this)">⭐ Priority Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','canceled',  this)">🚫 Canceled &amp; Defunct</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           RELEASE ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          Every game, expansion, and media entry in real-world release order. Gold rows = Team Silent essentials. Faded rows = optional or low-priority entries. Red rows = canceled / inaccessible. Purple rows = film / media crossover notes.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Emulator / Core</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE TEAM SILENT ERA (1999–2004) ──</td></tr>
+
+          <tr class="fn-ps1 fn-highlight">
+            <td>1999</td>
+            <td>Silent Hill <span class="fn-star">⭐</span></td>
+            <td>PS1</td>
+            <td>pcsx_rearmed</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> The original. Harry Mason searches for his daughter in a fog-drowned resort town that becomes hell. PS1 tank controls and lo-fi visuals add to the dread. Essential.</td>
+          </tr>
+          <tr class="fn-ps2 fn-highlight">
+            <td>2001</td>
+            <td>Silent Hill 2 <span class="fn-star">⭐</span></td>
+            <td>PS2 / Xbox / PC</td>
+            <td>PCSX2 / native PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/PS5</span></td>
+            <td><span class="fn-star">⭐</span> The masterpiece. James Sunderland follows a letter from his dead wife. Pyramid Head. The best psychological horror game ever made. Also available via the 2024 Bloober Team remake on PS5/PC.</td>
+          </tr>
+          <tr class="fn-ps2 fn-highlight">
+            <td>2003</td>
+            <td>Silent Hill 3 <span class="fn-star">⭐</span></td>
+            <td>PS2 / PC</td>
+            <td>PCSX2 / native PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Direct sequel to SH1. Heather Mason, grotesque body-horror imagery, best art direction in the Team Silent era. Requires SH1 first.</td>
+          </tr>
+          <tr class="fn-ps2 fn-highlight">
+            <td>2004</td>
+            <td>Silent Hill 4: The Room</td>
+            <td>PS2 / Xbox / PC</td>
+            <td>PCSX2 / native PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>The odd one out — Henry Townshend is locked in his apartment as a window into the Order's mythology. Not a direct sequel but thematically essential. Team Silent's final game.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>Silent Hill</strong> (2006 film) — Loosely adapts SH1+SH3 mythology. Acceptable companion piece. Watch after SH1 and SH3 for the most context.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── SIDE STORIES &amp; PORTS (2001–2007) ──</td></tr>
+
+          <tr class="fn-gba fn-skip">
+            <td>2001</td>
+            <td>Silent Hill: Play Novel</td>
+            <td>GBA (Japan only)</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">fan translation</span> Visual novel retelling of SH1 with some new branching scenes. Japan-only; fan translation exists. Low priority but interesting for lore completionists.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2006</td>
+            <td>Silent Hill Mobile</td>
+            <td>Java mobile (i-mode / BREW)</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-no">Lost</span></td>
+            <td>Japan-only mobile game for feature phones (Konami i-mode / BREW platform). Survival mechanics in the SH universe. No longer accessible; platform shut down.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2007</td>
+            <td>Silent Hill Mobile 2</td>
+            <td>Java mobile (i-mode / BREW)</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-no">Lost</span></td>
+            <td>Sequel to SH Mobile. Japan-only. Same platform fate — offline and inaccessible. New monster design unique to mobile lineup.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2008</td>
+            <td>Silent Hill Mobile 3</td>
+            <td>Java mobile (i-mode / BREW)</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-no">Lost</span></td>
+            <td>Final entry in the Japan mobile trilogy. Same platform as SH Mobile 1–2. All three are essentially lost media.</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>2007</td>
+            <td>Silent Hill: Origins</td>
+            <td>PSP / PS2</td>
+            <td>PPSSPP / PCSX2</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td>Prequel to SH1 — Travis Grady, the trucker. Developed by Climax Studios (UK). Passable but clearly a stopgap. Play after SH1 and SH3 if curious about the Order's backstory.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE WESTERN ERA (2008–2012) ──</td></tr>
+
+          <tr class="fn-ps3">
+            <td>2008</td>
+            <td>Silent Hill: Homecoming</td>
+            <td>PS3 / Xbox 360 / PC</td>
+            <td>RPCS3 / native PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Alex Shepherd returns to Shepherd's Glen. Developed by Double Helix (US). Combat-heavy, action-oriented — criticized for deviating from the Team Silent formula. The post-SH4 decline begins here.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2009</td>
+            <td>Silent Hill: Shattered Memories</td>
+            <td>Wii / PS2 / PSP</td>
+            <td>Dolphin / PCSX2 / PPSSPP</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td>A psychological reimagining of SH1 that adapts to player behavior. No combat — just running. Divisive but genuinely fascinating as a design experiment. One of the more interesting entries post-SH4 despite its flaws.</td>
+          </tr>
+          <tr class="fn-ps3 fn-skip">
+            <td>2012</td>
+            <td>Silent Hill: Downpour</td>
+            <td>PS3 / Xbox 360</td>
+            <td>RPCS3</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Murphy Pendleton, a convict. Open-world structure, side quests, rain mechanic. Developed by Vatra Games. Not bad by western SH standards but technically rough on launch. Completionists only.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── HD COLLECTION ERA (2012) ──</td></tr>
+
+          <tr class="fn-ps3 fn-skip">
+            <td>2012</td>
+            <td>Silent Hill HD Collection (SH2 + SH3)</td>
+            <td>PS3 / Xbox 360</td>
+            <td>RPCS3</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">avoid</span> Infamously broken port — missing fog effects, broken audio, altered voice acting (SH2 lost the original cast). Avoid in favor of original PS2 versions or the 2024 SH2 remake. The PS3 patch improved SH2 slightly; SH3 patch was never released.</td>
+          </tr>
+          <tr class="fn-arcade">
+            <td>2007</td>
+            <td>Silent Hill: The Arcade</td>
+            <td>Arcade (AM-Hunexs hardware)</td>
+            <td>Not emulated</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Defunct</span></td>
+            <td>Light-gun rail shooter set between SH1 and SH3. Japan/limited western release. Arcade hardware is not emulated; effectively lost outside of physical cabinets.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── BOOK OF MEMORIES &amp; MOBILE (2012–2014) ──</td></tr>
+
+          <tr class="fn-nds fn-skip">
+            <td>2012</td>
+            <td>Silent Hill: Book of Memories</td>
+            <td>PS Vita</td>
+            <td>Vita3K (experimental)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Isometric action-RPG with co-op. Developed by WayForward. Not survival horror at all — dungeon crawler set in the SH universe. Panned by fans for being completely off-genre. Curiosity item only.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2014</td>
+            <td>Silent Hill: Escape</td>
+            <td>iOS / Android</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-no">Delisted</span></td>
+            <td>Endless runner mobile game. Delisted from app stores. No longer playable without a sideloaded APK. Throwaway promotional tie-in with minimal content.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2014</td>
+            <td>Silent Hill: Orphan</td>
+            <td>Java mobile (BREW)</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-no">Lost</span></td>
+            <td>Western mobile release on BREW platform. Konami's attempt to bring SH to North American feature phones. Primitive gameplay; considered lost media.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2014</td>
+            <td>Silent Hill: Orphan 2</td>
+            <td>Java mobile (BREW)</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-no">Lost</span></td>
+            <td>Sequel to SH: Orphan on the same BREW platform. Same fate — inaccessible.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── P.T. / SILENT HILLS ERA (2014–2015) — CANCELED ──</td></tr>
+
+          <tr class="fn-ps4 fn-canceled">
+            <td>2014</td>
+            <td>P.T. (Playable Teaser for Silent Hills)</td>
+            <td>PS4 (delisted)</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Delisted</span></td>
+            <td><span class="fn-tag fn-tag-no">Preserved only</span></td>
+            <td><span class="fn-tag fn-tag-cancel">❌ Canceled</span> Hideo Kojima + Guillermo del Toro + Norman Reedus collaboration. Possibly the most influential horror demo ever released. Removed from PSN after Kojima's departure from Konami. Preserved by fans; unofficial PC ports exist. The game that defined an era.</td>
+          </tr>
+          <tr class="fn-ps4 fn-canceled">
+            <td>2015</td>
+            <td>Silent Hills</td>
+            <td>PS4 (never released)</td>
+            <td><span class="fn-tag fn-tag-cancel">❌ Canceled</span></td>
+            <td><span class="fn-tag fn-tag-no">Never released</span></td>
+            <td><span class="fn-tag fn-tag-cancel">❌ Canceled</span> The full game by Kojima + del Toro that P.T. was teasing. Canceled after Konami and Kojima Productions split in 2015. Widely considered one of the biggest losses in gaming history.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>Silent Hill: Revelation</strong> (2012 film) — Sequel to the 2006 film, loosely adapts SH3. Significantly weaker; notable only for franchise completionists.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── REVIVAL ERA (2022–PRESENT) ──</td></tr>
+
+          <tr class="fn-ps5 fn-highlight">
+            <td>2024</td>
+            <td>Silent Hill 2 (Remake) <span class="fn-star">⭐</span></td>
+            <td>PS5 / PC</td>
+            <td>Native (Steam)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/PS5</span></td>
+            <td><span class="fn-star">⭐</span> Bloober Team's full remake of SH2. Faithful adaptation with modern controls and graphics while preserving the psychological depth of the original. Best entry point for newcomers. Excellent.</td>
+          </tr>
+          <tr class="fn-ps5">
+            <td>TBA</td>
+            <td>Silent Hill f</td>
+            <td>PS5 / PC (announced)</td>
+            <td>TBA</td>
+            <td><span class="fn-tag fn-tag-no">TBA</span></td>
+            <td>New mainline entry set in 1960s Japan. Developed by NeoBards Entertainment, written by Ryukishi07 (Higurashi/Umineko). Striking visual design; distinct from western SH aesthetic. Highly anticipated.</td>
+          </tr>
+          <tr class="fn-ps5">
+            <td>TBA</td>
+            <td>Silent Hill: Townfall</td>
+            <td>PS5 / PC (announced)</td>
+            <td>TBA</td>
+            <td><span class="fn-tag fn-tag-no">TBA</span></td>
+            <td>New game by No Code (Stories Untold, Observation). Atmospheric horror; limited gameplay shown. Konami revival project alongside SH2 remake.</td>
+          </tr>
+          <tr class="fn-ps5">
+            <td>TBA</td>
+            <td>Silent Hill: Ascension</td>
+            <td>Web / Mobile (streaming event)</td>
+            <td>N/A — web-based</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Live interactive streaming event (2023). Audience votes affected story outcomes in real-time. Part of the Konami revival push. Divided fans — not a traditional game. Experience has concluded; archive available.</td>
+          </tr>
+
+        </table>
+
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold border = essential / best in tier</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded = optional / low priority</span>
+          <span><span class="fn-dot" style="background:#ef5350"></span>Red = canceled or inaccessible</span>
+          <span><span class="fn-tag fn-tag-no">🖥️ PC Only</span> Requires PC / RPCS3 / PCSX2</span>
+          <span><span class="fn-tag fn-tag-varies">⚡ Varies</span> Works on both PC and capable mobile</span>
+          <span><span class="fn-tag fn-tag-defunct">⛔ Defunct</span> No longer accessible</span>
+          <span><span class="fn-tag fn-tag-cancel">❌ Canceled</span> Never completed or released</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = film crossover note</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           PRIORITY ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-priority">
+        <div class="fn-view-desc">
+          Recommended play order for someone new to the franchise — or returning after a long gap. Prioritizes the Team Silent canon, skips the weakest western entries, and accounts for modern accessibility (SH2 Remake as entry point).
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🚪 START HERE — Modern Entry Point</td></tr>
+          <tr class="fn-ps5 fn-highlight">
+            <td>1</td><td>Silent Hill 2 (Remake, 2024) <span class="fn-star">⭐</span></td>
+            <td>PS5 / PC</td>
+            <td>Best version of the best game. Modern controls remove the friction of the PS2 original for newcomers. Sets tone, themes, and atmosphere for the entire series.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🕯️ THE TEAM SILENT CORE</td></tr>
+          <tr class="fn-ps1 fn-highlight">
+            <td>2</td><td>Silent Hill (1999) <span class="fn-star">⭐</span></td>
+            <td>PS1 / pcsx_rearmed</td>
+            <td>Now that you understand what the town is, experience where it all started. Harry's story. Builds context for SH3.</td>
+          </tr>
+          <tr class="fn-ps2 fn-highlight">
+            <td>3</td><td>Silent Hill 3 (2003) <span class="fn-star">⭐</span></td>
+            <td>PS2 / PC / PCSX2</td>
+            <td>Direct sequel to SH1. Heather's story. The Order mythology payoff. Play SH1 first or the ending means nothing.</td>
+          </tr>
+          <tr class="fn-ps2">
+            <td>4</td><td>Silent Hill 4: The Room (2004)</td>
+            <td>PS2 / PC / PCSX2</td>
+            <td>Team Silent's final game. Unique apartment-anchored design. Expands on the cult mythology from a different angle. Essential for completing the Team Silent picture.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🗺️ OPTIONAL LORE DEPTH</td></tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>5</td><td>Silent Hill: Origins (2007)</td>
+            <td>PSP / PS2 / PCSX2</td>
+            <td>Prequel filling in Order backstory. Non-essential but provides context for SH1–SH3 events. Play if you want more lore.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>6</td><td>Silent Hill: Shattered Memories (2009)</td>
+            <td>Wii / Dolphin</td>
+            <td>SH1 reimagining with psychological profiling. Interesting design experiment. Worth a play for its ideas even if not canon.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🔻 COMPLETIONISTS ONLY</td></tr>
+          <tr class="fn-ps3 fn-skip">
+            <td>7</td><td>Silent Hill: Homecoming (2008)</td>
+            <td>PS3 / PC / RPCS3</td>
+            <td>The western era begins. Worth experiencing as a historical artifact of the franchise's decline. Not recommended unless you're going for 100%.</td>
+          </tr>
+          <tr class="fn-ps3 fn-skip">
+            <td>8</td><td>Silent Hill: Downpour (2012)</td>
+            <td>PS3 / RPCS3</td>
+            <td>Most ambitious western entry. Rough execution. Completionists only.</td>
+          </tr>
+          <tr class="fn-ps4 fn-skip">
+            <td>9</td><td>P.T. (if you can access it)</td>
+            <td>PS4 delisted / PC fan port</td>
+            <td>Not canon. But you owe it to yourself to experience this at least once. The greatest demo ever made. Seek out a preserved version.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🚫 SKIP OR SKIP UNLESS OBSESSED</td></tr>
+          <tr class="fn-nds fn-skip">
+            <td>—</td><td>Silent Hill: Book of Memories (2012)</td>
+            <td>PS Vita / Vita3K</td>
+            <td>Dungeon crawler. Not horror. Curiosity item only.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>—</td><td>All mobile entries (SH Mobile 1–3, Orphan 1–2, Escape)</td>
+            <td>Feature phone / Defunct</td>
+            <td>Lost media or delisted. Documented here for completeness; not playable.</td>
+          </tr>
+
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BY PLATFORM
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All entries grouped by primary platform. Use this to plan what you can play right now.</div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Title</th><th>Year</th><th>Emulator</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟡 PS1 (pcsx_rearmed)</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>PS1</td><td>Silent Hill</td><td>1999</td><td>pcsx_rearmed</td><td>Good emulation; minor texture shimmer is accurate to era.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟠 PS2 (PCSX2)</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>PS2</td><td>Silent Hill 2</td><td>2001</td><td>PCSX2</td><td>Or use the 2024 remake. Original PS2 is definitive if you want the original voice cast.</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>PS2</td><td>Silent Hill 3</td><td>2003</td><td>PCSX2</td><td>Best fog effects and art in the series. PC version also available.</td></tr>
+          <tr class="fn-ps2"><td>PS2</td><td>Silent Hill 4: The Room</td><td>2004</td><td>PCSX2</td><td>Also available on PC via GOG.</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>PS2</td><td>Silent Hill: Origins</td><td>2007</td><td>PCSX2</td><td>PSP version also playable via PPSSPP.</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>Wii/PS2</td><td>Silent Hill: Shattered Memories</td><td>2009</td><td>Dolphin / PCSX2</td><td>Wii version preferred for motion controls; Dolphin is excellent.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🔴 PS3 / Xbox 360 (RPCS3)</td></tr>
+          <tr class="fn-ps3 fn-skip"><td>PS3/360</td><td>Silent Hill: Homecoming</td><td>2008</td><td>RPCS3</td><td>PC version also available on GOG.</td></tr>
+          <tr class="fn-ps3 fn-skip"><td>PS3/360</td><td>Silent Hill: Downpour</td><td>2012</td><td>RPCS3</td><td>Performance issues even on RPCS3; be patient.</td></tr>
+          <tr class="fn-ps3 fn-skip"><td>PS3/360</td><td>Silent Hill HD Collection</td><td>2012</td><td>RPCS3</td><td>Avoid — use original PS2 or 2024 remake instead.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 GBA (mgba)</td></tr>
+          <tr class="fn-gba fn-skip"><td>GBA</td><td>Silent Hill: Play Novel</td><td>2001</td><td>mgba</td><td>Japan-only; fan translation patch available. Visual novel only.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟢 PC (Native)</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC</td><td>Silent Hill 2 (Remake, 2024)</td><td>2024</td><td>Native (Steam)</td><td>Best current way to play SH2. High recommended specs.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC</td><td>Silent Hill 2 (original)</td><td>2001</td><td>Native + SH2EE patch</td><td>Needs the Silent Hill 2: Enhanced Edition community patch for best experience.</td></tr>
+          <tr class="fn-pc"><td>PC</td><td>Silent Hill 3</td><td>2003</td><td>Native + SH3EE patch</td><td>Same — community patch highly recommended for resolution and audio fixes.</td></tr>
+          <tr class="fn-pc"><td>PC</td><td>Silent Hill 4: The Room</td><td>2004</td><td>Native (GOG)</td><td>Available on GOG. Works on modern Windows with minor tweaks.</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC</td><td>Silent Hill: Homecoming</td><td>2008</td><td>Native (GOG)</td><td>Has a community patch for missing Xbox 360 content on PC.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📱 PS5 (Native)</td></tr>
+          <tr class="fn-ps5 fn-highlight"><td>PS5</td><td>Silent Hill 2 (Remake, 2024)</td><td>2024</td><td>Native</td><td>Console-exclusive launch alongside PC.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⛔ Defunct / No Longer Accessible</td></tr>
+          <tr class="fn-mobile fn-canceled"><td>Feature Phone</td><td>Silent Hill Mobile 1–3 (Japan)</td><td>2006–2008</td><td>N/A</td><td>i-mode / BREW platform. No emulator exists.</td></tr>
+          <tr class="fn-mobile fn-canceled"><td>Feature Phone</td><td>Silent Hill: Orphan 1–2</td><td>2004</td><td>N/A</td><td>BREW platform. Lost media.</td></tr>
+          <tr class="fn-mobile fn-canceled"><td>iOS/Android</td><td>Silent Hill: Escape</td><td>2014</td><td>N/A</td><td>Delisted. APK floats around preservation communities.</td></tr>
+          <tr class="fn-arcade fn-canceled"><td>Arcade</td><td>Silent Hill: The Arcade</td><td>2007</td><td>N/A</td><td>AM-Hunexs hardware. Not emulated.</td></tr>
+          <tr class="fn-ps4 fn-canceled"><td>PS4 (delisted)</td><td>P.T.</td><td>2014</td><td>Unofficial PC port only</td><td>Officially gone. Community-built remakes and ports exist.</td></tr>
+
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           CANCELED & DEFUNCT
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-canceled">
+        <div class="fn-view-desc">
+          Every Silent Hill project that was canceled, delisted, shut down, or is no longer accessible. Documented here for completeness and preservation awareness. Red rows throughout all views reference these entries.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Status</th><th>Platform</th><th>What Happened</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">❌ CANCELED PROJECTS</td></tr>
+          <tr class="fn-ps4 fn-canceled">
+            <td>2014–2015</td>
+            <td>Silent Hills (+ P.T.)</td>
+            <td><span class="fn-tag fn-tag-cancel">❌ Canceled</span></td>
+            <td>PS4</td>
+            <td>Hideo Kojima + Guillermo del Toro + Norman Reedus collaboration. Canceled following Konami's split with Kojima Productions in 2015. P.T. simultaneously delisted from PSN. The fallout shaped how the industry views publisher-developer relationships for years. Kojima has since said he would still like to make a horror game.</td>
+          </tr>
+          <tr class="fn-canceled">
+            <td>~2014–2015</td>
+            <td>Untitled Silent Hill (Tomm Hulett era pitches)</td>
+            <td><span class="fn-tag fn-tag-cancel">❌ Shelved</span></td>
+            <td>Unknown</td>
+            <td>Multiple pitches reportedly made to Konami by western developers during the Hulett producer era. None formally announced; details emerged in interviews. The sheer number of pitches suggests Konami had no clear creative direction post-SH4.</td>
+          </tr>
+          <tr class="fn-canceled">
+            <td>~2015</td>
+            <td>Silent Hill (Christophe Gans reboot)</td>
+            <td><span class="fn-tag fn-tag-cancel">❌ Shelved</span></td>
+            <td>Film</td>
+            <td>Director of the 2006 film reportedly developed a third film concept after Revelation's poor performance. Never officially announced; quietly abandoned as Konami pulled back from most external partnerships.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⛔ DELISTED / DEFUNCT DIGITAL</td></tr>
+          <tr class="fn-ps4 fn-canceled">
+            <td>2014</td>
+            <td>P.T. (Playable Teaser)</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Delisted</span></td>
+            <td>PS4 (PSN)</td>
+            <td>Removed from PSN in April 2015. Cannot be re-downloaded even if previously purchased or downloaded. The PS4 console itself must have P.T. installed — it cannot be transferred. Community preservations include: an unofficial PC recreation (Unreal Engine), multiple fan-made demakes, and a complete decompilation project.</td>
+          </tr>
+          <tr class="fn-mobile fn-canceled">
+            <td>2006–2008</td>
+            <td>Silent Hill Mobile 1, 2, 3</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Platform Dead</span></td>
+            <td>Japan feature phone (i-mode / BREW)</td>
+            <td>Konami's Japanese mobile platform ceased new content; the i-mode storefront eventually shut down entirely. No ROM dumps are publicly known. These games exist only in screenshots and Japan-market fan documentation.</td>
+          </tr>
+          <tr class="fn-mobile fn-canceled">
+            <td>2004</td>
+            <td>Silent Hill: Orphan 1 &amp; 2</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Platform Dead</span></td>
+            <td>North America feature phone (BREW)</td>
+            <td>BREW feature phone platform. Sprint and Verizon download storefronts long defunct. No official preservation. Some partial documentation survives on GameFAQs and early mobile gaming archives.</td>
+          </tr>
+          <tr class="fn-mobile fn-canceled">
+            <td>2014</td>
+            <td>Silent Hill: Escape</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Delisted</span></td>
+            <td>iOS / Android</td>
+            <td>Endless runner promotion for the film era. Delisted. APK has been shared in preservation spaces but official support ended. Minimal content — not considered a significant loss.</td>
+          </tr>
+          <tr class="fn-arcade fn-canceled">
+            <td>2007</td>
+            <td>Silent Hill: The Arcade</td>
+            <td><span class="fn-tag fn-tag-defunct">⛔ Arcade-only</span></td>
+            <td>AM-Hunexs arcade hardware</td>
+            <td>Light-gun rail shooter released in Japanese arcades (limited western locations). The AM-Hunexs board is not supported by MAME or any known emulator. Playable only on surviving physical cabinets. Documentation exists on arcade preservation wikis.</td>
+          </tr>
+
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           MOBILE ONLY
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">
+          Entries technically playable on mobile hardware (Android RetroArch / iOS EmulatorJS). Note: Silent Hill is not a mobile-first franchise. Most entries require PCSX2/RPCS3 on a PC. The entries below work on capable Android devices.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Core</th><th>Notes</th></tr>
+          <tr class="fn-ps1 fn-highlight">
+            <td>1</td><td>Silent Hill (1999)</td><td>pcsx_rearmed</td><td>Runs well on mid-range Android via RetroArch. Lower graphical demands than PS2 entries.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2</td><td>Silent Hill: Play Novel (GBA)</td><td>mgba</td><td>Visual novel — runs on any hardware. Apply fan translation patch first.</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>3</td><td>Silent Hill 2/3/4 (PS2)</td><td>AetherSX2 / NetherSX2</td><td>Requires a high-end Android (Snapdragon 8 Gen 1+). Performance inconsistent. Use SH2 Remake on PC/PS5 instead.</td>
+          </tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body"><strong>Most Silent Hill games require a PC.</strong> RPCS3 (PS3), PCSX2 (PS2), and Dolphin (Wii) are desktop-only for reliable results. Stream via Sunshine + Moonlight for a TV/mobile experience. The SH2 Remake and SH3 PC ports are the best fully-PC-native options.</div>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM &amp; Installation Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\SilentHill\
+  ├── ps1\          → .bin/.cue or .chd   (core: pcsx_rearmed)
+  │   └── Silent Hill (1999).chd
+  ├── ps2\          → .iso or .chd        (emulator: PCSX2)
+  │   ├── Silent Hill 2 (2001).iso
+  │   ├── Silent Hill 3 (2003).iso
+  │   └── Silent Hill 4 - The Room (2004).iso
+  ├── psp\          → .iso or .cso        (core: ppsspp)
+  │   └── Silent Hill - Origins (2007).iso
+  ├── wii\          → .iso or .rvz        (emulator: Dolphin)
+  │   └── Silent Hill - Shattered Memories (2009).rvz
+  ├── gba\          → .gba                (core: mgba)
+  │   └── Silent Hill - Play Novel (2001) [Fan Translation].gba
+  └── pc\           → native installs
+      ├── Silent Hill 2 Enhanced Edition\  (SH2EE community patch)
+      ├── Silent Hill 3\                   (+ SH3EE community patch)
+      └── Silent Hill 4 - The Room\        (GOG install)</pre>
+      <p style="font-size:.8rem;color:var(--text-dim);margin-top:8px">PS3 entries (Homecoming, Downpour, HD Collection) use RPCS3 — install separately. The <strong>Silent Hill 2 Enhanced Edition</strong> and <strong>Silent Hill 3 HD Fix</strong> community patches are highly recommended for the PC ports.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Silent Hill TV &amp; Anime</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',       this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button>
+      </div>
+
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Silent Hill has no canonical anime or TV series as of 2024. What exists is animated content associated with the films, promotional shorts, and the 2023 Ascension streaming event.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Length</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── ANIMATED / MOTION COMIC ENTRIES ──</td></tr>
+          <tr class="fn-anime fn-skip">
+            <td>2006</td>
+            <td>Silent Hill: Dying Inside (IDW Motion Comic)</td>
+            <td><span class="fn-tag fn-tag-opt">Motion Comic</span></td>
+            <td>~30 min total</td>
+            <td>YouTube / fan archive</td>
+            <td>Animated adaptation of the IDW comic series. Limited animation. Covers Troy Abernathy and the Order. Non-essential; for lore completionists.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2023</td>
+            <td>Silent Hill: Ascension</td>
+            <td><span class="fn-tag fn-tag-opt">Interactive Stream</span></td>
+            <td>Multi-month event</td>
+            <td>silenthill.com / archive</td>
+            <td>Interactive streaming event — live-animated story with real-time audience voting. Concluded 2024. Archive available. The closest thing to a Silent Hill TV series but deeply divisive.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── ANNOUNCED / RUMORED ──</td></tr>
+          <tr class="fn-tv fn-canceled">
+            <td>TBA</td>
+            <td>Silent Hill (TV series — unconfirmed)</td>
+            <td><span class="fn-tag fn-tag-opt">Rumored</span></td>
+            <td>Unknown</td>
+            <td>Unknown</td>
+            <td>Various industry reports have mentioned a TV series adaptation in development alongside the Konami revival push. No official announcement as of 2024. Filed here for tracking.</td>
+          </tr>
+
+        </table>
+        <div class="callout callout-tip" style="margin-top:14px">
+          <div class="callout-icon">📖</div>
+          <div class="callout-body">
+            <strong>Comics are the closest thing to Silent Hill serialized media.</strong> The IDW Publishing run (2004–2008) produced several miniseries: <em>Dying Inside</em>, <em>Paint It Black</em>, <em>The Grinning Man</em>, <em>Among the Damned</em>, and <em>Dead/Alive</em>. Written by Scott Ciencin; artwork varies. Collected in trade paperbacks. Non-canon to the games but atmospheric.
+          </div>
+        </div>
+      </div>
+
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">There is no anime in the traditional sense. Watch order for available visual media.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Type</th><th>Watch After</th><th>Notes</th></tr>
+          <tr class="fn-ps1 fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">1</td>
+            <td>Silent Hill (1999 game)</td><td>Game</td>
+            <td>Start here</td>
+            <td>Play the game before any other media. The film and comics reference it directly.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">2</td>
+            <td>Silent Hill (2006 film)</td><td>Film</td>
+            <td>After SH1 + SH3</td>
+            <td>Blends SH1 and SH3 mythology. Works best knowing both games.</td>
+          </tr>
+          <tr class="fn-anime fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">3</td>
+            <td>IDW Comics / Motion Comic</td><td>Comic / Animation</td>
+            <td>After SH1–SH4</td>
+            <td>Optional extended lore. Non-canon. Best appreciated once you understand the Order.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">4</td>
+            <td>Silent Hill: Ascension (archive)</td><td>Interactive stream</td>
+            <td>After any game</td>
+            <td>Standalone characters; no required game knowledge. Atmospheric tone piece.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\TV\Silent Hill\
+  └── Silent Hill Ascension (2023)\
+      ├── Season 01\
+      │   └── [Episode files if archived]
+
+D:\Media\Anime\Silent Hill\
+  └── (no canonical anime series — placeholder for future)</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Silent Hill Films</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',        this)">📋 All Films</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">Two theatrical releases directed by Christophe Gans (2006) and M. J. Bassett (2012). A third film has been in development limbo since ~2015.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Runtime</th><th>Director</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THEATRICAL RELEASES ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2006</td>
+            <td>Silent Hill <span class="fn-star">⭐</span></td>
+            <td>~125 min</td>
+            <td>Christophe Gans</td>
+            <td>Jellyfin</td>
+            <td><span class="fn-star">⭐</span> Rose Da Silva takes her daughter Sharon to Silent Hill and becomes trapped. Loosely adapts SH1 and SH3 mythology. Best video game adaptation of its era — Gans was a genuine fan. Stunning production design. The Order mythology is faithfully rendered. Recommended for anyone who has played SH1 and SH3.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2012</td>
+            <td>Silent Hill: Revelation</td>
+            <td>~95 min</td>
+            <td>M. J. Bassett</td>
+            <td>Jellyfin</td>
+            <td><span class="fn-tag fn-tag-opt">skip unless completionist</span> Heather Mason (Sharon grown up) is drawn back to Silent Hill. Adapts SH3 more directly than the first film but executes it poorly — over-CGI'd, tonally inconsistent. The Pyramid Head cameo is egregiously out of place. Watch only if you want the full film canon closed.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── IN DEVELOPMENT / SHELVED ──</td></tr>
+          <tr class="fn-movie fn-canceled">
+            <td>TBA</td>
+            <td>Silent Hill (third film — Gans reboot)</td>
+            <td>Unknown</td>
+            <td>Christophe Gans (rumored)</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-cancel">❌ Shelved</span> Gans has publicly discussed wanting to return to Silent Hill with a fresh take post-Revelation. No formal announcement. Konami's revival announcement (2022) renewed speculation. As of 2024, no confirmed production.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold = recommended</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded = completionist only</span>
+          <span><span class="fn-dot" style="background:#ef5350"></span>Red = canceled / shelved</span>
+        </div>
+      </div>
+
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">Watch order including game context for best impact.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Type</th><th>Watch After</th><th>Notes</th></tr>
+          <tr class="fn-ps1 fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">1</td>
+            <td>Silent Hill (1999)</td><td>Game</td>
+            <td>Start here</td>
+            <td>Establishes the town, the fog, and the Order. The 2006 film directly cribs from this.</td>
+          </tr>
+          <tr class="fn-ps2">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">2</td>
+            <td>Silent Hill 3 (2003)</td><td>Game</td>
+            <td>After SH1</td>
+            <td>The 2006 film's second half is essentially the SH3 plot. Playing SH3 first makes the film's climax land.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">3</td>
+            <td>Silent Hill (2006)</td><td>Film</td>
+            <td>After SH1 + SH3</td>
+            <td>Now you'll recognize every borrowed element and appreciate what Gans got right.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">4</td>
+            <td>Silent Hill: Revelation (2012)</td><td>Film</td>
+            <td>After the 2006 film</td>
+            <td>Optional. Close the film arc. Lower your expectations significantly.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Silent Hill\
+  ├── Silent Hill (2006)\
+  │   └── Silent Hill (2006).mkv
+  └── Silent Hill - Revelation (2012)\
+      └── Silent Hill - Revelation (2012).mkv</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Silent Hill Merchandise &amp; Collectibles</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Silent Hill merch was sparse during the series' active run but has exploded since the 2022 revival announcement. The modern Gecco / Gecco x Mamegyorai statue market is the current collector focus. Gold rows = grail or especially notable items.</div>
+    </div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('merch','all',     this)">📋 All Merch</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','statues', this)">🗿 Statues &amp; Figures</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','history', this)">📖 Merch History</button>
+      </div>
+
+      <div class="fn-view active" id="fn-merch-all">
+        <div class="fn-view-desc">Notable merchandise across all categories. ⭐ = especially sought-after.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Category</th><th>Manufacturer</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Early Konami Era (1999–2012) ──</td></tr>
+          <tr class="fn-merch-toy">
+            <td>2001–2004</td>
+            <td>Silent Hill 2 / 3 figures (Japanese import)</td>
+            <td><span class="fn-tag fn-tag-opt">Figure</span></td>
+            <td>Art Asylum / McFarlane</td>
+            <td>Small run figures of Pyramid Head, Nurses, Robbie the Rabbit. McFarlane "Movie Maniacs" wave included SH2 Pyramid Head. Secondary market $40–120.</td>
+          </tr>
+          <tr class="fn-merch-book fn-highlight">
+            <td>2004</td>
+            <td>Silent Hill: The Official Strategy Guide (BradyGames)</td>
+            <td><span class="fn-tag fn-tag-opt">Book</span></td>
+            <td>BradyGames</td>
+            <td>Covers SH1–SH3 with full walkthroughs and lore summaries. Hard to find in good condition; useful companion piece.</td>
+          </tr>
+          <tr class="fn-merch-book">
+            <td>2004–2008</td>
+            <td>Silent Hill IDW Comics (various miniseries)</td>
+            <td><span class="fn-tag fn-tag-opt">Comic / TPB</span></td>
+            <td>IDW Publishing</td>
+            <td>5 miniseries: Dying Inside, Paint It Black, The Grinning Man, Among the Damned, Dead/Alive. Trade paperback collections available secondhand. Non-canon but atmospheric.</td>
+          </tr>
+          <tr class="fn-merch-toy fn-skip">
+            <td>2006</td>
+            <td>Silent Hill film tie-in figures</td>
+            <td><span class="fn-tag fn-tag-opt">Figure</span></td>
+            <td>NECA</td>
+            <td>Film-version Pyramid Head and Nurse figures by NECA. Inaccurate to game designs; collectors generally prefer game-accurate versions.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Revival / Premium Era (2014–Present) ──</td></tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2015–2023</td>
+            <td>Pyramid Head 1/6 Scale Statue</td>
+            <td><span class="fn-tag fn-tag-opt">Statue</span></td>
+            <td>Gecco</td>
+            <td><span class="fn-star">⭐</span> Multiple releases — the definitive Pyramid Head collectible. Gecco's SH2-accurate version with weathered Great Knife. ~$300–500 retail; higher secondary. Grail piece for SH collectors.</td>
+          </tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2016</td>
+            <td>Bubble Head Nurse 1/6 Scale Statue</td>
+            <td><span class="fn-tag fn-tag-opt">Statue</span></td>
+            <td>Gecco</td>
+            <td><span class="fn-star">⭐</span> Companion to the Pyramid Head statue. Iconic SH2 nurse design. Limited edition. Secondary market ~$250–400.</td>
+          </tr>
+          <tr class="fn-merch-statue">
+            <td>2020</td>
+            <td>Robbie the Rabbit Plush (various)</td>
+            <td><span class="fn-tag fn-tag-opt">Plush</span></td>
+            <td>Mamegyorai / various</td>
+            <td>The SH3 mascot rabbit. Multiple editions. The bloodied "Heather's Room" version is particularly popular. Accessible price point (~$40–80).</td>
+          </tr>
+          <tr class="fn-merch-apparel">
+            <td>2022–present</td>
+            <td>Konami Revival Apparel (SH2 Remake promo)</td>
+            <td><span class="fn-tag fn-tag-opt">Apparel</span></td>
+            <td>Konami / various licensees</td>
+            <td>T-shirts, hoodies, and accessories released alongside the 2022 revival announcement and 2024 SH2 Remake. Available via Konami Style shop and licensed retailers.</td>
+          </tr>
+          <tr class="fn-merch-book fn-highlight">
+            <td>2021</td>
+            <td>Nightmares Made Flesh: The Art of Silent Hill</td>
+            <td><span class="fn-tag fn-tag-opt">Art Book</span></td>
+            <td>Udon Entertainment</td>
+            <td><span class="fn-star">⭐</span> The definitive art book. Official art from SH1–SH: Homecoming plus concept art, character designs, and developer commentary. Essential for any serious fan.</td>
+          </tr>
+          <tr class="fn-merch-card">
+            <td>2023</td>
+            <td>Silent Hill Card Game</td>
+            <td><span class="fn-tag fn-tag-opt">Card Game</span></td>
+            <td>Konami (prototype stage)</td>
+            <td>A card game reportedly prototyped but never commercially released. Surfaced at a trade show. Filed here for completeness — status unclear as of 2024.</td>
+          </tr>
+
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-statues">
+        <div class="fn-view-desc">Premium statues, figures, and collectible models. The Gecco line is the gold standard for game-accurate Silent Hill sculpture.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Scale</th><th>Manufacturer</th><th>Price Range</th><th>Notes</th></tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2015</td><td>Pyramid Head — SH2 ver. <span class="fn-star">⭐</span></td><td>1/6</td><td>Gecco</td><td>$300–500 secondary</td><td>Weathered metal helmet, weathered Great Knife. Game-accurate SH2 design. The definitive version.</td>
+          </tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2016</td><td>Bubble Head Nurse — SH2 ver. <span class="fn-star">⭐</span></td><td>1/6</td><td>Gecco</td><td>$250–400 secondary</td><td>Companion piece to Pyramid Head. Accurate deformed posture and hospital gown.</td>
+          </tr>
+          <tr class="fn-merch-statue">
+            <td>2017</td><td>Heather Mason — SH3 ver.</td><td>1/6</td><td>Gecco</td><td>$200–350 secondary</td><td>Full outfit with shopping bag accessory. Less common than the monster statues but beloved by SH3 fans.</td>
+          </tr>
+          <tr class="fn-merch-toy fn-skip">
+            <td>2003</td><td>Pyramid Head — McFarlane Movie Maniacs</td><td>~7"</td><td>McFarlane Toys</td><td>$30–60 secondary</td><td>Older figure; less accurate than Gecco. Budget entry into SH collecting.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-history">
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">Early Era (1999–2007) — Sparse and Import-Heavy</div>
+          <p style="font-size:.84rem;line-height:1.7">Silent Hill's western merch presence was minimal during the Team Silent era. Most collectibles were Japanese imports — soft vinyl figures, keychains, and strategy guides. The McFarlane Movie Maniacs wave (2001–2004) gave Pyramid Head his first western figure. IDW's comic license (2004–2008) produced the most substantial non-game content of the era.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">Film Era (2006–2012) — NECA + Mainstream Exposure</div>
+          <p style="font-size:.84rem;line-height:1.7">The 2006 Christophe Gans film brought the franchise mainstream visibility. NECA produced film-version Pyramid Head and Nurse figures, though these were based on the cinematic designs rather than the games. The Revelation sequel's poor performance ended the film line. Merch quality and quantity declined as the franchise creatively stagnated in the western developer era.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">Premium Era (2014–Present) — Gecco &amp; Revival</div>
+          <p style="font-size:.84rem;line-height:1.7">Japanese manufacturer Gecco emerged as the definitive Silent Hill collectible maker, producing 1/6-scale game-accurate statues of SH2 and SH3's most iconic figures. The 2022 Konami revival announcement triggered renewed licensing activity — Udon's art book, new apparel, and expanded statue programs. The SH2 Remake (2024) has further accelerated the merch market. The Gecco line remains the benchmark for quality.</p>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Grail Items &amp; What to Avoid</div>
+          <p style="font-size:.84rem;color:var(--text-dim)">Grail: Gecco 1/6 Pyramid Head (SH2 ver.), Gecco Bubble Head Nurse, Gecco Heather Mason, any Robbie the Rabbit limited edition variant, first-edition BradyGames strategy guides. <strong>Avoid:</strong> the NECA film-version figures if you want game-accurate designs; bootleg Pyramid Head statues from Wish/AliExpress (poor paint, wrong proportions); the HD Collection on PS3/360.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Filler Content — Silent Hill Tunarr Channel</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">📺</div>
+      <div class="callout-body">Short-form pieces for bumpers, interstitials, and standalone filler segments on a Silent Hill Tunarr channel. Use between film episodes, game longplays, or as atmospheric openers. Akira Yamaoka's OST is the single best asset this franchise has for a horror channel.</div>
+    </div>
+    <div class="fn-filler-grid">
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">Silent Hill 2 Remake — Reveal Trailer (2022)</div>
+        <div class="fn-filler-meta">2022 · ~2 min · YouTube</div>
+        <div class="fn-filler-desc">The State of Play reveal — James walking through fog to the theme. Elegant, atmospheric, set the tone for the entire revival campaign. Perfect channel opener.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Silent Hill 2 Remake Reveal Trailer"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">Silent Hill f — Announcement Trailer (2022)</div>
+        <div class="fn-filler-meta">2022 · ~2 min · YouTube</div>
+        <div class="fn-filler-desc">The SH f reveal — Japanese schoolgirl, floral horror imagery, completely new visual language. Striking contrast to western SH aesthetics. Great palette cleanser.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Silent Hill f announcement trailer"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Canceled Teaser</div>
+        <div class="fn-filler-name">P.T. — Full Playthrough (documentary-style)</div>
+        <div class="fn-filler-meta">2014 · ~30–60 min · YouTube (preservation)</div>
+        <div class="fn-filler-desc">P.T. is delisted, so a full playthrough video functions as filler. Use a high-quality blind playthrough — the dread is in the reactions. Excellent standalone atmospheric block.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "P.T. Silent Hills full playthrough" (many preserved uploads)</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music / OST</div>
+        <div class="fn-filler-name">Akira Yamaoka — "Theme of Laura" (Live)</div>
+        <div class="fn-filler-meta">Various years · ~4 min · YouTube</div>
+        <div class="fn-filler-desc">The SH2 main theme — possibly the most iconic piece of video game music from the PS2 era. Multiple live concert performances available. Devastating closer for any horror block.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Akira Yamaoka Theme of Laura live"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music / OST</div>
+        <div class="fn-filler-name">Akira Yamaoka — "Promise (Reprise)" feat. Mary Elizabeth McGlynn</div>
+        <div class="fn-filler-meta">2001 · ~5 min · YouTube</div>
+        <div class="fn-filler-desc">SH2 ending theme sung by Mary Elizabeth McGlynn (James's wife's voice). Emotionally devastating. Use as a block closer after any SH2 content. One of the most memorable video game songs ever recorded.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Silent Hill 2 Promise Reprise Mary Elizabeth McGlynn"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+        <div class="fn-filler-name">The Making of Silent Hill 2 (various video essays)</div>
+        <div class="fn-filler-meta">2018–2023 · ~30–60 min · YouTube</div>
+        <div class="fn-filler-desc">Multiple quality retrospectives by channels like Jacob Geller ("Fear of Depths"), Whitelight, and Gehenna Gaming. Use between game or film blocks. These are some of the best video essays in gaming.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Silent Hill 2 video essay" — Jacob Geller and Whitelight versions recommended</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+        <div class="fn-filler-name">Team Silent — Developer Retrospective Interviews</div>
+        <div class="fn-filler-meta">Various · ~10–30 min each · YouTube / Game archive</div>
+        <div class="fn-filler-desc">Scattered interviews with Keiichiro Toyama, Masahiro Ito (Pyramid Head designer), Akira Yamaoka, and Isao Takahashi. Some available through GDC Vault. Mosaic them together as a "making of" block.</div>
+        <div class="fn-filler-where">🔗 GDC Vault + YouTube — search individual names</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+        <div class="fn-filler-name">The Konami Fallout — Silent Hills Cancelation Coverage</div>
+        <div class="fn-filler-meta">2015–2018 · ~15–45 min · YouTube</div>
+        <div class="fn-filler-desc">Documentary-style coverage of the Konami/Kojima split and P.T.'s removal. Noclip's "Konami's Transition" and Kotaku's written documentation. A defining moment in gaming history — excellent filler for the context block between game content.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Noclip Konami" and "Silent Hills canceled documentary"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-bumper">Bumper / Atmospheric</div>
+        <div class="fn-filler-name">Silent Hill — Fog + Siren Ambiance</div>
+        <div class="fn-filler-meta">Various · 1–10 min · YouTube</div>
+        <div class="fn-filler-desc">The Silent Hill town ambiance — fog, air raid siren, distant industrial sounds. True interstitial filler. Numerous YouTube uploads. Use as a transition between content blocks to maintain dread atmosphere.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Silent Hill ambiance fog siren"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-hype">Hype / Fan</div>
+        <div class="fn-filler-name">Masahiro Ito — Pyramid Head Origins (Twitter / interviews)</div>
+        <div class="fn-filler-meta">Various · short clips</div>
+        <div class="fn-filler-desc">Masahiro Ito (Pyramid Head's creator) is famously active on social media discussing his designs. Short interview clips and his own commentary on what Pyramid Head "means" are compelling channel content around SH2 episodes.</div>
+        <div class="fn-filler-where">🔗 YouTube — search "Masahiro Ito Pyramid Head interview"</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Adding to Tunarr</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Download OST videos and ambiance clips → store in a <code>Silent Hill Filler</code> Jellyfin collection</li>
+        <li>Yamaoka OST tracks → best as <strong>block closers</strong> after film or game content</li>
+        <li>Video essays (Geller, Whitelight) → standalone 30–60 min filler blocks</li>
+        <li>Trailers → channel openers, top of content blocks</li>
+        <li>P.T. playthrough → works as a standalone 60-min "horror event" episode</li>
+        <li>Fog/siren ambiance → short transition interstitials between any segments</li>
+      </ul>
+      <p style="margin-top:10px;font-size:.83rem;color:var(--text-dim)">See the <strong>Tunarr</strong> tab for channel config and the full flex content workflow.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 A History of Silent Hill</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Overview</div>
+      <p>Silent Hill was created by Keiichiro Toyama at Konami's Japan studio in 1999 — a deliberate response to the then-dominant Resident Evil formula. Where RE was action-horror with external monsters, Silent Hill turned inward: the town itself was a projection of its visitors' psychological trauma. The franchise ran through four canonical entries under Team Silent (SH1–SH4, 1999–2004), then passed through multiple western developers, culminating in a near-decade of dormancy bookended by the most famous cancellation in gaming history (Silent Hills, 2015). A major revival began in 2022 with Bloober Team's SH2 Remake and multiple new announcements.</p>
+    </div>
+
+    <div class="fn-timeline">
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1996–1998 — "Project Hill"</div>
+        <div class="fn-era-title">The Fog Begins to Form</div>
+        <div class="fn-era-body">Keiichiro Toyama (later director of Forbidden Siren) pitched and began development of what would become Silent Hill at Konami's internal "Team Silent" — a loose collective of young developers across various departments. Inspired by David Lynch's Twin Peaks, Stephen King's novels, and the paintings of Francis Bacon, the team built a psychological horror experience around fog (which also, conveniently, masked the PS1's draw distance limitations). The fog became a design philosophy.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1999 — Silent Hill</div>
+        <div class="fn-era-title">Birth of a New Horror Vocabulary</div>
+        <div class="fn-era-body">Silent Hill launched for PlayStation in February 1999. It sold modestly but received critical attention for its psychological depth, unsettling monster designs (by Masahiro Ito), and Akira Yamaoka's industrial-ambient soundtrack. The game established the franchise's core metaphor: Silent Hill is not a place but a mirror — it reflects the protagonist's guilt, desire, and trauma back at them in monstrous form. Toyama left Konami after the game shipped to found his own studio (which eventually became SIE Japan Studio).</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2001–2004 — The Team Silent Apex</div>
+        <div class="fn-era-title">SH2, SH3, and SH4: The Masterwork Trilogy</div>
+        <div class="fn-era-body">Under directors Masashi Tsuboyama (SH2) and Masayuki Akutsu (SH3), Team Silent produced the games now considered the gold standard of psychological horror. Silent Hill 2 (2001) introduced James Sunderland and Pyramid Head — both Masahiro Ito creations — and told a story of grief, guilt, and repression that had no precedent in gaming. Silent Hill 3 (2003) was the most technically accomplished entry with the best monster design and art direction. Silent Hill 4: The Room (2004) was an internal pivot that experimented with first-person apartment sequences; it was originally a different game concept (Room 302) retrofitted into the SH universe. Team Silent dissolved after SH4 shipped — the core members dispersed to other Konami divisions or left the company entirely.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2006–2012 — The Western Developer Era</div>
+        <div class="fn-era-title">Climax, Double Helix, Vatra: Competent but Missing the Soul</div>
+        <div class="fn-era-body">With Team Silent gone, Konami began licensing the franchise to western developers. Climax Studios (UK) made Origins (2007) and Shattered Memories (2009) — the latter is genuinely interesting as a design experiment. Double Helix (US) made Homecoming (2008), which shifted to action-heavy combat and received a mixed reception. Vatra Games (Czech Republic) made Downpour (2012), the most ambitious and technically troubled western entry. The HD Collection (2012, Mass Media Inc.) became infamous for missing fog effects and broken audio — a significant black mark on the franchise's reputation. This era sold the franchise's name without understanding its purpose.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2012–2015 — The Wilderness and P.T.</div>
+        <div class="fn-era-title">The Greatest Cancellation in Gaming History</div>
+        <div class="fn-era-body">After Downpour's middling performance, the franchise went quiet. Then in August 2014, an anonymous horror game called "P.T." appeared on PSN as a free download. Players eventually discovered it was a Playable Teaser for "Silent Hills" — a collaboration between Hideo Kojima, Guillermo del Toro, and Norman Reedus. P.T. was a looping PS1-sized hallway of escalating psychological horror that became a phenomenon overnight. In 2015, Konami and Kojima Productions parted ways under highly publicized and acrimonious circumstances. Silent Hills was canceled. P.T. was pulled from PSN permanently. The gaming world processed it like a cultural loss.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2015–2022 — The Long Silence</div>
+        <div class="fn-era-title">Seven Years of Rumors and Nothing</div>
+        <div class="fn-era-body">After the Silent Hills cancellation, the franchise was effectively dead. Konami's public reputation cratered following the Kojima departure and widespread reports about its treatment of employees. Silent Hill existed only in rumors: various developers claiming to have pitched Konami, multiple "revival" rumors every year. Konami became a pachinko and mobile gaming company in the public perception. The franchise's absence made every anniversary a wound.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2022–Present — The Revival</div>
+        <div class="fn-era-title">Multiple Fronts, Real Stakes</div>
+        <div class="fn-era-body">In October 2022, Konami held a "Silent Hill Transmission" event announcing multiple simultaneous projects: a remake of SH2 by Bloober Team, a new mainline game (Silent Hill f) by NeoBards Entertainment with story by Ryukishi07, a new game (Townfall) by No Code, and the interactive streaming event Ascension. The SH2 Remake launched in October 2024 to significant critical praise — widely considered the best possible outcome for a remake. Bloober Team (previously known for horror games like Layers of Fear and The Medium) executed a faithful modernization. The franchise has genuine momentum for the first time since 2004, with SH f and Townfall still upcoming.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's not?</div>
+      <p style="font-size:.84rem;line-height:1.7">Silent Hill's canon is loosely defined. Each game is largely self-contained with the exception of the SH1/SH3 pair (direct sequel) and the SH2/SH4 pair (thematic/lore connection). The Town itself is the constant; individual games are not tightly continuity-dependent.</p>
+      <table style="margin-top:12px">
+        <tr><th>Entry</th><th>Canon Status</th><th>Notes</th></tr>
+        <tr><td>SH1, SH2, SH3, SH4</td><td>✅ Canon</td><td>Team Silent core. SH1 and SH3 are directly linked (Alessa/Heather). SH2 is self-contained. SH4 connects via the Order's history.</td></tr>
+        <tr><td>Origins</td><td>⚠️ Soft Canon</td><td>Fills in SH1 prequel lore but was not made by Team Silent. Konami approved it but it has retcon-adjacent issues.</td></tr>
+        <tr><td>Shattered Memories</td><td>❌ Non-canon</td><td>Officially an "alternate reimagining" of SH1. The game itself tells you this at the start. Same setting, completely different story.</td></tr>
+        <tr><td>Homecoming, Downpour</td><td>⚠️ Ambiguous</td><td>Set in the same universe with Order references, but Konami has never formally integrated them into the main timeline.</td></tr>
+        <tr><td>Book of Memories</td><td>❌ Non-canon</td><td>Stated by developer as taking place in a separate timeline. Pure spinoff.</td></tr>
+        <tr><td>P.T. / Silent Hills</td><td>⚠️ Ambiguous</td><td>P.T. references James Sunderland. Would have been canon if completed. Now a fragment.</td></tr>
+        <tr><td>SH2 Remake (2024)</td><td>✅ Canon</td><td>Konami officially treats the remake as the canonical version going forward. All new promotions use its James model.</td></tr>
+        <tr><td>SH f, Townfall</td><td>✅ Announced Canon</td><td>New mainline entries. SH f appears to be a standalone story set in Japan.</td></tr>
+        <tr><td>2006 Film, Revelation</td><td>❌ Non-canon</td><td>Set in a film-specific continuity. Director Gans drew from the games but it's a separate continuity.</td></tr>
+        <tr><td>IDW Comics</td><td>❌ Non-canon</td><td>Licensed fiction; Konami did not involve the game developers in its creation.</td></tr>
+        <tr><td>Mobile games (SH Mobile 1–3, Orphan 1–2)</td><td>❌ Non-canon / Unknown</td><td>Japan-only and largely lost. Their canonical status was never formally addressed.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>Pyramid Head was designed by Masahiro Ito and was never intended as the franchise's mascot — he is specific to James Sunderland's guilt. His appearances in non-SH2 entries (film, Homecoming, SH2 Remake's marketing) have always been controversial with Team Silent alumni.</li>
+        <li>Akira Yamaoka composed every mainline SH soundtrack through Downpour and was rehired for the SH2 Remake. His industrial ambient-rock fusion is so central to the franchise that many fans consider the OST to be the primary horror mechanism — not the visuals.</li>
+        <li>Keiichiro Toyama (SH1 director) created Forbidden Siren after leaving Konami — a spiritual successor to SH's psychological horror approach. He later co-founded Bokeh Game Studio (Slitterhead, 2024).</li>
+        <li>The PS1 version of SH1 used fog not just atmospherically but as a technical necessity — the PS1 could not render more than a short draw distance without it. The design team recognized this limitation as an asset and doubled down on it.</li>
+        <li>P.T. was downloaded approximately 1 million times before it was delisted. PS4 consoles with P.T. still installed have sold on eBay for $1,000–4,000+, with the game itself as the selling point.</li>
+        <li>The SH2 "Leave" ending — in which James and Mary survive — was not intended by Masashi Tsuboyama as the "true" ending. The multiple endings reflect the player's psychological investment in James's guilt or redemption, not a ranked narrative truth.</li>
+        <li>Silent Hill 3 contains a Heather dressing room that can be found to have a message referencing the events of SH2, implying the games exist in the same world but are mostly self-contained tragedies.</li>
+        <li>Konami trademarked "Silent Hills" (plural) in 2015 before officially canceling the project — the trademark was allowed to lapse in 2022, which some fans interpreted as a sign of the revival effort moving forward.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>

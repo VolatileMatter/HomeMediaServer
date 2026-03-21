@@ -331,8 +331,8 @@ function navigateTo(idx) {
   currentIndex = idx;
   const f = FRANCHISES[idx];
 
-  // Update URL without reload
-  history.replaceState(null, '', 'franchise-viewer.html?id=' + f.id);
+// Update URL — pushState so browser Back works
+  history.pushState({ franchiseId: f.id }, '', 'franchise-viewer.html?id=' + f.id);
 
   // Update crumb
   document.getElementById('crumb-name').textContent = f.name;
@@ -364,9 +364,10 @@ function onFrameLoad() {
 function goBack() {
   if (window.parent && window.parent !== window) {
     const p = window.parent;
-    // Clear the cached pane so go() reloads the iframe fresh
     if (p.loaded) p.loaded.delete('franchisenavigator');
     if (p.go) p.go('franchisenavigator');
+  } else if (history.length > 1) {
+    history.back();
   } else {
     location.href = 'franchise-navigator.html';
   }

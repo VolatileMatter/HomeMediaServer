@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Five Nights at Freddy's</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 10px 20px; background: transparent; border: none;
+  border-bottom: 3px solid transparent; color: var(--text-dim);
+  cursor: pointer; transition: all .16s; margin-bottom: -2px; white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(139,37,0,.5); }
+.fn-tab-btn.active { color: #e05a2b; border-bottom-color: #e05a2b; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(139,37,0,.18); border-color: #e05a2b; color: #e05a2b; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid #e05a2b; padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3); color: #e05a2b;
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 7px 10px; text-align: left;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top; line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era rows */
+.fn-arc-row td {
+  background: rgba(139,37,0,.1) !important; color: #e05a2b;
+  font-size: .69rem; font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: .08em; padding: 5px 10px;
+  border-top: 1px solid rgba(139,37,0,.3) !important;
+  border-bottom: 1px solid rgba(139,37,0,.2) !important;
+}
+
+/* Media / lore break rows — purple */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic; color: var(--text-dim); font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform colour stripes */
+.fn-pc      td:first-child { border-left: 3px solid #90a4ae; }
+.fn-mobile  td:first-child { border-left: 3px solid #81c784; }
+.fn-vr      td:first-child { border-left: 3px solid #80cbc4; }
+.fn-console td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-book    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-novel   td:first-child { border-left: 3px solid #ce93d8; }
+.fn-movie   td:first-child { border-left: 3px solid #ffb74d; }
+.fn-fangame td:first-child { border-left: 3px solid #f48fb1; }
+.fn-defunct td:first-child { border-left: 3px solid #ef5350; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(139,37,0,.05) !important; }
+.fn-highlight td:first-child { border-left: 3px solid #e05a2b !important; }
+
+/* Faded = optional / defunct */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block; font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px; border-radius: 3px; white-space: nowrap; vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-dead   { background: rgba(239,83,80,.25);   color: #ff6b6b; border: 1px solid rgba(239,83,80,.5); }
+.fn-tag-free   { background: rgba(76,175,80,.14);   color: #a5d6a7; border: 1px solid rgba(76,175,80,.25); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-fan    { background: rgba(244,143,177,.12); color: #f48fb1; border: 1px solid rgba(244,143,177,.3); }
+.fn-tag-canon  { background: rgba(139,37,0,.14);    color: #e05a2b; border: 1px solid rgba(139,37,0,.3); }
+.fn-star       { color: #e05a2b; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #e05a2b; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #e05a2b; border: 3px solid var(--bg);
+}
+.fn-era-year { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: .1em; color: #e05a2b; text-transform: uppercase; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: #e05a2b; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 14px; }
+.fn-filler-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.fn-filler-type { font-family: 'Share Tech Mono', monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; margin-bottom: 7px; display: inline-block; }
+.fn-filler-trailer     { background: rgba(91,141,217,.15); color: #5b8dd9; border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-music       { background: rgba(78,205,196,.12); color: #4ecdc4; border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary { background: rgba(224,133,92,.12); color: #e0855c; border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc; border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+/* Defunct banner */
+.fn-defunct-banner {
+  background: rgba(239,83,80,.08); border: 1px solid rgba(239,83,80,.4);
+  border-radius: 4px; padding: 14px 16px; margin-bottom: 16px;
+  font-size: .82rem; line-height: 1.7; color: var(--text);
+}
+.fn-defunct-banner strong { color: #ff6b6b; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🐻</div>
+  <div>
+    <h1>Five Nights at Freddy's</h1>
+    <div class="subtitle">// PC · Mobile · VR · Console · Books · Movie · Fan Games · 2014–Present //</div>
+    <p class="desc">
+      Scott Cawthon's indie horror megafranchise — launched in 2014 as a $5 GameJolt game about surviving animatronics, grew into one of gaming's most intricate unsolved lore puzzles and a genuine multimedia empire.
+      The core games span FNaF 1 through Security Breach + Ruin; the extended universe includes 20+ anthology novels, a theatrical film, fan games that became ascended canon, and a VR subseries.
+      Use the Library tab to browse every entry by release order, story arc, or platform. Other tabs cover the movie, books, merchandise, Tunarr filler material, and the full history from GameJolt prototype to Blumhouse film.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">17</div><div class="fn-stat-label">Main Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">5</div><div class="fn-stat-label">Fan Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">Movie</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">24+</div><div class="fn-stat-label">Books</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2014</div><div class="fn-stat-label">Est.</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The FNaF Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','arc',       this)">🕰️ By Story Arc</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','fangames',  this)">👾 Fan Games</button>
+      </div>
+
+      <!-- ─── RELEASE ORDER ─────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          All games in real-world release order. ⭐ = recommended entry or standout entry. Gold rows = highlights. Faded = optional. Red tags = defunct/shutdown.
+          Fan games are marked separately and appear at the bottom.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── The Original Trilogy (2014–2015) ──</td></tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2014</td>
+            <td>Five Nights at Freddy's <span class="fn-star">⭐</span></td>
+            <td>PC · Console · Mobile</td>
+            <td>Steam / Mobile</td>
+            <td><span class="fn-star">⭐</span> Start here. 5 nights, 4 animatronics, no doors — just cameras, lights, and power. Short and brutal.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2014</td>
+            <td>Five Nights at Freddy's 2 <span class="fn-star">⭐</span></td>
+            <td>PC · Console · Mobile</td>
+            <td>Steam / Mobile</td>
+            <td>Prequel. Toy animatronics + Withered variants. No doors — mask mechanic. Sets the bulk of the series lore.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>2015</td>
+            <td>Five Nights at Freddy's 3</td>
+            <td>PC · Console · Mobile</td>
+            <td>Steam / Mobile</td>
+            <td>30 years later. Fazbear's Fright. Springtrap introduced. The minigame sequences reveal who William Afton is and what he did. Has a true ending.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2015</td>
+            <td>Five Nights at Freddy's 4 <span class="fn-star">⭐</span></td>
+            <td>PC · Console · Mobile</td>
+            <td>Steam / Mobile</td>
+            <td><span class="fn-star">⭐</span> No cameras. A child's bedroom. Nightmare animatronics at the door. The most frightening entry. Deeply mysterious lore. Halloween DLC adds extra nightmare variants.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── The Sister Location Arc (2016–2018) ──</td></tr>
+
+          <tr class="fn-pc fn-skip">
+            <td>2016</td>
+            <td>FNaF World</td>
+            <td>PC · Mobile</td>
+            <td>GameJolt (free)</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Chibi RPG. Originally broken, pulled from Steam, remade, released free. The Fredbear dialogue and secret endings have lore weight. Otherwise a palate cleanser.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2016</td>
+            <td>Sister Location <span class="fn-star">⭐</span></td>
+            <td>PC · Console · Mobile</td>
+            <td>Steam / Mobile</td>
+            <td><span class="fn-star">⭐</span> Circus Baby's underground facility. Fully scripted narrative. Baby, Ballora, Ennard. Major story pivot — the Afton family arc begins in earnest.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2017</td>
+            <td>Freddy Fazbear's Pizzeria Simulator <span class="fn-star">⭐</span></td>
+            <td>PC · Mobile</td>
+            <td>Steam (free)</td>
+            <td><span class="fn-star">⭐</span> Presented as a free tycoon game. Actually FNaF 6. The conclusion of the Afton/Emily arc — the ending is genuinely earned. Do not spoil it.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>2018</td>
+            <td>Ultimate Custom Night</td>
+            <td>PC · Mobile</td>
+            <td>Steam (free)</td>
+            <td>50 animatronics, fully configurable difficulty. The Cassette Man / Afton cutscene is canon. 50/20 mode is legendary in the community.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── The Steel Wool / VR / Glitchtrap Arc (2019–2023) ──</td></tr>
+
+          <tr class="fn-vr fn-highlight">
+            <td>2019</td>
+            <td>Help Wanted (VR) <span class="fn-star">⭐</span></td>
+            <td>PC VR · PSVR · Switch</td>
+            <td>Steam / PSN</td>
+            <td><span class="fn-star">⭐</span> VR anthology of rebuilt FNaF 1–4 + new content. First Steel Wool entry. Introduces Glitchtrap (William Afton digitized) and the Mimic concept — foundational for the next arc.</td>
+          </tr>
+          <tr class="fn-defunct fn-skip">
+            <td>2019</td>
+            <td>FNaF AR: Special Delivery</td>
+            <td>Mobile (AR)</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-dead">💀 Server shutdown Jan 2023</span> Animatronics delivered to your real-world location via AR. No longer playable. Community video archives only.</td>
+          </tr>
+          <tr class="fn-vr fn-skip">
+            <td>2019</td>
+            <td>Help Wanted: Curse of Dreadbear (DLC)</td>
+            <td>PC VR · PSVR</td>
+            <td>Steam / PSN</td>
+            <td><span class="fn-tag fn-tag-opt">DLC</span> Halloween DLC. Dreadbear haunted maze. Primarily aesthetic; some lore notes.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2019</td>
+            <td>Freddy in Space 2</td>
+            <td>PC</td>
+            <td>GameJolt (free)</td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Charity shooter. Non-canon. Released for Extra Life fundraiser.</td>
+          </tr>
+          <tr class="fn-console fn-highlight">
+            <td>2021</td>
+            <td>Security Breach</td>
+            <td>PC · PS4 · PS5 · Switch · Xbox</td>
+            <td>Steam / Consoles</td>
+            <td>Open-world stealth in the Mega Pizzaplex. Glamrock era. Multiple endings — only some are canon. Run Ruin DLC after; it corrects and concludes the arc.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2022</td>
+            <td>FNaF Plus (fan-made, Scott-endorsed)</td>
+            <td>PC</td>
+            <td>GameJolt / Steam</td>
+            <td><span class="fn-tag fn-tag-fan">fan/ascended</span> Phisnom's FNaF 1 remake. Scott publicly promoted it. Semi-official status. Superior visuals and revamped mechanics.</td>
+          </tr>
+          <tr class="fn-console fn-highlight">
+            <td>2023</td>
+            <td>Security Breach: Ruin (DLC) <span class="fn-star">⭐</span></td>
+            <td>PC · PS4 · PS5 · Switch · Xbox</td>
+            <td>Steam / Consoles (free DLC)</td>
+            <td><span class="fn-star">⭐</span> Free DLC. Cassie in the abandoned Pizzaplex. The Mimic formally revealed. Connects Help Wanted, Security Breach, and the Tales from the Pizzaplex books. The real narrative ending.</td>
+          </tr>
+          <tr class="fn-vr">
+            <td>2023</td>
+            <td>Help Wanted 2 (VR)</td>
+            <td>PC VR · PSVR2</td>
+            <td>Steam / PSN</td>
+            <td>VR sequel anthology. Security Breach / Ruin era content. Continues Mimic lore. Flat mode available.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2024</td>
+            <td>Into the Pit <span class="fn-star">⭐</span></td>
+            <td>PC · Switch · PS4/5 · Xbox</td>
+            <td>Steam / Consoles</td>
+            <td><span class="fn-star">⭐</span> 2D pixel adventure adapting the Fazbear Frights story. Oswald falls through a ball pit into 1985 — Springtrap in his prime. Critically acclaimed, best received non-Scott entry.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2023</td>
+            <td>Freddy in Space 3: Chica in Space</td>
+            <td>PC</td>
+            <td>GameJolt (free)</td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Third charity shooter. Extra Life fundraiser. Non-canon.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Ascended Fan Games ──</td></tr>
+          <tr class="fn-fangame fn-highlight">
+            <td>2014–2021</td>
+            <td>One Night at Flumpty's 1–3 <span class="fn-star">⭐</span></td>
+            <td>PC · Mobile</td>
+            <td>itch / GameJolt / Mobile</td>
+            <td><span class="fn-tag fn-tag-fan">fan / ascended</span> <span class="fn-star">⭐</span> Jonochrome's Flumpty trilogy. An egg who kidnaps you. Scott personally promoted ONaF 3. PC free; mobile paid. Charming, genuinely funny, surprisingly terrifying.</td>
+          </tr>
+          <tr class="fn-fangame fn-highlight">
+            <td>2017</td>
+            <td>The Joy of Creation: Story Mode <span class="fn-star">⭐</span></td>
+            <td>PC</td>
+            <td>GameJolt (free)</td>
+            <td><span class="fn-tag fn-tag-fan">fan</span> <span class="fn-star">⭐</span> Nikson's masterpiece. Scott Cawthon's own family stalked by Ignited Freddy. Chapter-based, terrifying, one of the most acclaimed FNaF fan games ever made.</td>
+          </tr>
+          <tr class="fn-fangame">
+            <td>2015+</td>
+            <td>Five Nights at Candy's 1–3 + Remaster</td>
+            <td>PC</td>
+            <td>GameJolt (free)</td>
+            <td><span class="fn-tag fn-tag-fan">fan</span> Candy's Burgers & Fries — polished alternate restaurant with self-contained lore and multiple entries. The most feature-complete FNaF fan series.</td>
+          </tr>
+          <tr class="fn-fangame">
+            <td>2016–2023</td>
+            <td>POPGOES / POPGOES Evergreen</td>
+            <td>PC</td>
+            <td>GameJolt (free) / Steam</td>
+            <td><span class="fn-tag fn-tag-fan">fan / semi-official</span> Kane Carter's POPGOES Weasel series. POPGOES Evergreen (2023) is the remake and recommended version. Kane Carter became an official FNaF extended-universe contributor.</td>
+          </tr>
+
+        </table>
+
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#e05a2b"></span>Orange border = recommended / highlighted</span>
+          <span><span style="opacity:.5">Faded</span> = optional or skip-first-time</span>
+          <span><span class="fn-tag fn-tag-dead">💀 Defunct</span> servers shut down, no longer playable</span>
+          <span><span class="fn-tag fn-tag-fan">fan</span> fan-made entry</span>
+          <span><span class="fn-tag fn-tag-free">free</span> available free on GameJolt/Steam</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = book/lore insert point</span>
+        </div>
+      </div>
+
+      <!-- ─── BY STORY ARC ───────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-arc">
+        <div class="fn-view-desc">
+          FNaF's story is famously non-linear. This view groups entries by narrative arc rather than release date — useful after your first playthrough for re-reading the lore in context.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>In-Story Role</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🟠 Arc 1 — The Original Hauntings (FNaF 1–3)</td></tr>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>FNaF 2 (1987)</td><td>Earliest story event. The Missing Children Incident in detail.</td><td>Although released 2nd, set earliest in timeline.</td></tr>
+          <tr class="fn-pc"><td>2</td><td>FNaF 1 (1993)</td><td>The original Freddy's. The hauntings play out.</td><td>The restaurant everyone burned down in 3.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>FNaF 3 (2023)</td><td>Fazbear's Fright. Springtrap = William Afton's first death. Minigames show who freed the children.</td><td>True ending requires completing minigames.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🟠 Arc 2 — The Child and the Fredbear (FNaF 4)</td></tr>
+          <tr class="fn-pc fn-highlight"><td>4</td><td>FNaF 4 (1983)</td><td>The Crying Child's last days. The Fredbear Bite. Nightmare animatronics as trauma metaphors.</td><td>Set before FNaF 2 in the timeline. Deeply debated.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🟠 Arc 3 — The Afton Family (Sister Location → Pizzeria Sim)</td></tr>
+          <tr class="fn-pc fn-highlight"><td>5</td><td>Sister Location</td><td>William Afton's daughter Elizabeth and the Circus Baby murders. Ennard and Michael Afton.</td><td>The Afton family becomes the central throughline.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>6</td><td>Pizzeria Simulator (FNaF 6)</td><td>Henry Emily's revenge. The ultimate confrontation. The ending closes the original arc definitively.</td><td>Do not spoil. Free on Steam.</td></tr>
+          <tr class="fn-pc"><td>7</td><td>Ultimate Custom Night</td><td>William Afton's purgatory. The Cassette Man reveal.</td><td>Post-credits canon for the original arc.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🟠 Arc 4 — Glitchtrap / The Mimic (Help Wanted → Ruin)</td></tr>
+          <tr class="fn-vr fn-highlight"><td>8</td><td>Help Wanted (VR)</td><td>Glitchtrap (Afton's digital echo) infects the VR game and escapes into Vanessa.</td><td>New continuity managed by Steel Wool.</td></tr>
+          <tr class="fn-console fn-highlight"><td>9</td><td>Security Breach</td><td>Gregory in the Pizzaplex. Glamrock Freddy as protector. Vanny / Vanessa as antagonist.</td><td>Multiple endings; only some canonically matter.</td></tr>
+          <tr class="fn-console fn-highlight"><td>10</td><td>Security Breach: Ruin</td><td>Cassie and the Mimic. The Mimic revealed as an entity distinct from Afton — a digital copycat.</td><td>Required reading: Tales from the Pizzaplex vol. 2 "The Mimic."</td></tr>
+          <tr class="fn-vr"><td>11</td><td>Help Wanted 2 (VR)</td><td>Continues the Mimic arc. Expands on Ruin lore.</td><td>Most recent entry (2023).</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🟠 Standalone / Outside Canon</td></tr>
+          <tr class="fn-pc fn-highlight"><td>—</td><td>Into the Pit (2024)</td><td>Adapts "Into the Pit" Fazbear Frights story. Springtrap 1985 origin in detail.</td><td>Canon to Fazbear Frights continuity.</td></tr>
+          <tr class="fn-pc fn-skip"><td>—</td><td>FNaF World</td><td>Soft-canon. Fredbear dialogue hints at meta-narrative level.</td><td>Free. Optional.</td></tr>
+
+        </table>
+      </div>
+
+      <!-- ─── BY PLATFORM ──────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">Entries grouped by primary platform. Most core games are cross-platform; this view helps identify what can be played where.</div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Titles</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🖥️ PC (Steam / GameJolt / itch.io)</td></tr>
+          <tr class="fn-pc"><td>PC (Steam)</td><td>FNaF 1–4, Sister Location, Pizzeria Sim (free), UCN (free), Help Wanted, Help Wanted 2, Security Breach + Ruin, Into the Pit</td><td>All main entries available on Steam. Pizzeria Simulator and UCN are free.</td></tr>
+          <tr class="fn-pc"><td>PC (Free / GameJolt)</td><td>FNaF World, Freddy in Space 2, FNaF Plus, POPGOES Evergreen, Five Nights at Candy's, ONaF 1–2, TJoC Story Mode</td><td>Large library of free PC games including fan entries.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">📱 Mobile (iOS / Android)</td></tr>
+          <tr class="fn-mobile"><td>Mobile</td><td>FNaF 1–4, Sister Location, FNaF World, ONaF 3 (paid)</td><td>Classic mobile ports by Clickteam USA. Generally solid. FNaF AR: Special Delivery was mobile-only but is now defunct (shutdown Jan 2023).</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🥽 VR (PC VR / PSVR / PSVR2)</td></tr>
+          <tr class="fn-vr"><td>VR</td><td>Help Wanted, Help Wanted: Curse of Dreadbear, Help Wanted 2</td><td>Help Wanted supports flat mode (non-VR). HW2 is PSVR2 / PC VR only with flat option. Best experienced in VR.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🎮 Console (Switch / PS / Xbox)</td></tr>
+          <tr class="fn-console"><td>Console</td><td>FNaF 1–4 (Switch, PS4, Xbox), Sister Location (Switch), Security Breach + Ruin (PS4/5, Switch, Xbox), Into the Pit (all)</td><td>Steel Wool handled console ports for later entries. Into the Pit is on all platforms.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">💀 Defunct Platforms</td></tr>
+          <tr class="fn-defunct fn-skip"><td>Mobile AR</td><td>FNaF AR: Special Delivery</td><td><span class="fn-tag fn-tag-dead">💀 Dead</span> Illumix-developed AR game. Servers shut down January 13, 2023. Completely unplayable.</td></tr>
+
+        </table>
+      </div>
+
+      <!-- ─── BEST FIRST ────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          Recommended play order for a new player — prioritizing the best entries first, then building out to the full lore. Assumes PC access.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Why Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🎯 Start Here — Hook First</td></tr>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>FNaF 1 <span class="fn-star">⭐</span></td><td>Origin point. Short (under 2 hours to complete). The purest expression of the formula. If this grabs you, you're in.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2</td><td>FNaF 4 <span class="fn-star">⭐</span></td><td>Skip 2 and 3 initially — come back to them with context. FNaF 4 is the most frightening and the most emotionally affecting. Its mystery will pull you into the lore.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>Sister Location <span class="fn-star">⭐</span></td><td>The tone shift. Fully scripted, narrative-forward, introduces Baby. The best-paced entry in the franchise.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🧩 Now Fill in the Gaps</td></tr>
+          <tr class="fn-pc fn-highlight"><td>4</td><td>FNaF 2 <span class="fn-star">⭐</span></td><td>You understand enough now to appreciate what the minigames are showing you about Afton. Play this for lore, not just gameplay.</td></tr>
+          <tr class="fn-pc"><td>5</td><td>FNaF 3</td><td>The Springtrap reveal and the minigame sequence that names the killer. The true ending matters.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>6</td><td>Pizzeria Simulator (FNaF 6) <span class="fn-star">⭐</span></td><td>The payoff for everything you've read and played. Don't look up the ending in advance.</td></tr>
+          <tr class="fn-pc"><td>7</td><td>Ultimate Custom Night</td><td>The epilogue. The Cassette Man cutscene is the final word on the original arc.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🔮 The New Arc</td></tr>
+          <tr class="fn-vr fn-highlight"><td>8</td><td>Help Wanted (VR)</td><td>New era. Flat mode works fine. Glitchtrap changes everything.</td></tr>
+          <tr class="fn-console fn-highlight"><td>9</td><td>Security Breach + Ruin</td><td>Play Ruin immediately after Security Breach. Ruin is the actual ending. Read Tales from the Pizzaplex vol. 2 between them if possible.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>10</td><td>Into the Pit <span class="fn-star">⭐</span></td><td>Best non-Scott entry. Play whenever — completely standalone. Pixel art horror at its best.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">👾 Fan Games Worth Your Time</td></tr>
+          <tr class="fn-fangame fn-highlight"><td>★</td><td>The Joy of Creation: Story Mode</td><td>The best FNaF fan game. Five chapters. Ignited Freddy in Scott Cawthon's own house. Free.</td></tr>
+          <tr class="fn-fangame fn-highlight"><td>★</td><td>One Night at Flumpty's 1–3</td><td>Absurdist, funny, and somehow scary. ONaF 3 was promoted by Scott himself. Short and free.</td></tr>
+
+        </table>
+      </div>
+
+      <!-- ─── FAN GAMES ─────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-fangames">
+        <div class="fn-view-desc">
+          The FNaF fan game ecosystem is enormous. This view covers notable fan games — particularly ones that became ascended canon, received official acknowledgment, or are considered essential by the community. All are free unless noted.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Developer</th><th>Status</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⭐ Ascended / Semi-Official</td></tr>
+          <tr class="fn-fangame fn-highlight">
+            <td>2014–2021</td>
+            <td>One Night at Flumpty's 1–3 <span class="fn-star">⭐</span></td>
+            <td>Jonochrome</td>
+            <td><span class="fn-tag fn-tag-fan">Scott-endorsed</span></td>
+            <td>Flumpty Bumpty kidnaps you. An egg who exists outside of the story and therefore cannot be copyrighted, allegedly. ONaF 3 promoted on official FNaF socials. ONaF 3 is paid on mobile; PC free.</td>
+          </tr>
+          <tr class="fn-fangame fn-highlight">
+            <td>2022</td>
+            <td>FNaF Plus <span class="fn-star">⭐</span></td>
+            <td>Phisnom</td>
+            <td><span class="fn-tag fn-tag-fan">Scott-sponsored</span></td>
+            <td>Fully remastered FNaF 1 with new mechanics and visuals. Phisnom was publicly endorsed by Scott. Available on GameJolt (free) and Steam (paid). Most polished version of FNaF 1 that exists.</td>
+          </tr>
+          <tr class="fn-fangame fn-highlight">
+            <td>2016–2023</td>
+            <td>POPGOES / POPGOES Evergreen</td>
+            <td>Kane Carter</td>
+            <td><span class="fn-tag fn-tag-fan">semi-official</span></td>
+            <td>Kane Carter went on to contribute to official FNaF extended-universe media. POPGOES Evergreen is the definitive version — available on Steam.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🏆 Community Acclaimed</td></tr>
+          <tr class="fn-fangame fn-highlight">
+            <td>2017</td>
+            <td>The Joy of Creation: Story Mode <span class="fn-star">⭐</span></td>
+            <td>Nikson</td>
+            <td><span class="fn-tag fn-tag-fan">fan</span></td>
+            <td>The most acclaimed FNaF fan game. Five chapters, each with unique mechanics. Scott Cawthon's family as characters. Ignited animatronics became iconic. Free on GameJolt.</td>
+          </tr>
+          <tr class="fn-fangame fn-highlight">
+            <td>2015+</td>
+            <td>Five Nights at Candy's 1–3 + Remaster</td>
+            <td>Emil Ace Macko (RAT)</td>
+            <td><span class="fn-tag fn-tag-fan">fan</span></td>
+            <td>Candy's Burgers & Fries. Four entries total (3 main games + remaster). Self-contained lore. Among the most polished fan series — Cat and Candy are beloved community characters.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎵 Cultural Phenomena (Non-Game)</td></tr>
+          <tr class="fn-fangame fn-skip">
+            <td>2014–2016</td>
+            <td>FNaF Musicals by Random Encounters</td>
+            <td>Random Encounters</td>
+            <td><span class="fn-tag fn-tag-fan">fan / YouTube</span></td>
+            <td>Six-part YouTube musical series covering FNaF 1 through Sister Location. Several videos exceeded 100M views. Defining artifact of early FNaF fandom culture.</td>
+          </tr>
+          <tr class="fn-fangame fn-skip">
+            <td>2014+</td>
+            <td>SFM Animation Ecosystem</td>
+            <td>Community</td>
+            <td><span class="fn-tag fn-tag-fan">fan / YouTube</span></td>
+            <td>Source Filmmaker FNaF animations constituted one of the largest content verticals on YouTube 2014–2017. Channels like GameTunes, EnchantedMob, and The Stupid Ones collectively amassed billions of views.</td>
+          </tr>
+
+        </table>
+
+        <div class="callout callout-tip" style="margin-top:12px">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">Most FNaF fan games are available free on <strong>GameJolt</strong> or <strong>itch.io</strong>. The FNaF Fan Game Wiki maintains an exhaustive list. Notable omissions here: There are hundreds of fan games — this list focuses on the most acclaimed, most-played, or officially-acknowledged works.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+     Note: FNaF has no proper animated series — this tab covers
+     the YouTube musical/animation ecosystem and any animated content.
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 FNaF Animated &amp; Video Content</div>
+
+    <div class="callout callout-warn" style="margin-bottom:20px">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>No official animated series exists as of 2026.</strong> A Netflix series was rumored/announced but unconfirmed. This tab covers official animated shorts from Steel Wool, the Random Encounters musical series (enormous cultural footprint), and the YouTube animation ecosystem that defined early FNaF fandom.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Official Animated Content</div>
+      <table class="fn-table">
+        <tr><th>Year</th><th>Title</th><th>Type</th><th>Where</th><th>Notes</th></tr>
+        <tr class="fn-pc fn-highlight">
+          <td>2023</td>
+          <td>Security Breach RUIN Animated Trailer</td>
+          <td>Short Film (~2 min)</td>
+          <td>YouTube (official Steel Wool)</td>
+          <td>Animated short produced by Steel Wool for the Ruin DLC announcement. Cassie and the Mask. Canonically depicts the setup for the DLC. The most polished official animation to date.</td>
+        </tr>
+        <tr class="fn-pc fn-skip">
+          <td>2021–2023</td>
+          <td>Steel Wool Animated Character Shorts</td>
+          <td>Shorts (~1–2 min each)</td>
+          <td>YouTube (official)</td>
+          <td>Various character reveal and promotional animated shorts for Security Breach — Glamrock Freddy, Roxanne Wolf, Montgomery Gator, Glamrock Chica. Canon character design references.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Fan Animated Series (Cultural Essential)</div>
+      <table class="fn-table">
+        <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Creator</th><th>Notes</th></tr>
+        <tr class="fn-fangame fn-highlight">
+          <td>2014–2016</td>
+          <td>FNaF Musicals (Random Encounters)</td>
+          <td>6 episodes</td>
+          <td>Random Encounters (AJ Pinkerton)</td>
+          <td>The defining FNaF fan media artifact. Covers FNaF 1 through Sister Location. Each episode is a fully produced musical number. "It's Been So Long" (FNaF 3 musical) alone exceeds 150M views. These videos were the primary entry point into FNaF fandom for millions of viewers 2015–2017.</td>
+        </tr>
+        <tr class="fn-fangame fn-highlight">
+          <td>2014–2018</td>
+          <td>FNaF SFM Animation Community</td>
+          <td>Hundreds of videos</td>
+          <td>Various (EnchantedMob, GameTunes, etc.)</td>
+          <td>Source Filmmaker animation ecosystem. Collectively billions of views. Channels like The Stupendium, EnchantedMob, and GameTunes produced some of the most-watched YouTube content of the mid-2010s using FNaF assets.</td>
+        </tr>
+        <tr class="fn-fangame fn-skip">
+          <td>2023</td>
+          <td>GoldenSector (FNaF fan animation — Ruin era)</td>
+          <td>Ongoing</td>
+          <td>Various community animators</td>
+          <td>Current-era community animation, primarily covering Security Breach and Ruin content. Quality varies widely.</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\TV\Five Nights at Freddys\
+  └── Official Shorts (2023)\
+      ├── RUIN Animated Trailer.mp4
+      └── Glamrock Character Shorts\</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 FNaF Movies &amp; Films</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',        this)">📋 All Films</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">All released and announced theatrical/home video content in the franchise.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Runtime</th><th>Type</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Released ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2023</td>
+            <td>Five Nights at Freddy's <span class="fn-star">⭐</span></td>
+            <td>~110 min</td>
+            <td><span class="fn-tag fn-tag-yes">Theatrical</span></td>
+            <td>Peacock / Jellyfin</td>
+            <td>Josh Hutcherson as Mike Schmidt. Elizabeth Lail as Vanessa. Matthew Lillard as William Afton. Blumhouse / Universal production. $20M budget, $297M worldwide gross. PG-13. Day-and-date Peacock release. Non-canonical to the games but draws from Silver Eyes novel continuity. A sequel is in development.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── In Development / Announced ──</td></tr>
+          <tr class="fn-movie fn-skip">
+            <td>TBD</td>
+            <td>Five Nights at Freddy's (sequel)</td>
+            <td>TBD</td>
+            <td><span class="fn-tag fn-tag-opt">announced</span></td>
+            <td>TBD</td>
+            <td>Confirmed by Blumhouse following the theatrical success of the first film. No release date as of early 2026.</td>
+          </tr>
+
+        </table>
+
+        <div class="callout callout-tip" style="margin-top:12px">
+          <div class="callout-icon">🎬</div>
+          <div class="callout-body">
+            <strong>Canon note:</strong> The 2023 film is not considered canon to the main game timeline. It draws loosely from the Silver Eyes novel continuity (alternate universe). Josh Hutcherson and Matthew Lillard are both excellent; Lillard's casting is widely considered perfect. The film skews younger than the games.
+          </div>
+        </div>
+      </div>
+
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">Recommended order — play the games first, then the film as a separate take.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Type</th><th>Notes</th></tr>
+          <tr class="fn-highlight fn-pc">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e05a2b">1</td>
+            <td>Play FNaF 1–3 (at minimum)</td><td>Games</td>
+            <td>The film references enough that familiarity with the original restaurant, the murders, and William Afton makes it significantly richer.</td>
+          </tr>
+          <tr class="fn-highlight fn-movie">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e05a2b">2</td>
+            <td>Five Nights at Freddy's (2023)</td><td>Movie</td>
+            <td>Enjoy as a companion piece, not a canon continuation. Matthew Lillard.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Five Nights at Freddys\
+  └── Five Nights at Freddy's (2023)\
+      └── Five Nights at Freddy's (2023).mkv</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 FNaF Merchandise &amp; Collectibles</div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">📦 2014–2015 — The Initial Wave</div>
+      <p style="font-size:.84rem;line-height:1.7;margin:0">
+        FNaF merchandise launched almost immediately after the game's success. The first official products were plush toys produced by Funko — the Freddy, Bonnie, Chica, and Foxy plush set sold out almost immediately and remained scarce for over a year.
+        Hot Topic became the primary physical retail channel for FNaF apparel, selling out of FNaF shirts within days of restocking. The initial Funko Pop! figures (Freddy Fazbear, Bonnie, Chica, Foxy, Golden Freddy) launched in 2015 and became some of Funko's fastest-selling new licenses.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">🧸 2016–2019 — The Funko Explosion &amp; Action Figures</div>
+      <p style="font-size:.84rem;line-height:1.7;margin:0">
+        Funko expanded the FNaF Pop! line aggressively — eventually producing over 50 distinct FNaF Funko Pop! figures, covering every animatronic from every game including exclusives and chase variants.
+        McFarlane Toys entered with construction sets and action figures. The Plushstrap 4" plush became a particularly sought-after item.
+        Sanshee and other licensees produced enamel pins, keychains, and apparel. The market for FNaF merchandise at conventions (PAX, SDCC) was enormous.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">🎬 2023 — Movie Merchandise Wave</div>
+      <p style="font-size:.84rem;line-height:1.7;margin:0">
+        The 2023 film triggered a second major merchandise wave. Film-accurate versions of Freddy, Chica, Bonnie, and Foxy appeared alongside standard game-based products.
+        Spirit Halloween — which has an existing relationship with FNaF through annual licensed costumes — sold film-specific animatronic prop replicas. Funko released film-edition Pops featuring the human cast.
+        The Spirit Halloween FNaF partnership is particularly notable: Spirit Halloween's seasonal stores are a direct real-world analogue to the franchise's horror-attraction themes, which FNaF 3 (Fazbear's Fright) literalized.
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Notable Collectibles</div>
+      <table class="fn-table">
+        <tr><th>Item</th><th>Maker</th><th>Notes</th></tr>
+        <tr><td>Funko Pop! FNaF Series (50+ figures)</td><td>Funko</td><td>The most extensive Funko Pop franchise expansion for an indie game IP. Chase variants for Golden Freddy, Nightmare Freddy, etc.</td></tr>
+        <tr><td>FNaF Plush (6" series, all games)</td><td>Funko / Various</td><td>Plush lines for FNaF 1–4, Sister Location, and Security Breach. Glamrock variants were best-sellers in 2022.</td></tr>
+        <tr><td>Mystery Minis</td><td>Funko</td><td>Blind-box mini figures covering multiple series. Traded actively online.</td></tr>
+        <tr><td>FNaF Board Game</td><td>USAopoly</td><td>Officially licensed board game adaption. Deduction-style gameplay.</td></tr>
+        <tr><td>NECA Articulated Action Figures</td><td>NECA</td><td>High-detail 7" articulated figures. Freddy, Bonnie, Chica, Foxy. Highly sought for quality.</td></tr>
+        <tr><td>Fazbear Entertainment Employee Shirt</td><td>Various licensees</td><td>The in-universe "Fazbear Entertainment" employee uniform shirt is one of the most popular apparel items in the franchise.</td></tr>
+        <tr><td>Security Badge Prop Replica</td><td>Various</td><td>Multiple unofficial and semi-official versions of the purple night-guard security badge prop.</td></tr>
+        <tr><td>FNaF Funko Snap! Sets</td><td>Funko</td><td>Construction figure line — mix between Funko Pop! and building toy. FNaF sets include the Freddy's dining area.</td></tr>
+      </table>
+    </div>
+
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Tunarr Filler — FNaF Channel Material</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">📡</div>
+      <div class="callout-body">Content suitable for scheduling on a Tunarr FNaF or horror channel. Mix trailers, documentary segments, and community content for bumper/filler blocks between longer features.</div>
+    </div>
+
+    <div class="fn-filler-grid">
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Official Trailer</div>
+        <div class="fn-filler-name">Five Nights at Freddy's (2023) — Official Trailers</div>
+        <div class="fn-filler-meta">Blumhouse · 2023 · 2–3 min each</div>
+        <div class="fn-filler-desc">Official theatrical trailers for the 2023 film. Multiple cuts available (teaser, full trailer, character trailers). High production value, good for a horror-themed channel opener.</div>
+        <div class="fn-filler-where">📍 YouTube (Universal Pictures official)</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">Security Breach RUIN — Animated Announcement Trailer</div>
+        <div class="fn-filler-meta">Steel Wool · 2023 · ~2 min</div>
+        <div class="fn-filler-desc">The animated short produced by Steel Wool for the Ruin DLC. Cassie and the Mask. The highest-quality official FNaF animation to date — visually striking, excellent on a horror channel.</div>
+        <div class="fn-filler-where">📍 YouTube (Steel Wool official)</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music</div>
+        <div class="fn-filler-name">The Living Tombstone — FNaF Song Series</div>
+        <div class="fn-filler-meta">The Living Tombstone · 2014–2017 · 3–4 min each</div>
+        <div class="fn-filler-desc">The definitive FNaF music artists. "Five Nights at Freddy's (It's Been So Long)," "FNAF 2 Song," and subsequent entries collectively exceeded 500M streams. Original music that defined the franchise's early fandom soundscape.</div>
+        <div class="fn-filler-where">📍 YouTube / Spotify</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+        <div class="fn-filler-name">Nexpo — The Complete FNaF Lore</div>
+        <div class="fn-filler-meta">Nexpo · Various · 30–60 min</div>
+        <div class="fn-filler-desc">Nexpo's documentary-style deep dive videos on FNaF lore are among the best produced fan content in the franchise. The "Complete Lore" video is a staple of FNaF discussion. Good for longer programming blocks.</div>
+        <div class="fn-filler-where">📍 YouTube (Nexpo channel)</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music</div>
+        <div class="fn-filler-name">Random Encounters — FNaF Musicals</div>
+        <div class="fn-filler-meta">Random Encounters · 2014–2016 · 3–5 min each</div>
+        <div class="fn-filler-desc">Six-part YouTube musical series. "It's Been So Long" (FNaF 3 episode) alone has over 150M views. Excellent nostalgia-bait for any long-term fan. Suitable for themed filler blocks.</div>
+        <div class="fn-filler-where">📍 YouTube (Random Encounters channel)</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+        <div class="fn-filler-name">Scott Cawthon — GDC / Interview Content</div>
+        <div class="fn-filler-meta">Various · 2015–2021 · 15–45 min</div>
+        <div class="fn-filler-desc">Scott Cawthon has given several notable interviews and panel discussions about FNaF's creation. His GDC-adjacent discussions about indie development and FNaF's origin story (created after "Chipper & Sons" review criticism) are widely shared. Good for history context.</div>
+        <div class="fn-filler-where">📍 YouTube (various uploads)</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2012–2013 — Before the Bite</div>
+          <div class="fn-era-title">Chipper & Sons and the Accidental Horror Genre</div>
+          <div class="fn-era-body">
+            Scott Cawthon was a Christian game developer making children's games. His 2013 title <em>Chipper & Sons Lumber Co.</em> received a devastating Steam review: critics noted the animal characters looked "terrifying" and "nightmarish" rather than charming.
+            Rather than quit, Cawthon leaned in. He spent the next several months prototyping a game intentionally designed around animatronic horror — the design philosophy that would become FNaF.
+            The original FNaF prototype showed security guard mechanics, limited power, and camera management in a rough form that closely resembled the shipped product.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2014 — The Explosion</div>
+          <div class="fn-era-title">GameJolt to Cultural Phenomenon in 90 Days</div>
+          <div class="fn-era-body">
+            <em>Five Nights at Freddy's</em> launched on GameJolt on August 8, 2014. It cost $5. Within a week, it was the most-covered game on YouTube — PewDiePie, Markiplier, and Jacksepticeye's Let's Play videos collectively drove tens of millions of views in the first month.
+            The game launched on Steam within 48 hours and reached the top of the charts. <em>FNaF 2</em> launched just three months later on November 10, 2014 — a development pace Cawthon maintained through the entire original trilogy and beyond.
+            By December 2014, FNaF had generated more YouTube reaction content than any other game in the platform's history. The franchise became synonymous with Let's Play culture.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2015 — The Golden Age</div>
+          <div class="fn-era-title">FNaF 3, FNaF 4, and the Birth of Lore Culture</div>
+          <div class="fn-era-body">
+            2015 saw both <em>FNaF 3</em> (March) and <em>FNaF 4</em> (July) — two distinct tonal approaches. FNaF 3 introduced the Springtrap reveal and the first major lore confirmation about William Afton and the Missing Children. FNaF 4 added the Crying Child and the Bite of '87 subplot, dramatically deepening the timeline mystery.
+            The FNaF Wiki and community theorist channels (MatPat's Game Theory in particular) brought the lore to audiences who had never played the games. MatPat's "FNAF is Real" theory video became one of the most-watched YouTube essays of the year.
+            The fan game ecosystem exploded: <em>One Night at Flumpty's</em>, <em>Five Nights at Candy's</em>, and dozens of others launched in 2015. This ecosystem would become one of the defining characteristics of the franchise.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2016–2018 — The Narrative Turn</div>
+          <div class="fn-era-title">Sister Location, the Afton Arc, and the End of the Beginning</div>
+          <div class="fn-era-body">
+            <em>Sister Location</em> (2016) was the first major tonal pivot — scripted, voiced, narrative-forward. The Afton family became the emotional core of the series. Michael Afton, Baby/Elizabeth, and William's history added dramatic weight the gameplay-first entries hadn't attempted.
+            <em>Pizzeria Simulator</em> (2017) was released free on Steam under the guise of a tycoon game — a deliberate misdirect. Its ending, where Henry Emily burns everything down and eulogizes the children, remains one of the most emotionally powerful moments in indie gaming.
+            <em>Ultimate Custom Night</em> (2018) closed the original arc with William Afton in a purgatory of his own creation. The Cassette Man final cutscene felt definitive.
+            Scott Cawthon appeared to be wrapping up the franchise — until VR changed that.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2019–2021 — Steel Wool and New Directions</div>
+          <div class="fn-era-title">VR, the Mimic Seed, and the AR That Died</div>
+          <div class="fn-era-body">
+            <em>Help Wanted</em> (2019) marked the handoff to Steel Wool Studios — a larger developer working under Cawthon's creative direction. The VR anthology was warmly received, and the Glitchtrap storyline introduced a new antagonist: William Afton digitized and escaped into the game's code, possessing a beta tester named Vanessa.
+            <em>FNaF AR: Special Delivery</em> (2019) by Illumix attempted a mobile AR game — animatronics appearing in your real environment. It had a devoted player base but never found mainstream traction, and servers were shut down on January 13, 2023.
+            Scott Cawthon publicly retired from active game development in June 2021 following personal controversy, handing the franchise fully to Steel Wool with his continued involvement as executive producer.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2021–2023 — The Blumhouse Era</div>
+          <div class="fn-era-title">Security Breach, the Movie, and the Mimic Revealed</div>
+          <div class="fn-era-body">
+            <em>Security Breach</em> launched December 2021 to mixed reception — technically ambitious, visually impressive, narratively messy with numerous unresolved threads. The "many endings" approach frustrated longtime lore followers.
+            The <em>Ruin</em> DLC (2023) was widely seen as a course-correction. Free, focused, and culminating in the Mimic reveal — a digital entity that mimics Afton but is distinct from him — it retroactively clarified much of the Glitchtrap/Vanessa arc from Help Wanted.
+            The <em>FNaF theatrical film</em> (October 2023) was the franchise's commercial peak: $297M worldwide on a $20M budget, one of the most profitable horror films of the decade. Josh Hutcherson and Matthew Lillard were universally praised. A sequel is in active development.
+            <em>Into the Pit</em> (2024) by Mega Cat Studios was the first third-party-developed FNaF game not from Steel Wool — a critically acclaimed 2D pixel adventure adapting the Fazbear Frights story, showing the franchise had matured into a genuine licensed game platform.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2024–Present</div>
+          <div class="fn-era-title">Where Things Stand</div>
+          <div class="fn-era-body">
+            As of early 2026, the FNaF franchise is in one of its most active phases: a film sequel in development, Steel Wool continuing VR content (Help Wanted 2 released 2023), Into the Pit showing a new model for licensed third-party entries, and the Fazbear Frights / Tales from the Pizzaplex book series ongoing.
+            The community lore debate continues — the Mimic / Glitchtrap / Afton relationship is still contested. MatPat's retirement from Game Theory in 2024 was marked by his final FNaF theory video, a cultural moment that trended worldwide.
+            Scott Cawthon remains an executive producer and occasional public voice for the franchise. The FNaF Wiki remains one of the most active game wikis on Fandom.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators &amp; Contributors</div>
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>Scott Cawthon</td><td>Creator / Developer / Writer</td><td>FNaF 1–6, UCN, Sister Location; all original game design, lore architecture, and writing. Executive producer on all Steel Wool entries.</td></tr>
+        <tr><td>Steel Wool Studios</td><td>Developer (Steel Wool era)</td><td>Help Wanted 1 &amp; 2, Security Breach, Security Breach: Ruin. Transitioned the franchise to 3D open-world and VR formats.</td></tr>
+        <tr><td>Mega Cat Studios</td><td>Developer (third-party)</td><td>Into the Pit (2024). First critically acclaimed third-party FNaF entry.</td></tr>
+        <tr><td>Kira Breed-Wrisley</td><td>Co-author</td><td>Silver Eyes trilogy and multiple Fazbear Frights / Tales entries. Primary prose writer for the novel series.</td></tr>
+        <tr><td>Emma Tammi</td><td>Film Director</td><td>Directed the 2023 theatrical film. Previously directed <em>The Wind</em> (2018).</td></tr>
+        <tr><td>Matthew Lillard</td><td>Actor</td><td>William Afton in the 2023 film. Widely considered ideal casting.</td></tr>
+        <tr><td>Josh Hutcherson</td><td>Actor</td><td>Mike Schmidt in the 2023 film.</td></tr>
+        <tr><td>Jonochrome</td><td>Fan Developer (Ascended)</td><td>One Night at Flumpty's 1–3. Publicly promoted by Scott Cawthon. Largest ascended fan game series.</td></tr>
+        <tr><td>Nikson</td><td>Fan Developer</td><td>The Joy of Creation: Story Mode. Most acclaimed FNaF fan game.</td></tr>
+        <tr><td>Kane Carter</td><td>Fan Developer (Ascended)</td><td>POPGOES series. Became an official extended-universe contributor.</td></tr>
+        <tr><td>Phisnom</td><td>Fan Developer (Scott-endorsed)</td><td>FNaF Plus — the Scott-endorsed FNaF 1 remake.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's connected?</div>
+      <p style="font-size:.84rem;line-height:1.7">
+        FNaF canon is notoriously fragmented and intentionally layered with unreliable narrators. Scott Cawthon has confirmed that multiple simultaneous "interpretations" can be valid. The general accepted framework:
+      </p>
+      <table style="margin-top:12px">
+        <tr><th>Entry</th><th>Canon Status</th><th>Notes</th></tr>
+        <tr><td>FNaF 1–4, Sister Location, Pizzeria Sim, UCN</td><td>✅ Canon (original arc)</td><td>Core timeline. William Afton / Henry Emily / Afton children. The Crying Child, the Missing Children Incident, the Fredbear Bite.</td></tr>
+        <tr><td>Help Wanted, Security Breach, Ruin, HW2</td><td>✅ Canon (Steel Wool arc)</td><td>Glitchtrap / Mimic arc. Distinct from but connected to original arc via Afton's digital echo.</td></tr>
+        <tr><td>Fazbear Frights (all 12 vols.)</td><td>✅ Canon</td><td>Anthology stories considered in-universe unless contradicted by games. The Mimic originates here.</td></tr>
+        <tr><td>Tales from the Pizzaplex (all 8 vols.)</td><td>✅ Canon</td><td>Directly ties into Ruin and HW2. "The Mimic" story is required reading for Ruin.</td></tr>
+        <tr><td>Silver Eyes Trilogy (novels)</td><td>❌ Alternate continuity</td><td>Officially acknowledged alternate universe. Charlie Emily as protagonist. Not the same timeline as the games.</td></tr>
+        <tr><td>FNaF Movie (2023)</td><td>❌ Alternate continuity</td><td>Draws from Silver Eyes continuity. Not canon to the games. Its own self-contained storyline.</td></tr>
+        <tr><td>FNaF World</td><td>⚠️ Soft-canon / Meta</td><td>Scott has implied it exists on a "meta" level outside the main story. Fredbear dialogue is cryptic but cited by lore analysts.</td></tr>
+        <tr><td>ONaF 1–3, Joy of Creation, FNaF Plus</td><td>❌ Non-canon</td><td>Fan-made / fan-inspired. No narrative connection to FNaF lore. Separately excellent.</td></tr>
+        <tr><td>FNaF AR: Special Delivery</td><td>⚠️ Ambiguous</td><td>Lore elements referenced by Steel Wool content but AR game is defunct. Canonicity unresolved.</td></tr>
+        <tr><td>Ultimate Custom Night (Afton ending)</td><td>✅ Canon</td><td>The final Cassette Man sequence is the textual end of Afton's original arc. Canonicity confirmed by Pizzeria Sim's ending.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>FNaF 1 was created in approximately 6 weeks. Scott Cawthon began development after the Chipper &amp; Sons review criticism and shipped before any major publisher knew the game existed.</li>
+        <li>At peak popularity (2015), FNaF merchandise at Hot Topic outsold every other licensed property in their stores — including major Marvel and DC properties.</li>
+        <li>The franchise generated an estimated $500M+ in merchandise revenue by 2020, dwarfing the games' actual revenue.</li>
+        <li>MatPat (Game Theory) has covered FNaF more than any other single topic in his channel's history — over 30 episodes across 10 years. His final FNaF video (2024) trended worldwide.</li>
+        <li>Scott Cawthon is a devout Christian and has stated multiple times that themes of redemption, sin, and consequence are intentionally embedded in the FNaF lore — particularly in Pizzeria Simulator's ending.</li>
+        <li>The Fazbear Frights anthology series has sold over 3 million copies collectively, making it one of the best-selling horror middle-grade book series in print.</li>
+        <li>The 2023 film used practical animatronic suits built by the Jim Henson Company — the same studio behind the Muppets. The film's behind-the-scenes confirmed all four main animatronics were fully physical.</li>
+        <li>FNaF AR: Special Delivery accumulated over 10 million downloads before its shutdown. It held a 4.5+ App Store rating at shutdown.</li>
+        <li>The Joy of Creation: Story Mode is the only FNaF fan game Scott Cawthon has publicly praised by name on record. He called it "far better than anything I could have made."</li>
+        <li>There are an estimated 3,000+ FNaF fan games catalogued on the FNaF Fan Game Wiki — making it one of the largest fan game ecosystems around any single IP in history.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
