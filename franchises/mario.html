@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Super Mario</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(229,34,34,.35); }
+.fn-tab-btn.active { color: #e52222; border-bottom-color: #e52222; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(229,34,34,.15); border-color: #e52222; color: #e52222; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid #e52222;
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: #e52222;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+.fn-arc-row td {
+  background: rgba(229,34,34,.07) !important;
+  color: #e52222;
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(229,34,34,.25) !important;
+  border-bottom: 1px solid rgba(229,34,34,.15) !important;
+}
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform stripes */
+.fn-nes    td:first-child { border-left: 3px solid #e57373; }
+.fn-snes   td:first-child { border-left: 3px solid #9575cd; }
+.fn-gb     td:first-child { border-left: 3px solid #aed581; }
+.fn-gbc    td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-gc     td:first-child { border-left: 3px solid #80cbc4; }
+.fn-wii    td:first-child { border-left: 3px solid #b0bec5; }
+.fn-wiiu   td:first-child { border-left: 3px solid #80cbc4; }
+.fn-n64    td:first-child { border-left: 3px solid #ffb74d; }
+.fn-arcade td:first-child { border-left: 3px solid #ff8a65; }
+.fn-movie  td:first-child { border-left: 3px solid #ffb74d; }
+.fn-tv     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-anime  td:first-child { border-left: 3px solid #ce93d8; }
+
+.fn-highlight td { background: rgba(229,34,34,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid #e52222 !important; }
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-bad    { background: rgba(239,83,80,.25);   color: #ff6b6b; border: 1px solid rgba(239,83,80,.5); font-weight:700; }
+.fn-star       { color: #e52222; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #e52222;
+  border: 3px solid var(--bg);
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: #e52222;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fn-era-title {
+  font-family: 'Cinzel', serif;
+  font-size: .95rem;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 14px; }
+.fn-filler-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.fn-filler-type {
+  font-family: 'Share Tech Mono', monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 2px; margin-bottom: 7px; display: inline-block;
+}
+.fn-filler-trailer     { background: rgba(91,141,217,.15);  color: #5b8dd9;       border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-music       { background: rgba(78,205,196,.12);  color: #4ecdc4;       border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary { background: rgba(224,133,92,.12);  color: #e0855c;       border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: #e52222; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin: 0 0 24px; }
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #e52222; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* awful movie callout */
+.fn-disaster-banner {
+  background: rgba(239,83,80,.08);
+  border: 1px solid rgba(239,83,80,.4);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: .82rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+.fn-disaster-banner strong { color: #ff6b6b; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🍄</div>
+  <div>
+    <h1>Super Mario</h1>
+    <div class="subtitle">// NES · SNES · N64 · GBA · NDS · Wii · Switch · TV · Movies · EmulatorJS · Jellyfin //</div>
+    <p class="desc">
+      Nintendo's flagship franchise and the best-selling video game series of all time — over 40 years of platformers, RPGs, kart racers, party games, and one genuinely catastrophic live-action film that somehow got a worthy sequel 30 years later.
+      Use the Library tab to sort by era, platform, or best-first. The other tabs cover the cartoons, both movies, collectibles, Tunarr filler, and franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">30+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">3</div><div class="fn-stat-label">TV Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2</div><div class="fn-stat-label">Movies</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">Disaster Film</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1981</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Cartoons</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Super Mario Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','chrono',    this)">🕰️ Chronological</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           RELEASE ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          All mainline and major spinoff Mario games in release order. TV and film crossovers noted inline. ⭐ = recommended entry points. Gold rows = standout entries. Faded rows = optional or platform-locked.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core / Emulator</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The Arcade Era (1981–1985) ──</td></tr>
+
+          <tr class="fn-arcade fn-skip">
+            <td>1981</td>
+            <td>Donkey Kong</td>
+            <td>Arcade</td>
+            <td>mame2003_plus</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td>Mario's debut as "Jumpman." Historical curiosity. MAME requires full romset.</td>
+          </tr>
+          <tr class="fn-arcade fn-skip">
+            <td>1983</td>
+            <td>Mario Bros.</td>
+            <td>Arcade / NES</td>
+            <td>fceumm</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Introduces Luigi. The NES port is perfectly fine.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The NES Era (1985–1993) ──</td></tr>
+
+          <tr class="fn-nes fn-highlight">
+            <td>1985</td>
+            <td>Super Mario Bros. <span class="fn-star">⭐</span></td>
+            <td>NES</td>
+            <td>fceumm</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> The game that defined the medium. Start here if you've never played Mario. Still excellent.</td>
+          </tr>
+          <tr class="fn-nes fn-skip">
+            <td>1986</td>
+            <td>Super Mario Bros.: The Lost Levels</td>
+            <td>NES</td>
+            <td>fceumm</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Japan-only SMB2 — punishingly hard, designed for masochists. Available in All-Stars.</td>
+          </tr>
+          <tr class="fn-nes fn-skip">
+            <td>1988</td>
+            <td>Super Mario Bros. 2</td>
+            <td>NES</td>
+            <td>fceumm</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Reskin of Doki Doki Panic — non-canon dream. Fun but the odd one out.</td>
+          </tr>
+          <tr class="fn-nes fn-highlight">
+            <td>1988</td>
+            <td>Super Mario Bros. 3 <span class="fn-star">⭐</span></td>
+            <td>NES</td>
+            <td>fceumm</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> One of the greatest games ever made. Tanooki Suit. World map. Koopalings. Do not skip.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>The Super Mario Bros. Super Show!</strong> (1989) — DiC cartoon running alongside SMB1/2. Watch whenever, it's ambient noise rather than required viewing.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Adventures of Super Mario Bros. 3</strong> (1990) — Cartoon tie-in to SMB3. Aired the same season.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The SNES / Game Boy Era (1989–1995) ──</td></tr>
+
+          <tr class="fn-gb fn-skip">
+            <td>1989</td>
+            <td>Super Mario Land</td>
+            <td>GB</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>First handheld Mario. Rescues Daisy. Short and charming, shows its age.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td>1990</td>
+            <td>Super Mario World <span class="fn-star">⭐</span></td>
+            <td>SNES</td>
+            <td>snes9x</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> SNES launch title. Introduces Yoshi. Essential.</td>
+          </tr>
+          <tr class="fn-gbc">
+            <td>1992</td>
+            <td>Super Mario Land 2: 6 Golden Coins</td>
+            <td>GB</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Big step up from Land 1. Introduces Wario. Worth playing.</td>
+          </tr>
+          <tr class="fn-snes fn-skip">
+            <td>1993</td>
+            <td>Super Mario All-Stars</td>
+            <td>SNES</td>
+            <td>snes9x</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Remastered NES collection. Play this OR the NES originals — not both.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td>1995</td>
+            <td>Super Mario World 2: Yoshi's Island <span class="fn-star">⭐</span></td>
+            <td>SNES</td>
+            <td>snes9x</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Prequel — Yoshi protects Baby Mario. Gorgeous crayon aesthetic. One of the best platformers on SNES.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Super Mario World (TV Series)</strong> (1991) — DiC cartoon set in Dinosaur Land. Non-canon but Yoshi is there.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The N64 / GBA Era (1996–2004) ──</td></tr>
+
+          <tr class="fn-n64 fn-highlight">
+            <td>1996</td>
+            <td>Super Mario 64 <span class="fn-star">⭐</span></td>
+            <td>N64</td>
+            <td>mupen64plus_next</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> Defined 3D gaming. 120 Power Stars. Play the PC port for widescreen if possible.</td>
+          </tr>
+          <tr class="fn-n64 fn-highlight">
+            <td>2000</td>
+            <td>Paper Mario <span class="fn-star">⭐</span></td>
+            <td>N64</td>
+            <td>mupen64plus_next</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> Best RPG entry point in the Paper Mario line. Gorgeous, funny, mechanically rich.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2001–2004</td>
+            <td>Super Mario Advance 1–4</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> GBA ports of SMB2, SMW, Yoshi's Island, and SMB3. Play originals unless you want GBA-specific features.</td>
+          </tr>
+          <tr class="fn-gc fn-skip">
+            <td>2002</td>
+            <td>Super Mario Sunshine</td>
+            <td>GameCube</td>
+            <td>Dolphin (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Isle Delfino + FLUDD jetpack. Divisive — love it or hate it. Stream via Sunshine.</td>
+          </tr>
+          <tr class="fn-gc fn-highlight">
+            <td>2004</td>
+            <td>Paper Mario: The Thousand-Year Door <span class="fn-star">⭐</span></td>
+            <td>GameCube</td>
+            <td>Dolphin (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Best Paper Mario. Deep combat, brilliant writing. Stream via Sunshine or play the Switch remaster.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The DS / Wii Era (2006–2010) ──</td></tr>
+
+          <tr class="fn-nds">
+            <td>2006</td>
+            <td>New Super Mario Bros.</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>First new 2D Mario in years. Solid but unambitious — the template for better entries to follow.</td>
+          </tr>
+          <tr class="fn-wii fn-highlight">
+            <td>2007</td>
+            <td>Super Mario Galaxy <span class="fn-star">⭐</span></td>
+            <td>Wii</td>
+            <td>Dolphin (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Spherical planets in outer space. Orchestral score. One of the greatest games Nintendo ever made. Stream via Sunshine.</td>
+          </tr>
+          <tr class="fn-wii">
+            <td>2009</td>
+            <td>New Super Mario Bros. Wii</td>
+            <td>Wii</td>
+            <td>Dolphin (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>4-player co-op 2D Mario. Chaotic fun. Stream via Sunshine.</td>
+          </tr>
+          <tr class="fn-wii fn-highlight">
+            <td>2010</td>
+            <td>Super Mario Galaxy 2 <span class="fn-star">⭐</span></td>
+            <td>Wii</td>
+            <td>Dolphin (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> More Galaxy with Yoshi. Some argue it surpasses Galaxy 1. Play both.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The 3DS / WiiU Era (2011–2015) ──</td></tr>
+
+          <tr class="fn-3ds fn-skip">
+            <td>2011</td>
+            <td>Super Mario 3D Land</td>
+            <td>3DS</td>
+            <td>Citra (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Bridge between 2D and 3D Mario. Great handheld title, less exciting on a screen.</td>
+          </tr>
+          <tr class="fn-3ds fn-skip">
+            <td>2012</td>
+            <td>New Super Mario Bros. 2</td>
+            <td>3DS</td>
+            <td>Citra (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Coin-heavy NSMB. Weakest of the series. Skip unless completing the line.</td>
+          </tr>
+          <tr class="fn-wiiu">
+            <td>2012</td>
+            <td>New Super Mario Bros. U</td>
+            <td>WiiU</td>
+            <td>Cemu (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Most polished NSMB — HD, challenging, includes New Super Luigi U. Stream via Sunshine.</td>
+          </tr>
+          <tr class="fn-wiiu fn-highlight">
+            <td>2013</td>
+            <td>Super Mario 3D World <span class="fn-star">⭐</span></td>
+            <td>WiiU</td>
+            <td>Cemu (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> 4-player 3D Mario with cat suits. Brilliant. Also on Switch as 3D World + Bowser's Fury.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The Switch Era (2017–present) ──</td></tr>
+
+          <tr class="fn-switch fn-highlight">
+            <td>2017</td>
+            <td>Super Mario Odyssey <span class="fn-star">⭐</span></td>
+            <td>Switch</td>
+            <td>Yuzu / Ryujinx (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Hat-capturing across real-world kingdoms. A masterpiece. Stream via Sunshine.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2023</td>
+            <td>Super Mario Bros. Wonder <span class="fn-star">⭐</span></td>
+            <td>Switch</td>
+            <td>Yuzu / Ryujinx (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Best 2D Mario since the SNES era. Wonder Flowers transform every level unpredictably. Do not sleep on this.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>The Super Mario Bros. Movie</strong> (2023) — Animated film. Watch anytime after you've played a few games.</td></tr>
+
+        </table>
+
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#e57373"></span>Red = NES</span>
+          <span><span class="fn-dot" style="background:#9575cd"></span>Purple = SNES</span>
+          <span><span class="fn-dot" style="background:#ffb74d"></span>Orange = N64</span>
+          <span><span class="fn-dot" style="background:#4fc3f7"></span>Blue = GBA / NDS</span>
+          <span><span class="fn-dot" style="background:#b0bec5"></span>Grey = Wii</span>
+          <span><span class="fn-dot" style="background:#ef5350"></span>Crimson = Switch</span>
+          <span><span class="fn-star">⭐</span> = essential</span>
+          <span><span style="opacity:.5">Faded</span> = optional</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           CHRONOLOGICAL
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-chrono">
+        <div class="fn-view-desc">In-universe story order — where each game falls in Mario's world, not when it was released. Mario's universe has no single official timeline but this is the commonly accepted ordering.</div>
+        <table class="fn-table">
+          <tr><th>Order</th><th>Title</th><th>Platform</th><th>Story Beat</th></tr>
+          <tr class="fn-arc-row"><td colspan="4">── Prehistory / Baby Era ──</td></tr>
+          <tr class="fn-snes fn-highlight">
+            <td>1</td><td>Super Mario World 2: Yoshi's Island</td><td>SNES</td>
+            <td>Baby Mario and Baby Luigi's origin. Set before everything else.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="4">── The Mushroom Kingdom Begins ──</td></tr>
+          <tr class="fn-arcade fn-skip">
+            <td>2</td><td>Donkey Kong / Mario Bros.</td><td>Arcade</td>
+            <td>Mario's early adventures — pre-Peach, pre-Bowser.</td>
+          </tr>
+          <tr class="fn-nes fn-highlight">
+            <td>3</td><td>Super Mario Bros.</td><td>NES</td>
+            <td>The inciting incident — Bowser kidnaps Peach. The template for everything.</td>
+          </tr>
+          <tr class="fn-nes fn-highlight">
+            <td>4</td><td>Super Mario Bros. 3</td><td>NES</td>
+            <td>Bowser sends the Koopalings to conquer kingdoms. Mario stops them.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td>5</td><td>Super Mario World</td><td>SNES</td>
+            <td>Dinosaur Land holiday interrupted by Bowser. Yoshi enters the picture.</td>
+          </tr>
+          <tr class="fn-n64 fn-highlight">
+            <td>6</td><td>Super Mario 64</td><td>N64</td>
+            <td>Peach's castle invaded. The 3D era begins.</td>
+          </tr>
+          <tr class="fn-gc fn-skip">
+            <td>7</td><td>Super Mario Sunshine</td><td>GC</td>
+            <td>Isle Delfino vacation disaster. FLUDD. Bowser Jr. introduced.</td>
+          </tr>
+          <tr class="fn-wii fn-highlight">
+            <td>8</td><td>Super Mario Galaxy</td><td>Wii</td>
+            <td>Bowser claims the universe. Mario pursues him across space.</td>
+          </tr>
+          <tr class="fn-wii fn-highlight">
+            <td>9</td><td>Super Mario Galaxy 2</td><td>Wii</td>
+            <td>Bowser grows planet-sized. Yoshi returns.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>10</td><td>Super Mario Odyssey</td><td>Switch</td>
+            <td>Bowser tries to marry Peach. Mario and Cappy travel the world.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>11</td><td>Super Mario Bros. Wonder</td><td>Switch</td>
+            <td>The Flower Kingdom. Wonder Seeds. The freshest 2D Mario in decades.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BY PLATFORM
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All games grouped by hardware. Useful if you want to exhaust one emulator before moving to the next.</div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Year</th><th>Core</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟥 NES — core: fceumm</td></tr>
+          <tr class="fn-nes fn-highlight"><td>Super Mario Bros.</td><td>1985</td><td>fceumm</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+          <tr class="fn-nes"><td>Super Mario Bros. 2</td><td>1988</td><td>fceumm</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Non-canon dream. Still fun.</td></tr>
+          <tr class="fn-nes fn-highlight"><td>Super Mario Bros. 3</td><td>1988</td><td>fceumm</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+          <tr class="fn-nes fn-skip"><td>Super Mario Bros.: The Lost Levels</td><td>1986</td><td>fceumm</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Optional. Brutal.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟣 SNES — core: snes9x</td></tr>
+          <tr class="fn-snes fn-highlight"><td>Super Mario World</td><td>1990</td><td>snes9x</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+          <tr class="fn-snes fn-highlight"><td>Super Mario World 2: Yoshi's Island</td><td>1995</td><td>snes9x</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+          <tr class="fn-snes fn-skip"><td>Super Mario All-Stars</td><td>1993</td><td>snes9x</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Optional — play NES originals instead unless you prefer 16-bit sprites.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟢 Game Boy / GBC / GBA — cores: gambatte / mgba</td></tr>
+          <tr class="fn-gb fn-skip"><td>Super Mario Land</td><td>1989</td><td>gambatte</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Historical. Short.</td></tr>
+          <tr class="fn-gbc"><td>Super Mario Land 2: 6 Golden Coins</td><td>1992</td><td>gambatte</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Introduces Wario. Worth it.</td></tr>
+          <tr class="fn-gba fn-skip"><td>Super Mario Advance 1–4</td><td>2001–04</td><td>mgba</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>GBA ports of NES/SNES titles. Optional if you have the originals.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟠 N64 — core: mupen64plus_next</td></tr>
+          <tr class="fn-n64 fn-highlight"><td>Super Mario 64</td><td>1996</td><td>mupen64plus_next</td><td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td><td><span class="fn-star">⭐</span> Essential. PC port preferred.</td></tr>
+          <tr class="fn-n64 fn-highlight"><td>Paper Mario</td><td>2000</td><td>mupen64plus_next</td><td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">💠 NDS — core: melonds</td></tr>
+          <tr class="fn-nds"><td>New Super Mario Bros.</td><td>2006</td><td>melonds</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Solid 2D Mario return.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🖥️ GameCube / Wii / WiiU — Dolphin / Cemu on PC · Stream via Sunshine</td></tr>
+          <tr class="fn-gc fn-skip"><td>Super Mario Sunshine</td><td>2002</td><td>Dolphin</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td>Divisive FLUDD adventure.</td></tr>
+          <tr class="fn-gc fn-highlight"><td>Paper Mario: The Thousand-Year Door</td><td>2004</td><td>Dolphin</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-star">⭐</span> Best Paper Mario.</td></tr>
+          <tr class="fn-wii fn-highlight"><td>Super Mario Galaxy</td><td>2007</td><td>Dolphin</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+          <tr class="fn-wii"><td>New Super Mario Bros. Wii</td><td>2009</td><td>Dolphin</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td>4-player co-op.</td></tr>
+          <tr class="fn-wii fn-highlight"><td>Super Mario Galaxy 2</td><td>2010</td><td>Dolphin</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+          <tr class="fn-wiiu"><td>New Super Mario Bros. U</td><td>2012</td><td>Cemu</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td>Best NSMB entry.</td></tr>
+          <tr class="fn-wiiu fn-highlight"><td>Super Mario 3D World</td><td>2013</td><td>Cemu</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-star">⭐</span> Also on Switch.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🔴 Switch — Yuzu / Ryujinx on PC · Stream via Sunshine</td></tr>
+          <tr class="fn-switch fn-highlight"><td>Super Mario Odyssey</td><td>2017</td><td>Yuzu / Ryujinx</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+          <tr class="fn-switch fn-highlight"><td>Super Mario Bros. Wonder</td><td>2023</td><td>Yuzu / Ryujinx</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-star">⭐</span> Essential.</td></tr>
+
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BEST FIRST
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">The cream of the crop. Start here if you want the best Mario has to offer and don't want to play everything.</div>
+        <table class="fn-table">
+          <tr><th>Rank</th><th>Title</th><th>Platform</th><th>Why</th></tr>
+          <tr class="fn-switch fn-highlight">
+            <td>1</td><td>Super Mario Odyssey</td><td>Switch</td>
+            <td>The most complete 3D Mario experience. Freedom, charm, invention. Best starting point for a new player who has access to PC/emulation.</td>
+          </tr>
+          <tr class="fn-nes fn-highlight">
+            <td>2</td><td>Super Mario Bros. 3</td><td>NES</td>
+            <td>Still holds up as one of the best games ever made. Accessible, deep, essential history.</td>
+          </tr>
+          <tr class="fn-wii fn-highlight">
+            <td>3</td><td>Super Mario Galaxy</td><td>Wii</td>
+            <td>Breathtaking design and music. The Wii's defining title.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>4</td><td>Super Mario Bros. Wonder</td><td>Switch</td>
+            <td>Best 2D Mario since the SNES era. Inventive to its core.</td>
+          </tr>
+          <tr class="fn-gc fn-highlight">
+            <td>5</td><td>Paper Mario: The Thousand-Year Door</td><td>GameCube</td>
+            <td>Best RPG in the franchise. Brilliant writing and battle system.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td>6</td><td>Super Mario World 2: Yoshi's Island</td><td>SNES</td>
+            <td>Unique aesthetic and feel. One of the SNES's best.</td>
+          </tr>
+          <tr class="fn-wii fn-highlight">
+            <td>7</td><td>Super Mario Galaxy 2</td><td>Wii</td>
+            <td>More inventive than the original. Arguably the better game.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td>8</td><td>Super Mario World</td><td>SNES</td>
+            <td>The SNES launch title. Still a joy to play from start to finish.</td>
+          </tr>
+          <tr class="fn-n64 fn-highlight">
+            <td>9</td><td>Super Mario 64</td><td>N64</td>
+            <td>Essential history. Defined 3D gaming. Holds up surprisingly well.</td>
+          </tr>
+          <tr class="fn-n64 fn-highlight">
+            <td>10</td><td>Paper Mario</td><td>N64</td>
+            <td>Great entry to the RPG line — simpler than TTYD but excellent.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           MOBILE ONLY
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Games that run comfortably in EmulatorJS on a phone or tablet without a controller. Console-heavy entries excluded.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Core</th><th>Notes</th></tr>
+          <tr class="fn-nes fn-highlight">
+            <td>1</td><td>Super Mario Bros. <span class="fn-star">⭐</span></td><td>NES</td><td>fceumm</td>
+            <td>D-pad + two buttons. Perfect for touch controls.</td>
+          </tr>
+          <tr class="fn-nes fn-highlight">
+            <td>2</td><td>Super Mario Bros. 3 <span class="fn-star">⭐</span></td><td>NES</td><td>fceumm</td>
+            <td>More complex but very playable on touch. Use a controller if possible.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td>3</td><td>Super Mario World <span class="fn-star">⭐</span></td><td>SNES</td><td>snes9x</td>
+            <td>SNES touch controls work well. Yoshi buttons mapped fine.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td>4</td><td>Yoshi's Island</td><td>SNES</td><td>snes9x</td>
+            <td>Touch-friendly. The egg aiming is a little fiddly but manageable.</td>
+          </tr>
+          <tr class="fn-gbc">
+            <td>5</td><td>Super Mario Land 2</td><td>GB</td><td>gambatte</td>
+            <td>Great handheld game remains great on a phone screen.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>6</td><td>New Super Mario Bros.</td><td>NDS</td><td>melonds</td>
+            <td>Stream via Jellyfin mobile app.</td>
+          </tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body"><strong>Excluded from this view:</strong> N64, GameCube, Wii, WiiU, and Switch games require PC-level emulators (Dolphin, Cemu, Yuzu/Ryujinx) and don't run in-browser. Stream them via Sunshine + Moonlight for handheld play.</div>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\Mario\
+  ├── nes\    → .nes   (core: fceumm)
+  ├── snes\   → .sfc   (core: snes9x)
+  ├── gb\     → .gb    (core: gambatte)
+  ├── gbc\    → .gbc   (core: gambatte)
+  ├── gba\    → .gba   (core: mgba)
+  └── nds\    → .nds   (core: melonds)</pre>
+      <div class="callout callout-tip" style="margin-top:8px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Prefix all EmulatorJS game IDs with <code>mario-</code> to avoid save slot conflicts. N64 games (SM64, Paper Mario) run via mupen64plus_next but performance varies — test on your hardware. GameCube and above require PC emulators and should be added to the Sunshine streaming library.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & CARTOONS
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Super Mario TV &amp; Cartoons</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',        this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder', this)">🎯 Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','bytype',     this)">🏷️ By Type</button>
+      </div>
+
+      <!-- ALL ENTRIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Three DiC animated series from 1989–1991 — non-canon, campy, and very much of their era. None of them are required viewing but they're harmless Saturday morning nostalgia. Live-action framing segments in the Super Show are a special kind of television.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── DiC Animation Era (1989–1991) ──</td></tr>
+          <tr class="fn-tv fn-skip">
+            <td>1989</td>
+            <td>The Super Mario Bros. Super Show!</td>
+            <td><span class="fn-tag fn-tag-varies">TV</span></td>
+            <td>65 eps</td>
+            <td>Jellyfin</td>
+            <td>Lou Albano plays Mario in live-action wraparounds. The animated segments adapt SMB1 and SMB2. Non-canon. The "Do the Mario" closing dance is genuinely iconic and you should watch it at least once.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>1990</td>
+            <td>The Adventures of Super Mario Bros. 3</td>
+            <td><span class="fn-tag fn-tag-varies">TV</span></td>
+            <td>26 eps</td>
+            <td>Jellyfin</td>
+            <td>Cartoon tie-in to SMB3. Aired alongside the game's North American launch. Gives the Koopalings names and personalities. Better than the Super Show.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>1991</td>
+            <td>Super Mario World (TV Series)</td>
+            <td><span class="fn-tag fn-tag-varies">TV</span></td>
+            <td>13 eps</td>
+            <td>Jellyfin</td>
+            <td>Final DiC series. Set in Dinosaur Land with Yoshi. Short and inoffensive. Non-canon.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#4fc3f7"></span>Blue = western TV</span>
+          <span><span style="opacity:.5">Faded</span> = optional / non-canon</span>
+        </div>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">If you're going to watch the DiC cartoons, the games they loosely accompany suggest a natural order.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Media</th><th>Type</th><th>Watch After</th><th>Notes</th></tr>
+          <tr class="fn-highlight fn-tv">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e52222">1</td>
+            <td>The Super Mario Bros. Super Show!</td><td>TV</td>
+            <td>Super Mario Bros. (NES)</td>
+            <td>Loosely based on SMB1/2. Play the game first so the references land.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e52222">2</td>
+            <td>Adventures of Super Mario Bros. 3</td><td>TV</td>
+            <td>Super Mario Bros. 3 (NES)</td>
+            <td>Aired alongside SMB3's NA launch. A direct companion.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e52222">3</td>
+            <td>Super Mario World (TV Series)</td><td>TV</td>
+            <td>Super Mario World (SNES)</td>
+            <td>Set in the SNES game's world. Watch after the game.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- BY TYPE -->
+      <div class="fn-view" id="fn-tvanime-bytype">
+        <div class="fn-view-desc">All entries grouped by format.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Canon?</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">🔵 Western TV Series</td></tr>
+          <tr class="fn-tv fn-skip"><td>1989</td><td>The Super Mario Bros. Super Show!</td><td>65 eps</td><td>❌ Non-canon</td><td>DiC. SMB1/2 cartoon adaptation.</td></tr>
+          <tr class="fn-tv fn-skip"><td>1990</td><td>Adventures of Super Mario Bros. 3</td><td>26 eps</td><td>❌ Non-canon</td><td>DiC. SMB3 tie-in.</td></tr>
+          <tr class="fn-tv fn-skip"><td>1991</td><td>Super Mario World (TV Series)</td><td>13 eps</td><td>❌ Non-canon</td><td>DiC. SMW tie-in.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\TV\Super Mario\
+  ├── Super Mario Bros Super Show (1989)\
+  │   └── Season 01\
+  ├── Adventures of Super Mario Bros 3 (1990)\
+  │   └── Season 01\
+  └── Super Mario World (1991)\
+      └── Season 01\</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Super Mario Movies</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',        this)">📋 All Movies</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <!-- ALL MOVIES -->
+      <div class="fn-view active" id="fn-movies-all">
+
+        <div class="fn-disaster-banner">
+          ⚠️ <strong>A note on the 1993 film:</strong> It is not good. Bob Hoskins later said it was one of his biggest regrets. John Leguizamo admitted they drank on set to cope. Dennis Hopper plays Bowser as a slicked-back corporate villain in a fungal cyberpunk city that has nothing to do with anything. It is fascinating as a historical artifact of Hollywood's complete lack of understanding of video games. Watch it with that context, or don't watch it at all. The 2023 film makes up for it entirely.
+        </div>
+
+        <div class="fn-view-desc">Two theatrical films. Thirty years apart. One is a disaster. One is a delight. Both are on Jellyfin.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Runtime</th><th>Type</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The Dark Ages (1993) ──</td></tr>
+          <tr class="fn-movie fn-skip">
+            <td>1993</td>
+            <td>Super Mario Bros. <span class="fn-tag fn-tag-bad">⚠️ TERRIBLE</span></td>
+            <td>~104 min</td>
+            <td><span class="fn-tag fn-tag-opt">Live Action</span></td>
+            <td>Jellyfin</td>
+            <td>Bob Hoskins and John Leguizamo as the Brothers Mario. Dennis Hopper as Bowser. A dystopian fungal sci-fi city that bears no resemblance to the Mushroom Kingdom. Both lead actors publicly hated making it. Watch as a curiosity if you're a completionist or a bad-movie connoisseur. Not recommended otherwise.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Redemption (2023) ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2023</td>
+            <td>The Super Mario Bros. Movie <span class="fn-star">⭐</span></td>
+            <td>~92 min</td>
+            <td><span class="fn-tag fn-tag-yes">Animated</span></td>
+            <td>Jellyfin</td>
+            <td><span class="fn-star">⭐</span> Illumination's animated film. Visually spectacular, crammed with fan service, Charlie Day is a perfect Luigi, and Jack Black's Bowser is genuinely inspired. Not a masterpiece but exactly what this franchise deserved after the 1993 disaster. Recommended for everyone.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#ffb74d"></span>Orange = movie</span>
+          <span><span class="fn-star">⭐</span> = recommended</span>
+          <span><span style="opacity:.5">Faded</span> = watch at your own risk</span>
+        </div>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">Recommended viewing order. Spoiler: watch the 2023 film. You can watch the 1993 film out of morbid curiosity afterward.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Type</th><th>Watch After</th><th>Notes</th></tr>
+          <tr class="fn-highlight fn-movie">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e52222">1</td>
+            <td>The Super Mario Bros. Movie (2023)</td><td>Animated</td>
+            <td>Any mainline Mario game</td>
+            <td>Start here. It assumes familiarity with Mario basics but nothing deep. Excellent.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e52222">2</td>
+            <td>Super Mario Bros. (1993)</td><td>Live Action</td>
+            <td>The 2023 film, for contrast</td>
+            <td>Optional. Watch to understand how badly wrong a Mario adaptation can go. Best experienced as a double feature with the 2023 film to appreciate the glow-up.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Super Mario\
+  ├── Super Mario Bros (1993)\
+  │   └── Super Mario Bros (1993).mkv
+  └── The Super Mario Bros Movie (2023)\
+      └── The Super Mario Bros Movie (2023).mkv</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Super Mario Merchandise &amp; Collectibles</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Physical collectibles, amiibo, toys, and tie-in products. Update this section as the collection grows.</div>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">amiibo</div>
+      <table style="width:100%;font-size:.82rem">
+        <tr><th>Figure</th><th>Line</th><th>Status</th><th>Notes</th></tr>
+        <tr><td>Mario (Super Mario Bros.)</td><td>Super Smash Bros.</td><td>—</td><td>Classic red overalls pose.</td></tr>
+        <tr><td>Mario (Wedding)</td><td>Super Mario Odyssey</td><td>—</td><td>White tuxedo from Odyssey.</td></tr>
+        <tr><td>Luigi</td><td>Super Smash Bros.</td><td>—</td><td>Green twin.</td></tr>
+        <tr><td>Bowser</td><td>Super Smash Bros.</td><td>—</td><td>The king himself.</td></tr>
+        <tr><td>Yoshi</td><td>Super Smash Bros.</td><td>—</td><td>Green dino.</td></tr>
+        <tr><td>Peach</td><td>Super Smash Bros.</td><td>—</td><td>Princess.</td></tr>
+        <tr><td>Toad</td><td>Super Mario</td><td>—</td><td>Blue-spotted.</td></tr>
+      </table>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">Physical Media &amp; Books</div>
+      <table style="width:100%;font-size:.82rem">
+        <tr><th>Item</th><th>Type</th><th>Status</th><th>Notes</th></tr>
+        <tr><td>Super Mario Encyclopedia (Prima)</td><td>Art Book</td><td>—</td><td>Complete visual history of the franchise through Super Mario Odyssey.</td></tr>
+        <tr><td>Ask Iwata</td><td>Book</td><td>—</td><td>Insights from Nintendo's late president — Mario development stories included.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler — Super Mario</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Content suitable for padding Mario-themed Tunarr channels between game streams and movie blocks. Trailers, documentary segments, and Nintendo Direct highlights.</div>
+    </div>
+
+    <div class="fn-filler-grid">
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Trailer</div>
+        <div class="fn-filler-name">Super Mario Bros. Wonder — Nintendo Direct Reveal</div>
+        <div class="fn-filler-meta">2023 · ~4 min · Nintendo YouTube</div>
+        <div class="fn-filler-desc">The reveal trailer for Wonder — Wonder Flower transformations shown for the first time. High energy, great filler between 2D Mario content.</div>
+        <div class="fn-filler-where">Source: Nintendo YouTube → download via yt-dlp</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Trailer</div>
+        <div class="fn-filler-name">Super Mario Odyssey — E3 2017 Trailer</div>
+        <div class="fn-filler-meta">2017 · ~3 min · Nintendo YouTube</div>
+        <div class="fn-filler-desc">"Jump Up, Super Star!" Odyssey reveal at E3 — captures the energy of the game perfectly.</div>
+        <div class="fn-filler-where">Source: Nintendo YouTube → download via yt-dlp</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music</div>
+        <div class="fn-filler-name">Super Mario Galaxy Orchestra — Full Soundtrack</div>
+        <div class="fn-filler-meta">2007–2010 · Nintendo / Koji Kondo &amp; Mahito Yokota</div>
+        <div class="fn-filler-desc">The Galaxy games feature fully orchestrated scores — among the best Nintendo has ever produced. Good ambient filler for any Mario block.</div>
+        <div class="fn-filler-where">Source: Rip from Galaxy 1 &amp; 2 OST releases</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+        <div class="fn-filler-name">Did You Know Gaming — Super Mario Bros. Series</div>
+        <div class="fn-filler-meta">Various · ~10–15 min each · YouTube</div>
+        <div class="fn-filler-desc">Fan-made documentary segments covering development history, cut content, and trivia for the NES, SNES, and 3D Mario eras. Excellent pre-game filler.</div>
+        <div class="fn-filler-where">Source: DYKG YouTube → download via yt-dlp</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Trailer</div>
+        <div class="fn-filler-name">The Super Mario Bros. Movie — Official Trailer 2</div>
+        <div class="fn-filler-meta">2022 · ~2 min · Universal Pictures</div>
+        <div class="fn-filler-desc">Best trailer for the 2023 film — shows Bowser in full song. Good lead-in filler before the movie block.</div>
+        <div class="fn-filler-where">Source: Universal YouTube → download via yt-dlp</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">1981</div>
+          <div class="fn-era-title">The Arcade Origin — Jumpman</div>
+          <div class="fn-era-body">
+            Shigeru Miyamoto designed Donkey Kong as a response to failed negotiations to license Popeye for an arcade game. The protagonist — originally named Jumpman — was a carpenter, not a plumber. His girlfriend Pauline was kidnapped by a gorilla. The game became one of Nintendo's first major arcade hits in North America. Mario (the name came later, reportedly after Nintendo of America's warehouse owner Mario Segale) became the default protagonist for whatever Nintendo needed next.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1985</div>
+          <div class="fn-era-title">Super Mario Bros. — The Game That Saved the Industry</div>
+          <div class="fn-era-body">
+            Released as a launch title for the Famicom's North American debut as the Nintendo Entertainment System, Super Mario Bros. is credited with reviving the video game industry after the 1983 crash. Miyamoto and Takashi Tezuka designed the first level, 1-1, as a masterclass in implicit game design — everything the player needs to understand the rules is taught without a single word of text. The game sold over 40 million copies bundled with the NES.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1988–1990</div>
+          <div class="fn-era-title">SMB2, SMB3, and the Peak of the NES Era</div>
+          <div class="fn-era-body">
+            Nintendo of America rejected the Japanese SMB2 (The Lost Levels) as too hard for Western audiences and instead reskinned Doki Doki Panic with Mario characters. The "fake" SMB2 introduced four-character gameplay and Shy Guys — both have persisted in the franchise ever since. Super Mario Bros. 3 (1988 in Japan, 1990 in North America) is widely considered the finest 2D platformer of the 8-bit era and remains one of the best games ever made.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1990–1995</div>
+          <div class="fn-era-title">The SNES Golden Age</div>
+          <div class="fn-era-body">
+            Super Mario World launched with the SNES and introduced Yoshi — one of Nintendo's most enduring characters. Super Mario World 2: Yoshi's Island (1995) used the Super FX2 chip to achieve its distinctive crayon-drawn aesthetic and established the "Baby Mario" prequel continuity. The SNES era also saw Nintendo license the character to DiC for three cartoon series — the less said the better, but the "Do the Mario" dance from the Super Show's credits is an objectively correct cultural artifact.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1993</div>
+          <div class="fn-era-title">The Live-Action Film — A Warning to Future Generations</div>
+          <div class="fn-era-body">
+            Hollywood's first major video game adaptation was a $48 million disaster. Directed by Rocky Morton and Annabel Jankel, the film reimagined the Mushroom Kingdom as a parallel-dimension cyberpunk city where dinosaurs evolved into humanoids and Bowser was Dennis Hopper in a business suit. Bob Hoskins (Mario) and John Leguizamo (Luigi) both admitted to heavy drinking on set. Hoskins called it the worst thing he ever did. It grossed $21 million against its budget. Nintendo has never licensed a live-action Mario adaptation since.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1996</div>
+          <div class="fn-era-title">Super Mario 64 — The 3D Revolution</div>
+          <div class="fn-era-body">
+            Super Mario 64 defined how 3D platformers work. Miyamoto's team had to invent solutions to problems no one had solved before — camera systems, analogue movement, spatial audio, level design for three dimensions. The result was a game that still holds up. The run animation alone — the way Mario's weight shifts — remains a reference point for character animation. 64 established the template that every 3D Mario since has iterated on.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2007–2010</div>
+          <div class="fn-era-title">Super Mario Galaxy — A Second Peak</div>
+          <div class="fn-era-body">
+            Super Mario Galaxy used the Wii's motion controls purposefully rather than as a gimmick, introduced fully orchestrated music to the franchise, and built its world design around the concept of gravitational spheres — tiny planets with their own gravity. Mahito Yokota and Koji Kondo's score remains the most musically ambitious in Nintendo history. Galaxy 2 (2010) is often ranked above the original — it is denser, more inventive, and introduces Yoshi into the 3D Mario context for the first time.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2017</div>
+          <div class="fn-era-title">Super Mario Odyssey — Reinvention Again</div>
+          <div class="fn-era-body">
+            Odyssey introduced Cappy, a hat that can capture and control enemies, as the core mechanic — an entirely new movement vocabulary built on top of the most technically precise Mario movement ever coded. The game's real-world-inspired kingdoms (New Donk City, the Luncheon Kingdom) gave it a surreal quality distinct from any previous Mario game. It sold over 26 million copies on Switch. The post-credits sequence is still being discussed.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2023</div>
+          <div class="fn-era-title">Double Victory — The Movie and Wonder</div>
+          <div class="fn-era-body">
+            2023 was the best year for Mario since at least the Galaxy era. The Illumination animated film grossed $1.36 billion worldwide — the highest-grossing video game adaptation ever made and the second-highest-grossing animated film of all time at that point. Four months later, Super Mario Bros. Wonder launched on Switch to universal acclaim, widely regarded as the most inventive 2D Mario since Yoshi's Island. After thirty years, the 1993 film's legacy was officially buried.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's not?</div>
+      <p style="font-size:.84rem;line-height:1.7">Nintendo has never published an official Mario timeline. The franchise is intentionally loose — Miyamoto has said the games are each their own distinct fairy tale. The sub-series (Paper Mario, Mario RPG, Mario Kart, Mario Party) are generally considered separate continuities from the mainline platformers. The DiC cartoons and 1993 film are non-canon by any measure. The 2023 animated film is not directly tied to any game's events.</p>
+      <table style="margin-top:12px">
+        <tr><th>Entry</th><th>Canon Status</th><th>Notes</th></tr>
+        <tr><td>Mainline platformers (SMB through Wonder)</td><td>✅ Canonical</td><td>The core continuity, such as it is.</td></tr>
+        <tr><td>Yoshi's Island</td><td>✅ Canon</td><td>Official prequel.</td></tr>
+        <tr><td>Paper Mario series</td><td>⚠️ Ambiguous</td><td>Separate storybook universe — not the main continuity.</td></tr>
+        <tr><td>Super Mario Bros. 2 (Western)</td><td>❌ Non-canon</td><td>Explicitly a dream sequence within the game itself.</td></tr>
+        <tr><td>DiC Cartoons (1989–1991)</td><td>❌ Non-canon</td><td>Officially licensed but not part of game continuity.</td></tr>
+        <tr><td>Super Mario Bros. (1993 film)</td><td>❌ Non-canon</td><td>Very much its own cursed thing.</td></tr>
+        <tr><td>The Super Mario Bros. Movie (2023)</td><td>⚠️ Ambiguous</td><td>Illumination/Nintendo co-production. Loosely inspired by the games but its own continuity.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>Super Mario Bros. is the best-selling video game franchise of all time with over 800 million units sold across all titles.</li>
+        <li>The original SMB was designed in parallel with the NES hardware — some mechanics (the coin counter, the timer) existed to mask the hardware's limitations.</li>
+        <li>Shigeru Miyamoto designed the Mario Bros. level layout on graph paper on his commute to work.</li>
+        <li>Super Mario Bros. 3 was believed by many to be a "movie" due to the curtain and stage lighting — the game opens on a theatrical stage and the entire world is framed as a performance.</li>
+        <li>The "Super Mario Bros. speedrunning" community is one of the oldest continuous speedrunning communities in gaming, dating back to the early internet era.</li>
+        <li>Koji Kondo's Super Mario Bros. theme (the "ground theme") is one of the most recognizable pieces of music ever composed — it has been performed by symphony orchestras worldwide.</li>
+        <li>Bob Hoskins, when asked about the 1993 film in a 2007 Guardian interview, said simply: "The worst thing I ever did."</li>
+        <li>The 2023 film's $1.36 billion worldwide gross made it the highest-grossing video game adaptation in cinema history, surpassing Warcraft, Detective Pikachu, and Sonic the Hedgehog 2.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
