@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Viva Piñata</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.fn-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS (pill buttons)
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era header rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media / TV crossover note rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Defunct / inaccessible rows */
+.fn-defunct-row td {
+  background: rgba(239,83,80,.04) !important;
+  border-top: 1px dashed rgba(239,83,80,.3) !important;
+  border-bottom: 1px dashed rgba(239,83,80,.3) !important;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-defunct-row td { border-left: 3px solid #ef5350 !important; }
+
+/* Platform left-border colour stripes */
+.fn-xbox360  td:first-child { border-left: 3px solid #81c784; }
+.fn-pc       td:first-child { border-left: 3px solid #90a4ae; }
+.fn-nds      td:first-child { border-left: 3px solid #f48fb1; }
+.fn-tv       td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-merch-toy     td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-merch-card    td:first-child { border-left: 3px solid #80cbc4; }
+.fn-merch-apparel td:first-child { border-left: 3px solid #ce93d8; }
+.fn-merch-book    td:first-child { border-left: 3px solid #90a4ae; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-defunct{ background: rgba(239,83,80,.15);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.3); }
+.fn-tag-rare   { background: rgba(180,100,220,.15); color: #ce93d8; border: 1px solid rgba(180,100,220,.3); }
+.fn-star       { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+}
+.fn-era-year  { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: .1em; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body  { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 14px; }
+.fn-filler-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.fn-filler-type { font-family: 'Share Tech Mono', monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; margin-bottom: 7px; display: inline-block; }
+.fn-filler-trailer     { background: rgba(91,141,217,.15);  color: #5b8dd9;       border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-hype        { background: rgba(200,168,75,.12);  color: var(--accent); border: 1px solid rgba(200,168,75,.3); }
+.fn-filler-music       { background: rgba(78,205,196,.12);  color: #4ecdc4;       border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary { background: rgba(224,133,92,.12);  color: #e0855c;       border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc;      border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-bumper      { background: rgba(76,175,80,.12);   color: #81c784;       border: 1px solid rgba(76,175,80,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin: 0 0 24px; }
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🎪</div>
+  <div>
+    <h1>Viva Piñata</h1>
+    <div class="subtitle">// Xbox 360 · NDS · PC · Tunarr TV · Jellyfin · EmulatorJS (NDS) //</div>
+    <p class="desc">
+      Viva Piñata is a cozy garden-sim franchise created by Rare (Microsoft) in 2006 — attract, romance, and protect candy-filled piñata creatures from Professor Pester while sculpting your island garden. The franchise ran hard from 2006–2008 with four games, a 52-episode 4Kids animated series, and a full consumer products push, then went dormant. Use the Library tab to sort by platform or best-first. The other tabs cover the TV show, merchandise, Tunarr filler, and franchise history.
+    </p>
+  </div>
+</div>
+
+<!-- Stat row -->
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">4</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">TV Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">52</div><div class="fn-stat-label">Episodes</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2</div><div class="fn-stat-label">Defunct</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2006</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The Viva Piñata Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile Only</button>
+        <button class="fn-view-btn"        onclick="fnView('library','defunct',   this)">⚰️ Defunct / Lost</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           RELEASE ORDER
+      ─────────────────────────────────────────────────────  -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          All games and media in real-world release order. Red rows = defunct / no longer accessible. Purple rows = TV crossover notes. Gold rows = standout entries.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── The Launch Blitz (2006) ──</td></tr>
+
+          <tr class="fn-xbox360 fn-highlight">
+            <td>Nov 2006</td>
+            <td>Viva Piñata <span class="fn-star">⭐</span></td>
+            <td>Xbox 360</td>
+            <td><span class="fn-star">⭐</span> The original. Attract 60 piñata species to your garden. Brilliant, a little hard. Included in Rare Replay (Xbox One/Series). Available on Xbox Game Pass.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Viva Piñata (TV Series) S1</strong> (2006) — Launched alongside the game. 4Kids/Fox, 26 episodes. Fergy, Hudson, Paulie, Franklin on Piñata Island. Closely tied to game mechanics; gives tips on in-game piñata behaviour.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── Expansion Era (2007) ──</td></tr>
+
+          <tr class="fn-xbox360 fn-skip">
+            <td>Oct 2007</td>
+            <td>Viva Piñata: Party Animals</td>
+            <td>Xbox 360</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Minigame party collection developed by Krome Studios (not Rare). Eight TV-series characters. Fun for groups; thin on content. Not a gardening game.</td>
+          </tr>
+
+          <tr class="fn-pc fn-skip">
+            <td>Nov 2007</td>
+            <td>Viva Piñata (Windows)</td>
+            <td>PC (GFWL)</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Defunct</span> Port handled by Climax Group. Requires Games for Windows Live, which is fully shut down — multiplayer and cloud saves are gone. The offline single-player core still installs from disc but activation is broken on new Windows installs.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Viva Piñata (TV Series) S2</strong> (2007–2009) — 26 more episodes. Aired on CW4Kids in the US, YTV in Canada. No new story arc — same episodic slice-of-life format as S1. Final US broadcast Oct 2008; final YTV broadcast May 2009.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── The Finale (2008) ──</td></tr>
+
+          <tr class="fn-xbox360 fn-highlight">
+            <td>Sep 2008</td>
+            <td>Viva Piñata: Trouble in Paradise <span class="fn-star">⭐</span></td>
+            <td>Xbox 360</td>
+            <td><span class="fn-star">⭐</span> The definitive game. Adds Piñarctic and Dessert Desert zones, co-op, Piñata Vision camera cards, and 100+ species. Included in Rare Replay. The better version if you only play one.</td>
+          </tr>
+
+          <tr class="fn-nds">
+            <td>Sep 2008</td>
+            <td>Viva Piñata: Pocket Paradise</td>
+            <td>Nintendo DS</td>
+            <td>Standalone handheld rework of the original game, published by THQ. Touch-screen controls. Some mechanics simplified (no Wildcard variants). The only entry playable on mobile via melonDS / EmulatorJS.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── Defunct / Never Released ──</td></tr>
+
+          <tr class="fn-defunct-row">
+            <td>2007–2015</td>
+            <td>Piñata Sharing (online feature)</td>
+            <td>Xbox 360 / PC</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Offline</span> The online piñata-sharing servers for both games were shut down before the Rare Replay re-release in 2015. The feature is referenced in-game but non-functional.</td>
+          </tr>
+
+          <tr class="fn-defunct-row">
+            <td>—</td>
+            <td>Viva Piñata: "Your Garden" prototype</td>
+            <td>Pocket PC → Xbox</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Lost</span> Tim Stamper's original 2002 gardening prototype, first built for handheld Pocket PC, then the original Xbox, before the piñata concept emerged. No public build exists.</td>
+          </tr>
+
+          <tr class="fn-defunct-row">
+            <td>—</td>
+            <td>Viva Piñata sequel (Trouble in Paradise follow-up)</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Cancelled</span> Gregg Mayles acknowledged around TiP's release that ideas for a third game were conceptualized but not pursued — the team lacked enough new gameplay ideas to warrant it. Never announced.</td>
+          </tr>
+
+          <tr class="fn-defunct-row">
+            <td>~2007</td>
+            <td>Viva Piñata for Xbox One / 3DS (discussed)</td>
+            <td>Xbox One · 3DS</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Never Made</span> A Microsoft exec expressed interest in a 3DS entry in early 2007 during Pocket Paradise development. Rare explored it but deprioritized in favor of shipping Pocket Paradise on time. The Xbox One revival was fan-requested but never materialized.</td>
+          </tr>
+        </table>
+
+        <div class="fn-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold left border = recommended / best in its tier</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded row = optional</span>
+          <span><span class="fn-dot" style="background:#ef5350"></span>Red dashed row = defunct / no longer accessible</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = TV insert point</span>
+          <span><span class="fn-tag fn-tag-defunct">⚰️ Defunct</span> Servers shut down, activation broken, or build lost</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BY PLATFORM
+      ─────────────────────────────────────────────────────  -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">
+          All games grouped by platform. Green = Xbox 360, grey = PC, pink = Nintendo DS.
+        </div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Year</th><th>Developer</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🟩 Xbox 360</td></tr>
+          <tr class="fn-xbox360 fn-highlight"><td>Viva Piñata</td><td>2006</td><td>Rare</td><td>Original. Best starting point for history's sake.</td></tr>
+          <tr class="fn-xbox360 fn-skip"><td>Viva Piñata: Party Animals</td><td>2007</td><td>Krome Studios</td><td>Minigame collection. Not a core gardening game.</td></tr>
+          <tr class="fn-xbox360 fn-highlight"><td>Viva Piñata: Trouble in Paradise</td><td>2008</td><td>Rare</td><td><span class="fn-star">⭐</span> Best overall entry. Also in Rare Replay.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🖥️ PC (Windows)</td></tr>
+          <tr class="fn-pc fn-skip"><td>Viva Piñata (Windows)</td><td>2007</td><td>Climax Group</td><td><span class="fn-tag fn-tag-defunct">⚰️ GFWL broken</span> Port with busted activation. Use Xbox 360 version via Rare Replay instead.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">📱 Nintendo DS</td></tr>
+          <tr class="fn-nds"><td>Viva Piñata: Pocket Paradise</td><td>2008</td><td>Rare</td><td>Touch-screen handheld port. Best playable option on mobile via melonDS / EmulatorJS.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BEST FIRST
+      ─────────────────────────────────────────────────────  -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          Ranked purely by quality and accessibility. Start here if you want to know the best the franchise has to offer before committing to everything.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why Here</th></tr>
+
+          <tr class="fn-xbox360 fn-highlight">
+            <td>1</td>
+            <td>Viva Piñata: Trouble in Paradise <span class="fn-star">⭐</span></td>
+            <td>Xbox 360 / Rare Replay</td>
+            <td><span class="fn-star">⭐</span> More content, better balance, co-op, two extra biomes. If you only play one game in the franchise, this is it.</td>
+          </tr>
+          <tr class="fn-xbox360 fn-highlight">
+            <td>2</td>
+            <td>Viva Piñata (original)</td>
+            <td>Xbox 360 / Rare Replay</td>
+            <td>Play for historical context after TiP. Slightly harder and more obtuse, but charming. Also in Rare Replay.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>3</td>
+            <td>Viva Piñata: Pocket Paradise</td>
+            <td>NDS / melonDS</td>
+            <td>Solid portable entry. If you only have a phone/tablet and want to play, this is your option via EmulatorJS.</td>
+          </tr>
+          <tr class="fn-xbox360 fn-skip">
+            <td>4</td>
+            <td>Viva Piñata: Party Animals</td>
+            <td>Xbox 360</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Minigame collection for groups. Fun in short bursts, not a real gardening game. Skip unless you have friends and a couch.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           MOBILE ONLY
+      ─────────────────────────────────────────────────────  -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">
+          Only titles playable on mobile via EmulatorJS in a browser or melonDS on Android. Xbox 360 games require streaming via Sunshine or a real console.
+        </div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Core</th><th>Notes</th></tr>
+          <tr class="fn-nds fn-highlight">
+            <td>Viva Piñata: Pocket Paradise <span class="fn-star">⭐</span></td>
+            <td>melonDS / melonds</td>
+            <td>Touch-screen controls map well to mobile. The only mainline entry playable without Sunshine streaming. Some mechanics are simplified vs the Xbox version.</td>
+          </tr>
+        </table>
+        <div class="callout callout-tip" style="margin-top:12px">
+          <div class="callout-icon">☁️</div>
+          <div class="callout-body">
+            <strong>For the Xbox 360 games on mobile</strong> — stream via <strong>Sunshine/Moonlight</strong>. Trouble in Paradise and the original VP both run excellently on Xbox Series via Rare Replay. A controller + Moonlight stream from the home server is the cleanest mobile path.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           DEFUNCT / LOST
+      ─────────────────────────────────────────────────────  -->
+      <div class="fn-view" id="fn-library-defunct">
+        <div class="fn-view-desc">
+          Entries that are no longer accessible, never shipped, or had features stripped post-launch. Documented for completeness.
+        </div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Status</th><th>What's Lost</th><th>Workaround</th></tr>
+
+          <tr class="fn-defunct-row">
+            <td>Viva Piñata: Party Animals (online)</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Offline</span></td>
+            <td>Xbox Live online multiplayer — matchmaking never functioned well at launch and is now fully gone.</td>
+            <td>Local 4-player still works on original hardware or via Rare Replay.</td>
+          </tr>
+          <tr class="fn-defunct-row">
+            <td>Piñata-sharing servers (VP1 + TiP)</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Offline</span></td>
+            <td>The online piñata garden-sharing feature was shut down before Rare Replay's 2015 release. In-game buttons for it still appear but don't work.</td>
+            <td>None. The feature is gone from all platforms.</td>
+          </tr>
+          <tr class="fn-defunct-row">
+            <td>Viva Piñata (Windows / GFWL)</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Broken</span></td>
+            <td>Games for Windows Live activation is dead. Fresh installs cannot activate. GFWL achievements, cloud saves, and the PC-exclusive online features are gone.</td>
+            <td>Use Xbox 360 version via Rare Replay or original disc on 360/One/Series hardware.</td>
+          </tr>
+          <tr class="fn-defunct-row">
+            <td>Piñata Vision cards (TiP)</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Limited</span></td>
+            <td>Piñata Vision used the Xbox 360 Vision camera to scan printed cards and spawn piñatas. The camera accessory is discontinued and rare; most cards never saw wide release.</td>
+            <td>Some cards have been scanned and shared by fans online. The feature works if you print and hold them up to a working Vision camera.</td>
+          </tr>
+          <tr class="fn-defunct-row">
+            <td>"Your Garden" prototype (2002)</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Lost</span></td>
+            <td>Tim Stamper's original Pocket PC gardening prototype and the early Xbox build that preceded the piñata concept redesign. No public build exists.</td>
+            <td>None. Pre-production only.</td>
+          </tr>
+          <tr class="fn-defunct-row">
+            <td>Cancelled sequel to Trouble in Paradise</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Cancelled</span></td>
+            <td>Gregg Mayles indicated after TiP's release that the team had design ideas but couldn't justify a third game without sufficiently new concepts. Never moved to production.</td>
+            <td>N/A — conceptual only.</td>
+          </tr>
+          <tr class="fn-defunct-row">
+            <td>Viva Piñata for Nintendo 3DS (discussed)</td>
+            <td><span class="fn-tag fn-tag-defunct">⚰️ Never Made</span></td>
+            <td>A Microsoft exec floated a 3DS version in early 2007 while Pocket Paradise was in development. Rare explored the idea and chose to ship Pocket Paradise on time instead.</td>
+            <td>N/A.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /section -->
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 TV & Animation</div>
+
+    <div class="card">
+      <div class="card-title">Viva Piñata (Animated Series) — 2006–2009</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px">
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">STUDIO</span><div style="margin-top:3px">4Kids Productions / Bardel Entertainment</div></div>
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">NETWORK</span><div style="margin-top:3px">Fox (4Kids TV) → CW4Kids (US); YTV (Canada); Nicktoons / CITV (UK)</div></div>
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">RUN</span><div style="margin-top:3px">Aug 26, 2006 – May 18, 2009</div></div>
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">SEASONS</span><div style="margin-top:3px">2</div></div>
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">EPISODES</span><div style="margin-top:3px">52 (each split into two ~11-min segments = 104 segments)</div></div>
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">JELLYFIN STATUS</span><div style="margin-top:3px"><span class="fn-tag fn-tag-yes">Available</span> Archive.org upload exists; full series downloadable.</div></div>
+      </div>
+
+      <p style="font-size:.84rem;line-height:1.7;margin-bottom:14px">
+        Produced in collaboration with Microsoft, the show launched simultaneously with the Xbox 360 game as part of a 4Kids/Microsoft cross-media push. Animations use the game's own 3D character models, and episodes were approved by Rare's Gregg Mayles for accuracy to the game's piñata lore. Many episodes contain direct tips on how to handle in-game piñata species — making it genuinely useful reference alongside the games.
+      </p>
+      <p style="font-size:.84rem;line-height:1.7;margin-bottom:14px">
+        The show is episodic with no continuity between segments. Season 2 began airing one week after Season 1 ended with no discernible change in format. Core recurring cast: <strong>Fergy Fudgehog</strong> (neurotic, fears parties), <strong>Hudson Horstachio</strong> (vain celebrity horse), <strong>Paulie Pretztail</strong> (fox, the clever one), <strong>Franklin Fizzlybear</strong> (chill surfer bear), <strong>Ella Elephanilla</strong> (forgetful ballerina elephant), <strong>Les Galagoogoo</strong> (speaks only in high-pitched gibberish). Villains: <strong>Professor Pester</strong> and his Ruffians.
+      </p>
+
+      <table class="fn-table">
+        <tr><th>Season</th><th>Episodes</th><th>US Broadcast</th><th>Network</th><th>Notes</th></tr>
+        <tr class="fn-tv fn-highlight">
+          <td>Season 1</td><td>26 (episodes 1–26)</td><td>Aug 26, 2006 – 2007</td><td>Fox (4Kids TV)</td>
+          <td><span class="fn-star">⭐</span> Launched same week as the Xbox 360 game. Introduces core cast and Piñata Island.</td>
+        </tr>
+        <tr class="fn-tv">
+          <td>Season 2</td><td>26 (episodes 27–52)</td><td>2007 – Oct 25, 2008</td><td>CW4Kids</td>
+          <td>Same format as S1. Moved to CW4Kids mid-run. Final US air date Oct 25, 2008; final YTV episode May 18, 2009.</td>
+        </tr>
+      </table>
+
+      <div class="callout callout-tip" style="margin-top:14px">
+        <div class="callout-icon">📺</div>
+        <div class="callout-body">
+          <strong>Where to watch:</strong> The full 52-episode run has been archived on <a href="https://archive.org/details/vivapinatafullseries" target="_blank">Internet Archive</a>. Not available on any streaming service. Not on DVD (only a handful of promotional releases). Add to Jellyfin from the Archive.org source.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Movies</div>
+    <div class="card">
+      <p style="font-size:.84rem;color:var(--text-dim);line-height:1.7">
+        No theatrical or direct-to-video films were produced for the Viva Piñata franchise. The 4Kids/Microsoft media push focused entirely on the TV series. No animated film was announced or leaked during the franchise's active years (2006–2008).
+      </p>
+      <div class="callout callout-warning" style="margin-top:12px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          A movie was never announced. If Microsoft revives the franchise, a theatrical or streaming film remains a theoretical possibility given current IP nostalgia trends — but nothing is in development as of 2026.
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Merchandise & Consumer Products</div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">2006–2008 — The 4Kids Licensing Era</div>
+      <p style="font-size:.83rem;line-height:1.7;margin-bottom:10px">
+        4Kids Entertainment served as the exclusive licensing and distribution agent for the Viva Piñata IP. Microsoft filed broad trademark registrations covering virtually every consumer product category. Playmates Toys was signed as master toy partner. The merch push targeted children 6–12, leaning heavily on the TV series characters rather than the game's gardening mechanics.
+      </p>
+      <p style="font-size:.83rem;line-height:1.7">
+        The product line was wider on paper than in retail reality — many categories (bed linens, electric toothbrushes, lunch boxes) appear in trademark filings but had limited actual shelf presence outside North America.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Known Product Categories</div>
+      <table class="fn-table">
+        <tr><th>Category</th><th>Manufacturer</th><th>Notes</th><th>Availability</th></tr>
+
+        <tr class="fn-merch-toy">
+          <td>Action figures / plush toys</td>
+          <td>Playmates Toys</td>
+          <td>Core toy line featuring Fergy, Hudson, Paulie, Franklin and others. Spring-loaded piñata-pop gimmick on some figures. Plush variants were produced.</td>
+          <td><span class="fn-tag fn-tag-rare">🔮 eBay / secondhand</span></td>
+        </tr>
+        <tr class="fn-merch-toy">
+          <td>Inflatable piñata figures</td>
+          <td>Unique Industries</td>
+          <td>Party-supply inflatables. Horstachio and Fudgehog were the most common. Sold in party stores.</td>
+          <td><span class="fn-tag fn-tag-rare">🔮 Very rare</span></td>
+        </tr>
+        <tr class="fn-merch-card">
+          <td>Piñata Vision cards (in-game)</td>
+          <td>Microsoft / Rare</td>
+          <td>Printed cards for use with the Xbox 360 Vision camera in Trouble in Paradise. Scanned by the camera to spawn in-game piñatas and items. Bundled with Trouble in Paradise Special Edition; also sold separately in limited quantities.</td>
+          <td><span class="fn-tag fn-tag-rare">🔮 Limited release; fan scans exist</span></td>
+        </tr>
+        <tr class="fn-merch-card">
+          <td>Greeting cards / social expressions</td>
+          <td>American Greetings</td>
+          <td>Birthday and holiday cards featuring TV-series characters. Sold in card shops and big-box retailers 2006–2008.</td>
+          <td><span class="fn-tag fn-tag-defunct">⚰️ Discontinued</span></td>
+        </tr>
+        <tr class="fn-merch-toy">
+          <td>Halloween costumes</td>
+          <td>Rubie's</td>
+          <td>Fergy Fudgehog and Horstachio costumes for children. Sold in costume shops and online for Halloween 2006–2007.</td>
+          <td><span class="fn-tag fn-tag-defunct">⚰️ Discontinued</span></td>
+        </tr>
+        <tr class="fn-merch-toy">
+          <td>Balloons / party supplies</td>
+          <td>Unique Industries</td>
+          <td>Mylar balloons, party hats, napkins, and decorations. Widely distributed at party supply stores in North America.</td>
+          <td><span class="fn-tag fn-tag-defunct">⚰️ Discontinued</span></td>
+        </tr>
+        <tr class="fn-merch-toy">
+          <td>Cake decorations</td>
+          <td>DecoPac</td>
+          <td>Cake toppers and fondant kits with piñata characters. Sold through bakery supply channels.</td>
+          <td><span class="fn-tag fn-tag-defunct">⚰️ Discontinued</span></td>
+        </tr>
+        <tr class="fn-merch-apparel">
+          <td>Backpacks, bags, school supplies</td>
+          <td>Various</td>
+          <td>Backpacks, lunch bags, pencil cases, and notebooks with TV-series artwork. Sold through school supply and department stores.</td>
+          <td><span class="fn-tag fn-tag-defunct">⚰️ Discontinued</span></td>
+        </tr>
+        <tr class="fn-merch-apparel">
+          <td>Bedding (comforters, pillowcases)</td>
+          <td>Various (MS trademark)</td>
+          <td>Filed under Microsoft trademark registrations. Actual retail presence unclear — may have been limited or cancelled before wide release.</td>
+          <td><span class="fn-tag fn-tag-rare">🔮 Uncertain / very rare</span></td>
+        </tr>
+        <tr class="fn-merch-apparel">
+          <td>Personal care (toothbrushes, bath products)</td>
+          <td>Various (MS trademark)</td>
+          <td>Electric toothbrushes and bath foam filed under Microsoft trademarks. Actual products may have been limited or co-branded drugstore items.</td>
+          <td><span class="fn-tag fn-tag-rare">🔮 Uncertain</span></td>
+        </tr>
+        <tr class="fn-merch-toy">
+          <td>Collector's Edition game bundle</td>
+          <td>Microsoft Game Studios</td>
+          <td>The Viva Piñata Collector's Edition for Xbox 360 came in a rounded tin case with Horstachio artwork, a game disc, and bonus content card. Included a limited Piñata Vision card set.</td>
+          <td><span class="fn-tag fn-tag-rare">🔮 Secondhand / eBay</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Merch Notes</div>
+      <p style="font-size:.83rem;line-height:1.7">
+        The merch program was larger in scope than in execution. 4Kids' licensing machine was at reduced capacity compared to its Pokémon/Yu-Gi-Oh peak, and Viva Piñata's audience overlap between "kids who watch Saturday morning cartoons" and "Xbox 360 owners" was awkward. The franchise was cancelled before the product line could establish itself. Most items were produced only for the 2006–2007 holiday seasons and are now only found secondhand.
+      </p>
+    </div>
+
+  </div>
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler</div>
+    <div class="card">
+      <div class="card-title">Suggested Filler for a Kids/Cozy Channel</div>
+      <p style="font-size:.83rem;line-height:1.7;margin-bottom:14px">
+        Viva Piñata filler works best on a Saturday-morning or cozy/family channel. The TV series episodes run ~22 min each (two ~11-min segments). Mix in game trailers and retrospective video essays for context. All TV episodes are available via Internet Archive.
+      </p>
+
+      <div class="fn-filler-grid">
+
+        <div class="fn-filler-card">
+          <span class="fn-filler-type fn-filler-bumper">📺 TV Episode</span>
+          <div class="fn-filler-name">Viva Piñata S1 Episodes (x26)</div>
+          <div class="fn-filler-meta">4Kids · 2006 · ~22 min each</div>
+          <div class="fn-filler-desc">Core filler block. Each ep = two unrelated 11-min segments. Good for between-show padding on a family/cozy channel. No continuity required — any episode can air in any order.</div>
+          <div class="fn-filler-where">Source: Internet Archive (vivapinatafullseries) → Jellyfin</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <span class="fn-filler-type fn-filler-bumper">📺 TV Episode</span>
+          <div class="fn-filler-name">Viva Piñata S2 Episodes (x26)</div>
+          <div class="fn-filler-meta">CW4Kids · 2007–2009 · ~22 min each</div>
+          <div class="fn-filler-desc">Identical format to S1. Indistinguishable in quality or tone. Extend your rotation seamlessly after S1 is exhausted.</div>
+          <div class="fn-filler-where">Source: Internet Archive → Jellyfin</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <span class="fn-filler-type fn-filler-trailer">🎬 Trailer</span>
+          <div class="fn-filler-name">Viva Piñata: Trouble in Paradise — Announce Trailer</div>
+          <div class="fn-filler-meta">Microsoft · 2008 · ~2 min</div>
+          <div class="fn-filler-desc">Showcases the Piñarctic and Dessert Desert zones. Clean, colourful, age-appropriate. Good bumper filler between episodes.</div>
+          <div class="fn-filler-where">Source: YouTube → download via yt-dlp</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <span class="fn-filler-type fn-filler-retrospective">🎞️ Retrospective</span>
+          <div class="fn-filler-name">Viva Piñata 15th Anniversary Interview (TheGamer, 2021)</div>
+          <div class="fn-filler-meta">TheGamer · 2021 · ~8 min read / video essay</div>
+          <div class="fn-filler-desc">Key Rare developers reminisce about production. Best used as a "making-of" documentary bumper on a retro/cozy channel. Video essay format if sourced from YouTube.</div>
+          <div class="fn-filler-where">Source: YouTube video essays based on this interview → yt-dlp</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <span class="fn-filler-type fn-filler-music">🎵 Music</span>
+          <div class="fn-filler-name">Viva Piñata Soundtrack (OST)</div>
+          <div class="fn-filler-meta">Rare · 2006–2008 · Various lengths</div>
+          <div class="fn-filler-desc">The garden and ambient music from VP1 and Trouble in Paradise. Works as background music filler between longer segments on a low-key cozy channel.</div>
+          <div class="fn-filler-where">Source: YouTube uploads / OST rips → Navidrome</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">2002</div>
+          <div class="fn-era-title">The Garden Seed</div>
+          <div class="fn-era-body">
+            Rare co-founder Tim Stamper conceptualises a gardening game for the handheld Pocket PC platform. A three-person prototype team begins work while Rare is still affiliated with Nintendo. Development soon migrates to the original Xbox.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2003–2005</div>
+          <div class="fn-era-title">The Piñata Concept Emerges</div>
+          <div class="fn-era-body">
+            After Microsoft's acquisition of Rare, development moves to the Xbox 360. The team wants a unified visual style for the creatures — a concept artist lands on piñatas, an idea that excites the UK team since piñatas weren't culturally familiar in England. The candy-filled-interior mechanic flows naturally from the piñata concept. The game's working title was "Your Garden." The team grows to ~50 people. Microsoft pressures the team toward kid-friendly themes to broaden the Xbox 360's market appeal.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">January 2006</div>
+          <div class="fn-era-title">The 4Kids Partnership</div>
+          <div class="fn-era-body">
+            4Kids Entertainment signs an exclusive licensing and distribution deal with Microsoft Game Studios before the game even releases. Viva Piñata was selected from a slate of Microsoft IP that 4Kids evaluated. The plan: a simultaneous game-and-cartoon launch, supported by a full consumer products licensing programme. 4Kids serves as master licensing agent.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">November 2006</div>
+          <div class="fn-era-title">Franchise Launch</div>
+          <div class="fn-era-body">
+            Viva Piñata (Xbox 360) and the animated TV series premiere in the same week. The game receives strong reviews. Phil Spencer calls it a commercial success. The 4Kids TV show airs on Fox's Saturday morning block, reaching children across North America. Merchandise — Playmates toys, greeting cards, party supplies — begins hitting shelves.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2007</div>
+          <div class="fn-era-title">Expansion and Cracks</div>
+          <div class="fn-era-body">
+            Three new entries ship: the PC port (Climax Group, GFWL-dependent), and Party Animals (Krome Studios, a minigame spin-off). The TV series moves to CW4Kids. Rare lead designer Gregg Mayles departs the VP team to work on Banjo-Kazooie: Nuts &amp; Bolts; Justin Cook takes over as lead. A Microsoft exec publicly expresses interest in a Nintendo DS entry.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2008</div>
+          <div class="fn-era-title">Peak and Finale</div>
+          <div class="fn-era-body">
+            Viva Piñata: Trouble in Paradise launches for Xbox 360 — the definitive version of the game, widely considered the high point of the franchise. Pocket Paradise ships for Nintendo DS via THQ. TV series ends US broadcasts in October. Mayles acknowledges that the team lacks enough new ideas to warrant a third mainline game.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2009–2014</div>
+          <div class="fn-era-title">Dormancy</div>
+          <div class="fn-era-body">
+            The TV series airs its final episode in Canada (May 2009) and runs in YTV reruns until June 2011. Rare moves entirely to Kinect projects and Sea of Thieves development. The online piñata-sharing servers are quietly shut down. GFWL begins its death spiral, eventually breaking the PC version entirely.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2015</div>
+          <div class="fn-era-title">Rare Replay Preservation</div>
+          <div class="fn-era-body">
+            Rare Replay bundles both Viva Piñata and Trouble in Paradise for Xbox One, giving the games new life without requiring original hardware. The online piñata-sharing feature is absent from the Replay versions. The games become available on Xbox Game Pass.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2022</div>
+          <div class="fn-era-title">Trademark Renewal</div>
+          <div class="fn-era-body">
+            Microsoft renews the Viva Piñata trademark after years of dormancy, sparking fan speculation. No project is announced. Rare continues work on Sea of Thieves and its next original IP.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2025–Present</div>
+          <div class="fn-era-title">Fan Revival Efforts</div>
+          <div class="fn-era-body">
+            A fan-led Steam project titled <em>Return to Paradise</em> is in development, seeking to recapture the garden-sim spirit without the Microsoft IP. No official revival has been announced from Rare or Xbox Game Studios.
+          </div>
+        </div>
+
+      </div><!-- /fn-timeline -->
+    </div>
+  </div>
+</div><!-- /fn-pane-history -->
+
+
+<script>
+/* ════════════════════════════════════════════════════
+   TAB / VIEW SWITCHING
+════════════════════════════════════════════════════ */
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tab, view, btn) {
+  const prefix = 'fn-' + tab + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.fn-view-btn').forEach(b => {
+    if (b.onclick && b.onclick.toString().includes(tab)) b.classList.remove('active');
+  });
+  const el = document.getElementById(prefix + view);
+  if (el) el.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

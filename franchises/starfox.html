@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Star Fox</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 10px 20px; background: transparent; border: none;
+  border-bottom: 3px solid transparent; color: var(--text-dim);
+  cursor: pointer; transition: all .16s; margin-bottom: -2px; white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(224,133,92,.35); }
+.fn-tab-btn.active { color: #e0855c; border-bottom-color: #e0855c; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(224,133,92,.15); border-color: #e0855c; color: #e0855c; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid #e0855c; padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3); color: #e0855c;
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 7px 10px; text-align: left;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top; line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+.fn-arc-row td {
+  background: rgba(224,133,92,.07) !important; color: #e0855c;
+  font-size: .69rem; font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(224,133,92,.25) !important;
+  border-bottom: 1px solid rgba(224,133,92,.15) !important;
+}
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic; color: var(--text-dim); font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform stripes */
+.fn-snes   td:first-child { border-left: 3px solid #9575cd; }
+.fn-n64    td:first-child { border-left: 3px solid #4db6ac; }
+.fn-gc     td:first-child { border-left: 3px solid #7e57c2; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-wiiu   td:first-child { border-left: 3px solid #80cbc4; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-multi  td:first-child { border-left: 3px solid #90a4ae; }
+.fn-manga  td:first-child { border-left: 3px solid #b464dc; }
+.fn-movie  td:first-child { border-left: 3px solid #ffb74d; }
+.fn-canceled td:first-child { border-left: 3px solid #546e7a; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(224,133,92,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid #e0855c !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block; font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px; border-radius: 3px; white-space: nowrap; vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(224,133,92,.18);  color: #e0855c; border: 1px solid rgba(224,133,92,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-cancel { background: rgba(84,110,122,.2);   color: #90a4ae; border: 1px solid rgba(84,110,122,.4); }
+.fn-star       { color: #e0855c; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #e0855c; border: 3px solid var(--bg);
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  letter-spacing: .1em; color: #e0855c; text-transform: uppercase; margin-bottom: 4px;
+}
+.fn-era-title  { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body   { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px; margin-top: 14px;
+}
+.fn-filler-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.fn-filler-type {
+  font-family: 'Share Tech Mono', monospace; font-size: .58rem;
+  letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px;
+  border-radius: 2px; margin-bottom: 7px; display: inline-block;
+}
+.fn-filler-trailer     { background: rgba(91,141,217,.15);  color: #5b8dd9;  border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-hype        { background: rgba(224,133,92,.12);  color: #e0855c;  border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-music       { background: rgba(78,205,196,.12);  color: #4ecdc4;  border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary { background: rgba(224,133,92,.12);  color: #e0855c;  border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc; border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-bumper      { background: rgba(76,175,80,.12);   color: #81c784;  border: 1px solid rgba(76,175,80,.3); }
+.fn-filler-name   { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta   { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc   { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where  { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: #e0855c; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin: 0 0 24px; }
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #e0855c; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🦊</div>
+  <div>
+    <h1>Star Fox</h1>
+    <div class="subtitle">// SNES · N64 · GC · DS · 3DS · Wii U · EmulatorJS · Anime Short · Manga //</div>
+    <p class="desc">
+      Nintendo's flagship space-rail shooter franchise (1993) following Fox McCloud and the Star Fox mercenary team defending the Lylat System from the mad scientist Andross. Known for branching flight paths, Super FX chip pioneering, the do-a-barrel-roll meme, and the most infamous shelved sequel in Nintendo history. Use the Library tab view pills to sort by release order, play order, or platform. The other tabs cover the one anime short, manga, merchandise, Tunarr filler candidates, and franchise history including canceled titles.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">8</div><div class="fn-stat-label">Main Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">5</div><div class="fn-stat-label">Canceled/Proto</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">Anime Short</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">4</div><div class="fn-stat-label">Manga/Comics</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1993</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Star Fox Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','playorder', this)">🎯 Play Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','canceled',  this)">🚫 Canceled &amp; Lost</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           RELEASE ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All games and media in real-world release order. Canceled/unreleased titles are included with their intended year. Gold rows = standout entries.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Type</th><th>Developer</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── SNES ERA (1993–1995) — Super FX Chip / Argonaut ──</td></tr>
+
+          <tr class="fn-snes fn-highlight">
+            <td>1993</td>
+            <td>Star Fox <span class="fn-star">⭐</span></td>
+            <td>SNES</td>
+            <td><span class="fn-tag fn-tag-yes">Rail Shooter</span></td>
+            <td>Nintendo EAD / Argonaut</td>
+            <td>The original. Super FX chip pioneer. Japanese release: <em>Star Wing</em> (EU: Starwing). Four planets, four routes.</td>
+          </tr>
+          <tr class="fn-manga">
+            <td>1993</td>
+            <td>Star Fox (Nintendo Power Comics)</td>
+            <td>Print</td>
+            <td><span class="fn-tag fn-tag-opt">Manga/Comic</span></td>
+            <td>Benimaru Itoh</td>
+            <td>6-part Nintendo Power comic series. Pre-N64 character designs. Non-canon flavor.</td>
+          </tr>
+          <tr class="fn-canceled fn-skip">
+            <td>1993</td>
+            <td>Super Weekend Competition Cart</td>
+            <td>SNES</td>
+            <td><span class="fn-tag fn-tag-cancel">Comp Cart</span></td>
+            <td>Nintendo</td>
+            <td>Score-attack competition cartridge. Not a retail release. ROM preserved.</td>
+          </tr>
+          <tr class="fn-canceled fn-skip">
+            <td>1995</td>
+            <td>Star Fox (Virtual Boy Prototype)</td>
+            <td>Virtual Boy</td>
+            <td><span class="fn-tag fn-tag-cancel">Canceled</span></td>
+            <td>Nintendo</td>
+            <td>Never publicly released. ROM leaked; plays as a basic rail-shooter tech demo.</td>
+          </tr>
+          <tr class="fn-snes">
+            <td>1995</td>
+            <td>Star Fox 2 <span class="fn-star">⭐</span></td>
+            <td>SNES <em>(2017 official)</em></td>
+            <td><span class="fn-tag fn-tag-yes">Rail / Strategy</span></td>
+            <td>Nintendo EAD / Argonaut</td>
+            <td>Completed, shelved in 1995. Officially released on SNES Classic Mini 2017. ROM circulated since the '90s. Adds Miyu &amp; Fay.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── N64 ERA (1997) — Lylat Wars / Voice Acting ──</td></tr>
+
+          <tr class="fn-n64 fn-highlight">
+            <td>1997</td>
+            <td>Star Fox 64 <span class="fn-star">⭐</span></td>
+            <td>N64</td>
+            <td><span class="fn-tag fn-tag-yes">Rail Shooter</span></td>
+            <td>Nintendo EAD</td>
+            <td>The definitive entry. Full VO, branching routes, Rumble Pak debut. EU/AU: <em>Lylat Wars</em>. Barrel roll.</td>
+          </tr>
+          <tr class="fn-manga fn-skip">
+            <td>1997</td>
+            <td>Star Fox 64 (CoroCoro Manga)</td>
+            <td>Print</td>
+            <td><span class="fn-tag fn-tag-opt">Manga</span></td>
+            <td>CoroCoro Comic</td>
+            <td>Japanese manga adaptation published around SF64's launch. Out of print.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── GAMECUBE ERA (2002–2005) — Adventures / Assault ──</td></tr>
+
+          <tr class="fn-canceled fn-skip">
+            <td>2000</td>
+            <td>Dinosaur Planet (pre-SF Adventures build)</td>
+            <td>N64 → GC</td>
+            <td><span class="fn-tag fn-tag-cancel">Unreleased</span></td>
+            <td>Rare</td>
+            <td>Rare's original N64 game before Nintendo mandated the Star Fox skin. N64 &amp; GC prototypes leaked in 2021.</td>
+          </tr>
+          <tr class="fn-gc">
+            <td>2002</td>
+            <td>Star Fox Adventures</td>
+            <td>GC</td>
+            <td><span class="fn-tag fn-tag-varies">Action-Adventure</span></td>
+            <td>Rare</td>
+            <td>Dinosaur Planet retrofit. More Zelda than Star Fox. Rare's final Nintendo game before Microsoft acquisition.</td>
+          </tr>
+          <tr class="fn-canceled fn-skip">
+            <td>2002</td>
+            <td>Star Fox (GBA — Canceled)</td>
+            <td>GBA</td>
+            <td><span class="fn-tag fn-tag-cancel">Canceled</span></td>
+            <td>Nintendo / Rare</td>
+            <td>Announced at E3 2002 alongside Adventures. No ROM known. Quietly dropped.</td>
+          </tr>
+          <tr class="fn-manga fn-skip">
+            <td>2002</td>
+            <td>Farewell, Beloved Falco</td>
+            <td>Print</td>
+            <td><span class="fn-tag fn-tag-yes">Manga</span></td>
+            <td>Nintendo (official)</td>
+            <td>Official bridge manga explaining Falco's departure between SF64 and Adventures. Canon.</td>
+          </tr>
+          <tr class="fn-gc fn-highlight">
+            <td>2005</td>
+            <td>Star Fox: Assault <span class="fn-star">⭐</span></td>
+            <td>GC</td>
+            <td><span class="fn-tag fn-tag-yes">Rail / TPS</span></td>
+            <td>Namco</td>
+            <td>Aparoid invasion arc. Best rail sections since SF64. Excellent multiplayer. Namco-developed.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── DS ERA (2006) — Strategy Hybrid ──</td></tr>
+
+          <tr class="fn-nds">
+            <td>2006</td>
+            <td>Star Fox Command</td>
+            <td>DS</td>
+            <td><span class="fn-tag fn-tag-varies">Strategy / Shooter</span></td>
+            <td>Q-Games</td>
+            <td>Stylus controls, 9 branching endings, set after Assault. Wi-Fi multiplayer defunct. Canonical ending ambiguous.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── 3DS ERA (2011) — SF64 Remake ──</td></tr>
+
+          <tr class="fn-3ds">
+            <td>2011</td>
+            <td>Star Fox 64 3D</td>
+            <td>3DS</td>
+            <td><span class="fn-tag fn-tag-yes">Rail Shooter</span></td>
+            <td>Nintendo EAD / Q-Games</td>
+            <td>Full remake of SF64. Gyro controls, face-cam multiplayer, redrawn assets. Best portable SF64.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── WII U ERA (2016) — Zero / Guard ──</td></tr>
+
+          <tr class="fn-wiiu">
+            <td>2016</td>
+            <td>Star Fox Zero</td>
+            <td>Wii U</td>
+            <td><span class="fn-tag fn-tag-yes">Rail Shooter</span></td>
+            <td>Nintendo EPD / PlatinumGames</td>
+            <td>SF64 reimagining with mandatory dual-screen gyro controls. Divisive. PlatinumGames co-developed.</td>
+          </tr>
+          <tr class="fn-wiiu fn-skip">
+            <td>2016</td>
+            <td>Star Fox Guard</td>
+            <td>Wii U</td>
+            <td><span class="fn-tag fn-tag-opt">Tower Defense</span></td>
+            <td>Nintendo EPD / PlatinumGames</td>
+            <td>Bundled with Zero. Camera-tower defense spinoff starring Slippy's uncle Grippy. Light canon tie-in only.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2016</td>
+            <td>Star Fox: The Battle Begins <span class="fn-star">⭐</span></td>
+            <td>YouTube</td>
+            <td><span class="fn-tag fn-tag-varies">Anime Short</span></td>
+            <td>Production I.G / WIT Studio</td>
+            <td>~4 min CG anime promotional film. Theatrical-quality animation. Non-canon to the games. Available on Nintendo's YouTube.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#9575cd"></span>Purple = SNES</span>
+          <span><span class="fn-dot" style="background:#4db6ac"></span>Teal = N64</span>
+          <span><span class="fn-dot" style="background:#7e57c2"></span>Indigo = GameCube</span>
+          <span><span class="fn-dot" style="background:#f48fb1"></span>Pink = DS</span>
+          <span><span class="fn-dot" style="background:#80cbc4"></span>Mint = Wii U</span>
+          <span><span class="fn-dot" style="background:#546e7a"></span>Grey = Canceled / Prototype</span>
+          <span><span class="fn-dot" style="background:#e0855c"></span>Orange highlight = recommended</span>
+          <span><span style="opacity:.5">Faded</span> = optional / skip</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           PLAY ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-playorder">
+        <div class="fn-view-desc">Recommended play order for a newcomer wanting to experience the best of Star Fox without the noise. Skips the contested entries and frames the timeline.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Platform</th><th>Why</th></tr>
+          <tr class="fn-n64 fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">1</td>
+            <td>Star Fox 64</td><td>N64 / 3DS</td>
+            <td>Start here. The definitive experience and foundation for everything else.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">2</td>
+            <td>Star Fox (SNES)</td><td>SNES</td>
+            <td>Historical context — see where it started. Shorter than SF64.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">3</td>
+            <td>Star Fox 2</td><td>SNES</td>
+            <td>The shelved sequel — fascinating design, proto-Zero concepts, Miyu &amp; Fay.</td>
+          </tr>
+          <tr class="fn-manga fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--text-dim)">3.5</td>
+            <td>Farewell, Beloved Falco</td><td>Manga</td>
+            <td>Read before Adventures. Canon bridge explaining Falco's absence.</td>
+          </tr>
+          <tr class="fn-gc">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">4</td>
+            <td>Star Fox Adventures</td><td>GC</td>
+            <td>Play for the lore and Krystal's introduction. Know it's more Zelda than SF.</td>
+          </tr>
+          <tr class="fn-gc fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">5</td>
+            <td>Star Fox: Assault</td><td>GC</td>
+            <td>Closest to SF64 in feel. Aparoid arc concludes the Adventures-era story.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--text-dim)">6</td>
+            <td>Star Fox Command</td><td>DS</td>
+            <td>Optional. Interesting alternate-futures story; control scheme divisive.</td>
+          </tr>
+          <tr class="fn-wiiu fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--text-dim)">7</td>
+            <td>Star Fox Zero</td><td>Wii U</td>
+            <td>Optional. Soft-reboot of SF64. Play only if gyro controls don't bother you.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BY PLATFORM
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All titles grouped by hardware. Emulator core notes included.</div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Title</th><th>Core / Emulator</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── SNES ──</td></tr>
+          <tr class="fn-snes"><td>SNES</td><td>Star Fox</td><td>bsnes / Mesen-S (Super FX)</td><td>Requires Super FX chip emulation. Use bsnes for accuracy.</td></tr>
+          <tr class="fn-snes"><td>SNES</td><td>Star Fox 2</td><td>bsnes / Mesen-S (Super FX2)</td><td>ROM freely available since '90s. Official release on SNES Classic 2017.</td></tr>
+          <tr class="fn-canceled fn-skip"><td>SNES</td><td>Super Weekend Competition</td><td>bsnes</td><td>Score-attack competition cart. ROM preserved.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── N64 ──</td></tr>
+          <tr class="fn-n64 fn-highlight"><td>N64</td><td>Star Fox 64</td><td>Mupen64Plus / ParaLLEl-N64</td><td>ParaLLEl-N64 for best accuracy. Rumble Pak effects lost in emulation.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── GameCube ──</td></tr>
+          <tr class="fn-gc"><td>GC</td><td>Dinosaur Planet (Prototype)</td><td>Dolphin</td><td>2021 leak. N64 build also exists (Mupen64Plus). Not the Adventures retail ROM.</td></tr>
+          <tr class="fn-gc"><td>GC</td><td>Star Fox Adventures</td><td>Dolphin</td><td>Standard GC emulation. No special requirements.</td></tr>
+          <tr class="fn-gc fn-highlight"><td>GC</td><td>Star Fox: Assault</td><td>Dolphin</td><td>Runs well. Enable widescreen hack for 16:9.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── Nintendo DS ──</td></tr>
+          <tr class="fn-nds"><td>DS</td><td>Star Fox Command</td><td>melonDS / DeSmuME</td><td>Stylus controls map to mouse in melonDS. Online defunct.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── 3DS ──</td></tr>
+          <tr class="fn-3ds"><td>3DS</td><td>Star Fox 64 3D</td><td>Citra / Lime3DS</td><td>Gyro via mouse or analog input. Face-cam multiplayer non-functional in emulation.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">── Wii U ──</td></tr>
+          <tr class="fn-wiiu"><td>Wii U</td><td>Star Fox Zero</td><td>Cemu</td><td>Gamepad gyro maps awkwardly — use controller + mouse or a Xinput pad with gyro.</td></tr>
+          <tr class="fn-wiiu fn-skip"><td>Wii U</td><td>Star Fox Guard</td><td>Cemu</td><td>Bundled with Zero. Camera controls map to mouse in Cemu.</td></tr>
+
+        </table>
+        <div class="callout callout-info" style="margin-top:12px">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-body">Star Fox Zero's mandatory gamepad gyro is the main emulation challenge. Cemu supports this via mouse as the gamepad touchscreen/gyro input. It's workable but requires setup. See the Cemu documentation for gamepad motion mapping.</div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BEST FIRST
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Ranked by quality and impact. Start at the top if you want the best the franchise has to offer.</div>
+        <table class="fn-table">
+          <tr><th>Rank</th><th>Title</th><th>Platform</th><th>Why It's Here</th></tr>
+          <tr class="fn-n64 fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">S</td>
+            <td>Star Fox 64 <span class="fn-star">⭐</span></td><td>N64</td>
+            <td>Perfect execution of the formula. The reason the franchise exists in memory.</td>
+          </tr>
+          <tr class="fn-gc fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">A</td>
+            <td>Star Fox: Assault</td><td>GC</td>
+            <td>Best post-SF64 rail sections. Aparoid arc is narratively satisfying.</td>
+          </tr>
+          <tr class="fn-snes fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">A</td>
+            <td>Star Fox (SNES)</td><td>SNES</td>
+            <td>The original. Still playable, historically essential.</td>
+          </tr>
+          <tr class="fn-snes">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">B</td>
+            <td>Star Fox 2</td><td>SNES</td>
+            <td>Fascinating shelved design. Real-time planet defense and new pilots.</td>
+          </tr>
+          <tr class="fn-3ds">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">B</td>
+            <td>Star Fox 64 3D</td><td>3DS</td>
+            <td>Best portable SF64. Faithful remake, some added depth.</td>
+          </tr>
+          <tr class="fn-gc">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--text-dim)">C</td>
+            <td>Star Fox Adventures</td><td>GC</td>
+            <td>Good Zelda-like game wearing a Star Fox skin. Worth it for Krystal and the lore bridge.</td>
+          </tr>
+          <tr class="fn-wiiu fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--text-dim)">C</td>
+            <td>Star Fox Zero</td><td>Wii U</td>
+            <td>Divisive. Controls are genuinely interesting once mastered. Undermined by Wii U obscurity.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--text-dim)">C</td>
+            <td>Star Fox Command</td><td>DS</td>
+            <td>Interesting concept, messy execution. Nine endings dilute canon.</td>
+          </tr>
+          <tr class="fn-wiiu fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--text-dim)">D</td>
+            <td>Star Fox Guard</td><td>Wii U</td>
+            <td>Serviceable tower defense. Negligible lore. Skip unless you loved Zero.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           CANCELED & LOST
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-canceled">
+        <div class="fn-view-desc">Canceled games, prototypes, unreleased builds, and defunct content. Includes ROM preservation status.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>What Happened</th></tr>
+
+          <tr class="fn-canceled">
+            <td>1992</td>
+            <td>Star Fox SNES Prototype (1992 Demo)</td>
+            <td>SNES</td>
+            <td><span class="fn-tag fn-tag-cancel">ROM Preserved</span></td>
+            <td>Pre-release press demo build predating the Super FX branding. Different level layouts and enemy designs. Archived by ROM preservationists.</td>
+          </tr>
+          <tr class="fn-canceled">
+            <td>1993</td>
+            <td>Super Weekend Competition Cart</td>
+            <td>SNES</td>
+            <td><span class="fn-tag fn-tag-cancel">ROM Preserved</span></td>
+            <td>Score-attack build used in Nintendo's 1993 retail tournament. Extremely rare physical cartridge. Not a consumer product. ROM extracted and preserved.</td>
+          </tr>
+          <tr class="fn-canceled fn-highlight">
+            <td>1995</td>
+            <td>Star Fox 2</td>
+            <td>SNES</td>
+            <td><span class="fn-tag fn-tag-yes">Officially Released 2017</span></td>
+            <td>100% complete at cancellation. Shelved to avoid upstaging the N64. ROM leaked in the late 1990s and circulated for 20+ years. Nintendo officially released it on the SNES Classic Mini in September 2017.</td>
+          </tr>
+          <tr class="fn-canceled">
+            <td>1995</td>
+            <td>Star Fox (Virtual Boy Prototype)</td>
+            <td>Virtual Boy</td>
+            <td><span class="fn-tag fn-tag-cancel">ROM Leaked</span></td>
+            <td>Rail-shooter tech demo for the Virtual Boy. Never publicly announced or released. ROM leaked; shows early flight corridors using Virtual Boy's red/black 3D display. Playable in Mednafen/BeetleVB.</td>
+          </tr>
+          <tr class="fn-canceled fn-highlight">
+            <td>2000</td>
+            <td>Dinosaur Planet</td>
+            <td>N64 → GC</td>
+            <td><span class="fn-tag fn-tag-cancel">Prototype Leaked 2021</span></td>
+            <td>Rare's original standalone action-adventure before Nintendo requested the Star Fox skin. Stars Sabre and Krystal (pre-renaming). Both the late-era N64 build and an early GC build leaked in 2021 via the "GigaLeak." Significant historical artifact. Playable in Mupen64Plus (N64 build) and Dolphin (GC build).</td>
+          </tr>
+          <tr class="fn-canceled">
+            <td>2002</td>
+            <td>Star Fox (GBA — Announced)</td>
+            <td>GBA</td>
+            <td><span class="fn-tag fn-tag-no">No ROM Known</span></td>
+            <td>Announced at E3 2002 alongside Adventures in promotional material. Never showed gameplay. Quietly dropped from Nintendo's release schedule. May have been an early concept only — no prototype is known to exist.</td>
+          </tr>
+          <tr class="fn-canceled fn-skip">
+            <td>2006+</td>
+            <td>Star Fox Command Online Multiplayer</td>
+            <td>DS</td>
+            <td><span class="fn-tag fn-tag-no">Defunct</span></td>
+            <td>Nintendo Wi-Fi Connection multiplayer for Command shut down on May 20, 2014 alongside all DS/Wii online services. No fan server revival as of 2026.</td>
+          </tr>
+          <tr class="fn-canceled fn-skip">
+            <td>201X</td>
+            <td>Star Fox (Wii — Rumored)</td>
+            <td>Wii</td>
+            <td><span class="fn-tag fn-tag-cancel">Unconfirmed</span></td>
+            <td>Multiple reports of a Star Fox Wii prototype or project that was shelved in favor of Zero. Never officially confirmed. No ROM or visual evidence surfaced publicly.</td>
+          </tr>
+
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Prototype ROMs</strong> sourced from the GigaLeak (2020–2021) are widely available but of uncertain legal standing. The Dinosaur Planet N64 leak is among the most historically significant game prototypes ever released publicly.</div>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\StarFox\
+  ├── snes\           → .sfc   (core: bsnes / Mesen-S — Super FX required)
+  ├── n64\            → .n64 / .z64   (core: Mupen64Plus / ParaLLEl-N64)
+  ├── gc\             → .iso / .rvz   (Dolphin)
+  ├── nds\            → .nds   (core: melonDS)
+  ├── 3ds\            → .3ds / .cia   (Citra / Lime3DS)
+  ├── wiiu\           → .wua / rpx   (Cemu)
+  └── prototypes\     → .sfc / .n64 / .iso   (leaked builds — Dinosaur Planet, VB demo, etc.)</pre>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-top:8px">Star Fox 2 ROM has circulated since the late 1990s under various filenames. The official SNES Classic dump is the cleanest version.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Star Fox TV &amp; Anime</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all', this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <!-- ALL ENTRIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Star Fox has no full-length anime or TV series. The franchise's only animated screen adaptation is the 2016 promotional short. Fan projects and the 1990s Satellaview content are noted below.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Length</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-movie fn-highlight">
+            <td>2016</td>
+            <td>Star Fox: The Battle Begins <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Anime Short</span></td>
+            <td>~4 min</td>
+            <td>YouTube (Nintendo)</td>
+            <td>Production I.G + WIT Studio CG anime. Theatrical production quality. Made to promote Star Fox Zero. Not canon to game events. Fox, Falco, Slippy, Peppy, Wolf all appear.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── DEFUNCT / INACCESSIBLE ──</td></tr>
+
+          <tr class="fn-canceled fn-skip">
+            <td>1997</td>
+            <td>Satellaview BS Star Fox (Radio Drama content)</td>
+            <td><span class="fn-tag fn-tag-cancel">Defunct</span></td>
+            <td>Unknown</td>
+            <td>Lost</td>
+            <td>Nintendo broadcast Satellaview content in Japan including Star Fox-related audio/radio drama material alongside BSX downloadable game content. The Satellaview service shut down in 2000; most audio content is considered lost.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── CANCELLED PROJECTS ──</td></tr>
+
+          <tr class="fn-canceled fn-skip">
+            <td>TBD</td>
+            <td>Star Fox (Animated Series — Various Reports)</td>
+            <td><span class="fn-tag fn-tag-cancel">Never Greenlit</span></td>
+            <td>N/A</td>
+            <td>N/A</td>
+            <td>Multiple fan petitions and industry rumors over the years have suggested a Star Fox animated series was pitched to Nintendo. Nothing has been officially announced or confirmed as of 2026.</td>
+          </tr>
+
+        </table>
+        <div class="callout callout-info" style="margin-top:12px">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-body"><strong>Star Fox has never had a dedicated anime or TV series.</strong> The 2016 WIT/Production I.G short is the only professional animated Star Fox content that exists in a watchable form. Nintendo has been notably protective of IP adaptation rights across all franchises.</div>
+        </div>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Given there is only one animated entry, the watch order is trivial.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Watch When</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:#e0855c">1</td>
+            <td>Star Fox: The Battle Begins</td>
+            <td>Anytime — standalone</td>
+            <td>4 minutes. Watch before or after playing Zero. Non-canon but visually stunning.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Star Fox\
+  └── Star Fox - The Battle Begins (2016).mp4   ← download from Nintendo YouTube, add to Jellyfin</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Star Fox Movies</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all', this)">📋 All Entries</button>
+      </div>
+
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">Star Fox has no feature films. The 2016 anime short is catalogued under TV &amp; Anime. This tab covers announced or rumored film adaptations.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Status</th><th>Notes</th></tr>
+          <tr class="fn-canceled fn-skip">
+            <td>TBD</td>
+            <td>Star Fox (Feature Film — Rumored)</td>
+            <td><span class="fn-tag fn-tag-cancel">Unconfirmed</span></td>
+            <td>No announcement</td>
+            <td>Industry speculation only. No studio, director, or official announcement as of 2026. Nintendo's ongoing push for IP adaptations (Mario, Zelda) has renewed fan speculation.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Star Fox\
+  └── [No feature films — add if a theatrical release occurs]</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Star Fox Merchandise &amp; Collectibles</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Star Fox has historically been under-merchandised relative to its cultural footprint. Nintendo's primary vehicle for the franchise has been Amiibo and First4Figures statues. The N64 era saw the most licensing activity (toys, plush, cards). Post-2006, physical merch dried up significantly — Command and Zero received almost no licensed product. Gold rows = grail / especially notable.</div>
+    </div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('merch','all',      this)">📋 All Merch</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','toys',     this)">🧸 Toys &amp; Figures</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','statues',  this)">🗿 Statues &amp; Premium</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','tabletop', this)">🃏 Tabletop &amp; Cards</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','history',  this)">📖 Merch History</button>
+      </div>
+
+      <!-- ALL MERCH -->
+      <div class="fn-view active" id="fn-merch-all">
+        <div class="fn-view-desc">Complete notable merchandise across all categories. ⭐ = grail / especially noteworthy.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Category</th><th>Manufacturer</th><th>Price Range</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── N64 Era Licensing (1997–2005) ──</td></tr>
+          <tr class="fn-merch-toy">
+            <td>1997</td><td>Star Fox 64 Promo Figures (Nintendo Power)</td>
+            <td><span class="fn-tag fn-tag-opt">Figure</span></td>
+            <td>Nintendo / various</td><td>$15–40</td>
+            <td>Small Fox McCloud and Arwing figures bundled with Nintendo Power subscriptions and contest prizes. Not retail. Collectible.</td>
+          </tr>
+          <tr class="fn-merch-toy fn-highlight">
+            <td>1997</td><td>Star Fox 64 Arwing Model Kit <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Model Kit</span></td>
+            <td>Bandai (Japan)</td><td>$40–120</td>
+            <td>Japanese market only. Snap-fit model of the Arwing and Wolfen. Highly collectible in the West. Secondary market prices have risen significantly.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>2002</td><td>Fox McCloud (Adventures era figure)</td>
+            <td><span class="fn-tag fn-tag-opt">Figure</span></td>
+            <td>Toy Biz</td><td>$10–30</td>
+            <td>Adventures era character design. Found in discount retail at the time. Low production quality.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Amiibo Era (2014–present) ──</td></tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2014</td><td>Fox McCloud Amiibo (Smash series) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Amiibo</span></td>
+            <td>Nintendo</td><td>$12–35</td>
+            <td>First Fox Amiibo. Smash Bros. series. Still relatively findable. Unlocks costumes in various games.</td>
+          </tr>
+          <tr class="fn-merch-statue">
+            <td>2016</td><td>Star Fox Zero Amiibo 4-Pack <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Amiibo</span></td>
+            <td>Nintendo</td><td>$50–120 (set)</td>
+            <td>Fox, Falco, Wolf, Slippy — four-figure set released with Star Fox Zero. Fox in Arwing variant. Now secondary market only. Wolf is the hardest to find.</td>
+          </tr>
+          <tr class="fn-merch-statue">
+            <td>2014</td><td>Falco Lombardi Amiibo (Smash)</td>
+            <td><span class="fn-tag fn-tag-yes">Amiibo</span></td>
+            <td>Nintendo</td><td>$15–50</td>
+            <td>Smash Bros. series Falco. One of the earlier Smash wave scarcities — had a limited production run initially.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── First4Figures / Premium (2017–present) ──</td></tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2017</td><td>Fox McCloud on Arwing (First4Figures) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-opt">Premium Statue</span></td>
+            <td>First4Figures</td><td>$200–500+</td>
+            <td>~35cm resin statue of Fox in his Arwing cockpit. Multiple editions (standard, exclusive with LED). Secondary market prices vary by edition. F4F's flagship Star Fox piece.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Print / Books ──</td></tr>
+          <tr class="fn-merch-book">
+            <td>1993</td><td>Nintendo Power Star Fox Player's Guide</td>
+            <td><span class="fn-tag fn-tag-opt">Strategy Guide</span></td>
+            <td>Nintendo Power</td><td>$5–20</td>
+            <td>Original SNES game guide. Contains the Benimaru Itoh comics. Good artifact.</td>
+          </tr>
+          <tr class="fn-merch-book">
+            <td>1997</td><td>Star Fox 64 Official Nintendo Player's Guide</td>
+            <td><span class="fn-tag fn-tag-opt">Strategy Guide</span></td>
+            <td>Nintendo Power</td><td>$5–25</td>
+            <td>High-quality official guide with full route maps and medal requirements. Common on secondary market.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- TOYS & FIGURES -->
+      <div class="fn-view" id="fn-merch-toys">
+        <div class="fn-view-desc">Action figures, model kits, and smaller collectible figures.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Manufacturer</th><th>Scale</th><th>Price Range</th><th>Notes</th></tr>
+          <tr class="fn-merch-toy fn-highlight">
+            <td>1997</td><td>Arwing Model Kit <span class="fn-star">⭐</span></td>
+            <td>Bandai (Japan)</td><td>~1:72</td><td>$40–120</td>
+            <td>Japan-only snap-fit model. The best physical Star Fox product of the N64 era.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>1997</td><td>Wolfen Model Kit</td>
+            <td>Bandai (Japan)</td><td>~1:72</td><td>$30–80</td>
+            <td>Companion to the Arwing kit. Wolf O'Donnell's ship.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>1997</td><td>Nintendo Power Promo Figures</td>
+            <td>Nintendo</td><td>~3 in</td><td>$15–40</td>
+            <td>Contest/subscription premiums. Fox McCloud and misc. characters.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- STATUES & PREMIUM -->
+      <div class="fn-view" id="fn-merch-statues">
+        <div class="fn-view-desc">Premium statues, Amiibo, and high-end collectibles.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Manufacturer</th><th>Edition</th><th>Price Range</th><th>Notes</th></tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2017</td><td>Fox McCloud on Arwing <span class="fn-star">⭐</span></td>
+            <td>First4Figures</td><td>Standard / Exclusive (LED)</td><td>$200–500+</td>
+            <td>The grail Star Fox statue. Exclusive edition has cockpit LED lighting. Limited run. Check F4F's forum for reorder windows.</td>
+          </tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2016</td><td>Star Fox Zero Amiibo 4-Pack <span class="fn-star">⭐</span></td>
+            <td>Nintendo</td><td>Retail bundle</td><td>$50–120</td>
+            <td>Fox (Arwing variant), Falco, Wolf, Slippy. Wolf is the scarce one. All four now secondary market only.</td>
+          </tr>
+          <tr class="fn-merch-statue">
+            <td>2014</td><td>Fox McCloud Amiibo (Smash)</td>
+            <td>Nintendo</td><td>Standard</td><td>$12–35</td>
+            <td>Most accessible Amiibo. Periodically restocked. Functions in Smash Ultimate.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- TABLETOP -->
+      <div class="fn-view" id="fn-merch-tabletop">
+        <div class="fn-view-desc">Tabletop and card games. Star Fox has minimal representation in this category.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Publisher</th><th>Players</th><th>Notes</th></tr>
+          <tr class="fn-merch-card fn-skip">
+            <td>1998</td><td>Star Fox 64 promotional card sets</td>
+            <td><span class="fn-tag fn-tag-opt">Promo Cards</span></td>
+            <td>Nintendo (Japan)</td><td>—</td>
+            <td>Japanese promotional card sets distributed with Club Nintendo and game purchases. Collectible art cards, not a game system.</td>
+          </tr>
+          <tr class="fn-merch-card fn-skip">
+            <td>Various</td><td>Star Fox (Super Smash Bros. Trading Cards)</td>
+            <td><span class="fn-tag fn-tag-opt">Trading Cards</span></td>
+            <td>Various regional publishers</td><td>—</td>
+            <td>Fox McCloud appeared in various Nintendo/Smash Bros. trading card sets across regions. Not a standalone Star Fox product.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- MERCH HISTORY -->
+      <div class="fn-view" id="fn-merch-history">
+        <div class="fn-view-desc">A brief history of the Star Fox merchandise program.</div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The N64 Golden Window (1997–2002)</div>
+          <p style="font-size:.84rem;line-height:1.7">Star Fox 64's massive commercial success generated the franchise's peak licensing activity. Bandai produced model kits for the Japanese market (Arwing, Wolfen), and Nintendo Power distributed promotional figures as subscription rewards. Quality varied widely — the Bandai kits remain genuinely excellent; the Western toy output was cheap and sparse. This window represented the only time Star Fox merchandise was treated as a priority product by licensees.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Barren Middle Years (2002–2014)</div>
+          <p style="font-size:.84rem;line-height:1.7">Adventures, Assault, and Command generated almost no licensed merchandise outside of strategy guides and occasional Nintendo-catalog items (keychains, plush distributed at Nintendo World events). Rare's departure and the franchise's declining sales profile made Star Fox a low-priority license. Toy Biz produced a small Adventures-era figure line at poor quality. The Wii era saw zero Star Fox titles and zero Star Fox merchandise.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Amiibo &amp; Premium Statue Era (2014–present)</div>
+          <p style="font-size:.84rem;line-height:1.7">The Amiibo platform gave Star Fox its first quality mainstream collectibles — Fox in the original Smash wave (2014), followed by the full four-character Zero 4-pack in 2016. First4Figures entered the franchise with the Fox on Arwing statue in 2017, which remains the most prestigious Star Fox collectible ever produced. As of 2026, Star Fox merch is primarily Amiibo (secondary market) and First4Figures reorder windows. No major new licensed products have been announced, reflecting the franchise's dormant state post-Zero.</p>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Grail Items &amp; Hard-to-Find Pieces</div>
+          <p style="font-size:.84rem;color:var(--text-dim)">The Bandai Arwing/Wolfen model kits (Japan, 1997) are the most sought-after vintage pieces — prices have climbed as demand from adult collectors outpaced supply. The Wolf O'Donnell Amiibo from the Zero 4-pack is the scarcest modern piece. The First4Figures Fox on Arwing Exclusive edition (LED) rarely surfaces on secondary market. Avoid bootleg Amiibo — they're common for Wolf and Falco specifically.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Tunarr Filler — Star Fox</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">📡</div>
+      <div class="callout-body">Star Fox content works well as filler on a Nintendo Retro or Gaming History channel. The 2016 anime short is a genuine must-have. Game trailers from the N64 and GameCube eras hold up well. The Iwata Asks and retrospective documentary content is excellent between-game viewing.</div>
+    </div>
+    <div class="fn-filler-grid">
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-bumper">Anime Short</div>
+        <div class="fn-filler-name">Star Fox: The Battle Begins (2016)</div>
+        <div class="fn-filler-meta">2016 · ~4 min · Production I.G / WIT Studio · Nintendo YouTube</div>
+        <div class="fn-filler-desc">The franchise's crown jewel for filler. Theatrical-quality CG anime. Opens with the Lylat System in crisis. Can be used as a channel opener or standalone filler between game sessions. Visual quality is legitimately stunning.</div>
+        <div class="fn-filler-where">🔗 Nintendo YouTube channel · Mirror: archive.org</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Official Trailer</div>
+        <div class="fn-filler-name">Star Fox 64 — Original TV Commercial (1997)</div>
+        <div class="fn-filler-meta">1997 · ~30 sec · Nintendo · YouTube</div>
+        <div class="fn-filler-desc">The classic "Do a barrel roll" era TV spot. Pure nostalgia. Ideal bumper content for any retro Nintendo block. Multiple regional variants exist (US, JP, UK).</div>
+        <div class="fn-filler-where">🔗 YouTube search: "Star Fox 64 commercial 1997"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">E3 Trailer</div>
+        <div class="fn-filler-name">Star Fox Zero — E3 2015 Reveal Trailer</div>
+        <div class="fn-filler-meta">2015 · ~3 min · Nintendo · YouTube</div>
+        <div class="fn-filler-desc">The Zero reveal generated significant fan excitement before the control scheme controversy emerged. Good historical artifact — captures a moment of genuine anticipation before the Wii U era's twilight.</div>
+        <div class="fn-filler-where">🔗 Nintendo YouTube · E3 2015 Direct timestamp</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Retrospective</div>
+        <div class="fn-filler-name">Iwata Asks — Star Fox 64 3D</div>
+        <div class="fn-filler-meta">2011 · ~20 min (text + video) · Nintendo · nintendo.com archive</div>
+        <div class="fn-filler-desc">Satoru Iwata interviews the original development team about the creation of Star Fox 64, the Super FX chip origins, and the design decisions behind the rail-shooter format. Essential franchise history from primary sources.</div>
+        <div class="fn-filler-where">🔗 Web Archive: nintendo.com/iwata-asks/star-fox-64-3d</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">OST / Music</div>
+        <div class="fn-filler-name">Star Fox 64 — Full Soundtrack</div>
+        <div class="fn-filler-meta">1997 · ~60 min · Koji Kondo / Hajime Wakai · YouTube / VGMdb</div>
+        <div class="fn-filler-desc">Corneria, Sector Z, Venom, the Game Over sting — one of Nintendo's most iconic N64 soundtracks. Works as channel background music or standalone music filler. Available on various OST collections.</div>
+        <div class="fn-filler-where">🔗 YouTube: "Star Fox 64 OST full" · Navidrome: Nintendo OST collection</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-retrospective">Documentary</div>
+        <div class="fn-filler-name">Did You Know Gaming — Star Fox</div>
+        <div class="fn-filler-meta">2014 · ~12 min · Did You Know Gaming · YouTube</div>
+        <div class="fn-filler-desc">Covers the franchise's history including Star Fox 2's cancellation, the Virtual Boy prototype, and development trivia. Solid factual overview. Viewer-friendly format. Good between-game-session filler.</div>
+        <div class="fn-filler-where">🔗 YouTube: "Did You Know Gaming Star Fox"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+        <div class="fn-filler-name">Dinosaur Planet / Star Fox Adventures — Development History (various)</div>
+        <div class="fn-filler-meta">2021+ · Various length · YouTube documentarians</div>
+        <div class="fn-filler-desc">The 2021 Dinosaur Planet prototype leak spawned multiple long-form documentary retrospectives on Rare's relationship with Nintendo and the game's transformation. Particularly relevant after the GigaLeak. Search YouTube for "Dinosaur Planet prototype" — several quality 20–40 min pieces exist.</div>
+        <div class="fn-filler-where">🔗 YouTube: "Dinosaur Planet Star Fox Adventures history"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-hype">Hype / Showcase</div>
+        <div class="fn-filler-name">Star Fox 2 — Official Reveal (2017 SNES Classic announcement)</div>
+        <div class="fn-filler-meta">2017 · ~5 min · Nintendo · YouTube</div>
+        <div class="fn-filler-desc">Nintendo's reveal that Star Fox 2 would finally be officially released after 22 years. A genuine "wait, what?" moment in Nintendo history. Excellent context-setting piece for the SF2 deep dive.</div>
+        <div class="fn-filler-where">🔗 Nintendo YouTube · SNES Classic announcement stream</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Adding to Tunarr</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Download <em>The Battle Begins</em> → store in a <code>Star Fox Filler</code> Jellyfin collection</li>
+        <li>Add as <strong>Flex content</strong> on the Tunarr channel (the ~4 min short works perfectly as a content block opener)</li>
+        <li>SF64 TV commercials → true bumpers (30 sec interstitials)</li>
+        <li>Did You Know Gaming / retrospectives → standalone filler blocks between game sessions</li>
+        <li>OST → end-of-block music closer</li>
+        <li>Iwata Asks video (if a recording exists) → documentary filler slot</li>
+      </ul>
+      <p style="margin-top:10px;font-size:.83rem;color:var(--text-dim)">See the <strong>Tunarr</strong> tab for channel config and the full flex content workflow.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 A History of Star Fox</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Overview</div>
+      <p>Star Fox is Nintendo's space-rail shooter franchise, created by Shigeru Miyamoto and Takaya Imamura in 1993 as a showcase for Argonaut Software's Super FX chip — a co-processor that enabled polygonal 3D graphics on the SNES. The franchise is built around Fox McCloud, the young leader of a mercenary flight team defending the fictional Lylat System from the mad scientist Andross. Critically acclaimed for its cinematic presentation, memorable voice cast, and branching route design, Star Fox 64 (1997) remains the franchise's defining achievement and one of the most mechanically satisfying games Nintendo has ever produced. The franchise has been largely dormant since 2016.</p>
+    </div>
+
+    <div class="fn-timeline">
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1991–1993 — The Origin</div>
+        <div class="fn-era-title">Argonaut, the Super FX Chip, and the Birth of a Franchise</div>
+        <div class="fn-era-body">Argonaut Software, a UK team that had impressed Nintendo by porting a 3D demo to the Game Boy without help, approached Nintendo about co-developing hardware to enable polygonal 3D on the SNES. The result was the Super FX chip — a math co-processor soldered inside the cartridge. Shigeru Miyamoto and designer Takaya Imamura developed the Star Fox concept around the chip's capabilities, drawing on Japanese mythology (the kitsune / fox spirit) for the characters and creating a rail-shooter format that hid the hardware's polygon limitations behind fast forward movement. The game shipped in 1993 and was a critical and commercial success, establishing Nintendo as a company willing to push hardware engineering to achieve a cinematic experience.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1995 — The Sequel That Never Was</div>
+        <div class="fn-era-title">Star Fox 2 — Complete, Shelved, Vindicated</div>
+        <div class="fn-era-body">Star Fox 2 was completed in late 1995 and shown publicly at trade events. It expanded dramatically on the original with real-time planetary defense, two-player co-op, all-range mode sections, and two new female pilots (Miyu and Fay). Ninety-nine percent finished, it was shelved at the executive level — Miyamoto and Minoru Arakawa concluded that releasing a SNES sequel would undermine hype for the forthcoming Nintendo 64 and its presumably superior Star Fox follow-up. The ROM leaked within years and built a devoted fanbase that played it in emulators for two decades. Nintendo finally released it officially on the SNES Classic Mini in 2017, confirming what fans had always argued: it was a genuinely excellent game that deserved better.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1997 — The Apex</div>
+        <div class="fn-era-title">Star Fox 64 and the Gold Standard</div>
+        <div class="fn-era-body">Star Fox 64 is universally regarded as the franchise's masterpiece. Built entirely in-house at Nintendo EAD with a new team following Argonaut's departure, it introduced full voice acting (English and Japanese dubs both excellent), a 15-stage branching route system across the Lylat System, the Rumble Pak (its pack-in debut), a robust multiplayer mode, and the most quotable script in Nintendo history ("Do a barrel roll," "Can't let you do that, Star Fox," "We're using our Landmaster"). The European/Australian release as Lylat Wars is the same game under a different name due to trademark issues. It sold over 4 million copies and established the franchise's voice cast and world design that persists to this day.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1997–2000 — The Rare Partnership</div>
+        <div class="fn-era-title">Dinosaur Planet and the Identity Crisis</div>
+        <div class="fn-era-body">After SF64's success, Nintendo approached Rare — riding high on Donkey Kong Country, GoldenEye, and Banjo-Kazooie — about creating a new Star Fox adventure for the N64. Rare developed Dinosaur Planet as a standalone action-adventure with original characters. When Miyamoto saw a late build at Space World 2000, he noted that the main character resembled Fox McCloud and suggested simply making it a Star Fox game. The decision was made; Rare converted protagonist Sabre into Fox, Krystal was repositioned from co-lead to a character to be rescued, and the game was ported to the GameCube to improve visuals. It shipped as Star Fox Adventures in 2002 — Rare's final Nintendo product before Microsoft acquired them.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2002–2006 — The GameCube / DS Era</div>
+        <div class="fn-era-title">Assault, Command, and the Quiet Slide</div>
+        <div class="fn-era-body">Star Fox: Assault (2005), co-developed with Namco, returned to space combat and was critically well-received. Its Aparoid invasion storyline and on-foot/Landmaster sections drew comparisons to the GC era's action-game trend, but rail sections showed genuine craft. Star Fox Command (2006) for DS was Q-Games' first franchise entry — an experimental strategy/shooter with stylus controls and nine branching narrative endings, none of them especially satisfying canonically. By this point the franchise was clearly losing directional focus, with each entry taking a different genre approach and none recapturing SF64's impact. The Wii era (2006–2012) saw no Star Fox title — an unprecedented six-year gap.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2011–2016 — Remakes, Revivals, and the Wii U Gamble</div>
+        <div class="fn-era-title">Star Fox 64 3D, Zero, and the End of an Era</div>
+        <div class="fn-era-body">Star Fox 64 3D (2011) gave the 3DS a strong showcase title and was well-received as a faithful remake. It hinted at renewed franchise interest at Nintendo. Star Fox Zero (2016), co-developed with PlatinumGames on Wii U, was announced as a proper new entry and generated significant enthusiasm. The final product's mandatory dual-screen gyro control scheme — requiring players to aim with the GamePad while watching the TV — divided audiences sharply and is widely credited with suppressing both critical reception and sales. PlatinumGames' own designers reportedly had reservations during development. Zero also shipped alongside Star Fox Guard, a tower-defense spinoff. Both titles underperformed commercially and represented the Wii U's final Star Fox chapter. The accompanying WIT Studio anime short, however, was universally praised.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2016–2026 — The Long Silence</div>
+        <div class="fn-era-title">Dormancy and Unresolved Futures</div>
+        <div class="fn-era-body">As of 2026, no new Star Fox game has been released or officially announced since Star Fox Zero in 2016. The franchise has maintained a presence through Smash Bros. Ultimate (Fox, Falco, and Wolf as fighters; Krystal as Assist Trophy), the 2017 official Star Fox 2 release, and ongoing Amiibo availability. Miyamoto has stated in interviews that he finds the franchise's future directionally unclear — the original space-rail format feels dated, and Adventure-style spinoffs drew criticism. PlatinumGames expressed interest in developing a follow-up to Zero if Nintendo provided the opportunity. Fan advocacy for a Krystal-playable entry, a proper Star Fox 64 sequel, and an HD remaster of Assault persists. The franchise turns 33 in 2026 with its mainline future unresolved.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👥 Key Creators</div>
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Contribution</th></tr>
+        <tr><td>Shigeru Miyamoto</td><td>Creator / Producer</td><td>Co-created the franchise concept; producer on SF64 and Zero; the "Fox looks like Fox McCloud" Space World story.</td></tr>
+        <tr><td>Takaya Imamura</td><td>Character Designer</td><td>Designed Fox McCloud, Falco, Wolf, and the core cast. Defined the franchise's visual identity. Left Nintendo 2021.</td></tr>
+        <tr><td>Jez San</td><td>Co-Creator (Super FX)</td><td>Argonaut founder whose 3D Game Boy demo caught Nintendo's attention; co-designed the Super FX chip.</td></tr>
+        <tr><td>Dylan Cuthbert</td><td>Lead Programmer (SNES era)</td><td>Argonaut programmer who built the original SNES engine; went on to found Q-Games, which made SF64 3D and Command.</td></tr>
+        <tr><td>Koji Kondo / Hajime Wakai</td><td>Composers</td><td>Kondo composed the original; Wakai scored SF64 — creating Corneria, Sector Z, and the franchise's defining sonic identity.</td></tr>
+        <tr><td>Atsushi Inaba</td><td>Producer (Zero)</td><td>PlatinumGames producer on Star Fox Zero; navigated the dual-screen control mandate.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's not?</div>
+      <p style="font-size:.84rem;line-height:1.7">Star Fox's canon is notoriously unclear — Nintendo has never published an official timeline. The community-consensus understanding is that the SNES game, SF64, Adventures, and Assault form a single continuous timeline. Star Fox Zero is a soft reboot / reimagining of SF64 and sits in a separate continuity. Command's nine endings are all considered "possible futures" rather than definitive canon. The manga "Farewell, Beloved Falco" is official Nintendo material and generally accepted as bridging SF64 and Adventures.</p>
+      <table style="margin-top:12px">
+        <tr><th>Entry</th><th>Canon Status</th><th>Notes</th></tr>
+        <tr><td>Star Fox (SNES)</td><td>✅ Canon</td><td>The origin event — Andross exiled, Fox Sr. killed.</td></tr>
+        <tr><td>Star Fox 2</td><td>⚠️ Ambiguous</td><td>Officially released but Nintendo hasn't declared its timeline placement. Many treat it as alternate or parallel to SF64.</td></tr>
+        <tr><td>Star Fox 64</td><td>✅ Canon</td><td>Primary continuity baseline. Most characters and lore originate here.</td></tr>
+        <tr><td>Farewell, Beloved Falco (manga)</td><td>✅ Canon</td><td>Official Nintendo publication. Bridges SF64→Adventures.</td></tr>
+        <tr><td>Star Fox Adventures</td><td>✅ Canon</td><td>Dinosaur Planet / Krystal join continuity here. Eight years after SF64.</td></tr>
+        <tr><td>Star Fox: Assault</td><td>✅ Canon</td><td>Picks up after Adventures. Aparoid arc concludes.</td></tr>
+        <tr><td>Star Fox Command</td><td>⚠️ Ambiguous</td><td>Nine endings; none declared canonical. Treated as "possible futures."</td></tr>
+        <tr><td>Star Fox Zero</td><td>❌ Separate Continuity</td><td>Explicitly a reimagining of SF64. Not a sequel. Parallel universe framing.</td></tr>
+        <tr><td>Star Fox Guard</td><td>❌ Non-canon</td><td>Spinoff. Light tie-in to Zero's separate continuity.</td></tr>
+        <tr><td>Nintendo Power Comics</td><td>❌ Non-canon</td><td>Western adaptation with pre-N64 designs. Fun artifact, not official lore.</td></tr>
+        <tr><td>The Battle Begins (anime)</td><td>❌ Non-canon</td><td>Promotional piece. Not tied to any game's story.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>The "Do a barrel roll" instruction from Peppy in SF64 is technically wrong — the maneuver performed is an aileron roll, not a barrel roll. Nintendo has never corrected this. The phrase became one of the earliest widespread gaming memes.</li>
+        <li>Star Fox 2's cancellation created an unusual situation where a complete, polished Nintendo game circulated as a ROM for 22 years before official release. Nintendo finally bundled it with the SNES Classic in 2017, marking its first official public appearance.</li>
+        <li>The Virtual Boy Star Fox prototype (leaked ROM) predates the Virtual Boy's commercial launch. It demonstrates that Nintendo explored Star Fox as a flagship title for the platform before apparent abandonment. The Virtual Boy sold approximately 770,000 units and was discontinued within one year.</li>
+        <li>Argonaut Software's lead programmer Dylan Cuthbert is Japanese-fluent and lived in Kyoto during the original game's development. He founded Q-Games in Kyoto and has maintained ties to the franchise through SF64 3D and Command.</li>
+        <li>The Dinosaur Planet GigaLeak (2021) is considered one of the most significant game preservation events of the decade — providing direct evidence of the game's original design before the Star Fox retrofit, including Sabre's character arc and Krystal's original protagonist role.</li>
+        <li>Falco Lombardi's Amiibo was among the initial Smash wave Amiibo supply scarcities (2014–2015) — reportedly due to a production misjudgment. Used copies sold for multiples of retail price during the shortage, establishing the Amiibo secondary market as a genuine collector phenomenon.</li>
+        <li>Star Fox has appeared in every Smash Bros. entry since Melee (2001). Fox McCloud is statistically one of the most-played characters in competitive Smash history.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
