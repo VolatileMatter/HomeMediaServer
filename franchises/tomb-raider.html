@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tomb Raider Franchise</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.fn-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era / platform group header rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media / anime break rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Canceled entry rows */
+.fn-canceled-row td {
+  background: rgba(239,83,80,.04) !important;
+  border-top: 1px dashed rgba(239,83,80,.25) !important;
+  border-bottom: 1px dashed rgba(239,83,80,.25) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-canceled-row td { border-left: 3px solid #ef5350 !important; }
+
+/* Platform left-border colour stripes */
+.fn-ps1    td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps2    td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps3    td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-ps5    td:first-child { border-left: 3px solid #ffe57f; }
+.fn-sat    td:first-child { border-left: 3px solid #4db6ac; }
+.fn-pc     td:first-child { border-left: 3px solid #90a4ae; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-xbox360 td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-xbo    td:first-child { border-left: 3px solid #c8e6c9; }
+.fn-gbc    td:first-child { border-left: 3px solid #aed581; }
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-psp    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-gc     td:first-child { border-left: 3px solid #9575cd; }
+.fn-wii    td:first-child { border-left: 3px solid #b0bec5; }
+.fn-ngage  td:first-child { border-left: 3px solid #80cbc4; }
+.fn-mobile td:first-child { border-left: 3px solid #4caf50; }
+.fn-ios    td:first-child { border-left: 3px solid #26a69a; }
+.fn-dc     td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-anime  td:first-child { border-left: 3px solid #ce93d8; }
+.fn-movie  td:first-child { border-left: 3px solid #ffb74d; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-dead   { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-java   { background: rgba(121,85,72,.25);   color: #bcaaa4; border: 1px solid rgba(121,85,72,.4); }
+.fn-star       { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fn-era-title {
+  font-family: 'Cinzel', serif;
+  font-size: .95rem;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🏺</div>
+  <div>
+    <h1>Tomb Raider Franchise</h1>
+    <div class="subtitle">// PS1 · PS2 · PS3 · PS4 · Xbox · PC · GBC · GBA · NDS · PSP · Mobile · Netflix //</div>
+    <p class="desc">
+      The complete Tomb Raider franchise library — every main series game, spinoff, handheld title, Java/mobile release, animated series, film, and canceled project across all eras.
+      Lara Croft has been gaming's most recognizable female protagonist since 1996. The franchise spans three distinct continuities: the original Core Design saga (1996–2003), the Crystal Dynamics Legend trilogy (2006–2008), and the Survivor trilogy reboot (2013–2018).
+      Use the Library tab to sort by release order, trilogy, platform, or recommended path. The other tabs cover animated and live-action adaptations, films, merch, and the full franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">30+</div><div class="fn-stat-label">Games (all)</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2</div><div class="fn-stat-label">Animated Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">3</div><div class="fn-stat-label">Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">3</div><div class="fn-stat-label">Continuities</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1996</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Tomb Raider Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',    this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','trilogy',    this)">🏛️ By Trilogy</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst',  this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',     this)">📱 Mobile &amp; Handheld</button>
+        <button class="fn-view-btn"        onclick="fnView('library','canceled',   this)">⚰️ Canceled</button>
+      </div>
+
+      <!-- ────────────────────────────────────────────
+           RELEASE ORDER
+      ──────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          Every Tomb Raider game in real-world release order, including handheld, mobile, and spinoffs. ⭐ = recommended entry points. Faded rows = optional or skippable. Red rows = canceled/unreleased. Mobile/Java entries noted inline.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── The Core Design Era · Classic Saga (1996–2003) ──</td></tr>
+
+          <tr class="fn-ps1 fn-highlight">
+            <td>1996</td>
+            <td>Tomb Raider <span class="fn-star">⭐</span></td>
+            <td>PS1 · Saturn · PC</td>
+            <td><span class="fn-tag fn-tag-yes">📱 iOS/Android</span></td>
+            <td><span class="fn-star">⭐</span> The original. Lara Croft, Atlantis, the genre-defining platformer. Available on iOS/Android (Aspyr port). GOG on PC. Tank controls — now playable via Remastered (2024).</td>
+          </tr>
+          <tr class="fn-ps1">
+            <td>1997</td>
+            <td>Tomb Raider II</td>
+            <td>PS1 · PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td>Dagger of Xian, Venice, Great Wall. Larger scope than TR1. Remastered 2024 brings it to modern platforms.</td>
+          </tr>
+          <tr class="fn-ps1">
+            <td>1998</td>
+            <td>Tomb Raider III</td>
+            <td>PS1 · PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td>Non-linear level select. Five global locations. Arguably the hardest Core Design entry. Remastered 2025.</td>
+          </tr>
+          <tr class="fn-ps1 fn-highlight">
+            <td>1999</td>
+            <td>Tomb Raider: The Last Revelation <span class="fn-star">⭐</span></td>
+            <td>PS1 · PC · Dreamcast</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td><span class="fn-star">⭐</span> Egypt-focused, best of the classic era gameplay. Ends with Lara's apparent death. Remastered 2025.</td>
+          </tr>
+          <tr class="fn-gbc fn-skip">
+            <td>2000</td>
+            <td>Tomb Raider (Game Boy Color)</td>
+            <td>GBC</td>
+            <td><span class="fn-tag fn-tag-yes">📱 GBC emulation</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 2D side-scroller. First portable TR. Unique standalone story. Never ported — GBC emulation (Gambatte) only.</td>
+          </tr>
+          <tr class="fn-ps1 fn-skip">
+            <td>2000</td>
+            <td>Tomb Raider: Chronicles</td>
+            <td>PS1 · PC · Dreamcast</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td><span class="fn-tag fn-tag-opt">skip-friendly</span> Flashback anthology; weaker than Last Revelation. Completionists only. Remastered 2025.</td>
+          </tr>
+          <tr class="fn-gbc fn-skip">
+            <td>2001</td>
+            <td>Tomb Raider: Curse of the Sword (GBC)</td>
+            <td>GBC</td>
+            <td><span class="fn-tag fn-tag-yes">📱 GBC emulation</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Sequel to the GBC original. 2D platformer; a noteworthy footnote. GBC emulation only.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2002</td>
+            <td>Tomb Raider (Pocket PC)</td>
+            <td>Pocket PC / PDA</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Port of TR1 for Windows CE handhelds. Effectively inaccessible on modern hardware.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2002</td>
+            <td>Tomb Raider: Apocalypse — Eye of Osiris (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> First of three Java iTV/mobile titles. iTV game-show tie-in. Practically inaccessible.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2002</td>
+            <td>Tomb Raider: Apocalypse — The Shadow Falls (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Java sequel. iTV tie-in series part 2.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2003</td>
+            <td>Tomb Raider: Apocalypse — The Last Midnight (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Final Java iTV entry. Trilogy concludes here.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2003</td>
+            <td>Tomb Raider: Temple of Anubis (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Standalone Java mobile game. Egypt-themed top-down puzzler.</td>
+          </tr>
+          <tr class="fn-ngage fn-skip">
+            <td>2003</td>
+            <td>Tomb Raider (Nokia N-Gage)</td>
+            <td>Nokia N-Gage</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Port of TR1 for Nokia's gaming phone. Obscure and effectively inaccessible.</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>2003</td>
+            <td>Tomb Raider: The Angel of Darkness</td>
+            <td>PS2 · PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">notoriously troubled</span> Core Design's final entry. Buggy, incomplete, but has a fascinating dark noir story. Killed the original series. PC/PCSX2 required.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Crystal Dynamics · Legend Trilogy (2006–2008) ──</td></tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2006</td>
+            <td>Tomb Raider: Legend <span class="fn-star">⭐</span></td>
+            <td>PS2 · PS3 · Xbox360 · PC · GC · GBA · NDS · PSP</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> Complete series reboot. Fluid controls, Hollywood action tone. Best entry point for the Legend trilogy. GBA/NDS versions are stripped-down spinoffs.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2006</td>
+            <td>Tomb Raider: Legend (GBA)</td>
+            <td>GBA</td>
+            <td><span class="fn-tag fn-tag-yes">📱 GBA emulation</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Side-scroller adaptation of the main game's story. Different gameplay entirely. GBA emulation (mGBA).</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2006</td>
+            <td>Lara Croft's Poker Party (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Officially licensed poker game featuring Lara. Purely novelty.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2006</td>
+            <td>Tomb Raider: Puzzle Paradox (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Java puzzle game. Standalone mobile release.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2006</td>
+            <td>Tomb Raider: The Reckoning (iTV)</td>
+            <td>Interactive TV</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Interactive TV game for UK Sky Digital platform. Completely inaccessible today.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2007</td>
+            <td>Tomb Raider: Anniversary <span class="fn-star">⭐</span></td>
+            <td>PS2 · PS3 · Xbox360 · Wii · PC · PSP · NDS</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> Full remake of TR1 in the Legend engine. Best way to experience the original story. Wii version has motion controls. PSP version is excellent.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2007</td>
+            <td>Tomb Raider: Anniversary (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Mobile adaptation of Anniversary. Java only. Inaccessible.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2004</td>
+            <td>Tomb Raider: Elixir of Life (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Java standalone puzzle/adventure title. Defunct.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2004</td>
+            <td>Tomb Raider: Quest for Cinnabar (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Java adventure game. China-themed. Defunct.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2003</td>
+            <td>Tomb Raider: The Osiris Codex (Java)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Java Egypt-themed adventure. Part of the Java mobile wave.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2008</td>
+            <td>Tomb Raider: Underworld <span class="fn-star">⭐</span></td>
+            <td>PS3 · PS2 · Xbox360 · Wii · NDS · PC</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> Concludes the Legend trilogy. Nordic mythology, Lara's mother's fate. PS2/Wii versions are downgraded. Two Xbox360 DLC episodes ("Beneath the Ashes," "Lara's Shadow") expand the ending.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2008</td>
+            <td>Tomb Raider: Underworld (Java Mobile)</td>
+            <td>Java Mobile</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Java port of Underworld. Last Java TR release. Defunct.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Lara Croft Spinoffs (2010–2014) ──</td></tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2010</td>
+            <td>Lara Croft and the Guardian of Light <span class="fn-star">⭐</span></td>
+            <td>PS3 · Xbox360 · PC · iOS · Android</td>
+            <td><span class="fn-tag fn-tag-yes">📱 iOS/Android</span></td>
+            <td><span class="fn-star">⭐</span> Top-down co-op action. Completely different gameplay. Fantastic two-player title. Mobile version available. Not Tomb Raider branded but same universe.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>2014</td>
+            <td>Lara Croft and the Temple of Osiris</td>
+            <td>PS4 · XBO · PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td>Sequel to Guardian of Light. Up to 4-player co-op. Egypt setting. Good but overshadowed by the 2013 reboot's popularity.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Crystal Dynamics · Survivor Trilogy Reboot (2013–2018) ──</td></tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2013</td>
+            <td>Tomb Raider (2013) <span class="fn-star">⭐</span></td>
+            <td>PS3 · PS4 · Xbox360 · XBO · PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td><span class="fn-star">⭐</span> Best starting point for new players. Gritty origin story, Uncharted-inspired. Over 14.5 million copies sold — best-selling TR ever. Definitive Edition on PS4/XBO is the version to play.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="5">📺 <strong>Tomb Raider: The Legend of Lara Croft (Netflix S1)</strong> (2024) — Watch after TR2013. Takes place after Shadow of the Tomb Raider in the Survivor continuity.</td></tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2016</td>
+            <td>Rise of the Tomb Raider <span class="fn-star">⭐</span></td>
+            <td>Xbox360 · XBO · PS4 · PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td><span class="fn-star">⭐</span> Siberia, immortality, the Divine Source. Larger than 2013, more tombs. The best-playing Survivor entry. 20 Year Celebration edition includes all DLC.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2018</td>
+            <td>Shadow of the Tomb Raider <span class="fn-star">⭐</span></td>
+            <td>PS4 · XBO · PC</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td><span class="fn-star">⭐</span> Concludes the Survivor trilogy. Peru, Mayan apocalypse. Darkest and most puzzle-heavy entry. Definitive Edition includes all DLC. Play last in the trilogy.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="5">📺 <strong>Tomb Raider: The Legend of Lara Croft (Netflix S2)</strong> (2025) — Final season. Continues post-Shadow of the Tomb Raider.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Mobile Era (2015–2023) ──</td></tr>
+
+          <tr class="fn-mobile fn-highlight">
+            <td>2015</td>
+            <td>Lara Croft GO <span class="fn-star">⭐</span></td>
+            <td>iOS · Android · PS4 · PSVita · PC</td>
+            <td><span class="fn-tag fn-tag-yes">📱 iOS/Android</span></td>
+            <td><span class="fn-star">⭐</span> Turn-based puzzle game. Beautiful minimalist art. The best mobile TR. ~$5 paid. Won multiple mobile GOTY awards in 2015.</td>
+          </tr>
+          <tr class="fn-mobile">
+            <td>2015</td>
+            <td>Lara Croft: Relic Run</td>
+            <td>iOS · Android · Windows Phone · PS4 · PSVita</td>
+            <td><span class="fn-tag fn-tag-yes">📱 iOS/Android</span></td>
+            <td>Endless runner. Fast-paced, fun for short sessions. Free-to-play with microtransactions. Eventually removed from stores — may be inaccessible.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2021</td>
+            <td>Tomb Raider Reloaded</td>
+            <td>iOS · Android</td>
+            <td><span class="fn-tag fn-tag-yes">📱 iOS/Android</span></td>
+            <td><span class="fn-tag fn-tag-opt">free-to-play</span> Top-down arcade shooter. Cartoonish classic-era Lara aesthetic. F2P with heavy gacha monetization. Still available as of 2025.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Remasters (2024–2026) ──</td></tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2024</td>
+            <td>Tomb Raider I–III Remastered <span class="fn-star">⭐</span></td>
+            <td>PS4 · PS5 · Xbox · Switch · PC</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Switch</span></td>
+            <td><span class="fn-star">⭐</span> Best way to play TR1–3 today. Toggle between classic and HD visuals. Aspyr-developed. Switch version enables mobile-like handheld play.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2025</td>
+            <td>Tomb Raider IV–VI Remastered <span class="fn-star">⭐</span></td>
+            <td>PS4 · PS5 · Xbox · Switch · PC</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Switch</span></td>
+            <td><span class="fn-star">⭐</span> Remasters of The Last Revelation, Chronicles, and Angel of Darkness. Aspyr. Redeems Angel of Darkness somewhat.</td>
+          </tr>
+
+        </table>
+
+        <div class="fn-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold border = recommended / best in tier</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded = optional / skip-friendly</span>
+          <span><span class="fn-tag fn-tag-yes">📱 Yes</span> Mobile / emulation playable</span>
+          <span><span class="fn-tag fn-tag-dead">⚰️ Defunct</span> Inaccessible on modern hardware</span>
+          <span><span class="fn-tag fn-tag-java">Java</span> Java mobile era — requires J2ME emulator</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = anime/TV watch point</span>
+        </div>
+      </div>
+
+      <!-- ────────────────────────────────────────────
+           BY TRILOGY
+      ──────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-trilogy">
+        <div class="fn-view-desc">
+          Tomb Raider has three distinct continuities with separate Laras. Play one trilogy before mixing into another — especially don't start with the Survivor trilogy and then jump back to Core Design without understanding the timeline split.
+        </div>
+        <table class="fn-table">
+          <tr><th>Order</th><th>Title</th><th>Platform</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🏛️ CONTINUITY 1 — Core Design Classic Saga (1996–2003)</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>1</td><td>Tomb Raider I–III Remastered (covers TR1–3)</td><td>PS4/PS5/Switch/PC</td><td><span class="fn-star">⭐</span> Play the Remastered versions. Toggle HD/classic at will.</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>2</td><td>Tomb Raider: The Last Revelation (Remastered)</td><td>PS4/PS5/Switch/PC</td><td><span class="fn-star">⭐</span> Best of the classic era. Egypt. Ends with Lara "dying."</td></tr>
+          <tr class="fn-ps1 fn-skip"><td>3</td><td>Tomb Raider: Chronicles (Remastered)</td><td>PS4/PS5/Switch/PC</td><td>Flashback filler. Skippable without missing story.</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>4</td><td>Tomb Raider: The Angel of Darkness (Remastered)</td><td>PS4/PS5/Switch/PC</td><td>Troubled finale. Dark Paris noir story. Remaster fixes worst bugs.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🏛️ CONTINUITY 2 — Legend Trilogy (2006–2008) — separate Lara, separate continuity</td></tr>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>Tomb Raider: Legend</td><td>PS2/PS3/Xbox360/PC</td><td><span class="fn-star">⭐</span> Best starting point. Modern controls, global adventure.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2</td><td>Tomb Raider: Anniversary</td><td>PS2/PS3/Xbox360/PC</td><td><span class="fn-star">⭐</span> Remake of TR1 in Legend engine. Best version of the Atlantis story.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>Tomb Raider: Underworld</td><td>PS3/Xbox360/PC</td><td><span class="fn-star">⭐</span> Trilogy finale. Nordic mythology. Play Legend + Anniversary first.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🏛️ CONTINUITY 3 — Survivor Trilogy (2013–2018) — younger Lara, origin story</td></tr>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>Tomb Raider (2013)</td><td>PS3/PS4/Xbox/PC</td><td><span class="fn-star">⭐</span> Best entry for newcomers. Gritty origin. Definitive Edition recommended.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2</td><td>Rise of the Tomb Raider</td><td>PS4/Xbox/PC</td><td><span class="fn-star">⭐</span> Siberia, best gameplay. Play before Shadow.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>Shadow of the Tomb Raider</td><td>PS4/Xbox/PC</td><td><span class="fn-star">⭐</span> Trilogy conclusion. Play last. Most puzzle-focused.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Netflix: Tomb Raider: The Legend of Lara Croft S1–S2</strong> (2024–2025) — Set after Shadow. Direct continuation of Survivor continuity.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🔀 UNIFIED TIMELINE — Post-2024 (attempts to merge all three)</td></tr>
+          <tr class="fn-pc fn-skip"><td>—</td><td>Legacy of Atlantis (Upcoming)</td><td>TBD — PC/Console</td><td>UE5 reboot. Flying Wild Hog. Set in a "Unified Timeline" treating Survivor trilogy as Lara's origin.</td></tr>
+          <tr class="fn-pc fn-skip"><td>—</td><td>Catalyst (Upcoming)</td><td>TBD — PC/Console</td><td>Second UE5 title announced alongside Legacy of Atlantis. Crystal Dynamics. Northern India setting.</td></tr>
+        </table>
+      </div>
+
+      <!-- ────────────────────────────────────────────
+           BEST FIRST
+      ──────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          Start with the best mechanics and stories, earn the right to go back and suffer the classics. Recommended path for new players who want the franchise to hook them before testing their patience.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🎯 Start Here — Best Mechanics & Stories</td></tr>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>Tomb Raider (2013)</td><td>PS4/PC/Xbox</td><td><span class="fn-star">⭐</span> Best entry point for modern players. Best production values, tight story, accessible combat.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2</td><td>Rise of the Tomb Raider</td><td>PS4/PC/Xbox</td><td><span class="fn-star">⭐</span> Improves on 2013 in nearly every way. Play immediately after.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>Shadow of the Tomb Raider</td><td>PS4/PC/Xbox</td><td><span class="fn-star">⭐</span> Closes the Survivor arc. Best tomb design of the trilogy.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🎮 Then: The Legend Trilogy</td></tr>
+          <tr class="fn-pc fn-highlight"><td>4</td><td>Tomb Raider: Legend</td><td>PS3/Xbox360/PC</td><td><span class="fn-star">⭐</span> Crystal Dynamics' first Lara. Action-movie tone. Still plays great.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>5</td><td>Tomb Raider: Anniversary</td><td>PS3/Xbox360/PC</td><td><span class="fn-star">⭐</span> Now that you like Crystal Dynamics, experience their TR1 remake.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>6</td><td>Tomb Raider: Underworld</td><td>PS3/Xbox360/PC</td><td>Closes the Legend arc. Play Legend + Anniversary first.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">📱 Side Quest: Best Mobile Entry</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>7</td><td>Lara Croft GO</td><td>iOS/Android/PC</td><td><span class="fn-star">⭐</span> The only mobile TR worth going out of your way for. Puzzle masterpiece.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>8</td><td>Lara Croft and the Guardian of Light</td><td>PS3/Xbox360/PC/iOS</td><td><span class="fn-star">⭐</span> Top-down co-op. Plays nothing like mainline TR — but it's excellent.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🏛️ Now Earn the Classics</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>9</td><td>Tomb Raider I–III Remastered</td><td>PS4/PS5/Switch/PC</td><td><span class="fn-star">⭐</span> You're now invested enough to appreciate where it all started. Toggle HD/classic on the fly.</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>10</td><td>Tomb Raider: The Last Revelation (Remastered)</td><td>PS4/PS5/Switch/PC</td><td><span class="fn-star">⭐</span> Best of the Core Design era. Save it for after you love the series.</td></tr>
+          <tr class="fn-ps1 fn-skip"><td>11</td><td>Tomb Raider: Chronicles (Remastered)</td><td>PS4/PS5/Switch/PC</td><td>Only if you need to see everything. Weaker anthology entry.</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>12</td><td>Tomb Raider: The Angel of Darkness (Remastered)</td><td>PS4/PS5/Switch/PC</td><td>The controversial finale. Fascinating story, troubled execution. Play for completion.</td></tr>
+        </table>
+      </div>
+
+      <!-- ────────────────────────────────────────────
+           MOBILE & HANDHELD
+      ──────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">
+          All Tomb Raider titles that were made for or are playable on mobile and handheld devices. Java titles are effectively inaccessible — included for completeness. GBC/GBA require emulation (Gambatte, mGBA). Switch Remastered is the only way to get near-native TR on a portable today.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟢 Playable Today on Phone/Tablet</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2015</td><td>Lara Croft GO</td><td>iOS · Android · PC</td><td><span class="fn-tag fn-tag-yes">✅ Active</span></td><td><span class="fn-star">⭐</span> Turn-based puzzle. The best mobile TR. ~$5.</td></tr>
+          <tr class="fn-ios"><td>1996/2013</td><td>Tomb Raider 1 (Aspyr iOS/Android port)</td><td>iOS · Android</td><td><span class="fn-tag fn-tag-yes">✅ Active</span></td><td>Original TR1 ported by Aspyr. Still available on App Store / Google Play.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2021</td><td>Tomb Raider Reloaded</td><td>iOS · Android</td><td><span class="fn-tag fn-tag-yes">✅ Active (F2P)</span></td><td>Top-down arcade shooter. Free-to-play with gacha elements.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2015</td><td>Lara Croft: Relic Run</td><td>iOS · Android</td><td><span class="fn-tag fn-tag-dead">⚠️ Delisted</span></td><td>Endless runner. Removed from major app stores — may be sideloadable.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2010</td><td>Lara Croft: Guardian of Light (iOS)</td><td>iOS</td><td><span class="fn-tag fn-tag-dead">⚠️ Delisted</span></td><td>Mobile port of the XBLA/PSN title. Removed from App Store.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟡 Playable via Emulation (GBC/GBA)</td></tr>
+          <tr class="fn-gbc fn-skip"><td>2000</td><td>Tomb Raider (Game Boy Color)</td><td>GBC · Gambatte</td><td><span class="fn-tag fn-tag-varies">⚡ Emulation</span></td><td>2D side-scroller. Standalone story. Never re-released.</td></tr>
+          <tr class="fn-gbc fn-skip"><td>2001</td><td>Tomb Raider: Curse of the Sword (GBC)</td><td>GBC · Gambatte</td><td><span class="fn-tag fn-tag-varies">⚡ Emulation</span></td><td>GBC sequel. Also 2D platformer. GBC emulation only.</td></tr>
+          <tr class="fn-gba fn-skip"><td>2002</td><td>Tomb Raider: The Prophecy (GBA)</td><td>GBA · mGBA</td><td><span class="fn-tag fn-tag-varies">⚡ Emulation</span></td><td>Top-down isometric. Third handheld entry. mGBA compatible.</td></tr>
+          <tr class="fn-gba fn-skip"><td>2006</td><td>Tomb Raider: Legend (GBA)</td><td>GBA · mGBA</td><td><span class="fn-tag fn-tag-varies">⚡ Emulation</span></td><td>2D side-scroller adaptation of Legend. Different from the console game.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🔴 Defunct — Java / Pocket PC / N-Gage (effectively inaccessible)</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2002</td><td>Tomb Raider (Pocket PC)</td><td>Pocket PC / PDA</td><td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td><td>TR1 for Windows CE. Requires vintage PDA hardware.</td></tr>
+          <tr class="fn-ngage fn-skip"><td>2003</td><td>Tomb Raider (Nokia N-Gage)</td><td>N-Gage</td><td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td><td>TR1 port for Nokia's gaming phone. Obscure.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2002</td><td>Tomb Raider: Apocalypse — Eye of Osiris</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>iTV tie-in game 1 of 3.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2002</td><td>Tomb Raider: Apocalypse — The Shadow Falls</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>iTV tie-in game 2 of 3.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2003</td><td>Tomb Raider: Apocalypse — The Last Midnight</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>iTV tie-in game 3 of 3.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2003</td><td>Tomb Raider: Temple of Anubis</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>Standalone Java puzzle game.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2003</td><td>Tomb Raider: The Osiris Codex</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>Java adventure.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2004</td><td>Tomb Raider: Quest for Cinnabar</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>China-themed Java adventure.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2004</td><td>Tomb Raider: Elixir of Life</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>Java standalone puzzle.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2006</td><td>Lara Croft's Poker Party</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>Licensed poker game. Novelty item.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2006</td><td>Tomb Raider: Puzzle Paradox</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>Java puzzle game.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2006</td><td>Tomb Raider: The Reckoning (iTV)</td><td>Sky Digital Interactive TV</td><td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td><td>UK interactive TV game. Entirely inaccessible.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2007</td><td>Tomb Raider: Anniversary (Java)</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>Mobile adaptation of Anniversary.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2008</td><td>Tomb Raider: Underworld (Java)</td><td>Java</td><td><span class="fn-tag fn-tag-dead">⚰️ Java defunct</span></td><td>Final Java mobile TR.</td></tr>
+        </table>
+      </div>
+
+      <!-- ────────────────────────────────────────────
+           CANCELED
+      ──────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-canceled">
+        <div class="fn-view-desc">
+          Every known canceled or unreleased Tomb Raider game. Includes prototypes, planned sequels, and projects killed mid-development. Some materials have leaked or been preserved; noted where applicable.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Studio</th><th>Status</th><th>What Happened</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚰️ Core Design / Eidos Era Cancellations</td></tr>
+          <tr class="fn-canceled-row">
+            <td>~1997</td>
+            <td>Tomb Raider III (PS2 survival game)</td>
+            <td>Core Design</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Canceled</span></td>
+            <td>The original TR3 concept was a PS2 survival game planned 2–3 years out. Eidos forced annual releases; a second team made the actual TR3 for PS1 instead. The PS2 vision was abandoned.</td>
+          </tr>
+          <tr class="fn-canceled-row">
+            <td>~1997</td>
+            <td>The Further Adventures of Lara Croft</td>
+            <td>Core Design</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Became TR3</span></td>
+            <td>Originally an expansion pack for TR2. Eidos asked a second team to expand it into a full sequel — which became Tomb Raider III (1998). The original team didn't know until it was announced publicly.</td>
+          </tr>
+          <tr class="fn-canceled-row">
+            <td>~1999–2000</td>
+            <td>Tomb Raider IV Expansion (Gold Edition)</td>
+            <td>Core Design</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Canceled</span></td>
+            <td>An expansion for The Last Revelation was planned for a Gold Edition re-release. Canceled. Level plans were later made public and adapted by fans.</td>
+          </tr>
+          <tr class="fn-canceled-row">
+            <td>~2003–2004</td>
+            <td>The Lost Dominion (AoD sequel)</td>
+            <td>Core Design</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Canceled</span></td>
+            <td>A sequel to Angel of Darkness was in early development. Canceled after AoD's disappointing commercial and critical reception. Would have continued the Lara/Kurtis story arc.</td>
+          </tr>
+          <tr class="fn-canceled-row">
+            <td>2005–2006</td>
+            <td>10th Anniversary (PSP)</td>
+            <td>Core Design</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Canceled / leaked</span></td>
+            <td>A PSP remake of TR1 developed at Core Design. Nearly finished when Core Design was sold to Rebellion in June 2006. Eidos canceled it to let Crystal Dynamics make Anniversary instead. A January 2006 build leaked online in 2020 and is preserved on the Internet Archive.</td>
+          </tr>
+          <tr class="fn-canceled-row">
+            <td>2005–2006</td>
+            <td>Indiana Jones / National Treasure reskin of 10th Anniversary</td>
+            <td>Core Design / Rebellion Derby</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Canceled</span></td>
+            <td>After 10th Anniversary was killed, Core Design attempted to repurpose the work as Indiana Jones or National Treasure games. Neither materialized. The studio became Rebellion Derby and shut down in 2010.</td>
+          </tr>
+          <tr class="fn-canceled-row">
+            <td>~2005</td>
+            <td>LEGO Tomb Raider (test animation)</td>
+            <td>TT Games</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Never greenlit</span></td>
+            <td>TT Games produced a test animation of Lara as a LEGO minifigure. The studio felt the TR series wasn't big enough for a standalone LEGO game. It was pitched as a possible Indiana Jones crossover — which also never happened in that form.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚰️ Film / TV Cancellations</td></tr>
+          <tr class="fn-canceled-row">
+            <td>2021–2022</td>
+            <td>Tomb Raider: Obsidian (Alicia Vikander film sequel)</td>
+            <td>MGM / Warner Bros.</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Canceled</span></td>
+            <td>Planned sequel to the 2018 film. Amy Jump wrote a script; Ben Wheatley signed to direct (later replaced by Misha Green). Working title: Tomb Raider: Obsidian. MGM lost the film rights in July 2022 after the production window expired without greenlight. Rights reverted to the game company, sparking a bidding war.</td>
+          </tr>
+          <tr class="fn-canceled-row">
+            <td>~2015</td>
+            <td>Square Enix Shared Film Universe</td>
+            <td>Hitman Films (Adrian Askarieh)</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Never materialized</span></td>
+            <td>Producer Adrian Askarieh proposed a shared Square Enix cinematic universe covering Tomb Raider, Hitman, Just Cause, Deus Ex, and Thief. He didn't hold the Tomb Raider rights and the concept never moved forward.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚰️ Tabletop / Misc Cancellations</td></tr>
+          <tr class="fn-canceled-row">
+            <td>2024–2025</td>
+            <td>Tomb Raider: Shadows of Truth (TTRPG)</td>
+            <td>Evil Hat Productions</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Canceled June 2025</span></td>
+            <td>An officially licensed TTRPG using Powered by the Apocalypse mechanics. Announced February 2024. Canceled June 2025 "due to creative differences" between Evil Hat and Crystal Dynamics.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /section -->
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 TV &amp; Animated Series</div>
+
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all', this)">📋 All</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','netflix', this)">🎬 Netflix</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','legacy', this)">📼 Legacy</button>
+      </div>
+
+      <div class="fn-view active" id="fn-tvanime-all">
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Netflix Animated Series (Powerhouse Animation) ──</td></tr>
+          <tr class="fn-anime fn-highlight">
+            <td>2024</td>
+            <td>Tomb Raider: The Legend of Lara Croft — Season 1 <span class="fn-star">⭐</span></td>
+            <td>Animated series</td>
+            <td>8 × ~22 min</td>
+            <td>Netflix</td>
+            <td><span class="fn-star">⭐</span> Set post-Shadow of the Tomb Raider in the Survivor continuity. Hayley Atwell as Lara. Powerhouse Animation (same studio as Castlevania). Chinese mythology artifact arc. Season 1 of 2.</td>
+          </tr>
+          <tr class="fn-anime fn-highlight">
+            <td>2025</td>
+            <td>Tomb Raider: The Legend of Lara Croft — Season 2</td>
+            <td>Animated series (final)</td>
+            <td>TBD</td>
+            <td>Netflix</td>
+            <td>Premiered December 11, 2025. Final season. Lara pursues stolen African Orisha masks with friend Sam. Confirmed as series finale.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Legacy / Early Animated Work ──</td></tr>
+          <tr class="fn-anime fn-skip">
+            <td>2007</td>
+            <td>Revisioned: Tomb Raider</td>
+            <td>Animated shorts</td>
+            <td>8 short films</td>
+            <td>GameTrailers (defunct) / YouTube</td>
+            <td>Eight animated short films produced by various animation studios. Minnie Driver voices Lara. Anthology format — each short has a different art style. Available on YouTube via archive uploads. Non-canonical tone.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-tvanime-netflix">
+        <div class="fn-view-desc">Both Netflix seasons set in the Survivor continuity. Watch after completing the Survivor Trilogy (TR2013, Rise, Shadow).</div>
+        <table class="fn-table">
+          <tr><th>Season</th><th>Episodes</th><th>Premiere</th><th>Arc</th></tr>
+          <tr class="fn-anime fn-highlight">
+            <td>Season 1</td><td>8 (~22 min each)</td><td>October 10, 2024</td>
+            <td>Chinese artifact stolen from Croft Manor. Global chase. Lara confronts her post-Survivor isolation. Hayley Atwell, Earl Baylon (Jonah), Allen Maldonado (Zip).</td>
+          </tr>
+          <tr class="fn-anime fn-highlight">
+            <td>Season 2 (Final)</td><td>TBD</td><td>December 11, 2025</td>
+            <td>Stolen African Orisha masks. Lara teams up with best friend Sam. Series finale. O-T Fagbenle joins as Eshu.</td>
+          </tr>
+        </table>
+        <div class="callout callout-tip" style="margin-top:12px">
+          <div class="callout-icon">📺</div>
+          <div class="callout-body">
+            <strong>Watch order:</strong> Complete the Survivor Trilogy (2013 → Rise → Shadow) first. The Netflix series is a direct continuation — it spoils Shadow of the Tomb Raider's ending in the opening setup.
+          </div>
+        </div>
+      </div>
+
+      <div class="fn-view" id="fn-tvanime-legacy">
+        <div class="fn-view-desc">Pre-Netflix animated work. Revisioned is the only legacy animated series — short films rather than a television run.</div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Year</th><th>Format</th><th>Voice of Lara</th><th>Notes</th></tr>
+          <tr class="fn-anime fn-skip">
+            <td>Revisioned: Tomb Raider</td><td>2007</td><td>8 animated shorts</td><td>Minnie Driver</td>
+            <td>GameTrailers-exclusive web series. Eight different animation studios, eight very different visual styles. Anthology — no single canonical storyline. Technically the first animated Tomb Raider series. Available through YouTube fan archives.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Films &amp; Live-Action Adaptations</div>
+
+    <div class="card">
+      <table class="fn-table">
+        <tr><th>Year</th><th>Title</th><th>Lara</th><th>Director</th><th>Status</th><th>Notes</th></tr>
+
+        <tr class="fn-arc-row"><td colspan="6">── Jolie Era (2001–2003) ──</td></tr>
+        <tr class="fn-movie fn-skip">
+          <td>2001</td>
+          <td>Lara Croft: Tomb Raider</td>
+          <td>Angelina Jolie</td>
+          <td>Simon West</td>
+          <td>Released</td>
+          <td>Financially successful ($274M worldwide). Critically panned. Campy, heavily 90s action movie tone. Not canon to any game timeline. Jolie's casting was widely praised even as the film itself was not.</td>
+        </tr>
+        <tr class="fn-movie fn-skip">
+          <td>2003</td>
+          <td>Lara Croft Tomb Raider: The Cradle of Life</td>
+          <td>Angelina Jolie</td>
+          <td>Jan de Bont</td>
+          <td>Released</td>
+          <td>Sequel. Also financially successful but also poorly reviewed. Pandora's Box, Atlantean mythology. Better stunts than the first film. Lower box office than its predecessor — Jolie did not return for a third.</td>
+        </tr>
+
+        <tr class="fn-arc-row"><td colspan="6">── Vikander Reboot (2018) ──</td></tr>
+        <tr class="fn-movie fn-highlight">
+          <td>2018</td>
+          <td>Tomb Raider</td>
+          <td>Alicia Vikander</td>
+          <td>Roar Uthaug</td>
+          <td>Released</td>
+          <td><span class="fn-star">⭐</span> Better received than the Jolie films. Based heavily on the 2013 game. Yamatai island, Himiko mythology. Vikander was widely praised. $274M worldwide — modest for a tentpole. Better tone alignment with the reboot games.</td>
+        </tr>
+        <tr class="fn-movie fn-skip">
+          <td>2021–2022</td>
+          <td>Tomb Raider: Obsidian (sequel — CANCELED)</td>
+          <td>Alicia Vikander</td>
+          <td>Misha Green (signed)</td>
+          <td><span class="fn-tag fn-tag-dead">⚰️ Canceled</span></td>
+          <td>Sequel planned for 2021 release. Ben Wheatley signed first, then replaced by Misha Green. Working title: Obsidian. MGM lost rights July 2022 after failing to greenlight within the contractual window. Rights reverted to Crystal Dynamics.</td>
+        </tr>
+
+        <tr class="fn-arc-row"><td colspan="6">── Upcoming / In Development ──</td></tr>
+        <tr class="fn-movie fn-highlight">
+          <td>TBD</td>
+          <td>Tomb Raider (Amazon Prime Video live-action series)</td>
+          <td>Sophie Turner (confirmed)</td>
+          <td>TBD</td>
+          <td><span class="fn-tag fn-tag-varies">🎬 In Production</span></td>
+          <td>Live-action series for Amazon Prime Video. Written/produced by Phoebe Waller-Bridge. Sophie Turner confirmed as Lara Croft. Production start date set as of late 2025. Represents a fresh continuity — not the Vikander film nor the Survivor Trilogy.</td>
+        </tr>
+
+        <tr class="fn-arc-row"><td colspan="6">── Notable Cameos ──</td></tr>
+        <tr class="fn-movie fn-skip">
+          <td>2018</td>
+          <td>Ready Player One</td>
+          <td>—</td>
+          <td>Steven Spielberg</td>
+          <td>Released</td>
+          <td>Lara Croft appears briefly as a background character in the OASIS virtual world. Minor cameo, not a Tomb Raider production.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Merchandise &amp; Collectibles</div>
+    <div class="card">
+      <div class="card-title">Notable Merch by Era</div>
+
+      <div class="fn-merch-history" style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:16px 18px;margin-bottom:14px">
+        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:var(--accent);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">📦 Core Design / Eidos Era (1996–2006)</div>
+        <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.9;color:var(--text)">
+          <li><strong>Action figures (Playmates, 1997–2000)</strong> — Classic Lara in the original outfit. Early production runs are collector items.</li>
+          <li><strong>Lara Croft: The Comic (Top Cow/Image, 1999)</strong> — Limited comic series adapting a new original story. Out of print; back issues on eBay.</li>
+          <li><strong>Angel of Darkness merchandise</strong> — Board game released to tie in with AoD. Rare.</li>
+          <li><strong>Film tie-in figures (2001, 2003)</strong> — Jolie-likeness figures. Playmates and others. Widely available secondhand.</li>
+        </ul>
+      </div>
+
+      <div class="fn-merch-history" style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:16px 18px;margin-bottom:14px">
+        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:var(--accent);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">📦 Crystal Dynamics / Square Enix Era (2006–2022)</div>
+        <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.9;color:var(--text)">
+          <li><strong>ARTFX statues (Kotobukiya)</strong> — Multiple high-quality 1/6 and 1/7 scale statues of Survivor Trilogy Lara. Most are out of production.</li>
+          <li><strong>Definitive Survivor Trilogy art book</strong> — Official art books for the 2013, Rise, and Shadow games.</li>
+          <li><strong>Tomb Raider Underworld Board Game</strong> — Official board game. Out of print.</li>
+          <li><strong>Tomb Raider Legends Board Game</strong> — A second official board game. Also out of print.</li>
+          <li><strong>Play Arts Kai figures (Square Enix)</strong> — High-end collector figures for Survivor Lara. 2013/Rise/Shadow era designs. Some variants extremely expensive secondhand.</li>
+          <li><strong>McFarlane Toys figures (Survivor era)</strong> — More accessible collector line. Rise and Shadow of the Tomb Raider variants.</li>
+        </ul>
+      </div>
+
+      <div class="fn-merch-history" style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:16px 18px;margin-bottom:14px">
+        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:var(--accent);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">📦 Comics &amp; Print</div>
+        <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.9;color:var(--text)">
+          <li><strong>Dark Horse Comics — Tomb Raider (2014–2016)</strong> — 12-issue run by Gail Simone set between TR2013 and Rise of the Tomb Raider. Directly canon to Survivor continuity. Collected in two trade paperbacks.</li>
+          <li><strong>Dark Horse Comics — Survivor's Crusade (2017–2018)</strong> — Follows Lara between Rise and Shadow. 4-issue miniseries. Also canon.</li>
+          <li><strong>Dark Horse Comics — Inferno (2018)</strong> — Ties into Shadow of the Tomb Raider. 4 issues. Canon.</li>
+          <li><strong>Top Cow / Image Comics (1999–2001)</strong> — Original classic-era Lara comics. Not considered canon to any specific game timeline.</li>
+          <li><strong>Official novel adaptations</strong> — Novelizations of the Jolie films and several original novels (Dave Morris, Karen Traviss). Out of print.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Channel Filler</div>
+    <div class="card">
+      <div class="card-title">Tunarr Channel Filler Assets</div>
+      <p style="font-size:.83rem;margin-bottom:16px">Short-form content for use between longer Tomb Raider programming on Tunarr channels. Ideal for a "Lara Croft Classic Cinema" or "Adventure &amp; Exploration" channel block.</p>
+
+      <div class="fn-filler-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:14px">
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(91,141,217,.15);color:#5b8dd9;border:1px solid rgba(91,141,217,.3)">TRAILER</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">TR2013 / Rise / Shadow Trailers</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">~2–3 min each · 9 total (3 per game)</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">High-production official trailers. Available via YouTube. Good for Survivor trilogy promotion blocks.</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(200,168,75,.12);color:var(--accent);border:1px solid rgba(200,168,75,.3)">HYPE</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">25th Anniversary Documentary</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">~45 min · 2021</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Official 25th anniversary retrospective. Covers Core Design origins through Survivor trilogy. Good standalone filler piece.</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(78,205,196,.12);color:#4ecdc4;border:1px solid rgba(78,205,196,.3)">MUSIC</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">OST Highlight Reels</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">Various lengths · Nathan McCree (TR1–3) / Troels Brun Folmann (TR4–Legend) / Brian D'Oliveira (Survivor)</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Three distinct OST eras. Nathan McCree's classic themes are iconic. Good for ambient filler between action blocks.</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(224,133,92,.12);color:#e0855c;border:1px solid rgba(224,133,92,.3)">DOCUMENTARY</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">Revisioned: Tomb Raider (2007)</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">8 × ~5 min shorts</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Eight animated short films, each by a different studio. Eclectic visual styles. Available via YouTube archives. Unusual filler that shows the franchise's range.</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(180,100,220,.12);color:#b464dc;border:1px solid rgba(180,100,220,.3)">RETROSPECTIVE</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">Core Design Development Story</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">Various YouTube documentaries · ~30–60 min</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Multiple fan and journalist retrospectives covering the creation and collapse of the Core Design era. Crunch culture, Eidos annual release pressure, AoD fallout. Compelling franchise history content.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">1993–1996</div>
+          <div class="fn-era-title">Origins at Core Design</div>
+          <div class="fn-era-body">
+            Tomb Raider was conceived at Core Design in Derby, UK, by a small team led by Toby Gard. The original protagonist was a male archaeologist, then briefly a woman named Laura Cruz, before being anglicized to Lara Croft. Gard designed the character primarily as a reaction against the hypersexualized depictions common in gaming at the time — she was intended to be competent and self-sufficient, not titillating. The game launched in October 1996 for Sega Saturn and PlayStation, followed by PC. It sold 2.5 million units by 1997 and made Lara Croft an immediate global icon.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1997–2003</div>
+          <div class="fn-era-title">The Annual Release Treadmill &amp; Core Design's Collapse</div>
+          <div class="fn-era-body">
+            Publisher Eidos Interactive demanded annual Christmas releases, forcing Core Design to produce sequels at a punishing pace. Toby Gard left Core Design shortly after TR1 shipped, citing creative differences. TR2 through TR5 (Chronicles) released each year from 1997 to 2000 under intense crunch. By Angel of Darkness (2003) the team was burned out, the engine was unstable, and the game shipped in a broken state. Eidos pulled the franchise from Core Design and transferred it to Crystal Dynamics in California. Core Design was eventually sold to Rebellion in 2006 and closed as Rebellion Derby in 2010.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2001–2003</div>
+          <div class="fn-era-title">The Jolie Films</div>
+          <div class="fn-era-body">
+            Two live-action films were produced: Lara Croft: Tomb Raider (2001) and The Cradle of Life (2003), both starring Angelina Jolie. Both were commercial successes despite critical panning. They kept Lara Croft in mainstream pop culture during the decline of the Core Design games. Jolie's casting remains one of the most recognized pieces of video game film casting history.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2006–2008</div>
+          <div class="fn-era-title">Crystal Dynamics' Legend Trilogy Reboot</div>
+          <div class="fn-era-body">
+            Crystal Dynamics completely rebuilt the franchise with Tomb Raider: Legend (2006), introducing a new Lara with fluid controls, a Hollywood action tone, and a fresh story unconnected to the Core Design games. Legend, Anniversary, and Underworld formed a tight trilogy with a continuous narrative about Lara's mother and Thor's gauntlets. The trilogy was well-received and stabilized the franchise commercially, though it never reached the cultural saturation of the 1996–1998 era.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2009–2012</div>
+          <div class="fn-era-title">Square Enix Acquisition &amp; Survivor Trilogy Development</div>
+          <div class="fn-era-body">
+            Eidos Interactive was acquired by Square Enix in April 2009, bringing Tomb Raider into the Square Enix family. Crystal Dynamics began work on a complete franchise reboot — a gritty origin story for a younger, more vulnerable Lara, heavily inspired by Naughty Dog's Uncharted and survival horror aesthetics. Rhianna Pratchett was brought on as lead writer.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2013–2018</div>
+          <div class="fn-era-title">The Survivor Trilogy</div>
+          <div class="fn-era-body">
+            Tomb Raider (2013) became the fastest-selling game in Square Enix history and the best-selling TR entry ever at 14.5+ million copies. Rise of the Tomb Raider (2016) was a timed Xbox exclusive before releasing on PS4 and PC. Shadow of the Tomb Raider (2018), developed by Eidos Montréal, concluded the trilogy in Peru. The trilogy significantly expanded Lara's character but also drew criticism for its Uncharted-derivative tone. Dark Horse Comics published canonical tie-in comics during this period.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2018–2022</div>
+          <div class="fn-era-title">Vikander Film, Embracer Acquisition, Rights Turbulence</div>
+          <div class="fn-era-body">
+            The 2018 Alicia Vikander film was better received than the Jolie films and aligned with the Survivor trilogy aesthetic. A sequel entered and exited development twice before MGM lost the rights in 2022. Embracer Group acquired the Tomb Raider IP alongside Eidos Montréal and Crystal Dynamics from Square Enix in 2022 for approximately $300M — the largest gaming acquisition that year.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2022–Present</div>
+          <div class="fn-era-title">CDE Entertainment, Amazon Series &amp; Upcoming Games</div>
+          <div class="fn-era-body">
+            Embracer Group transferred the IP to its subsidiary CDE Entertainment. Crystal Dynamics announced two simultaneous UE5 games: Legacy of Atlantis (developed by Flying Wild Hog) and Catalyst (Crystal Dynamics, set in Northern India). Both use Alix Wilton Regan as Lara and treat the Survivor trilogy as canon origin. Amazon confirmed a live-action Prime Video series with Phoebe Waller-Bridge writing and Sophie Turner as Lara. Netflix's animated series concluded with Season 2 in December 2025. The franchise is now in its most active multi-platform state since the late 1990s.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Key Creators</div>
+    <div class="card">
+      <table>
+        <tr><th>Creator</th><th>Role</th><th>Contribution</th></tr>
+        <tr><td>Toby Gard</td><td>Original designer (Core Design)</td><td>Created Lara Croft and designed TR1. Left Core Design after TR1 citing creative disagreements over Lara's sexualization in marketing. Returned to Crystal Dynamics to consult on Legend.</td></tr>
+        <tr><td>Core Design (Derby team)</td><td>Developer (TR1–6)</td><td>Created and shipped the original six Tomb Raider games under extreme crunch. Burned out by the annual release schedule. Shut down as Rebellion Derby in 2010.</td></tr>
+        <tr><td>Rhianna Pratchett</td><td>Lead Writer (Survivor Trilogy)</td><td>Wrote the Survivor trilogy Lara Croft, dramatically redefining her character as younger, more vulnerable, and emotionally complex. Daughter of Terry Pratchett.</td></tr>
+        <tr><td>Tasha Huo</td><td>Showrunner (Netflix Series)</td><td>Wrote and executive produced both Netflix animated seasons. Tied multiple game timelines together in the "Unified Timeline."</td></tr>
+        <tr><td>Phoebe Waller-Bridge</td><td>Writer / Producer (Amazon Series)</td><td>Writer and producer for the upcoming Amazon Prime Video live-action series. Known for Fleabag and Killing Eve.</td></tr>
+        <tr><td>Nathan McCree</td><td>Composer (TR1–3)</td><td>Composed the original Tomb Raider themes. His work defined the franchise's sonic identity in its most iconic era.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">Three Continuities — Not Compatible</div>
+      <p style="font-size:.84rem;line-height:1.7">Tomb Raider has three hard continuity breaks. The three Laras share a name and archetype but are not the same character in the same timeline. CDE's "Unified Timeline" attempts to retroactively connect the Survivor trilogy as the origin of all Laras going forward.</p>
+      <table style="margin-top:12px">
+        <tr><th>Entry</th><th>Continuity</th><th>Notes</th></tr>
+        <tr><td>TR1–6 (Core Design)</td><td>Classic Canon (Continuity 1)</td><td>Self-contained. Ends with AoD. Not connected to Legend or Survivor.</td></tr>
+        <tr><td>Legend / Anniversary / Underworld</td><td>Legend Canon (Continuity 2)</td><td>Anniversary is a Legend-continuity retelling of TR1's story. Separate Lara from Core Design.</td></tr>
+        <tr><td>TR2013 / Rise / Shadow</td><td>Survivor Canon (Continuity 3)</td><td>Separate origin-story Lara. Netflix series is direct Survivor continuity continuation.</td></tr>
+        <tr><td>Netflix: Legend of Lara Croft S1–S2</td><td>Survivor Canon</td><td>Set post-Shadow. Hayley Atwell's Lara is the Survivor trilogy Lara.</td></tr>
+        <tr><td>GBC / GBA handhelds</td><td>⚠️ Ambiguous</td><td>Official licensed products but do not fit clearly into any continuity. Standalone stories.</td></tr>
+        <tr><td>Jolie films</td><td>❌ Film Canon (isolated)</td><td>No connection to any game continuity. Own isolated continuity.</td></tr>
+        <tr><td>Vikander 2018 film</td><td>⚠️ Film Canon (Survivor-adjacent)</td><td>Based on the 2013 game's story but not a strict adaptation. Treated as a separate film continuity.</td></tr>
+        <tr><td>Legacy of Atlantis / Catalyst (upcoming)</td><td>Unified Timeline (new)</td><td>Explicitly set in a "Unified Timeline" where Survivor trilogy is the origin. Attempting to merge all prior Laras.</td></tr>
+        <tr><td>Guardian of Light / Temple of Osiris</td><td>Spinoff — Survivor-adjacent</td><td>Set in their own pocket continuity. Not strictly incompatible with Survivor but not clearly integrated.</td></tr>
+        <tr><td>Dark Horse Comics (2014–2018)</td><td>✅ Survivor Canon</td><td>Officially canon to the Survivor trilogy. Fills gaps between TR2013, Rise, and Shadow.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>Lara Croft was originally named Laura Cruz. The name was anglicized to Lara Croft after Toby Gard went through British phone books looking for a "posh-sounding" surname.</li>
+        <li>The Guinness Book of World Records recognized Lara Croft as the "Most Successful Human Videogame Heroine" in 2006, a title she holds nearly two decades later.</li>
+        <li>Toby Gard, Lara's creator, left Core Design immediately after TR1 shipped over disagreements about how Lara was being marketed. Eidos famously dressed promotional models as Lara for events — something Gard opposed.</li>
+        <li>The leaked 2006 build of the canceled 10th Anniversary PSP remake is preserved on the Internet Archive and is fully playable. It represents a complete alternate history where Core Design, not Crystal Dynamics, made the TR1 remake.</li>
+        <li>TT Games produced a LEGO Lara Croft test animation in the mid-2000s but judged the franchise not big enough for a standalone game. The pitch became an Indiana Jones crossover concept — which also never happened in that form.</li>
+        <li>The Tomb Raider franchise has sold over 100 million units across all games — placing it among the top-selling video game series of all time.</li>
+        <li>Embracer Group purchased Crystal Dynamics, Eidos Montréal, and the Tomb Raider IP from Square Enix for roughly $300M in 2022 — Square Enix had paid approximately £400M for Eidos in 2009, meaning they sold it at a substantial loss.</li>
+        <li>The Amazon Prime Video live-action series marks the first time a Tomb Raider screen adaptation has had a female writer as the primary creative lead (Phoebe Waller-Bridge).</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>

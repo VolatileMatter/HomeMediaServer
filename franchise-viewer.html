@@ -362,9 +362,11 @@ function onFrameLoad() {
 }
 
 function goBack() {
-  // If inside the index.html shell, navigate parent back to franchise navigator
-  if (window.parent && window.parent !== window && window.parent.go) {
-    window.parent.go('franchisenavigator');
+  if (window.parent && window.parent !== window) {
+    const p = window.parent;
+    // Clear the cached pane so go() reloads the iframe fresh
+    if (p.loaded) p.loaded.delete('franchisenavigator');
+    if (p.go) p.go('franchisenavigator');
   } else {
     location.href = 'franchise-navigator.html';
   }
