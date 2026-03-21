@@ -1,6 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Castlevania</title><link rel="stylesheet" href="shared.css"></head>
+<head><meta charset="UTF-8"><title>Castlevania</title><link rel="stylesheet" href="shared.css">
+<style>
+/* ════════════════════════════════════════════════════
+   CV VIEW TABS
+════════════════════════════════════════════════════ */
+.cv-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.cv-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.cv-view-btn:hover { background: var(--bg3); color: var(--text); }
+.cv-view-btn.active {
+  background: rgba(200,168,75,.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.cv-view { display: none; }
+.cv-view.active { display: block; }
+
+.cv-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.cv-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.cv-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.cv-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.cv-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/platform group header rows */
+.cv-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media / anime break rows */
+.cv-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.cv-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform left-border colour stripes */
+.cv-nes  td:first-child { border-left: 3px solid #e57373; }
+.cv-snes td:first-child { border-left: 3px solid #9575cd; }
+.cv-gen  td:first-child { border-left: 3px solid #4db6ac; }
+.cv-gb   td:first-child { border-left: 3px solid #aed581; }
+.cv-gba  td:first-child { border-left: 3px solid #4fc3f7; }
+.cv-nds  td:first-child { border-left: 3px solid #f48fb1; }
+.cv-ps1  td:first-child { border-left: 3px solid #ffb74d; }
+.cv-ps2  td:first-child { border-left: 3px solid #ff8a65; }
+
+/* Gold highlight = recommended row */
+.cv-highlight td { background: rgba(200,168,75,.04) !important; }
+.cv-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional/skip */
+.cv-skip td { opacity: .58; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.cv-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.cv-phone  { background: rgba(76,175,80,.18);  color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.cv-pconly { background: rgba(239,83,80,.18);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.cv-either { background: rgba(200,168,75,.18); color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.cv-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.cv-star   { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.cv-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.cv-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+</style>
+</head>
 <body>
 
 <div class="page-header">
@@ -8,274 +150,245 @@
   <div>
     <h1>Castlevania Game Library</h1>
     <div class="subtitle">// All Platforms · Browser-Based · Per-User Saves · EmulatorJS //</div>
-    <p class="desc">Play the entire Castlevania series in release order, directly in the browser. Same per-user save architecture as the Pokémon library.</p>
+    <p class="desc">Play the entire Castlevania series in the browser. Use the view tabs below to sort by release date, story order, best mechanics, mobile-only, or by console. Same per-user save architecture as the Pokémon library.</p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 Same backend architecture as the Pokémon library. If you run both, they can share the same Flask server and users.json — just use different game IDs and save paths.</div>
+<div class="v1-banner">🐉 Same backend architecture as the Pokémon library. Extend the same Flask server — just prefix game IDs with <code>cv-</code> to avoid save conflicts.</div>
 
+<!-- ══════════════════════════════════════════════════════════
+     UNIFIED TABLE
+══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title">🏰 The Full Castlevania Chronology</div>
+  <div class="section-title">🏰 The Castlevania Library</div>
   <div class="card">
-    <table>
-      <tr><th>Game</th><th>Year</th><th>Platform</th><th>EmulatorJS Core</th><th>Notes</th></tr>
-      <tr><td>Castlevania</td><td>1986</td><td>NES/FC</td><td>fceumm</td><td>The original</td></tr>
-      <tr><td>Castlevania II: Simon's Quest</td><td>1987</td><td>NES</td><td>fceumm</td><td></td></tr>
-      <tr><td>Castlevania III: Dracula's Curse</td><td>1989</td><td>NES</td><td>fceumm</td><td></td></tr>
-      <tr><td>Super Castlevania IV</td><td>1991</td><td>SNES</td><td>snes9x</td><td></td></tr>
-      <tr><td>Castlevania: Bloodlines</td><td>1994</td><td>Genesis</td><td>genesis_plus_gx</td><td></td></tr>
-      <tr><td>Castlevania: Dracula X</td><td>1995</td><td>SNES</td><td>snes9x</td><td></td></tr>
-      <tr><td>Castlevania: Symphony of the Night</td><td>1997</td><td>PS1</td><td>pcsx_rearmed</td><td>⭐ Best in series</td></tr>
-      <tr><td>Castlevania Legends</td><td>1997</td><td>GB</td><td>gambatte</td><td></td></tr>
-      <tr><td>Castlevania: Circle of the Moon</td><td>2001</td><td>GBA</td><td>mgba</td><td></td></tr>
-      <tr><td>Castlevania: Harmony of Dissonance</td><td>2002</td><td>GBA</td><td>mgba</td><td></td></tr>
-      <tr><td>Castlevania: Aria of Sorrow</td><td>2003</td><td>GBA</td><td>mgba</td><td>⭐ Excellent</td></tr>
-      <tr><td>Castlevania: Dawn of Sorrow</td><td>2005</td><td>NDS</td><td>melonds</td><td></td></tr>
-      <tr><td>Castlevania: Portrait of Ruin</td><td>2006</td><td>NDS</td><td>melonds</td><td></td></tr>
-      <tr><td>Castlevania: Order of Ecclesia</td><td>2008</td><td>NDS</td><td>melonds</td><td>⭐ Excellent</td></tr>
-    </table>
-    <div class="callout callout-tip">
-      <div class="callout-icon">🐉</div>
-      <div class="callout-body"><strong>Recommended playing order for newcomers:</strong> Symphony of the Night → Aria of Sorrow → Order of Ecclesia → Original NES Trilogy → Super Castlevania IV. The DS games are a goldilocks series — not too hard, great stories.</div>
+
+    <div class="cv-view-nav">
+      <button class="cv-view-btn active" onclick="cvSwitch('release',this)">📅 Release</button>
+      <button class="cv-view-btn" onclick="cvSwitch('chrono',this)">🕰️ Chronological</button>
+      <button class="cv-view-btn" onclick="cvSwitch('mechanical',this)">🎮 Mechanical</button>
+      <button class="cv-view-btn" onclick="cvSwitch('mobile',this)">📱 Mobile Only</button>
+      <button class="cv-view-btn" onclick="cvSwitch('platform',this)">🕹️ Single Platform</button>
     </div>
+
+    <!-- ════════════════════
+         RELEASE ORDER
+    ════════════════════ -->
+    <div class="cv-view active" id="cv-release">
+      <div class="cv-view-desc">All games and outside media in real-world release order. Useful for understanding how the series evolved mechanically and tonally. The Metroidvania era begins with Symphony of the Night (1997).</div>
+      <table class="cv-table">
+        <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core</th><th>Mobile?</th><th>Notes</th></tr>
+
+        <tr class="cv-nes"><td>1986</td><td>Castlevania</td><td>NES/FC</td><td>fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>The original. Short, brutal, iconic. Linear action-platformer.</td></tr>
+        <tr class="cv-nes"><td>1987</td><td>Castlevania II: Simon's Quest</td><td>NES</td><td>fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Open-world RPG hybrid. Famously cryptic — use a guide.</td></tr>
+        <tr class="cv-nes"><td>1989</td><td>Castlevania III: Dracula's Curse</td><td>NES</td><td>fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Branching paths, 4 playable characters. Chronologically the first game in the story.</td></tr>
+        <tr class="cv-snes cv-highlight"><td>1991</td><td>Super Castlevania IV</td><td>SNES</td><td>snes9x</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Retelling of CV1 with 8-directional whip and vastly better controls. Best classic-style entry.</td></tr>
+        <tr class="cv-gen"><td>1994</td><td>Castlevania: Bloodlines</td><td>Genesis</td><td>genesis_plus_gx</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>WWI setting. Genesis exclusive. Two playable characters (John Morris, Eric Lecarde).</td></tr>
+        <tr class="cv-snes"><td>1995</td><td>Castlevania: Dracula X</td><td>SNES</td><td>snes9x</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>SNES port of Rondo of Blood (PC Engine). Inferior but playable on mobile. Covers Richter's era.</td></tr>
+        <tr class="cv-ps1 cv-highlight"><td>1997</td><td>Castlevania: Symphony of the Night</td><td>PS1</td><td>pcsx_rearmed</td><td><span class="cv-tag cv-either">⚡ Varies</span></td><td><span class="cv-star">⭐</span> The series masterpiece. Invented Metroidvania. Best entry point for new players.</td></tr>
+        <tr class="cv-gb cv-skip"><td>1997</td><td>Castlevania Legends</td><td>GB</td><td>gambatte</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-tag cv-opt">non-canon</span> Decanonised. Skip unless completionist.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania S1–S2</strong> (Netflix, 2017–2018) — Animated series. Trevor/Alucard/Sypha vs Dracula. Covers the CV3 era. Watch anytime after CV3 or SotN.</td></tr>
+        <tr class="cv-gba"><td>2001</td><td>Castlevania: Circle of the Moon</td><td>GBA</td><td>mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>GBA launch title. Dark and atmospheric. DSS card combo system.</td></tr>
+        <tr class="cv-gba"><td>2002</td><td>Castlevania: Harmony of Dissonance</td><td>GBA</td><td>mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Juste Belmont (Simon's grandson). Weakest GBA entry — easy and visually cluttered.</td></tr>
+        <tr class="cv-ps2 cv-skip"><td>2003</td><td>Castlevania: Lament of Innocence</td><td>PS2</td><td>PCSX2</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td><span class="cv-tag cv-opt">optional</span> Origin of the Belmont clan. Story-essential lore, repetitive 3D gameplay. Requires PCSX2.</td></tr>
+        <tr class="cv-gba cv-highlight"><td>2003</td><td>Castlevania: Aria of Sorrow</td><td>GBA</td><td>mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Best GBA entry. Soma Cruz. Soul Steal mechanic. Outstanding story twist.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania S3–S4</strong> (Netflix, 2020–2021) — Hector/Isaac storylines. Aftermath of Dracula's death.</td></tr>
+        <tr class="cv-ps2 cv-skip"><td>2005</td><td>Castlevania: Curse of Darkness</td><td>PS2</td><td>PCSX2</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td><span class="cv-tag cv-opt">optional</span> Hector's story. Set 3 years after CV3. Connects to anime S3–S4. Requires PCSX2.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>2005</td><td>Castlevania: Dawn of Sorrow</td><td>NDS</td><td>melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Sequel to Aria of Sorrow. Play Aria first — Dawn immediately spoils its twist.</td></tr>
+        <tr class="cv-nds"><td>2006</td><td>Castlevania: Portrait of Ruin</td><td>NDS</td><td>melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>WWII era. Dual-protagonist system. Jonathan Morris — son of Bloodlines' John Morris.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>2008</td><td>Castlevania: Order of Ecclesia</td><td>NDS</td><td>melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Shanoa. Hardest and best DS entry. Glyph absorption system. Excellent challenge.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania: Nocturne S1–S2</strong> (Netflix, 2023–2025) — Richter Belmont, French Revolution (~1792). Watch after Symphony of the Night.</td></tr>
+      </table>
+    </div>
+
+    <!-- ════════════════════
+         CHRONOLOGICAL
+    ════════════════════ -->
+    <div class="cv-view" id="cv-chrono">
+      <div class="cv-view-desc">All entries sorted by in-universe date. Outside media inserted where it fits the story. Warning: strict chronological order means starting with the hardest, most dated games — see Mechanical view for a friendlier path.</div>
+      <table class="cv-table">
+        <tr><th>#</th><th>Date</th><th>Title</th><th>Platform</th><th>Mobile?</th><th>Story Notes</th></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ Deep History — Origin of the Belmonts (1094)</td></tr>
+        <tr class="cv-ps2 cv-skip"><td>1</td><td>1094</td><td>Castlevania: Lament of Innocence</td><td>PS2 · PCSX2</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td>Leon Belmont forges the Vampire Killer whip. The true origin. Best saved until you're already invested in the series.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The Founding Era — Trevor &amp; Dracula (1476–1479)</td></tr>
+        <tr class="cv-nes"><td>2</td><td>1476</td><td>Castlevania III: Dracula's Curse</td><td>NES · fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Trevor Belmont, Sypha, Alucard, and Grant form an unlikely team against Dracula. Story beginning.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania Anime S1–S2</strong> — Directly adapts this era. Watch after CV3.</td></tr>
+        <tr class="cv-ps2 cv-skip"><td>3</td><td>1479</td><td>Castlevania: Curse of Darkness</td><td>PS2 · PCSX2</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td>Hector hunts Dracula's remnants 3 years after CV3. PC required.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania Anime S3–S4</strong> — Hector and Isaac's arcs. Watch after Curse of Darkness.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The Simon Era (1691–1698)</td></tr>
+        <tr class="cv-nes"><td>4</td><td>1691</td><td>Castlevania (original)</td><td>NES · fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Simon Belmont storms Dracula's castle. The original.</td></tr>
+        <tr class="cv-snes cv-highlight"><td>—</td><td>1691</td><td>Super Castlevania IV <em>(retelling of CV1)</em></td><td>SNES · snes9x</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Same story, far better controls. Play one or the other — SC4 recommended.</td></tr>
+        <tr class="cv-nes"><td>5</td><td>1698</td><td>Castlevania II: Simon's Quest</td><td>NES · fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Simon cursed; must collect Dracula's body parts. Cryptic open world — use a guide.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The Juste &amp; Richter Era (1748–1797)</td></tr>
+        <tr class="cv-gba cv-skip"><td>6</td><td>1748</td><td>Castlevania: Harmony of Dissonance</td><td>GBA · mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Juste Belmont (Simon's grandson). Weakest GBA entry. Fills the lore gap.</td></tr>
+        <tr class="cv-snes"><td>7</td><td>1792</td><td>Castlevania: Dracula X</td><td>SNES · snes9x</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Richter Belmont. SNES port of Rondo of Blood (original requires PC Engine / PC).</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania: Nocturne S1–S2</strong> — ~1792, French Revolution. Richter's arc. Watch alongside or after Dracula X.</td></tr>
+        <tr class="cv-ps1 cv-highlight"><td>8</td><td>1797</td><td>Castlevania: Symphony of the Night</td><td>PS1 · pcsx_rearmed</td><td><span class="cv-tag cv-either">⚡ Varies</span></td><td><span class="cv-star">⭐</span> Alucard investigates Richter's disappearance. The masterpiece — best game in the series.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The 19th Century (1830 – ~1890s)</td></tr>
+        <tr class="cv-gba"><td>9</td><td>1830</td><td>Castlevania: Circle of the Moon</td><td>GBA · mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Nathan Graves, student of a Belmont associate. Not strictly canon but solid Metroidvania.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>10</td><td>~19th c.</td><td>Castlevania: Order of Ecclesia</td><td>NDS · melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Shanoa of the Ecclesia order seeks the Dominus seal. Best DS entry.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The 20th Century (1917–1944)</td></tr>
+        <tr class="cv-gen"><td>11</td><td>1917</td><td>Castlevania: Bloodlines</td><td>Genesis · genesis_plus_gx</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>John Morris (Belmont descendant) during WWI. Unique setting.</td></tr>
+        <tr class="cv-nds"><td>12</td><td>1944</td><td>Castlevania: Portrait of Ruin</td><td>NDS · melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Jonathan Morris (John's son) and Charlotte during WWII. Dual-character system.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The Future — The Soma Arc (2035–2036)</td></tr>
+        <tr class="cv-gba cv-highlight"><td>13</td><td>2035</td><td>Castlevania: Aria of Sorrow</td><td>GBA · mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Soma Cruz, an exchange student who may be Dracula reincarnated. Brilliant twist. Best GBA game.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>14</td><td>2036</td><td>Castlevania: Dawn of Sorrow</td><td>NDS · melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Soma returns. Play Aria first — Dawn spoils its ending in the opening minutes.</td></tr>
+      </table>
+    </div>
+
+    <!-- ════════════════════
+         MECHANICAL
+    ════════════════════ -->
+    <div class="cv-view" id="cv-mechanical">
+      <div class="cv-view-desc">Narrative-adjacent order, but starts with the best mechanics. The NES games are rewarding once you care about the series — this path builds that investment first before asking you to endure them.</div>
+      <table class="cv-table">
+        <tr><th>#</th><th>Title</th><th>Platform</th><th>In-Universe</th><th>Mobile?</th><th>Why Here</th></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🎯 Best Mechanics First — Hook Yourself</td></tr>
+        <tr class="cv-ps1 cv-highlight"><td>1</td><td>Castlevania: Symphony of the Night</td><td>PS1 · pcsx_rearmed</td><td>1797</td><td><span class="cv-tag cv-either">⚡ Varies</span></td><td><span class="cv-star">⭐</span> The best entry point. Forgiving, huge, rewarding from minute one. Sets the template for everything that follows.</td></tr>
+        <tr class="cv-gba cv-highlight"><td>2</td><td>Castlevania: Aria of Sorrow</td><td>GBA · mgba</td><td>2035</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Best GBA entry. Builds on SotN, shorter, excellent story. Has the series' best twist.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>3</td><td>Castlevania: Dawn of Sorrow</td><td>NDS · melonds</td><td>2036</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Direct Aria sequel — play immediately after. Don't stop between them.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>4</td><td>Castlevania: Order of Ecclesia</td><td>NDS · melonds</td><td>~19th c.</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Best DS game. Save it for when you're comfortable with the genre — it's the hardest of the three.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🕹️ Now Earn the Classics</td></tr>
+        <tr class="cv-nes"><td>5</td><td>Castlevania III: Dracula's Curse</td><td>NES · fceumm</td><td>1476</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Chronological story start. You're now invested enough to appreciate NES-hard difficulty and the lore payoff.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania Anime S1–S2</strong> — Watch here. You know these characters now — the adaptation hits differently.</td></tr>
+        <tr class="cv-snes cv-highlight"><td>6</td><td>Super Castlevania IV</td><td>SNES · snes9x</td><td>1691</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Best classic-era entry. 8-directional whip makes this the playable version of CV1.</td></tr>
+        <tr class="cv-nes"><td>7</td><td>Castlevania (original)</td><td>NES · fceumm</td><td>1691</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Having played SC4, try this to feel the difference. Short enough that it's worth doing.</td></tr>
+        <tr class="cv-nes"><td>8</td><td>Castlevania II: Simon's Quest</td><td>NES · fceumm</td><td>1698</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Story-relevant but mechanically the weakest. Use a guide — the in-game hints are mistranslated.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🎮 Remaining Metroidvanias (any order)</td></tr>
+        <tr class="cv-gba"><td>9</td><td>Castlevania: Circle of the Moon</td><td>GBA · mgba</td><td>1830</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Dark and hard GBA entry. Not strictly canon but great Metroidvania.</td></tr>
+        <tr class="cv-nds"><td>10</td><td>Castlevania: Portrait of Ruin</td><td>NDS · melonds</td><td>1944</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>WWII, dual protagonists. Good not essential. Connects to Bloodlines lineage.</td></tr>
+        <tr class="cv-gen"><td>11</td><td>Castlevania: Bloodlines</td><td>Genesis · genesis_plus_gx</td><td>1917</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>WWI classic-style game. Genesis exclusive. Unique tone.</td></tr>
+        <tr class="cv-gba cv-skip"><td>12</td><td>Castlevania: Harmony of Dissonance</td><td>GBA · mgba</td><td>1748</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Weakest GBA entry. Easy and visually garish. Completionists only.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🖥️ PC-Required Extras (optional, story completionists)</td></tr>
+        <tr class="cv-ps2 cv-skip"><td>13</td><td>Castlevania: Lament of Innocence</td><td>PS2 · PCSX2</td><td>1094</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td>Origin of Belmont bloodline. Essential lore, repetitive gameplay. PCSX2 required.</td></tr>
+        <tr class="cv-ps2 cv-skip"><td>14</td><td>Castlevania: Curse of Darkness</td><td>PS2 · PCSX2</td><td>1479</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td>Hector's story. Connects CV3 to anime S3–S4. PCSX2 required.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania Anime S3–S4</strong> — Watch after Curse of Darkness for the Hector payoff.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania: Nocturne S1–S2</strong> — Watch after Symphony of the Night. Richter's era, French Revolution.</td></tr>
+      </table>
+    </div>
+
+    <!-- ════════════════════
+         MOBILE ONLY
+    ════════════════════ -->
+    <div class="cv-view" id="cv-mobile">
+      <div class="cv-view-desc">Only titles playable on phone via RetroArch (Android/iOS) or EmulatorJS in a mobile browser. PS2 games excluded entirely — they require PCSX2 on a PC. Sorted chronologically for story flow.</div>
+      <table class="cv-table">
+        <tr><th>#</th><th>Title</th><th>Platform</th><th>Core</th><th>In-Universe</th><th>Notes</th></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The Founding Era</td></tr>
+        <tr class="cv-nes"><td>1</td><td>Castlevania III: Dracula's Curse</td><td>NES</td><td>fceumm</td><td>1476</td><td>Story start. Trevor, Sypha, Alucard, Grant.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania Anime S1–S2</strong> — Watch after CV3.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The Simon Era</td></tr>
+        <tr class="cv-nes"><td>2</td><td>Castlevania (original)</td><td>NES</td><td>fceumm</td><td>1691</td><td>Simon's first fight. <em>Or</em> play Super Castlevania IV below — same story, better controls.</td></tr>
+        <tr class="cv-snes cv-highlight"><td>—</td><td>Super Castlevania IV <em>(alt. for CV1)</em></td><td>SNES</td><td>snes9x</td><td>1691</td><td><span class="cv-star">⭐</span> Retelling of CV1. Recommended over the NES original for playability.</td></tr>
+        <tr class="cv-nes"><td>3</td><td>Castlevania II: Simon's Quest</td><td>NES</td><td>fceumm</td><td>1698</td><td>Simon cursed; cryptic open world. Use a guide.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ Juste / Richter Era</td></tr>
+        <tr class="cv-gba cv-skip"><td>4</td><td>Castlevania: Harmony of Dissonance</td><td>GBA</td><td>mgba</td><td>1748</td><td>Weakest GBA entry — short, low stakes. Completionists only.</td></tr>
+        <tr class="cv-snes"><td>5</td><td>Castlevania: Dracula X</td><td>SNES</td><td>snes9x</td><td>1792</td><td>Richter Belmont. Best mobile-available option for this era (Rondo of Blood requires PC Engine).</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania: Nocturne S1–S2</strong> — ~1792, French Revolution. Watch alongside Dracula X.</td></tr>
+        <tr class="cv-ps1 cv-highlight"><td>6</td><td>Castlevania: Symphony of the Night</td><td>PS1</td><td>pcsx_rearmed</td><td>1797</td><td><span class="cv-star">⭐</span> Best game in the series. Modern phones handle it well; older/budget phones may struggle. Needs PS1 BIOS.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ 19th Century</td></tr>
+        <tr class="cv-gba"><td>7</td><td>Castlevania: Circle of the Moon</td><td>GBA</td><td>mgba</td><td>1830</td><td>Nathan Graves. Hard, dark, atmospheric GBA entry.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>8</td><td>Castlevania: Order of Ecclesia</td><td>NDS</td><td>melonds</td><td>~19th c.</td><td><span class="cv-star">⭐</span> Best DS game. Shanoa's glyph system. Hard but fair.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ 20th Century</td></tr>
+        <tr class="cv-gen"><td>9</td><td>Castlevania: Bloodlines</td><td>Genesis</td><td>genesis_plus_gx</td><td>1917</td><td>WWI. John Morris (Belmont descendant). Unique setting in the series.</td></tr>
+        <tr class="cv-nds"><td>10</td><td>Castlevania: Portrait of Ruin</td><td>NDS</td><td>melonds</td><td>1944</td><td>WWII, Jonathan Morris and Charlotte. Dual characters. Connects to Bloodlines.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚔️ The Future — Soma Arc</td></tr>
+        <tr class="cv-gba cv-highlight"><td>11</td><td>Castlevania: Aria of Sorrow</td><td>GBA</td><td>mgba</td><td>2035</td><td><span class="cv-star">⭐</span> Best GBA game. Soma Cruz. Play before Dawn of Sorrow.</td></tr>
+        <tr class="cv-nds cv-highlight"><td>12</td><td>Castlevania: Dawn of Sorrow</td><td>NDS</td><td>melonds</td><td>2036</td><td><span class="cv-star">⭐</span> Aria sequel. Requires Aria first.</td></tr>
+        <tr class="cv-media-row"><td colspan="6">📺 <strong>Castlevania Anime S3–S4</strong> — Can watch anytime from here onward.</td></tr>
+      </table>
+      <div class="callout callout-warn" style="margin-top:12px">
+        <div class="callout-icon">🖥️</div>
+        <div class="callout-body"><strong>Excluded from this view:</strong> Lament of Innocence and Curse of Darkness (PS2) require PCSX2 on a PC. If you want them on a phone screen, stream them via Sunshine + Moonlight.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════
+         SINGLE PLATFORM
+    ════════════════════ -->
+    <div class="cv-view" id="cv-platform">
+      <div class="cv-view-desc">Grouped by console, in hardware-generation order. Games that appear on multiple platforms are listed under each relevant console. Stay in one emulator and exhaust it before moving to the next. Soma Arc games (Aria → Dawn) cross GBA/NDS — follow the sequel note.</div>
+      <table class="cv-table">
+        <tr><th>Order</th><th>Title</th><th>Year</th><th>Core</th><th>Mobile?</th><th>Notes</th></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🟥 NES / Famicom — Emulator: fceumm</td></tr>
+        <tr class="cv-nes"><td>1</td><td>Castlevania</td><td>1986</td><td>fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>The original. Start here for NES-first run.</td></tr>
+        <tr class="cv-nes"><td>2</td><td>Castlevania II: Simon's Quest</td><td>1987</td><td>fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Open-world sequel. Use a guide.</td></tr>
+        <tr class="cv-nes"><td>3</td><td>Castlevania III: Dracula's Curse</td><td>1989</td><td>fceumm</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Best NES entry. Branching paths, multiple characters.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🟩 Game Boy / Game Boy Color — Emulator: gambatte</td></tr>
+        <tr class="cv-gb cv-skip"><td>4</td><td>Castlevania Legends</td><td>1997</td><td>gambatte</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-tag cv-opt">non-canon</span> Only GB entry. Completionists only.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🟪 SNES / Super Famicom — Emulator: snes9x</td></tr>
+        <tr class="cv-snes cv-highlight"><td>5</td><td>Super Castlevania IV</td><td>1991</td><td>snes9x</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Best classic-style entry. Also the best version of the CV1 story.</td></tr>
+        <tr class="cv-snes"><td>6</td><td>Castlevania: Dracula X</td><td>1995</td><td>snes9x</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Port of Rondo of Blood. Covers the Richter era (1792).</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🟦 Sega Genesis / Mega Drive — Emulator: genesis_plus_gx</td></tr>
+        <tr class="cv-gen"><td>7</td><td>Castlevania: Bloodlines</td><td>1994</td><td>genesis_plus_gx</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Genesis exclusive. WWI. Two characters: John Morris and Eric Lecarde.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🟠 PlayStation 1 — Emulator: pcsx_rearmed (requires scph1001.bin BIOS)</td></tr>
+        <tr class="cv-ps1 cv-highlight"><td>8</td><td>Castlevania: Symphony of the Night</td><td>1997</td><td>pcsx_rearmed</td><td><span class="cv-tag cv-either">⚡ Varies</span></td><td><span class="cv-star">⭐</span> The masterpiece. Needs PS1 BIOS file. Only PS1 Castlevania title.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🔵 Game Boy Advance — Emulator: mgba</td></tr>
+        <tr class="cv-gba"><td>9</td><td>Castlevania: Circle of the Moon</td><td>2001</td><td>mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>GBA launch title. Hardest of the three GBA games. Dark atmosphere.</td></tr>
+        <tr class="cv-gba"><td>10</td><td>Castlevania: Harmony of Dissonance</td><td>2002</td><td>mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>Weakest GBA entry. Completes the trilogy if going platform-first.</td></tr>
+        <tr class="cv-gba cv-highlight"><td>11</td><td>Castlevania: Aria of Sorrow</td><td>2003</td><td>mgba</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Best GBA game. Save last. Then continue to Dawn of Sorrow on NDS.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">🔴 PlayStation 2 — Emulator: PCSX2 <span class="cv-tag cv-pconly" style="margin-left:6px">🖥️ PC Only</span></td></tr>
+        <tr class="cv-ps2 cv-skip"><td>12</td><td>Castlevania: Lament of Innocence</td><td>2003</td><td>PCSX2</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td>Origin of the Belmont bloodline. 3D action-adventure.</td></tr>
+        <tr class="cv-ps2 cv-skip"><td>13</td><td>Castlevania: Curse of Darkness</td><td>2005</td><td>PCSX2</td><td><span class="cv-tag cv-pconly">🖥️ PC Only</span></td><td>Hector's story. Post-CV3 lore. Connects to anime S3–S4.</td></tr>
+
+        <tr class="cv-arc-row"><td colspan="6">⚫ Nintendo DS — Emulator: melonds</td></tr>
+        <tr class="cv-nds cv-highlight"><td>14</td><td>Castlevania: Dawn of Sorrow</td><td>2005</td><td>melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Direct Aria of Sorrow sequel — play Aria (GBA) first, then come here.</td></tr>
+        <tr class="cv-nds"><td>15</td><td>Castlevania: Portrait of Ruin</td><td>2006</td><td>melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td>WWII era. Dual protagonists (Jonathan Morris + Charlotte).</td></tr>
+        <tr class="cv-nds cv-highlight"><td>16</td><td>Castlevania: Order of Ecclesia</td><td>2008</td><td>melonds</td><td><span class="cv-tag cv-phone">📱 Yes</span></td><td><span class="cv-star">⭐</span> Best DS entry. Play last — it's the hardest of the three.</td></tr>
+      </table>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="cv-legend">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase">Legend</span>
+      <span><span class="cv-dot" style="background:var(--accent)"></span>Gold left border = recommended / best entry in its tier</span>
+      <span><span class="cv-dot" style="background:rgba(255,255,255,.2)"></span>Faded row = optional, skip on first playthrough</span>
+      <span><span class="cv-tag cv-phone">📱 Yes</span> RetroArch Android/iOS or EmulatorJS mobile</span>
+      <span><span class="cv-tag cv-pconly">🖥️ PC Only</span> Requires PCSX2 — not mobile friendly</span>
+      <span><span class="cv-tag cv-either">⚡ Varies</span> Works on both; modern phones OK</span>
+      <span><span class="cv-dot" style="background:#ce93d8"></span>Purple row = outside media (anime) insert point</span>
+    </div>
+
+    <div class="callout callout-tip" style="margin-top:12px">
+      <div class="callout-icon">📺</div>
+      <div class="callout-body">
+        <strong>Netflix Anime at a glance —</strong>
+        <strong>S1–S2:</strong> Trevor/Alucard/Sypha vs Dracula (CV3 era) ·
+        <strong>S3–S4:</strong> Hector and Isaac aftermath ·
+        <strong>Nocturne S1–S2:</strong> Richter Belmont, French Revolution ~1792 (SotN prequel era)
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
-     NEW: RECOMMENDED STORY ORDER TABLE
+     SETUP / UI NOTES / STORAGE
 ══════════════════════════════════════════════════════════ -->
-<div class="section">
-  <div class="section-title">📖 Recommended Story Playing Order</div>
-  <div class="card">
-    <p style="margin-bottom:10px">This order is designed for narrative coherence — not release date. The Castlevania timeline is non-linear, so playing in release order means jumping back and forth across the story era. This order threads the lore together and inserts outside media (anime, etc.) at the natural story beats.</p>
-
-    <style>
-      /* ── Emulator platform tags ── */
-      .cv-tag {
-        display: inline-block;
-        font-size: .65rem;
-        font-family: 'Share Tech Mono', monospace;
-        padding: 1px 6px;
-        border-radius: 3px;
-        white-space: nowrap;
-        vertical-align: middle;
-        margin-left: 3px;
-      }
-      .cv-phone   { background: rgba(76,175,80,.18);  color: #81c784; border: 1px solid rgba(76,175,80,.35); }
-      .cv-pc      { background: rgba(239,83,80,.18);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
-      .cv-either  { background: rgba(200,168,75,.18); color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
-      .cv-media   { background: rgba(171,71,188,.18); color: #ce93d8; border: 1px solid rgba(171,71,188,.35); }
-
-      /* ── Media break rows ── */
-      .cv-media-row td {
-        background: rgba(171,71,188,.08) !important;
-        border-top: 1px dashed rgba(171,71,188,.4);
-        border-bottom: 1px dashed rgba(171,71,188,.4);
-        font-style: italic;
-        color: var(--text);
-      }
-      .cv-media-row td:first-child::before {
-        content: "📺 ";
-      }
-    </style>
-
-    <table>
-      <tr>
-        <th>#</th>
-        <th>Title</th>
-        <th>Era / Arc</th>
-        <th>Platform</th>
-        <th>Emulator</th>
-        <th>Notes</th>
-      </tr>
-
-      <!-- ── ARC 1: The Dark Lords' Origin ── -->
-      <tr><td colspan="6" style="background:rgba(200,168,75,.08);color:var(--accent);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:6px 10px;font-family:'Share Tech Mono',monospace">⚔️ Arc 1 — The Belmont Legacy Begins</td></tr>
-
-      <tr>
-        <td>1</td>
-        <td>Castlevania III: Dracula's Curse</td>
-        <td>1476 — Trevor Belmont</td>
-        <td>NES</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch NES</td>
-        <td>Chronologically first. Sets up the Belmont bloodline. Start here for lore.</td>
-      </tr>
-
-      <tr class="cv-media-row">
-        <td colspan="6">Castlevania (Netflix Anime) — Season 1 &amp; 2 · Covers exactly this era. Watch after finishing CV3. Expands on Trevor, Sypha, Alucard, and Dracula's motivation.</td>
-      </tr>
-
-      <tr>
-        <td>2</td>
-        <td>Castlevania: Curse of Darkness</td>
-        <td>1479 — Hector</td>
-        <td>PS2 / Xbox</td>
-        <td><span class="cv-tag cv-pc">🖥️ PC Only</span> PCSX2 (PS2)</td>
-        <td>Directly follows CV3 events by 3 years. Requires PCSX2 — too heavy for mobile RetroArch.</td>
-      </tr>
-
-      <tr class="cv-media-row">
-        <td colspan="6">Castlevania (Netflix Anime) — Season 3 &amp; 4 · Follows Hector's storyline and aftermath of Dracula's death. Watch after Curse of Darkness.</td>
-      </tr>
-
-      <!-- ── ARC 2: The Classic Era ── -->
-      <tr><td colspan="6" style="background:rgba(200,168,75,.08);color:var(--accent);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:6px 10px;font-family:'Share Tech Mono',monospace">🏰 Arc 2 — The Classic Era (Belmonts vs Dracula)</td></tr>
-
-      <tr>
-        <td>3</td>
-        <td>Castlevania (original)</td>
-        <td>1691 — Simon Belmont</td>
-        <td>NES/FC</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch fceumm</td>
-        <td>Simon's first mission. Short and brutal. The iconic experience.</td>
-      </tr>
-      <tr>
-        <td>4</td>
-        <td>Super Castlevania IV</td>
-        <td>1691 — Simon Belmont (retelling)</td>
-        <td>SNES</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch snes9x</td>
-        <td>A more polished retelling of the first game. Better controls, same story. Play one or the other — most recommend SC4.</td>
-      </tr>
-      <tr>
-        <td>5</td>
-        <td>Castlevania II: Simon's Quest</td>
-        <td>1698 — Simon Belmont</td>
-        <td>NES</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch fceumm</td>
-        <td>Direct sequel to CV1. Simon is cursed and must resurrect Dracula to break it. Famously obtuse but story-relevant.</td>
-      </tr>
-      <tr>
-        <td>6</td>
-        <td>Castlevania: Bloodlines</td>
-        <td>1917 — John Morris</td>
-        <td>Genesis</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch genesis_plus_gx</td>
-        <td>Set during WWI. A Belmont descendant (not a Belmont by name). Unique era and tone.</td>
-      </tr>
-      <tr>
-        <td>7</td>
-        <td>Castlevania: Dracula X / Rondo of Blood</td>
-        <td>1792 — Richter Belmont</td>
-        <td>SNES (Dracula X) / PC Engine (Rondo)</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch snes9x (Dracula X) <em>or</em> <span class="cv-tag cv-pc">🖥️ PC Only</span> Mednafen/Beetle (PC Engine Rondo)</td>
-        <td>Dracula X (SNES) is an in-browser playable port of Rondo of Blood. Rondo itself is better but needs PC Engine emulation. Either works for story purposes.</td>
-      </tr>
-
-      <!-- ── ARC 3: Symphony & the Alucard Arc ── -->
-      <tr><td colspan="6" style="background:rgba(200,168,75,.08);color:var(--accent);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:6px 10px;font-family:'Share Tech Mono',monospace">🌙 Arc 3 — Symphony of the Night &amp; Alucard</td></tr>
-
-      <tr>
-        <td>8</td>
-        <td>Castlevania: Symphony of the Night</td>
-        <td>1797 — Alucard</td>
-        <td>PS1</td>
-        <td><span class="cv-tag cv-either">⚡ Either</span> EmulatorJS pcsx_rearmed <em>or</em> RetroArch (phone may struggle)</td>
-        <td>⭐ The masterpiece. Direct sequel to Rondo of Blood — Richter vanished, Alucard investigates. The game that defined Metroidvania.</td>
-      </tr>
-
-      <tr class="cv-media-row">
-        <td colspan="6">Castlevania: Nocturne (Netflix Anime) — Set ~100 years after SotN, following Richter Belmont's descendant. Watch after finishing Symphony of the Night for full context.</td>
-      </tr>
-
-      <!-- ── ARC 4: The Soma Arc ── -->
-      <tr><td colspan="6" style="background:rgba(200,168,75,.08);color:var(--accent);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:6px 10px;font-family:'Share Tech Mono',monospace">🔮 Arc 4 — The Soma Cruz Arc (Modern Era)</td></tr>
-
-      <tr>
-        <td>9</td>
-        <td>Castlevania: Aria of Sorrow</td>
-        <td>2035 — Soma Cruz</td>
-        <td>GBA</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch mgba <em>or</em> EmulatorJS mgba</td>
-        <td>⭐ Set in the far future. Soma may be Dracula reincarnated. Best GBA entry. Soul Steal mechanic is brilliant.</td>
-      </tr>
-      <tr>
-        <td>10</td>
-        <td>Castlevania: Dawn of Sorrow</td>
-        <td>2036 — Soma Cruz</td>
-        <td>NDS</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch melonds <em>or</em> EmulatorJS melonds</td>
-        <td>Direct sequel to Aria. Soma must resist becoming Dracula again. Play Aria first — this expects you to know the twist.</td>
-      </tr>
-
-      <!-- ── ARC 5: The DS Era (Standalone entries) ── -->
-      <tr><td colspan="6" style="background:rgba(200,168,75,.08);color:var(--accent);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:6px 10px;font-family:'Share Tech Mono',monospace">🗡️ Arc 5 — DS Era Standalones (can be played in any order)</td></tr>
-
-      <tr>
-        <td>11</td>
-        <td>Castlevania: Portrait of Ruin</td>
-        <td>1944 — Jonathan Morris</td>
-        <td>NDS</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch melonds <em>or</em> EmulatorJS melonds</td>
-        <td>Set during WWII. Connects back to Bloodlines (John Morris's son). Dual-character system. Excellent co-op-flavored gameplay.</td>
-      </tr>
-      <tr>
-        <td>12</td>
-        <td>Castlevania: Order of Ecclesia</td>
-        <td>19th century — Shanoa</td>
-        <td>NDS</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch melonds <em>or</em> EmulatorJS melonds</td>
-        <td>⭐ The hardest and most atmospheric DS entry. A woman from a secret order seeks Dracula's seal. Great late-game challenge.</td>
-      </tr>
-
-      <!-- ── ARC 6: The Iga-verse completionist extras ── -->
-      <tr><td colspan="6" style="background:rgba(200,168,75,.08);color:var(--accent);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:6px 10px;font-family:'Share Tech Mono',monospace">🎯 Arc 6 — Completionist / Exploration (optional)</td></tr>
-
-      <tr>
-        <td>13</td>
-        <td>Castlevania: Harmony of Dissonance</td>
-        <td>1748 — Juste Belmont</td>
-        <td>GBA</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch mgba <em>or</em> EmulatorJS mgba</td>
-        <td>Juste Belmont (Simon's grandson). Visually ugly but lore-interesting — references CV2. Weakest GBA entry but short.</td>
-      </tr>
-      <tr>
-        <td>14</td>
-        <td>Castlevania: Circle of the Moon</td>
-        <td>1830 — Nathan Graves</td>
-        <td>GBA</td>
-        <td><span class="cv-tag cv-phone">📱 Phone OK</span> RetroArch mgba <em>or</em> EmulatorJS mgba</td>
-        <td>GBA launch title. Nathan is a disciple of a Belmont associate. Not strictly canon but solid Metroidvania gameplay.</td>
-      </tr>
-      <tr>
-        <td>15</td>
-        <td>Castlevania: Lament of Innocence</td>
-        <td>1094 — Leon Belmont</td>
-        <td>PS2</td>
-        <td><span class="cv-tag cv-pc">🖥️ PC Only</span> PCSX2</td>
-        <td>The <em>actual</em> chronological origin of the Belmont clan and their whip. Great story context — but requires PCSX2, not mobile-friendly.</td>
-      </tr>
-    </table>
-
-    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:.78rem">
-      <strong style="color:var(--text-dim)">Legend:</strong>
-      <span class="cv-tag cv-phone">📱 Phone OK</span> <span style="color:var(--text-dim)">RetroArch (Android/iOS) or EmulatorJS in browser — runs fine on mobile</span>
-      <span class="cv-tag cv-pc">🖥️ PC Only</span> <span style="color:var(--text-dim)">Requires PCSX2 / Mednafen — too demanding or uses unsupported cores for mobile</span>
-      <span class="cv-tag cv-either">⚡ Either</span> <span style="color:var(--text-dim)">Works on both but phone performance varies</span>
-      <span class="cv-tag cv-media">📺 Outside Media</span> <span style="color:var(--text-dim)">Anime / other media — inserts into story here</span>
-    </div>
-
-    <div class="callout callout-tip" style="margin-top:14px">
-      <div class="callout-icon">📺</div>
-      <div class="callout-body">
-        <strong>Netflix Anime Summary:</strong>
-        <ul style="margin:6px 0 0 16px;line-height:1.8">
-          <li><strong>Castlevania S1–S2</strong> — Trevor, Sypha, Alucard vs Dracula. Watch after CV3 (Dracula's Curse).</li>
-          <li><strong>Castlevania S3–S4</strong> — Hector's story, aftermath. Watch after Curse of Darkness.</li>
-          <li><strong>Castlevania: Nocturne S1–S2</strong> — Richter Belmont, French Revolution era (~1792). Watch after Symphony of the Night.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="callout callout-warn" style="margin-top:10px">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>PS2 games (Lament of Innocence, Curse of Darkness)</strong> require PCSX2 on a proper PC — they are <em>not</em> available via EmulatorJS and will not run acceptably in RetroArch on Android. Stream them via Sunshine if needed.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Original sections preserved below ── -->
-
 <div class="section">
   <div class="section-title">⚙️ Setup (Shares Architecture with Pokémon Library)</div>
   <div class="card">
@@ -346,6 +459,15 @@ save_path = os.path.join(save_dir, f'{game_id}.sav')</pre>
     <p>See the <strong>SSO tab → User Data Storage</strong> for the full architecture, Nextcloud quota integration, and the session manager service.</p>
   </div>
 </div>
+
+<script>
+function cvSwitch(view, btn) {
+  document.querySelectorAll('.cv-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.cv-view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('cv-' + view).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
 
 </body>
 </html>
