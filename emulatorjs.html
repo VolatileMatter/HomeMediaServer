@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Emulation</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION — copy verbatim to every service page.
+    ═══════════════════════════════════════════════ */
+    .subtab-nav {
+      display: flex; gap: 0; margin-bottom: 24px;
+      border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+      letter-spacing: .08em; text-transform: uppercase; padding: 9px 18px;
+      background: transparent; border: none; border-bottom: 2px solid transparent;
+      color: var(--text-dim); cursor: pointer; transition: all .16s;
+      margin-bottom: -1px; white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox bar ── */
+    .setup-complete-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+      cursor: pointer; transition: background .2s; user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px; display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; color: #4caf7d; flex-shrink: 0;
+    }
+    .setup-complete-label { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .setup-complete-sub { font-size: .74rem; color: var(--text-dim); margin-left: auto; }
+
+    /* ── Achievement cards ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
+    .ach-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; }
+    .ach-icon  { font-size: 1.3rem; margin-bottom: 5px; }
+    .ach-name  { font-weight: 700; font-size: .82rem; margin-bottom: 3px; }
+    .ach-desc  { font-size: .74rem; color: var(--text-dim); line-height: 1.5; }
+    .ach-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .ach-pts    { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--accent); }
+    .ach-method { font-size: .65rem; color: var(--text-dim); background: var(--bg3); padding: 1px 5px; border-radius: 2px; }
+
+    /* ── Storage breakdown ── */
+    .storage-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin: 14px 0; }
+    .storage-cell { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 12px 14px; }
+    .storage-cell-label { font-family: 'Share Tech Mono', monospace; font-size: .57rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+    .storage-cell-val { font-family: 'Share Tech Mono', monospace; font-size: .85rem; color: var(--text-bright); }
+
+    /* ── Trouble items ── */
+    .trouble-item { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--warning); border-radius: 3px; padding: 14px 16px; margin-bottom: 12px; }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+
+    /* ── UI Preview pane ── */
+    .preview-chrome { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
+    .preview-bar { background: #161b22; border-bottom: 1px solid var(--border); padding: 8px 14px; display: flex; align-items: center; gap: 10px; font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); }
+    .preview-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .preview-url { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 3px 10px; flex: 1; max-width: 380px; }
+    .preview-user-badge { margin-left: auto; background: rgba(200,168,75,.12); border: 1px solid rgba(200,168,75,.25); border-radius: 3px; padding: 2px 8px; color: var(--accent); font-size: .6rem; }
+    .preview-body { padding: 20px; min-height: 300px; }
+    .preview-note { background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22); border-radius: 4px; padding: 10px 14px; font-size: .78rem; color: var(--text-dim); margin-bottom: 16px; display: flex; gap: 8px; align-items: flex-start; }
+    .preview-todo { background: rgba(224,92,92,.07); border: 1px dashed rgba(224,92,92,.35); border-radius: 4px; padding: 14px 16px; font-size: .8rem; color: rgba(224,92,92,.8); text-align: center; margin: 10px 0; }
+
+    /* ── Platform / system tags ── */
+    .sys-tag {
+      display: inline-block; font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem; letter-spacing: .06em; text-transform: uppercase;
+      padding: 1px 7px; border-radius: 2px; margin-right: 4px; margin-bottom: 2px;
+      border: 1px solid var(--border); color: var(--text-dim); background: var(--bg3);
+    }
+    .sys-tag.nes    { border-color: rgba(229,75,75,.4);   color: #e54b4b; background: rgba(229,75,75,.07); }
+    .sys-tag.snes   { border-color: rgba(106,75,229,.4);  color: #6a4be5; background: rgba(106,75,229,.07); }
+    .sys-tag.gb     { border-color: rgba(100,200,100,.4); color: #64c864; background: rgba(100,200,100,.07); }
+    .sys-tag.gbc    { border-color: rgba(100,200,100,.4); color: #64c864; background: rgba(100,200,100,.07); }
+    .sys-tag.gba    { border-color: rgba(100,160,229,.4); color: #64a0e5; background: rgba(100,160,229,.07); }
+    .sys-tag.nds    { border-color: rgba(200,168,75,.4);  color: var(--accent); background: rgba(200,168,75,.07); }
+    .sys-tag.n64    { border-color: rgba(229,130,75,.4);  color: #e5824b; background: rgba(229,130,75,.07); }
+    .sys-tag.psx    { border-color: rgba(100,100,229,.4); color: #6464e5; background: rgba(100,100,229,.07); }
+    .sys-tag.sms    { border-color: rgba(75,200,200,.4);  color: #4bc8c8; background: rgba(75,200,200,.07); }
+    .sys-tag.gg     { border-color: rgba(75,200,200,.4);  color: #4bc8c8; background: rgba(75,200,200,.07); }
+    .sys-tag.pce    { border-color: rgba(200,75,150,.4);  color: #c84b96; background: rgba(200,75,150,.07); }
+    .sys-tag.ngg    { border-color: rgba(229,200,75,.4);  color: #e5c84b; background: rgba(229,200,75,.07); }
+    .sys-tag.atari  { border-color: rgba(200,120,75,.4);  color: #c87850; background: rgba(200,120,75,.07); }
+    .sys-tag.segacd { border-color: rgba(75,200,200,.4);  color: #4bc8c8; background: rgba(75,200,200,.07); }
+    .sys-tag.32x    { border-color: rgba(75,200,200,.4);  color: #4bc8c8; background: rgba(75,200,200,.07); }
+    .sys-tag.arcade { border-color: rgba(229,75,150,.4);  color: #e54b96; background: rgba(229,75,150,.07); }
+
+    /* ── Platform grid cards ── */
+    .platform-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 10px; margin-top: 12px; }
+    .platform-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 5px; padding: 14px 16px; }
+    .platform-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .platform-name { font-family: 'Cinzel', serif; font-size: .82rem; color: var(--text-bright); font-weight: 700; }
+    .platform-core { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); }
+    .platform-notes { font-size: .78rem; color: var(--text-dim); line-height: 1.5; }
+
+    /* ── Shader browser ── */
+    .shader-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; margin-top: 12px; }
+    .shader-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 5px; overflow: hidden; }
+    .shader-preview { width: 100%; aspect-ratio: 4/3; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+    .shader-info { padding: 10px 12px; }
+    .shader-name { font-family: 'Cinzel', serif; font-size: .78rem; color: var(--text-bright); font-weight: 700; margin-bottom: 3px; }
+    .shader-desc { font-size: .72rem; color: var(--text-dim); line-height: 1.5; }
+    .shader-path { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--accent); margin-top: 5px; }
+
+    /* ── RA integration box ── */
+    .ra-box { background: rgba(229,75,75,.06); border: 1px solid rgba(229,75,75,.25); border-radius: 5px; padding: 14px 16px; margin-bottom: 14px; }
+    .ra-box-title { font-family: 'Cinzel', serif; font-size: .82rem; color: #e54b4b; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+
+    /* ── Library preview mock ── */
+    .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+    .lib-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .lib-cover { width: 100%; aspect-ratio: 3/4; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; }
+    .lib-cover-sys { position: absolute; bottom: 4px; right: 4px; font-size: .5rem; font-family: 'Share Tech Mono', monospace; background: rgba(0,0,0,.75); padding: 1px 4px; border-radius: 2px; color: var(--text-dim); }
+    .lib-title { padding: 6px 8px; font-size: .72rem; color: var(--text); font-weight: 600; line-height: 1.3; }
+    .lib-sub { padding: 0 8px 6px; font-size: .64rem; color: var(--text-dim); }
+
+    /* ── Completionist playlist ── */
+    .playlist { border: 1px solid var(--border); border-radius: 5px; overflow: hidden; margin-bottom: 12px; }
+    .playlist-header { background: rgba(200,168,75,.08); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+    .playlist-title { font-family: 'Cinzel', serif; font-size: .84rem; color: var(--accent); font-weight: 700; }
+    .playlist-count { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: var(--text-dim); }
+    .playlist-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 1px solid rgba(37,45,61,.5); font-size: .82rem; }
+    .playlist-item:last-child { border-bottom: none; }
+    .playlist-num { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--text-dim); width: 20px; text-align: right; flex-shrink: 0; }
+    .playlist-game { color: var(--text); }
+    .playlist-note { margin-left: auto; font-size: .68rem; color: var(--text-dim); font-style: italic; }
+
+    /* ── Mobile responsive ── */
+    @media (max-width: 600px) {
+      .platform-grid { grid-template-columns: 1fr; }
+      .shader-grid { grid-template-columns: repeat(2,1fr); }
+      .lib-grid { grid-template-columns: repeat(3,1fr); }
+      .subtab-btn { font-size: .6rem; padding: 7px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Page header ── -->
+<div class="page-header">
+  <div class="page-icon">⚡</div>
+  <div>
+    <h1>Browser Emulation</h1>
+    <div class="subtitle">// EmulatorJS · Port <span data-cfg="port:emulatorjs"></span> · Native Windows (NSSM) · Authentik forward_auth //</div>
+    <p class="desc">
+      A Netflix-style retro game library running entirely in the browser via WebAssembly. Play NES, SNES, GBA, NDS, N64, PS1, and a dozen more systems. Per-user save files, RetroAchievements integration, GLSL shader browser, on-screen controller overlays, and completionist playlists — all accessible from any device including mobile.
+    </p>
+  </div>
+</div>
+
+<!-- ── Sub-tab nav ── -->
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div class="setup-complete-sub-wrap">
+      <div class="setup-complete-label">Complete?</div>
+      <div class="setup-complete-sub" id="complete-sub">Mark done when: library loads at games.yourdomain, saves persist across devices, RA linked, shaders load, overlays work on mobile.</div>
+    </div>
+  </div>
+
+  <div class="v1-banner">⚡ V1 Goal: A browser-accessible game library at <code><span data-cfg="url:emulatorjs"></span></code> where users log in via Authentik, browse games in a Netflix-style grid, play with per-user cloud saves, and can enable RetroAchievements tracking. Mobile-playable with on-screen overlays.</div>
+
+  <!-- STEP 1: Directory structure -->
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Create Directory Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\BrowserGames\
+  ├── emulatorjs\              ← EmulatorJS repo (data/ folder)
+  ├── roms\                    ← ROM library (organized by system)
+  │   ├── nes\
+  │   ├── snes\
+  │   ├── gb\
+  │   ├── gbc\
+  │   ├── gba\
+  │   ├── nds\
+  │   ├── n64\
+  │   ├── psx\
+  │   ├── sms\                 ← Sega Master System
+  │   ├── gg\                  ← Game Gear
+  │   ├── genesis\             ← Sega Genesis / Mega Drive
+  │   ├── segacd\
+  │   ├── 32x\
+  │   ├── pce\                 ← PC Engine / TurboGrafx-16
+  │   ├── ngp\                 ← Neo Geo Pocket
+  │   └── arcade\              ← MAME (requires full romset)
+  ├── covers\                  ← Box art images (named [game-id].jpg)
+  ├── shaders\                 ← GLSL shaders (cloned from libretro)
+  ├── server.py                ← Save server + Flask backend
+  ├── games.json               ← Game catalogue metadata
+  └── index.html               ← Frontend (Netflix library UI)</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Per-user saves live at <code>D:\Users\[username]\emulation\browser\</code> — not in this folder. The server reads the <code>X-authentik-username</code> header and writes directly to each user's path. No symlinks needed for browser-based emulation since each HTTP session is already user-isolated.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: EmulatorJS -->
+  <div class="section">
+    <div class="section-title">📦 Step 2 — Install EmulatorJS</div>
+    <div class="card">
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Clone the EmulatorJS repo</strong>
+            <pre>cd D:\Emulation\BrowserGames
+git clone https://github.com/EmulatorJS/EmulatorJS emulatorjs
+# You only need the data/ folder — this contains all emulator cores (WASM)</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Clone GLSL shaders from Libretro</strong>
+            <pre>cd D:\Emulation\BrowserGames
+git clone https://github.com/libretro/glsl-shaders shaders
+# This repo contains hundreds of GLSL shader presets
+# Key subdirectories: crt/, scanlines/, retro/, handheld/, misc/
+# EmulatorJS supports GLSL shaders via EJS_shaders setting</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Verify the data/ folder has all cores</strong>
+            <pre>dir D:\Emulation\BrowserGames\emulatorjs\data\cores\
+# Should list: gambatte_libretro.wasm, mgba_libretro.wasm,
+# melonds_libretro.wasm, mupen64plus_next_libretro.wasm,
+# mednafen_psx_hw_libretro.wasm, etc.</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Python save server -->
+  <div class="section">
+    <div class="section-title">🐍 Step 3 — Install the Flask Save Server</div>
+    <div class="card">
+      <div class="card-title">Install dependencies</div>
+      <pre>pip install flask flask-cors waitress</pre>
+      <div class="card-title" style="margin-top:14px">Create <code>D:\Emulation\BrowserGames\server.py</code></div>
+      <pre>from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask_cors import CORS
+import os, json, mimetypes
+
+app = Flask(__name__, static_folder='.')
+CORS(app)
+
+ROMS_DIR    = 'D:/Emulation/BrowserGames/roms'
+COVERS_DIR  = 'D:/Emulation/BrowserGames/covers'
+SHADERS_DIR = 'D:/Emulation/BrowserGames/shaders'
+USERS_BASE  = 'D:/Users'
+GAMES_FILE  = 'D:/Emulation/BrowserGames/games.json'
+
+def get_user():
+    # Authentik injects this header via Caddy forward_auth
+    return request.headers.get('X-authentik-username', 'anonymous')
+
+def user_save_dir(username):
+    path = f'{USERS_BASE}/{username}/emulation/browser'
+    os.makedirs(path, exist_ok=True)
+    return path
+
+# ── Game catalogue ──────────────────────────────────────────────
+@app.route('/api/games')
+def games():
+    with open(GAMES_FILE) as f:
+        return jsonify(json.load(f))
+
+# ── Save file API ───────────────────────────────────────────────
+@app.route('/api/save/&lt;game_id&gt;', methods=['GET'])
+def load_save(game_id):
+    username = get_user()
+    path = os.path.join(user_save_dir(username), f'{game_id}.sav')
+    if os.path.exists(path):
+        return send_file(path, mimetype='application/octet-stream')
+    return '', 204  # No save yet
+
+@app.route('/api/save/&lt;game_id&gt;', methods=['POST'])
+def store_save(game_id):
+    username = get_user()
+    path = os.path.join(user_save_dir(username), f'{game_id}.sav')
+    with open(path, 'wb') as f:
+        f.write(request.data)
+    return jsonify({'ok': True})
+
+# ── Save state slots (1–5 per game) ─────────────────────────────
+@app.route('/api/state/&lt;game_id&gt;/&lt;int:slot&gt;', methods=['GET'])
+def load_state(game_id, slot):
+    username = get_user()
+    path = os.path.join(user_save_dir(username), f'{game_id}.state{slot}')
+    if os.path.exists(path):
+        return send_file(path, mimetype='application/octet-stream')
+    return '', 204
+
+@app.route('/api/state/&lt;game_id&gt;/&lt;int:slot&gt;', methods=['POST'])
+def store_state(game_id, slot):
+    username = get_user()
+    path = os.path.join(user_save_dir(username), f'{game_id}.state{slot}')
+    with open(path, 'wb') as f:
+        f.write(request.data)
+    return jsonify({'ok': True})
+
+# ── ROM serving (requires auth header to be present) ────────────
+@app.route('/roms/&lt;path:filename&gt;')
+def serve_rom(filename):
+    if get_user() == 'anonymous':
+        return 'Unauthorized', 401
+    return send_from_directory(ROMS_DIR, filename)
+
+# ── Cover art ───────────────────────────────────────────────────
+@app.route('/covers/&lt;path:filename&gt;')
+def serve_cover(filename):
+    return send_from_directory(COVERS_DIR, filename)
+
+# ── Shader listing ──────────────────────────────────────────────
+@app.route('/api/shaders')
+def list_shaders():
+    shaders = []
+    for root, dirs, files in os.walk(SHADERS_DIR):
+        for f in files:
+            if f.endswith('.glslp') or f.endswith('.glsl'):
+                full = os.path.join(root, f)
+                rel  = os.path.relpath(full, SHADERS_DIR).replace('\\', '/')
+                category = rel.split('/')[0]
+                shaders.append({'path': rel, 'name': f, 'category': category})
+    return jsonify(shaders)
+
+# ── Static files (index.html, JS, etc.) ─────────────────────────
+@app.route('/')
+@app.route('/&lt;path:filename&gt;')
+def static_files(filename='index.html'):
+    return send_from_directory('D:/Emulation/BrowserGames', filename)
+
+if __name__ == '__main__':
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=8085)
+</pre>
+    </div>
+  </div>
+
+  <!-- STEP 4: games.json -->
+  <div class="section">
+    <div class="section-title">🗂️ Step 4 — Populate games.json</div>
+    <div class="card">
+      <div class="card-title">Structure and example entries</div>
+      <pre>[
+  {
+    "id":         "super-metroid",
+    "title":      "Super Metroid",
+    "system":     "snes",
+    "core":       "snes9x",
+    "rom":        "/roms/snes/super-metroid.smc",
+    "cover":      "/covers/super-metroid.jpg",
+    "developer":  "Nintendo",
+    "franchise":  "Metroid",
+    "genre":      ["Action", "Platformer"],
+    "year":       1994,
+    "ra_game_id": 1273,    ← RetroAchievements game ID (0 = unsupported)
+    "description": "The definitive Super Nintendo action adventure.",
+    "tags":       ["completionist-friendly", "long"]
+  },
+  {
+    "id":         "pokemon-crystal-clear",
+    "title":      "Pokémon Crystal Clear",
+    "system":     "gbc",
+    "core":       "gambatte",
+    "rom":        "/roms/gbc/pokemon-crystal-clear.gbc",
+    "cover":      "/covers/pokemon-crystal-clear.jpg",
+    "developer":  "ShockSlayer",
+    "franchise":  "Pokémon",
+    "genre":      ["RPG"],
+    "year":       2018,
+    "ra_game_id": 0,
+    "tags":       ["rom-hack"]
+  }
+]</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Find RetroAchievements game IDs at <a href="https://retroachievements.org" target="_blank">retroachievements.org</a> — search the game and grab the ID from the URL. Set <code>ra_game_id: 0</code> for ROM hacks or games not in the RA database.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Frontend -->
+  <div class="section">
+    <div class="section-title">🎬 Step 5 — Deploy the Library Frontend (index.html)</div>
+    <div class="card">
+      <p>The frontend is a single-page HTML file that fetches <code>/api/games</code> and renders the Netflix-style grid. Key features built into it:</p>
+      <ul style="margin: 8px 0 0 18px; font-size:.85rem; line-height:1.8">
+        <li><strong>Category tabs:</strong> By Platform · By Developer · By Franchise · Playlists</li>
+        <li><strong>Search bar:</strong> Live filter across all fields</li>
+        <li><strong>Game detail modal:</strong> Cover art, description, achievements count, play button</li>
+        <li><strong>Emulator launcher:</strong> Bootstraps EmulatorJS in an overlay, loads user's save</li>
+        <li><strong>Overlay controls:</strong> On-screen D-pad + buttons (on by default, toggle-able)</li>
+        <li><strong>Shader picker:</strong> Fetches <code>/api/shaders</code>, previews applied to cover art via CSS filter approximation; actual shader is passed to EmulatorJS</li>
+        <li><strong>RetroAchievements panel:</strong> Shows game's RA badge count; user links their RA account once</li>
+        <li><strong>Completionist playlists:</strong> Ordered game lists per franchise with progress tracking</li>
+      </ul>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">The full <code>index.html</code> frontend is a large standalone file. It is maintained separately from this documentation page. See the <strong>UI Preview tab</strong> for a screenshot of the design intent, and the Overview tab for the EmulatorJS initialization snippet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6: NSSM service -->
+  <div class="section">
+    <div class="section-title">🔧 Step 6 — Run as a Windows Service (NSSM)</div>
+    <div class="card">
+      <pre># Install NSSM from nssm.cc, then:
+nssm install BrowserGames "C:\Python311\python.exe"
+nssm set BrowserGames AppParameters "D:\Emulation\BrowserGames\server.py"
+nssm set BrowserGames AppDirectory  "D:\Emulation\BrowserGames"
+nssm set BrowserGames Start         SERVICE_AUTO_START
+nssm set BrowserGames AppStdout     "D:\Logs\browsergames.log"
+nssm set BrowserGames AppStderr     "D:\Logs\browsergames-err.log"
+nssm start BrowserGames
+
+# Verify:
+curl http://localhost:8085/api/games</pre>
+    </div>
+  </div>
+
+  <!-- STEP 7: Caddy -->
+  <div class="section">
+    <div class="section-title">🌐 Step 7 — Caddy Reverse Proxy + Authentik SSO</div>
+    <div class="card">
+      <div class="card-title">Caddyfile block</div>
+      <pre>games.<span data-cfg="domain"></span> {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+    }
+    reverse_proxy localhost:<span data-cfg="port:emulatorjs"></span>
+}</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">The <code>forward_auth</code> block injects <code>X-authentik-username</code> into every request. The Flask server reads this header directly — no session cookies needed. This means saves are correctly attributed to the logged-in user automatically.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 8: RetroAchievements -->
+  <div class="section">
+    <div class="section-title">🏅 Step 8 — RetroAchievements Integration</div>
+    <div class="card">
+      <div class="card-title">How it works</div>
+      <p>EmulatorJS has native RetroAchievements support. Users link their own free RA account once via the settings panel. After that, RA tracks their achievements automatically per game, synced to the global RA leaderboard.</p>
+      <pre>// In the EmulatorJS initialization block (inside index.html):
+EJS_retroarch = true;
+EJS_cheats    = false;     // disable if desired
+// RA credentials: user enters once, stored in localStorage per-device
+// EJS_raUsername and EJS_raToken are set from the settings panel
+
+// In settings panel HTML (one-time setup per device):
+// User enters RA username + RA API token (from retroachievements.org/settings)
+// Store with: localStorage.setItem('ra_username', val)
+//             localStorage.setItem('ra_token', val)
+// Then pass to EmulatorJS: EJS_raUsername = localStorage.getItem('ra_username')
+//                           EJS_raToken   = localStorage.getItem('ra_token')</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>RA only works with unmodified ROMs</strong> — ROM hacks will not trigger RA achievements since their checksums don't match the RA database. For hacks, RA integration is silently skipped (set <code>ra_game_id: 0</code> in games.json).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 9: Controller + overlay -->
+  <div class="section">
+    <div class="section-title">🎮 Step 9 — Controllers &amp; Touch Overlays</div>
+    <div class="card">
+      <div class="card-title">Physical controllers (USB / Bluetooth)</div>
+      <p>EmulatorJS detects any browser-exposed gamepad via the Gamepad API automatically. Connect a controller via USB or pair it via Bluetooth before opening the game. No configuration needed — Xbox, PlayStation, and most generic USB controllers work out of the box.</p>
+      <pre>// Gamepad is auto-detected — no code needed.
+// EmulatorJS maps buttons using standard gamepad layout.
+// Remapping: EJS_controlScheme = {...} for custom mappings
+// Or use the in-emulator menu: Menu (F1) → Controls → Remap</pre>
+
+      <div class="card-title" style="margin-top:14px">On-screen overlay (mobile / no controller)</div>
+      <pre>// On by default. Toggle via the HUD button or URL param:
+// games.yourdomain/?overlay=0   → hides overlay on load
+// Or: via settings panel toggle (persisted to localStorage)
+
+EJS_VirtualGamepadSettings = {
+    enabled: true,       // ← false hides it
+    opacity: 0.65,
+    buttonColor: 'rgba(200,168,75,0.5)',   // gold accent
+    stickColor:  'rgba(200,168,75,0.35)',
+};
+// The overlay auto-hides when a physical gamepad is detected.
+// Users can force-hide: tap the settings gear → "Hide overlay"</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">The overlay auto-hides when a physical gamepad is connected, so desktop players with controllers never see it. Mobile players see it immediately. A persistent localStorage flag (<code>overlay_hidden</code>) lets users disable it permanently per device.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="section">
+    <div class="section-title">📋 Quick Reference</div>
+    <div class="card">
+      <table>
+        <tr><th>Property</th><th>Value</th></tr>
+        <tr><td>URL</td><td><code><span data-cfg="url:emulatorjs"></span></code></td></tr>
+        <tr><td>Port</td><td><span data-cfg="port:emulatorjs"></span></td></tr>
+        <tr><td>Install type</td><td>Python (Flask + Waitress) · Native Windows via NSSM</td></tr>
+        <tr><td>Auth</td><td>Authentik forward_auth · <code>X-authentik-username</code> header</td></tr>
+        <tr><td>Save storage</td><td><code>D:\Users\[username]\emulation\browser\</code> (Pattern B)</td></tr>
+        <tr><td>ROM library</td><td><code>D:\Emulation\BrowserGames\roms\</code></td></tr>
+        <tr><td>Game catalogue</td><td><code>D:\Emulation\BrowserGames\games.json</code></td></tr>
+        <tr><td>EmulatorJS repo</td><td><a href="https://github.com/EmulatorJS/EmulatorJS" target="_blank">github.com/EmulatorJS/EmulatorJS</a></td></tr>
+        <tr><td>GLSL Shaders repo</td><td><a href="https://github.com/libretro/glsl-shaders" target="_blank">github.com/libretro/glsl-shaders</a></td></tr>
+        <tr><td>RetroAchievements</td><td><a href="https://retroachievements.org" target="_blank">retroachievements.org</a> · User links own account</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🕹️ Supported Systems &amp; Cores</div>
+    <div class="platform-grid">
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">NES</div>
+          <span class="sys-tag nes">NES</span>
+        </div>
+        <div class="platform-core">Core: fceumm</div>
+        <div class="platform-notes">Nintendo Entertainment System. Full mapper support. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Super Nintendo</div>
+          <span class="sys-tag snes">SNES</span>
+        </div>
+        <div class="platform-core">Core: snes9x</div>
+        <div class="platform-notes">Full library support. SA-1, SuperFX, DSP co-processors. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Game Boy</div>
+          <span class="sys-tag gb">GB</span>
+        </div>
+        <div class="platform-core">Core: gambatte</div>
+        <div class="platform-notes">Original DMG and Super Game Boy. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Game Boy Color</div>
+          <span class="sys-tag gbc">GBC</span>
+        </div>
+        <div class="platform-core">Core: gambatte</div>
+        <div class="platform-notes">Same core as GB — change system to gbc. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Game Boy Advance</div>
+          <span class="sys-tag gba">GBA</span>
+        </div>
+        <div class="platform-core">Core: mgba</div>
+        <div class="platform-notes">Excellent compatibility. ROM hacks work. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Nintendo DS</div>
+          <span class="sys-tag nds">NDS</span>
+        </div>
+        <div class="platform-core">Core: melonds</div>
+        <div class="platform-notes">Dual-screen emulation in browser. Touch controls on mobile. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Nintendo 64</div>
+          <span class="sys-tag n64">N64</span>
+        </div>
+        <div class="platform-core">Core: mupen64plus_next</div>
+        <div class="platform-notes">Most games playable. Some 3D titles need a fast device. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">PlayStation 1</div>
+          <span class="sys-tag psx">PSX</span>
+        </div>
+        <div class="platform-core">Core: mednafen_psx_hw</div>
+        <div class="platform-notes">Multi-disc support via M3U. BIOS required (place in emulatorjs/data/bios/). RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Sega Master System</div>
+          <span class="sys-tag sms">SMS</span>
+        </div>
+        <div class="platform-core">Core: genesis_plus_gx</div>
+        <div class="platform-notes">Full SMS + Game Gear library. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Game Gear</div>
+          <span class="sys-tag gg">GG</span>
+        </div>
+        <div class="platform-core">Core: genesis_plus_gx</div>
+        <div class="platform-notes">Sega's handheld. Same core as SMS. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Genesis / Mega Drive</div>
+          <span class="sys-tag sms">GEN</span>
+        </div>
+        <div class="platform-core">Core: genesis_plus_gx</div>
+        <div class="platform-notes">Full 16-bit Sega library. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Sega CD</div>
+          <span class="sys-tag segacd">SEGACD</span>
+        </div>
+        <div class="platform-core">Core: genesis_plus_gx</div>
+        <div class="platform-notes">CD-ROM games. BIN/CUE format. BIOS required. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">32X</div>
+          <span class="sys-tag 32x">32X</span>
+        </div>
+        <div class="platform-core">Core: picodrive</div>
+        <div class="platform-notes">Sega 32X. Small library. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">PC Engine / TG-16</div>
+          <span class="sys-tag pce">PCE</span>
+        </div>
+        <div class="platform-core">Core: mednafen_pce</div>
+        <div class="platform-notes">Hudson's console. CD-ROM² supported. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Neo Geo Pocket</div>
+          <span class="sys-tag ngg">NGP</span>
+        </div>
+        <div class="platform-core">Core: mednafen_ngp</div>
+        <div class="platform-notes">NGP + NGP Color. Small but excellent library. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Atari 2600</div>
+          <span class="sys-tag atari">2600</span>
+        </div>
+        <div class="platform-core">Core: stella</div>
+        <div class="platform-notes">Classic Atari library. RA supported.</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-card-header">
+          <div class="platform-name">Arcade (MAME)</div>
+          <span class="sys-tag arcade">ARCADE</span>
+        </div>
+        <div class="platform-core">Core: mame2003_plus</div>
+        <div class="platform-notes">Requires full MAME 0.78 romset. Many titles playable. RA supported for select titles.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎬 Library Categories</div>
+    <div class="card">
+      <p>The frontend organizes the library into four category views, all derived from <code>games.json</code> fields:</p>
+      <table>
+        <tr><th>Category Tab</th><th>Grouped by</th><th>Example</th></tr>
+        <tr><td>By Platform</td><td><code>system</code> field</td><td>NES · SNES · GBA · NDS · N64 · PSX…</td></tr>
+        <tr><td>By Developer</td><td><code>developer</code> field</td><td>Nintendo · SEGA · Rare · Konami · Capcom…</td></tr>
+        <tr><td>By Franchise</td><td><code>franchise</code> field</td><td>Pokémon · Castlevania · Metroid · Zelda…</td></tr>
+        <tr><td>Playlists</td><td>Completionist ordering (hardcoded)</td><td>Play Pokémon in order · Metroidvania journey…</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌊 EmulatorJS Initialization Snippet</div>
+    <div class="card">
+      <p>The play page bootstraps EmulatorJS like this (simplified — full version in <code>index.html</code>):</p>
+      <pre>&lt;div id="game"&gt;&lt;/div&gt;
+&lt;script src="/emulatorjs/data/loader.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+async function launchGame(game) {
+    // 1. Load user's save file from server
+    let saveData = null;
+    const saveRes = await fetch(`/api/save/${game.id}`);
+    if (saveRes.status === 200) saveData = await saveRes.arrayBuffer();
+
+    // 2. Configure EmulatorJS
+    EJS_player      = '#game';
+    EJS_gameUrl     = game.rom;
+    EJS_core        = game.core;
+    EJS_gameID      = game.id;
+    EJS_language    = 'en-US';
+    EJS_pathtodata  = '/emulatorjs/data/';
+    EJS_retroarch   = true;   // RetroAchievements support
+
+    // 3. RA credentials (user sets once in settings panel)
+    EJS_raUsername  = localStorage.getItem('ra_username') || '';
+    EJS_raToken     = localStorage.getItem('ra_token') || '';
+
+    // 4. Shader (user-selected, persisted to localStorage)
+    const shader = localStorage.getItem('active_shader');
+    if (shader) EJS_shaders = `/shaders/${shader}`;
+
+    // 5. On-screen overlay
+    EJS_VirtualGamepadSettings = {
+        enabled: localStorage.getItem('overlay_hidden') !== '1',
+        opacity: 0.65,
+        buttonColor: 'rgba(200,168,75,0.5)',
+        stickColor:  'rgba(200,168,75,0.35)',
+    };
+
+    // 6. Pre-load save file if one exists
+    if (saveData) {
+        EJS_onGameStart = function() {
+            EJS_emulator.gameManager.setSaveFile(new Uint8Array(saveData));
+        };
+    }
+
+    // 7. Auto-save on in-game save + every 60s
+    EJS_onSaveState = async (data) => {
+        await fetch(`/api/save/${game.id}`, {
+            method: 'POST', body: data,
+            headers: {'Content-Type': 'application/octet-stream'}
+        });
+    };
+    EJS_saveStateOnExit = true;
+}
+&lt;/script&gt;</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 How to Update EmulatorJS</div>
+    <div class="card">
+      <div class="card-title">Last confirmed working version: <span data-cfg="version:emulatorjs"></span></div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Pull latest EmulatorJS</strong>
+            <pre>cd D:\Emulation\BrowserGames\emulatorjs
+git pull origin main
+# Verify cores are intact:
+dir data\cores\*.wasm | Select-Object Name, Length</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Pull latest GLSL shaders</strong>
+            <pre>cd D:\Emulation\BrowserGames\shaders
+git pull origin master
+# No service restart needed — shaders are loaded at game launch</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Restart the Flask server if server.py was changed</strong>
+            <pre>nssm restart BrowserGames
+# Verify:
+curl http://localhost:8085/api/games</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">➕ Adding New Games</div>
+    <div class="card">
+      <ol style="margin:0 0 0 18px;font-size:.85rem;line-height:2">
+        <li>Place the ROM file in <code>D:\Emulation\BrowserGames\roms\[system]\</code></li>
+        <li>Add cover art (ideally 300×400px JPG) to <code>D:\Emulation\BrowserGames\covers\</code> named <code>[game-id].jpg</code></li>
+        <li>Add an entry to <code>games.json</code> with all required fields (see Setup tab)</li>
+        <li>If the game has RetroAchievements: look up its <code>ra_game_id</code> at retroachievements.org and add it</li>
+        <li>Refresh the browser — the library auto-rebuilds from <code>games.json</code> on each load</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Breakpoints</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li><strong>EmulatorJS major version change:</strong> Core file paths inside <code>data/</code> occasionally move between major releases. After pulling, verify your existing games still launch before pushing to production.</li>
+        <li><strong>WASM memory limits on mobile:</strong> N64 and PSX titles use substantial WASM memory. Low-RAM mobile devices (&lt;4GB) may crash when launching these. GBA/SNES are safe on any device.</li>
+        <li><strong>GLSL shader format:</strong> EmulatorJS only supports <code>.glslp</code> preset files (not <code>.slangp</code> which are Vulkan/D3D). The libretro glsl-shaders repo has both — only serve the <code>.glslp</code> files.</li>
+        <li><strong>PS1 BIOS requirement:</strong> If users report a black screen on PSX games, the BIOS file is missing or misnamed. Required: <code>scph5501.bin</code> in <code>emulatorjs/data/bios/</code>.</li>
+        <li><strong>RetroAchievements token expiry:</strong> RA tokens don't expire but can be revoked. If a user reports RA not working, have them re-generate their API token at retroachievements.org/settings.</li>
+        <li><strong>NDS touch controls on iOS:</strong> The melonDS core's touch input for the bottom screen requires enabling "Desktop site" in Safari, or using the dedicated overlay touch area. iOS Safari in mobile mode may misroute touch events.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Monthly</td><td>Pull latest EmulatorJS — check GitHub releases for notable fixes</td></tr>
+        <tr><td>Monthly</td><td>Pull latest glsl-shaders to get new shader additions</td></tr>
+        <tr><td>Monthly</td><td>Review server.py logs for 404s (missing ROMs or broken game IDs in games.json)</td></tr>
+        <tr><td>When adding content</td><td>Verify new game launches, save/load works, RA game ID is correct</td></tr>
+        <tr><td>Quarterly</td><td>Audit <code>D:\Users\[user]\emulation\browser\</code> — purge orphaned save files for removed games</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🎖️ Two Achievement Systems</div>
+    <div class="card">
+      <p>Browser Emulation uses <strong>two parallel achievement systems</strong> that coexist and complement each other:</p>
+      <table>
+        <tr><th>System</th><th>What it tracks</th><th>Where it lives</th></tr>
+        <tr><td><strong>RetroAchievements</strong></td><td>In-game milestones (beat a boss, find a secret, complete 100%). Per-game, per-user, on the global RA leaderboard.</td><td>retroachievements.org — user's own RA account</td></tr>
+        <tr><td><strong>Server achievements</strong></td><td>Server-side milestones (first game launched, 10 games played, completed a franchise playlist). Trophy shelf in the binder.</td><td>Local achievement server (port <span data-cfg="port:achievement"></span>)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 RetroAchievements Setup</div>
+    <div class="ra-box">
+      <div class="ra-box-title">🏅 RetroAchievements</div>
+      <p style="font-size:.83rem;line-height:1.6;color:var(--text)">
+        RA is a free community-run achievement system for retro games. EmulatorJS supports it natively. Each user signs up at <a href="https://retroachievements.org" target="_blank">retroachievements.org</a>, gets an API token from their settings page, and enters it once in the game library's settings panel. After that, every supported game auto-submits achievements to their RA profile.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">What users need to do (one-time per device)</div>
+      <ol style="margin:0 0 0 18px;font-size:.85rem;line-height:2">
+        <li>Create a free account at <a href="https://retroachievements.org/createaccount.php" target="_blank">retroachievements.org/createaccount.php</a></li>
+        <li>Go to <a href="https://retroachievements.org/settings" target="_blank">retroachievements.org/settings</a> and copy your API key</li>
+        <li>In the game library, open ⚙ Settings → RetroAchievements tab</li>
+        <li>Enter your RA username and API key — saved to localStorage for this device</li>
+        <li>Launch any supported game — achievements will track automatically</li>
+      </ol>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">RA credentials are stored per-device in localStorage, not server-side. Users need to re-enter them on each device they play on (phone, tablet, desktop). This is by design — RA tokens should not be stored server-side.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 Server-Side Achievement Triggers</div>
+    <div class="card">
+      <p>The Flask save server fires these events to the local achievement server via POST when they occur:</p>
+      <pre># server.py — fire achievement trigger on save:
+import requests
+
+def fire_achievement(username, trigger, metadata={}):
+    try:
+        requests.post(
+            f'http://localhost:{ACHIEVEMENT_PORT}/api/achievement/trigger',
+            json={'username': username, 'trigger': trigger, 'metadata': metadata},
+            timeout=2
+        )
+    except: pass   # Never block a save for an achievement
+
+# Examples:
+# After storing a save: fire_achievement(user, 'game_played', {'game': game_id})
+# After 10 saves:       fire_achievement(user, 'ten_games_played')
+# After playlist completion: fire_achievement(user, 'playlist_complete', {'playlist': name})</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏅 Available Server Achievements</div>
+    <div class="ach-grid">
+
+      <div class="ach-card">
+        <div class="ach-icon">🕹️</div>
+        <div class="ach-name">Insert Coin</div>
+        <div class="ach-desc">Launch your first browser emulation game.</div>
+        <div class="ach-footer"><span class="ach-pts">5 XP</span><span class="ach-method">db poll</span></div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">💾</div>
+        <div class="ach-name">Save State</div>
+        <div class="ach-desc">Save your game for the first time using cloud saves.</div>
+        <div class="ach-footer"><span class="ach-pts">5 XP</span><span class="ach-method">save API</span></div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🎮</div>
+        <div class="ach-name">Multi-Console</div>
+        <div class="ach-desc">Play games on 5 different systems.</div>
+        <div class="ach-footer"><span class="ach-pts">20 XP</span><span class="ach-method">db poll</span></div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📜</div>
+        <div class="ach-name">Completionist</div>
+        <div class="ach-desc">Finish every game in a franchise playlist.</div>
+        <div class="ach-footer"><span class="ach-pts">50 XP</span><span class="ach-method">playlist API</span></div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📺</div>
+        <div class="ach-name">Scanline Aesthete</div>
+        <div class="ach-desc">Enable a CRT shader and play for 30+ minutes.</div>
+        <div class="ach-footer"><span class="ach-pts">10 XP</span><span class="ach-method">save API</span></div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">📱</div>
+        <div class="ach-name">Pocket Gamer</div>
+        <div class="ach-desc">Complete a game session entirely on mobile with touch controls.</div>
+        <div class="ach-footer"><span class="ach-pts">15 XP</span><span class="ach-method">client hint</span></div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🏅</div>
+        <div class="ach-name">Trophy Hunter</div>
+        <div class="ach-desc">Unlock 50 RetroAchievements across any games.</div>
+        <div class="ach-footer"><span class="ach-pts">30 XP</span><span class="ach-method">RA API poll</span></div>
+      </div>
+
+      <div class="ach-card">
+        <div class="ach-icon">🕰️</div>
+        <div class="ach-name">Long Session</div>
+        <div class="ach-desc">Play for 3+ continuous hours in a single session.</div>
+        <div class="ach-footer"><span class="ach-pts">25 XP</span><span class="ach-method">session timer</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 Feeding the AI Recommendation Engine</div>
+    <div class="card">
+      <p>Every completed save event is a strong taste signal. Games where a user has substantial save file growth (indicating real play time) are even stronger. The recommendation engine receives game completion events to suggest next games in a franchise or similar titles across franchises.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Feed completed sessions to rec_server.py</div>
+      <pre># In server.py — after a save store, record to recommendation server:
+# (Only fire if save file size indicates meaningful play — > 1KB)
+if len(request.data) > 1024:
+    try:
+        requests.post(
+            f'http://localhost:{REC_PORT}/api/history/record',
+            json={
+                'user':  username,
+                'type':  'game',
+                'id':    game_id,
+                'title': game_title,   # look up from games.json
+                'system': game_system,
+                'franchise': game_franchise
+            },
+            timeout=2
+        )
+    except: pass</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Storage Overview</div>
+    <div class="storage-breakdown">
+      <div class="storage-cell">
+        <div class="storage-cell-label">EmulatorJS App</div>
+        <div class="storage-cell-val">~300 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">GLSL Shaders</div>
+        <div class="storage-cell-val">~120 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">ROM Library</div>
+        <div class="storage-cell-val">Varies (GBs)</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Cover Art</div>
+        <div class="storage-cell-val">~50 MB typical</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Per-User Saves</div>
+        <div class="storage-cell-val">~5–50 MB / user</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Catalogue JSON</div>
+        <div class="storage-cell-val">&lt; 1 MB</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Where Everything Lives</div>
+    <div class="card">
+      <pre>D:\Emulation\BrowserGames\
+  ├── emulatorjs\              ← EmulatorJS repo (git)
+  │   └── data\
+  │       ├── cores\           ← WASM emulator cores (~200 MB)
+  │       ├── bios\            ← BIOS files (PSX: scph5501.bin, etc.)
+  │       └── loader.js        ← Main bootstrap script
+  ├── roms\                    ← ROM library (your content, various sizes)
+  │   ├── nes\  snes\  gb\  gbc\  gba\  nds\  n64\  psx\
+  │   ├── sms\  gg\  genesis\  segacd\  32x\  pce\  ngp\  arcade\
+  ├── covers\                  ← Box art (300×400px JPG, named [id].jpg)
+  ├── shaders\                 ← libretro/glsl-shaders repo (git)
+  ├── server.py                ← Flask save server
+  ├── games.json               ← Game catalogue metadata
+  └── index.html               ← Library frontend
+
+D:\Users\[username]\emulation\browser\     ← Pattern B: per-user saves
+  ├── super-metroid.sav        ← SRAM save file (per game)
+  ├── super-metroid.state1     ← Save state slot 1
+  ├── super-metroid.state2     ← Save state slot 2
+  ├── pokemon-crystal.sav
+  └── ...
+
+D:\Logs\
+  ├── browsergames.log         ← NSSM stdout
+  └── browsergames-err.log     ← NSSM stderr</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Per-User Data (Pattern B)</div>
+    <div class="card">
+      <div class="card-title">What lives in <code>D:\Users\[username]\emulation\browser\</code></div>
+      <p>Each game creates up to <strong>6 files</strong> per user: one SRAM save (<code>.sav</code>) and up to 5 named save state slots (<code>.state1</code> through <code>.state5</code>). Save files are tiny — typically 8KB–512KB each depending on the system. Even a library of 100 games totals well under 50 MB per user.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">This folder is inside <code>D:\Users\[username]\</code> which is mounted as "App Data" in Nextcloud and counts toward the user's storage quota. Save data is negligible — it won't meaningfully affect quotas.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗄️ Backup Recommendations</div>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Where</th><th>How often</th><th>Priority</th></tr>
+        <tr><td>Per-user saves</td><td><code>D:\Users\[user]\emulation\browser\</code></td><td>Daily (auto via user folder backup)</td><td>🔴 High — irreplaceable play progress</td></tr>
+        <tr><td>games.json</td><td><code>D:\Emulation\BrowserGames\games.json</code></td><td>On every edit</td><td>🔴 High — catalogue metadata</td></tr>
+        <tr><td>ROM library</td><td><code>D:\Emulation\BrowserGames\roms\</code></td><td>Incremental as acquired</td><td>🔴 High — media library</td></tr>
+        <tr><td>Cover art</td><td><code>D:\Emulation\BrowserGames\covers\</code></td><td>Incremental as added</td><td>🟡 Med — re-downloadable</td></tr>
+        <tr><td>server.py</td><td><code>D:\Emulation\BrowserGames\server.py</code></td><td>On every edit (tracked in git)</td><td>🟡 Med — easy to recreate</td></tr>
+        <tr><td>EmulatorJS core</td><td><code>D:\Emulation\BrowserGames\emulatorjs\</code></td><td>On git pull</td><td>🟢 Low — re-cloneable</td></tr>
+        <tr><td>GLSL shaders</td><td><code>D:\Emulation\BrowserGames\shaders\</code></td><td>On git pull</td><td>🟢 Low — re-cloneable</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="trouble-item">
+    <div class="trouble-q">Game shows black screen or hangs on "Loading…"</div>
+    <div class="trouble-a">
+      1. Open browser DevTools → Console — look for 404s on ROM or core WASM files.<br>
+      2. Verify the ROM path in <code>games.json</code> matches the actual file path under <code>roms/</code> (case-sensitive on the Flask server).<br>
+      3. For PSX games: check that the BIOS file exists at <code>emulatorjs/data/bios/scph5501.bin</code>.<br>
+      4. Verify the core name in <code>games.json</code> matches an actual <code>.wasm</code> file in <code>emulatorjs/data/cores/</code>.
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">Save file not loading — game starts fresh every time</div>
+    <div class="trouble-a">
+      1. Check the browser console for a failed <code>GET /api/save/[game-id]</code> request.<br>
+      2. Verify the Flask server is running: <code>curl http://localhost:8085/api/games</code>.<br>
+      3. Confirm <code>X-authentik-username</code> header is being injected by Caddy — check with <code>curl -v https://games.yourdomain.com/api/games</code> and look at request headers.<br>
+      4. Check <code>D:\Users\[username]\emulation\browser\</code> exists and contains <code>[game-id].sav</code>.<br>
+      5. Check <code>D:\Logs\browsergames-err.log</code> for Python errors.
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">RetroAchievements not triggering in-game</div>
+    <div class="trouble-a">
+      1. RA only works with unmodified ROMs — confirm the game has <code>ra_game_id</code> > 0 in games.json.<br>
+      2. Confirm <code>EJS_retroarch = true</code> and <code>EJS_raUsername</code> / <code>EJS_raToken</code> are non-empty before launch.<br>
+      3. Test the RA token is valid by checking retroachievements.org with it.<br>
+      4. Some games need a "hardcore mode" off — EmulatorJS does not enforce hardcore mode by default.
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">On-screen overlay not appearing on mobile</div>
+    <div class="trouble-a">
+      1. Check if <code>overlay_hidden</code> is set in localStorage — open DevTools → Application → Local Storage.<br>
+      2. Verify <code>EJS_VirtualGamepadSettings.enabled</code> is <code>true</code> in the launch script.<br>
+      3. The overlay auto-hides when a gamepad is detected — disconnect any paired controllers and reload.
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">Shader applied but no visible effect</div>
+    <div class="trouble-a">
+      1. Only <code>.glslp</code> preset files work — not <code>.slangp</code> (Vulkan) or <code>.cgp</code> (Cg). Filter the shader list to <code>*.glslp</code> only.<br>
+      2. Some shaders require <code>EJS_color</code> or specific core support. CRT shaders in <code>shaders/crt/</code> are the most reliably supported.<br>
+      3. Check the browser console for GLSL compile errors if a specific shader fails silently.
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">NSSM service starts but <code>/api/games</code> returns 500</div>
+    <div class="trouble-a">
+      1. Check <code>D:\Logs\browsergames-err.log</code> for the Python traceback.<br>
+      2. Most common: <code>games.json</code> has a syntax error (trailing comma, missing quote). Validate with <code>python -m json.tool games.json</code>.<br>
+      3. Verify all path constants in <code>server.py</code> exist on disk.<br>
+      4. Run manually to see live errors: <code>python D:\Emulation\BrowserGames\server.py</code>
+    </div>
+  </div>
+
+  <div class="trouble-item ok">
+    <div class="trouble-q">Admin: manually trigger a save backup</div>
+    <div class="trouble-a">
+      <pre>robocopy D:\Users E:\Backups\Users /E /MIR /R:2 /W:5
+# This mirrors the entire D:\Users tree — includes all browser saves,
+# Pokemon saves, Dolphin saves, etc. in one operation.</pre>
+    </div>
+  </div>
+
+  <div class="trouble-item ok">
+    <div class="trouble-q">Admin: purge a user's saves for one game</div>
+    <div class="trouble-a">
+      <pre># Delete save + all states for a specific game for user alice:
+Remove-Item "D:\Users\alice\emulation\browser\castlevania-sotn.sav" -ErrorAction SilentlyContinue
+Remove-Item "D:\Users\alice\emulation\browser\castlevania-sotn.state*" -ErrorAction SilentlyContinue</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 7 — UI PREVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-uipreview">
+
+  <!-- ── SCREEN 1: Library grid view ── -->
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#ffbd2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">games.<span data-cfg="domain"></span></div>
+      <div class="preview-user-badge">👤 alice</div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-note">ℹ️ Mock library view — dummy data. Illustrates the Netflix-style grid layout with category tabs.</div>
+
+      <!-- Header bar mock -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div style="font-family:'Cinzel',serif;font-size:.9rem;color:var(--accent);font-weight:700">⚡ GAME LIBRARY</div>
+        <div style="flex:1;min-width:160px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:5px 10px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim)">🔍 search games…</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div style="background:rgba(200,168,75,.15);border:1px solid var(--accent);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);cursor:pointer">PLATFORM</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);cursor:pointer">DEVELOPER</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);cursor:pointer">FRANCHISE</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);cursor:pointer">📜 PLAYLISTS</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);cursor:pointer">🎨 SHADERS</div>
+      </div>
+
+      <!-- Platform filter row -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <span class="sys-tag nes" style="cursor:pointer">NES</span>
+        <span class="sys-tag snes" style="cursor:pointer;opacity:.6">SNES</span>
+        <span class="sys-tag gb" style="cursor:pointer;opacity:.6">GB</span>
+        <span class="sys-tag gbc" style="cursor:pointer;opacity:.6">GBC</span>
+        <span class="sys-tag gba" style="cursor:pointer;opacity:.6">GBA</span>
+        <span class="sys-tag nds" style="cursor:pointer;opacity:.6">NDS</span>
+        <span class="sys-tag n64" style="cursor:pointer;opacity:.6">N64</span>
+        <span class="sys-tag psx" style="cursor:pointer;opacity:.6">PSX</span>
+        <span class="sys-tag sms" style="cursor:pointer;opacity:.6">GEN</span>
+      </div>
+
+      <!-- Game grid -->
+      <div class="lib-grid">
+        <div class="lib-card">
+          <div class="lib-cover">🎮<div class="lib-cover-sys">NES</div></div>
+          <div class="lib-title">Mega Man 2</div>
+          <div class="lib-sub">Capcom · 1988</div>
+        </div>
+        <div class="lib-card">
+          <div class="lib-cover" style="background:rgba(229,75,75,.1)">🐉<div class="lib-cover-sys">NES</div></div>
+          <div class="lib-title">Castlevania III</div>
+          <div class="lib-sub">Konami · 1989</div>
+        </div>
+        <div class="lib-card">
+          <div class="lib-cover" style="background:rgba(75,200,100,.1)">🍄<div class="lib-cover-sys">NES</div></div>
+          <div class="lib-title">Super Mario Bros. 3</div>
+          <div class="lib-sub">Nintendo · 1988</div>
+        </div>
+        <div class="lib-card">
+          <div class="lib-cover" style="background:rgba(100,100,229,.1)">🔵<div class="lib-cover-sys">NES</div></div>
+          <div class="lib-title">Kirby's Adventure</div>
+          <div class="lib-sub">Nintendo · 1993</div>
+        </div>
+        <div class="lib-card">
+          <div class="lib-cover" style="background:rgba(200,168,75,.1)">⚔️<div class="lib-cover-sys">NES</div></div>
+          <div class="lib-title">Ninja Gaiden</div>
+          <div class="lib-sub">Tecmo · 1988</div>
+        </div>
+        <div class="lib-card">
+          <div class="lib-cover" style="background:rgba(229,130,75,.1)">🔫<div class="lib-cover-sys">NES</div></div>
+          <div class="lib-title">Contra</div>
+          <div class="lib-sub">Konami · 1988</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 2: Shader browser ── -->
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#ffbd2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">games.<span data-cfg="domain"></span> · Shader Browser</div>
+      <div class="preview-user-badge">👤 alice</div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-note">ℹ️ Shader browser — GLSL presets from libretro/glsl-shaders. Previews show CSS filter approximations applied to cover art. Selecting a shader writes it to localStorage and uses it in-game.</div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="background:rgba(200,168,75,.15);border:1px solid var(--accent);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent)">CRT</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">SCANLINES</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">RETRO</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">HANDHELD</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">NONE</div>
+      </div>
+
+      <div class="shader-grid">
+        <div class="shader-card" style="border-color:var(--accent)">
+          <div class="shader-preview" style="filter:contrast(1.2) brightness(0.85) saturate(1.3)">🎮</div>
+          <div class="shader-info">
+            <div class="shader-name">CRT-Royale</div>
+            <div class="shader-desc">High-quality phosphor simulation with bloom and curvature.</div>
+            <div class="shader-path">crt/crt-royale.glslp ✓ active</div>
+          </div>
+        </div>
+        <div class="shader-card">
+          <div class="shader-preview" style="background:repeating-linear-gradient(0deg,rgba(0,0,0,.15) 0px,rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px)">🎮</div>
+          <div class="shader-info">
+            <div class="shader-name">Scanlines</div>
+            <div class="shader-desc">Simple horizontal scanline overlay. Lightweight, works on all devices.</div>
+            <div class="shader-path">scanlines/scanlines.glslp</div>
+          </div>
+        </div>
+        <div class="shader-card">
+          <div class="shader-preview" style="filter:sepia(.3) contrast(1.1)">🎮</div>
+          <div class="shader-info">
+            <div class="shader-name">GB DMG</div>
+            <div class="shader-desc">Classic Game Boy greenish-grey LCD palette simulation.</div>
+            <div class="shader-path">handheld/gb-dmg.glslp</div>
+          </div>
+        </div>
+        <div class="shader-card">
+          <div class="shader-preview">🎮</div>
+          <div class="shader-info">
+            <div class="shader-name">None (Sharp)</div>
+            <div class="shader-desc">No shader. Pixel-perfect nearest-neighbour scaling.</div>
+            <div class="shader-path">— no shader</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 3: Completionist Playlists ── -->
+  <div class="preview-chrome">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#ffbd2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">games.<span data-cfg="domain"></span> · Playlists</div>
+      <div class="preview-user-badge">👤 alice</div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-note">ℹ️ Completionist playlists — ordered play lists per franchise. Progress tracked via save file presence. Green = save file found. Gold = completed.</div>
+
+      <div class="playlist">
+        <div class="playlist-header">
+          <span style="font-size:1.2rem">⚡</span>
+          <div class="playlist-title">Pokémon — Definitive Journey</div>
+          <div class="playlist-count">10 games · 2 completed</div>
+        </div>
+        <div class="playlist-item" style="background:rgba(76,175,125,.05)">
+          <div class="playlist-num">1</div>
+          <div class="playlist-game" style="color:#4caf7d">✓ Pokémon Crystal Clear <span class="sys-tag gbc" style="margin-left:6px">GBC</span></div>
+          <div class="playlist-note">Open world Gen 1+2</div>
+        </div>
+        <div class="playlist-item" style="background:rgba(76,175,125,.05)">
+          <div class="playlist-num">2</div>
+          <div class="playlist-game" style="color:#4caf7d">✓ Pokémon Ultra Violet <span class="sys-tag gba" style="margin-left:6px">GBA</span></div>
+          <div class="playlist-note">Complete FireRed Dex</div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-num">3</div>
+          <div class="playlist-game">Pokémon Emerald Rogue <span class="sys-tag gba" style="margin-left:6px">GBA</span></div>
+          <div class="playlist-note">Roguelite</div>
+        </div>
+        <div class="playlist-item" style="opacity:.5">
+          <div class="playlist-num">4</div>
+          <div class="playlist-game">Renegade Platinum <span class="sys-tag nds" style="margin-left:6px">NDS</span></div>
+          <div class="playlist-note">Complete Sinnoh Dex</div>
+        </div>
+        <div class="playlist-item" style="opacity:.5">
+          <div class="playlist-num">5</div>
+          <div class="playlist-game">Pokémon Unbound <span class="sys-tag gba" style="margin-left:6px">GBA</span></div>
+          <div class="playlist-note">Standalone adventure</div>
+        </div>
+      </div>
+
+      <div class="playlist">
+        <div class="playlist-header">
+          <span style="font-size:1.2rem">🧛</span>
+          <div class="playlist-title">Castlevania — Metroidvania Journey</div>
+          <div class="playlist-count">6 games · 0 completed</div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-num">1</div>
+          <div class="playlist-game">Castlevania: Symphony of the Night <span class="sys-tag psx" style="margin-left:6px">PSX</span></div>
+          <div class="playlist-note">Start here</div>
+        </div>
+        <div class="playlist-item" style="opacity:.5">
+          <div class="playlist-num">2</div>
+          <div class="playlist-game">Castlevania: Circle of the Moon <span class="sys-tag gba" style="margin-left:6px">GBA</span></div>
+          <div class="playlist-note">First GBA entry</div>
+        </div>
+        <div class="playlist-item" style="opacity:.5">
+          <div class="playlist-num">3</div>
+          <div class="playlist-game">Castlevania: Harmony of Dissonance <span class="sys-tag gba" style="margin-left:6px">GBA</span></div>
+          <div class="playlist-note"></div>
+        </div>
+        <div class="playlist-item" style="opacity:.5">
+          <div class="playlist-num">4</div>
+          <div class="playlist-game">Castlevania: Aria of Sorrow <span class="sys-tag gba" style="margin-left:6px">GBA</span></div>
+          <div class="playlist-note">Best GBA entry</div>
+        </div>
+        <div class="playlist-item" style="opacity:.5">
+          <div class="playlist-num">5</div>
+          <div class="playlist-game">Castlevania: Dawn of Sorrow <span class="sys-tag nds" style="margin-left:6px">NDS</span></div>
+          <div class="playlist-note">Sequel to Aria</div>
+        </div>
+        <div class="playlist-item" style="opacity:.5">
+          <div class="playlist-num">6</div>
+          <div class="playlist-game">Castlevania: Portrait of Ruin <span class="sys-tag nds" style="margin-left:6px">NDS</span></div>
+          <div class="playlist-note">Co-op elements</div>
+        </div>
+      </div>
+
+      <div class="preview-todo">[ ] Additional playlists: Mega Man Classic, Zelda Timeline, Metroid, Fire Emblem GBA/DS, Contra — add entries to completionist_playlists array in index.html</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📝 UI Notes &amp; Iteration Log</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;color:var(--text-dim)">
+        <li>[ ] Cover art generation: ideally use actual box art scraped from <a href="https://www.screenscraper.fr" target="_blank">screenscraper.fr</a> or <a href="https://www.igdb.com" target="_blank">IGDB API</a> — placeholder emoji used in mock</li>
+        <li>[ ] Shader preview: CSS filter is an approximation. Consider canvas-based preview that applies the first pass of the GLSL shader to a thumbnail image using WebGL for real-time accuracy</li>
+        <li>[ ] NDS dual-screen layout on mobile needs testing — melonDS has a "rotate screen" option for portrait phone orientation</li>
+        <li>[ ] Consider a "Recently Played" row at the top of the library, sorted by most recent save file modification time</li>
+        <li>[ ] RA badge count could be displayed on each game card (fetch from RA API on library load, cache for 24h)</li>
+        <li>[ ] Mobile: test that the emulator overlay doesn't conflict with iOS Safari's bottom navigation bar — may need <code>padding-bottom: env(safe-area-inset-bottom)</code></li>
+        <li>[ ] The shader browser should persist last-used shader per system (e.g. CRT for NES/SNES, GB shader for GB/GBC) rather than one global shader</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-uipreview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Sub-tab switching + setup-complete persistence
+═══════════════════════════════════════════════════════════════ -->
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'emulatorjs_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = '700'; overviewBtn.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark done when: library loads at games.yourdomain, saves persist across devices, RA linked, shaders load, overlays work on mobile.';
+      if (overviewBtn) { overviewBtn.style.fontWeight = ''; overviewBtn.style.color = ''; }
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const btn = document.querySelector('[onclick*="overview"]');
+      if (btn) switchTab('overview', btn);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const btn = document.querySelector('[onclick*="overview"]');
+      if (btn) switchTab('overview', btn);
+    }
+  });
+</script>
+
+</body>
+</html>
