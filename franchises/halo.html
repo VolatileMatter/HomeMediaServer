@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Halo</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+   Library · TV & Anime · Movies · Merch · Filler · History
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.fn-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS (pill buttons — used inside every tab)
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era / platform group header rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media crossover note rows — purple italic */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform / type left-border colour stripes */
+.fn-xbox    td:first-child { border-left: 3px solid #81c784; }
+.fn-pc      td:first-child { border-left: 3px solid #90a4ae; }
+.fn-tv      td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-movie   td:first-child { border-left: 3px solid #ffb74d; }
+.fn-book    td:first-child { border-left: 3px solid #aed581; }
+.fn-merch-toy     td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-merch-statue  td:first-child { border-left: 3px solid #ffcc02; }
+.fn-merch-card    td:first-child { border-left: 3px solid #80cbc4; }
+.fn-merch-board   td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-merch-apparel td:first-child { border-left: 3px solid #ce93d8; }
+.fn-merch-book    td:first-child { border-left: 3px solid #90a4ae; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-star       { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   ERA TAGS (Bungie / 343)
+════════════════════════════════════════════════════ */
+.fn-tag-bungie  { background: rgba(3,169,244,.18);  color: #29b6f6; border: 1px solid rgba(3,169,244,.35); }
+.fn-tag-343     { background: rgba(239,83,80,.18);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-retcon  { background: rgba(255,160,0,.18);  color: #ffb74d; border: 1px solid rgba(255,160,0,.35); }
+.fn-tag-silver  { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+
+/* Bungie-era / 343-era row tinting */
+.fn-bungie-row td:first-child { border-left: 3px solid #29b6f6; }
+.fn-343-row    td:first-child { border-left: 3px solid #ef5350; }
+
+/* ════════════════════════════════════════════════════
+   ERA CALLOUT BANNERS
+════════════════════════════════════════════════════ */
+.fn-era-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 700px) { .fn-era-split { grid-template-columns: 1fr; } }
+.fn-era-banner {
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: .8rem;
+  line-height: 1.7;
+}
+.fn-era-bungie {
+  background: rgba(3,169,244,.07);
+  border: 1px solid rgba(3,169,244,.3);
+  border-left: 4px solid #29b6f6;
+}
+.fn-era-343 {
+  background: rgba(239,83,80,.07);
+  border: 1px solid rgba(239,83,80,.3);
+  border-left: 4px solid #ef5350;
+}
+.fn-era-banner strong { color: var(--text); }
+
+/* ════════════════════════════════════════════════════
+   RETCON BOX
+════════════════════════════════════════════════════ */
+.fn-retcon-box {
+  background: rgba(255,160,0,.06);
+  border: 1px solid rgba(255,160,0,.3);
+  border-left: 4px solid #ffb74d;
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: .8rem;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.fn-retcon-box strong { color: #ffb74d; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fn-era-title {
+  font-family: 'Cinzel', serif;
+  font-size: .95rem;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.fn-filler-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.fn-filler-type {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  margin-bottom: 7px;
+  display: inline-block;
+}
+.fn-filler-trailer      { background: rgba(91,141,217,.15);  color: #5b8dd9;       border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-hype         { background: rgba(200,168,75,.12);  color: var(--accent); border: 1px solid rgba(200,168,75,.3); }
+.fn-filler-music        { background: rgba(78,205,196,.12);  color: #4ecdc4;       border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary  { background: rgba(224,133,92,.12);  color: #e0855c;       border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc;       border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-bumper       { background: rgba(76,175,80,.12);   color: #81c784;       border: 1px solid rgba(76,175,80,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where {
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: .72rem; color: var(--text-dim);
+}
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.fn-merch-history-era {
+  font-family: 'Cinzel', serif;
+  font-size: .85rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🪖</div>
+  <div>
+    <h1>Halo</h1>
+    <div class="subtitle">// Xbox · PC · MCC · Jellyfin · Two Creative Eras //</div>
+    <p class="desc">
+      The complete Halo franchise reference — every game, every canon novel, every film, and every canon TV season, with a clear breakdown of where the Bungie era ends and the 343 Industries era begins. The Library tab covers games (with inner views for release order, chronological, best-first, and Bungie-era-only). The other tabs cover the Legends film, the Paramount+ series, merchandise, Tunarr filler, and franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">9</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2</div><div class="fn-stat-label">TV Seasons</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">14+</div><div class="fn-stat-label">Novels</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2001</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- Era explainer — shown above the tabs so it's always visible -->
+<div class="fn-era-split">
+  <div class="fn-era-banner fn-era-bungie">
+    <strong><span class="fn-tag fn-tag-bungie">Bungie Era</span> 2001–2010</strong><br>
+    Halo CE through Reach. Bungie's original vision. The Forerunners were seeded as <em>human ancestors</em> — humanity devolved and punished by the Mantle after the Flood war. Never made fully explicit in-game, but embedded in terminals and the original lore bible. Master Chief as symbolic heir to the Forerunner legacy. Ends with Reach (2010).
+  </div>
+  <div class="fn-era-banner fn-era-343">
+    <strong><span class="fn-tag fn-tag-343">343 Era</span> 2012–present</strong><br>
+    Halo 4 onward. 343 retconned Forerunners into a <em>separate alien species</em> with humanity as a distinct lineage. The Didact and Librarian are now fleshed-out Forerunner characters. The Greg Bear <em>Forerunner Saga</em> novels (Cryptum, Primordium, Silentium) formalized the retcon. <span class="fn-tag fn-tag-retcon">⚡ Retcon</span> marks entries that conflict with Bungie's original framing.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Film</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Legends Film</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Halo Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','chrono',    this)">🕰️ Chronological</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bungie',    this)">🔵 Bungie Era Only</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           RELEASE ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          All games and novels in real-world release order. TV and film noted inline at their best consumption points. <span class="fn-tag fn-tag-retcon">⚡ Retcon</span> marks entries that conflict with Bungie's original Forerunner lore. Gold rows = standout entries.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Era</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Bungie Era (2001–2010) ──</td></tr>
+
+          <tr class="fn-bungie-row fn-highlight">
+            <td>2001</td>
+            <td>Halo: Combat Evolved <span class="fn-star">⭐</span></td>
+            <td>Game (Xbox / MCC)</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-star">⭐</span> The beginning. Master Chief, Alpha Halo, the Flood. The Forerunner mystery starts here — under Bungie's framing it carries a deeper implication about human ancestry.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2001</td>
+            <td>The Fall of Reach <em>(Nylund)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-star">⭐</span> The definitive origin novel. John-117's Spartan training, the fall of Reach, the backdrop before CE. Read before or after CE — both work perfectly.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>2001</td>
+            <td>The Flood <em>(Dietz)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> CE novelization. Skippable if you've played the game. Adds side-character depth for completionists.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2003</td>
+            <td>First Strike <em>(Nylund)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td>Bridge between CE and Halo 2. Chief and Cortana fighting back toward Earth. Excellent pacing, strong Covenant lore.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>2004</td>
+            <td>Halo 2 <span class="fn-star">⭐</span></td>
+            <td>Game (Xbox / MCC)</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-star">⭐</span> Dual campaign — Master Chief and the Arbiter. Best Covenant worldbuilding in the series. The cliffhanger ending is infamous.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>2006</td>
+            <td>Ghosts of Onyx <em>(Nylund)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-star">⭐</span> Spartan-IIIs, Dr. Halsey, Forerunner shield world. Best Bungie-era novel after Fall of Reach. Concurrent with Halo 2–3.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2007</td>
+            <td>Contact Harvest <em>(Staten)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td>First Contact — how the Human-Covenant War began. Sergeant Johnson's origin. Written by Bungie's own Joe Staten.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>2007</td>
+            <td>Halo 3 <span class="fn-star">⭐</span></td>
+            <td>Game (Xbox 360 / MCC)</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-star">⭐</span> The Bungie trilogy conclusion. The Ark, Truth, the Gravemind's endgame. Read the terminals — they hint at the human-Forerunner connection. Bungie's intended ending for Master Chief.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="5">🎬 <strong>Halo Legends</strong> (2009) — Seven animated shorts. "The Duel" and "Origins" are the standouts. Canon-adjacent; watch any time after Halo 2 or 3.</td></tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>2009</td>
+            <td>Halo 3: ODST <span class="fn-star">⭐</span></td>
+            <td>Game (Xbox 360 / MCC)</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-star">⭐</span> ODST squad during Halo 2's New Mombasa invasion. Noir atmosphere, outstanding audio. Buck introduced. No Master Chief — a feature, not a bug.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>2011</td>
+            <td>Halo: Evolutions <em>(Various)</em></td>
+            <td>Short story collection</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-tag fn-tag-opt">selective</span> Multi-author anthology. "Midnight in the Heart of Midlothian" and "The Mona Lisa" are worth reading. The rest is variable.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>2010</td>
+            <td>Halo: Reach <span class="fn-star">⭐</span></td>
+            <td>Game (Xbox 360 / MCC)</td>
+            <td><span class="fn-tag fn-tag-bungie">Bungie</span></td>
+            <td><span class="fn-star">⭐</span> Bungie's final Halo. Noble Team's last stand. Ends exactly where CE begins. The most emotionally complete game in the series. Bungie's farewell.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Transition: Forerunner Saga (2011–2013) ──</td></tr>
+
+          <tr class="fn-book">
+            <td>2011</td>
+            <td>Cryptum <em>(Bear)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-343">343</span> <span class="fn-tag fn-tag-retcon">⚡ Retcon</span></td>
+            <td>Forerunner Saga Book 1. Forerunners established as a non-human alien species — directly contradicts Bungie's human-as-Forerunner seeding. Excellent worldbuilding if you accept the retcon. Required for Halo 4.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2012</td>
+            <td>Primordium <em>(Bear)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-343">343</span> <span class="fn-tag fn-tag-retcon">⚡ Retcon</span></td>
+            <td>Forerunner Saga Book 2. Ancient humans from a Forerunner POV. Flood war escalates. Deepens the Didact and Librarian as characters.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2013</td>
+            <td>Silentium <em>(Bear)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-343">343</span> <span class="fn-tag fn-tag-retcon">⚡ Retcon</span></td>
+            <td>Forerunner Saga Book 3. The Flood endgame, the Librarian's sacrifice, the firing of the rings. The definitive retcon of Forerunner history. Read before Halo 4 for full impact.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── 343 Industries Era (2012–present) ──</td></tr>
+
+          <tr class="fn-343-row fn-highlight">
+            <td>2012</td>
+            <td>Halo 4 <span class="fn-star">⭐</span></td>
+            <td>Game (Xbox 360 / MCC)</td>
+            <td><span class="fn-tag fn-tag-343">343</span></td>
+            <td><span class="fn-star">⭐</span> Master Chief returns. The Didact as antagonist. Cortana's rampancy arc. Requires Forerunner Saga context to fully land. Best 343 campaign.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2015</td>
+            <td>New Blood <em>(Forbeck)</em></td>
+            <td>Novel</td>
+            <td><span class="fn-tag fn-tag-343">343</span></td>
+            <td>Buck's transition from ODST to Spartan-IV. Bridges ODST to Halo 5. Good character work for fans of the ODST crew.</td>
+          </tr>
+          <tr class="fn-343-row fn-skip">
+            <td>2015</td>
+            <td>Halo 5: Guardians</td>
+            <td>Game (Xbox One)</td>
+            <td><span class="fn-tag fn-tag-343">343</span></td>
+            <td><span class="fn-tag fn-tag-opt">divisive</span> Blue Team and Fireteam Osiris. Campaign felt underdeveloped. Multiplayer was genuinely strong. Part of the ongoing story — skippable but relevant to Infinite's setup.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="5">📺 <strong>Halo: The Series S1</strong> (2022) — Silver Timeline (parallel canon, not game lore). Better than expected. Watch as an elseworld.</td></tr>
+          <tr class="fn-343-row fn-highlight">
+            <td>2021</td>
+            <td>Halo Infinite <span class="fn-star">⭐</span></td>
+            <td>Game (Xbox / PC)</td>
+            <td><span class="fn-tag fn-tag-343">343</span></td>
+            <td><span class="fn-star">⭐</span> Open-world Zeta Halo. The Banished as antagonists. Cortana fallout. Best 343 game since Halo 3 in feel and scope. Multiplayer is free-to-play.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="5">📺 <strong>Halo: The Series S2</strong> (2023) — Silver Timeline. Covers the Fall of Reach arc. Darker and better-received than Season 1.</td></tr>
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#29b6f6"></span>Bungie Era game</span>
+          <span><span class="fn-dot" style="background:#ef5350"></span>343 Era game</span>
+          <span><span class="fn-dot" style="background:#aed581"></span>Novel</span>
+          <span><span class="fn-dot" style="background:rgba(171,71,188,.7)"></span>Purple row = media crossover note</span>
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold = recommended</span>
+          <span><span class="fn-tag fn-tag-retcon" style="font-size:.6rem">⚡ Retcon</span>Conflicts with Bungie's Forerunner lore</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           CHRONOLOGICAL ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-chrono">
+        <div class="fn-view-desc">
+          All entries sorted by in-universe date. Note: entries written during the 343 era may conflict with Bungie-era assumptions about the same period. <span class="fn-tag fn-tag-retcon">⚡ Retcon</span> marks the key divergence points.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>In-Universe</th><th>Title</th><th>Type</th><th>Story Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚔️ Forerunner Age (~100,000 BCE) — Requires acceptance of 343 retcon</td></tr>
+          <tr class="fn-book">
+            <td>1</td><td>~100,000 BCE</td>
+            <td>Cryptum</td><td>Novel</td>
+            <td>Forerunner civilization at its height. Bornstellar encounters the Didact. <span class="fn-tag fn-tag-retcon">⚡ Retcon</span> Forerunners as non-human species.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2</td><td>~100,000 BCE</td>
+            <td>Primordium</td><td>Novel</td>
+            <td>Ancient humans from a Forerunner POV. The Flood war escalates.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>3</td><td>~100,000 BCE</td>
+            <td>Silentium</td><td>Novel</td>
+            <td>The Flood endgame. The Librarian's plan. The Halo Array fires. <span class="fn-tag fn-tag-retcon">⚡ Retcon</span></td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚔️ Human-Covenant War (2525–2553)</td></tr>
+          <tr class="fn-book">
+            <td>4</td><td>2525</td>
+            <td>Contact Harvest</td><td>Novel</td>
+            <td>First Contact. How the war began. Sergeant Johnson's origin.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>5</td><td>2517–2552</td>
+            <td>The Fall of Reach</td><td>Novel</td>
+            <td><span class="fn-star">⭐</span> Spartan-II program inception through the fall of Reach. Best lore-first entry point.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>6</td><td>2552</td>
+            <td>Halo: Combat Evolved</td><td>Game</td>
+            <td><span class="fn-star">⭐</span> Discovery of Alpha Halo (Installation 04). The Flood introduced.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>7</td><td>2552</td>
+            <td>First Strike</td><td>Novel</td>
+            <td>Bridge between CE and Halo 2. Chief and Cortana's journey back to Earth.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>8</td><td>2552</td>
+            <td>Halo 2</td><td>Game</td>
+            <td><span class="fn-star">⭐</span> New Mombasa, the Arbiter, High Charity, Delta Halo.</td>
+          </tr>
+          <tr class="fn-bungie-row">
+            <td>9</td><td>2552 (concurrent)</td>
+            <td>Halo 3: ODST</td><td>Game</td>
+            <td><span class="fn-star">⭐</span> Concurrent with Halo 2 in New Mombasa. ODST squad perspective.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>10</td><td>2552 (concurrent)</td>
+            <td>Ghosts of Onyx</td><td>Novel</td>
+            <td><span class="fn-star">⭐</span> Concurrent with Halo 2–3. Spartan-IIIs and Shield World Onyx.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>11</td><td>2552</td>
+            <td>Halo 3</td><td>Game</td>
+            <td><span class="fn-star">⭐</span> The Ark. The Flood endgame. Bungie's conclusion for the original trilogy.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>12</td><td>2552 (prequel)</td>
+            <td>Halo: Reach</td><td>Game</td>
+            <td><span class="fn-star">⭐</span> The fall of Reach. Ends exactly where CE begins. Noble Team's last stand. Play last for maximum impact.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚔️ Post-War / 343 Era (2557–2559)</td></tr>
+          <tr class="fn-343-row fn-highlight">
+            <td>13</td><td>2557</td>
+            <td>Halo 4</td><td>Game</td>
+            <td><span class="fn-star">⭐</span> Chief wakes up. The Didact. Cortana's rampancy. Requires Forerunner Saga reading.</td>
+          </tr>
+          <tr class="fn-343-row fn-skip">
+            <td>14</td><td>2558</td>
+            <td>Halo 5: Guardians</td><td>Game</td>
+            <td>Fireteam Osiris, Blue Team, the Created conflict. Divisive but relevant to Infinite's setup.</td>
+          </tr>
+          <tr class="fn-343-row fn-highlight">
+            <td>15</td><td>2559</td>
+            <td>Halo Infinite</td><td>Game</td>
+            <td><span class="fn-star">⭐</span> Zeta Halo. The Banished. Cortana aftermath. Best 343 entry since Halo 4.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BEST FIRST
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          Curated order for newcomers — start with the best, most accessible entry and work outward. Ignores release order intentionally. Novel pairings noted alongside each game.
+        </div>
+        <table class="fn-table">
+          <tr><th>Tier</th><th>Title</th><th>Type</th><th>Why Start Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">⭐⭐⭐ S-Tier — Play these first</td></tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td style="color:var(--accent);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.85rem">S</td>
+            <td>Halo: Combat Evolved <span class="fn-star">⭐</span></td>
+            <td>Game (MCC)</td>
+            <td>Start here. The ring, the Flood, the mystery. Short, focused, iconic. MCC version has Anniversary graphics toggle.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td style="color:var(--accent);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.85rem">S</td>
+            <td>The Fall of Reach <em>(Nylund)</em> <span class="fn-star">⭐</span></td>
+            <td>Novel</td>
+            <td>Read alongside or just before CE. Makes every Chief moment hit harder. The gold standard for tie-in novel quality.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td style="color:var(--accent);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.85rem">S</td>
+            <td>Halo 2 <span class="fn-star">⭐</span></td>
+            <td>Game (MCC)</td>
+            <td>The Arbiter's arc elevates the whole series. Best Covenant characterization. The cliffhanger is one of gaming's most memorable.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td style="color:var(--accent);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.85rem">S</td>
+            <td>Halo 3: ODST <span class="fn-star">⭐</span></td>
+            <td>Game (MCC)</td>
+            <td>The best-paced Halo campaign. Noir atmosphere. No Chief required — in fact, the absence is the point. Play after Halo 2.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td style="color:var(--accent);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.85rem">S</td>
+            <td>Halo: Reach <span class="fn-star">⭐</span></td>
+            <td>Game (MCC)</td>
+            <td>Bungie's farewell. Play last in the Bungie lineup — knowing how CE starts makes Reach's final minutes devastating.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">⭐⭐ A-Tier — Play after the Bungie essentials</td></tr>
+          <tr class="fn-bungie-row">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">A</td>
+            <td>Halo 3</td>
+            <td>Game (MCC)</td>
+            <td>The conclusion of the trilogy. Play after Halo 2 — it closes the loop with the Gravemind and the Ark. Bungie's intended endpoint.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">A</td>
+            <td>Ghosts of Onyx <em>(Nylund)</em></td>
+            <td>Novel</td>
+            <td>Read concurrent with Halo 2–3. Spartan-IIIs, Halsey, Shield World Onyx. Devastating finale. Nylund's best work.</td>
+          </tr>
+          <tr class="fn-343-row fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">A</td>
+            <td>Halo 4</td>
+            <td>Game (MCC)</td>
+            <td>Best 343 campaign. Read Cryptum/Primordium/Silentium first — the Didact won't land without that context.</td>
+          </tr>
+          <tr class="fn-343-row fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">A</td>
+            <td>Halo Infinite</td>
+            <td>Game (Xbox/PC)</td>
+            <td>Open-world Zeta Halo. Grappleshot. Best feel since Halo 3. F2P multiplayer. Skip Halo 5 summary is online if needed.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">⭐ B-Tier — For fans after the A-tier</td></tr>
+          <tr class="fn-book">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">B</td>
+            <td>Forerunner Saga (Cryptum / Primordium / Silentium)</td>
+            <td>Novels</td>
+            <td>Essential context for Halo 4, but the retcon is a significant creative pivot. B if you're Bungie-era-first; required reading if you're playing 343 games.</td>
+          </tr>
+          <tr class="fn-book">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">B</td>
+            <td>Contact Harvest <em>(Staten)</em></td>
+            <td>Novel</td>
+            <td>First Contact story. Sergeant Johnson origin. Good standalone for lore fans at any point.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">✂️ Skip or Completionists Only</td></tr>
+          <tr class="fn-343-row fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--danger)">C</td>
+            <td>Halo 5: Guardians</td>
+            <td>Game</td>
+            <td>Weakest main-series campaign. Okay multiplayer. Story required for full Infinite context but a summary suffices. Skip the campaign if time is tight.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--danger)">C</td>
+            <td>The Flood <em>(Dietz)</em></td>
+            <td>Novel</td>
+            <td>CE novelization. Nothing you don't already know from the game. Completionists only.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BUNGIE ERA ONLY
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bungie">
+        <div class="fn-view-desc">
+          Everything made by or in full alignment with Bungie's original creative vision — games through 2010 and novels written before the 343 retcon. A fully self-contained, satisfying narrative arc. The 343 games are not excluded because they're bad — Halo 4 and Infinite are genuinely excellent — but this path has zero retcon friction.
+        </div>
+
+        <div class="fn-retcon-box">
+          <strong>⚡ The Forerunner Retcon Explained</strong><br>
+          Bungie's Halo lore — in Halo 3 terminals, the original lore bible, and staff interviews — seeded the idea that <em>ancient humans were the Forerunners</em>: humanity devolved and punished by the Mantle after being consumed by the Flood threat. The Covenant worshipped Forerunner relics because they were, unknowingly, worshipping humanity's ancestors.<br><br>
+          Greg Bear's <em>Forerunner Saga</em>, written in consultation with 343, instead establishes Forerunners as a distinct alien species. Humans exist in the same universe but are a different lineage — the Librarian "indexed" them separately. <strong>Neither version is wrong per se — the retcon just replaced one mythology with another.</strong> If you prefer Bungie's vision, treat Cryptum/Primordium/Silentium as an alternate branch and stop your reading at the 2010 line.
+        </div>
+
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Type</th><th>When to Consume</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">The Ideal Bungie-Era Experience (Recommended Order)</td></tr>
+
+          <tr class="fn-book fn-highlight">
+            <td>1</td><td>The Fall of Reach <em>(Nylund)</em></td>
+            <td>Novel</td><td>Before everything</td>
+            <td><span class="fn-star">⭐</span> John-117's origin. The Spartan program. The war backdrop. Read first — it makes CE land harder.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>2</td><td>Halo: Combat Evolved</td>
+            <td>Game (MCC)</td><td>After Fall of Reach</td>
+            <td><span class="fn-star">⭐</span> Installation 04. The Flood. The Forerunner mystery begins. Under Bungie's framing, every ring carries a deeper implication.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>3</td><td>First Strike <em>(Nylund)</em></td>
+            <td>Novel</td><td>After CE</td>
+            <td>Fills the gap between CE and Halo 2. Chief and Cortana's journey back to Earth.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>4</td><td>Halo 2</td>
+            <td>Game (MCC)</td><td>After First Strike</td>
+            <td><span class="fn-star">⭐</span> The Arbiter's arc is one of the best in the series. The Covenant civil war. The Gravemind.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>5</td><td>Ghosts of Onyx <em>(Nylund)</em></td>
+            <td>Novel</td><td>During or after Halo 2</td>
+            <td><span class="fn-star">⭐</span> Concurrent with Halo 2–3. Spartan-IIIs, Dr. Halsey, the shield world. Nylund's best work.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>6</td><td>Halo 3</td>
+            <td>Game (MCC)</td><td>After Halo 2</td>
+            <td><span class="fn-star">⭐</span> The conclusion. The Ark. Truth falls. Read the terminals — they hint at the human-Forerunner connection that Bungie was building toward.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>7</td><td>Halo 3: ODST</td>
+            <td>Game (MCC)</td><td>After Halo 3</td>
+            <td><span class="fn-star">⭐</span> The human cost of New Mombasa. Best consumed after the trilogy for emotional contrast.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>8</td><td>Contact Harvest <em>(Staten)</em></td>
+            <td>Novel</td><td>Any time</td>
+            <td>First Contact novel. Can be read at any point — no spoilers for the game trilogy.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>+</td><td>Halo Legends</td>
+            <td>Film (anthology)</td><td>Optional, any time after Halo 2</td>
+            <td>Seven animated shorts. "The Duel" (Arbiter origin), "Prototype" (ODST tone), and "Origins" (Forerunner history in Bungie framing) are the strongest.</td>
+          </tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td>9</td><td>Halo: Reach</td>
+            <td>Game (MCC)</td><td>Last</td>
+            <td><span class="fn-star">⭐</span> Play last. You already know Reach falls. Knowing how CE begins makes Reach's final moments devastating. Bungie's perfect farewell.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚠️ Where the Bungie Era Ends</td></tr>
+          <tr class="fn-343-row fn-skip">
+            <td>—</td><td>Halo 4 / 5 / Infinite</td>
+            <td>Games</td><td>Separate decision</td>
+            <td>343's continuation. Not part of this path — but Halo 4 and Infinite are genuinely worth playing if you want more. The retcon is baked in; go in knowing that.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>—</td><td>Cryptum / Primordium / Silentium</td>
+            <td>Novels</td><td>Separate decision</td>
+            <td>The Forerunner Saga rewrites the foundation. Skip entirely if you prefer Bungie's human-as-Forerunner framing. Excellent novels in their own right — just a different mythology.</td>
+          </tr>
+        </table>
+
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#29b6f6"></span>Bungie Era game</span>
+          <span><span class="fn-dot" style="background:#aed581"></span>Novel</span>
+          <span><span class="fn-dot" style="background:#ffb74d"></span>Film</span>
+          <span><span class="fn-dot" style="background:var(--accent)"></span>⭐ Recommended</span>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📦 Master Chief Collection — Platform Notes</div>
+    <div class="card">
+      <pre>All Bungie-era games + Halo 4 are available in:
+  Halo: The Master Chief Collection (MCC)
+  ├── Xbox One / Xbox Series X|S
+  ├── PC (Steam)
+  └── Includes: CE, Halo 2, Halo 3, ODST, Reach, Halo 4
+      └── CE Anniversary and Halo 2 Anniversary remastered graphics toggleable in-game
+
+Halo Infinite (2021)
+  ├── Xbox / PC (Steam / Microsoft Store)
+  ├── Campaign — paid
+  └── Multiplayer — free-to-play</pre>
+      <div class="callout callout-tip" style="margin-top:10px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">MCC on PC is the definitive way to play the Bungie games. Enhanced resolution, mod support, and the ability to toggle between classic and Anniversary visuals mid-game on CE and Halo 2.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & FILM (Paramount+ Series)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Halo TV &amp; Film</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">🪖</div>
+      <div class="callout-body"><strong>Silver Timeline:</strong> The Paramount+ series is set in a deliberate parallel "Silver Timeline" — 343's own choice to avoid contradicting game canon. Think of it as an elseworld. The Covenant, the rings, Chief, and Cortana all exist — but the specific story and character choices diverge from the games. Treat it as a separate adaptation, not a prequel or sequel.</div>
+    </div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',        this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder', this)">🎯 Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','bytype',     this)">🏷️ By Type</button>
+      </div>
+
+      <!-- ALL ENTRIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Every live-action TV entry in the franchise. The Legends anthology film is covered in the Legends Film tab.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Paramount+ Silver Timeline ──</td></tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2022</td>
+            <td>Halo: The Series — Season 1 <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-varies">TV</span> <span class="fn-tag fn-tag-silver">Silver Timeline</span></td>
+            <td>9 eps</td>
+            <td>Jellyfin / Paramount+</td>
+            <td>Master Chief has a personal arc and removes his helmet. Better than the discourse suggested — solid production, genuinely engaging if approached as an elseworld. Not game canon.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2023</td>
+            <td>Halo: The Series — Season 2</td>
+            <td><span class="fn-tag fn-tag-varies">TV</span> <span class="fn-tag fn-tag-silver">Silver Timeline</span></td>
+            <td>8 eps</td>
+            <td>Jellyfin / Paramount+</td>
+            <td>Covers the Fall of Reach arc. Darker tone, better received than Season 1. Still Silver Timeline — not game canon but internally consistent with Season 1. Watch after Season 1.</td>
+          </tr>
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#4fc3f7"></span>Blue = western TV</span>
+          <span><span class="fn-star">⭐</span> = worth watching</span>
+          <span><span class="fn-tag fn-tag-silver" style="font-size:.6rem">Silver Timeline</span> = parallel canon, not game lore</span>
+        </div>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended watch order. The show is self-contained — no game prerequisite needed, but knowing the games enriches the experience.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Media</th><th>Type</th><th>Length</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">── Recommended sequence ──</td></tr>
+          <tr class="fn-bungie-row fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">1</td>
+            <td>Halo: Combat Evolved (optional but enriching)</td>
+            <td>Game</td>
+            <td>~10 hrs</td>
+            <td>Not required, but knowing the Covenant, Chief, and the ring context makes the show richer.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">2</td>
+            <td>Halo: The Series — Season 1</td>
+            <td>TV</td>
+            <td>9 eps (~45 min ea)</td>
+            <td>Start here for the TV line. Establish the Silver Timeline's characterisation of Chief and Makee before Season 2.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">3</td>
+            <td>Halo: The Series — Season 2</td>
+            <td>TV</td>
+            <td>8 eps (~45 min ea)</td>
+            <td>Falls of Reach arc. Darker. Watch directly after Season 1 — it follows immediately. Better paced.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- BY TYPE -->
+      <div class="fn-view" id="fn-tvanime-bytype">
+        <div class="fn-view-desc">All entries grouped by format.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Canon?</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">🔵 Live-Action Western TV (Paramount+)</td></tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2022</td><td>Halo: The Series S1 <span class="fn-star">⭐</span></td>
+            <td>9 eps</td><td><span class="fn-tag fn-tag-silver">Silver Timeline</span></td><td>Best entry for newcomers to the franchise via TV.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2023</td><td>Halo: The Series S2</td>
+            <td>8 eps</td><td><span class="fn-tag fn-tag-silver">Silver Timeline</span></td><td>Fall of Reach arc. Stronger than Season 1. Watch after S1.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">🎬 Animated (see Legends Film tab)</td></tr>
+          <tr class="fn-movie fn-skip">
+            <td>2009</td><td>Halo Legends</td>
+            <td>7 shorts (~80 min total)</td><td>⚠️ Canon-adjacent</td><td>Full coverage on the Legends Film tab.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\TV\Halo\
+  └── Halo The Series (2022)\
+      ├── Season 01\
+      │   └── Halo S01E01 - Contact.mkv  (× 9)
+      └── Season 02\
+          └── Halo S02E01 - Sanctuary.mkv  (× 8)</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — LEGENDS FILM
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Halo Legends (2009)</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',        this)">📋 All Shorts</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <!-- ALL SHORTS -->
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">Seven animated shorts produced by Japanese studios for the anthology film. Variable quality — the best are genuinely excellent. Canon-adjacent; some shorts conflict with later 343 retcons.</div>
+        <table class="fn-table">
+          <tr><th>Short</th><th>Title</th><th>Studio</th><th>Runtime</th><th>Canon?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Halo Legends Anthology (2009) ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>1</td>
+            <td>Origins I &amp; II <span class="fn-star">⭐</span></td>
+            <td>Production I.G</td>
+            <td>~26 min total</td>
+            <td>⚠️ Bungie-era framing</td>
+            <td><span class="fn-star">⭐</span> Cortana narrates Forerunner and Covenant history. Presented under Bungie's framing of the Forerunner mystery — conflicts with 343's later retcon. Essential if staying in the Bungie era.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2</td>
+            <td>The Duel <span class="fn-star">⭐</span></td>
+            <td>Production I.G</td>
+            <td>~12 min</td>
+            <td>✅ Canon</td>
+            <td><span class="fn-star">⭐</span> The origin of the Arbiter title. Cel-shaded ink wash aesthetic. Portrays the first Arbiter to be disgraced. Beautifully stylized and genuinely moving.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>3</td>
+            <td>Prototype <span class="fn-star">⭐</span></td>
+            <td>Studio 4°C</td>
+            <td>~12 min</td>
+            <td>✅ Canon</td>
+            <td><span class="fn-star">⭐</span> An ODST Marine pilots a prototype Mjolnir-like suit in a last stand. Captures the ODST-era tone perfectly. Best action short in the collection.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>4</td>
+            <td>The Package</td>
+            <td>Blur Studio</td>
+            <td>~15 min</td>
+            <td>✅ Canon</td>
+            <td>Master Chief and Blue Team on a mission. Hyper-stylized CG action. Good showcase of Spartan teamwork. Less artistically distinctive but technically impressive.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>5</td>
+            <td>Odd One Out</td>
+            <td>Toei Animation</td>
+            <td>~12 min</td>
+            <td>❌ Non-canon</td>
+            <td><span class="fn-tag fn-tag-opt">parody</span> Intentional comedic parody in a classic Toei super-robot style. Deliberately non-serious. Divisive — either charmingly absurd or jarring depending on your mood.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>6</td>
+            <td>Homecoming</td>
+            <td>Studio 4°C</td>
+            <td>~12 min</td>
+            <td>✅ Canon</td>
+            <td>Female Spartan's final memories and sacrifice. Emotional but slow paced. Completionists and character-lore fans only.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>7</td>
+            <td>Babysitter</td>
+            <td>Production I.G</td>
+            <td>~12 min</td>
+            <td>✅ Canon</td>
+            <td>Rivalry between an ODST sniper and a Spartan on a joint mission. Decent but the weakest of the more grounded shorts.</td>
+          </tr>
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#ffb74d"></span>Orange = animated film short</span>
+          <span><span class="fn-star">⭐</span> = essential viewing</span>
+          <span><span style="opacity:.5">Faded</span> = optional / non-canon or weak entry</span>
+        </div>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">Recommended watch order within the anthology, and where it fits in the broader franchise.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Watch After</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">1</td>
+            <td>Origins I &amp; II</td>
+            <td>Halo 2 or 3</td>
+            <td>Sets the Forerunner-Covenant cosmological backdrop. Watch in Bungie-era framing — Origins was made before the 343 retcon.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">2</td>
+            <td>The Duel</td>
+            <td>After Halo 2 (Arbiter arc)</td>
+            <td>Hits much harder after you've played as the Arbiter. The context of the dishonour is earned by playing Halo 2 first.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">3</td>
+            <td>Prototype</td>
+            <td>After ODST</td>
+            <td>An ODST-flavoured piece. The tone lands perfectly if you've played ODST recently.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">4</td>
+            <td>The Package</td>
+            <td>After Fall of Reach novel</td>
+            <td>Blue Team mission. Richer with novel context on Spartan-II team dynamics.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">+</td>
+            <td>Homecoming / Babysitter / Odd One Out</td>
+            <td>Any time</td>
+            <td>Optional. Odd One Out is a comedic short — manage expectations.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Halo\
+  └── Halo Legends (2009)\
+      └── Halo Legends (2009).mkv</pre>
+      <p style="font-size:.8rem;color:var(--text-dim);margin-top:8px">Store as a single film entry in Jellyfin. Alternatively, split into individual shorts as a "Halo Legends" TV collection with each short as an episode — useful for adding individual shorts to Tunarr filler.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Halo Merchandise &amp; Collectibles</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Physical collectibles, statues, figures, apparel, and tabletop products. Gold rows = notable / grail items. Halo has had active merch licensing since 2001 — the collector market is mature and deep.</div>
+    </div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('merch','all',      this)">📋 All Merch</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','toys',     this)">🧸 Figures &amp; Replicas</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','statues',  this)">🗿 Statues &amp; Premium</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','tabletop', this)">🃏 Tabletop</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','history',  this)">📖 Merch History</button>
+      </div>
+
+      <!-- ALL MERCH -->
+      <div class="fn-view active" id="fn-merch-all">
+        <div class="fn-view-desc">Notable merchandise across all categories. ⭐ = grail / especially notable items.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Category</th><th>Manufacturer</th><th>Price Range</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Early Licensed Era (2001–2009) ──</td></tr>
+          <tr class="fn-merch-toy">
+            <td>2003</td><td>Spartan-II Action Figure Series</td>
+            <td><span class="fn-tag fn-tag-yes">Figure</span></td>
+            <td>Joyride Studios</td><td>$15–40 secondary</td>
+            <td>Early CE-era figures. Decent articulation for the time. Red/Blue/Green Spartan variants. Good nostalgic shelf piece.</td>
+          </tr>
+          <tr class="fn-merch-book">
+            <td>2006</td><td>The Art of Halo</td>
+            <td><span class="fn-tag fn-tag-opt">Art Book</span></td>
+            <td>Prima Games / Microsoft</td><td>$30–60</td>
+            <td>Bungie-era concept art. Covers CE through Halo 2. Good companion to the Fall of Reach novel.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── McFarlane Toys Era (2010s) ──</td></tr>
+          <tr class="fn-merch-toy fn-highlight">
+            <td>2012</td><td>Master Chief (Halo 4) — McFarlane 6" <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Figure</span></td>
+            <td>McFarlane Toys</td><td>$15–30</td>
+            <td><span class="fn-star">⭐</span> The definitive mass-market Halo figure line. Excellent detail, good articulation, widely available. Halo 4 Chief redesign. Strong paint apps at the price point.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>2015</td><td>Spartan Locke — McFarlane 6"</td>
+            <td><span class="fn-tag fn-tag-yes">Figure</span></td>
+            <td>McFarlane Toys</td><td>$10–20</td>
+            <td>Halo 5 era. Multiple Spartan variants across the lineup — Blue Team, Fireteam Osiris, Sangheili.</td>
+          </tr>
+          <tr class="fn-merch-book fn-highlight">
+            <td>2018</td><td>The Art of Halo 5 / Halo Infinite Art Books <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-opt">Art Book</span></td>
+            <td>Dark Horse</td><td>$35–50</td>
+            <td><span class="fn-star">⭐</span> Dark Horse's Halo art books are exceptionally produced. Full concept art, cut content, commentary from 343 artists. Worth owning for any serious Halo fan.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Premium Collector Era (2015–present) ──</td></tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2019</td><td>Master Chief (Halo CE) — F4F Statue <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-opt">Statue</span></td>
+            <td>First 4 Figures</td><td>$250–400</td>
+            <td><span class="fn-star">⭐</span> Grail item. CE-era Master Chief at 1/4 scale. LED lighting, numbered limited edition. Secondary market stable. Editions: Standard, Exclusive (with light base).</td>
+          </tr>
+          <tr class="fn-merch-board fn-highlight">
+            <td>2019</td><td>Halo: Fleet Battles <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-opt">Miniatures</span></td>
+            <td>Spartan Games</td><td>$50–120</td>
+            <td><span class="fn-star">⭐</span> Naval combat miniatures game. UNSC vs Covenant. Out of print — secondary market only. Excellent design; sought after by collectors and miniature gamers.</td>
+          </tr>
+          <tr class="fn-merch-apparel">
+            <td>2022</td><td>MJOLNIR Wearable Replica Helmets</td>
+            <td><span class="fn-tag fn-tag-varies">Apparel</span></td>
+            <td>Disguise / various</td><td>$50–400</td>
+            <td>Range from cosplay-grade foam builds to resin premium replicas. Mark VI (CE / H3 variant) most popular. Indie builders on Etsy often exceed official quality.</td>
+          </tr>
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#ef9a9a"></span>Red = figures</span>
+          <span><span class="fn-dot" style="background:#ffcc02"></span>Yellow = statues</span>
+          <span><span class="fn-dot" style="background:#a5d6a7"></span>Green = tabletop</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple = apparel</span>
+          <span><span class="fn-dot" style="background:#90a4ae"></span>Grey = art books</span>
+        </div>
+      </div>
+
+      <!-- FIGURES & REPLICAS -->
+      <div class="fn-view" id="fn-merch-toys">
+        <div class="fn-view-desc">Action figures, model kits, and wearable replicas.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Scale</th><th>Manufacturer</th><th>Character(s)</th><th>Notes</th></tr>
+          <tr class="fn-merch-toy fn-highlight">
+            <td>2012</td><td>McFarlane 6" Master Chief (H4) <span class="fn-star">⭐</span></td>
+            <td>~6" / 1:12 approx</td><td>McFarlane Toys</td><td>Master Chief</td>
+            <td>Best value Halo figure. Excellent detail-to-price ratio. Widely available new and used.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>2003–2006</td><td>Joyride CE Era Figures</td><td>~5–6"</td><td>Joyride Studios</td><td>Chief, Marines, Elites</td>
+            <td>Early collector pieces. Nostalgic. Loose figures are affordable; boxed command premiums.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>2021</td><td>Jazwares 6" Halo Infinite Series</td><td>~6"</td><td>Jazwares</td><td>Chief (Infinite), Brutes, Elites</td>
+            <td>Current retail line. Solid articulation, good paint. Banished enemy figures are highlights of the range.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- STATUES & PREMIUM -->
+      <div class="fn-view" id="fn-merch-statues">
+        <div class="fn-view-desc">High-end statues, dioramas, and premium collectibles.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Scale</th><th>Manufacturer</th><th>Edition</th><th>Market Value</th><th>Notes</th></tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2019</td><td>Master Chief (CE) Statue <span class="fn-star">⭐</span></td>
+            <td>1/4 scale</td><td>First 4 Figures</td>
+            <td>Limited / Exclusive</td><td>$250–400</td>
+            <td>The grail F4F piece. LED-lit base, CE armor variant. Limited edition. Pairs well with the ODST statue.</td>
+          </tr>
+          <tr class="fn-merch-statue fn-highlight">
+            <td>2021</td><td>ODST Statue</td>
+            <td>1/4 scale</td><td>First 4 Figures</td>
+            <td>Limited / Exclusive</td><td>$250–350</td>
+            <td>F4F ODST — moody lighting, rain effects on the base. Complements the CE Chief nicely for a diorama display.</td>
+          </tr>
+          <tr class="fn-merch-statue">
+            <td>2018</td><td>Arbiter Statue</td>
+            <td>1/4 scale</td><td>First 4 Figures</td>
+            <td>Limited</td><td>$200–350</td>
+            <td>Arbiter in classic Halo 2 pose. Mandibles articulated. Excellent for fans of the Arbiter's arc.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- TABLETOP -->
+      <div class="fn-view" id="fn-merch-tabletop">
+        <div class="fn-view-desc">Board games, miniatures, and card games in the Halo universe.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Publisher</th><th>Players</th><th>Notes</th></tr>
+          <tr class="fn-merch-board fn-highlight">
+            <td>2019</td><td>Halo: Fleet Battles <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-varies">Miniatures</span></td>
+            <td>Spartan Games</td><td>2+</td>
+            <td>Naval combat miniatures. UNSC vs Covenant capital ships. Out of print. Secondary market $50–120. Highly regarded in miniatures communities.</td>
+          </tr>
+          <tr class="fn-merch-board">
+            <td>2019</td><td>Halo: Ground Command</td>
+            <td><span class="fn-tag fn-tag-varies">Miniatures</span></td>
+            <td>Spartan Games</td><td>2</td>
+            <td>Ground-scale miniatures companion to Fleet Battles. Also OOP. UNSC Marines vs Covenant infantry. Smaller entry price than Fleet Battles.</td>
+          </tr>
+          <tr class="fn-merch-board fn-highlight">
+            <td>2017</td><td>Halo: Interactive Strategy Game</td>
+            <td><span class="fn-tag fn-tag-opt">Board Game</span></td>
+            <td>Mattel</td><td>2–4</td>
+            <td>Mass-market strategy game. Not as deep as Fleet Battles but available new and cheap. Good for casual fans.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- MERCH HISTORY -->
+      <div class="fn-view" id="fn-merch-history">
+        <div class="fn-view-desc">A brief history of the Halo merchandise program.</div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 Early Licensed Era (2001–2009)</div>
+          <p style="font-size:.84rem;line-height:1.7">The first wave of Halo merch was driven by Joyride Studios, who produced CE- and Halo 2-era action figures. Quality was respectable for the era and the line has nostalgic collector value. Microsoft also licensed art books through Prima Games. The market was primarily games retail adjacent — sold at GameStop and EB Games alongside the actual games.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 McFarlane Mass-Market Era (2010s)</div>
+          <p style="font-size:.84rem;line-height:1.7">McFarlane Toys became the dominant figure licensee from the Halo 3 era onward, producing consistent 5–6" figure lines for every major release through Halo 5. These are the most widely available Halo figures and represent excellent value. Dark Horse Comics picked up the art book license and produced significantly higher-quality volumes than the earlier Prima releases.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 Premium Collector Era (2015–present)</div>
+          <p style="font-size:.84rem;line-height:1.7">First 4 Figures entered the Halo space with premium 1/4-scale statues targeting adult collectors. Their CE Master Chief, ODST, and Arbiter pieces are the grails of the Halo statue market. Spartan Games produced a well-regarded but now out-of-print miniatures line (Fleet Battles, Ground Command). Jazwares replaced McFarlane as the current mass-market figure licensee for the Halo Infinite era.</p>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Grail Items &amp; Hard-to-Find Pieces</div>
+          <p style="font-size:.84rem;color:var(--text-dim)">First 4 Figures limited editions (CE Chief, ODST, Arbiter) command premiums on the secondary market but remain fairly stable. Spartan Games Fleet Battles is out of print and sought after by miniature gamers — check eBay for incomplete starter sets if you want to play rather than collect. Joyride Studios early figures in box are increasingly rare and collectible.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Filler Content — Halo Tunarr Channel</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">📺</div>
+      <div class="callout-body">Short-form pieces for bumpers, interstitials, and filler segments on a Halo-themed Tunarr channel. Drop between episodes of Halo Legends or the Paramount+ show, or use as openers/closers for a game streaming block.</div>
+    </div>
+    <div class="fn-filler-grid">
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">Halo 3 — "Starry Night" TV Spot</div>
+        <div class="fn-filler-meta">2007 · ~1 min · YouTube</div>
+        <div class="fn-filler-desc">The iconic live-action TV spot. A soldier stares at stars from a trench. No gameplay — pure atmosphere. One of the greatest game trailers ever made. Perfect channel opener.</div>
+        <div class="fn-filler-where">🔗 Search: "Halo 3 Starry Night trailer"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">Halo Infinite — "Discover Hope"</div>
+        <div class="fn-filler-meta">2019 · ~2 min · YouTube</div>
+        <div class="fn-filler-desc">The E3 2019 Halo Infinite announcement. Master Chief, a surviving UNSC soldier, a Pelican drifting through space. Emotional and beautifully scored. Strong as a filler piece between other content.</div>
+        <div class="fn-filler-where">🔗 Search: "Halo Infinite Discover Hope trailer"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music / OST</div>
+        <div class="fn-filler-name">Halo Theme — Original Gregorian Chant Version</div>
+        <div class="fn-filler-meta">2001 · ~3 min · YouTube</div>
+        <div class="fn-filler-desc">Martin O'Donnell and Michael Salvatori's original Halo CE theme. The iconic opening Gregorian chant leading into the full orchestral arrangement. Use as a channel cold open or closing bumper.</div>
+        <div class="fn-filler-where">🔗 Search: "Halo Theme Mjolnir Mix original"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-hype">Hype Piece</div>
+        <div class="fn-filler-name">Halo 2 Anniversary Cinematic Trailer</div>
+        <div class="fn-filler-meta">2014 · ~3 min · YouTube</div>
+        <div class="fn-filler-desc">The Blur-produced Halo 2 Anniversary cutscene opening — Chief and the Arbiter face off. Stunning CG that made the MCC launch trailer iconic. Great mid-block piece.</div>
+        <div class="fn-filler-where">🔗 Search: "Halo 2 Anniversary cinematic trailer Blur"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+        <div class="fn-filler-name">Remaking the Legend — Halo 2 Anniversary Documentary</div>
+        <div class="fn-filler-meta">2014 · ~20 min · YouTube</div>
+        <div class="fn-filler-desc">Bungie and 343 retrospective on remastering Halo 2 for MCC. Developer interviews, archive footage, and retrospective on the original game's legacy. Standalone filler block between episodes.</div>
+        <div class="fn-filler-where">🔗 Search: "Remaking the Legend Halo 2 Anniversary documentary"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+        <div class="fn-filler-name">Halo CE — A Retrospective (any quality video essay)</div>
+        <div class="fn-filler-meta">2018+ · ~20–40 min · YouTube</div>
+        <div class="fn-filler-desc">Multiple quality retrospectives on CE's development and cultural impact exist. Look for essays by channels like NakeyJakey or Lore Reloaded. Strong as a standalone filler block between Legends shorts.</div>
+        <div class="fn-filler-where">🔗 Search: "Halo Combat Evolved retrospective 2020"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-bumper">Bumper / Short</div>
+        <div class="fn-filler-name">Halo: Reach — "Deliver Hope" Live-Action Short</div>
+        <div class="fn-filler-meta">2010 · ~3 min · YouTube</div>
+        <div class="fn-filler-desc">Neill Blomkamp-directed live-action short for Reach. Noble Team in live action. Brutal, beautiful, and short enough to use as a true interstitial. Best Halo live-action piece before the Paramount+ series.</div>
+        <div class="fn-filler-where">🔗 Search: "Halo Reach Deliver Hope live action"</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music / OST</div>
+        <div class="fn-filler-name">To Galaxy — Halo 3 ODST OST</div>
+        <div class="fn-filler-meta">2009 · ~3 min · YouTube</div>
+        <div class="fn-filler-desc">Jazz-noir ODST soundtrack highlight. Atmospheric and melancholy. Perfect mood piece as a block closer after ODST content or a late-night Tunarr slot.</div>
+        <div class="fn-filler-where">🔗 Search: "Halo ODST To Galaxy OST"</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Adding to Tunarr</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Download clips → store in a <code>Halo Filler</code> Jellyfin collection</li>
+        <li>Add as <strong>Flex content</strong> on the Tunarr channel (30 sec – 5 min duration)</li>
+        <li>"Starry Night" + "Deliver Hope" → channel openers or game block starters</li>
+        <li>Retrospective docs → standalone filler blocks between Legends shorts</li>
+        <li>OST pieces (Halo Theme, ODST "To Galaxy") → end-of-block closers</li>
+        <li>Legends shorts (The Duel, Prototype) → strong standalone 12-min filler slots</li>
+      </ul>
+      <p style="margin-top:10px;font-size:.83rem;color:var(--text-dim)">See the <strong>Tunarr</strong> tab for channel config and the full flex content workflow.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 A History of Halo</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Overview</div>
+      <p>Halo began as a real-time strategy game for Mac before Microsoft acquired Bungie in 2000 and pivoted it to a first-person shooter launch title for the original Xbox. Halo: Combat Evolved (2001) didn't just sell a console — it redefined what first-person shooters could be on consoles, establishing the two-weapon system, regenerating shields, and vehicle integration that became genre conventions. The franchise helped make Xbox Live viable, sold over 80 million units across all entries, and spawned one of the most robust extended-universe novel programs in gaming.</p>
+    </div>
+
+    <div class="fn-timeline">
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1999–2001 — The Origin</div>
+        <div class="fn-era-title">From Mac RTS to Xbox FPS Launch Title</div>
+        <div class="fn-era-body">Bungie announced Halo at Macworld 1999 as a third-person real-time strategy game for Mac and Windows. Microsoft acquired Bungie in 2000, cancelled the Mac version, and pivoted the game into an Xbox-exclusive first-person shooter. CE shipped as an Xbox launch title in November 2001 and sold over five million copies. It established the tone, mechanics, and mystery of the Forerunner universe that would define the franchise for a decade.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2004–2007 — The Golden Age</div>
+        <div class="fn-era-title">Halo 2, Xbox Live, and the Cultural Peak</div>
+        <div class="fn-era-body">Halo 2 (2004) launched Xbox Live as a viable online gaming platform. Its online multiplayer was transformative — hundreds of thousands of players on launch day, a then-unprecedented figure. The game introduced the Arbiter, elevated the Covenant narrative, and ended on a notorious cliffhanger. Halo 3 (2007) became one of the fastest-selling entertainment products in history at the time, generating over $170M on its opening day. It concluded the trilogy with the Ark and the Gravemind while embedding Forerunner lore through in-game terminals.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2009–2010 — Bungie's Farewell</div>
+        <div class="fn-era-title">ODST, Reach, and the End of an Era</div>
+        <div class="fn-era-body">Halo 3: ODST (2009) was a tonal departure — noir, grounded, human. Critically acclaimed and commercially successful despite being a shorter standalone release. Halo: Reach (2010) was Bungie's final Halo game. A prequel depicting the fall of the planet Reach, it featured a cast of original characters (Noble Team) and ended with a direct handoff to CE's opening. Bungie spun off from Microsoft and retained studio independence while 343 Industries was established to carry the franchise forward.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2012–2015 — The 343 Transition</div>
+        <div class="fn-era-title">Halo 4, the Forerunner Retcon, and a New Foundation</div>
+        <div class="fn-era-body">343 Industries' first major act was the Forerunner Saga novels (Greg Bear, 2011–2013), which formally retconned the Forerunners from humanity's ancestors to a separate alien species. Halo 4 (2012) introduced the Didact, deepened Cortana's rampancy arc, and proved 343 could make a technically excellent Halo campaign. Halo 5: Guardians (2015) was more divisive — a split campaign between Chief and Fireteam Osiris that many felt underserved its premise, though its multiplayer (Warzone, Arena) was widely praised.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2021 — The Revival</div>
+        <div class="fn-era-title">Halo Infinite and the Free-to-Play Reset</div>
+        <div class="fn-era-body">After a troubled development and a delayed launch, Halo Infinite (2021) released to strong critical reception for its campaign — an open-world Zeta Halo adventure with the Banished as antagonists, the grappleshot as a transformative traversal tool, and a more grounded emotional story. The multiplayer launched as free-to-play, the first in franchise history. Post-launch support has been gradual but sustained.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2022–2024 — Present</div>
+        <div class="fn-era-title">The Paramount+ Series and an Uncertain Future</div>
+        <div class="fn-era-body">The Paramount+ series (2022–2023) brought Halo to live-action with the deliberate "Silver Timeline" framing — a parallel canon that let the show make different creative choices without contradicting the games. 343 Industries was restructured in 2023 following layoffs, with leadership changes and the franchise's future direction under active re-evaluation. The MCC remains actively played on PC with robust mod support. Community enthusiasm remains high, particularly in the Bungie-era modding scene.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators &amp; Contributors</div>
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>Jason Jones</td><td>Bungie Co-founder, Director</td><td>Halo CE design and direction. Established the foundational gameplay and tone.</td></tr>
+        <tr><td>Marcus Lehto</td><td>Art Director (Bungie)</td><td>Master Chief's visual design. Bungie-era art direction through Reach.</td></tr>
+        <tr><td>Martin O'Donnell &amp; Michael Salvatori</td><td>Composers</td><td>The Halo musical identity. The theme, the Gregorian chant, the ODST jazz score. Every iconic cue through Reach.</td></tr>
+        <tr><td>Eric Nylund</td><td>Novelist</td><td>Fall of Reach, First Strike, Ghosts of Onyx — the gold standard of Halo novels.</td></tr>
+        <tr><td>Joseph Staten</td><td>Writer / Creative Director (Bungie / 343)</td><td>Contact Harvest. Halo 2 and 3 narrative. Returned to 343 to lead the Halo Infinite campaign.</td></tr>
+        <tr><td>Frank O'Connor</td><td>Franchise Director (343)</td><td>Overseen the franchise since 2007. The primary voice of canon decisions during the 343 transition.</td></tr>
+        <tr><td>Greg Bear</td><td>Novelist</td><td>Forerunner Saga (Cryptum, Primordium, Silentium). Defined the 343-era cosmological retcon.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's not?</div>
+      <p style="font-size:.84rem;line-height:1.7">Halo has a two-tier canon situation. The main game timeline (CE through Infinite) is unambiguous canon. The Paramount+ series operates under the "Silver Timeline" — a deliberately separate parallel canon. The Forerunner Saga novels are 343-era canon but retroactively conflict with Bungie-era lore seeding.</p>
+      <table style="margin-top:12px">
+        <tr><th>Entry</th><th>Canon Status</th><th>Notes</th></tr>
+        <tr><td>Games: CE, 2, 3, ODST, Reach, 4, 5, Infinite</td><td>✅ Main Canon</td><td>The authoritative timeline. All 343 games build on the Forerunner retcon.</td></tr>
+        <tr><td>Novels: Fall of Reach, First Strike, Ghosts of Onyx, Contact Harvest</td><td>✅ Main Canon</td><td>Bungie-era. Still fully canon under 343 — they just predate the Forerunner retcon.</td></tr>
+        <tr><td>Forerunner Saga (Cryptum, Primordium, Silentium)</td><td>✅ Main Canon</td><td>343-era retcon. Canon — but conflicts with Bungie's implied Forerunner-as-human seeding.</td></tr>
+        <tr><td>Halo Legends</td><td>⚠️ Canon-adjacent</td><td>"Origins" shorts use Bungie-era framing that conflicts with later retcons. Other shorts are canon.</td></tr>
+        <tr><td>Halo: The Series (Paramount+)</td><td>❌ Silver Timeline</td><td>Officially designated a parallel canon by 343 — not the main game timeline.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>Halo CE was announced at Macworld 1999 by Steve Jobs himself, as a game coming to Mac — two years before it launched as an Xbox exclusive following Microsoft's Bungie acquisition.</li>
+        <li>Martin O'Donnell's original Halo theme was composed in a single afternoon and used placeholder Gregorian chant that was meant to be replaced — the team loved it so much it stayed in the game unchanged.</li>
+        <li>The Halo 3 campaign terminals, written by Bungie, explicitly hint that "they" (the Forerunners) and humans are the same species — a thread 343 chose not to follow in the retcon, leading to the two-era creative split.</li>
+        <li>Joseph Staten, the writer of Halo 2 and 3, left Bungie, worked on Destiny, and then returned to 343 Industries specifically to lead the Halo Infinite campaign narrative — a full-circle moment for the franchise.</li>
+        <li>Halo: Reach was produced without knowledge of 343's future Forerunner plans — Bungie had signed off from the franchise entirely by the time Greg Bear began writing Cryptum.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+// ── Main page tab switching ─────────────────────────────────
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+// ── Inner view switching ────────────────────────────────────
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bakugan</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.fn-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era / platform group header rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Anime / TV / Movie crossover note rows — purple italic */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform left-border colour stripes */
+.fn-nes    td:first-child { border-left: 3px solid #e57373; }
+.fn-snes   td:first-child { border-left: 3px solid #9575cd; }
+.fn-gen    td:first-child { border-left: 3px solid #4db6ac; }
+.fn-gb     td:first-child { border-left: 3px solid #aed581; }
+.fn-gbc    td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-ps1    td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps2    td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps3    td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-pc     td:first-child { border-left: 3px solid #90a4ae; }
+.fn-wii    td:first-child { border-left: 3px solid #b0bec5; }
+.fn-wiiu   td:first-child { border-left: 3px solid #80cbc4; }
+.fn-anime  td:first-child { border-left: 3px solid #ce93d8; }
+.fn-tv     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-ova    td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-movie  td:first-child { border-left: 3px solid #ffb74d; }
+.fn-merch-toy     td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-merch-statue  td:first-child { border-left: 3px solid #ffcc02; }
+.fn-merch-card    td:first-child { border-left: 3px solid #80cbc4; }
+.fn-merch-board   td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-merch-apparel td:first-child { border-left: 3px solid #ce93d8; }
+.fn-merch-book    td:first-child { border-left: 3px solid #90a4ae; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-star       { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body  { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.fn-filler-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.fn-filler-type {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  margin-bottom: 7px;
+  display: inline-block;
+}
+.fn-filler-trailer      { background: rgba(91,141,217,.15);  color: #5b8dd9;       border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-hype         { background: rgba(200,168,75,.12);  color: var(--accent); border: 1px solid rgba(200,168,75,.3); }
+.fn-filler-music        { background: rgba(78,205,196,.12);  color: #4ecdc4;       border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary  { background: rgba(224,133,92,.12);  color: #e0855c;       border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc;       border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-bumper       { background: rgba(76,175,80,.12);   color: #81c784;       border: 1px solid rgba(76,175,80,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin: 0 0 24px; }
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔮</div>
+  <div>
+    <h1>Bakugan</h1>
+    <div class="subtitle">// DS · PSP · PS3 · Switch · Anime · EmulatorJS · Jellyfin //</div>
+    <p class="desc">
+      Bakugan is a hybrid marble/card-battle franchise co-created by Sega Toys and Spin Master (2006) — spring-loaded spheres that pop open into monster forms on magnetic gate cards. Three anime generations (2007–2023) and five retail games across DS, Wii, PS2, PS3, Xbox 360, PSP, and Switch. Use the Library tab view pills to sort by release order, story order, platform, or best-first. The other tabs cover the anime, merch, Tunarr filler, and franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">5</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">9</div><div class="fn-stat-label">Anime / TV</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">0</div><div class="fn-stat-label">Movies</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">3</div><div class="fn-stat-label">Generations</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2006</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Bakugan Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',  this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','chrono',   this)">🕰️ Chronological</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform', this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst',this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',   this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- ─────────────────────────
+           RELEASE ORDER
+      ───────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All games and media in real-world release order. Purple rows mark anime seasons — pause and watch before continuing. Gen 1 games tie directly to specific story arcs. Gen 2: watch all five seasons first, then play Champions of Vestroia as the capstone.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core / Emulator</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 1 — Battle Brawlers Continuity (2007–2012) ──</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan Battle Brawlers S1</strong> (2007–2008, 52 eps) — Dan Kuso, Drago, Masquerade, Naga. Watch before the game to establish the world. Amazon Prime Video.</td></tr>
+
+          <tr class="fn-nds fn-highlight">
+            <td>2009</td>
+            <td>Bakugan Battle Brawlers <span class="fn-star">⭐</span></td>
+            <td>DS / Wii / PS2 / PS3 / 360</td>
+            <td>melonds (DS)</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> DS recommended — touchscreen gate cards feel natural. Original story with exclusive Bakugan Leonidas not in the anime.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: New Vestroia S2</strong> (2009–2010, 52 eps) — Best Gen 1 season. Spectra is the standout villain. Defenders of the Core is based on this arc — watch after playing it. Amazon Prime Video.</td></tr>
+
+          <tr class="fn-nds fn-skip">
+            <td>2010</td>
+            <td>Bakugan: Battle Trainer</td>
+            <td>DS only</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 45-min training spin-off, no story. Insert anywhere during Gen 1. Completionists only.</td>
+          </tr>
+
+          <tr class="fn-ps3 fn-highlight">
+            <td>2010</td>
+            <td>Bakugan: Defenders of the Core <span class="fn-star">⭐</span></td>
+            <td>DS / Wii / PSP / PS3 / 360</td>
+            <td>RPCS3 (PS3) · ppsspp (PSP)</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ PSP only</span></td>
+            <td><span class="fn-star">⭐</span> Best game overall. 3D arena brawler based on New Vestroia. PS3 via RPCS3 is best fidelity; PSP via ppsspp runs in-browser.</td>
+          </tr>
+
+          <tr class="fn-pc fn-skip">
+            <td>2010–11</td>
+            <td>Bakugan: Dimensions</td>
+            <td>Web MMO</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">💀 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-opt">defunct</span> Browser MMO shut down June 2011. No private server exists. Historical record only.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: Gundalian Invaders S3</strong> (2010–2011, 39 eps) — Neathia vs Gundalia. Weakest Gen 1 season but needed for S4 context. Amazon Prime Video.</td></tr>
+
+          <tr class="fn-nds">
+            <td>2011</td>
+            <td>Bakugan: Rise of the Resistance</td>
+            <td>DS only</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Tower defense in New Vestroia. Unique genre for the franchise. DS-exclusive. ~5–7 hrs.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: Mechtanium Surge S4</strong> (2011–2012, 46 eps) — Gen 1 finale. Closes Dan and Drago's full arc. Amazon Prime Video.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 2 — Battle Planet Continuity (2018–2023) ──</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: Battle Planet S1</strong> (2018–2020, 50 eps) — Full reboot. New Dan Kouzo, biomechanical Bakugan, ViewTuber premise. Peacock.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: Armored Alliance S2</strong> (2020, 26 eps) — Baku-Gear armor system. Continuous. Peacock.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: Geogan Rising S3</strong> (2021, 26 eps) — Crystal-fused Geogan creatures. Peacock / Netflix.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: Evolutions S4</strong> (2022, 26 eps) — Earth–Vestroia link weakening; stakes escalate. Peacock.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Bakugan: Legends S5</strong> (Mar 2023, 26 eps) — Gen 2 finale. Watch before Champions of Vestroia. Netflix.</td></tr>
+
+          <tr class="fn-switch fn-highlight">
+            <td>Nov 2020</td>
+            <td>Bakugan: Champions of Vestroia <span class="fn-star">⭐</span></td>
+            <td>Switch only</td>
+            <td>Yuzu / Ryujinx</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Gen 2 capstone. WayForward / Warner Bros. 3v3 action RPG, 80+ Bakugan. Original story. Emulate on PC; stream via Sunshine + Moonlight for mobile.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 3 — 2023 Reboot (Cancelled) ──</td></tr>
+
+          <tr class="fn-anime fn-skip">
+            <td>Sep 2023</td>
+            <td>Bakugan (2023)</td>
+            <td>Anime only — Netflix / Disney XD</td>
+            <td>—</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-opt">cancelled</span> 13 eps. Spin Master killed the toy line mid-run; show cancelled unresolved. No games. Watch only for novelty.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold border = recommended version / best entry</span>
+          <span><span class="fn-dot" style="background:rgba(171,71,188,.7)"></span>Purple row = watch this anime before continuing</span>
+          <span><span style="opacity:.5">Faded row</span> = optional / defunct / skip</span>
+          <span><span class="fn-star">⭐</span> = best entry for new players</span>
+          <span><span class="fn-tag fn-tag-no" style="font-size:.6rem">🖥️ PC Only</span> = requires PC emulator, not browser-playable</span>
+          <span><span class="fn-tag fn-tag-varies" style="font-size:.6rem">⚡ Varies</span> = mobile works on some versions only</span>
+        </div>
+      </div>
+
+
+      <!-- ─────────────────────────
+           CHRONOLOGICAL ORDER
+      ───────────────────────── -->
+      <div class="fn-view" id="fn-library-chrono">
+        <div class="fn-view-desc">All entries sorted by in-universe story order. Anime seasons inserted where they fit the lore. ⚠️ Bakugan games don't share a continuous in-universe timeline — Gen 1 and Gen 2 are separate continuities. Within each generation, the games align loosely to the anime arcs they adapt.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>In-Universe</th><th>Title</th><th>Platform · Core</th><th>Mobile?</th><th>Story Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">🟢 Generation 1 — Vestroia / Earth Conflict</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Battle Brawlers S1</strong> — Dan Kuso discovers Bakugan. Naga destabilises Vestroia. Watch first to understand the world before the S1 game.</td></tr>
+
+          <tr class="fn-nds fn-highlight">
+            <td>1</td><td>S1 era</td>
+            <td>Bakugan Battle Brawlers <span class="fn-star">⭐</span></td>
+            <td>DS · melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Original story with Leonidas — a Doom Dimension Bakugan not in the anime. Runs parallel to S1 events.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>New Vestroia S2</strong> — Vestroia restored but now occupied by the Vexos. Spectra is the best villain in the franchise. The next game is set in this arc.</td></tr>
+
+          <tr class="fn-ps3 fn-highlight">
+            <td>2</td><td>S2 era</td>
+            <td>Bakugan: Defenders of the Core <span class="fn-star">⭐</span></td>
+            <td>PS3 · RPCS3 <em>or</em> PSP · ppsspp</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ PSP only</span></td>
+            <td><span class="fn-star">⭐</span> Best game. Directly adapts New Vestroia — Spectra and the Vexos as antagonists. Separate story thread but same setting and cast.</td>
+          </tr>
+
+          <tr class="fn-nds">
+            <td>3</td><td>S2 era</td>
+            <td>Bakugan: Rise of the Resistance</td>
+            <td>DS · melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Tower defense also set in New Vestroia. Different gameplay — you command Bakugan defensively rather than brawling. Can play before or after Defenders.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Gundalian Invaders S3</strong> — The Brawlers enter a new interplanetary war. Needed for S4 context. Weakest season but don't skip it.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Mechtanium Surge S4</strong> — Gen 1 finale. Introduces Mechtogan. Closes Dan and Drago's arc.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">🔵 Generation 2 — Earth / Vestroia Reconnection</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Battle Planet S1 → Armored Alliance S2 → Geogan Rising S3 → Evolutions S4 → Legends S5</strong> — Watch all five seasons (Peacock / Netflix) before playing Champions of Vestroia. Gen 2 is a full reboot — starts fresh, ends with Legends.</td></tr>
+
+          <tr class="fn-switch fn-highlight">
+            <td>4</td><td>Post-Legends</td>
+            <td>Bakugan: Champions of Vestroia <span class="fn-star">⭐</span></td>
+            <td>Switch · Yuzu / Ryujinx</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Set in the Gen 2 universe after Legends. Original story — you become a new Brawler. Best played after Legends for full world context.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">✂️ Skip / Dead Ends</td></tr>
+
+          <tr class="fn-nds fn-skip">
+            <td>—</td><td>Any time</td>
+            <td>Bakugan: Battle Trainer</td>
+            <td>DS · melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> No story, no continuity. Training spin-off. Insert anywhere or skip entirely.</td>
+          </tr>
+
+          <tr class="fn-anime fn-skip">
+            <td>—</td><td>Gen 3</td>
+            <td>Bakugan (2023)</td>
+            <td>Netflix / Disney XD</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-opt">cancelled</span> Separate continuity, cancelled without resolution. No games tie into it.</td>
+          </tr>
+
+        </table>
+      </div>
+
+
+      <!-- ─────────────────────────
+           BY PLATFORM
+      ───────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">Grouped by emulator. Stay in one emulator and exhaust its Bakugan games before moving on. DS + melonds is the most complete single-emulator Gen 1 run — all four DS titles are browser-playable. Anime seasons noted after the games they connect to.</div>
+        <table class="fn-table">
+          <tr><th>Order</th><th>Title</th><th>Year</th><th>Core</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">⚫ Nintendo DS — melonds — Full Gen 1, browser-playable</td></tr>
+          <tr class="fn-nds fn-highlight">
+            <td>1</td><td>Bakugan Battle Brawlers <span class="fn-star">⭐</span></td><td>2009</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Best version of the first game. Touchscreen gate cards feel natural. Start here.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Battle Brawlers S1 → New Vestroia S2</strong> — Watch both after game 1 before continuing to Defenders. Amazon Prime Video.</td></tr>
+          <tr class="fn-nds fn-skip">
+            <td>—</td><td>Bakugan: Battle Trainer</td><td>2010</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 45-min training spin-off. Insert here or skip.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>2</td><td>Bakugan: Defenders of the Core</td><td>2010</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Stealth + brawler on DS. Trimmed vs PS3/360 but fully playable in-browser.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>3</td><td>Bakugan: Rise of the Resistance</td><td>2011</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Tower defense. DS-exclusive. Best before S3 for story context.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Gundalian Invaders S3 → Mechtanium Surge S4</strong> — Watch to close Gen 1. Amazon Prime Video.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">🟡 PSP — ppsspp — Best browser/mobile option for Defenders</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Battle Brawlers S1 → New Vestroia S2</strong> — Watch before playing. Amazon Prime Video.</td></tr>
+          <tr class="fn-ps3 fn-highlight">
+            <td>1</td><td>Bakugan: Defenders of the Core <span class="fn-star">⭐</span></td><td>2010</td><td>ppsspp</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Runs in EmulatorJS via ppsspp core. Full 3D arena brawling — superior to DS version for the best game.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Gundalian Invaders S3 → Mechtanium Surge S4</strong> — Watch to close Gen 1.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">🟡 PlayStation 3 — RPCS3 — Best console fidelity for Defenders</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Battle Brawlers S1 → New Vestroia S2</strong> — Watch before playing. Amazon Prime Video.</td></tr>
+          <tr class="fn-ps3">
+            <td>1</td><td>Bakugan Battle Brawlers</td><td>2009</td><td>RPCS3</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>SIXAXIS tilt for rolling. Playable on RPCS3 (ID: BLES00758 / BLUS30281). 60 FPS patch available.</td>
+          </tr>
+          <tr class="fn-ps3 fn-highlight">
+            <td>2</td><td>Bakugan: Defenders of the Core <span class="fn-star">⭐</span></td><td>2010</td><td>RPCS3</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Best version of the best game. Full 3D at highest fidelity. Use Vulkan renderer. Capture 20 Bakugan in Battle Mode.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Gundalian Invaders S3 → Mechtanium Surge S4</strong> — Watch to close Gen 1. Amazon Prime Video.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">⬜ Wii — Dolphin — Inferior versions, motion gimmick</td></tr>
+          <tr class="fn-wii fn-skip">
+            <td>1</td><td>Bakugan Battle Brawlers</td><td>2009</td><td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Motion-controlled rolling. Thematic but shallow. DS version is a better pick.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2</td><td>Bakugan: Defenders of the Core</td><td>2010</td><td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Same content as PS3/360, worse controls. RPCS3 is the better pick for Defenders.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">🖥️ PC-Only Platforms (stream via Sunshine)</td></tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>1</td><td>Bakugan Battle Brawlers (PS2)</td><td>2009</td><td>PCSX2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Identical content to PS3 but lower fidelity. Use only if RPCS3 is too demanding on your hardware.</td>
+          </tr>
+          <tr class="fn-xbox fn-skip">
+            <td>2</td><td>Bakugan Battle Brawlers (360)</td><td>2009</td><td>Xenia Canary</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Equivalent to PS3. RPCS3 tends to be more stable for these titles.</td>
+          </tr>
+          <tr class="fn-xbox fn-skip">
+            <td>3</td><td>Bakugan: Defenders of the Core (360)</td><td>2010</td><td>Xenia Canary</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Same as PS3 version. Use Xenia if already configured; otherwise prefer RPCS3.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">🔴 Switch — Yuzu / Ryujinx — Gen 2 capstone (PC emulation only)</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Battle Planet S1 → Armored Alliance S2 → Geogan Rising S3 → Evolutions S4 → Legends S5</strong> — Watch all five Gen 2 seasons (Peacock / Netflix) before playing.</td></tr>
+          <tr class="fn-switch fn-highlight">
+            <td>1</td><td>Bakugan: Champions of Vestroia <span class="fn-star">⭐</span></td><td>2020</td><td>Yuzu / Ryujinx</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> WayForward / Warner Bros. 3v3 action RPG, 80+ Bakugan. ~3.2 GB NSP/XCI. Yuzu = lower VRAM; Ryujinx = more stable. Stream via Sunshine + Moonlight for mobile.</td>
+          </tr>
+
+        </table>
+      </div>
+
+
+      <!-- ─────────────────────────
+           BEST FIRST
+      ───────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Curated quality tiers for newcomers — start with the best and most accessible entries, then branch outward. The two S-tier games are all most players need. Tier ratings are subjective; adjust to taste.</div>
+        <table class="fn-table">
+          <tr><th>Tier</th><th>Title</th><th>Platform</th><th>Why Start Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">⭐⭐⭐ S-Tier — Play these first</td></tr>
+          <tr class="fn-highlight fn-ps3">
+            <td style="color:var(--accent);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.85rem">S</td>
+            <td>Bakugan: Defenders of the Core <span class="fn-star">⭐</span></td>
+            <td>PS3 (RPCS3) · PSP (ppsspp)</td>
+            <td>Best game. 3D arena brawling — closest the series gets to a proper action game. Based on the best anime arc. PS3 for fidelity; PSP for in-browser play via ppsspp.</td>
+          </tr>
+          <tr class="fn-highlight fn-nds">
+            <td style="color:var(--accent);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.85rem">S</td>
+            <td>Bakugan Battle Brawlers <span class="fn-star">⭐</span></td>
+            <td>DS (melonds)</td>
+            <td>Best introduction to the card-rolling system. Leonidas is an exclusive character not in the anime. Touchscreen on DS is the definitive way to play.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">⭐⭐ A-Tier — Play after the essentials</td></tr>
+          <tr class="fn-switch">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">A</td>
+            <td>Bakugan: Champions of Vestroia</td>
+            <td>Switch (Yuzu/Ryujinx)</td>
+            <td>Gen 2 capstone with 80+ Bakugan and online multiplayer. WayForward quality. Best after watching all Gen 2 anime for world context.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem">A</td>
+            <td>Bakugan: Rise of the Resistance</td>
+            <td>DS (melonds)</td>
+            <td>Only tower defense game in the franchise. Mechanically distinct and surprisingly deep. ~5–7 hrs — doesn't overstay its welcome.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="4">✂️ Skip or Completionists Only</td></tr>
+          <tr class="fn-nds fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--danger)">C</td>
+            <td>Bakugan: Battle Trainer</td>
+            <td>DS (melonds)</td>
+            <td>45-min training spin-off, no story. Nothing here that isn't covered by the main games.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--danger)">—</td>
+            <td>Bakugan: Dimensions</td>
+            <td>Web MMO (defunct)</td>
+            <td>Shut down June 2011. No emulation possible. Cannot be played under any circumstances.</td>
+          </tr>
+
+        </table>
+      </div>
+
+
+      <!-- ─────────────────────────
+           MOBILE ONLY
+      ───────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Only titles playable on phone via EmulatorJS in a mobile browser. DS games via melonds and the PSP Defenders via ppsspp both run in-browser. Listed in recommended play order.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Core</th><th>Mobile Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Recommended mobile play order ──</td></tr>
+
+          <tr class="fn-nds fn-highlight">
+            <td>1</td>
+            <td>Bakugan Battle Brawlers <span class="fn-star">⭐</span></td>
+            <td>DS</td><td>melonds</td>
+            <td>Start here. Card-rolling on touchscreen feels natural. Best mobile intro to the franchise.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="5">📺 <strong>Battle Brawlers S1 → New Vestroia S2</strong> — Watch between sessions. Stream via Jellyfin mobile app or Amazon Prime.</td></tr>
+          <tr class="fn-ps3 fn-highlight">
+            <td>2</td>
+            <td>Bakugan: Defenders of the Core <span class="fn-star">⭐</span></td>
+            <td>PSP</td><td>ppsspp</td>
+            <td>Best game. Full 3D arena brawling. Runs in EmulatorJS via ppsspp core. Smooth on most modern phones.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>3</td>
+            <td>Bakugan: Rise of the Resistance</td>
+            <td>DS</td><td>melonds</td>
+            <td>Tower defense. Good on touchscreen — tap to command. DS-exclusive.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>—</td>
+            <td>Bakugan: Battle Trainer</td>
+            <td>DS</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 45-min spin-off. No story.</td>
+          </tr>
+
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body"><strong>Excluded from this view:</strong> PS3/360/Wii/PS2 versions of Defenders require RPCS3, Xenia, or Dolphin on PC. Champions of Vestroia (Switch) requires Yuzu or Ryujinx on PC — it cannot run in-browser. Stream PC-only titles via Sunshine + Moonlight if you want them on a phone screen.</div>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\Bakugan\
+  ├── nds\    → .nds   (core: melonds)
+  │             bk-battle-ds · bk-trainer-ds · bk-defenders-ds · bk-rise-ds
+  └── psp\    → .iso   (core: ppsspp)
+                bk-defenders-psp</pre>
+      <div class="callout callout-tip" style="margin-top:8px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Prefix all EmulatorJS game IDs with <code>bk-</code> to avoid save conflicts with the Pokémon and Castlevania libraries. Champions of Vestroia (Switch) cannot run in EmulatorJS — add it to the Sunshine streaming library instead.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Bakugan TV &amp; Anime</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',       this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','bytype',    this)">🏷️ By Type</button>
+      </div>
+
+      <!-- ALL ENTRIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Every anime series in the franchise in release order. Three separate continuities — each generation is a reboot. Seasons within a generation are continuous and should not be skipped.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 1 — Battle Brawlers (2007–2013) ──</td></tr>
+          <tr class="fn-anime fn-highlight">
+            <td>2007</td><td>Bakugan Battle Brawlers <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>52 eps</td>
+            <td>Amazon Prime</td>
+            <td>Gen 1 origin. Dan Kuso, Drago, Masquerade, Naga. The Battle Brawlers fight to restore Vestroia.</td>
+          </tr>
+          <tr class="fn-anime fn-highlight">
+            <td>2009</td><td>Bakugan: New Vestroia <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>52 eps</td>
+            <td>Amazon Prime</td>
+            <td>Best Gen 1 season. Spectra is the standout villain. Both Gen 1 action games adapt this arc.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td>2010</td><td>Bakugan: Gundalian Invaders</td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>39 eps</td>
+            <td>Amazon Prime</td>
+            <td>Neathia vs Gundalia war. Weakest Gen 1 season but needed for Mechtanium Surge context.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td>2011</td><td>Bakugan: Mechtanium Surge</td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>46 eps</td>
+            <td>Amazon Prime</td>
+            <td>Gen 1 finale. Introduces Mechtogan. Divisive but closes Dan and Drago's five-season arc.</td>
+          </tr>
+          <tr class="fn-anime fn-skip">
+            <td>2012</td><td>BakuTech! Bakugan (+ Gachi)</td>
+            <td><span class="fn-tag fn-tag-opt">Spin-off</span></td><td>77 eps</td>
+            <td>JP only</td>
+            <td><span class="fn-tag fn-tag-opt">JP only</span> Different cast, never dubbed. Completionists only.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 2 — Battle Planet (2018–2023) ──</td></tr>
+          <tr class="fn-anime">
+            <td>2018</td><td>Bakugan: Battle Planet</td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>50 eps</td>
+            <td>Peacock</td>
+            <td>Full reboot. New Dan Kouzo, biomechanical Bakugan, ViewTuber premise. Lighter tone than Gen 1.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td>2020</td><td>Bakugan: Armored Alliance</td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>26 eps</td>
+            <td>Peacock</td>
+            <td>Baku-Gear armor system introduced. Continuous sequel to Battle Planet.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td>2021</td><td>Bakugan: Geogan Rising</td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>26 eps</td>
+            <td>Peacock / Netflix</td>
+            <td>Crystal-fused Geogan creatures. Same cast, mid-arc feel.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td>2022</td><td>Bakugan: Evolutions</td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>26 eps</td>
+            <td>Peacock</td>
+            <td>Earth–Vestroia connection weakening. Stakes escalate meaningfully.</td>
+          </tr>
+          <tr class="fn-anime fn-highlight">
+            <td>2023</td><td>Bakugan: Legends <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td><td>26 eps</td>
+            <td>Netflix</td>
+            <td>Gen 2 finale. Wraps the Awesome Brawlers' arc. Watch before Champions of Vestroia.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 3 — 2023 Reboot (Cancelled) ──</td></tr>
+          <tr class="fn-anime fn-skip">
+            <td>2023</td><td>Bakugan (2023)</td>
+            <td><span class="fn-tag fn-tag-opt">Anime</span></td><td>13 eps</td>
+            <td>Netflix</td>
+            <td><span class="fn-tag fn-tag-opt">cancelled</span> Spin Master killed the toy line mid-run. Unresolved ending. Watch for novelty only.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple = anime</span>
+          <span><span class="fn-star">⭐</span> = essential / best in generation</span>
+          <span><span style="opacity:.5">Faded</span> = optional / JP-only / cancelled</span>
+        </div>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended watch order interleaved with game checkpoints. Play each game, watch the season it covers, then move on.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Media</th><th>Type</th><th>Length</th><th>Why Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Generation 1 ──</td></tr>
+          <tr class="fn-highlight fn-anime">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">1</td>
+            <td>Bakugan Battle Brawlers (anime S1)</td><td>Anime</td><td>52 eps</td>
+            <td>Watch first — establishes Dan, Drago, the Brawlers, and Vestroia before playing the S1 game.</td>
+          </tr>
+          <tr class="fn-highlight fn-nds">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">2</td>
+            <td>Bakugan Battle Brawlers (game, DS)</td><td>Game</td><td>~8–12 hrs</td>
+            <td>Original Leonidas story — not in the anime. Card-rolling at its best on touchscreen.</td>
+          </tr>
+          <tr class="fn-highlight fn-anime">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">3</td>
+            <td>New Vestroia (anime S2)</td><td>Anime</td><td>52 eps</td>
+            <td>Best Gen 1 season. Watch before Defenders — Spectra is the antagonist in both.</td>
+          </tr>
+          <tr class="fn-highlight fn-ps3">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">4</td>
+            <td>Defenders of the Core (PS3 or PSP)</td><td>Game</td><td>~10–15 hrs</td>
+            <td>Best game. Directly adapts New Vestroia — you'll recognise the story beats from S2.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">5</td>
+            <td>Rise of the Resistance (DS)</td><td>Game</td><td>~5–7 hrs</td>
+            <td>Optional bridge — tower defense also set in New Vestroia. Play before S3.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">6</td>
+            <td>Gundalian Invaders (anime S3)</td><td>Anime</td><td>39 eps</td>
+            <td>Weakest season — needed for S4 context. Watch at your own pace.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">7</td>
+            <td>Mechtanium Surge (anime S4)</td><td>Anime</td><td>46 eps</td>
+            <td>Gen 1 finale. Closes Dan's arc.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Generation 2 ──</td></tr>
+          <tr class="fn-anime">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">8</td>
+            <td>Battle Planet → Armored Alliance → Geogan Rising → Evolutions</td><td>Anime</td><td>128 eps</td>
+            <td>Watch all four seasons straight (Peacock) before the finale. Don't skip any.</td>
+          </tr>
+          <tr class="fn-highlight fn-anime">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">9</td>
+            <td>Legends (anime S5)</td><td>Anime</td><td>26 eps</td>
+            <td>Gen 2 finale. Watch immediately before Champions of Vestroia. Netflix.</td>
+          </tr>
+          <tr class="fn-highlight fn-switch">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">10</td>
+            <td>Champions of Vestroia (Switch)</td><td>Game</td><td>~20–30 hrs</td>
+            <td>Gen 2 capstone game. Original story — best with full Gen 2 anime context behind you.</td>
+          </tr>
+
+        </table>
+      </div>
+
+      <!-- BY TYPE -->
+      <div class="fn-view" id="fn-tvanime-bytype">
+        <div class="fn-view-desc">All entries grouped by generation / continuity. Each generation is independent — you can start Gen 2 without watching Gen 1.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Canon?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟢 Generation 1 — Battle Brawlers continuity</td></tr>
+          <tr class="fn-anime fn-highlight"><td>2007</td><td>Battle Brawlers <span class="fn-star">⭐</span></td><td>52</td><td>✅ Canon</td><td>Gen 1 origin.</td></tr>
+          <tr class="fn-anime fn-highlight"><td>2009</td><td>New Vestroia <span class="fn-star">⭐</span></td><td>52</td><td>✅ Canon</td><td>Best Gen 1 season.</td></tr>
+          <tr class="fn-anime"><td>2010</td><td>Gundalian Invaders</td><td>39</td><td>✅ Canon</td><td>Watch for S4 context.</td></tr>
+          <tr class="fn-anime"><td>2011</td><td>Mechtanium Surge</td><td>46</td><td>✅ Canon</td><td>Gen 1 finale.</td></tr>
+          <tr class="fn-anime fn-skip"><td>2012</td><td>BakuTech! Bakugan + Gachi</td><td>77</td><td>❌ Spin-off</td><td>JP only, different cast.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🔵 Generation 2 — Battle Planet continuity</td></tr>
+          <tr class="fn-anime"><td>2018</td><td>Battle Planet</td><td>50</td><td>✅ Canon</td><td>Gen 2 start. Full reboot.</td></tr>
+          <tr class="fn-anime"><td>2020</td><td>Armored Alliance</td><td>26</td><td>✅ Canon</td><td>Continuous.</td></tr>
+          <tr class="fn-anime"><td>2021</td><td>Geogan Rising</td><td>26</td><td>✅ Canon</td><td>Continuous.</td></tr>
+          <tr class="fn-anime"><td>2022</td><td>Evolutions</td><td>26</td><td>✅ Canon</td><td>Continuous.</td></tr>
+          <tr class="fn-anime fn-highlight"><td>2023</td><td>Legends <span class="fn-star">⭐</span></td><td>26</td><td>✅ Canon</td><td>Gen 2 finale.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🔴 Generation 3 — Dead end</td></tr>
+          <tr class="fn-anime fn-skip"><td>2023</td><td>Bakugan (2023)</td><td>13</td><td>⚠️ Cancelled</td><td>No resolution. Separate continuity.</td></tr>
+
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Anime\Bakugan\
+  ├── Bakugan Battle Brawlers (2007)\    ← Amazon Prime; local copy optional
+  ├── Bakugan New Vestroia (2009)\
+  ├── Bakugan Gundalian Invaders (2010)\
+  ├── Bakugan Mechtanium Surge (2011)\
+  ├── Bakugan Battle Planet (2018)\      ← Peacock; local copy optional
+  ├── Bakugan Armored Alliance (2020)\
+  ├── Bakugan Geogan Rising (2021)\
+  ├── Bakugan Evolutions (2022)\
+  └── Bakugan Legends (2023)\            ← Netflix; local copy optional</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Bakugan Movies</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',       this)">📋 All Movies</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder',this)">🎯 Watch Order</button>
+      </div>
+
+      <!-- ALL MOVIES -->
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">Bakugan has no theatrical or direct-to-video films as of 2025. A live-action film was announced in February 2025 — tracked below.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Runtime</th><th>Type</th><th>Where</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="6">── Announced ──</td></tr>
+          <tr class="fn-movie fn-skip">
+            <td>TBA</td>
+            <td>Bakugan (Live-Action Film)</td>
+            <td>TBA</td>
+            <td><span class="fn-tag fn-tag-varies">Announced</span></td>
+            <td>TBA</td>
+            <td>Announced Feb 6, 2025. Director/writer/producer: Brad Peyton. No studio, cast, or release date confirmed as of the last update.</td>
+          </tr>
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#ffb74d"></span>Orange = movie</span>
+          <span><span style="opacity:.5">Faded</span> = unconfirmed / announced only</span>
+        </div>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">No movies available yet. Update this view when the live-action film releases.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Type</th><th>Watch After</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">—</td>
+            <td>Bakugan (Live-Action)</td><td>Movie</td>
+            <td>TBA — likely after the Gen 3 anime given the reboot trajectory</td>
+            <td>Fill in once confirmed.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Bakugan\
+  └── [No entries yet — add when the live-action film releases]</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Bakugan Merchandise &amp; Collectibles</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Bakugan's entire physical product line is built around the core toy — spring-loaded marble spheres that pop open on magnetic gate cards. The toy IS the merch. Gen 1 (2006–2012) toys are now secondary-market collectibles. Gen 2 (2019–2022) had a modern redesign. Gen 3 toys were discontinued mid-production when Spin Master cancelled the line in 2023. Gold rows = notable / grail items.</div>
+    </div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('merch','all',     this)">📋 All Merch</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','toys',    this)">🧸 Toys &amp; Figures</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','statues', this)">🗿 Statues &amp; Premium</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','tabletop',this)">🃏 Tabletop &amp; Cards</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','history', this)">📖 Merch History</button>
+      </div>
+
+      <!-- ALL MERCH -->
+      <div class="fn-view active" id="fn-merch-all">
+        <div class="fn-view-desc">Complete list of notable merchandise. ⭐ = grail / especially notable.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Category</th><th>Manufacturer</th><th>Price Range</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 1 Toys &amp; Cards (2006–2012) ──</td></tr>
+          <tr class="fn-merch-toy fn-highlight">
+            <td>2006–08</td>
+            <td>Original Bakugan Marbles (Series 1) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Toy</span></td>
+            <td>Sega Toys / Spin Master</td>
+            <td>$5–$50+ secondary</td>
+            <td>The original spring-loaded marbles. Pyrus Dragonoid is the grail figure. Gen 1 in good condition commands a premium on secondary market.</td>
+          </tr>
+          <tr class="fn-merch-card fn-highlight">
+            <td>2006–12</td>
+            <td>Gate Cards &amp; Ability Cards <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-varies">Card Game</span></td>
+            <td>Sega Toys / Spin Master</td>
+            <td>$1–$20 per pack</td>
+            <td>Metal-strip Gate Cards + Ability Cards that modify G-Power in battle. The physical card game. Gen 1 sets are most complete and collectible.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>2009–12</td>
+            <td>Battle Arena / Battle Set</td>
+            <td><span class="fn-tag fn-tag-opt">Playset</span></td>
+            <td>Spin Master</td>
+            <td>$15–$40 secondary</td>
+            <td>Official arena with card holders and marble launchers. Needed for proper competitive play. Secondary market only now.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 2 Toys &amp; Cards (2019–2022) ──</td></tr>
+          <tr class="fn-merch-toy">
+            <td>2019–22</td>
+            <td>Bakugan Battle Planet Marbles</td>
+            <td><span class="fn-tag fn-tag-yes">Toy</span></td>
+            <td>Spin Master</td>
+            <td>$6–$25</td>
+            <td>Redesigned marbles with updated card game. Still findable at retail or light secondary market.</td>
+          </tr>
+          <tr class="fn-merch-board">
+            <td>2019–22</td>
+            <td>Bakugan TCG (Battle Planet era)</td>
+            <td><span class="fn-tag fn-tag-varies">Card Game</span></td>
+            <td>Spin Master</td>
+            <td>$8–$30 per set</td>
+            <td>Full competitive TCG co-designed by Justin Gary (Ascension). Better structured rules than Gen 1. Sets still findable at retail.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Generation 3 (2023 — Discontinued) ──</td></tr>
+          <tr class="fn-merch-toy fn-skip">
+            <td>2023</td>
+            <td>Gen 3 Revolution Series</td>
+            <td><span class="fn-tag fn-tag-no">Toy</span></td>
+            <td>Spin Master</td>
+            <td>$10–$40 NOS</td>
+            <td><span class="fn-tag fn-tag-opt">discontinued</span> Spin Master ordered future Gen 3 product destroyed when cancelling the line. Retail survivors are accidental collectibles.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#ef9a9a"></span>Red = toys / figures</span>
+          <span><span class="fn-dot" style="background:#ffcc02"></span>Yellow = statues</span>
+          <span><span class="fn-dot" style="background:#80cbc4"></span>Teal = card games</span>
+          <span><span class="fn-dot" style="background:#a5d6a7"></span>Green = board games / playsets</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple = apparel</span>
+          <span><span class="fn-dot" style="background:#90a4ae"></span>Grey = books</span>
+        </div>
+      </div>
+
+      <!-- TOYS & FIGURES -->
+      <div class="fn-view" id="fn-merch-toys">
+        <div class="fn-view-desc">The core Bakugan marble toys — the physical figures that pop open on gate cards. The entire franchise revolves around these.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>G-Power</th><th>Manufacturer</th><th>Character</th><th>Notes</th></tr>
+          <tr class="fn-merch-toy fn-highlight">
+            <td>Gen 1</td><td>Pyrus Dragonoid <span class="fn-star">⭐</span></td>
+            <td>300–600 G</td><td>Sega Toys</td><td>Drago</td>
+            <td>The franchise mascot. Gen 1 original in good condition is the most sought-after figure. Red colourway, fire attribute.</td>
+          </tr>
+          <tr class="fn-merch-toy fn-highlight">
+            <td>2009</td><td>Leonidas <span class="fn-star">⭐</span></td>
+            <td>600+ G</td><td>Spin Master</td><td>Leonidas (game-exclusive)</td>
+            <td>Bundled with select GameStop/EB Games DS copies — never sold separately. Game-exclusive character. Collector piece.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>Gen 1</td><td>White Naga</td>
+            <td>300 G</td><td>Spin Master</td><td>Naga</td>
+            <td>Originally rumoured to be a Leonidas pack-in; was actually White Naga. Rare.</td>
+          </tr>
+          <tr class="fn-merch-toy">
+            <td>Gen 2</td><td>Battle Planet Dragonoid</td>
+            <td>Varies</td><td>Spin Master</td><td>Drago (Gen 2)</td>
+            <td>Redesigned for the Battle Planet era. Larger and more articulated than Gen 1.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- STATUES & PREMIUM -->
+      <div class="fn-view" id="fn-merch-statues">
+        <div class="fn-view-desc">Bakugan has no high-end statue line from First 4 Figures, Kotobukiya, or similar premium manufacturers as of 2025. The franchise is toy-focused rather than collector-statue focused.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Scale</th><th>Manufacturer</th><th>Edition</th><th>Market Value</th><th>Notes</th></tr>
+          <tr class="fn-merch-toy fn-skip">
+            <td>—</td><td>No premium statue line exists</td>
+            <td>—</td><td>—</td><td>—</td><td>—</td>
+            <td>Bakugan collectibles are the marble toys themselves. No F4F, Kotobukiya, or Sideshow products as of 2025. Update when available.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- TABLETOP & CARDS -->
+      <div class="fn-view" id="fn-merch-tabletop">
+        <div class="fn-view-desc">The card game component — Gate Cards, Ability Cards, and the full tabletop system across both generations.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Publisher</th><th>Players</th><th>Notes</th></tr>
+          <tr class="fn-merch-card fn-highlight">
+            <td>2006–12</td>
+            <td>Bakugan Battle Brawlers Card Game <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-varies">Card Game</span></td>
+            <td>Spin Master / Sega Toys</td><td>2</td>
+            <td>Metal-strip Gate Cards + G-Power Ability Cards. The original physical game. Gen 1 sets are the most complete and collectible — easiest to find on secondary market.</td>
+          </tr>
+          <tr class="fn-merch-card">
+            <td>2019–22</td>
+            <td>Bakugan TCG (Battle Planet era)</td>
+            <td><span class="fn-tag fn-tag-varies">Card Game</span></td>
+            <td>Spin Master</td><td>2</td>
+            <td>Redesigned competitive card game co-designed by Justin Gary. More structured rules, expansion sets. Still findable at retail in 2025.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- MERCH HISTORY -->
+      <div class="fn-view" id="fn-merch-history">
+        <div class="fn-view-desc">A history of the Bakugan merchandise program across three generations.</div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Original Toy Era (2006–2012)</div>
+          <p style="font-size:.84rem;line-height:1.7">Bakugan launched as a joint Sega Toys / Spin Master product in Japan (2006) and North America (2007). Over 55 million Bakugan toys sold in 2008 alone — at its peak, one was purchased every four seconds in the US. McDonald's Happy Meals, Cartoon Network deal, top-selling boys' toy for ages 6–12. Gen 1 figures in good condition are now legitimate secondary-market collectibles, particularly Pyrus Dragonoid and the game-bundle Leonidas pack-in.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Dormant Period (2013–2018)</div>
+          <p style="font-size:.84rem;line-height:1.7">After Mechtanium Surge ended in 2012, the toy line quietly wound down. Spin Master announced revival plans in a 2015 investor presentation but gave no timeline. No significant merchandise was produced during this gap. Gen 1 secondary market began consolidating into collector categories.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Gen 2 Revival (2019–2022)</div>
+          <p style="font-size:.84rem;line-height:1.7">Battle Planet relaunched the toy line with redesigned marbles and a new card game co-designed by Justin Gary for competitive play. Spin Master simultaneously filed patent infringement suits against competing marble-toy products (Screechers Wild, Mecard, Beyblade Burst). The Gen 2 line was broadly available at major retailers through 2022.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Gen 3 Collapse (2023–present)</div>
+          <p style="font-size:.84rem;line-height:1.7">The Gen 3 "Revolution" line launched in early 2023 with significant product redesigns. When the accompanying Netflix show failed to gain traction, Spin Master ordered the destruction of future Gen 3 product and cancelled the line entirely. Some retail stock had already shipped. The programme became a widely discussed example of a toy line killing its own media. No active toy line exists as of 2025 — the franchise's future depends on the announced live-action film.</p>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Grail Items &amp; Hard-to-Find Pieces</div>
+          <p style="font-size:.84rem;color:var(--text-dim)">Gen 1 Pyrus Dragonoid in original packaging. The Leonidas figure bundled with select GameStop/EB Games DS copies (2009) — never sold separately; clean-condition copies with the figure intact command a collector premium. Gen 3 Revolution prototypes and cancelled product that survived the destruction order are accidental collectibles but require verification against bootlegs.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Filler Content — Bakugan Tunarr Channel</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">📺</div>
+      <div class="callout-body">Short-form pieces for bumpers, interstitials, and filler segments on a Bakugan Tunarr channel. Drop between episodes or use as openers/closers.</div>
+    </div>
+    <div class="fn-filler-grid">
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">Bakugan Battle Brawlers — Launch Trailer (2009)</div>
+        <div class="fn-filler-meta">2009 · ~2 min · YouTube</div>
+        <div class="fn-filler-desc">The original game launch trailer. Shows the card-rolling system in action and introduces Leonidas. Good channel opener before a Gen 1 game session or S1 anime block.</div>
+        <div class="fn-filler-where">🔗 Search "Bakugan Battle Brawlers 2009 launch trailer" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">Bakugan: Champions of Vestroia — Announce Trailer (2020)</div>
+        <div class="fn-filler-meta">2020 · ~2 min · YouTube</div>
+        <div class="fn-filler-desc">WayForward's reveal trailer for the Switch game. Clean production, shows the 3v3 arena system and Bakugan variety. Good closer before a Gen 2 anime block.</div>
+        <div class="fn-filler-where">🔗 Search "Bakugan Champions of Vestroia announce trailer" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-bumper">Bumper / Short</div>
+        <div class="fn-filler-name">Bakugan Battle Brawlers — Anime Opening (S1, English)</div>
+        <div class="fn-filler-meta">2007 · ~1.5 min · YouTube</div>
+        <div class="fn-filler-desc">The iconic English dub opening. Instantly recognisable to anyone who watched Cartoon Network in 2008. Perfect true interstitial bumper — under 2 min, high energy.</div>
+        <div class="fn-filler-where">🔗 Search "Bakugan Battle Brawlers opening theme English" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-bumper">Bumper / Short</div>
+        <div class="fn-filler-name">Bakugan: New Vestroia — Anime Opening</div>
+        <div class="fn-filler-meta">2009 · ~1.5 min · YouTube</div>
+        <div class="fn-filler-desc">S2 opening theme. More energetic than S1. Use as a transition bumper before New Vestroia episodes.</div>
+        <div class="fn-filler-where">🔗 Search "Bakugan New Vestroia opening theme" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-hype">Hype Piece</div>
+        <div class="fn-filler-name">Bakugan: Beyond the Brawl — Web Shorts</div>
+        <div class="fn-filler-meta">2019–20 · ~3–5 min each · YouTube</div>
+        <div class="fn-filler-desc">Official animated web shorts produced by Spin Master for Battle Planet. Comedic, lightweight. Good Gen 2 filler between episodes — find the full playlist on the official Bakugan YouTube channel.</div>
+        <div class="fn-filler-where">🔗 Bakugan YouTube channel → "Beyond the Brawl" playlist</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+        <div class="fn-filler-name">The Rise and Fall of Bakugan — Video Essays</div>
+        <div class="fn-filler-meta">2022–2023 · 15–30 min · YouTube</div>
+        <div class="fn-filler-desc">Several quality video essays covering the franchise's peak (2007–2010), the Gen 2 revival, and the Gen 3 cancellation. The 2023 Gen 3 collapse content is particularly strong. Best as a standalone filler block or channel closer.</div>
+        <div class="fn-filler-where">🔗 Search "Bakugan franchise history" or "what happened to Bakugan" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+        <div class="fn-filler-name">How Bakugan Actually Works — Toy Mechanism Deep Dive</div>
+        <div class="fn-filler-meta">Various · 5–15 min · YouTube</div>
+        <div class="fn-filler-desc">Short-form docs on the spring mechanism, magnetic gate card interaction, and G-Power system. Good before a physical toy session. The engineering is genuinely clever.</div>
+        <div class="fn-filler-where">🔗 Search "how Bakugan works mechanism" on YouTube</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Adding to Tunarr</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Download clips → store in a <code>Bakugan Filler</code> Jellyfin collection</li>
+        <li>Add as <strong>Flex content</strong> on the Tunarr channel (30 sec – 5 min duration)</li>
+        <li>Game trailers → channel openers, top of a content block</li>
+        <li>Docs / retrospectives → standalone filler block between episodes</li>
+        <li>Anime openings → anywhere under 2 min, true interstitial</li>
+        <li>Beyond the Brawl shorts → drop between Gen 2 anime episodes</li>
+      </ul>
+      <p style="margin-top:10px;font-size:.83rem;color:var(--text-dim)">See the <strong>Tunarr</strong> tab for channel config and the full flex content workflow.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 A History of Bakugan</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Overview</div>
+      <p>Bakugan was co-created by Sega Toys (Japan) and Spin Master (Canada) in 2006 as a hybrid toy game: spring-loaded marble spheres that magnetically open into monster figures when rolled onto metal-embedded gate cards. The concept merged the playground appeal of marbles with the collecting compulsion of Pokémon and the strategic depth of a trading card game. At its commercial peak in 2008–2009 it was one of the top-selling boys' toys in North America. Three generations, a messy corporate cancellation, and a live-action film announcement later, it remains a franchise defined entirely by that original toy mechanism — nothing has quite replaced it.</p>
+    </div>
+
+    <div class="fn-timeline">
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2006 — The Origin</div>
+        <div class="fn-era-title">Marbles from Another Dimension</div>
+        <div class="fn-era-body">Sega Toys developed the spring-loaded marble mechanism in Japan; Spin Master handled North American distribution and game design. The product launched in Japan in 2006 — a full year before the anime — letting the toy establish itself independently. The mechanism (a marble that pops open when it crosses a magnetic strip inside a card) was patented, and Spin Master would later aggressively defend those patents. The anime launched on TV Tokyo in April 2007 and was quickly licensed by Nelvana for Cartoon Network broadcast in North America.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2007–2009 — The Golden Age</div>
+        <div class="fn-era-title">55 Million Marbles</div>
+        <div class="fn-era-body">The franchise exploded in 2008. Over 55 million Bakugan toys sold that year alone — one every four seconds in the US. McDonald's Happy Meals carried Bakugan figures; Cartoon Network ran the dub. New Vestroia (S2) and the first video game (Now Production / Activision) both landed in 2009, capitalising on peak popularity. The game was the second best-selling Nintendo DS release in North America during Holiday 2009 despite mixed critical reviews.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2009–2012 — The Decline</div>
+        <div class="fn-era-title">Mechtanium and the Slow Fade</div>
+        <div class="fn-era-body">S3 (Gundalian Invaders) and S4 (Mechtanium Surge) were produced with declining budgets and ratings as the cultural moment passed. Mechtanium Surge introduced Mechtogan — large mechanical Bakugan companions — which divided the fanbase. The anime concluded in 2012. Japan-only spin-off BakuTech! Bakugan ran through 2013 but never received an English dub. A 2015 Spin Master investor presentation hinted at revival plans with no timeline.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2018–2023 — The Gen 2 Revival</div>
+        <div class="fn-era-title">ViewTubers and Biomechanical Creatures</div>
+        <div class="fn-era-body">Battle Planet premiered on Cartoon Network in December 2018, rebooting with a new cast and lighter tone. Bakugan were now biomechanical creatures native to Earth; Dan Kouzo was a ViewTuber analogue. The toy game was redesigned and co-developed by tabletop designer Justin Gary for competitive play. Five anime seasons and one Switch game (Champions of Vestroia, WayForward, November 2020) followed through March 2023, concluding with Legends on Netflix.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2023 — The Gen 3 Collapse</div>
+        <div class="fn-era-title">Revolution Cancelled</div>
+        <div class="fn-era-body">A third generation launched September 2023 on Netflix and Disney XD, accompanied by a fully redesigned toy line internally called "Revolution." After one 13-episode season failed to hit targets, Spin Master ordered the destruction of future Gen 3 product and cancelled the entire line. The show ended without resolution. Some retail stock of the Revolution toys had already shipped before the order, making surviving pieces accidental collectibles. The abrupt collapse became a widely discussed case study in toy-driven media failure.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2025 — Present</div>
+        <div class="fn-era-title">Live-Action in Development</div>
+        <div class="fn-era-body">On February 6, 2025, a live-action Bakugan film was announced with Brad Peyton (San Andreas, Rampage) attached as director, writer, and producer. No studio, release date, or casting details have been confirmed. The franchise's toy future remains unclear following the Gen 3 cancellation. The Gen 1 and Gen 2 communities remain active, organising competitive play with physical toys and maintaining wikis for both eras.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators &amp; Contributors</div>
+    <div class="card">
+      <table>
+        <tr><th>Name / Company</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>Sega Toys</td><td>Original toy creator</td><td>Invented the spring-loaded marble mechanism; holds original character and anime IP with TMS Entertainment.</td></tr>
+        <tr><td>Spin Master</td><td>Co-creator, global toy distributor</td><td>North American design, manufacturing, and distribution; filed/defended patents; produced Gen 2–3; owns the Bakugan brand.</td></tr>
+        <tr><td>TMS Entertainment</td><td>Animation studio</td><td>All Gen 1 and Gen 2 anime (Battle Brawlers through Legends).</td></tr>
+        <tr><td>Nelvana</td><td>Animation co-producer / localisation</td><td>International co-production and English dub for Gen 1 and Gen 2.</td></tr>
+        <tr><td>Mitsuo Hashimoto</td><td>Director</td><td>Directed Bakugan Battle Brawlers S1 (TV Tokyo, 2007).</td></tr>
+        <tr><td>WayForward</td><td>Game developer</td><td>Champions of Vestroia (Switch, November 2020) — the only Gen 2 video game.</td></tr>
+        <tr><td>Now Production / Activision</td><td>Game developer / publisher</td><td>All Gen 1 console and DS games (2009–2011).</td></tr>
+        <tr><td>Justin Gary</td><td>Card game designer</td><td>Co-designed the Gen 2 Battle Planet tabletop game for structured competitive play.</td></tr>
+        <tr><td>Brad Peyton</td><td>Director (announced)</td><td>Attached to the 2025-announced live-action film (San Andreas, Rampage).</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon?</div>
+      <p style="font-size:.84rem;line-height:1.7">Sega Toys and TMS Entertainment hold the original anime IP; Spin Master owns the toy brand. No official unified canon document exists. The three anime generations are separate continuities with no in-universe connection. All video games have original stories — Leonidas (Battle Brawlers game) and his cameo in Champions of Vestroia are game-exclusive and do not appear in any anime.</p>
+      <table style="margin-top:12px">
+        <tr><th>Entry</th><th>Canon Status</th><th>Notes</th></tr>
+        <tr><td>Battle Brawlers – Mechtanium Surge (anime S1–S4)</td><td>✅ Canon (Gen 1)</td><td>Self-contained original continuity.</td></tr>
+        <tr><td>Battle Planet – Legends (anime S1–S5)</td><td>✅ Canon (Gen 2)</td><td>Separate reboot continuity. No connection to Gen 1.</td></tr>
+        <tr><td>Bakugan (2023)</td><td>⚠️ Canon but abandoned</td><td>Gen 3 continuity — cancelled before resolution.</td></tr>
+        <tr><td>BakuTech! Bakugan + Gachi</td><td>⚠️ Spin-off / soft-canon</td><td>JP only, different characters. Not considered main Gen 1 canon by most fans.</td></tr>
+        <tr><td>All video games (2009–2020)</td><td>❌ Non-canon</td><td>Original stories. Leonidas is a game-exclusive Bakugan confirmed not present in the anime continuity.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>The physical toy mechanism predates the anime by a full year — Bakugan launched as a toy in Japan in 2006; the show didn't air until April 2007. The toy sold itself before the anime existed.</li>
+        <li>Over 55 million Bakugan were sold in 2008 alone. At peak, one was purchased every four seconds in the United States.</li>
+        <li>Spin Master filed patent infringement lawsuits against Mattel (Beyblade Burst), Alpha Group (Screechers Wild), and others, arguing their spring-loaded toy mechanisms violated Bakugan patents. The Screechers Wild suit settled in 2019.</li>
+        <li>The 2009 DS game was the second best-selling Nintendo DS release in North America during Holiday 2009 despite receiving mixed reviews. The tie-in toy sales likely drove purchases.</li>
+        <li>Defenders of the Core is misleadingly titled — despite being named after a Gen 1 S1 plot element (the Perfect Core), it is set in the New Vestroia (S2) era and features Spectra and the Vexos as antagonists.</li>
+        <li>The Leonidas figure was bundled with select retail copies of the 2009 DS game at GameStop/EB Games — never sold separately. Clean-condition copies with the figure intact are unexpectedly valuable to collectors.</li>
+        <li>When Spin Master cancelled Gen 3 in 2023, they reportedly ordered the destruction of future production runs. Any Gen 3 Revolution products that reached retail are survivors of a destruction order.</li>
+        <li>The Gen 2 card game was co-designed by Justin Gary — the designer of Ascension: Chronicle of the Godslayer — an unusually credentialed tabletop hire for a children's toy franchise.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
