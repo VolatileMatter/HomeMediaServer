@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Franchise Viewer</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ── Full-screen layout ── */
+    html, body { height: 100%; overflow: hidden; }
+    body { padding: 0; display: flex; flex-direction: column; }
+
+    /* ── Return bar ── */
+    .return-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 7px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .return-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .return-btn:hover { border-color: rgba(200,168,75,.5); color: var(--accent); }
+    .return-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      color: var(--text-dim);
+      letter-spacing: .06em;
+    }
+    .return-crumb {
+      font-family: 'Cinzel', serif;
+      font-size: .75rem;
+      color: var(--accent);
+      margin-left: 4px;
+    }
+    .return-bar-right {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .nav-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .nav-btn:hover { border-color: rgba(200,168,75,.4); color: var(--text); }
+    .nav-btn:disabled { opacity: .3; cursor: default; }
+
+    /* ── Main layout: sidebar + content ── */
+    .viewer-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      background: var(--bg3);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: width .2s;
+    }
+    .sidebar.collapsed { width: 0; }
+    .sidebar-header {
+      padding: 10px 12px 6px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .54rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: .6;
+    }
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      padding: 6px 0 20px;
+    }
+    .sidebar-scroll::-webkit-scrollbar { width: 3px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+
+    /* Franchise list items in sidebar */
+    .fn-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 14px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      font-family: 'Raleway', sans-serif;
+      font-size: .71rem;
+      font-weight: 600;
+      text-align: left;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all .12s;
+      border-left: 2px solid transparent;
+    }
+    .fn-nav-item:hover {
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      border-left-color: var(--border);
+    }
+    .fn-nav-item.active {
+      background: rgba(200,168,75,.1);
+      color: var(--accent);
+      border-left-color: var(--accent);
+      font-weight: 700;
+    }
+    .fn-nav-icon { font-size: .85rem; width: 16px; flex-shrink: 0; text-align: center; }
+    .fn-nav-divider {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .52rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: .5;
+      padding: 8px 12px 3px;
+    }
+
+    /* ── Toggle sidebar button ── */
+    .collapse-btn {
+      position: absolute;
+      left: 200px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 3px 3px 0;
+      color: var(--text-dim);
+      font-size: .6rem;
+      padding: 6px 3px;
+      cursor: pointer;
+      transition: left .2s, color .15s;
+      writing-mode: vertical-rl;
+      letter-spacing: .1em;
+    }
+    .collapse-btn:hover { color: var(--accent); }
+    .collapse-btn.cs { left: 0; }
+
+    /* ── Content iframe ── */
+    .viewer-content {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+    }
+    .viewer-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: var(--bg);
+      display: block;
+    }
+
+    /* ── Loading state ── */
+    .load-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      color: var(--text-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      z-index: 5;
+      transition: opacity .2s;
+    }
+    .load-overlay.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- ── Return bar ── -->
+<div class="return-bar">
+  <button class="return-btn" onclick="goBack()">◀ Back</button>
+  <span class="return-label">Franchise Navigator</span>
+  <span style="color:var(--text-dim);font-size:.7rem">›</span>
+  <span class="return-crumb" id="crumb-name">—</span>
+  <div class="return-bar-right">
+    <button class="nav-btn" id="btn-prev" onclick="navigateTo(currentIndex - 1)" disabled>◀ Prev</button>
+    <button class="nav-btn" id="btn-next" onclick="navigateTo(currentIndex + 1)" disabled>Next ▶</button>
+  </div>
+</div>
+
+<!-- ── Body: sidebar + iframe ── -->
+<div class="viewer-body">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Franchises</div>
+    </div>
+    <div class="sidebar-scroll" id="sidebar-scroll">
+      <div style="padding:12px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim)">Loading…</div>
+    </div>
+  </nav>
+
+  <button class="collapse-btn" id="cbtn" onclick="toggleSidebar()">☰</button>
+
+  <div class="viewer-content">
+    <div class="load-overlay" id="load-overlay">
+      <div class="spinner"></div>
+      Loading franchise…
+    </div>
+    <iframe id="franchise-frame" title="Franchise Detail" onload="onFrameLoad()"></iframe>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let FRANCHISES   = [];   // [{id, name, icon, hasPage}]
+let currentIndex = -1;
+let sidebarOpen  = localStorage.getItem('fv_sb') !== 'false';
+
+// ══════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════
+async function boot() {
+  // Apply sidebar state immediately
+  applySidebar();
+
+  // Read ?id= from URL
+  const params = new URLSearchParams(location.search);
+  const targetId = params.get('id') || '';
+
+  // Load manifest to build sidebar
+  let ids = [];
+  try {
+    const r = await fetch('franchises/index.json');
+    if (r.ok) {
+      const manifest = await r.json();
+      ids = Array.isArray(manifest) ? manifest : (manifest.franchises || []);
+    }
+  } catch (e) { /* sidebar will be empty */ }
+
+  // Probe each franchise for name/icon and page existence in parallel
+  const probes = await Promise.allSettled(
+    ids.map(id => Promise.all([
+      fetch('franchises/' + id + '.json').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('franchises/' + id + '.html', { method: 'HEAD' }).then(r => r.ok).catch(() => false)
+    ]))
+  );
+
+  probes.forEach((result, i) => {
+    const id = ids[i];
+    if (result.status === 'fulfilled') {
+      const [data, hasPage] = result.value;
+      FRANCHISES.push({
+        id,
+        name:    data?.franchise || id,
+        icon:    data?.icon     || '🎮',
+        hasPage
+      });
+    } else {
+      FRANCHISES.push({ id, name: id, icon: '🎮', hasPage: false });
+    }
+  });
+
+  renderSidebar();
+
+  // Navigate to target
+  const idx = FRANCHISES.findIndex(f => f.id === targetId);
+  if (idx !== -1) {
+    navigateTo(idx);
+  } else if (FRANCHISES.length) {
+    navigateTo(0);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function navigateTo(idx) {
+  if (idx < 0 || idx >= FRANCHISES.length) return;
+  currentIndex = idx;
+  const f = FRANCHISES[idx];
+
+  // Update URL without reload
+  history.replaceState(null, '', 'franchise-viewer.html?id=' + f.id);
+
+  // Update crumb
+  document.getElementById('crumb-name').textContent = f.name;
+  document.title = f.name + ' — Franchise Navigator';
+
+  // Show loading overlay
+  document.getElementById('load-overlay').classList.remove('hidden');
+
+  // Load iframe
+  document.getElementById('franchise-frame').src = 'franchises/' + f.id + '.html';
+
+  // Update sidebar active state
+  document.querySelectorAll('.fn-nav-item').forEach(el => el.classList.remove('active'));
+  const activeBtn = document.getElementById('fn-btn-' + f.id);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // Update prev/next buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === FRANCHISES.length - 1;
+}
+
+function onFrameLoad() {
+  document.getElementById('load-overlay').classList.add('hidden');
+}
+
+function goBack() {
+  // If inside the index.html shell, navigate parent back to franchise navigator
+  if (window.parent && window.parent !== window && window.parent.go) {
+    window.parent.go('franchisenavigator');
+  } else {
+    location.href = 'franchise-navigator.html';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  SIDEBAR
+// ══════════════════════════════════════════════════════
+function renderSidebar() {
+  const scroll = document.getElementById('sidebar-scroll');
+  if (!FRANCHISES.length) {
+    scroll.innerHTML = '<div style="padding:12px;font-family:\'Share Tech Mono\',monospace;font-size:.62rem;color:var(--text-dim)">No franchises found.</div>';
+    return;
+  }
+
+  // Separate franchises with pages from those without
+  const withPage    = FRANCHISES.filter(f => f.hasPage);
+  const withoutPage = FRANCHISES.filter(f => !f.hasPage);
+
+  let html = '';
+
+  if (withPage.length) {
+    withPage.forEach(f => {
+      html += `<button class="fn-nav-item" id="fn-btn-${f.id}" onclick="navigateTo(${FRANCHISES.indexOf(f)})">
+        <span class="fn-nav-icon">${f.icon}</span>${esc(f.name)}
+      </button>`;
+    });
+  }
+
+  if (withoutPage.length) {
+    html += `<div class="fn-nav-divider">No Page Yet</div>`;
+    withoutPage.forEach(f => {
+      html += `<button class="fn-nav-item" id="fn-btn-${f.id}" style="opacity:.45" disabled>
+        <span class="fn-nav-icon">${f.icon}</span>${esc(f.name)}
+      </button>`;
+    });
+  }
+
+  scroll.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+//  SIDEBAR TOGGLE
+// ══════════════════════════════════════════════════════
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  localStorage.setItem('fv_sb', sidebarOpen);
+  applySidebar();
+}
+
+function applySidebar() {
+  const sb   = document.getElementById('sidebar');
+  const cbtn = document.getElementById('cbtn');
+  if (sidebarOpen) {
+    sb.classList.remove('collapsed');
+    cbtn.classList.remove('cs');
+    cbtn.style.left = '200px';
+  } else {
+    sb.classList.add('collapsed');
+    cbtn.classList.add('cs');
+    cbtn.style.left = '0';
+  }
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Start ──
+boot();
+</script>
+</body>
+</html>

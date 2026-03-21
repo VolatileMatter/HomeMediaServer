@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Little Pony — Franchise Navigator</title>
+  <link rel="stylesheet" href="../shared.css">
+  <script src="../config.js"></script>
+  <style>
+/* ════════════════════════════════════════════════════
+   MLP-SPECIFIC PLATFORM STRIPE COLOURS
+════════════════════════════════════════════════════ */
+.fn-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/era rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media/TV insert rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+  border-left: 3px solid #ce93d8 !important;
+}
+
+/* Platform left-border colour stripes — MLP generation palette */
+.fn-g1    td:first-child { border-left: 3px solid #f06292; }  /* G1 — warm pink */
+.fn-g2    td:first-child { border-left: 3px solid #9575cd; }  /* G2 — muted purple */
+.fn-g3    td:first-child { border-left: 3px solid #4db6ac; }  /* G3 — teal */
+.fn-g4    td:first-child { border-left: 3px solid #7e57c2; }  /* G4 — FiM purple */
+.fn-eq    td:first-child { border-left: 3px solid #ff8a65; }  /* Equestria Girls — orange */
+.fn-g5    td:first-child { border-left: 3px solid #26c6da; }  /* G5 — cyan */
+.fn-gba   td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds   td:first-child { border-left: 3px solid #f48fb1; }
+.fn-pc    td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-mobile td:first-child{ border-left: 3px solid #ffd54f; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-wii   td:first-child { border-left: 3px solid #81c784; }
+
+/* Gold = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional/defunct/cancelled */
+.fn-skip td { opacity: .55; }
+
+/* Inline tags */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes     { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no      { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-mobile  { background: rgba(255,213,79,.18);  color: #ffd54f; border: 1px solid rgba(255,213,79,.35); }
+.fn-tag-defunct { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); }
+.fn-tag-opt     { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-star        { color: var(--accent); font-weight: 700; }
+
+/* View tabs */
+.fn-view-nav {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .62rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 5px 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+}
+.fn-view-btn:hover  { border-color: rgba(200,168,75,.4); color: var(--text); }
+.fn-view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.06); }
+
+.fn-view        { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc   { font-size: .74rem; color: var(--text-dim); margin-bottom: 10px; font-style: italic; }
+
+/* Main page tabs */
+.fn-tab-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 7px 14px; background: transparent;
+  border: 1px solid transparent; border-bottom: none;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+  margin-bottom: -1px; border-radius: 3px 3px 0 0;
+}
+.fn-tab-btn:hover  { color: var(--text); }
+.fn-tab-btn.active { border-color: var(--border); border-bottom-color: var(--bg); color: var(--accent); background: var(--bg); }
+
+.fn-tab-pane        { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* Legend bar */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* Stat row */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* Filler cards */
+.fn-filler-card {
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.fn-filler-episode   { background: rgba(200,168,75,.08); color: #c8a84b; border-color: rgba(200,168,75,.3); }
+.fn-filler-movie     { background: rgba(33,150,243,.08); color: #90caf9; border-color: rgba(33,150,243,.3); }
+.fn-filler-name  { font-weight:700; font-size:.88rem; color:var(--text-bright); margin-bottom:4px; }
+.fn-filler-meta  { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--text-dim); margin-bottom:6px; }
+.fn-filler-desc  { font-size:.78rem; color:var(--text-dim); line-height:1.6; }
+.fn-filler-where { margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:.72rem; color:var(--text-dim); }
+
+/* Merch history blocks */
+.fn-merch-history { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:16px 18px; margin-bottom:14px; }
+.fn-merch-history-era { font-family:'Cinzel',serif; font-size:.85rem; color:var(--accent); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🦄</div>
+  <div>
+    <h1>My Little Pony</h1>
+    <div class="subtitle">// G1–G5 · TV · Movies · GBA · DS · Mobile · Jellyfin //</div>
+    <p class="desc">
+      Hasbro's toy-turned-media empire, running from 1982 to the present across five toy generations and a remarkable diversity of animated media. G1 set the classic tone (ponies vs dark fantasy villains); G4 <em>Friendship Is Magic</em> (2010–2019) redefined it for a generation, attracting an unexpected adult fandom (bronies). G5 launched in 2021 and was discontinued in 2024. Use the Library tab to sort by release order, generation, or platform. Other tabs cover TV/Anime, Movies, Merch history, Tunarr filler, and full franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">16</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">12</div><div class="fn-stat-label">TV Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">11</div><div class="fn-stat-label">Movies / Specials</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">5</div><div class="fn-stat-label">Generations</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1982</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The My Little Pony Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','generation',this)">🌈 By Generation</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           RELEASE ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All games and media in real-world release order. Purple rows = major TV/movie milestone — recommended watch points. ⭐ = best entry for new viewers/players. Gold rows = standout entries. Faded rows = optional, defunct, or generation-specific.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Format</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <!-- G1 ─────────────────────────────── -->
+          <tr class="fn-arc-row"><td colspan="6">🌸 Generation 1 — The Classic Era (1982–1995)</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: Rescue at Midnight Castle</strong> (TV Special, 1984) — The first animated MLP. Dark fantasy tone; Tirac the villain. G1 lore foundation.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: Escape from Catrina</strong> (TV Special, 1985) — Second G1 special. Catrina the witch seeks the Rainbow of Darkness.</td></tr>
+          <tr class="fn-g1 fn-highlight"><td>1986</td><td>My Little Pony: The Movie <span class="fn-star">⭐</span></td><td>Theatrical</td><td>Movie</td><td><span class="fn-tag fn-tag-no">🖥️ Jellyfin</span></td><td><span class="fn-star">⭐</span> The canonical G1 theatrical film. Musical adventure vs the Smooze. Voice cast includes Danny DeVito, Madeline Kahn, Rhea Perlman. Best G1 entry point.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony 'n Friends</strong> (TV Series, 1986–1987) — 65-episode anthology. Incorporates Rescue at Midnight Castle and Escape from Catrina as two-parters. The core G1 series.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony Tales</strong> (TV Series, 1992) — Slice-of-life reboot. 26 episodes. More grounded, less fantasy. Different cast from G1 'n Friends.</td></tr>
+
+          <!-- G2 ─────────────────────────────── -->
+          <tr class="fn-arc-row"><td colspan="6">💎 Generation 2 — The Friendship Garden Era (1997–1999)</td></tr>
+          <tr class="fn-g2 fn-skip"><td>1998</td><td>My Little Pony: Friendship Gardens</td><td>PC (CD-ROM)</td><td>Virtual Pet</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-tag fn-tag-opt">G2 only</span> Virtual pet / edutainment by Artech Studios. The sole G2 media release. Groom, feed, and play with a pony. PC only.</td></tr>
+
+          <!-- G3 ─────────────────────────────── -->
+          <tr class="fn-arc-row"><td colspan="6">🌺 Generation 3 — The Ponyville Era (2003–2009)</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: A Very Minty Christmas</strong> (Direct-to-Video, 2005) — G3's first DTV. Holiday special. Minty accidentally breaks the Here Comes Christmas Candy Cane. Beloved fan favorite.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: The Princess Promenade</strong> (Direct-to-Video, 2006) — Wysteria becomes a princess. G3 main cast in Ponyville.</td></tr>
+          <tr class="fn-g3 fn-highlight"><td>2006</td><td>MLP Crystal Princess: The Runaway Rainbow <span class="fn-star">⭐</span></td><td>GBA</td><td>Game</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td><span class="fn-star">⭐</span> Best G3 game. Platform/adventure tie-in to the DTV film. Rarity accidentally teleports to Breezie Blossom; multi-pony playable cast. Best G3 game entry point. Emulatable on mobile via mGBA.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony Crystal Princess: The Runaway Rainbow</strong> (Direct-to-Video, 2006) — Direct tie-in to the GBA game. Watch alongside.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2003</td><td>MLP: Friendship Ball (Best Friends Ball)</td><td>PC (CD-ROM)</td><td>Activity</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td><span class="fn-tag fn-tag-opt">optional</span> Prepare four ponies for the Friendship Ball. Mini-games, dress-up, dance studio. G3 PC edutainment.</td></tr>
+          <tr class="fn-nds fn-skip"><td>2007</td><td>MLP: Pinkie Pie's Party Parade</td><td>NDS</td><td>Game</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td><span class="fn-tag fn-tag-opt">optional</span> 10 mini-games around Ponyville for Pinkie Pie's birthday. G3 characters. melonDS compatible.</td></tr>
+          <tr class="fn-nds fn-skip"><td>2008</td><td>MLP: Pinkie Pie's Birthday</td><td>NDS</td><td>Game</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td><span class="fn-tag fn-tag-opt">optional</span> Find Pinkie Pie's hidden presents across Ponyville. DS stylus mini-games. G3 cast.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: Twinkle Wish Adventure</strong> (Direct-to-Video, 2009) — Final G3 DTV. Wishing star granted to Cheerilee. G3 era closer.</td></tr>
+
+          <!-- G4 FiM ──────────────────────────── -->
+          <tr class="fn-arc-row"><td colspan="6">🌟 Generation 4 — Friendship Is Magic (2010–2020)</td></tr>
+          <tr class="fn-g4 fn-highlight"><td>2010</td><td>My Little Pony: Friendship Is Magic (S1–S9) <span class="fn-star">⭐</span></td><td>TV — The Hub / Discovery Family</td><td>TV Series</td><td><span class="fn-tag fn-tag-no">🖥️ Jellyfin</span></td><td><span class="fn-star">⭐</span> THE franchise peak. 221 episodes, 9 seasons, 2010–2019. Lauren Faust's reinvention. Mane Six — Twilight Sparkle, Rainbow Dash, Fluttershy, Rarity, Applejack, Pinkie Pie. Best overall entry point to the franchise.</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2012</td><td>MLP: Magic Princess (Gameloft) <span class="fn-star">⭐</span></td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td><span class="fn-star">⭐</span> Best G4 mobile game. City-builder / Sims-style — rebuild Ponyville, 300+ characters, official voice cast, minigames. Free-to-play, monetized but generous. Still live. Best mobile entry.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2013</td><td>My Little Pony: Equestria Girls (Mobile)</td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Canterlot High spin-off game. Fashion / social quests. Discontinued — no longer available on app stores.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Equestria Girls</strong> (2013–2019) — Anthro/human spin-off. 4 theatrical films + 5 direct-to-video + specials + short series. Sunset Shimmer is the true protagonist. Runs parallel to FiM S3–S9.</td></tr>
+          <tr class="fn-g4 fn-skip"><td>2014</td><td>MLP: Twilight Sparkle, Teacher for a Day</td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span></td><td><span class="fn-tag fn-tag-opt">cancelled</span> Edutainment mini-game by Budge Studios. Teaching/classroom theme. Removed from app stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: Harmony Quest</td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>2D platformer — Mane Six fight a changeling invasion. Each pony has unique abilities. In-app purchases for character unlocks. Still available.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: AR Guide</td><td>iOS / Android</td><td>AR App</td><td><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span></td><td><span class="fn-tag fn-tag-opt">defunct</span> Augmented reality app — place Mane Six in real world. Removed from both app stores by 2023.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2017</td><td>MLP: Rainbow Runners</td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Auto-runner. Mane Six dodge obstacles to restore color to Ponyville after a Discord mishap. Rainbow Power abilities per character.</td></tr>
+          <tr class="fn-g4"><td>2017</td><td>My Little Pony: The Movie</td><td>Theatrical</td><td>Movie</td><td><span class="fn-tag fn-tag-no">🖥️ Jellyfin</span></td><td>G4 theatrical film. Storm King invades Equestria. Star-studded voice cast (Emily Blunt, Taye Diggs, Zoe Saldana, Liev Schreiber). Grossed $60M on a $6M budget. Watch after FiM S7.</td></tr>
+          <tr class="fn-g4 fn-skip"><td>2019</td><td>MLP: School of Friendship (Pocket Pony)</td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Arcade challenge game set at the School of Friendship. Face-off against students and teachers. Discontinued.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2020</td><td>MLP: Color By Magic</td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Coloring game — restore the Museum of Friendship. G4 art. Relaxed / creative audience.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: Pony Life</strong> (TV Series, 2020–2021) — 52-episode G4 chibi-comedy spin-off. Shorter episodes, slapstick tone. Non-essential; divisive among FiM fans.</td></tr>
+
+          <!-- G5 ─────────────────────────────── -->
+          <tr class="fn-arc-row"><td colspan="6">🌊 Generation 5 — A New Generation (2021–2024) [DISCONTINUED]</td></tr>
+          <tr class="fn-g5 fn-highlight"><td>2021</td><td>My Little Pony: A New Generation <span class="fn-star">⭐</span></td><td>Netflix</td><td>Movie</td><td><span class="fn-tag fn-tag-no">🖥️ Jellyfin</span></td><td><span class="fn-star">⭐</span> G5 launch film. Sunny Starscout leads the new Mane 5. Set in Equestria generations after G4. Best G5 entry. 3D CGI by Boulder Media.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2022</td><td>MLP: A Maretime Bay Adventure</td><td>Switch / PC / PS4 / Xbox</td><td>Game</td><td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td><td>G5 platformer tie-in. Sunny hosts Maretime Bay Day festival. Outright Games. PC via Sunshine streaming.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: Make Your Mark</strong> (Netflix Series, 2022–2023) — G5 series, 44 episodes. Continues after A New Generation. Final episodes Nov 2023.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>My Little Pony: Tell Your Tale</strong> (YouTube / Netflix, 2022–2024) — G5 short-form series, 5-min episodes. Light, supplementary content. Ended Oct 2024.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2022</td><td>MLP: Mane Merge (Apple Arcade)</td><td>iOS / macOS</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 iOS Only</span></td><td>Apple Arcade exclusive. Match-3 puzzle game set in G5. Gameloft Brisbane. Requires Apple Arcade subscription.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2022</td><td>MLP: World</td><td>iOS / Android</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>G5 open-world mobile game. Explore Maretime Bay, Bridlewood, Zephyr Heights. Released Sep 2022 (iOS) / Nov 2022 (Android).</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2024</td><td>MLP: A Zephyr Heights Mystery</td><td>Switch / PC / PS4 / Xbox</td><td>Game</td><td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td><td><span class="fn-tag fn-tag-opt">discontinued gen</span> G5 action-adventure. Mane 5 investigate magic anomalies at the Zephyr Heights Gala. Up to 2 players. Outright Games. Final G5 retail game.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Secrets of Starlight</strong> (Netflix Special, Nov 2023) — G5 special alongside final Make Your Mark episodes. Caps G5 narrative arc.</td></tr>
+        </table>
+
+        <div class="fn-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold border = best entry in its tier</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded = optional / defunct / discontinued</span>
+          <span><span class="fn-tag fn-tag-mobile">📱 Mobile</span> iOS/Android</span>
+          <span><span class="fn-tag fn-tag-no">🖥️ Jellyfin</span> Video-only, not a game</span>
+          <span><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span> No longer available</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = TV/movie watch point</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BY GENERATION
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-generation">
+        <div class="fn-view-desc">All media grouped by generation. Each generation is a distinct toy/media era with its own characters and tone.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Status</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌸 G1 — Generation 1 (1982–1995)</td></tr>
+          <tr class="fn-g1"><td>1984</td><td>Rescue at Midnight Castle (Special)</td><td>TV Special</td><td>✅ Available</td><td>First animation. Tirac, Rainbow of Darkness. Dark tone. 30 min.</td></tr>
+          <tr class="fn-g1"><td>1985</td><td>Escape from Catrina (Special)</td><td>TV Special</td><td>✅ Available</td><td>Second special. Catrina + Rep. Potion addiction metaphor.</td></tr>
+          <tr class="fn-g1 fn-highlight"><td>1986</td><td>My Little Pony: The Movie</td><td>Theatrical Film</td><td>✅ Available</td><td><span class="fn-star">⭐</span> The G1 peak. Danny DeVito, Madeline Kahn. Musical.</td></tr>
+          <tr class="fn-g1"><td>1986</td><td>My Little Pony 'n Friends</td><td>TV Series</td><td>✅ Available</td><td>65 episodes. G1 main series. Anthology format.</td></tr>
+          <tr class="fn-g1 fn-skip"><td>1992</td><td>My Little Pony Tales</td><td>TV Series</td><td>✅ Available</td><td>26 eps. Slice-of-life reboot. Different characters and tone from 'n Friends.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">💎 G2 — Friendship Garden Era (1997–1999) [US only briefly]</td></tr>
+          <tr class="fn-g2 fn-skip"><td>1998</td><td>My Little Pony: Friendship Gardens</td><td>PC Game</td><td>✅ PC Only</td><td>Only G2 media. Virtual pet / edutainment CD-ROM. Artech Studios.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌺 G3 — Ponyville Era (2003–2009)</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2003</td><td>My Little Pony: Best Friends Ball</td><td>PC Game</td><td>✅ PC Only</td><td>Friendship Ball prep mini-games. Windows CD-ROM. G3 debut.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2005</td><td>My Little Pony: Hide &amp; Seek</td><td>PC / Handheld</td><td>🟡 Limited</td><td>Merlin Group mini-game compilation. Handheld LCD-style release.</td></tr>
+          <tr class="fn-g3"><td>2005</td><td>A Very Minty Christmas</td><td>Direct-to-Video</td><td>✅ Available</td><td>Holiday special. Most beloved G3 DTV. Minty breaks the Candy Cane.</td></tr>
+          <tr class="fn-g3"><td>2006</td><td>The Princess Promenade</td><td>Direct-to-Video</td><td>✅ Available</td><td>Wysteria becomes princess. Spring festival story.</td></tr>
+          <tr class="fn-g3 fn-highlight"><td>2006</td><td>Crystal Princess: The Runaway Rainbow (GBA)</td><td>GBA Game</td><td>✅ Emulatable</td><td><span class="fn-star">⭐</span> Best G3 game. Multi-pony adventure. mGBA on mobile.</td></tr>
+          <tr class="fn-g3"><td>2006</td><td>Crystal Princess: The Runaway Rainbow (DTV)</td><td>Direct-to-Video</td><td>✅ Available</td><td>Tie-in to GBA game. Rarity in Breezie Blossom.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2007</td><td>Pinkie Pie's Party Parade (NDS)</td><td>DS Game</td><td>✅ Emulatable</td><td>10 mini-games. G3 characters. melonDS compatible.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2008</td><td>Pinkie Pie's Birthday (NDS)</td><td>DS Game</td><td>✅ Emulatable</td><td>Present hunt + stylus mini-games. DS microphone gimmicks.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2009</td><td>Twinkle Wish Adventure (DTV)</td><td>Direct-to-Video</td><td>✅ Available</td><td>Final G3 DTV. Wishing star. G3 era closer.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌟 G4 — Friendship Is Magic (2010–2020)</td></tr>
+          <tr class="fn-g4 fn-highlight"><td>2010</td><td>Friendship Is Magic (S1–S9, 221 eps)</td><td>TV Series</td><td>✅ Jellyfin</td><td><span class="fn-star">⭐</span> The franchise peak. Lauren Faust. 9 seasons.</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2012</td><td>MLP: Magic Princess (Gameloft)</td><td>Mobile Game</td><td>✅ Still Live</td><td><span class="fn-star">⭐</span> City-builder. 300+ characters. Official voices. Best G4 game.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2013</td><td>Equestria Girls (Mobile)</td><td>Mobile Game</td><td>⚠️ Defunct</td><td>Canterlot High social/fashion game. Removed from stores.</td></tr>
+          <tr class="fn-g4 fn-skip"><td>2014</td><td>Twilight Sparkle, Teacher for a Day</td><td>Mobile Game</td><td>⚠️ Defunct</td><td>Edutainment. Removed from stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: Harmony Quest</td><td>Mobile Game</td><td>✅ Available</td><td>2D platformer vs changelings. Still on stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: AR Guide</td><td>AR App</td><td>⚠️ Defunct</td><td>Augmented reality. Removed by 2023.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2017</td><td>MLP: Rainbow Runners</td><td>Mobile Game</td><td>✅ Available</td><td>Auto-runner. Color restoration theme.</td></tr>
+          <tr class="fn-g4 fn-highlight"><td>2017</td><td>My Little Pony: The Movie</td><td>Theatrical Film</td><td>✅ Jellyfin</td><td>Storm King. Emily Blunt, Taye Diggs. $60M gross.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2019</td><td>School of Friendship / Pocket Pony</td><td>Mobile Game</td><td>⚠️ Defunct</td><td>Arcade challenges. Discontinued.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2020</td><td>MLP: Color By Magic</td><td>Mobile Game</td><td>✅ Available</td><td>Coloring / museum restoration. Relaxed gameplay.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2013</td><td>Equestria Girls Series (4 films + 5 DTVs)</td><td>Film Series</td><td>✅ Jellyfin</td><td>Anthro spin-off. Sunset Shimmer arc. See Movies tab.</td></tr>
+          <tr class="fn-g4 fn-skip"><td>2020</td><td>Pony Life (52 eps)</td><td>TV Series (Spin-off)</td><td>✅ Available</td><td>Chibi-comedy spin-off. Non-essential.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌊 G5 — A New Generation (2021–2024) [DISCONTINUED]</td></tr>
+          <tr class="fn-g5 fn-highlight"><td>2021</td><td>My Little Pony: A New Generation (Film)</td><td>Netflix Film</td><td>✅ Jellyfin</td><td><span class="fn-star">⭐</span> Best G5 entry. Sunny Starscout. 3D CGI. Boulder Media.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2022</td><td>Make Your Mark (44 eps)</td><td>Netflix Series</td><td>✅ Jellyfin</td><td>Main G5 series. Ended Nov 2023.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2022</td><td>Tell Your Tale (YouTube/Netflix shorts)</td><td>Short Series</td><td>✅ Jellyfin</td><td>5-min shorts. Supplementary. Ended Oct 2024.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2022</td><td>A Maretime Bay Adventure</td><td>Console Game</td><td>✅ PC via Sunshine</td><td>G5 platformer. Outright Games.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2022</td><td>MLP: Mane Merge (Apple Arcade)</td><td>Mobile Game</td><td>🍎 Apple Arcade Only</td><td>Match-3 puzzle. G5 characters. Requires subscription.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2022</td><td>MLP: World</td><td>Mobile Game</td><td>✅ Available</td><td>Open-world G5 mobile. Explore all three kingdoms.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2023</td><td>Secrets of Starlight (Special)</td><td>Netflix Special</td><td>✅ Jellyfin</td><td>G5 narrative cap. Released alongside final Make Your Mark eps.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2024</td><td>A Zephyr Heights Mystery</td><td>Console Game</td><td>✅ PC via Sunshine</td><td>Final G5 game. Co-op action adventure. Outright Games.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BY PLATFORM
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">Games only, grouped by platform. TV/film on the TV &amp; Anime and Movies tabs.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Generation</th><th>Core / App</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🖥️ PC (CD-ROM)</td></tr>
+          <tr class="fn-g2 fn-skip"><td>1998</td><td>My Little Pony: Friendship Gardens</td><td>G2</td><td>DOSBox / Win98 VM</td><td>Virtual pet. Only G2 media. Hard to run on modern PCs.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2003</td><td>My Little Pony: Best Friends Ball</td><td>G3</td><td>Win XP VM</td><td>Activity/mini-game compilation. CD-ROM era.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🕹️ GBA</td></tr>
+          <tr class="fn-gba fn-highlight"><td>2006</td><td>Crystal Princess: The Runaway Rainbow</td><td>G3</td><td>mGBA</td><td><span class="fn-star">⭐</span> Best GBA MLP. Multi-pony platformer. Excellent mobile via mGBA.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 Nintendo DS</td></tr>
+          <tr class="fn-nds fn-skip"><td>2007</td><td>Pinkie Pie's Party Parade</td><td>G3</td><td>melonDS</td><td>Mini-game pack. Touch screen / microphone gimmicks.</td></tr>
+          <tr class="fn-nds fn-skip"><td>2008</td><td>Pinkie Pie's Birthday</td><td>G3</td><td>melonDS</td><td>Present hunt + DS mini-games.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📱 iOS / Android (Mobile)</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2012</td><td>MLP: Magic Princess (Gameloft)</td><td>G4</td><td>Native App</td><td><span class="fn-star">⭐</span> City-builder. Still live. Best mobile game.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2013</td><td>Equestria Girls App</td><td>G4 Spin-off</td><td>⚠️ Defunct</td><td>Removed from stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2014</td><td>Twilight Sparkle, Teacher for a Day</td><td>G4</td><td>⚠️ Defunct</td><td>Removed from stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: Harmony Quest</td><td>G4</td><td>Native App</td><td>2D platformer. Still available.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: AR Guide</td><td>G4</td><td>⚠️ Defunct</td><td>AR app. Removed 2021–2023.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2017</td><td>MLP: Rainbow Runners</td><td>G4</td><td>Native App</td><td>Auto-runner. Still available.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2019</td><td>School of Friendship / Pocket Pony</td><td>G4</td><td>⚠️ Defunct</td><td>Discontinued.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2020</td><td>MLP: Color By Magic</td><td>G4</td><td>Native App</td><td>Coloring game. Still available.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2022</td><td>MLP: Mane Merge</td><td>G5</td><td>Apple Arcade</td><td>iOS / macOS only. Apple Arcade subscription required.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2022</td><td>MLP: World</td><td>G5</td><td>Native App</td><td>Open-world G5 mobile. Available on both stores.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🖥️ PC / Console (Modern)</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2022</td><td>A Maretime Bay Adventure</td><td>G5</td><td>PC / Switch / PS4 / Xbox</td><td>Outright Games G5 platformer. Sunshine streaming for TV.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2024</td><td>A Zephyr Heights Mystery</td><td>G5</td><td>PC / Switch / PS4 / Xbox</td><td>Co-op action adventure. Final G5 retail game.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BEST FIRST
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Recommended play/watch order for a newcomer. Prioritizes quality and accessibility over release order. Skip the lower-tier entries on a first pass.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Format</th><th>Why Start Here</th></tr>
+          <tr class="fn-g4 fn-highlight"><td>1</td><td>Friendship Is Magic S1–S3 <span class="fn-star">⭐</span></td><td>TV (Jellyfin)</td><td>The creative peak of the entire franchise. Lauren Faust's worldbuilding and character work. Start with S1E01–02 "Friendship Is Magic."</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2</td><td>MLP: Magic Princess (Gameloft) <span class="fn-star">⭐</span></td><td>Mobile Game</td><td>Companion game to FiM. Rebuild Ponyville, collect the show's cast. Works offline. Best entry game.</td></tr>
+          <tr class="fn-g4 fn-highlight"><td>3</td><td>Friendship Is Magic S4–S9</td><td>TV (Jellyfin)</td><td>Continue the full run. S4–S6 are peak quality; S7–S9 include the 2017 film and series finale.</td></tr>
+          <tr class="fn-g4"><td>4</td><td>My Little Pony: The Movie (2017)</td><td>Film (Jellyfin)</td><td>Theatrical G4 film. Fits between FiM S7 and S8. Big production values, excellent songs.</td></tr>
+          <tr class="fn-eq fn-skip"><td>5</td><td>Equestria Girls (All Films)</td><td>Films (Jellyfin)</td><td>Optional spin-off. Sunset Shimmer is a great character. Start with EG1 (2013) after FiM S3.</td></tr>
+          <tr class="fn-gba fn-highlight"><td>6</td><td>Crystal Princess: The Runaway Rainbow (GBA) <span class="fn-star">⭐</span></td><td>GBA Game (mGBA)</td><td>Best console MLP game. Short, charming G3 adventure. Playable on mobile.</td></tr>
+          <tr class="fn-g5"><td>7</td><td>My Little Pony: A New Generation (2021)</td><td>Film (Jellyfin)</td><td>G5 start film. Good quality even if G5 didn't sustain it. Sunny Starscout is a likeable lead.</td></tr>
+          <tr class="fn-g1 fn-highlight fn-skip"><td>8</td><td>My Little Pony: The Movie (1986)</td><td>Film (Jellyfin)</td><td>G1 nostalgia. Short, musical, charmingly weird. Danny DeVito as a villain.</td></tr>
+          <tr class="fn-g1 fn-skip"><td>9</td><td>Rescue at Midnight Castle (1984 Special)</td><td>TV Special</td><td>Surprisingly dark and still watchable. G1 genesis. Only 30 minutes.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           MOBILE ONLY
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Games playable on mobile — either native iOS/Android apps or emulatable on phone via RetroArch/mGBA mobile. PS2-style hardware not included.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">📱 Native Mobile Apps</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2012</td><td>MLP: Magic Princess (Gameloft) <span class="fn-star">⭐</span></td><td>iOS / Android</td><td>✅ Still Live</td><td><span class="fn-star">⭐</span> Best mobile MLP game. City-builder. Free with IAP. Still actively updated.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: Harmony Quest</td><td>iOS / Android</td><td>✅ Available</td><td>2D platformer vs Changelings. Still available on both stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2017</td><td>MLP: Rainbow Runners</td><td>iOS / Android</td><td>✅ Available</td><td>Auto-runner. Short sessions. Discord rainbow chaos theme.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2020</td><td>MLP: Color By Magic</td><td>iOS / Android</td><td>✅ Available</td><td>Coloring / relaxed gameplay. Museum of Friendship restoration.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2022</td><td>MLP: Mane Merge</td><td>iOS / macOS</td><td>🍎 Apple Arcade</td><td>Match-3. Subscription required. G5 characters.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2022</td><td>MLP: World</td><td>iOS / Android</td><td>✅ Available</td><td>G5 open-world mobile. Maretime Bay / Bridlewood / Zephyr Heights.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚠️ Defunct Mobile Apps (no longer downloadable)</td></tr>
+          <tr class="fn-eq fn-skip"><td>2013</td><td>Equestria Girls App</td><td>iOS / Android</td><td>⚠️ Removed</td><td>Canterlot High spin-off. Toy-scanning features. Gone from stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2014</td><td>Twilight Sparkle, Teacher for a Day</td><td>iOS / Android</td><td>⚠️ Removed</td><td>Edutainment. Removed.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2016</td><td>MLP: AR Guide</td><td>iOS / Android</td><td>⚠️ Removed</td><td>AR app. Removed 2021 (Android) / 2023 (iOS).</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2019</td><td>School of Friendship / Pocket Pony</td><td>iOS / Android</td><td>⚠️ Removed</td><td>Arcade. Discontinued.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🕹️ Emulatable on Mobile (mGBA / melonDS)</td></tr>
+          <tr class="fn-gba fn-highlight"><td>2006</td><td>Crystal Princess: The Runaway Rainbow</td><td>GBA → mGBA</td><td>✅ ROM</td><td><span class="fn-star">⭐</span> Best emulated MLP. Runs perfectly on mGBA mobile.</td></tr>
+          <tr class="fn-nds fn-skip"><td>2007</td><td>Pinkie Pie's Party Parade</td><td>NDS → melonDS</td><td>✅ ROM</td><td>Mini-game collection. Touch screen features intact on melonDS.</td></tr>
+          <tr class="fn-nds fn-skip"><td>2008</td><td>Pinkie Pie's Birthday</td><td>NDS → melonDS</td><td>✅ ROM</td><td>Microphone gimmicks won't transfer fully, but gameplay works.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 My Little Pony — TV Series &amp; Animated Media</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','bytype',    this)">📂 By Type</button>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view active" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended watch order. G4 FiM is the unambiguous start for new viewers. G1 and G5 are self-contained arcs.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Year</th><th>Episodes</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">🌟 Start Here — G4 Friendship Is Magic</td></tr>
+          <tr class="fn-g4 fn-highlight"><td>1</td><td>Friendship Is Magic S1–S3 <span class="fn-star">⭐</span></td><td>2010–2013</td><td>65 eps</td><td>The essential run. Lauren Faust's creative vision is strongest here. S1 is flawless.</td></tr>
+          <tr class="fn-eq fn-highlight"><td>2</td><td>Equestria Girls (Film 1)</td><td>2013</td><td>1 film</td><td>Optional after S3. Twilight crosses to human world. Sets up Sunset Shimmer's arc.</td></tr>
+          <tr class="fn-g4"><td>3</td><td>FiM S4–S6</td><td>2013–2016</td><td>78 eps</td><td>Sustained peak quality. S4 finale and S5 "Crusaders of the Lost Mark" are highlights.</td></tr>
+          <tr class="fn-eq fn-skip"><td>4</td><td>Equestria Girls: Rainbow Rocks</td><td>2014</td><td>1 film</td><td>Best Equestria Girls film. The Dazzlings are excellent villains.</td></tr>
+          <tr class="fn-eq fn-skip"><td>5</td><td>Equestria Girls: Friendship Games</td><td>2015</td><td>1 film</td><td>Crystal Prep vs Canterlot High. Sci-Twi introduced.</td></tr>
+          <tr class="fn-eq fn-skip"><td>6</td><td>Equestria Girls: Legend of Everfree</td><td>2016</td><td>1 film</td><td>Camp Everfree. Lighter tone but fun character moments.</td></tr>
+          <tr class="fn-g4"><td>7</td><td>FiM S7 + The Movie (2017)</td><td>2017</td><td>26 eps + 1 film</td><td>Watch the 2017 theatrical film between S7 and S8 for best flow.</td></tr>
+          <tr class="fn-eq fn-skip"><td>8</td><td>Equestria Girls: Forgotten Friendship + Rollercoaster of Friendship</td><td>2018</td><td>2 specials</td><td>DTVs. Sunset's memory erased, then theme park trouble. Sunset arc cap.</td></tr>
+          <tr class="fn-g4"><td>9</td><td>FiM S8–S9 + Best Gift Ever + Rainbow Roadtrip</td><td>2018–2019</td><td>52 eps + 2 specials</td><td>Series finale S9E25–26 "The Last Problem." Emotional conclusion.</td></tr>
+          <tr class="fn-eq fn-skip"><td>10</td><td>Equestria Girls: Spring Breakdown + Sunset's Backstage Pass</td><td>2019</td><td>2 specials</td><td>Final EG DTVs. Cruise ship magic, time loop hijinks.</td></tr>
+          <tr class="fn-g4 fn-skip"><td>11</td><td>Pony Life (S1–S2)</td><td>2020–2021</td><td>52 eps</td><td>Optional. Chibi comedy spin-off. Lower stakes, gag-focused. Not for everyone.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌊 G5 Arc (self-contained, set in Equestria's far future)</td></tr>
+          <tr class="fn-g5 fn-highlight"><td>12</td><td>A New Generation (Netflix Film) <span class="fn-star">⭐</span></td><td>2021</td><td>1 film</td><td>Best G5 start. Sunny Starscout. Ponies have forgotten each other. Hopeful tone.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>13</td><td>Make Your Mark (S1–S5)</td><td>2022–2023</td><td>44 eps</td><td>Main G5 series. Expands lore and adds new characters (Misty Brightdawn).</td></tr>
+          <tr class="fn-g5 fn-skip"><td>14</td><td>Tell Your Tale (Shorts)</td><td>2022–2024</td><td>100+ shorts</td><td>5-min YouTube/Netflix shorts. Supplementary. Skip unless heavily invested in G5.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>15</td><td>Secrets of Starlight (Special)</td><td>2023</td><td>1 special</td><td>G5 narrative cap. Watch after Make Your Mark finale.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌸 G1 Arc (classic, standalone — watch whenever)</td></tr>
+          <tr class="fn-g1"><td>—</td><td>Rescue at Midnight Castle (1984 Special)</td><td>1984</td><td>30 min</td><td>First animated MLP. Dark fantasy tone. Tirac villain. Historically significant.</td></tr>
+          <tr class="fn-g1"><td>—</td><td>Escape from Catrina (1985 Special)</td><td>1985</td><td>30 min</td><td>Second special. Catrina's addiction allegory (unintentional but notable).</td></tr>
+          <tr class="fn-g1 fn-highlight"><td>—</td><td>My Little Pony 'n Friends (1986–87)</td><td>1986</td><td>65 eps</td><td>The main G1 series. Best enjoyed a few episodes at a time — anthology structure.</td></tr>
+          <tr class="fn-g1 fn-skip"><td>—</td><td>My Little Pony Tales (1992)</td><td>1992</td><td>26 eps</td><td>Reboot. Slice-of-life, different cast. Worth sampling for contrast with G1.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌺 G3 DTVs (nostalgic — light viewing)</td></tr>
+          <tr class="fn-g3"><td>—</td><td>A Very Minty Christmas</td><td>2005</td><td>45 min</td><td>The most beloved G3 DTV. Good holiday comfort watch.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>—</td><td>The Princess Promenade</td><td>2006</td><td>45 min</td><td>Spring festival. Pleasant but forgettable.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>—</td><td>Crystal Princess: The Runaway Rainbow</td><td>2006</td><td>45 min</td><td>Watch alongside / after the GBA game.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>—</td><td>Twinkle Wish Adventure</td><td>2009</td><td>45 min</td><td>G3 era closer. Weakest of the G3 DTVs.</td></tr>
+        </table>
+      </div>
+
+      <!-- BY TYPE -->
+      <div class="fn-view" id="fn-tvanime-bytype">
+        <div class="fn-view-desc">All animated series and specials grouped by format.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Network</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎞️ TV Specials</td></tr>
+          <tr class="fn-g1"><td>1984</td><td>Rescue at Midnight Castle</td><td>1 special (30 min)</td><td>Syndication</td><td>First MLP animation. Surprisingly dark for the era.</td></tr>
+          <tr class="fn-g1"><td>1985</td><td>Escape from Catrina</td><td>1 special (30 min)</td><td>Syndication</td><td>Second special. Witch antagonist, Rainbow of Darkness.</td></tr>
+          <tr class="fn-g4"><td>2018</td><td>Best Gift Ever</td><td>1 special (44 min)</td><td>Discovery Family</td><td>Holiday special. Hearth's Warming gift hunt. Canon G4.</td></tr>
+          <tr class="fn-g4"><td>2019</td><td>Rainbow Roadtrip</td><td>1 special (60 min)</td><td>Discovery Family</td><td>Mane Six travel to Hope Hollow. Colour-drain mystery.</td></tr>
+          <tr class="fn-g5"><td>2023</td><td>Secrets of Starlight</td><td>1 special</td><td>Netflix</td><td>G5 arc cap. Misty Brightdawn conclusion.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📺 Television Series</td></tr>
+          <tr class="fn-g1 fn-highlight"><td>1986</td><td>My Little Pony 'n Friends</td><td>65 eps / 1 season</td><td>Syndication</td><td>The G1 main series. Produced by Sunbow/Marvel, animated by Toei.</td></tr>
+          <tr class="fn-g1 fn-skip"><td>1992</td><td>My Little Pony Tales</td><td>26 eps / 1 season</td><td>Syndication</td><td>G1 reboot. Different tone — school/slice-of-life.</td></tr>
+          <tr class="fn-g4 fn-highlight"><td>2010</td><td>Friendship Is Magic</td><td>221 eps / 9 seasons</td><td>The Hub / Discovery Family</td><td><span class="fn-star">⭐</span> The peak. 2010–2019. Lauren Faust, DHX Media.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2013</td><td>Equestria Girls (Shorts / Specials)</td><td>~90+ shorts + 5 specials</td><td>Discovery Family / YouTube</td><td>Various short-form content alongside the film series.</td></tr>
+          <tr class="fn-g4 fn-skip"><td>2020</td><td>My Little Pony: Pony Life</td><td>52 eps / 2 seasons</td><td>Discovery Family / Netflix</td><td>Chibi comedy. Not for everyone. 11-min episodes.</td></tr>
+          <tr class="fn-g5 fn-highlight"><td>2022</td><td>My Little Pony: Make Your Mark</td><td>44 eps / 5 chapters</td><td>Netflix</td><td>Main G5 series. Best G5 TV.</td></tr>
+          <tr class="fn-g5 fn-skip"><td>2022</td><td>My Little Pony: Tell Your Tale</td><td>100+ shorts</td><td>YouTube / Netflix</td><td>5-min short series. G5 supplementary content.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📀 Direct-to-Video Films (G3)</td></tr>
+          <tr class="fn-g3 fn-highlight"><td>2005</td><td>A Very Minty Christmas</td><td>1 film (45 min)</td><td>DVD</td><td>Best G3 DTV. Holiday warmth.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2006</td><td>The Princess Promenade</td><td>1 film (45 min)</td><td>DVD</td><td>Spring festival. Wysteria.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2006</td><td>Crystal Princess: The Runaway Rainbow</td><td>1 film (45 min)</td><td>DVD</td><td>Ties in with GBA game.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2009</td><td>Twinkle Wish Adventure</td><td>1 film (45 min)</td><td>DVD</td><td>Final G3 DTV. Weakest of the set.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎬 Equestria Girls Direct-to-Video Films (G4 Spin-off)</td></tr>
+          <tr class="fn-eq fn-skip"><td>2015</td><td>Friendship Games (DTV)</td><td>1 film (72 min)</td><td>DVD / Digital</td><td>Crystal Prep rivalry. Sci-Twi's introduction.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2016</td><td>Legend of Everfree (Netflix)</td><td>1 film (72 min)</td><td>Netflix</td><td>Camp setting. Magic stabilization theme.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2018</td><td>Forgotten Friendship</td><td>1 special (44 min)</td><td>Discovery Family</td><td>Sunset's memories erased. Good character writing.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2018</td><td>Rollercoaster of Friendship</td><td>1 special (44 min)</td><td>Discovery Family</td><td>Theme park adventure. Lighter tone.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2019</td><td>Spring Breakdown</td><td>1 special (44 min)</td><td>Discovery Family</td><td>Cruise ship magic. Rainbow Dash focus.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2019</td><td>Sunset's Backstage Pass</td><td>1 special (44 min)</td><td>Discovery Family</td><td>Time loop. Final EG special. Sunset's character arc complete.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\TV\My Little Pony\
+  ├── My Little Pony 'n Friends (1986)\
+  │   └── Season 01\
+  ├── My Little Pony Tales (1992)\
+  ├── My Little Pony Friendship Is Magic (2010)\
+  │   ├── Season 01 – Season 09\
+  │   └── Specials\  ← Best Gift Ever, Rainbow Roadtrip
+  ├── My Little Pony Pony Life (2020)\
+  ├── My Little Pony Make Your Mark (2022)\
+  └── My Little Pony Tell Your Tale (2022)\
+
+D:\Media\Movies\My Little Pony\
+  ├── My Little Pony The Movie (1986).mkv
+  ├── MLP A Very Minty Christmas (2005).mkv
+  ├── MLP The Princess Promenade (2006).mkv
+  ├── MLP Crystal Princess The Runaway Rainbow (2006).mkv
+  ├── MLP Twinkle Wish Adventure (2009).mkv
+  ├── My Little Pony Equestria Girls (2013).mkv
+  ├── MLP Equestria Girls Rainbow Rocks (2014).mkv
+  ├── MLP Equestria Girls Friendship Games (2015).mkv
+  ├── MLP Equestria Girls Legend of Everfree (2016).mkv
+  ├── My Little Pony The Movie (2017).mkv
+  ├── MLP Equestria Girls Forgotten Friendship (2018).mkv
+  ├── MLP Equestria Girls Rollercoaster of Friendship (2018).mkv
+  ├── MLP Equestria Girls Spring Breakdown (2019).mkv
+  ├── MLP Equestria Girls Sunsets Backstage Pass (2019).mkv
+  ├── My Little Pony A New Generation (2021).mkv
+  └── MLP Secrets of Starlight (2023).mkv</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 My Little Pony Movies</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',        this)">📋 All Films</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <!-- ALL FILMS -->
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">Every theatrical film and major direct-to-video release. G3 DTVs and Equestria Girls specials are grouped separately.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Canon</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎬 Theatrical Films</td></tr>
+          <tr class="fn-g1 fn-highlight"><td>1986</td><td>My Little Pony: The Movie <span class="fn-star">⭐</span></td><td>Theatrical</td><td>✅ G1 Canon</td><td>Danny DeVito, Madeline Kahn, Rhea Perlman. The Smooze. Musical. 421-theater limited release. Grossed $5M+.</td></tr>
+          <tr class="fn-g4 fn-highlight"><td>2017</td><td>My Little Pony: The Movie <span class="fn-star">⭐</span></td><td>Theatrical</td><td>✅ G4 Canon</td><td>Storm King invades Equestria. Emily Blunt, Zoe Saldana, Taye Diggs, Liev Schreiber. $6M budget, $60M gross. Best theatrical MLP film.</td></tr>
+          <tr class="fn-g5 fn-highlight"><td>2021</td><td>My Little Pony: A New Generation</td><td>Netflix Exclusive</td><td>✅ G5 Canon</td><td>G5 launch film. Sunny Starscout. 3D CGI by Boulder Media. Ponies have lost their magic and distrust each other.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌺 G3 Direct-to-Video Films</td></tr>
+          <tr class="fn-g3 fn-highlight"><td>2005</td><td>A Very Minty Christmas</td><td>Direct-to-Video</td><td>✅ G3 Canon</td><td>Best G3 film. Minty breaks the Candy Cane. Holiday classic for G3 fans.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2006</td><td>The Princess Promenade</td><td>Direct-to-Video</td><td>✅ G3 Canon</td><td>Wysteria becomes princess. Breezie friends appear.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2006</td><td>Crystal Princess: The Runaway Rainbow</td><td>Direct-to-Video</td><td>✅ G3 Canon</td><td>Rarity accidentally teleports. Tie-in to GBA game.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>2009</td><td>Twinkle Wish Adventure</td><td>Direct-to-Video</td><td>✅ G3 Canon</td><td>Final G3 DTV. Wishing star granted to Cheerilee.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🪞 Equestria Girls Films (G4 Spin-off)</td></tr>
+          <tr class="fn-eq fn-highlight"><td>2013</td><td>Equestria Girls</td><td>Theatrical / DVD</td><td>⚠️ Spin-off</td><td>Twilight crosses magic mirror to Canterlot High. Sunset Shimmer introduced. Limited theatrical run.</td></tr>
+          <tr class="fn-eq fn-highlight"><td>2014</td><td>Rainbow Rocks</td><td>Direct-to-Video</td><td>⚠️ Spin-off</td><td>The Dazzlings (siren villains). Best Equestria Girls film. Strong songs.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2015</td><td>Friendship Games</td><td>Direct-to-Video</td><td>⚠️ Spin-off</td><td>Crystal Prep rivalry. Sci-Twi introduced.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2016</td><td>Legend of Everfree</td><td>Netflix</td><td>⚠️ Spin-off</td><td>Camp Everfree. Earth-magic theme. First Netflix release for EG.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2018</td><td>Forgotten Friendship</td><td>Discovery Family Special</td><td>⚠️ Spin-off</td><td>Sunset's memories erased by Wallflower Blush. Best post-film EG entry.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2018</td><td>Rollercoaster of Friendship</td><td>Discovery Family Special</td><td>⚠️ Spin-off</td><td>Theme park. Vignette and Juniper Montage.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2019</td><td>Spring Breakdown</td><td>Discovery Family Special</td><td>⚠️ Spin-off</td><td>Cruise ship / storm magic. Rainbow Dash focus.</td></tr>
+          <tr class="fn-eq fn-skip"><td>2019</td><td>Sunset's Backstage Pass</td><td>Discovery Family Special</td><td>⚠️ Spin-off</td><td>Time loop. Final EG special. Sunset's full redemption arc closes here.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">⚠️ Cancelled / Unreleased</td></tr>
+          <tr class="fn-skip"><td>2025</td><td>Live-Action MLP Film (Amazon MGM)</td><td>Theatrical (Announced)</td><td>TBD</td><td>Announced July 2025. Amazon MGM Studios + Hasbro Entertainment. In development — no release date.</td></tr>
+          <tr class="fn-skip"><td>~2024</td><td>"Camp Cutie Mark" Reboot (Cancelled)</td><td>Animated Series</td><td>Cancelled</td><td>Leaked Sept 2024 via Equestria Daily. Would have bridged G4 and G5 characters. Hasbro cancelled after leaks surfaced.</td></tr>
+        </table>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">Films-only watch order for the casual viewer who wants to skip the full series.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Year</th><th>Why</th></tr>
+          <tr class="fn-g4 fn-highlight"><td>1</td><td>My Little Pony: The Movie (2017) <span class="fn-star">⭐</span></td><td>2017</td><td>Best film, most accessible. Works without seeing the series (though FiM S1–S7 enriches it).</td></tr>
+          <tr class="fn-g5"><td>2</td><td>My Little Pony: A New Generation</td><td>2021</td><td>Fully standalone. Good intro to G5's characters and world.</td></tr>
+          <tr class="fn-eq fn-skip"><td>3</td><td>Equestria Girls + Rainbow Rocks</td><td>2013–2014</td><td>Best Equestria Girls. Rainbow Rocks is especially strong. Some FiM S1–S3 context helps.</td></tr>
+          <tr class="fn-g1 fn-skip"><td>4</td><td>My Little Pony: The Movie (1986)</td><td>1986</td><td>Nostalgic curiosity. Short and fun as a historical artifact.</td></tr>
+          <tr class="fn-g3 fn-skip"><td>5</td><td>A Very Minty Christmas</td><td>2005</td><td>Best G3 film. Pleasant holiday watch even out of context.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 MLP Merchandise History</div>
+    <div class="card">
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">🌸 G1 Merchandise (1982–1995)</div>
+        <p>The original toy line — six Earth Ponies in 1982, expanding rapidly to Unicorns, Pegasi, Flutter Ponies, Sea Ponies, and Baby Ponies. Over 150 named G1 ponies produced. Huge collector market today; original condition G1s fetch significant sums. Notable playsets include Dream Castle (1983), Paradise Estate (1986, introduced in the movie), and the Lullaby Nursery. G1 merch was discontinued in the US in 1992, internationally in 1995. The 1985 G1 comic series ran for 220+ issues — one of the most successful licensed comics of its era.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">💎 G2 Merchandise (1997–1999)</div>
+        <p>Redesigned slimmer proportions with jewel eyes and turning heads. Five initial ponies: Berry Bright, Clever Clover, Morning Glory, Petal Blossom, Sky Skimmer. G2 was US-limited and commercially unsuccessful; sold more widely in Europe. Discontinued 1999. Almost no media to speak of — a small 5-issue European comic and the Friendship Gardens PC game are the sum total of G2 non-toy output. Extremely rare in the US collector market today.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">🌺 G3 Merchandise (2003–2009)</div>
+        <p>Return to approachable, rounder pony designs. Targeted younger audience than G1. ~100 million G3 ponies sold globally by 2010. Major playsets include the Celebration Castle and Ponyville town sets. G3 included a "G3.5" mini-refresh in 2009 with chibi-style proportions (bridging toward G4). The G3 design is closest to what most adults picture when they think "classic My Little Pony."</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">🌟 G4 Merchandise (2010–2020)</div>
+        <p>The franchise's commercial apex. Over $1 billion in annual retail sales in 2014–2015. G4 introduced the "Mane Six" as a stable character lineup, enabling collectible series targeting adult bronies alongside the core child demographic. Notable sub-lines: blind bags, Funko vinyl figures, NECA plush, Hot Topic exclusives, San Diego Comic-Con convention exclusives, the collector-aimed Guardians of Harmony figures, and the IDW comic series (2012–2021, 220+ issues). The 2017 movie tie-in merch was a commercial success in its own right.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">🌊 G5 Merchandise (2021–2024) [Discontinued]</div>
+        <p>Spin Master acquired the MLP toy license from Hasbro for G5, replacing Hasbro's own manufacturing. G5 failed to replicate G4's commercial success — lower product sales, mixed reviews, and inability to capture the brony fanbase (which remained G4-focused). Officially discontinued in 2024. Hasbro announced a "Total Brand Reinvention" in May 2025, aiming for a 2026–2027 relaunch with "retro-vibes" styling. A live-action Amazon MGM film was announced July 2025.</p>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr Channel Use)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler — MLP</div>
+    <div class="card">
+      <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">Episodes and specials well-suited for looping on a Tunarr background/ambient channel. Prioritize shorter, self-contained episodes. G4 FiM works well as constant background content given its 22-minute episodes and episodic structure.</p>
+
+      <div class="fn-filler-card fn-filler-episode">
+        <div class="fn-filler-name">FiM S1–S3 Loop — "Classic Equestria"</div>
+        <div class="fn-filler-meta">G4 · 22 min/ep · 65 episodes</div>
+        <div class="fn-filler-desc">The Lauren Faust seasons. Ideal for background viewing — bright, episodic, self-contained stories. Best single block for a 24/7 MLP channel. Each episode stands alone well.</div>
+        <div class="fn-filler-where">📍 Jellyfin → My Little Pony Friendship Is Magic (2010) → Season 01–03</div>
+      </div>
+
+      <div class="fn-filler-card fn-filler-episode">
+        <div class="fn-filler-name">G3 DTVs Loop — "Ponyville Cozy"</div>
+        <div class="fn-filler-meta">G3 · 45 min each · 4 films</div>
+        <div class="fn-filler-desc">Low-stakes, cheerful G3 films. Perfect for background ambiance on a "cozy channel." A Very Minty Christmas anchors a holiday rotation; the others fill standard blocks well.</div>
+        <div class="fn-filler-where">📍 Jellyfin → My Little Pony Movies folder → G3 DTVs</div>
+      </div>
+
+      <div class="fn-filler-card fn-filler-movie">
+        <div class="fn-filler-name">Equestria Girls Films — "Canterlot High Block"</div>
+        <div class="fn-filler-meta">G4 Spin-off · 44–72 min each · 9 entries</div>
+        <div class="fn-filler-desc">Solid mid-length entries for an Equestria Girls sub-channel. Rainbow Rocks and Forgotten Friendship are the two best for standalone filler quality.</div>
+        <div class="fn-filler-where">📍 Jellyfin → My Little Pony Movies folder → Equestria Girls</div>
+      </div>
+
+      <div class="fn-filler-card fn-filler-episode">
+        <div class="fn-filler-name">Tell Your Tale Shorts — "Quick Cuts"</div>
+        <div class="fn-filler-meta">G5 · 5 min/ep · 100+ episodes</div>
+        <div class="fn-filler-desc">Short-form content ideal for padding between longer blocks or bumper-style filler. Low commitment. Works well on a G5 channel as interstitials.</div>
+        <div class="fn-filler-where">📍 Jellyfin → My Little Pony Tell Your Tale (2022)</div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">📖 My Little Pony — Franchise History</div>
+    <div class="card">
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">1981–1982 — Origin: My Pretty Pony</div>
+        <p>Illustrator Bonnie Zacherle and sculptor Charles Muenchinger created the original "My Pretty Pony" figurine for Hasbro in 1981 — a 10-inch hard plastic toy that could wiggle ears, swish its tail, and wink. It was marketed to both boys and girls. The commercial relaunch in 1982 downsized the design, added vivid colors and flank symbols, and launched the brand that would define a generation of girls' toys. The initial six-pony lineup (Blossom, Butterscotch, Cotton Candy, Minty, Snuzzle, Bluebelle) sold out immediately.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">1984–1992 — G1: Animation and Expansion</div>
+        <p>Hasbro partnered with Sunbow Productions and Marvel Productions to produce animated content, animated by Toei Animation. The 1984 special "Rescue at Midnight Castle" introduced a surprisingly dark high-fantasy tone — the villain Tirac was genuinely menacing. By 1986, the franchise was large enough to support a theatrical film (with Danny DeVito, Madeline Kahn) and a full syndicated anthology series "My Little Pony 'n Friends." The 1985 Marvel/Star Comics series ran 220+ issues. The G1 animated universe featured three human children (Megan, Danny, and Molly) who frequently crossed the "Rainbow" to Ponyland — a distinctive element later generations dropped. The toy line itself grew to encompass over 150 individually named ponies across multiple sub-types before declining in the early 1990s, ending US production in 1992 and international production in 1995.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">1997–1999 — G2: The Quiet Failure</div>
+        <p>Hasbro relaunched MLP in 1997 with a redesigned European-influenced look — smaller, slimmer proportions, jewel eyes. The G2 toyline performed poorly in the US and was discontinued by 1999, though European sales continued somewhat longer. There was almost no media output: a short European comic run and the 1998 PC game "Friendship Gardens" (developed by Artech Studios) represent the entirety of G2 non-toy content. G2 remains the least-documented and least-collected generation.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">2003–2009 — G3: Ponyville and the DTV Era</div>
+        <p>A more commercially successful relaunch with toy designs resembling the original G1 aesthetic. Ponyville was established as the main setting. SD Entertainment produced a series of direct-to-video animated films — lighter in tone than G1, targeting a younger audience. Approximately 100 million G3 toys were sold globally by 2010. The generation received a design refresh mid-run (sometimes called "G3.5" or "Core 7"), narrowing the main cast to seven core ponies. Lauren Faust, who would later create FiM, was shown the G3 "Princess Promenade" special when she approached Hasbro with her "Galaxy Girls" pitch — a key coincidence that led to G4.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">2010–2019 — G4: Friendship Is Magic and the Brony Phenomenon</div>
+        <p>Animator Lauren Faust (The Powerpuff Girls, Foster's Home for Imaginary Friends) was hired to develop the G4 relaunch. Her pitch bible established deeper characterization, fantasy worldbuilding, and a fully female main cast with genuine personality differentiation. The Hub network premiered "Friendship Is Magic" on October 10, 2010. Within months, the show had attracted an unexpected adult male audience — "bronies" — who organized online through forums, fan conventions (BronyCon, 2011–2019), fan music, animation, and a thriving creative community. The brand grossed over $1 billion annually at retail in 2014–2015. G4 ran for 9 seasons (221 episodes), spawned the Equestria Girls spin-off franchise, a 2017 theatrical film, an IDW comic series, and multiple games. The series finale aired October 12, 2019.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">2020–2024 — G5: A New Generation, and a New Discontinuation</div>
+        <p>G5 launched with the Netflix-exclusive 3D CGI film "A New Generation" in September 2021, produced by Entertainment One and animated by Boulder Media. Set generations after G4 in a world where the three pony tribes had forgotten each other, the film was warmly received. The follow-up Netflix series "Make Your Mark" and short-form "Tell Your Tale" series continued the G5 story through 2023–2024. However, G5 failed to capture the cultural moment G4 had — the brony fandom remained G4-focused, toy sales underperformed, and the line was officially discontinued in 2024. A planned reboot ("Camp Cutie Mark," bridging G4 and G5 characters) was leaked and subsequently cancelled by Hasbro in September 2024. In May 2025, Hasbro announced a "Total Brand Reinvention" for 2026–2027 and a live-action film via Amazon MGM Studios.</p>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b  => b.classList.remove('active'));
+  document.getElementById('fn-pane-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function fnView(tabId, viewId, btn) {
+  const pane = document.getElementById('fn-pane-' + tabId);
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('fn-' + tabId + '-' + viewId);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
