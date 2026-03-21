@@ -135,11 +135,9 @@
   <div class="nav-group" id="g-gaming"><div class="nav-group-label" onclick="tg('gaming')"><span class="ga">▾</span>Gaming</div><div class="nav-group-items" id="gi-gaming">
     <button class="nav-item" id="nav-romm"          onclick="go('romm')"><span class="ni">🕹️</span>ROM Library</button>
     <button class="nav-item" id="nav-emulatorjs" onclick="go('emulatorjs')"><span class="ni">⚡</span>Browser Emulation</button>
-    <button class="nav-item" id="nav-pokemon"       onclick="go('pokemon')"><span class="ni">⚡</span>Pokémon</button>
-    <button class="nav-item" id="nav-castlevania"   onclick="go('castlevania')"><span class="ni">🧛</span>Castlevania</button>
-    <button class="nav-item" id="nav-fireemblem"    onclick="go('fireemblem')"><span class="ni">⚔️</span>Fire Emblem</button>
     <button class="nav-item" id="nav-marioparty"    onclick="go('marioparty')"><span class="ni">🎲</span>Mario Party</button>
     <button class="nav-item" id="nav-flasharcade"   onclick="go('flasharcade')"><span class="ni">🕹️</span>Flash Arcade</button>
+    <button class="nav-item" id="nav-franchisenavigator" onclick="go('franchisenavigator')"><span class="ni">🗺️</span>Franchise Navigator</button>
   </div></div>
 </div></nav>
 <button class="collapse-btn" id="cbtn" onclick="ts()" title="Toggle sidebar ([ key)"><span class="cba" id="cba">◀</span><span class="cbl">MENU</span></button>
@@ -204,6 +202,7 @@
   <div class="tab-content" id="pane-marioparty"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-flasharcade"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-emulatorjs"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-franchisenavigator"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
 </div></div>
 </div>
 <footer>
@@ -212,7 +211,7 @@
   <span>60 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
 </footer>
 <script>
-const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',excalidraw:'excalidraw.html',readeck:'readeck.html',privatebin:'privatebin.html',stirling:'stirling-pdf.html',upscayl:'upscayl.html',pxls:'pxls.html',genart:'genart.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',sunshine:'sunshine.html',goglibrary:'gog-library.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html',flasharcade:'flash-arcade.html',tunarr:'tunarr.html',emulatorjs:'emulatorjs.html'};
+const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',excalidraw:'excalidraw.html',readeck:'readeck.html',privatebin:'privatebin.html',stirling:'stirling-pdf.html',upscayl:'upscayl.html',pxls:'pxls.html',genart:'genart.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',sunshine:'sunshine.html',goglibrary:'gog-library.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html',flasharcade:'flash-arcade.html',tunarr:'tunarr.html',emulatorjs:'emulatorjs.html',franchisenavigator:'franchise-navigator.html'};
 const loaded=new Set();
 let open=localStorage.getItem('sb_open')!=='false';
 function go(n){
