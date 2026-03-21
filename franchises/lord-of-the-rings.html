@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lord of the Rings</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 10px 20px; background: transparent; border: none;
+  border-bottom: 3px solid transparent; color: var(--text-dim);
+  cursor: pointer; transition: all .16s; margin-bottom: -2px; white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.fn-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid var(--accent); padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3); color: var(--accent);
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 7px 10px; text-align: left;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top; line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era / group header rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent); font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media insert rows (purple) */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic; color: var(--text-dim); font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Defunct rows (red tint) */
+.fn-defunct td {
+  background: rgba(239,83,80,.04) !important;
+}
+.fn-defunct td:first-child { border-left: 3px solid #ef5350 !important; }
+
+/* Platform left-border stripes */
+.fn-pc     td:first-child { border-left: 3px solid #90a4ae; }
+.fn-nes    td:first-child { border-left: 3px solid #e57373; }
+.fn-snes   td:first-child { border-left: 3px solid #9575cd; }
+.fn-gen    td:first-child { border-left: 3px solid #4db6ac; }
+.fn-gb     td:first-child { border-left: 3px solid #aed581; }
+.fn-gbc    td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-ps2    td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps3    td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-ps5    td:first-child { border-left: 3px solid #ffffff; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-x360   td:first-child { border-left: 3px solid #66bb6a; }
+.fn-xbo    td:first-child { border-left: 3px solid #4caf50; }
+.fn-gc     td:first-child { border-left: 3px solid #7986cb; }
+.fn-wii    td:first-child { border-left: 3px solid #b0bec5; }
+.fn-wiiu   td:first-child { border-left: 3px solid #80cbc4; }
+.fn-mobile td:first-child { border-left: 3px solid #ffb74d; }
+.fn-movie  td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-tv     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-fan    td:first-child { border-left: 3px solid #ce93d8; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .55; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block; font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px; border-radius: 3px;
+  white-space: nowrap; vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-dead   { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-fan    { background: rgba(171,71,188,.18);  color: #ce93d8; border: 1px solid rgba(171,71,188,.35); }
+.fn-star       { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  align-items: center; margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); border: 3px solid var(--bg);
+}
+.fn-era-year { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: .1em; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body  { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 14px; }
+.fn-filler-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.fn-filler-type { font-family: 'Share Tech Mono', monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; margin-bottom: 7px; display: inline-block; }
+.fn-filler-trailer     { background: rgba(91,141,217,.15);  color: #5b8dd9;       border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-hype        { background: rgba(200,168,75,.12);  color: var(--accent); border: 1px solid rgba(200,168,75,.3); }
+.fn-filler-music       { background: rgba(78,205,196,.12);  color: #4ecdc4;       border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary { background: rgba(224,133,92,.12);  color: #e0855c;       border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">💍</div>
+  <div>
+    <h1>Lord of the Rings</h1>
+    <div class="subtitle">// PC · PS2 · PS4 · Xbox · GBA · NDS · GBC · Mobile · Jellyfin · Fan Films //</div>
+    <p class="desc">
+      The complete Tolkien screen and game legacy — every film, TV series, game, mobile title, fan project, and delisted/defunct release from 1977 to 2026.
+      Covers the Rankin/Bass animated era, Peter Jackson's two trilogies, Amazon's Rings of Power, and six decades of licensed games ranging from text adventures to open-world action RPGs.
+      Use the Library tab to sort by release order, platform, or best-first. The other tabs cover film and TV, merchandise, Tunarr filler, and the franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">30+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">3</div><div class="fn-stat-label">TV Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">9</div><div class="fn-stat-label">Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">8+</div><div class="fn-stat-label">Defunct</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1977</div><div class="fn-stat-label">First Screen Adapt.</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 Films &amp; TV</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Watch Order</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The Lord of the Rings Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile &amp; Phone</button>
+        <button class="fn-view-btn"        onclick="fnView('library','defunct',   this)">⚰️ Defunct / Lost</button>
+      </div>
+
+      <!-- ─────────────────── RELEASE ORDER ─────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All games and media in real-world release order. Purple rows = film/TV watch points. Gold rows = standout entries. Red-tinted rows = defunct / no longer accessible. ⭐ = recommended entry point.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Type</th><th>Accessible?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Pre-Jackson Era (1977–1999) ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>1977</td><td>The Hobbit (Rankin/Bass) <span class="fn-star">⭐</span></td><td>Film</td><td>Animated</td>
+            <td><span class="fn-tag fn-tag-yes">✅ Jellyfin</span></td>
+            <td><span class="fn-star">⭐</span> First Tolkien screen adaptation. Charming songs, simplified story. Solid entry point for the youngest audiences.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>1978</td><td>The Lord of the Rings (Ralph Bakshi)</td><td>Film</td><td>Rotoscope</td>
+            <td><span class="fn-tag fn-tag-yes">✅ Jellyfin</span></td>
+            <td>Unfinished — ends abruptly at Helm's Deep. Historically important rotoscoped film. Pair with 1980 Rankin/Bass to complete the story.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>1980</td><td>The Return of the King (Rankin/Bass)</td><td>Film</td><td>Animated</td>
+            <td><span class="fn-tag fn-tag-yes">✅ Jellyfin</span></td>
+            <td>Completes the Bakshi film's unfinished arc. Covers Frodo's journey and Sauron's defeat. Lighter tone with memorable songs.</td>
+          </tr>
+          <tr class="fn-pc fn-defunct fn-skip">
+            <td>1982</td><td>The Hobbit (Melbourne House)</td><td>PC (DOS)</td><td>Text Adventure</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ DOSBox</span></td>
+            <td>Landmark NLP text adventure. Thorin will sit and sing if you ignore him. Historical curiosity only.</td>
+          </tr>
+          <tr class="fn-pc fn-defunct fn-skip">
+            <td>1985</td><td>LotR: Game One (Melbourne House)</td><td>PC (DOS)</td><td>Text Adventure</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ DOSBox</span></td>
+            <td>Fellowship text adventure. Planned trilogy — Games 2 and 3 were never made. Ends mid-story.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>1990</td><td>The Lord of the Rings, Vol. I (Interplay)</td><td>PC / SNES / Genesis</td><td>RPG</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Emulator</span></td>
+            <td>Party-based RPG adapting Fellowship. SNES port (1994) recommended. Core: snes9x.</td>
+          </tr>
+          <tr class="fn-pc fn-defunct fn-skip">
+            <td>1993</td><td>The Lord of the Rings, Vol. II (Interplay)</td><td>PC (DOS)</td><td>RPG</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ DOSBox</span></td>
+            <td>Two Towers sequel. Vol. III cancelled — series ends unfinished.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Jackson Film Era Games (2001–2010) ──</td></tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>LotR: The Fellowship of the Ring</strong> (2001) — Jackson's theatrical trilogy begins. Extended Edition recommended.</td></tr>
+          <tr class="fn-gbc">
+            <td>2001</td><td>Fellowship of the Ring (GBC)</td><td>GBC</td><td>Action RPG</td>
+            <td><span class="fn-tag fn-tag-yes">📱 gambatte</span></td>
+            <td>Day-and-date mobile tie-in. More book-faithful than film-faithful.</td>
+          </tr>
+          <tr class="fn-ps2">
+            <td>2002</td><td>Fellowship of the Ring (Surreal Software)</td><td>PS2 / Xbox / PC</td><td>Action-Adv.</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/PCSX2</span></td>
+            <td>Book license (not Jackson film). Distinct visual style. Underrated and overlooked at launch.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>LotR: The Two Towers</strong> (2002) — Extended Edition adds vital Faramir and Ents scenes.</td></tr>
+          <tr class="fn-ps2 fn-highlight">
+            <td>2002</td><td>The Two Towers (EA) <span class="fn-star">⭐</span></td><td>PS2 / Xbox / GC / GBA</td><td>Hack-&amp;-Slash</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> Best co-op LotR game of the era. Film footage cutscenes, satisfying combat. Core: mgba (GBA), PCSX2 (PS2).</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>LotR: The Return of the King</strong> (2003) — Three Oscars. Extended Edition definitive.</td></tr>
+          <tr class="fn-ps2 fn-highlight">
+            <td>2003</td><td>The Return of the King (EA) <span class="fn-star">⭐</span></td><td>PS2 / Xbox / GC / GBA / PC</td><td>Hack-&amp;-Slash</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-star">⭐</span> Three-player co-op. Adds Gandalf, Faramir, Pippin, Merry. The peak of the EA action series. Core: mgba (GBA), PCSX2 (PS2).</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>2003</td><td>The Hobbit (Vivendi)</td><td>PS2 / Xbox / GC / GBA</td><td>Action-Adv.</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td>Book-licensed Hobbit game (not the Jackson films). Whimsical tone. Core: mgba (GBA), PCSX2 (PS2).</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2003</td><td>War of the Ring (Liquid Entertainment)</td><td>PC</td><td>RTS</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Warcraft III-style RTS with book license. Good/Evil campaigns. Underrated. PC only.</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>2004</td><td>The Third Age (EA)</td><td>PS2 / Xbox / GC / GBA</td><td>JRPG-style</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td>Turn-based RPG with original characters shadowing the Fellowship. EA's strangest LotR game.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2004</td><td>Battle for Middle-earth (EA) <span class="fn-star">⭐</span></td><td>PC</td><td>RTS</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Delisted</span></td>
+            <td><span class="fn-star">⭐</span> Masterpiece RTS. Film-licensed. Officially delisted — community T3A patch required. One of the best LotR games ever made.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>2006</td><td>Battle for Middle-earth II (EA)</td><td>PC / Xbox 360</td><td>RTS</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Delisted</span></td>
+            <td>Adds Elves, Dwarves, War of the Ring mode. Rise of the Witch-king expansion included. T3A:Online restores multiplayer.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2007</td><td>Lord of the Rings Online <span class="fn-star">⭐</span></td><td>PC</td><td>MMORPG</td>
+            <td><span class="fn-tag fn-tag-yes">✅ Active</span></td>
+            <td><span class="fn-star">⭐</span> Still live. The longest-running Tolkien game. Free-to-play base. Mines of Moria expansion recommended.</td>
+          </tr>
+          <tr class="fn-x360 fn-defunct fn-skip">
+            <td>2009</td><td>LotR: Conquest (Pandemic)</td><td>PS3 / Xbox 360 / NDS</td><td>Action</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ No Online</span></td>
+            <td>Battlefield-style class battles. Evil campaign rewrites history. Online servers dead. SP only.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2010</td><td>Aragorn's Quest</td><td>Wii / PS3 / NDS / PS2</td><td>Action</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td>Family/E-rated action game. Sam retells the trilogy to his children.</td>
+          </tr>
+          <tr class="fn-ps3">
+            <td>2011</td><td>War in the North (Snowblind)</td><td>PS3 / Xbox 360 / PC</td><td>Action RPG</td>
+            <td><span class="fn-tag fn-tag-yes">✅ PC/Steam</span></td>
+            <td>Three-player co-op RPG. Original Ranger/Elf/Dwarf characters. M-rated. Underrated. PC/Steam.</td>
+          </tr>
+          <tr class="fn-ps3 fn-defunct fn-skip">
+            <td>2012</td><td>Guardians of Middle-earth (Monolith)</td><td>PS3 / Xbox 360 / PC</td><td>MOBA</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Servers Dead</span></td>
+            <td>Console MOBA. Servers shut 2016. Unplayable online.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2012</td><td>Hobbit: Kingdoms of Middle-earth (Kabam)</td><td>iOS / Android</td><td>City-Builder</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td>
+            <td>Hobbit film tie-in mobile strategy. Servers dead since 2018.</td>
+          </tr>
+          <tr class="fn-ps3 fn-highlight">
+            <td>2012</td><td>Lego Lord of the Rings <span class="fn-star">⭐</span></td><td>PS3 / 360 / WiiU / 3DS / PC</td><td>Lego</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Delisted</span></td>
+            <td><span class="fn-star">⭐</span> Best Lego LotR game. Film audio clips, open Middle-earth hub. Officially delisted 2023 — physical copies work.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Hobbit Film Era (2012–2016) ──</td></tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>The Hobbit: An Unexpected Journey</strong> (2012) — Consider the Tolkien Edit fan-cut for a tighter 4-hour version of all three films.</td></tr>
+          <tr class="fn-ps3 fn-defunct fn-skip">
+            <td>2014</td><td>Lego The Hobbit</td><td>PS4 / PS3 / XBO / 360 / WiiU / 3DS / PC</td><td>Lego</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Delisted</span></td>
+            <td>Covers only the first two Hobbit films. Third film never integrated. Officially delisted 2023.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2014</td><td>Shadow of Mordor (Mobile)</td><td>iOS / Android</td><td>Action</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td>
+            <td>Mobile companion to Shadow of Mordor. Card-based combat. Removed from storefronts.</td>
+          </tr>
+          <tr class="fn-ps4 fn-highlight">
+            <td>2014</td><td>Shadow of Mordor (Monolith) <span class="fn-star">⭐</span></td><td>PS4 / PS3 / XBO / 360 / PC</td><td>Action RPG</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ PC/Steam</span></td>
+            <td><span class="fn-star">⭐</span> Nemesis System masterpiece. Talion and Celebrimbor hunt the Black Captains. Set between The Hobbit and LotR. Partially delisted — PC/physical still works.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>The Hobbit: The Desolation of Smaug</strong> (2013) · <strong>Battle of the Five Armies</strong> (2014)</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Modern Era (2017–Present) ──</td></tr>
+          <tr class="fn-ps4 fn-highlight">
+            <td>2017</td><td>Shadow of War (Monolith) <span class="fn-star">⭐</span></td><td>PS4 / XBO / PC</td><td>Action RPG</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ PC/Steam</span></td>
+            <td><span class="fn-star">⭐</span> Expanded Nemesis System, Nazgûl origin stories. Loot-box ending patched out. PC/physical still works. Play Shadow of Mordor first.</td>
+          </tr>
+          <tr class="fn-pc fn-defunct fn-skip">
+            <td>2018</td><td>Adventure Card Game (FFI)</td><td>PC</td><td>Card Game</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td>
+            <td>Digital LCG from Fantasy Flight. Studio shut down 2020, game abandoned. Physical LCG still excellent.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>The Rings of Power S1</strong> (2022, Prime Video) — Second Age; forging of the Rings.</td></tr>
+          <tr class="fn-mobile">
+            <td>2021</td><td>Rise to War (NetEase)</td><td>iOS / Android</td><td>Strategy</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Active</span></td>
+            <td>F2P faction strategy with seasonal Middle-earth campaigns. Heavy gacha. Still live 2026.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2022</td><td>Legends of Middle-earth (Kabam)</td><td>iOS / Android</td><td>RPG</td>
+            <td><span class="fn-tag fn-tag-dead">⚰️ Defunct</span></td>
+            <td>Mobile RPG. Launched 2022, servers shut down 2023.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>The Rings of Power S2</strong> (2024, Prime Video) — Sauron revealed. Better received than S1.</td></tr>
+          <tr class="fn-ps4 fn-skip">
+            <td>2023</td><td>The Lord of the Rings: Gollum (Daedalic)</td><td>PS5 / PS4 / XBO / PC</td><td>Stealth</td>
+            <td><span class="fn-tag fn-tag-yes">✅ Available</span></td>
+            <td>Critically panned stealth platformer. Caused Daedalic to cancel all future game development. Curiosity only — very cheap on sale.</td>
+          </tr>
+          <tr class="fn-mobile">
+            <td>2023</td><td>Heroes of Middle-earth (EA)</td><td>iOS / Android</td><td>Gacha RPG</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Active</span></td>
+            <td>Galaxy of Heroes clone. Collect film/book/Amazon series characters. F2P. Still live 2026.</td>
+          </tr>
+          <tr class="fn-ps5">
+            <td>2023</td><td>Return to Moria</td><td>PS5 / XBO / PC</td><td>Survival Crafting</td>
+            <td><span class="fn-tag fn-tag-yes">✅ Active</span></td>
+            <td>4th Age dwarven survival game. Co-op up to 8 players. Set in Rings of Power continuity.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>War of the Rohirrim</strong> (2024) — Anime-style feature by Kenji Kamiyama. King Helm Hammerhand, 183 years before the Fellowship.</td></tr>
+          <tr class="fn-ps5 fn-highlight">
+            <td>2025</td><td>Tales of the Shire <span class="fn-star">⭐</span></td><td>Switch / PS5 / XBO / PC</td><td>Cozy Life-Sim</td>
+            <td><span class="fn-tag fn-tag-yes">✅ Active</span></td>
+            <td><span class="fn-star">⭐</span> Cozy Shire life-sim by Weta Workshop. Garden, cook, befriend hobbits. No combat. Highly recommended for non-action fans.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Fan &amp; Ascended Works ──</td></tr>
+          <tr class="fn-fan fn-highlight">
+            <td>2009</td><td>The Hunt for Gollum (Fan Film) <span class="fn-star">⭐</span></td><td>Online</td><td>Fan Film</td>
+            <td><span class="fn-tag fn-tag-fan">💜 Free Online</span></td>
+            <td><span class="fn-star">⭐</span> Best LotR fan film. Made for £3000. Aragorn hunts Gollum between The Hobbit and Fellowship. ~40 minutes. Essential viewing.</td>
+          </tr>
+          <tr class="fn-fan">
+            <td>2009</td><td>Born of Hope (Fan Film)</td><td>Online</td><td>Fan Film</td>
+            <td><span class="fn-tag fn-tag-fan">💜 Free Online</span></td>
+            <td>Aragorn's parents — Arathorn and Gilraen — and Aragorn's early Dúnedain years. ~70 minutes. High production value.</td>
+          </tr>
+          <tr class="fn-fan fn-highlight">
+            <td>2021</td><td>The Tolkien Edit (Fan Cut)</td><td>Fan Edit</td><td>Fan Film</td>
+            <td><span class="fn-tag fn-tag-fan">💜 Fan Edit</span></td>
+            <td><span class="fn-star">⭐</span> All three Hobbit films cut to ~4 hours. Removes non-Tolkien additions. Ascended canon — the preferred way to watch the Hobbit trilogy. Requires source films.</td>
+          </tr>
+        </table>
+
+        <div class="fn-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold border = standout / recommended</span>
+          <span><span class="fn-dot" style="background:#ef5350"></span>Red tint = defunct or inaccessible</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = film/TV watch point</span>
+          <span><span class="fn-tag fn-tag-yes">✅</span> Available</span>
+          <span><span class="fn-tag fn-tag-dead">⚰️</span> Defunct / delisted</span>
+          <span><span class="fn-tag fn-tag-fan">💜</span> Fan work (ascended)</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────── BY PLATFORM ─────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All games grouped by the platform most relevant to your setup. GBA and NDS entries are mobile-playable via RetroArch. PS2 entries require PCSX2 on PC. PC-only titles marked where applicable.</div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Year</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🟩 GBA — Core: mgba (mobile-friendly)</td></tr>
+          <tr class="fn-gba"><td>The Two Towers (EA GBA port)</td><td>2002</td><td>Isometric hack-and-slash. Distinct from the console version.</td></tr>
+          <tr class="fn-gba"><td>The Return of the King (EA GBA port)</td><td>2003</td><td>Isometric sequel. Best mobile-accessible EA LotR game.</td></tr>
+          <tr class="fn-gba"><td>The Hobbit (Vivendi GBA port)</td><td>2003</td><td>Whimsical action-adventure. Book license.</td></tr>
+          <tr class="fn-gba"><td>The Third Age (EA GBA port)</td><td>2004</td><td>Simplified turn-based RPG version. Separate game from console.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🟣 GBC — Core: gambatte (mobile-friendly)</td></tr>
+          <tr class="fn-gbc"><td>Fellowship of the Ring (Black Label GBC)</td><td>2001</td><td>Action RPG. Day-and-date with the Jackson film. Book-faithful.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🟣 SNES — Core: snes9x (mobile-friendly)</td></tr>
+          <tr class="fn-snes"><td>The Lord of the Rings, Vol. I (SNES port)</td><td>1994</td><td>Best version of the Interplay RPG. Party-based, covers Fellowship.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🔵 NDS — Core: melonds (mobile-friendly, newer phones)</td></tr>
+          <tr class="fn-nds"><td>LotR: Conquest (NDS port)</td><td>2009</td><td>Scaled-down port. Single-player class battles.</td></tr>
+          <tr class="fn-nds"><td>Aragorn's Quest (NDS port)</td><td>2010</td><td>Family action game. E-rated.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🟠 PS2 — PCSX2 required (PC-only streaming)</td></tr>
+          <tr class="fn-ps2"><td>Fellowship of the Ring (Surreal Software)</td><td>2002</td><td>Book-licensed. Slower, more atmospheric. Worth playing if you love the books.</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>The Two Towers (EA)</td><td>2002</td><td><span class="fn-star">⭐</span> Best co-op era game. Film assets, satisfying hack-and-slash.</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>The Return of the King (EA)</td><td>2003</td><td><span class="fn-star">⭐</span> Three-player co-op, expanded roster. Peak EA LotR.</td></tr>
+          <tr class="fn-ps2"><td>The Hobbit (Vivendi)</td><td>2003</td><td>Book-licensed Hobbit adventure. Lightest tone of the era.</td></tr>
+          <tr class="fn-ps2"><td>The Third Age (EA)</td><td>2004</td><td>Turn-based RPG. Optional — more for JRPG fans than action players.</td></tr>
+          <tr class="fn-ps2"><td>Aragorn's Quest</td><td>2010</td><td>Family-friendly. PS2 version is the most accessible port.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">🖥️ PC — Native / Steam / Community Patches</td></tr>
+          <tr class="fn-pc fn-highlight"><td>Battle for Middle-earth (EA) — DELISTED</td><td>2004</td><td><span class="fn-star">⭐</span> Best LotR RTS. Community T3A patch required. Physical disc or grey market.</td></tr>
+          <tr class="fn-pc"><td>Battle for Middle-earth II (EA) — DELISTED</td><td>2006</td><td>Expands factions. T3A:Online for multiplayer. Rise of the Witch-king included.</td></tr>
+          <tr class="fn-pc"><td>Lord of the Rings Online</td><td>2007–</td><td>Still live. F2P. Massive open world.</td></tr>
+          <tr class="fn-pc"><td>War in the North (Snowblind)</td><td>2011</td><td>Steam. Three-player co-op RPG. Underrated.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>Shadow of Mordor</td><td>2014</td><td><span class="fn-star">⭐</span> Steam. Nemesis System. Partially delisted on console; PC fine.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>Shadow of War</td><td>2017</td><td><span class="fn-star">⭐</span> Steam. Expanded Nemesis. Play Mordor first.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="3">📱 Mobile — iOS / Android (Still Active)</td></tr>
+          <tr class="fn-mobile"><td>Rise to War (NetEase)</td><td>2021</td><td>Strategy / gacha. Still live 2026.</td></tr>
+          <tr class="fn-mobile"><td>Heroes of Middle-earth (EA)</td><td>2023</td><td>Galaxy of Heroes clone. Still live 2026.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────── BEST FIRST ─────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Curated entry path — best games first, building toward the full catalog. Skip anything below your interest threshold. No need to play everything; this is the essential LotR gaming experience.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why This Order</th></tr>
+          <tr class="fn-ps4 fn-highlight"><td>1</td><td>Shadow of Mordor <span class="fn-star">⭐</span></td><td>PC/Steam or PS4</td><td>The Nemesis System makes this feel alive like no other LotR game. Best starting point for a modern player. No prior game knowledge needed.</td></tr>
+          <tr class="fn-ps4 fn-highlight"><td>2</td><td>Shadow of War <span class="fn-star">⭐</span></td><td>PC/Steam or PS4</td><td>Immediate sequel — play back-to-back. Expands everything. The arc completes here.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">🎬 Now watch the Peter Jackson trilogy (Extended Editions) if you haven't — the Shadow games assume familiarity with the lore.</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>3</td><td>Return of the King (EA) <span class="fn-star">⭐</span></td><td>PS2 (PCSX2) / GBA</td><td>The best co-op LotR game of the classic era. Three players, film assets, satisfying combat. Works well on PCSX2.</td></tr>
+          <tr class="fn-ps2"><td>4</td><td>The Two Towers (EA)</td><td>PS2 (PCSX2) / GBA</td><td>Precursor to RoTK — same engine, same fun, plays directly into the sequel.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>5</td><td>Battle for Middle-earth (EA) <span class="fn-star">⭐</span></td><td>PC (community patch)</td><td>The best LotR RTS ever made. Requires the T3A community patch now that it's delisted. Worth the effort.</td></tr>
+          <tr class="fn-pc"><td>6</td><td>Lord of the Rings Online</td><td>PC (F2P)</td><td>If you've fallen in love with Middle-earth, this is the long game. F2P base is generous. Best played over months.</td></tr>
+          <tr class="fn-ps3"><td>7</td><td>War in the North (Snowblind)</td><td>PC/Steam</td><td>Three-player co-op RPG. Play with two friends for the best experience.</td></tr>
+          <tr class="fn-ps5"><td>8</td><td>Tales of the Shire</td><td>Switch / PC</td><td>Palette cleanser — cozy no-combat life-sim for when you want Middle-earth without the war.</td></tr>
+          <tr class="fn-fan fn-highlight"><td>—</td><td>The Hunt for Gollum (Fan Film) <span class="fn-star">⭐</span></td><td>Free Online</td><td>40 minutes. Made for £3000. Watch this anytime. It is genuinely good.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────── MOBILE / PHONE ─────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Games playable on a phone or tablet via RetroArch (Android/iOS), EmulatorJS in a mobile browser, or native mobile apps. PS2 games excluded — use PCSX2 on PC and stream via Sunshine/Moonlight.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform / Core</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="4">📱 RetroArch / EmulatorJS — Native Mobile Cores</td></tr>
+          <tr class="fn-gbc"><td>1</td><td>Fellowship of the Ring (GBC)</td><td>GBC · gambatte</td><td>Book-faithful action RPG. Short and accessible.</td></tr>
+          <tr class="fn-snes"><td>2</td><td>LotR Vol. I (SNES)</td><td>SNES · snes9x</td><td>Best version of the Interplay RPG. Party-based Fellowship adventure.</td></tr>
+          <tr class="fn-gba fn-highlight"><td>3</td><td>Return of the King (EA GBA) <span class="fn-star">⭐</span></td><td>GBA · mgba</td><td><span class="fn-star">⭐</span> Best mobile-playable LotR game. Isometric, co-op if you have two devices, satisfying for its length.</td></tr>
+          <tr class="fn-gba"><td>4</td><td>Two Towers (EA GBA)</td><td>GBA · mgba</td><td>Precursor — same isometric engine. Play before RoTK if you want context.</td></tr>
+          <tr class="fn-gba"><td>5</td><td>The Hobbit (Vivendi GBA)</td><td>GBA · mgba</td><td>Lightest tone. Whimsical Bilbo adventure.</td></tr>
+          <tr class="fn-gba"><td>6</td><td>The Third Age (EA GBA)</td><td>GBA · mgba</td><td>Simplified turn-based version. Weaker than the console game but playable.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">📱 Native Mobile Apps (Still Active as of 2026)</td></tr>
+          <tr class="fn-mobile"><td>7</td><td>Rise to War (NetEase)</td><td>iOS / Android</td><td>Strategy/gacha. Faction wars across Middle-earth. Still live.</td></tr>
+          <tr class="fn-mobile"><td>8</td><td>Heroes of Middle-earth (EA)</td><td>iOS / Android</td><td>Galaxy of Heroes clone. Collect across all Tolkien media. Still live.</td></tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body"><strong>Excluded:</strong> PS2 games (Two Towers, RoTK, Third Age console versions) require PCSX2 on PC. Shadow of Mordor/War require a full PC or console. Stream any of these via Sunshine + Moonlight if you want them on a TV or handheld screen.</div>
+        </div>
+      </div>
+
+      <!-- ─────────────────── DEFUNCT / LOST ─────────────────── -->
+      <div class="fn-view" id="fn-library-defunct">
+        <div class="fn-view-desc">Every LotR game or service that is no longer officially accessible — delisted, servers down, or studio closed. Listed for completeness. Some have community preservation.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Reason</th><th>Status</th></tr>
+          <tr class="fn-defunct"><td>1985</td><td>LotR: Game One (Melbourne House)</td><td>Abandoned after company sold. Vol. 2 &amp; 3 never made.</td><td>DOSBox playable</td></tr>
+          <tr class="fn-defunct"><td>1993</td><td>LotR Vol. II (Interplay)</td><td>License lost; Vol. III cancelled.</td><td>DOSBox playable</td></tr>
+          <tr class="fn-defunct"><td>2004</td><td>Battle for Middle-earth (EA)</td><td>Tolkien license expired; EA delisted.</td><td>Community T3A patch; physical disc works</td></tr>
+          <tr class="fn-defunct"><td>2006</td><td>Battle for Middle-earth II (EA)</td><td>Same license expiry.</td><td>T3A:Online patch; physical disc works</td></tr>
+          <tr class="fn-defunct"><td>2010</td><td>LotR: Middle-earth Defense (Gameloft)</td><td>App Store removal.</td><td>No preservation known</td></tr>
+          <tr class="fn-defunct"><td>2012</td><td>Guardians of Middle-earth</td><td>Servers shut down 2016.</td><td>No online. SP unplayable (online-required game)</td></tr>
+          <tr class="fn-defunct"><td>2012</td><td>Hobbit: Kingdoms of Middle-earth (Kabam)</td><td>Servers shut down 2018.</td><td>No preservation known</td></tr>
+          <tr class="fn-defunct"><td>2012</td><td>Lego Lord of the Rings</td><td>License expiry; delisted 2023.</td><td>Physical copies still work</td></tr>
+          <tr class="fn-defunct"><td>2014</td><td>Lego The Hobbit</td><td>License expiry; delisted 2023.</td><td>Physical copies still work. Third film never added.</td></tr>
+          <tr class="fn-defunct"><td>2014</td><td>Shadow of Mordor (Mobile companion)</td><td>App Store / Play Store removal.</td><td>No preservation known</td></tr>
+          <tr class="fn-defunct"><td>2018</td><td>LotR: Adventure Card Game (FFI)</td><td>Studio (Fantasy Flight Interactive) closed 2020.</td><td>Officially abandoned. No access.</td></tr>
+          <tr class="fn-defunct"><td>2022</td><td>Legends of Middle-earth (Kabam)</td><td>Servers shut down 2023.</td><td>No preservation known</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — FILMS & TV
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 Lord of the Rings — Films &amp; Television</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',     this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','animated',this)">🎨 Animated</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','jackson', this)">🎬 Jackson Films</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','tv',      this)">📺 TV &amp; Amazon</button>
+      </div>
+
+      <!-- ALL ENTRIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Every screen adaptation of Tolkien's work in release order, including animated films, live-action features, Amazon TV, fan films, and the West End musical recording.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Format</th><th>Where</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">── Animated Era ──</td></tr>
+          <tr class="fn-movie fn-highlight"><td>1977</td><td>The Hobbit (Rankin/Bass) <span class="fn-star">⭐</span></td><td>Animated TV Film</td><td>Jellyfin</td><td>First Tolkien screen adaptation. Songs by Maury Laws. Excellent for all ages.</td></tr>
+          <tr class="fn-movie"><td>1978</td><td>The Lord of the Rings (Ralph Bakshi)</td><td>Rotoscoped Film</td><td>Jellyfin</td><td>Covers Fellowship–Two Towers. Ends abruptly. Pair with 1980 to finish.</td></tr>
+          <tr class="fn-movie"><td>1980</td><td>The Return of the King (Rankin/Bass)</td><td>Animated TV Film</td><td>Jellyfin</td><td>Completes the Bakshi film's arc. Frodo &amp; Sam, Sauron's defeat.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── Peter Jackson Trilogy ──</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2001</td><td>Fellowship of the Ring <span class="fn-star">⭐</span></td><td>Film (Theatrical + Extended)</td><td>Jellyfin</td><td><span class="fn-star">⭐</span> Extended Edition adds 30 min. The gold standard of fantasy filmmaking.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2002</td><td>The Two Towers <span class="fn-star">⭐</span></td><td>Film (Theatrical + Extended)</td><td>Jellyfin</td><td><span class="fn-star">⭐</span> Extended adds vital Faramir characterisation and Ents backstory.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2003</td><td>The Return of the King <span class="fn-star">⭐</span></td><td>Film (Theatrical + Extended)</td><td>Jellyfin</td><td><span class="fn-star">⭐</span> 11 Oscars including Best Picture. Extended adds the Mouth of Sauron. Definitive cinema.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── Fan Films (Ascended) ──</td></tr>
+          <tr class="fn-fan fn-highlight"><td>2009</td><td>The Hunt for Gollum <span class="fn-star">⭐</span></td><td>Fan Film</td><td>Free Online</td><td><span class="fn-star">⭐</span> ~40 min, £3000 budget. Aragorn hunts Gollum. Exceptionally good.</td></tr>
+          <tr class="fn-fan"><td>2009</td><td>Born of Hope</td><td>Fan Film</td><td>Free Online</td><td>~70 min. Aragorn's parents and Dúnedain heritage. High production value.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── Peter Jackson Hobbit Trilogy ──</td></tr>
+          <tr class="fn-movie"><td>2012</td><td>The Hobbit: An Unexpected Journey</td><td>Film</td><td>Jellyfin</td><td>Consider the Tolkien Edit fan-cut — reduces all three to 4 hours without bloat.</td></tr>
+          <tr class="fn-movie"><td>2013</td><td>The Hobbit: The Desolation of Smaug</td><td>Film</td><td>Jellyfin</td><td>Smaug is a highlight. Barrel scene is divisive.</td></tr>
+          <tr class="fn-movie"><td>2014</td><td>The Hobbit: The Battle of the Five Armies</td><td>Film</td><td>Jellyfin</td><td>Extended Edition has the full White Council battle.</td></tr>
+          <tr class="fn-fan fn-highlight"><td>2021</td><td>The Tolkien Edit (Hobbit Fan Cut) <span class="fn-star">⭐</span></td><td>Fan Edit</td><td>Requires source files</td><td><span class="fn-star">⭐</span> ~4-hour version of the full Hobbit story without padding. Ascended canon. Best way to watch.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── Amazon &amp; New Era ──</td></tr>
+          <tr class="fn-tv fn-highlight"><td>2022</td><td>The Rings of Power S1 <span class="fn-star">⭐</span></td><td>TV Series</td><td>Prime Video</td><td>8 eps. Second Age — Galadriel hunts Sauron, Rings forged, Númenor rises. Ends with Mordor's creation.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>2024</td><td>The Rings of Power S2</td><td>TV Series</td><td>Prime Video</td><td>8 eps. Sauron's identity revealed. Darker, better characterised. More warmly received than S1.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2024</td><td>The War of the Rohirrim <span class="fn-star">⭐</span></td><td>Anime Feature Film</td><td>Jellyfin</td><td><span class="fn-star">⭐</span> Kenji Kamiyama (Ghost in the Shell SAC) directs. Helm Hammerhand's legend. 183 years before Fellowship.</td></tr>
+          <tr class="fn-movie"><td>2026</td><td>The Hunt for Gollum (Jackson film)</td><td>Film (In Production)</td><td>Theatrical</td><td>Andy Serkis returns to direct and star. Part of a planned new Jackson trilogy. Theatrical 2026.</td></tr>
+        </table>
+      </div>
+
+      <!-- ANIMATED -->
+      <div class="fn-view" id="fn-tvanime-animated">
+        <div class="fn-view-desc">All animated Tolkien screen adaptations — from 1977 Rankin/Bass to the 2024 Kamiyama anime feature.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Studio</th><th>Length</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight"><td>1977</td><td>The Hobbit (Rankin/Bass) <span class="fn-star">⭐</span></td><td>Rankin/Bass Productions</td><td>77 min</td><td>First screen LotR adaptation. Songs, simplified story. Best for younger viewers.</td></tr>
+          <tr class="fn-movie"><td>1978</td><td>The Lord of the Rings (Bakshi)</td><td>Fantasy Films / Saul Zaentz</td><td>132 min</td><td>Rotoscoped. Covers Fellowship–Two Towers midpoint. Unfinished.</td></tr>
+          <tr class="fn-movie"><td>1980</td><td>The Return of the King (Rankin/Bass)</td><td>Rankin/Bass Productions</td><td>98 min</td><td>Completes what Bakshi left unfinished. Frodo's journey, Sauron defeated.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2024</td><td>The War of the Rohirrim <span class="fn-star">⭐</span></td><td>Sola Entertainment / Warner Bros.</td><td>~134 min</td><td><span class="fn-star">⭐</span> First prestige anime Tolkien film. Kamiyama directs. Helm Hammerhand's founding war.</td></tr>
+        </table>
+      </div>
+
+      <!-- JACKSON FILMS -->
+      <div class="fn-view" id="fn-tvanime-jackson">
+        <div class="fn-view-desc">Peter Jackson's six Middle-earth films — both the LotR trilogy and the Hobbit trilogy. All have Theatrical and Extended Edition cuts; Extended always recommended.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Theatrical Runtime</th><th>Extended Runtime</th><th>Ext. Adds</th></tr>
+          <tr class="fn-movie fn-highlight"><td>2001</td><td>Fellowship of the Ring</td><td>178 min</td><td>208 min</td><td>Lothlórien scenes, Mirror of Galadriel expansion, character backstory.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2002</td><td>The Two Towers</td><td>179 min</td><td>223 min</td><td>Faramir's full arc (essential), Ents backstory, Boromir memories.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2003</td><td>The Return of the King</td><td>201 min</td><td>251 min</td><td>Saruman's death, Mouth of Sauron (essential), Houses of Healing.</td></tr>
+          <tr class="fn-movie"><td>2012</td><td>An Unexpected Journey</td><td>169 min</td><td>182 min</td><td>More dwarven backstory; minimal improvement over theatrical.</td></tr>
+          <tr class="fn-movie"><td>2013</td><td>Desolation of Smaug</td><td>161 min</td><td>186 min</td><td>Beorn extended, Gandalf in Dol Guldur expansion.</td></tr>
+          <tr class="fn-movie"><td>2014</td><td>Battle of the Five Armies</td><td>144 min</td><td>164 min</td><td>White Council vs. Sauron in full (the best Hobbit scene period).</td></tr>
+        </table>
+        <div class="callout callout-tip" style="margin-top:12px">
+          <div class="callout-icon">💜</div>
+          <div class="callout-body"><strong>Tolkien Edit recommendation —</strong> For the Hobbit films specifically, the <strong>Tolkien Edit</strong> fan cut (~4 hours total) compresses all three films into a tight adaptation removing non-Tolkien additions (Tauriel romance, Azog subplot padding, extended action sequences). Most Tolkien fans consider it the preferred viewing experience. Requires your own source copies.</div>
+        </div>
+      </div>
+
+      <!-- TV & AMAZON -->
+      <div class="fn-view" id="fn-tvanime-tv">
+        <div class="fn-view-desc">Television adaptations — Amazon's Rings of Power and the 2026 Jackson production slate.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Era</th><th>Where</th><th>Notes</th></tr>
+          <tr class="fn-tv fn-highlight"><td>2022</td><td>The Rings of Power S1</td><td>8</td><td>Second Age</td><td>Prime Video</td><td>Galadriel vs. Sauron. Rings forged. Númenor. Ends with Mordor's creation. Watch after the Jackson films for context.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>2024</td><td>The Rings of Power S2</td><td>8</td><td>Second Age</td><td>Prime Video</td><td>Sauron identity revealed. Darker tone. More warmly received than S1 by fans.</td></tr>
+          <tr class="fn-tv"><td>2026+</td><td>The Rings of Power S3 (unconfirmed)</td><td>TBD</td><td>Second Age</td><td>Prime Video</td><td>S3 in development as of early 2026. Not yet confirmed by Amazon.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Lord of the Rings\
+  ├── The Hobbit (1977)\
+  ├── The Lord of the Rings (1978)\
+  ├── The Return of the King (1980)\
+  ├── The Lord of the Rings - The Fellowship of the Ring (2001)\      ← Theatrical
+  ├── The Lord of the Rings - The Fellowship of the Ring Extended (2001)\
+  ├── The Lord of the Rings - The Two Towers (2002)\
+  ├── The Lord of the Rings - The Two Towers Extended (2002)\
+  ├── The Lord of the Rings - The Return of the King (2003)\
+  ├── The Lord of the Rings - The Return of the King Extended (2003)\
+  ├── The Hobbit - An Unexpected Journey (2012)\
+  ├── The Hobbit - The Desolation of Smaug (2013)\
+  ├── The Hobbit - The Battle of the Five Armies (2014)\
+  ├── The Tolkien Edit (2021 Fan Cut)\
+  ├── The War of the Rohirrim (2024)\
+  └── Fan Films\
+      ├── The Hunt for Gollum (2009)\
+      └── Born of Hope (2009)\
+
+D:\Media\TV\The Rings of Power\
+  └── Season 01\   └── Season 02\</pre>
+    </div>
+  </div>
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — WATCH ORDER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Lord of the Rings — Watch Orders</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','recommended',this)">⭐ Recommended</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','release',    this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','inuniverse', this)">🕰️ In-Universe Order</button>
+      </div>
+
+      <!-- RECOMMENDED -->
+      <div class="fn-view active" id="fn-movies-recommended">
+        <div class="fn-view-desc">The optimal first watch — Extended Editions, the Tolkien Edit for the Hobbit, and the fan films at the right moments.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Cut</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight"><td>1</td><td>Fellowship of the Ring <span class="fn-star">⭐</span></td><td>Extended Edition</td><td>The beginning. Extended adds ~30 min of essential character work.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2</td><td>The Two Towers <span class="fn-star">⭐</span></td><td>Extended Edition</td><td>Extended restores Faramir's heroism — he's a villain in the theatrical cut.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>3</td><td>The Return of the King <span class="fn-star">⭐</span></td><td>Extended Edition</td><td>Extended adds Saruman's death and the Mouth of Sauron. Watch the 4-hour cut.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">⏸️ Optional: watch the 1977 Hobbit and 1980 Return of the King animated films here if you want the full Tolkien screen lineage.</td></tr>
+          <tr class="fn-fan fn-highlight"><td>4</td><td>The Hunt for Gollum (Fan Film) <span class="fn-star">⭐</span></td><td>Full</td><td>40 minutes. Made for £3000. Watch before the Hobbit films for Gollum context.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>5</td><td>The Tolkien Edit (Hobbit Fan Cut) <span class="fn-star">⭐</span></td><td>4-hr Fan Edit</td><td>The lean version of all three Hobbit films. Bilbo's journey as Tolkien told it, without the studio padding.</td></tr>
+          <tr class="fn-fan"><td>6</td><td>Born of Hope (Fan Film)</td><td>Full</td><td>70 minutes. Aragorn's parents. Watch anytime after the Jackson LotR trilogy.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>7</td><td>The Rings of Power S1</td><td>Series</td><td>Second Age prequel. Watch after the main films for lore context.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>8</td><td>The Rings of Power S2</td><td>Series</td><td>Better than S1. Watch immediately after.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>9</td><td>The War of the Rohirrim</td><td>Theatrical</td><td>Anime feature. Standalone — can be watched anytime after FotR.</td></tr>
+        </table>
+      </div>
+
+      <!-- RELEASE ORDER -->
+      <div class="fn-view" id="fn-movies-release">
+        <div class="fn-view-desc">All screen adaptations in real-world release order.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Format</th></tr>
+          <tr class="fn-movie"><td>1977</td><td>The Hobbit (Rankin/Bass)</td><td>Animated TV Film</td></tr>
+          <tr class="fn-movie"><td>1978</td><td>The Lord of the Rings (Bakshi)</td><td>Rotoscoped Film</td></tr>
+          <tr class="fn-movie"><td>1980</td><td>The Return of the King (Rankin/Bass)</td><td>Animated TV Film</td></tr>
+          <tr class="fn-movie"><td>2001</td><td>Fellowship of the Ring (Jackson)</td><td>Film</td></tr>
+          <tr class="fn-movie"><td>2002</td><td>The Two Towers (Jackson)</td><td>Film</td></tr>
+          <tr class="fn-movie"><td>2003</td><td>The Return of the King (Jackson)</td><td>Film</td></tr>
+          <tr class="fn-fan"><td>2009</td><td>The Hunt for Gollum (Fan Film)</td><td>Fan Film</td></tr>
+          <tr class="fn-fan"><td>2009</td><td>Born of Hope (Fan Film)</td><td>Fan Film</td></tr>
+          <tr class="fn-movie"><td>2012</td><td>An Unexpected Journey (Jackson)</td><td>Film</td></tr>
+          <tr class="fn-movie"><td>2013</td><td>Desolation of Smaug (Jackson)</td><td>Film</td></tr>
+          <tr class="fn-movie"><td>2014</td><td>Battle of the Five Armies (Jackson)</td><td>Film</td></tr>
+          <tr class="fn-fan"><td>2021</td><td>The Tolkien Edit (Fan Cut)</td><td>Fan Edit</td></tr>
+          <tr class="fn-tv"><td>2022</td><td>The Rings of Power S1</td><td>TV Series</td></tr>
+          <tr class="fn-tv"><td>2024</td><td>The Rings of Power S2</td><td>TV Series</td></tr>
+          <tr class="fn-movie"><td>2024</td><td>The War of the Rohirrim</td><td>Anime Feature</td></tr>
+          <tr class="fn-movie"><td>2026</td><td>The Hunt for Gollum (Jackson)</td><td>Film (In Production)</td></tr>
+        </table>
+      </div>
+
+      <!-- IN-UNIVERSE ORDER -->
+      <div class="fn-view" id="fn-movies-inuniverse">
+        <div class="fn-view-desc">Chronological in-universe order. Note: not recommended for a first watch — the Second Age (Rings of Power) is far more impactful if you already understand what the Rings mean from the LotR trilogy.</div>
+        <table class="fn-table">
+          <tr><th>Era</th><th>Title</th><th>In-Universe</th></tr>
+          <tr class="fn-tv"><td>Second Age</td><td>The Rings of Power S1</td><td>~SA 1000–1701</td></tr>
+          <tr class="fn-tv"><td>Second Age</td><td>The Rings of Power S2</td><td>~SA 1701+</td></tr>
+          <tr class="fn-movie"><td>Third Age ~2758</td><td>The War of the Rohirrim</td><td>~TA 2758–2759 (183 yrs before FotR)</td></tr>
+          <tr class="fn-movie"><td>Third Age 2941</td><td>The Hobbit (any cut)</td><td>TA 2941 — Bilbo's journey</td></tr>
+          <tr class="fn-fan"><td>Third Age ~3001</td><td>Born of Hope (Fan Film)</td><td>~TA 2978–3001 — Aragorn's early years</td></tr>
+          <tr class="fn-fan"><td>Third Age ~3017</td><td>The Hunt for Gollum (Fan Film)</td><td>~TA 3017 — just before FotR</td></tr>
+          <tr class="fn-movie"><td>Third Age 3018</td><td>Fellowship of the Ring</td><td>TA 3018 — The Ring leaves the Shire</td></tr>
+          <tr class="fn-movie"><td>Third Age 3018–19</td><td>The Two Towers</td><td>TA 3018–3019 — Rohan, Isengard, Mordor</td></tr>
+          <tr class="fn-movie"><td>Third Age 3019</td><td>The Return of the King</td><td>TA 3019 — Sauron's fall, beginning of the Fourth Age</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Lord of the Rings Merchandise</div>
+    <div class="card">
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">Film Era I — Jackson LotR Trilogy (2001–2004)</div>
+        <p style="font-size:.84rem;line-height:1.7">New Line Cinema licensed broadly across the board. Highlights include WETA Workshop's original prop replicas (Sting, Glamdring, the One Ring in sterling and gold), ToyBiz action figures, Decipher's Lord of the Rings CCG (considered one of the finest film-licensed card games of the era), and the Games Workshop Battle of the Middle-earth Strategy Battle Game (SBG) — a wargame that has outlasted every digital LotR product and is still in print.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">The Games Workshop Era (2001–Present)</div>
+        <p style="font-size:.84rem;line-height:1.7">Games Workshop's Middle-earth Strategy Battle Game launched alongside the films. It has never gone out of print — the miniature wargame using Jackson film-licensed sculpts is still actively supported as of 2026. The War of the Ring large-scale battles supplement remains the best tabletop representation of the Battle of the Pelennor Fields. Essential for miniature painters and wargamers.</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">Hobbit Film Era (2012–2015)</div>
+        <p style="font-size:.84rem;line-height:1.7">Games Workshop expanded the SBG to include all Hobbit film content. Bridge Direct made the main action figures under the Hobbit license. WETA Workshop continued prestige prop replicas. The Decipher CCG had ended by this point but Fantasy Flight's Living Card Game launched 2011 as its spiritual successor (still in print).</p>
+      </div>
+
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">Amazon Rings of Power Era (2022–Present)</div>
+        <p style="font-size:.84rem;line-height:1.7">Prime Video licensing generated new merchandise including WETA Workshop Rings of Power statues, new Games Workshop supplements, and a Rings of Power edition of Fantasy Flight's LCG. A dedicated card game and a new edition of the LCG both launched alongside S1 (2022).</p>
+      </div>
+
+      <table class="fn-table" style="margin-top:16px">
+        <tr><th>Category</th><th>Item</th><th>Era</th><th>Status</th><th>Notes</th></tr>
+        <tr><td>Prop Replica</td><td>The One Ring (WETA Workshop, sterling/gold)</td><td>2001–</td><td>✅ In print</td><td>Still available direct from WETA and third-party retailers. Multiple finishes.</td></tr>
+        <tr><td>Prop Replica</td><td>Sting (WETA Workshop)</td><td>2001–</td><td>✅ In print</td><td>United Cutlery also made licensed versions.</td></tr>
+        <tr><td>Wargame</td><td>Middle-earth Strategy Battle Game (Games Workshop)</td><td>2001–</td><td>✅ Active</td><td>Still in print and supported. Best tabletop representation of the Jackson films.</td></tr>
+        <tr><td>Card Game</td><td>LotR CCG (Decipher)</td><td>2001–2007</td><td>⚰️ OOP</td><td>Considered one of the best film-licensed CCGs. Out of print; second-hand market only.</td></tr>
+        <tr><td>Card Game</td><td>LotR Living Card Game (Fantasy Flight)</td><td>2011–</td><td>✅ Active</td><td>Cooperative LCG, still in print. Excellent for solo or co-op play. The digital version is defunct but this is very much alive.</td></tr>
+        <tr><td>Board Game</td><td>War of the Ring (Ares Games)</td><td>2004–</td><td>✅ Active</td><td>Asymmetric grand strategy board game. Widely considered the definitive LotR board game experience.</td></tr>
+        <tr><td>Figures</td><td>ToyBiz LotR Action Figures</td><td>2001–2004</td><td>⚰️ OOP</td><td>Film-accurate 6" figures. Collector's items now.</td></tr>
+        <tr><td>LEGO</td><td>Lego LotR sets</td><td>2012–2013</td><td>⚰️ OOP</td><td>Jackson film-licensed. All sets retired and no longer in production. Second-hand only.</td></tr>
+        <tr><td>LEGO</td><td>Lego Rivendell (2023)</td><td>2023</td><td>✅ Available</td><td>Icons/Creator Expert set — not film-licensed, book-based. 6167 pieces. Still in production.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Filler — Lord of the Rings Content</div>
+    <div class="card">
+      <div class="fn-view-desc">Recommended LotR-adjacent content for Tunarr channel slots. Long films, behind-the-scenes documentaries, and soundtrack performances all make excellent filler around the main features.</div>
+
+      <div class="fn-filler-grid">
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">The Lord of the Rings: Behind the Scenes (New Line)</div>
+          <div class="fn-filler-meta">2001–2003 · ~30–45 min each · Three films</div>
+          <div class="fn-filler-desc">New Line Cinema's official behind-the-scenes featurettes packaged with the Extended Editions. Each film has 3–4 hours of supplemental documentary content covering WETA, costumes, cast, and location work.</div>
+          <div class="fn-filler-where">📁 Bundled with Jellyfin Extended Editions. Pull individual featurettes as standalone filler segments.</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-music">Music / Soundtrack</div>
+          <div class="fn-filler-name">Howard Shore — The Lord of the Rings Symphony</div>
+          <div class="fn-filler-meta">Various live concert recordings · ~2 hours</div>
+          <div class="fn-filler-desc">Live orchestral performances of Howard Shore's iconic LotR score. Several high-quality concert recordings available. Excellent background filler for the channel during non-peak hours.</div>
+          <div class="fn-filler-where">📁 Search for concert recordings on YouTube or acquire from Navidrome library.</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">Ringers: Lord of the Fans</div>
+          <div class="fn-filler-meta">2005 · 97 min</div>
+          <div class="fn-filler-desc">Documentary about the Tolkien fandom itself — how readers connected with the books, the Usenet-era online communities, and the explosion of fandom around the Jackson films.</div>
+          <div class="fn-filler-where">📁 Jellyfin. Good between film rebroadcasts.</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-trailer">Trailer</div>
+          <div class="fn-filler-name">Jackson Trilogy Extended Trailers</div>
+          <div class="fn-filler-meta">2001–2003 · ~2–4 min each</div>
+          <div class="fn-filler-desc">The original theatrical trailers for all three Jackson films remain excellent standalone material. The Two Towers teaser with Gandalf the White is especially good.</div>
+          <div class="fn-filler-where">📁 Tunarr bumper/intro slot. Pull from Extended Edition bonus discs.</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-hype">Hype Reel</div>
+          <div class="fn-filler-name">Rings of Power S1 &amp; S2 Trailers</div>
+          <div class="fn-filler-meta">2022–2024 · ~2–3 min each</div>
+          <div class="fn-filler-desc">Amazon Prime's official trailers for both seasons. High production value — wide shots of Númenor and the forging sequences make excellent filler before a Rings of Power episode block.</div>
+          <div class="fn-filler-where">📁 Download from YouTube for Tunarr upload.</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">J.R.R. Tolkien: A Biography (various documentaries)</div>
+          <div class="fn-filler-meta">Various · 45–60 min</div>
+          <div class="fn-filler-desc">Several Tolkien biographical documentaries exist covering his WWI service, Oxford professorship, and the writing of LotR. BBC productions recommended. Context-setting before a film block.</div>
+          <div class="fn-filler-where">📁 Jellyfin. Run before the main film as a pre-show segment.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">1954–1955</div>
+          <div class="fn-era-title">The Books</div>
+          <div class="fn-era-body">J.R.R. Tolkien publishes The Lord of the Rings in three volumes (The Fellowship of the Ring, The Two Towers, The Return of the King). The Hobbit had preceded it in 1937. These books effectively created the modern fantasy genre. Tolkien began writing the mythology that became The Silmarillion and Unfinished Tales in 1917 — the complete legendarium spans roughly 60 years of writing.</div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1977–1980</div>
+          <div class="fn-era-title">First Screen Adaptations</div>
+          <div class="fn-era-body">Rankin/Bass Productions produce The Hobbit (1977) and The Return of the King (1980) as animated TV specials. Ralph Bakshi's rotoscoped The Lord of the Rings (1978) attempts a full theatrical adaptation but is cut in half when budget and ambitions outrun each other — the planned sequel is never made. The Bakshi film remains historically significant as the first live-action-inflected Tolkien adaptation, and its unfinished state became a cultural footnote for decades.</div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1982–1999</div>
+          <div class="fn-era-title">The Text Adventure and Early Game Era</div>
+          <div class="fn-era-body">Melbourne House publishes landmark text adventures — The Hobbit (1982) and LotR: Game One (1985) — that push NLP parsing further than almost any contemporary game. Interplay's PC RPG (1990) and its incomplete sequel represent the first serious attempts at an RPG adaptation. Multiple publishers hold the Tolkien license at various points, resulting in a fragmented catalog of games with different visual interpretations of Middle-earth.</div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2001–2004</div>
+          <div class="fn-era-title">The Peter Jackson LotR Trilogy</div>
+          <div class="fn-era-body">Peter Jackson's The Fellowship of the Ring (2001) becomes one of the most acclaimed fantasy films ever made. The trilogy wins 17 Academy Awards (11 for Return of the King alone, including Best Picture). EA Games holds the film license and produces a wave of tie-in games, culminating in the excellent Battle for Middle-earth RTS and the Return of the King co-op hack-and-slash. WETA Workshop's practical effects and Howard Shore's score redefine the fantasy genre's visual and musical language. The Extended Editions on DVD become landmark home media releases.</div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2005–2011</div>
+          <div class="fn-era-title">The Post-Trilogy Drought</div>
+          <div class="fn-era-body">EA's Tolkien license expires and the company declines to renew it after declining sales. The Battle for Middle-earth games are delisted. Warner Bros. acquires the game rights. Lord of the Rings Online launches 2007 as the first major MMORPG in the setting and survives by transitioning to free-to-play in 2010. A series of licensed games under WB — Conquest, Aragorn's Quest, War in the North — have mixed results. The Hunt for Gollum and Born of Hope fan films (both 2009) demonstrate that the fan community has as much cinematic ambition as the studios.</div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2012–2015</div>
+          <div class="fn-era-title">The Hobbit Trilogy and the Lego / Nemesis Era</div>
+          <div class="fn-era-body">Peter Jackson returns for The Hobbit, expanding a single 300-page book into three films totalling ~9 hours. Critical response is mixed; the fan community's Tolkien Edit (2021) later demonstrates the films work better as a 4-hour single feature. On the game side, Monolith Productions develops Shadow of Mordor (2014) with the revolutionary Nemesis System — a procedurally generated villain hierarchy that becomes one of the most innovative mechanics in action gaming. The Lego games arrive and immediately get delisted nine years later when the license expires.</div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2017–2021</div>
+          <div class="fn-era-title">Shadow of War and the Amazon Deal</div>
+          <div class="fn-era-body">Shadow of War (2017) expands the Nemesis System into Mordor's fortress system, but launches with a controversial loot-box-gated true ending — later patched out entirely. Amazon acquires the rights to produce a multi-season TV series set in the Second Age for a reported $250M rights fee plus production costs. Plans for a Monolith-developed Tolkien game (reportedly featuring the Nemesis System as a core mechanic) collapse when WB sells Monolith's Nemesis System patent to themselves, and a new project is delayed indefinitely.</div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2022–Present</div>
+          <div class="fn-era-title">Rings of Power, New Films, and the Modern Catalog</div>
+          <div class="fn-era-body">The Rings of Power S1 launches on Prime Video (2022) to polarised fan reception but strong viewership. S2 (2024) is more warmly received, with Sauron's full arc and a darker tone. Kenji Kamiyama's anime feature The War of the Rohirrim (2024) marks the first prestige anime entry in the franchise. Peter Jackson confirms a new theatrical trilogy beginning with The Hunt for Gollum (2026). The game market fractures into mobile gacha (Rise to War, Heroes of Middle-earth), indie cozy games (Tales of the Shire), and the critically disastrous Gollum game from Daedalic. The physical LotR LCG and Games Workshop's wargame remain the most enduring licensed products across all media.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ License &amp; Canon Map</div>
+    <div class="card">
+      <p style="font-size:.84rem;line-height:1.7">The Tolkien estate's licensing is famously fragmented. Understanding who owns what explains why some games look nothing like the films:</p>
+      <table style="margin-top:12px">
+        <tr><th>License Holder</th><th>What They Control</th><th>Notable Products</th></tr>
+        <tr><td>Tolkien Estate / HarperCollins</td><td>The books, literary rights, Silmarillion / Unfinished Tales / posthumous works</td><td>All official book publications. Estate approval required for major TV/film.</td></tr>
+        <tr><td>New Line Cinema / Warner Bros.</td><td>Jackson LotR film rights</td><td>EA games (2001–2006), Lego games, Shadow of Mordor/War</td></tr>
+        <tr><td>MGM / Warner Bros.</td><td>Jackson Hobbit film rights</td><td>Lego Hobbit, Hobbit Kingdoms (Kabam)</td></tr>
+        <tr><td>Amazon MGM Studios</td><td>Second Age TV rights (Appendices-based)</td><td>Rings of Power S1–S2</td></tr>
+        <tr><td>Middle-earth Enterprises</td><td>Film/game adaptation rights (separate from book rights)</td><td>LotRO, most WB-era games</td></tr>
+      </table>
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">This is why early 2000s games have two different visual interpretations of Frodo at the same time — Surreal Software had the <em>book</em> license while EA had the <em>film</em> license. The Tolkien estate notoriously refused to sell Tolkien the TV rights to the core novels directly — Amazon's Rings of Power is based only on the Appendices of Return of the King and cannot directly adapt the book's main narrative.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>The Lord of the Rings (2003) holds the record for most wins at a single Academy Awards ceremony — 11 wins from 11 nominations, tying Ben-Hur and Titanic.</li>
+        <li>The Hunt for Gollum fan film (2009) was made for approximately £3,000 (~$4,700 USD) by director Chris Bouchard. It received over 10 million views and remains widely regarded as the best fan film in any franchise.</li>
+        <li>EA's Battle for Middle-earth (2004) is considered one of the finest RTS games of the 2000s and one of the best licensed games ever made — and it is no longer officially purchasable anywhere due to license expiry.</li>
+        <li>The Tolkien Edit (2021) is a fan edit that compresses all three Hobbit films into ~4 hours. Director Peter Jackson has reportedly acknowledged it positively in interviews, making it one of the more notable fan edits ever produced.</li>
+        <li>The Nemesis System in Shadow of Mordor/War won a Technical Achievement Award at the Game Developers Choice Awards. Warner Bros. patented it, which has prevented other developers from using it.</li>
+        <li>Lord of the Rings Online (2007) is still live as of 2026 — making it older than most modern AAA franchises. Its playerbase is small but deeply committed.</li>
+        <li>The Decipher LotR CCG (2001–2007) is considered by many card game historians to be underrated — it had sophisticated deck building for its era and genuine strategic depth. It was discontinued not due to quality but due to competition with Magic: The Gathering and license complications.</li>
+        <li>Amazon paid a reported $250,000,000 just for the Rings of Power rights — before a single frame was shot. It is one of the most expensive TV rights acquisitions in history.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
