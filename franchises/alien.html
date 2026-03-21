@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Alien Franchise</title><link rel="stylesheet" href="../shared.css">
+<style>
+/* ════════════════════════════════════════════════════
+   ALIEN VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 6px 14px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-tab-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-tab-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+.fn-view-nav {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid var(--accent); padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3); color: var(--accent);
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 7px 10px; text-align: left;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top; line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important; color: var(--accent);
+  font-size: .69rem; font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media crossover rows — purple */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic; color: var(--text-dim); font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform colour stripes */
+.fn-atari   td:first-child { border-left: 3px solid #f06292; }
+.fn-c64     td:first-child { border-left: 3px solid #7986cb; }
+.fn-amiga   td:first-child { border-left: 3px solid #4db6ac; }
+.fn-nes     td:first-child { border-left: 3px solid #e57373; }
+.fn-snes    td:first-child { border-left: 3px solid #9575cd; }
+.fn-gb      td:first-child { border-left: 3px solid #aed581; }
+.fn-smd     td:first-child { border-left: 3px solid #4db6ac; }
+.fn-jaguar  td:first-child { border-left: 3px solid #ff7043; }
+.fn-ps1     td:first-child { border-left: 3px solid #ffb74d; }
+.fn-saturn  td:first-child { border-left: 3px solid #80deea; }
+.fn-pc      td:first-child { border-left: 3px solid #90a4ae; }
+.fn-gba     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-ps2     td:first-child { border-left: 3px solid #ff8a65; }
+.fn-xbox    td:first-child { border-left: 3px solid #81c784; }
+.fn-xbox360 td:first-child { border-left: 3px solid #66bb6a; }
+.fn-ps3     td:first-child { border-left: 3px solid #ffd54f; }
+.fn-wii     td:first-child { border-left: 3px solid #b0bec5; }
+.fn-nds     td:first-child { border-left: 3px solid #f48fb1; }
+.fn-psp     td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-ps4     td:first-child { border-left: 3px solid #ffcc02; }
+.fn-xbo     td:first-child { border-left: 3px solid #4caf50; }
+.fn-ios     td:first-child { border-left: 3px solid #80cbc4; }
+.fn-android td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-mobile  td:first-child { border-left: 3px solid #80cbc4; }
+.fn-vr      td:first-child { border-left: 3px solid #ce93d8; }
+.fn-movie   td:first-child { border-left: 3px solid #ffb74d; }
+.fn-comic   td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-novel   td:first-child { border-left: 3px solid #b0bec5; }
+.fn-anime   td:first-child { border-left: 3px solid #ce93d8; }
+
+/* Gold highlight = must-play / must-watch */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = skippable / defunct / non-canon */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block; font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px; border-radius: 3px;
+  white-space: nowrap; vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-canon  { background: rgba(76,175,80,.12);   color: #81c784; border: 1px solid rgba(76,175,80,.3); }
+.fn-tag-noncanon { background: rgba(239,83,80,.12); color: #ef9a9a; border: 1px solid rgba(239,83,80,.3); }
+.fn-tag-avp    { background: rgba(180,100,220,.18); color: #b464dc; border: 1px solid rgba(180,100,220,.3); }
+.fn-tag-defunct { background: rgba(120,120,120,.15); color: #aaa; border: 1px solid rgba(150,150,150,.3); }
+.fn-tag-canceled { background: rgba(239,83,80,.1);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.25); font-style: italic; }
+.fn-star { color: var(--accent); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); border: 3px solid var(--bg);
+}
+.fn-era-year { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: .1em; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   MERCH BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 14px; }
+.fn-filler-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.fn-filler-type { font-family: 'Share Tech Mono', monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; margin-bottom: 7px; display: inline-block; }
+.fn-filler-trailer     { background: rgba(91,141,217,.15);  color: #5b8dd9;       border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-music       { background: rgba(78,205,196,.12);  color: #4ecdc4;       border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary { background: rgba(224,133,92,.12);  color: #e0855c;       border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12);color: #b464dc;       border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">👾</div>
+  <div>
+    <h1>Alien Franchise</h1>
+    <div class="subtitle">// PC · Console · Mobile · Jellyfin · EmulatorJS · 1979–Present //</div>
+    <p class="desc">
+      H.R. Giger's biomechanical nightmare — spanning four decades of films, games, comics, and novels.
+      The franchise encompasses the core Alien series, the Predator crossovers (AvP), and the prequel
+      Prometheus/Covenant thread. Use the Library tab to browse every game by release order, platform,
+      or best-first. Films and TV are on the Movies and TV tabs. The History tab covers Giger's original
+      designs through the current FX series era.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">30+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">9</div><div class="fn-stat-label">Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">TV Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">100+</div><div class="fn-stat-label">Comic Issues</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1979</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Alien Game Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile Only</button>
+        <button class="fn-view-btn"        onclick="fnView('library','avp',       this)">🔫 AvP Only</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────
+           RELEASE ORDER
+      ───────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          Every Alien, AvP, and Prometheus/Covenant game in real-world release order, from the 1982 Atari 2600 original to the present. Canceled and defunct titles included. ⭐ = standout entry. Gold = best in class. Faded = skippable or defunct.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core / Source</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Early Era (1982–1993) — Home Computer &amp; Atari ──</td></tr>
+
+          <tr class="fn-atari fn-skip">
+            <td>1982</td><td>Alien</td><td>Atari 2600</td><td>stella</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-tag fn-tag-opt">historical</span> Original tie-in by Fox Video Games. Pac-Man-style maze. Playable in stella core.</td>
+          </tr>
+
+          <tr class="fn-c64 fn-skip">
+            <td>1984</td><td>Alien (CRL)</td><td>C64 / Spectrum / Amstrad</td><td>vice (C64)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">historical</span> Text adventure with graphics. CRL Group release.</td>
+          </tr>
+
+          <tr class="fn-amiga fn-skip">
+            <td>1987</td><td>Aliens (Electric Dreams)</td><td>Amiga / Atari ST / DOS</td><td>dosbox</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">historical</span> Top-down shooter loosely based on the film. DOSBox playable.</td>
+          </tr>
+
+          <tr class="fn-amiga fn-skip">
+            <td>1987</td><td>Alien (CRL Reissue)</td><td>Amiga / PC DOS</td><td>dosbox</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">historical</span> Updated re-release of 1984 text adventure. DOSBox only.</td>
+          </tr>
+
+          <tr class="fn-pc fn-skip">
+            <td>1990</td><td>Aliens: Neoplasma</td><td>DOS</td><td>dosbox</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">historical</span> Unlicensed Soviet shareware clone. Curiosity piece only.</td>
+          </tr>
+
+          <tr class="fn-snes fn-highlight">
+            <td>1992</td><td>Aliens vs Predator</td><td>SNES</td><td>snes9x</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Beat-em-up. First AvP game. Remarkable for the era — plays well today.</td>
+          </tr>
+
+          <tr class="fn-smd">
+            <td>1993</td><td>Alien 3</td><td>Sega Genesis / Mega Drive</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Loose film tie-in. Run-and-gun. Better than the movie it's based on.</td>
+          </tr>
+
+          <tr class="fn-snes">
+            <td>1993</td><td>Alien 3</td><td>SNES</td><td>snes9x</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Same game, slightly different port. Genesis version preferred.</td>
+          </tr>
+
+          <tr class="fn-gb fn-skip">
+            <td>1993</td><td>Alien 3</td><td>Game Boy</td><td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Cut-down handheld port. Completionists only.</td>
+          </tr>
+
+          <tr class="fn-jaguar fn-skip">
+            <td>1994</td><td>Aliens vs Predator</td><td>Atari Jaguar</td><td>virtualjaguar</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">historical</span> First-person on Jaguar hardware. Revolutionary at release. Emulation rough.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The Rebellion &amp; Fox Interactive Era (1994–2001) ──</td></tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>1999</td><td>Aliens vs Predator (PC) <span class="fn-star">⭐</span></td><td>PC</td><td>GOG / Direct</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Rebellion's masterpiece. Three campaigns (Marine, Alien, Predator). Still terrifying. Best AvP game.</td>
+          </tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2001</td><td>Aliens vs Predator 2 (PC) <span class="fn-star">⭐</span></td><td>PC</td><td>GOG / Unofficial patch</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Monolith Productions. Deeper story than AvP1. Requires community patch for modern Windows.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Colonial Marines &amp; Isolation Era (2001–2014) ──</td></tr>
+
+          <tr class="fn-ps2 fn-skip">
+            <td>2001</td><td>Alien Resurrection</td><td>PS1</td><td>pcsx_rearmed</td>
+            <td><span class="fn-tag fn-tag-varies">⚡ Varies</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> First-person shooter. Needs PS1 BIOS. Unremarkable.</td>
+          </tr>
+
+          <tr class="fn-xbox fn-skip">
+            <td>2003</td><td>Aliens: Extermination</td><td>Arcade</td><td>MAME</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Light-gun arcade game. Playable in MAME with controller remapping.</td>
+          </tr>
+
+          <tr class="fn-ps2">
+            <td>2004</td><td>Aliens vs Predator: Extinction</td><td>PS2 / Xbox</td><td>pcsx2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>RTS on console. Requires PCSX2. Surprisingly deep. Worth trying via PC stream.</td>
+          </tr>
+
+          <tr class="fn-xbox360 fn-skip">
+            <td>2006</td><td>Aliens vs Predator: Requiem</td><td>PSP</td><td>ppsspp</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">skip</span> AvPR film tie-in. Below average. PSP via PPSSPP only.</td>
+          </tr>
+
+          <tr class="fn-xbox360 fn-skip">
+            <td>2007</td><td>Aliens: Armageddon</td><td>Arcade</td><td>MAME</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Light-gun arcade sequel. MAME only.</td>
+          </tr>
+
+          <tr class="fn-xbox360">
+            <td>2010</td><td>Aliens vs Predator (2010)</td><td>PC / PS3 / Xbox 360</td><td>PC direct</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Rebellion revisits AvP with modern graphics. Three campaigns. Solid but not the 1999 original.</td>
+          </tr>
+
+          <tr class="fn-xbox360 fn-skip">
+            <td>2013</td><td>Aliens: Colonial Marines</td><td>PC / PS3 / Xbox 360 / Wii U</td><td>PC direct</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">infamously bad</span> Gearbox's infamous bait-and-switch. Community mods (FixAliensCM) make it tolerable. Historical curiosity.</td>
+          </tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2014</td><td>Alien: Isolation <span class="fn-star">⭐</span></td><td>PC / PS4 / XBO</td><td>PC/Steam</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> The definitive Alien game. Amanda Ripley aboard Sevastopol Station. Best horror game of the decade. Essential.</td>
+          </tr>
+
+          <tr class="fn-mobile fn-skip">
+            <td>2014</td><td>Alien: Isolation (Mobile)</td><td>iOS / Android</td><td>Native app</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-defunct">defunct</span> Cut-down port of the PC game. Removed from stores. Only Nightmare DLC content included. Sideload APK required.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Mobile Era &amp; Current (2014–Present) ──</td></tr>
+
+          <tr class="fn-mobile fn-skip">
+            <td>2014</td><td>Alien: Blackout (pre-release teaser)</td><td>—</td><td>—</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-canceled">canceled</span> The title "Alien: Blackout" was initially announced for consoles, then shelved. See 2019 entry.</td>
+          </tr>
+
+          <tr class="fn-mobile fn-skip">
+            <td>2016</td><td>Alien: Covenant — In Utero</td><td>iOS / Android (VR)</td><td>Google Cardboard</td>
+            <td><span class="fn-tag fn-tag-defunct">defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">defunct</span> 360° VR short tied to the Covenant film. No longer available in stores.</td>
+          </tr>
+
+          <tr class="fn-vr fn-skip">
+            <td>2017</td><td>Alien: Covenant VR</td><td>PSVR / PC VR</td><td>Steam VR</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-defunct">defunct</span> Film promotional VR experience. Removed from sale. Archived copies float around.</td>
+          </tr>
+
+          <tr class="fn-mobile">
+            <td>2019</td><td>Alien: Blackout</td><td>iOS / Android</td><td>Native app</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Five Nights-style panic management on a space station. Amanda Ripley. Surprisingly tense. Canon sequel to Isolation.</td>
+          </tr>
+
+          <tr class="fn-pc fn-highlight">
+            <td>2023</td><td>Aliens: Dark Descent <span class="fn-star">⭐</span></td><td>PC / PS5 / XSX</td><td>PC/Steam</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Tindalos Interactive. Real-time tactics. Colonial Marines done right. Excellent.</td>
+          </tr>
+
+          <tr class="fn-pc fn-skip">
+            <td>2024</td><td>Aliens: Fireteam Elite (active)</td><td>PC / PS4 / PS5 / XBO / XSX</td><td>PC/Steam</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Co-op horde shooter. Third-person. Online component still active as of 2024. Content-light solo.</td>
+          </tr>
+
+        </table>
+
+        <div class="fn-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold border = best in class</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded = skippable / defunct</span>
+          <span><span class="fn-tag fn-tag-yes">📱 Yes</span> Mobile via EmulatorJS or native</span>
+          <span><span class="fn-tag fn-tag-no">🖥️ PC Only</span> PC direct or stream via Sunshine</span>
+          <span><span class="fn-tag fn-tag-defunct">defunct</span> No longer available for purchase</span>
+          <span><span class="fn-tag fn-tag-avp">AvP</span> Alien vs Predator crossover</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────
+           BY PLATFORM
+      ───────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All games grouped by platform. EmulatorJS-compatible platforms listed first.</div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Title</th><th>Year</th><th>Core</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Atari 2600 — Core: stella ──</td></tr>
+          <tr class="fn-atari fn-skip"><td>Atari 2600</td><td>Alien</td><td>1982</td><td>stella</td><td>Original Fox tie-in. Maze game.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Game Boy / GB Color — Core: gambatte ──</td></tr>
+          <tr class="fn-gb fn-skip"><td>GB</td><td>Alien 3</td><td>1993</td><td>gambatte</td><td>Cut-down port.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── SNES — Core: snes9x ──</td></tr>
+          <tr class="fn-snes fn-highlight"><td>SNES</td><td>Aliens vs Predator</td><td>1992</td><td>snes9x</td><td>Best SNES entry. Beat-em-up.</td></tr>
+          <tr class="fn-snes"><td>SNES</td><td>Alien 3</td><td>1993</td><td>snes9x</td><td>Genesis version preferred.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Sega Genesis / Mega Drive — Core: genesis_plus_gx ──</td></tr>
+          <tr class="fn-smd fn-highlight"><td>Genesis</td><td>Alien 3</td><td>1993</td><td>genesis_plus_gx</td><td><span class="fn-star">⭐</span> Best 16-bit Alien game. Run-and-gun.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── PSP — Core: ppsspp ──</td></tr>
+          <tr class="fn-psp fn-skip"><td>PSP</td><td>Aliens vs Predator: Requiem</td><td>2006</td><td>ppsspp</td><td>AvPR tie-in. Below average.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── iOS / Android (Native) ──</td></tr>
+          <tr class="fn-mobile fn-skip"><td>iOS/Android</td><td>Alien: Isolation (Mobile)</td><td>2014</td><td>Native (defunct)</td><td>Removed from stores. Sideload only.</td></tr>
+          <tr class="fn-mobile"><td>iOS/Android</td><td>Alien: Blackout</td><td>2019</td><td>Native app</td><td>FNaF-style. Canon. Still available.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── PC Only (Sunshine stream recommended) ──</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC</td><td>Aliens vs Predator (1999)</td><td>1999</td><td>GOG</td><td><span class="fn-star">⭐</span> Best AvP game. Three campaigns.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC</td><td>Aliens vs Predator 2</td><td>2001</td><td>GOG + patch</td><td><span class="fn-star">⭐</span> Monolith. Story-rich.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC</td><td>Alien: Isolation</td><td>2014</td><td>Steam</td><td><span class="fn-star">⭐</span> THE Alien game. Essential.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC</td><td>Aliens: Dark Descent</td><td>2023</td><td>Steam</td><td><span class="fn-star">⭐</span> Best modern Alien game.</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC</td><td>Aliens: Colonial Marines</td><td>2013</td><td>Steam</td><td>Infamously bad. FixAliensCM mod needed.</td></tr>
+          <tr class="fn-pc"><td>PC</td><td>Aliens vs Predator (2010)</td><td>2010</td><td>Steam</td><td>Solid but not as good as AvP1.</td></tr>
+          <tr class="fn-pc"><td>PC</td><td>Aliens: Fireteam Elite</td><td>2021</td><td>Steam</td><td>Co-op horde shooter.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────
+           BEST FIRST
+      ───────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Ranked by quality and replayability. Start here if you only have time for a few. All ⭐ entries are essential.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why</th></tr>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>Alien: Isolation <span class="fn-star">⭐</span></td><td>PC</td><td>The definitive Alien experience. Nothing else comes close. Play this first.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2</td><td>Aliens vs Predator (1999) <span class="fn-star">⭐</span></td><td>PC</td><td>Rebellion's masterwork. The Marine campaign remains one of horror gaming's all-time best.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>Aliens: Dark Descent <span class="fn-star">⭐</span></td><td>PC</td><td>Best modern Alien game. Tactical, atmospheric, brutal.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>4</td><td>Aliens vs Predator 2 <span class="fn-star">⭐</span></td><td>PC</td><td>Monolith's deeper AvP with a rich story. Needs community patch.</td></tr>
+          <tr class="fn-smd fn-highlight"><td>5</td><td>Alien 3 (Genesis) <span class="fn-star">⭐</span></td><td>Genesis</td><td>Best retro entry. Run-and-gun with real tension. Play on mobile or EmulatorJS.</td></tr>
+          <tr class="fn-snes fn-highlight"><td>6</td><td>Aliens vs Predator (SNES) <span class="fn-star">⭐</span></td><td>SNES</td><td>Beat-em-up classic. Holds up on mobile.</td></tr>
+          <tr class="fn-mobile"><td>7</td><td>Alien: Blackout</td><td>iOS/Android</td><td>Surprisingly tense phone game. Canon. Amanda Ripley.</td></tr>
+          <tr class="fn-xbox360"><td>8</td><td>Aliens vs Predator (2010)</td><td>PC</td><td>Modern AvP with decent campaigns. Fun but not AvP1.</td></tr>
+          <tr class="fn-pc"><td>9</td><td>Aliens: Fireteam Elite</td><td>PC</td><td>Co-op horde fun with friends. Thin solo.</td></tr>
+          <tr class="fn-xbox360 fn-skip"><td>—</td><td>Aliens: Colonial Marines</td><td>PC</td><td><span class="fn-tag fn-tag-opt">avoid or mod</span> Only with FixAliensCM installed.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────
+           MOBILE ONLY
+      ───────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Games playable on phone via EmulatorJS, native Android/iOS, or Jellyfin remote. PC-only titles excluded.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Core</th><th>Notes</th></tr>
+          <tr class="fn-snes fn-highlight"><td>1</td><td>Aliens vs Predator (SNES) <span class="fn-star">⭐</span></td><td>SNES</td><td>snes9x</td><td>Best mobile-playable Alien game. Beat-em-up. Excellent touch controls.</td></tr>
+          <tr class="fn-smd fn-highlight"><td>2</td><td>Alien 3 (Genesis) <span class="fn-star">⭐</span></td><td>Genesis</td><td>genesis_plus_gx</td><td>Run-and-gun. Great on a screen.</td></tr>
+          <tr class="fn-snes"><td>3</td><td>Alien 3 (SNES)</td><td>SNES</td><td>snes9x</td><td>Same as Genesis version. Either works.</td></tr>
+          <tr class="fn-gb fn-skip"><td>4</td><td>Alien 3 (Game Boy)</td><td>GB</td><td>gambatte</td><td>Cut-down. Completionist only.</td></tr>
+          <tr class="fn-mobile"><td>5</td><td>Alien: Blackout</td><td>iOS/Android</td><td>Native app</td><td>FNaF-style. Canon. Available now.</td></tr>
+          <tr class="fn-psp fn-skip"><td>6</td><td>Aliens vs Predator: Requiem (PSP)</td><td>PSP</td><td>ppsspp</td><td>Below average but playable via PPSSPP mobile.</td></tr>
+          <tr class="fn-atari fn-skip"><td>7</td><td>Alien (Atari 2600)</td><td>Atari 2600</td><td>stella</td><td>Historical curiosity. 1982.</td></tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body"><strong>PC-only titles excluded:</strong> Alien: Isolation, AvP 1999/2001/2010, Aliens: Colonial Marines, Dark Descent, and Fireteam Elite all require PC hardware. Stream via Sunshine + Moonlight to play on any screen.</div>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────
+           AvP ONLY
+      ───────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-avp">
+        <div class="fn-view-desc">Every Alien vs Predator crossover game in release order.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Rating</th><th>Notes</th></tr>
+          <tr class="fn-snes fn-highlight"><td>1992</td><td>Aliens vs Predator (SNES) <span class="fn-star">⭐</span></td><td>SNES</td><td>8/10</td><td>Best retro AvP. Beat-em-up. Still excellent.</td></tr>
+          <tr class="fn-jaguar fn-skip"><td>1994</td><td>Aliens vs Predator (Jaguar)</td><td>Atari Jaguar</td><td>6/10</td><td>Historic FPS. Rough in emulation.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>1999</td><td>Aliens vs Predator (PC) <span class="fn-star">⭐</span></td><td>PC</td><td>10/10</td><td>Masterpiece. Three campaigns. Essential.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2001</td><td>Aliens vs Predator 2 <span class="fn-star">⭐</span></td><td>PC</td><td>9/10</td><td>Monolith. Deeper story. Needs patch.</td></tr>
+          <tr class="fn-ps2"><td>2004</td><td>Aliens vs Predator: Extinction</td><td>PS2/Xbox</td><td>6/10</td><td>RTS on console. Niche.</td></tr>
+          <tr class="fn-psp fn-skip"><td>2006</td><td>Aliens vs Predator: Requiem (PSP)</td><td>PSP</td><td>4/10</td><td>AvPR film tie-in. Poor.</td></tr>
+          <tr class="fn-xbox360"><td>2010</td><td>Aliens vs Predator (2010)</td><td>PC/PS3/360</td><td>7/10</td><td>Rebellion returns. Fun but not AvP1.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2004</td><td>Alien vs Predator (Film)</td><td>Movie</td><td>4/10</td><td>Paul W.S. Anderson. PG-13. See Movies tab.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2007</td><td>Aliens vs Predator: Requiem (Film)</td><td>Movie</td><td>3/10</td><td>Brothers Strause. R-rated but poor. See Movies tab.</td></tr>
+        </table>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM / Game Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\Alien\
+  ├── atari2600\   → .a26   (core: stella)
+  │                  alien-1982.a26
+  ├── gb\          → .gb    (core: gambatte)
+  │                  alien3.gb
+  ├── snes\        → .sfc   (core: snes9x)
+  │                  aliens-vs-predator.sfc · alien3.sfc
+  ├── genesis\     → .md    (core: genesis_plus_gx)
+  │                  alien3.md
+  └── psp\         → .iso   (core: ppsspp)
+                     avp-requiem.iso
+
+PC Games (not in EmulatorJS — launch via Sunshine or direct):
+  D:\Games\Alien\
+    ├── AlienIsolation\          (Steam / GOG)
+    ├── AvP1999\                 (GOG)
+    ├── AvP2\                    (GOG + community patch)
+    ├── AvP2010\                 (Steam)
+    ├── AliensColonialMarines\   (Steam + FixAliensCM mod)
+    ├── AliensDarkDescent\       (Steam)
+    └── AliensFireteamElite\     (Steam)</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Prefix all EmulatorJS game IDs with <code>alien-</code> to avoid conflicts. Example: <code>alien-avp-snes</code>, <code>alien-3-gen</code>, <code>alien-blackout</code>.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Alien TV</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',       this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button>
+      </div>
+
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Every TV production in the franchise. The FX series (2024) is the first non-theatrical Alien property to receive major critical acclaim.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Animated / Early TV ──</td></tr>
+          <tr class="fn-anime fn-skip">
+            <td>1979</td><td>Alien (Kenner Promo Shorts)</td>
+            <td><span class="fn-tag fn-tag-opt">Promo</span></td><td>~3 shorts</td>
+            <td>YouTube archive</td>
+            <td><span class="fn-tag fn-tag-opt">historical</span> 30-second Kenner toy ads aired on TV. First animated Alien appearances.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Modern TV Era ──</td></tr>
+          <tr class="fn-anime fn-highlight">
+            <td>2024</td><td>Alien: Earth (Alien FX) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span></td><td>8 eps (S1)</td>
+            <td>Hulu / Disney+</td>
+            <td><span class="fn-star">⭐</span> Noah Hawley's acclaimed FX series. Earth-set. Pre-dates the films. S1 complete. Renewed for S2.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Unrealized TV Projects ──</td></tr>
+          <tr class="fn-anime fn-skip">
+            <td>2003</td><td>Alien: Origin (TV Movie Pitch)</td>
+            <td><span class="fn-tag fn-tag-canceled">Canceled</span></td><td>—</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-canceled">canceled</span> Fox development project that never got greenlit. Predated Prometheus.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended watch order for the full Alien universe — games, films, and TV together.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Type</th><th>Era (In-Universe)</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight"><td>1</td><td>Prometheus</td><td>Film</td><td>2093</td><td>Optional prequel. Sets up Engineers.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2</td><td>Alien: Covenant</td><td>Film</td><td>2104</td><td>David / Weyland-Yutani origin of the Xenomorph strain.</td></tr>
+          <tr class="fn-anime fn-highlight"><td>3</td><td>Alien: Earth (FX)</td><td>TV Series</td><td>2120s (pre-Alien)</td><td><span class="fn-star">⭐</span> Earth-set. Shows WY colony operations before the original film era.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>4</td><td>Alien (1979) <span class="fn-star">⭐</span></td><td>Film</td><td>2122</td><td>Start here if watching films only.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>5</td><td>Alien: Isolation (game)</td><td>Game</td><td>2137</td><td><span class="fn-star">⭐</span> Amanda Ripley. Mandatory.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>6</td><td>Aliens (1986) <span class="fn-star">⭐</span></td><td>Film</td><td>2179</td><td>Cameron's military action sequel.</td></tr>
+          <tr class="fn-mobile"><td>7</td><td>Alien: Blackout (game)</td><td>Game</td><td>2183</td><td>Amanda Ripley, post-Aliens.</td></tr>
+          <tr class="fn-movie"><td>8</td><td>Alien 3 (1992)</td><td>Film</td><td>2179+</td><td>Immediately follows Aliens.</td></tr>
+          <tr class="fn-movie fn-skip"><td>9</td><td>Alien Resurrection (1997)</td><td>Film</td><td>2379</td><td>Far-future clone Ripley. Optional.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>10</td><td>Alien: Romulus (2024) <span class="fn-star">⭐</span></td><td>Film</td><td>2142</td><td>Between Alien and Aliens. Best in the franchise since 1986.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Alien Films</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',      this)">📋 All Films</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','canon',    this)">✅ Canon Only</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','chrono',   this)">🕰️ Chronological</button>
+      </div>
+
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">Every theatrical release in the extended Alien universe, including AvP and Prometheus films. Release order.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Director</th><th>Canon?</th><th>Jellyfin</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Core Alien Series ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>1979</td><td>Alien <span class="fn-star">⭐</span></td><td>Ridley Scott</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Jellyfin</td>
+            <td><span class="fn-star">⭐</span> The original. One of cinema's greatest horror films. H.R. Giger designs. Essential.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>1986</td><td>Aliens <span class="fn-star">⭐</span></td><td>James Cameron</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Jellyfin</td>
+            <td><span class="fn-star">⭐</span> Cameron's action masterpiece. Colonial Marines. Some argue this surpasses the original.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>1992</td><td>Alien 3</td><td>David Fincher</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Jellyfin</td>
+            <td>Troubled production. The Assembly Cut (2003) significantly improves the theatrical cut — watch that version.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>1997</td><td>Alien Resurrection</td><td>Jean-Pierre Jeunet</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Jellyfin</td>
+            <td>Clone Ripley, 200 years later. Joss Whedon script. Divisive. More horror-comedy than horror.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Alien vs Predator Films ──</td></tr>
+          <tr class="fn-movie fn-skip">
+            <td>2004</td><td>Alien vs Predator</td><td>Paul W.S. Anderson</td>
+            <td><span class="fn-tag fn-tag-avp">AvP</span></td><td>Jellyfin</td>
+            <td>PG-13. Set in present day. Considered soft canon at best. Antarctic Pyramid concept is interesting.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2007</td><td>Aliens vs Predator: Requiem</td><td>Brothers Strause</td>
+            <td><span class="fn-tag fn-tag-avp">AvP</span></td><td>Jellyfin</td>
+            <td>R-rated but widely considered the worst entry in both franchises. Predalien concept.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Prequel Series ──</td></tr>
+          <tr class="fn-movie">
+            <td>2012</td><td>Prometheus</td><td>Ridley Scott</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Jellyfin</td>
+            <td>Engineer origin story. Weyland Corp. David the android. Beautiful visuals. Divisive script.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>2017</td><td>Alien: Covenant</td><td>Ridley Scott</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Jellyfin</td>
+            <td>David creates the Xenomorph strain. Connects prequels to the original. Scott's most controversial Alien film.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Modern Era ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2024</td><td>Alien: Romulus <span class="fn-star">⭐</span></td><td>Fede Álvarez</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Jellyfin</td>
+            <td><span class="fn-star">⭐</span> Set between Alien and Aliens. Young scavengers on a derelict Weyland-Yutani station. Best film since Aliens. Practical effects.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Short Films &amp; Promotional ──</td></tr>
+          <tr class="fn-movie fn-skip">
+            <td>2012</td><td>Prometheus: Viral Shorts (TED / Vickers)</td><td>Ridley Scott / Fox</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>YouTube</td>
+            <td>TED 2023 talk (Peter Weyland) and Vickers viral. Canon lore. 5–10 min each. On YouTube.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2017</td><td>Alien: Covenant — Prologue Shorts</td><td>Ridley Scott / Fox</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>YouTube</td>
+            <td>"Last Supper" and "The Crossing" shorts. Canon. Fills gaps between Prometheus and Covenant.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2024</td><td>Alien: Romulus — Prequel Short</td><td>Fede Álvarez</td>
+            <td><span class="fn-tag fn-tag-canon">Canon</span></td><td>Hulu</td>
+            <td>Promotional short depicting the discovery of the Renaissance station. Canon.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Unmade / Canceled Films ──</td></tr>
+          <tr class="fn-movie fn-skip">
+            <td>1990s</td><td>Alien 5 (Joss Whedon Draft)</td><td>—</td>
+            <td><span class="fn-tag fn-tag-canceled">Canceled</span></td><td>—</td>
+            <td><span class="fn-tag fn-tag-canceled">canceled</span> Whedon's post-Resurrection follow-up never developed. Script exists informally.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2015–2019</td><td>Alien 5 (Neill Blomkamp)</td><td>Neill Blomkamp</td>
+            <td><span class="fn-tag fn-tag-canceled">Canceled</span></td><td>—</td>
+            <td><span class="fn-tag fn-tag-canceled">canceled</span> Blomkamp's sequel that would retcon Alien 3+4 and bring back Hicks and Newt. Shelved by Fox for Covenant. Concept art released publicly.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2000s</td><td>Alien 5 (Ridley Scott / William Gibson Script)</td><td>—</td>
+            <td><span class="fn-tag fn-tag-canceled">Canceled</span></td><td>—</td>
+            <td><span class="fn-tag fn-tag-canceled">canceled</span> Gibson wrote an Alien sequel script in the late 1980s that was eventually published as a comic. Never filmed.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-movies-canon">
+        <div class="fn-view-desc">Canon films only. AvP crossovers excluded.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Director</th><th>In-Universe Year</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight"><td>1979</td><td>Alien <span class="fn-star">⭐</span></td><td>Ridley Scott</td><td>2122</td><td>Essential.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>1986</td><td>Aliens <span class="fn-star">⭐</span></td><td>James Cameron</td><td>2179</td><td>Essential.</td></tr>
+          <tr class="fn-movie"><td>1992</td><td>Alien 3 (Assembly Cut)</td><td>David Fincher</td><td>2179</td><td>Watch the Assembly Cut.</td></tr>
+          <tr class="fn-movie fn-skip"><td>1997</td><td>Alien Resurrection</td><td>Jean-Pierre Jeunet</td><td>2379</td><td>Optional.</td></tr>
+          <tr class="fn-movie"><td>2012</td><td>Prometheus</td><td>Ridley Scott</td><td>2093</td><td>Prequel.</td></tr>
+          <tr class="fn-movie"><td>2017</td><td>Alien: Covenant</td><td>Ridley Scott</td><td>2104</td><td>Prequel continuation.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2024</td><td>Alien: Romulus <span class="fn-star">⭐</span></td><td>Fede Álvarez</td><td>2142</td><td>Best since Aliens.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-movies-chrono">
+        <div class="fn-view-desc">In-universe chronological order. Engineers predates all human events by millennia — listed from first contact onward.</div>
+        <table class="fn-table">
+          <tr><th>In-Universe Year</th><th>Title</th><th>Type</th><th>Notes</th></tr>
+          <tr class="fn-movie"><td>2023 (real-world promo)</td><td>TED Talk: Peter Weyland</td><td>Short</td><td>YouTube. Foundation of Weyland Corp. canon.</td></tr>
+          <tr class="fn-movie"><td>2089–2093</td><td>Prometheus</td><td>Film</td><td>LV-223 expedition. Discovery of Engineers.</td></tr>
+          <tr class="fn-movie"><td>2104</td><td>Alien: Covenant</td><td>Film</td><td>Origae-6 colonists. David's Xenomorph.</td></tr>
+          <tr class="fn-anime fn-highlight"><td>2120s</td><td>Alien: Earth (FX TV)</td><td>TV Series</td><td><span class="fn-star">⭐</span> Pre-original-film Earth setting.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2122</td><td>Alien (1979) <span class="fn-star">⭐</span></td><td>Film</td><td>Nostromo. Ellen Ripley. The original.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2137</td><td>Alien: Isolation</td><td>Game</td><td>Amanda Ripley. 15 years after Alien.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2142</td><td>Alien: Romulus <span class="fn-star">⭐</span></td><td>Film</td><td>Between Alien and Aliens.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2179</td><td>Aliens (1986) <span class="fn-star">⭐</span></td><td>Film</td><td>LV-426. Colonial Marines.</td></tr>
+          <tr class="fn-mobile"><td>2183</td><td>Alien: Blackout</td><td>Game</td><td>Amanda Ripley, post-Aliens film.</td></tr>
+          <tr class="fn-movie"><td>2179</td><td>Alien 3</td><td>Film</td><td>Immediately follows Aliens.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2379</td><td>Alien Resurrection</td><td>Film</td><td>Distant future clone Ripley.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH (Comics, Novels, Toys)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Comics, Novels &amp; Print</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('merch','comics',this)">📚 Comics</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','novels',this)">📖 Novels</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','other', this)">🎲 Other</button>
+      </div>
+
+      <div class="fn-view active" id="fn-merch-comics">
+        <div class="fn-view-desc">Dark Horse published the bulk of the Alien comics from 1988–2016. Marvel acquired the license in 2020. Major series listed.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Publisher</th><th>Issues</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Dark Horse Era (1988–2016) ──</td></tr>
+          <tr class="fn-comic fn-highlight">
+            <td>1988</td><td>Aliens (Outbreak) <span class="fn-star">⭐</span></td><td>Dark Horse</td><td>6</td>
+            <td><span class="fn-star">⭐</span> The original Dark Horse series. Hicks and Newt as adults. Predated Alien 3 and contradicted by it. Essential reading.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>1989</td><td>Aliens: Nightmare Asylum</td><td>Dark Horse</td><td>4</td>
+            <td>Continues the Hicks/Newt storyline. Part of the original trilogy.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>1990</td><td>Aliens: Female War (Earth War)</td><td>Dark Horse</td><td>4</td>
+            <td>Conclusion of the original Dark Horse trilogy. The Queen Mother.</td>
+          </tr>
+          <tr class="fn-comic fn-highlight">
+            <td>1989</td><td>Aliens vs Predator <span class="fn-star">⭐</span></td><td>Dark Horse</td><td>4 + ongoing</td>
+            <td><span class="fn-star">⭐</span> The original AvP comics that inspired everything. Machiko Noguchi. Foundational.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>1993</td><td>Aliens: Genocide</td><td>Dark Horse</td><td>4</td>
+            <td>Red Queen Alien vs Black Queen. Post-Earth War.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>1995</td><td>Aliens: Labyrinth</td><td>Dark Horse</td><td>4</td>
+            <td>Body horror deep-cut. Dr. Church's experiments. One of the darkest Alien comics.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>1996</td><td>Aliens: Stronghold</td><td>Dark Horse</td><td>4</td>
+            <td>WY synthetic soldiers. Interesting android lore.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>1997</td><td>William Gibson's Alien 3</td><td>Dark Horse</td><td>5</td>
+            <td>Gibson's un-filmed Alien 3 script adapted to comics (2018 publication). The Alien 3 that wasn't.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>2009</td><td>Aliens: More Than Human</td><td>Dark Horse</td><td>1 (OGN)</td>
+            <td>Graphic novel. Colonial planet. Strong standalone.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Marvel Era (2020–Present) ──</td></tr>
+          <tr class="fn-comic">
+            <td>2021</td><td>Alien (Vol. 1) — Cristiano Seixas</td><td>Marvel</td><td>12</td>
+            <td>New protagonist Gabriel Cruz. Ties into Alien: Isolation lore somewhat.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>2022</td><td>Alien (Vol. 2)</td><td>Marvel</td><td>5+</td>
+            <td>Continuation. Expanding the universe.</td>
+          </tr>
+          <tr class="fn-comic">
+            <td>2023</td><td>Aliens: Aftermath</td><td>Marvel</td><td>1 (one-shot)</td>
+            <td>Romulus-adjacent storytelling.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-novels">
+        <div class="fn-view-desc">Major novel releases. Novelizations listed alongside original fiction.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Author</th><th>Type</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Film Novelizations ──</td></tr>
+          <tr class="fn-novel fn-skip"><td>1979</td><td>Alien</td><td>Alan Dean Foster</td><td>Novelization</td><td>Faithful film novelization. Foster wrote it as Walter (uncredited) at the time.</td></tr>
+          <tr class="fn-novel fn-skip"><td>1986</td><td>Aliens</td><td>Alan Dean Foster</td><td>Novelization</td><td>Cameron film novelization.</td></tr>
+          <tr class="fn-novel fn-skip"><td>1992</td><td>Alien 3</td><td>Alan Dean Foster</td><td>Novelization</td><td>Based on the theatrical cut.</td></tr>
+          <tr class="fn-novel fn-skip"><td>1997</td><td>Alien Resurrection</td><td>A.C. Crispin</td><td>Novelization</td><td>Based on Whedon's script.</td></tr>
+          <tr class="fn-novel fn-skip"><td>2012</td><td>Prometheus</td><td>Jon Spaihts / Damon Lindelof (adapted)</td><td>Novelization</td><td>Christie Golden adaptation.</td></tr>
+          <tr class="fn-novel fn-skip"><td>2017</td><td>Alien: Covenant</td><td>Alan Dean Foster</td><td>Novelization</td><td>Includes "Origins" prequel novella material.</td></tr>
+          <tr class="fn-novel fn-skip"><td>2024</td><td>Alien: Romulus</td><td>Titan Books</td><td>Novelization</td><td>Film tie-in novelization.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Original Novels ──</td></tr>
+          <tr class="fn-novel fn-highlight">
+            <td>2014</td><td>Alien: Out of the Shadows <span class="fn-star">⭐</span></td><td>Tim Lebbon</td><td>Original novel</td>
+            <td><span class="fn-star">⭐</span> Set between Alien and Aliens. Amanda Ripley adjacent. Effectively canon companion to Isolation.</td>
+          </tr>
+          <tr class="fn-novel">
+            <td>2014</td><td>Alien: Sea of Sorrows</td><td>James A. Moore</td><td>Original novel</td>
+            <td>Descendant of Ellen Ripley. Sequel to Out of the Shadows.</td>
+          </tr>
+          <tr class="fn-novel">
+            <td>2014</td><td>Alien: River of Pain</td><td>Christopher Golden</td><td>Original novel</td>
+            <td>Covers the colonization of LV-426 before Aliens. What happened to the Hadley's Hope families.</td>
+          </tr>
+          <tr class="fn-novel fn-highlight">
+            <td>2016</td><td>Alien: Isolation (Official Novelization)</td><td>Keith R.A. DeCandido</td><td>Novelization</td>
+            <td>Game novelization. Good companion to the game.</td></tr>
+          <tr class="fn-novel">
+            <td>2023</td><td>Alien: Uncivil War</td><td>Brendan Deneen</td><td>Original novel</td>
+            <td>Post-Romulus era fiction. Corporate war backdrop.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-other">
+        <div class="fn-view-desc">Board games, tabletop RPGs, and collectibles of note.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="4">── Tabletop ──</td></tr>
+          <tr class="fn-comic fn-highlight"><td>2021</td><td>Alien: The Roleplaying Game (Free League)</td><td>TTRPG</td><td><span class="fn-star">⭐</span> Free League Publishing. Exceptional design. Panic system mirrors the films perfectly. Physical + PDF.</td></tr>
+          <tr class="fn-comic fn-highlight"><td>2019</td><td>Aliens: Another Glorious Day in the Corps</td><td>Board Game</td><td><span class="fn-star">⭐</span> Gale Force Nine. Colonial Marines cooperative. Excellent miniatures.</td></tr>
+          <tr class="fn-comic"><td>2023</td><td>Alien: Fate of the Nostromo</td><td>Board Game</td><td>Ravensburger. Cooperative. Good gateway entry.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── Collectibles ──</td></tr>
+          <tr class="fn-comic"><td>1979</td><td>Kenner Alien (18" figure)</td><td>Toy / Collectible</td><td>The original Kenner Alien toy. Recalled and reissued. Highly collectible.</td></tr>
+          <tr class="fn-comic"><td>1992–</td><td>NECA Alien / Predator Figure Lines</td><td>Action Figures</td><td>NECA's 7" and 18" lines are the gold standard for Alien collectibles.</td></tr>
+          <tr class="fn-comic"><td>2012–</td><td>Hot Toys Alien / Aliens Figures</td><td>1/6 Scale</td><td>Museum-quality 1/6 scale figures. Ripley, Xenomorph, Queen.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr channel content)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler</div>
+    <div class="card">
+      <p style="font-size:.84rem;color:var(--text);line-height:1.7;margin-bottom:16px">
+        Content suitable for the <strong>Sci-Fi / Horror channel</strong> or a dedicated Alien programming block on Tunarr.
+        Bumpers, trailers, and retrospectives keep the block from feeling like a raw film marathon.
+      </p>
+
+      <div class="fn-filler-grid">
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-trailer">Trailer</div>
+          <div class="fn-filler-name">Alien (1979) — Original Theatrical Trailer</div>
+          <div class="fn-filler-meta">1979 · ~2 min · Fox</div>
+          <div class="fn-filler-desc">The famous "In space no one can hear you scream" trailer. Iconic. Perfect channel bumper before the film.</div>
+          <div class="fn-filler-where">📺 YouTube / archive.org</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-trailer">Trailer</div>
+          <div class="fn-filler-name">Aliens (1986) — "They Mostly Come at Night" Trailer</div>
+          <div class="fn-filler-meta">1986 · ~2 min · Fox</div>
+          <div class="fn-filler-desc">Cameron's action-heavy theatrical trailer. Run before Aliens in a marathon block.</div>
+          <div class="fn-filler-where">📺 YouTube</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">The Beast Within: Making Alien</div>
+          <div class="fn-filler-meta">2003 · ~3.5 hrs · Fox Home Entertainment</div>
+          <div class="fn-filler-desc">Comprehensive making-of covering the original film. H.R. Giger design process, O'Bannon script origins, Scott's direction. On the 2003 Alien Quadrilogy disc set.</div>
+          <div class="fn-filler-where">📺 Alien Quadrilogy DVD / Rip</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">Superior Firepower: Making Aliens</div>
+          <div class="fn-filler-meta">2003 · ~3 hrs · Fox Home Entertainment</div>
+          <div class="fn-filler-desc">Cameron's Aliens behind-the-scenes. Covers the practical effects and militaristic production design. Quadrilogy extras.</div>
+          <div class="fn-filler-where">📺 Alien Quadrilogy DVD / Rip</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">Wreckage and Rage: Making Alien 3</div>
+          <div class="fn-filler-meta">2003 · ~2.5 hrs · Fox</div>
+          <div class="fn-filler-desc">Covers Fincher's troubled production. Studio interference and multiple script rewrites. One of the best "troubled film" docs.</div>
+          <div class="fn-filler-where">📺 Alien Quadrilogy DVD / Rip</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">One Step Beyond: Making Alien Resurrection</div>
+          <div class="fn-filler-meta">2003 · ~2 hrs · Fox</div>
+          <div class="fn-filler-desc">Jeunet's French filmmaking approach to the Alien universe. Whedon interview on the script differences.</div>
+          <div class="fn-filler-where">📺 Alien Quadrilogy DVD / Rip</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+          <div class="fn-filler-name">H.R. Giger: The Artist Behind the Alien</div>
+          <div class="fn-filler-meta">Various · ~1 hr compiled</div>
+          <div class="fn-filler-desc">Documentary segments on Giger's biomechanical art, his Necronomicon book, and the design process for Alien. Multiple sources available.</div>
+          <div class="fn-filler-where">📺 YouTube / compile from various sources</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-music">Music</div>
+          <div class="fn-filler-name">Jerry Goldsmith — Alien OST</div>
+          <div class="fn-filler-meta">1979 · 36 min · Fox</div>
+          <div class="fn-filler-desc">Goldsmith's legendary score. The unused cues are as remarkable as what appeared in the film. Best used as ambient channel audio between films.</div>
+          <div class="fn-filler-where">📺 Navidrome / Rip from CD</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-trailer">Trailer</div>
+          <div class="fn-filler-name">Alien: Isolation — "Last Survivor" Short</div>
+          <div class="fn-filler-meta">2014 · 7 min · SEGA</div>
+          <div class="fn-filler-desc">Live-action short reimagining the original Alien ending from Amanda Ripley's perspective. Produced by Ridley Scott's RSA Films. Canon.</div>
+          <div class="fn-filler-where">📺 YouTube / Jellyfin extras</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+          <div class="fn-filler-name">Prometheus: Weyland Corp Archive (TED Talk &amp; Vickers shorts)</div>
+          <div class="fn-filler-meta">2012 · ~15 min · Fox / RSA</div>
+          <div class="fn-filler-desc">Canon viral marketing shorts. Peter Weyland's 2023 TED talk and the Vickers/android announcement. Good lore content for the prequel era block.</div>
+          <div class="fn-filler-where">📺 YouTube</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">1974–1978</div>
+          <div class="fn-era-title">Giger &amp; O'Bannon — Origins</div>
+          <div class="fn-era-body">
+            Dan O'Bannon wrote a script called "Memory" (later retitled "Alien") after his experience on the aborted Jodorowsky Dune project. Simultaneously, Swiss surrealist H.R. Giger was painting the Necronomicon series — biomechanical landscapes merging human anatomy with industrial machinery. Producer Gordon Carroll brought the two together when the script landed at Fox. Ridley Scott was hired as director in 1977.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1979</div>
+          <div class="fn-era-title">Alien — The Original Film</div>
+          <div class="fn-era-body">
+            Alien opened May 25, 1979. Giger designed the Xenomorph, the Space Jockey, and the derelict spacecraft — winning the Academy Award for Best Visual Effects. The film starred Sigourney Weaver as Ellen Ripley, establishing one of cinema's first major female action protagonists. It grossed $104 million on an $11 million budget. Fox immediately greenlit a sequel but Ridley Scott declined to return.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1982–1987</div>
+          <div class="fn-era-title">Early Games &amp; Merchandise</div>
+          <div class="fn-era-body">
+            Fox Video Games released the Atari 2600 Alien in 1982 — a Pac-Man style maze game. Kenner produced the infamous 18-inch Alien action figure in 1979, quickly pulled from shelves due to parent complaints (it was designed for adults). CRL Group released text adventures on home computers from 1984 onward. Electric Dreams adapted the Aliens film for Amiga and DOS in 1987.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1986</div>
+          <div class="fn-era-title">Aliens — Cameron's Military Expansion</div>
+          <div class="fn-era-body">
+            James Cameron rewrote O'Bannon's world as a military science fiction action epic. The Colonial Marines, the M41A Pulse Rifle, the APC, and the Dropship all debuted here. Aliens grossed $131 million and earned Weaver an Academy Award nomination for Best Actress — a first for an action/horror role. The film defined the visual language of the franchise's military side.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1988–1996</div>
+          <div class="fn-era-title">Dark Horse Comics &amp; EU Expansion</div>
+          <div class="fn-era-body">
+            Dark Horse Comics launched the Aliens comic line in 1988, creating an entire expanded universe before Alien 3 arrived. Their original continuity — where Hicks and Newt survived and went on to fight Alien infestations on Earth — was abruptly contradicted by the third film. Dark Horse retconned all their characters to avoid the conflict. The AvP crossover debuted in 1989 and became one of comics' most successful franchise mashups.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1992–1997</div>
+          <div class="fn-era-title">Alien 3, Resurrection &amp; Fox's Troubled Years</div>
+          <div class="fn-era-body">
+            Alien 3's production went through five directors before Fincher was hired. The studio imposed changes that Fincher publicly disowned. The film opened to mixed reviews. Alien Resurrection (1997) under Jeunet fared similarly. Joss Whedon's script was significantly altered during production. Fox's aggressive interference became a cautionary tale in franchise management. The line went dormant for theatrical releases until 2004.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1994–2001</div>
+          <div class="fn-era-title">Rebellion's AvP Games — The PC Golden Era</div>
+          <div class="fn-era-body">
+            Rebellion Developments produced the Atari Jaguar AvP in 1994 — one of the first FPS games with genuine horror atmosphere. Their 1999 PC follow-up, published by Fox Interactive, is widely considered the best Alien game ever made. Three complete campaigns (Marine, Alien, Predator) each with distinct gameplay. Monolith Productions' AvP2 (2001) deepened the narrative. Both games remain available through GOG.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2004–2013</div>
+          <div class="fn-era-title">AvP Films, Colonial Marines &amp; the Nadir</div>
+          <div class="fn-era-body">
+            Paul W.S. Anderson's Alien vs Predator (2004) and the Strauses' Requiem (2007) were commercially successful but critically reviled. Gearbox's Aliens: Colonial Marines (2013) became notorious for misrepresented pre-release footage — the shipped game looked nothing like the trailers. A lawsuit was settled. Community modder "TemplarGFX" later discovered and fixed a single-character typo in the game's AI code that made the entire game significantly more competent. The "intentionally bad" AI had been broken by a missing 'a' in a config file for years.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2014</div>
+          <div class="fn-era-title">Alien: Isolation — The Rehabilitation</div>
+          <div class="fn-era-body">
+            Creative Assembly's Alien: Isolation restored the franchise's gaming reputation in a single release. The game drew directly from Giger's original film designs rather than the Cameron military aesthetic, and created one of gaming's most sophisticated AI opponents. The single Xenomorph enemy uses two independent AI systems that both observe the player without direct communication — one hunts by stimuli, one hunts by prediction. The game won multiple BAFTA awards and is considered among the finest survival horror games ever made.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2012–2017</div>
+          <div class="fn-era-title">The Prequel Trilogy Attempt</div>
+          <div class="fn-era-body">
+            Ridley Scott returned to the franchise with Prometheus (2012), intended as the first of a trilogy explaining the Space Jockey. The film was divisive — praised for its visuals and David the android, criticized for its script logic. Alien: Covenant (2017) attempted to course-correct while still advancing the prequel storyline. The third prequel film was never made as Fox's acquisition by Disney shuffled franchise priorities.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2019–Present</div>
+          <div class="fn-era-title">Disney Era &amp; Renaissance</div>
+          <div class="fn-era-body">
+            Disney's acquisition of Fox brought the Alien IP under new management. Noah Hawley (Fargo, Legion) was commissioned to develop an FX television series — Alien: Earth — set on present-day Earth before the original film. It premiered in 2024 to exceptional reviews and strong viewership. Simultaneously, Fede Álvarez (Evil Dead remake) directed Alien: Romulus (2024), a theatrical film set between Alien and Aliens that received the franchise's best critical reception since the original Cameron sequel. Tindalos Interactive's Aliens: Dark Descent (2023) restored gaming's confidence in the property. The franchise is currently in its strongest position since 1986.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2014 (May 12)</div>
+          <div class="fn-era-title">H.R. Giger — In Memoriam</div>
+          <div class="fn-era-body">
+            Hans Ruedi Giger died on May 12, 2014, from injuries sustained in a fall. He was 74. His biomechanical art, expressed through paintings, sculpture, and the Alien design, permanently altered the visual vocabulary of science fiction and horror. The Giger Museum in Gruyères, Switzerland, remains open. His Academy Award for Alien (1980) was the only Oscar ever awarded for creature design at the time.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB CONTROLLER JS
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fn-pane-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function fnView(tab, view, btn) {
+  const pane = document.getElementById('fn-pane-' + tab);
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fn-' + tab + '-' + view).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
