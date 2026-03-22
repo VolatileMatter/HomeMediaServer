@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MeTube — Filler Downloader</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════
+       SUB-TAB NAVIGATION STYLES
+    ═══════════════════════════════════════════ */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox bar ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+      font-size: .85rem;
+    }
+    .setup-complete-bar.done .setup-checkbox { background: #4caf7d; border-color: #4caf7d; }
+    .setup-complete-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #4caf7d;
+    }
+    .setup-complete-sub { font-size: .7rem; color: var(--text-dim); margin-top: 2px; }
+
+    /* ── Duration guide ── */
+    .dur-table th { background: rgba(200,168,75,.08); }
+    .dur-ideal { color: #4caf7d; font-weight: 600; }
+    .dur-ok    { color: var(--accent); }
+
+    /* ── Playlist type badge ── */
+    .pl-badge {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .pl-standard { background: rgba(97,218,251,.12); color: #61dafb; border: 1px solid rgba(97,218,251,.3); }
+    .pl-clip      { background: rgba(255,170,80,.12);  color: #ffaa50; border: 1px solid rgba(255,170,80,.3); }
+
+    .cfg-note { color: var(--text-dim); font-style: italic; }
+    .cfg-key  { color: var(--accent); }
+    .cfg-val  { color: #a8d8a8; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📥</div>
+  <div>
+    <h1>MeTube</h1>
+    <p class="subtitle">Automated Filler Downloader — yt-dlp · PySceneDetect · ffmpeg-normalize</p>
+  </div>
+</div>
+
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
+</div>
+
+
+<!-- ═══ PANE 1 — SETUP ═══ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Mark setup as complete</div>
+      <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+    </div>
+  </div>
+
+  <div class="v1-banner">
+    🎯 Goal: A nightly Task Scheduler job runs at 1am, reads <code>filler_config.json</code>, downloads any new
+    videos from each configured playlist (skipping already-downloaded files), normalizes audio (EBU R128),
+    optionally runs PySceneDetect on clip-collection playlists to split them into individual clips, drops
+    everything into the correct <code>D:\Media\Filler\[channel]\</code> folder, and triggers a Jellyfin library
+    scan — zero manual intervention required.
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Part A — Install Dependencies</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Install yt-dlp</strong>
+          <pre># Download Windows .exe:
+# https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+# Place in C:\tools\  and add C:\tools to system PATH.
+yt-dlp --version</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Install FFmpeg</strong>
+          <pre># https://ffmpeg.org/download.html → Windows builds (gyan.dev recommended)
+# Extract to C:\ffmpeg\, add C:\ffmpeg\bin to PATH.
+ffmpeg -version</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Install Python packages</strong>
+          <pre>pip install yt-dlp "scenedetect[opencv]" ffmpeg-normalize requests --break-system-packages
+
+# Verify:
+python -c "import scenedetect; print(scenedetect.__version__)"
+ffmpeg-normalize --version</pre>
+          <p style="font-size:.8rem;color:var(--text-dim);margin-top:6px">
+            <code>ffmpeg-normalize</code> wraps ffmpeg for EBU R128 loudness normalization.
+            <code>scenedetect[opencv]</code> installs the OpenCV backend for scene detection.
+          </p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create script and cache directories</strong>
+          <pre>mkdir D:\Scripts
+mkdir D:\Scripts\metube_cache</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Part B — Create <code>filler_config.json</code></div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:12px">
+        Save at <code>D:\Scripts\filler_config.json</code>. Each entry maps one YouTube playlist URL to one
+        filler output folder. Two playlist types exist:
+        <span class="pl-badge pl-standard">standard</span> — download as-is, and
+        <span class="pl-badge pl-clip">clip-collection</span> — run PySceneDetect after download to split into
+        individual filler clips.
+      </p>
+      <pre>{
+  <span class="cfg-key">"jellyfin_base_url"</span>: <span class="cfg-val">"http://localhost:8096"</span>,
+  <span class="cfg-key">"jellyfin_api_key"</span>:  <span class="cfg-val">"PASTE_YOUR_JELLYFIN_API_KEY_HERE"</span>,
+  <span class="cfg-key">"jellyfin_library_id"</span>: <span class="cfg-val">""</span>,  <span class="cfg-note">// blank = scan all libraries</span>
+
+  <span class="cfg-key">"playlists"</span>: [
+
+    <span class="cfg-note">// STANDARD: each video becomes one filler clip</span>
+    {
+      <span class="cfg-key">"name"</span>:       <span class="cfg-val">"pokemon-filler"</span>,
+      <span class="cfg-key">"folder"</span>:     <span class="cfg-val">"D:\\Media\\Filler\\anime"</span>,
+      <span class="cfg-key">"url"</span>:        <span class="cfg-val">"https://www.youtube.com/playlist?list=PLAYLIST_ID"</span>,
+      <span class="cfg-key">"type"</span>:       <span class="cfg-val">"standard"</span>
+    },
+
+    <span class="cfg-note">// CLIP-COLLECTION: PySceneDetect splits each video into individual clips</span>
+    {
+      <span class="cfg-key">"name"</span>:               <span class="cfg-val">"pokemon-clipcollection-filler"</span>,
+      <span class="cfg-key">"folder"</span>:             <span class="cfg-val">"D:\\Media\\Filler\\anime\\clips"</span>,
+      <span class="cfg-key">"url"</span>:                <span class="cfg-val">"https://www.youtube.com/playlist?list=CLIP_PLAYLIST_ID"</span>,
+      <span class="cfg-key">"type"</span>:               <span class="cfg-val">"clip-collection"</span>,
+      <span class="cfg-key">"scene_threshold"</span>:   <span class="cfg-val">27.0</span>,   <span class="cfg-note">// lower = more cuts detected</span>
+      <span class="cfg-key">"scene_min_seconds"</span>: <span class="cfg-val">3</span>,     <span class="cfg-note">// discard cuts shorter than this</span>
+      <span class="cfg-key">"scene_max_seconds"</span>: <span class="cfg-val">300</span>    <span class="cfg-note">// discard segments longer than this (5min cap)</span>
+    }
+
+  ]
+}</pre>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-top:10px">
+        Get your Jellyfin API key: Jellyfin → Dashboard → API Keys → Add API Key → label it
+        <code>metube-filler</code>.
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐍 Part C — Create <code>filler_downloader.py</code></div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:12px">
+        Save at <code>D:\Scripts\filler_downloader.py</code>.
+      </p>
+      <pre>#!/usr/bin/env python3
+"""
+filler_downloader.py — Automated Tunarr filler acquisition
+Runs nightly at 1am via Windows Task Scheduler.
+
+Pipeline per playlist:
+  1. yt-dlp downloads new items (skips already-downloaded via archive file)
+  2. Format filter: 480p-720p only, no vertical video, no audio-only, smallest file
+  3. ffmpeg-normalize: EBU R128 loudness normalization on each new file
+  4. If type=clip-collection: PySceneDetect splits video into individual clips
+  5. POST Jellyfin /Library/Refresh after all playlists complete
+"""
+
+import json, os, subprocess, sys, logging, requests
+from pathlib import Path
+from scenedetect import open_video, SceneManager
+from scenedetect.detectors import ContentDetector
+
+# ── Paths ──────────────────────────────────────────────────────
+SCRIPT_DIR  = Path(__file__).parent
+CONFIG_FILE = SCRIPT_DIR / "filler_config.json"
+CACHE_DIR   = SCRIPT_DIR / "metube_cache"
+LOG_FILE    = SCRIPT_DIR / "filler_downloader.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+log = logging.getLogger(__name__)
+
+# ── Format selector ─────────────────────────────────────────────
+# Prefer 720p VP9/H264 (smallest file). Minimum 480p.
+# width>=height excludes vertical/portrait video.
+# vcodec!=none ensures a video stream exists (no audio-only).
+# +size suffix sorts ascending by filesize within quality tier.
+YTDLP_FORMAT = (
+    "bestvideo[height<=720][height>=480][vcodec!=none][width>=height]"
+    "+bestaudio[acodec!=none]"
+    "/bestvideo[height<=720][height>=480][vcodec!=none][width>=height]"
+    "/best[height<=720][height>=480][vcodec!=none][width>=height]"
+)
+
+YTDLP_EXTRA = [
+    "--format-sort", "res:720,codec:vp9:h264,+size",
+    "--merge-output-format", "mp4",
+    "--ignore-errors",    # skip unavailable/geo-blocked items, continue playlist
+    "--no-warnings",
+    "--quiet",
+    "--progress",
+    "--add-metadata",
+]
+
+
+def load_config():
+    with open(CONFIG_FILE, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def archive_file(name: str) -> Path:
+    CACHE_DIR.mkdir(exist_ok=True)
+    return CACHE_DIR / f"{name}.txt"
+
+
+def download_playlist(playlist: dict) -> list:
+    name    = playlist["name"]
+    folder  = Path(playlist["folder"])
+    url     = playlist["url"]
+    archive = archive_file(name)
+    folder.mkdir(parents=True, exist_ok=True)
+
+    output_tmpl = str(folder / "%(title)s [%(id)s].%(ext)s")
+    before = set(folder.glob("*.mp4")) | set(folder.glob("*.mkv")) | set(folder.glob("*.webm"))
+
+    cmd = [
+        "yt-dlp",
+        "--format", YTDLP_FORMAT,
+        "--download-archive", str(archive),
+        "--output", output_tmpl,
+        *YTDLP_EXTRA,
+        url,
+    ]
+    log.info(f"[{name}] Downloading from: {url}")
+    result = subprocess.run(cmd)
+    if result.returncode not in (0, 1):
+        log.warning(f"[{name}] yt-dlp exited with code {result.returncode}")
+
+    after = set(folder.glob("*.mp4")) | set(folder.glob("*.mkv")) | set(folder.glob("*.webm"))
+    new_files = sorted(after - before)
+    log.info(f"[{name}] {len(new_files)} new file(s) downloaded")
+    return new_files
+
+
+def normalize_audio(filepath: Path) -> bool:
+    """EBU R128 loudness normalization via ffmpeg-normalize (two-pass, in-place)."""
+    log.info(f"  Normalizing: {filepath.name}")
+    tmp = filepath.with_suffix(".norm.mp4")
+    cmd = [
+        "ffmpeg-normalize", str(filepath),
+        "--output", str(tmp),
+        "--audio-codec", "aac",
+        "--audio-bitrate", "192k",
+        "--normalization-type", "ebu",
+        "--target-level", "-23",
+        "--loudness-range-target", "7",
+        "--keep-loudness-range-target",
+        "--force", "--quiet",
+    ]
+    r = subprocess.run(cmd)
+    if r.returncode == 0 and tmp.exists():
+        filepath.unlink()
+        tmp.rename(filepath)
+        return True
+    else:
+        log.warning(f"  Normalization failed for {filepath.name}; keeping original")
+        if tmp.exists():
+            tmp.unlink()
+        return False
+
+
+def run_scene_detect(filepath: Path, out_folder: Path,
+                     threshold: float, min_sec: float, max_sec: float) -> list:
+    """Split a clip-collection video into individual scenes using PySceneDetect."""
+    log.info(f"  Scene detect: {filepath.name}")
+    video = open_video(str(filepath))
+    mgr   = SceneManager()
+    mgr.add_detector(ContentDetector(threshold=threshold))
+    mgr.detect_scenes(video)
+    scenes = mgr.get_scene_list()
+    log.info(f"    {len(scenes)} scenes found")
+
+    stem  = filepath.stem
+    clips = []
+    for i, (start, end) in enumerate(scenes, 1):
+        dur = (end - start).get_seconds()
+        if dur < min_sec:
+            continue
+        if dur > max_sec:
+            continue
+        out_path = out_folder / f"{stem}__clip_{i:04d}.mp4"
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(filepath),
+            "-ss", str(start.get_timecode()),
+            "-to", str(end.get_timecode()),
+            "-c:v", "libx264", "-crf", "23", "-preset", "fast",
+            "-c:a", "aac", "-b:a", "192k",
+            str(out_path),
+        ]
+        r = subprocess.run(cmd, capture_output=True)
+        if r.returncode == 0:
+            clips.append(out_path)
+        else:
+            log.warning(f"    Failed to extract scene {i}")
+
+    log.info(f"    {len(clips)} usable clips extracted")
+    return clips
+
+
+def trigger_jellyfin_scan(base_url: str, api_key: str, library_id: str = "") -> None:
+    if not api_key:
+        log.warning("No Jellyfin API key configured — skipping scan")
+        return
+    endpoint = f"{base_url}/Items/{library_id}/Refresh" if library_id else f"{base_url}/Library/Refresh"
+    try:
+        r = requests.post(endpoint, headers={"X-Emby-Token": api_key}, timeout=15)
+        if r.status_code in (200, 204):
+            log.info(f"Jellyfin scan triggered (HTTP {r.status_code})")
+        else:
+            log.warning(f"Jellyfin scan returned HTTP {r.status_code}")
+    except requests.RequestException as e:
+        log.error(f"Could not reach Jellyfin: {e}")
+
+
+def process_playlist(playlist: dict) -> None:
+    name    = playlist["name"]
+    pl_type = playlist.get("type", "standard")
+    log.info(f"=== [{name}] type={pl_type} ===")
+
+    new_files = download_playlist(playlist)
+    if not new_files:
+        log.info(f"[{name}] Nothing new.")
+        return
+
+    if pl_type == "clip-collection":
+        out_folder   = Path(playlist["folder"])
+        threshold    = playlist.get("scene_threshold",   27.0)
+        min_sec      = float(playlist.get("scene_min_seconds",  3))
+        max_sec      = float(playlist.get("scene_max_seconds", 300))
+        for f in new_files:
+            clips = run_scene_detect(f, out_folder, threshold, min_sec, max_sec)
+            for clip in clips:
+                normalize_audio(clip)
+            log.info(f"  {f.name}: {len(clips)} clips produced")
+    else:
+        for f in new_files:
+            normalize_audio(f)
+
+
+def main():
+    log.info("=" * 60)
+    log.info("filler_downloader.py — run start")
+    cfg = load_config()
+    for playlist in cfg.get("playlists", []):
+        try:
+            process_playlist(playlist)
+        except Exception as e:
+            log.error(f"Error in [{playlist.get('name','?')}]: {e}", exc_info=True)
+    log.info("Triggering Jellyfin library scan...")
+    trigger_jellyfin_scan(
+        cfg.get("jellyfin_base_url", "http://localhost:8096"),
+        cfg.get("jellyfin_api_key", ""),
+        cfg.get("jellyfin_library_id", ""),
+    )
+    log.info("filler_downloader.py — run complete")
+    log.info("=" * 60)
+
+
+if __name__ == "__main__":
+    main()
+</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🕐 Part D — Task Scheduler (Daily at 1am)</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Create Basic Task</strong>
+          <p>Name: <code>Filler Downloader</code> · Description: Nightly filler acquisition from YouTube playlists.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Trigger: Daily at 1:00 AM, recur every 1 day</strong>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Action: Start a program</strong>
+          <pre>Program/script:  [full path to python.exe — run: where python]
+Arguments:       D:\Scripts\filler_downloader.py
+Start in:        D:\Scripts</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 General tab: Run whether user is logged on or not · Run with highest privileges</strong>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>🔐 Test immediately</strong>
+          <pre>python D:\Scripts\filler_downloader.py
+# or: right-click task in Task Scheduler → Run
+# tail log: Get-Content D:\Scripts\filler_downloader.log -Wait -Tail 40</pre>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-warn" style="margin-top:16px">
+      <div class="callout-icon">⏰</div>
+      <div class="callout-body">
+        <strong>Why 1am?</strong> The 24-hour delay is intentional — it gives you time to remove a mistakenly
+        added playlist URL from <code>filler_config.json</code> before it gets downloaded. Nothing runs on
+        save; only the scheduled run at 1am triggers downloads.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Part E — Verify Jellyfin Filler Library</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim)">
+        Filler clips must be in a Jellyfin library so Tunarr can reference them. If not yet configured:
+      </p>
+      <div class="steps" style="margin-top:12px">
+        <div class="step"><div class="step-content">Jellyfin → Dashboard → Libraries → Add Media Library</div></div>
+        <div class="step"><div class="step-content">Content type: <strong>Mixed content</strong> · Name: <code>Filler</code></div></div>
+        <div class="step"><div class="step-content">Folder: <code>D:\Media\Filler</code> (Jellyfin scans subfolders recursively)</div></div>
+        <div class="step"><div class="step-content">In Tunarr channel settings → Filler → point at this Jellyfin library or a specific subfolder.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══ PANE 2 — OVERVIEW ═══ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">
+    📥 <code>filler_downloader.py</code> is deployed at <code>D:\Scripts\</code>. Task Scheduler runs it daily
+    at 1am. Quality: 480p–720p, smallest file (VP9/H.264 preferred). Audio: EBU R128 normalization.
+    Clip-collections: PySceneDetect split → normalize each clip. Jellyfin scan auto-triggered after every run.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Key Files</div>
+        <table>
+          <tr><th>File</th><th>Purpose</th></tr>
+          <tr><td><code>D:\Scripts\filler_downloader.py</code></td><td>Main script</td></tr>
+          <tr><td><code>D:\Scripts\filler_config.json</code></td><td>Playlist definitions</td></tr>
+          <tr><td><code>D:\Scripts\filler_downloader.log</code></td><td>Appending run log</td></tr>
+          <tr><td><code>D:\Scripts\metube_cache\[name].txt</code></td><td>yt-dlp download archive (dedup)</td></tr>
+          <tr><td><code>D:\Media\Filler\[channel]\</code></td><td>Output clips by channel</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Schedule</td><td>Daily 1:00 AM (Task Scheduler)</td></tr>
+          <tr><td>Quality target</td><td>720p preferred · 480p minimum</td></tr>
+          <tr><td>Rejects</td><td>Vertical video · audio-only · below 480p</td></tr>
+          <tr><td>Audio norm</td><td>EBU R128 / −23 LUFS (ffmpeg-normalize)</td></tr>
+          <tr><td>Scene detection</td><td>PySceneDetect ContentDetector</td></tr>
+          <tr><td>Dedup method</td><td>yt-dlp <code>--download-archive</code> per playlist</td></tr>
+          <tr><td>Jellyfin scan</td><td><code>POST /Library/Refresh</code> after run</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Duration Guide -->
+  <div class="section">
+    <div class="section-title">⏱️ Recommended Filler Durations (Tunarr Slot Timing)</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:14px">
+        Tunarr uses filler to bridge the gap between the end of content and the next fixed schedule slot. The
+        ideal filler clip duration depends on how large the typical gap is for each slot type. Curate playlists
+        with these ranges in mind.
+      </p>
+      <table class="dur-table">
+        <tr>
+          <th>Slot type</th>
+          <th>Slot length</th>
+          <th>Typical content runtime</th>
+          <th>Typical gap</th>
+          <th>Ideal filler duration</th>
+          <th>Acceptable range</th>
+        </tr>
+        <tr>
+          <td>Sitcom episode</td>
+          <td>30 min</td>
+          <td>22–24 min</td>
+          <td>6–8 min</td>
+          <td class="dur-ideal">5–8 min</td>
+          <td class="dur-ok">3–10 min</td>
+        </tr>
+        <tr>
+          <td>Drama episode</td>
+          <td>60 min</td>
+          <td>42–55 min</td>
+          <td>5–18 min</td>
+          <td class="dur-ideal">5–10 min</td>
+          <td class="dur-ok">3–15 min</td>
+        </tr>
+        <tr>
+          <td>Prestige episode</td>
+          <td>90 min</td>
+          <td>55–80 min</td>
+          <td>10–35 min</td>
+          <td class="dur-ideal">8–15 min</td>
+          <td class="dur-ok">5–20 min</td>
+        </tr>
+        <tr>
+          <td>Feature film slot</td>
+          <td>3 hrs (180 min)</td>
+          <td>90–150 min</td>
+          <td>30–90 min</td>
+          <td class="dur-ideal">15–30 min</td>
+          <td class="dur-ok">10–45 min</td>
+        </tr>
+        <tr>
+          <td>Overnight block</td>
+          <td>12am–5am</td>
+          <td>varies</td>
+          <td>varies</td>
+          <td class="dur-ideal">any</td>
+          <td class="dur-ok">5–60 min</td>
+        </tr>
+        <tr>
+          <td>Micro-pad / ad break</td>
+          <td>&lt;10 min pad</td>
+          <td>—</td>
+          <td>1–4 min</td>
+          <td class="dur-ideal">1–3 min</td>
+          <td class="dur-ok">30s–5 min</td>
+        </tr>
+      </table>
+      <div class="callout callout-info" style="margin-top:14px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong>Sweet spot:</strong> <strong>3–10 minutes</strong> covers sitcom gaps perfectly and handles
+          most drama gaps with 1–2 clips chained. Avoid sourcing clips over 15 minutes unless they're
+          specifically for movie-slot padding. PySceneDetect output (from clip-collection playlists) typically
+          produces 30s–5min chunks — ideal as micro-pads and sitcom fills.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Playlist type reference -->
+  <div class="section">
+    <div class="section-title">📋 Playlist Type Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="pl-badge pl-standard">standard</span> — Download as-is</div>
+        <p style="font-size:.82rem;color:var(--text-dim)">
+          Each video in the playlist becomes one filler clip. Best for: documentary shorts, video essays,
+          ambient footage, making-of featurettes, stand-up clips. Use when content is already short
+          (under 15 minutes) or when you want the full video intact.
+        </p>
+        <pre style="margin-top:8px">"type": "standard"</pre>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="pl-badge pl-clip">clip-collection</span> — Scene-split</div>
+        <p style="font-size:.82rem;color:var(--text-dim)">
+          Each video is a compilation (e.g. <em>Best Pokémon Moments Vol. 3</em>). PySceneDetect finds scene
+          boundaries and splits each video into individual clips. Each clip becomes its own independent filler
+          item. Best for: AMV compilations, highlight reels, reaction compilations, moment collections.
+        </p>
+        <pre style="margin-top:8px">"type": "clip-collection",
+"scene_threshold": 27.0,
+"scene_min_seconds": 3,
+"scene_max_seconds": 300</pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══ PANE 3 — MAINTENANCE ═══ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Automatic (1am nightly)</td><td>Download new filler, normalize audio, split clip-collections, trigger Jellyfin scan</td></tr>
+        <tr><td>Weekly</td><td>Review <code>filler_downloader.log</code> for yt-dlp errors, failed normalizations, scene-detect warnings</td></tr>
+        <tr><td>Monthly</td><td>Update yt-dlp (<code>yt-dlp -U</code>) — YouTube extractors break regularly</td></tr>
+        <tr><td>Monthly</td><td>Audit <code>D:\Media\Filler\</code> — delete clips no longer wanted in rotation</td></tr>
+        <tr><td>On demand</td><td>Edit <code>filler_config.json</code> to add/remove playlists</td></tr>
+        <tr><td>On demand</td><td>Delete a playlist's cache .txt to force full re-download</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 Updating yt-dlp</div>
+    <div class="card">
+      <pre># Self-update:
+yt-dlp -U
+
+# Or re-download the .exe to C:\tools\yt-dlp.exe
+# https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+
+yt-dlp --version</pre>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-top:8px">
+        When downloads fail silently, extractor rot is the first suspect. Always update yt-dlp before
+        assuming a playlist is dead.
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Tuning PySceneDetect Sensitivity</div>
+    <div class="card">
+      <table>
+        <tr><th>Threshold</th><th>Effect</th><th>Best for</th></tr>
+        <tr><td>15–20</td><td>Very sensitive — many cuts</td><td>Fast AMVs, action compilations</td></tr>
+        <tr><td>25–30</td><td>Moderate — good default</td><td>Most clip compilations</td></tr>
+        <tr><td>35–45</td><td>Less sensitive — only major transitions</td><td>Talking head reels, interview compilations</td></tr>
+      </table>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-top:10px">Test a file manually before committing a value to config:</p>
+      <pre>python -c "
+from scenedetect import open_video, SceneManager
+from scenedetect.detectors import ContentDetector
+v = open_video(r'D:\Media\Filler\test.mp4')
+m = SceneManager()
+m.add_detector(ContentDetector(threshold=27.0))
+m.detect_scenes(v)
+for s,e in m.get_scene_list():
+    print(f'{s.get_timecode()} -> {e.get_timecode()} ({(e-s).get_seconds():.1f}s)')
+"</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗑️ Force Re-download a Playlist</div>
+    <div class="card">
+      <pre># Delete the archive file for that playlist:
+del "D:\Scripts\metube_cache\pokemon-filler.txt"
+# Next run will treat all playlist items as new and re-download them.</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📦 Version Tracking</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Check command</th></tr>
+        <tr><td>yt-dlp</td><td><code>yt-dlp --version</code></td></tr>
+        <tr><td>ffmpeg</td><td><code>ffmpeg -version</code></td></tr>
+        <tr><td>ffmpeg-normalize</td><td><code>pip show ffmpeg-normalize</code></td></tr>
+        <tr><td>PySceneDetect</td><td><code>python -c "import scenedetect; print(scenedetect.__version__)"</code></td></tr>
+        <tr><td>Python</td><td><code>python --version</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══ PANE 4 — ACHIEVEMENTS ═══ -->
+<div class="subtab-pane" id="pane-achievements">
+  <div class="section">
+    <div class="section-title">🏆 Achievement Notes</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim)">
+        MeTube is headless admin infrastructure — no user-facing interactions to hook achievements to. Filler
+        content watched via Tunarr channels flows through Jellyfin's normal playback pipeline, which handles
+        achievements via its existing webhook.
+      </p>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-top:10px">
+        For admin milestone achievements (e.g. "500 filler clips downloaded"), add a call to the achievement
+        server API at the end of <code>main()</code> in <code>filler_downloader.py</code> when a clip count
+        threshold is crossed.
+      </p>
+    </div>
+  </div>
+</div><!-- /pane-achievements -->
+
+
+<!-- ═══ PANE 5 — STORAGE ═══ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Storage Map</div>
+    <div class="card">
+      <table>
+        <tr><th>Path</th><th>Contents</th><th>Grows?</th></tr>
+        <tr><td><code>D:\Scripts\filler_downloader.py</code></td><td>Script — static</td><td>No</td></tr>
+        <tr><td><code>D:\Scripts\filler_config.json</code></td><td>Playlist config — static</td><td>No</td></tr>
+        <tr><td><code>D:\Scripts\filler_downloader.log</code></td><td>Appending run log</td><td>Slowly — rotate manually</td></tr>
+        <tr><td><code>D:\Scripts\metube_cache\*.txt</code></td><td>yt-dlp download archives (tiny)</td><td>Very slowly</td></tr>
+        <tr><td><code>D:\Media\Filler\[channel]\</code></td><td>MP4 filler clips — the bulk</td><td>Yes — nightly</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📐 Estimated Storage per Type</div>
+    <div class="card">
+      <table>
+        <tr><th>Content type</th><th>Typical size (720p)</th><th>Est. per 10 videos</th></tr>
+        <tr><td>5-min clip (VP9/H.264 720p)</td><td>~80–150 MB</td><td>~1–1.5 GB</td></tr>
+        <tr><td>10-min clip (720p)</td><td>~150–300 MB</td><td>~2–3 GB</td></tr>
+        <tr><td>Clip-collection source (30 min)</td><td>~400–700 MB (pre-split)</td><td>varies</td></tr>
+        <tr><td>PySceneDetect output clip (1–3 min)</td><td>~20–60 MB each</td><td>~200–600 MB</td></tr>
+      </table>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-top:8px">
+        yt-dlp prefers smallest VP9/H.264 stream — real sizes typically land at the lower end of these ranges.
+      </p>
+    </div>
+  </div>
+
+  <div class="callout callout-info" style="margin: 0 0 24px">
+    <div class="callout-icon">📁</div>
+    <div class="callout-body">
+      <strong>Pattern A storage.</strong> All filler clips live under <code>D:\Media\Filler\</code> as shared
+      server media — not per-user. No user quota impact. Not included in user profile backups.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 Backup Priority</div>
+    <div class="card">
+      <table>
+        <tr><th>File</th><th>Priority</th><th>Reason</th></tr>
+        <tr><td><code>filler_config.json</code></td><td>🟢 High</td><td>Hours of curation; not auto-regeneratable</td></tr>
+        <tr><td><code>metube_cache\*.txt</code></td><td>🟡 Medium</td><td>Prevents re-downloading thousands of items</td></tr>
+        <tr><td><code>filler_downloader.py</code></td><td>🟢 High</td><td>Keep in git repo</td></tr>
+        <tr><td><code>D:\Media\Filler\</code></td><td>🔴 Low</td><td>Fully re-downloadable</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══ PANE 6 — TROUBLESHOOTING ═══ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">❌ Nothing downloads — "ERROR: Unsupported URL" or "extractor not found"</div>
+      <div class="trouble-a">
+        yt-dlp extractor is out of date. Run <code>yt-dlp -U</code> and retry. This is the most common failure
+        mode; YouTube breaks extractors within days of front-end updates.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">❌ Videos download as audio-only despite the format selector</div>
+      <div class="trouble-a">
+        That specific video has no 480p+ video stream on YouTube (rare, but happens with some uploads). The
+        script logs a warning and skips it. Confirm with:
+        <pre>yt-dlp -F "https://youtube.com/watch?v=VIDEO_ID"</pre>
+        If no video stream ≥480p exists, the correct behavior is to skip it.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ PySceneDetect produces too many clips (flash-cuts, micro-clips under 1 second)</div>
+      <div class="trouble-a">
+        Increase <code>scene_min_seconds</code> (e.g. from 3 to 5) and/or increase <code>scene_threshold</code>
+        (e.g. from 27 to 35) in <code>filler_config.json</code> for that playlist. Test with the manual
+        detection command in the Maintenance tab before committing.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Normalization step is very slow on first run</div>
+      <div class="trouble-a">
+        ffmpeg-normalize does a two-pass encode per file. A 10-minute clip takes ~30–60s; a large playlist
+        on first run may take hours. Subsequent nightly runs only process newly downloaded files, so this is a
+        one-time cost per video. If speed matters, reduce quality slightly:
+        change <code>-crf 23</code> to <code>-crf 28</code> in the <code>run_scene_detect</code> ffmpeg call.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">❌ Jellyfin scan fails — "Could not reach Jellyfin"</div>
+      <div class="trouble-a">
+        Check: (1) Jellyfin is running, (2) the API key in <code>filler_config.json</code> is valid. Test:
+        <pre>curl http://localhost:8096/System/Info -H "X-Emby-Token: YOUR_KEY"</pre>
+        401 = wrong key. Connection refused = Jellyfin is down.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Task Scheduler fires but log is empty</div>
+      <div class="trouble-a">
+        Python not found at the path in the task action. Run <code>where python</code> in CMD and update the
+        task. Also confirm "Start in" is set to <code>D:\Scripts</code>.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Vertical video still occasionally appears in the filler folder</div>
+      <div class="trouble-a">
+        Some videos only have portrait-mode streams; yt-dlp falls through to best-available when the format
+        filter matches nothing. Post-process check with ffprobe:
+        <pre>ffprobe -v error -select_streams v:0 \
+  -show_entries stream=width,height \
+  -of csv=p=0 "D:\Media\Filler\channel\somefile.mp4"
+# If height > width, delete the file.</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Useful Admin Commands</div>
+    <div class="card">
+      <pre># Manual run:
+python D:\Scripts\filler_downloader.py
+
+# Dry-run test (no download, just list what would be grabbed):
+yt-dlp --simulate --format "bestvideo[height<=720][height>=480][vcodec!=none][width>=height]+bestaudio" ^
+  "https://www.youtube.com/playlist?list=PLAYLIST_ID"
+
+# Check formats available for one video:
+yt-dlp -F "https://youtube.com/watch?v=VIDEO_ID"
+
+# Trigger Jellyfin scan manually:
+curl -X POST "http://localhost:8096/Library/Refresh" ^
+  -H "X-Emby-Token: YOUR_API_KEY"
+
+# Tail the log live (PowerShell):
+Get-Content D:\Scripts\filler_downloader.log -Wait -Tail 40</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ═══ PANE 7 — UI PREVIEW ═══ -->
+<div class="subtab-pane" id="pane-uipreview">
+  <div class="section">
+    <div class="section-title">🖥️ UI Preview</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:var(--text-dim)">
+        MeTube / <code>filler_downloader.py</code> is a headless Python script with no web UI. Monitoring is
+        via the log file or Task Scheduler history.
+      </p>
+      <pre># Tail the run log live:
+Get-Content D:\Scripts\filler_downloader.log -Wait -Tail 40</pre>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-top:12px">
+        The Tunarr filler UI (where these clips actually appear and are assigned to channels) is documented in
+        the <a href="tunarr.html">Tunarr</a> tab → Filler pane.
+      </p>
+    </div>
+  </div>
+</div><!-- /pane-uipreview -->
+
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'metube_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar      = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub      = document.getElementById('complete-sub');
+    const ovBtn    = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      ovBtn.style.fontWeight = '700';
+      ovBtn.style.color = 'var(--accent3, #4caf7d)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      ovBtn.style.fontWeight = '';
+      ovBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) switchTab('overview', document.querySelector('[onclick*="overview"]'));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) switchTab('overview', document.querySelector('[onclick*="overview"]'));
+  });
+</script>
+</body>
+</html>
