@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How to Train Your Dragon</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(46,125,154,.35); }
+.fn-tab-btn.active { color: #4fc3f7; border-bottom-color: #4fc3f7; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS (pill buttons)
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(46,125,154,.15); border-color: #4fc3f7; color: #4fc3f7; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid #4fc3f7;
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: #4fc3f7;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era group header rows */
+.fn-arc-row td {
+  background: rgba(46,125,154,.07) !important;
+  color: #4fc3f7;
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(46,125,154,.25) !important;
+  border-bottom: 1px solid rgba(46,125,154,.15) !important;
+}
+
+/* Media / TV break rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Book break rows */
+.fn-book-row td {
+  background: rgba(76,175,80,.06) !important;
+  border-top: 1px dashed rgba(76,175,80,.3) !important;
+  border-bottom: 1px dashed rgba(76,175,80,.3) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-book-row td { border-left: 3px solid #81c784 !important; }
+
+/* Platform left-border colour stripes */
+.fn-wii    td:first-child { border-left: 3px solid #b0bec5; }
+.fn-wiiu   td:first-child { border-left: 3px solid #80cbc4; }
+.fn-ds     td:first-child { border-left: 3px solid #f48fb1; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-ps3    td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-pc     td:first-child { border-left: 3px solid #90a4ae; }
+.fn-ios    td:first-child { border-left: 3px solid #80cbc4; }
+.fn-android td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-mobile td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-browser td:first-child { border-left: 3px solid #ce93d8; }
+.fn-defunct td:first-child { border-left: 3px solid #546e7a !important; }
+.fn-tv     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-movie  td:first-child { border-left: 3px solid #ffb74d; }
+.fn-book   td:first-child { border-left: 3px solid #81c784; }
+.fn-audio  td:first-child { border-left: 3px solid #f48fb1; }
+.fn-merch-toy     td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-merch-statue  td:first-child { border-left: 3px solid #ffcc02; }
+.fn-merch-card    td:first-child { border-left: 3px solid #80cbc4; }
+.fn-merch-board   td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-merch-apparel td:first-child { border-left: 3px solid #ce93d8; }
+.fn-merch-book    td:first-child { border-left: 3px solid #90a4ae; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(46,125,154,.05) !important; }
+.fn-highlight td:first-child { border-left: 3px solid #4fc3f7 !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .52; }
+
+/* Defunct = crossed out / grayed */
+.fn-defunct td { opacity: .45; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(46,125,154,.18);  color: #4fc3f7; border: 1px solid rgba(46,125,154,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-dead   { background: rgba(84,110,122,.2);   color: #90a4ae; border: 1px solid rgba(84,110,122,.4); }
+.fn-tag-book   { background: rgba(76,175,80,.15);   color: #81c784; border: 1px solid rgba(76,175,80,.3); }
+.fn-star       { color: #4fc3f7; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #4fc3f7;
+  border: 3px solid var(--bg);
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: #4fc3f7;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fn-era-title {
+  font-family: 'Cinzel', serif;
+  font-size: .95rem;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* ════════════════════════════════════════════════════
+   FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.fn-filler-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.fn-filler-type {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  margin-bottom: 7px;
+  display: inline-block;
+}
+.fn-filler-trailer      { background: rgba(91,141,217,.15);  color: #5b8dd9;       border: 1px solid rgba(91,141,217,.3); }
+.fn-filler-hype         { background: rgba(46,125,154,.12);  color: #4fc3f7;       border: 1px solid rgba(46,125,154,.3); }
+.fn-filler-music        { background: rgba(78,205,196,.12);  color: #4ecdc4;       border: 1px solid rgba(78,205,196,.3); }
+.fn-filler-documentary  { background: rgba(224,133,92,.12);  color: #e0855c;       border: 1px solid rgba(224,133,92,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc;       border: 1px solid rgba(180,100,220,.3); }
+.fn-filler-bumper       { background: rgba(76,175,80,.12);   color: #81c784;       border: 1px solid rgba(76,175,80,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where {
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: .72rem; color: var(--text-dim);
+}
+
+/* ════════════════════════════════════════════════════
+   MERCH HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-merch-history {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.fn-merch-history-era {
+  font-family: 'Cinzel', serif;
+  font-size: .85rem;
+  color: #4fc3f7;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #4fc3f7; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🐉</div>
+  <div>
+    <h1>HOW TO TRAIN YOUR DRAGON</h1>
+    <div class="subtitle">// Books · Films · TV · Games · Audiobooks · Comics · Live Action //</div>
+    <p class="desc">
+      Cressida Cowell's 2003 children's novel series, adapted by DreamWorks into a landmark animated trilogy (2010–2019) following Viking outcast Hiccup and his Night Fury dragon Toothless. One of animation's finest coming-of-age stories, now entering a live-action era with a 2025 remake. Note: the books and films are parallel universes — loosely inspired but telling very different stories.
+      Use the Library tab to browse all media in release or story order. TV & Anime covers the three series plus shorts. Movies has the full theatrical and live-action run.
+    </p>
+  </div>
+</div>
+
+<!-- Stat row -->
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">12</div><div class="fn-stat-label">Novels</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">4</div><div class="fn-stat-label">Films (+ 2 upcoming)</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">6</div><div class="fn-stat-label">Short Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">223</div><div class="fn-stat-label">TV Episodes</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">10+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2003</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The HTTYD Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','chrono',    this)">🕰️ Story Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','books',     this)">📖 Books Only</button>
+        <button class="fn-view-btn"        onclick="fnView('library','games',     this)">🕹️ Games Only</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+      </div>
+
+      <!-- RELEASE ORDER -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          Everything in real-world release order across both the Cowell book universe and the DreamWorks film/TV universe. ⭐ = best entry points. Blue rows = standout entries. 💀 = defunct / no longer accessible. Note: the two universes share a name and protagonist but tell entirely different stories.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type / Platform</th><th>Access</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── THE COWELL BOOK UNIVERSE (2003–2025) ──</td></tr>
+
+          <tr class="fn-book fn-highlight">
+            <td>2003</td>
+            <td>How to Train Your Dragon (Book 1) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td><span class="fn-star">⭐</span> David Tennant narrates. Toothless is tiny, talking, and very different from the film. Funny, fast, and charming. Start here for the book universe.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2004</td>
+            <td>How to Be a Pirate (Book 2)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Pirate treasure hunt. Tennant audiobook is excellent.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2005</td>
+            <td>How to Speak Dragonese (Book 3)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Romans abduct Hiccup. The dragon-language conceit gets more play.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2006</td>
+            <td>How to Cheat a Dragon's Curse (Book 4)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Race to cure a deadly dragon bite before Fishlegs dies.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2007</td>
+            <td>How to Twist a Dragon's Tale (Book 5)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Volcano threat. Exterminator dragon uprising begins.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2007</td>
+            <td>A Hero's Guide to Deadly Dragons (Book 6)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Heist at the dreaded Meathead Public Library.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2008</td>
+            <td>How to Ride a Dragon's Storm (Book 7)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Hiccup accidentally discovers America. Series' sense of scale expands.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2009</td>
+            <td>How to Break a Dragon's Heart (Book 8)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Hiccup and Fishlegs captured by the Berserks. Camicazi gets major role.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── THE DREAMWORKS FILM UNIVERSE (2010–present) ──</td></tr>
+
+          <tr class="fn-movie fn-highlight">
+            <td>2010</td>
+            <td>How to Train Your Dragon <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Film</span></td>
+            <td>Peacock / Prime</td>
+            <td><span class="fn-star">⭐</span> The absolute entry point to the DreamWorks universe. One of the finest animated films ever made. John Powell's score alone is worth it.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2010</td>
+            <td>Legend of the Boneknapper Dragon</td>
+            <td><span class="fn-tag fn-tag-opt">Short Film</span></td>
+            <td>Peacock</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 17-min Gobber-centric short. Charming but skippable.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2012</td>
+            <td>Dragons: TapDragonDrop</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span> iOS</td>
+            <td>Delisted</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Gone</span> PikPok mobile arcade game. No longer accessible anywhere.</td>
+          </tr>
+          <tr class="fn-browser fn-defunct fn-skip">
+            <td>2012</td>
+            <td>Dragons: Wild Skies</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span> Browser</td>
+            <td>Server dead</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Gone</span> CartoonNetwork.com browser game. Servers shut down 2019–2020. Fan revival attempts exist.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>2011</td>
+            <td>Book of Dragons</td>
+            <td><span class="fn-tag fn-tag-opt">Short Film</span></td>
+            <td>Peacock</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 18-min dragon species primer. Good lore reference.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2011</td>
+            <td>Gift of the Night Fury</td>
+            <td><span class="fn-tag fn-tag-yes">Short Film</span></td>
+            <td>Peacock</td>
+            <td>22-min holiday special. One of the better shorts — genuinely touching Toothless moment.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2011</td>
+            <td>How to Steal a Dragon's Sword (Book 9)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Series turns dark. Dragon Rebellion begins in earnest. Hiccup discovers uncomfortable truths.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2012</td>
+            <td>DreamWorks Dragons: Riders of Berk (S1) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span> Cartoon Network</td>
+            <td>Peacock</td>
+            <td><span class="fn-star">⭐</span> Essential bridge between Film 1 and Film 2. Original voice cast. Dragon Academy established.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td>2013</td>
+            <td>DreamWorks Dragons: Defenders of Berk (S2)</td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span> Cartoon Network</td>
+            <td>Peacock</td>
+            <td>Dagur the Deranged introduced. Series gets darker and better.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2013</td>
+            <td>Dragons Adventure: World Explorer</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span> Nokia WP</td>
+            <td>Delisted</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Gone</span> Nokia Lumia AR exclusive. Required specific hardware. Never widely available.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2013</td>
+            <td>School of Dragons</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span> PC/iOS/Android</td>
+            <td>Shut down 2023</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Gone</span> 3D educational MMORPG. Shut down June 30, 2023. Had semi-canonical story content from Race to the Edge writers.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2010</td>
+            <td>How to Train Your Dragon (Game)</td>
+            <td><span class="fn-tag fn-tag-opt">Game</span> Wii/360/PS3/DS</td>
+            <td>Emulator (Dolphin/DeSmuME)</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Film 1 tie-in arena fighter. Mixed reviews. Wii/DS emulatable. Low priority.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2012</td>
+            <td>How to Seize a Dragon's Jewel (Book 10)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Hiccup is now a fugitive hunted by all of Vikingdom.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2014</td>
+            <td>Dawn of the Dragon Racers</td>
+            <td><span class="fn-tag fn-tag-opt">Short Film</span></td>
+            <td>Peacock</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 25-min short. Explains dragon racing origins before Film 2.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2014</td>
+            <td>Dragons: Rise of Berk</td>
+            <td><span class="fn-tag fn-tag-yes">Game</span> iOS/Android</td>
+            <td>App Store / Play Store</td>
+            <td>Still active mobile builder. The best HTTYD mobile game still playable. Collect 760+ dragons.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2014</td>
+            <td>How to Train Your Dragon 2 (Game)</td>
+            <td><span class="fn-tag fn-tag-opt">Game</span> Wii/WiiU/360/PS3</td>
+            <td>Emulator (Dolphin)</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Film 2 tie-in. Flight school tournament gameplay. Inferior licensed game.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2014</td>
+            <td>How to Train Your Dragon 2 <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Film</span></td>
+            <td>Peacock / Prime</td>
+            <td><span class="fn-star">⭐</span> Significantly darker and more ambitious than Film 1. A major character death lands hard. Watch Defenders of Berk first.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2013</td>
+            <td>How to Betray a Dragon's Hero (Book 11)</td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td>Toothless's true nature revealed. Series approaches its climax.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>2015</td>
+            <td>How to Fight a Dragon's Fury (Book 12) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-book">Novel</span></td>
+            <td>Print / Audiobook</td>
+            <td><span class="fn-star">⭐</span> Series finale. The Doomsday of Yule. A genuinely epic conclusion to Cowell's 12-book arc.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2015</td>
+            <td>Dragons: Race to the Edge (S1–2) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span> Netflix</td>
+            <td>Peacock</td>
+            <td><span class="fn-star">⭐</span> Dragon Eye arc. Best-looking TV series entry. Required before Film 2 if you want full context.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td>2016</td>
+            <td>Dragons: Race to the Edge (S3–4)</td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span> Netflix</td>
+            <td>Peacock</td>
+            <td>Dragon Hunters arc intensifies. Heather arc pays off.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2017</td>
+            <td>Dragons: Race to the Edge (S5–6) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span> Netflix</td>
+            <td>Peacock</td>
+            <td>Final seasons. Ends directly before Film 2's prologue. Essential closure for the Defenders of Berk era.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>2014</td>
+            <td>Dragons: Riders of Berk Comics (Titan)</td>
+            <td><span class="fn-tag fn-tag-opt">Comics</span></td>
+            <td>Out of print</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 6 volumes by Simon Furman. Set in CN series continuity. Out of print — secondary market only.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>2016</td>
+            <td>The Serpent's Heir (Dark Horse Comics) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Comics</span></td>
+            <td>Dark Horse / Comixology</td>
+            <td><span class="fn-star">⭐</span> 4 graphic novels co-written by film director Dean DeBlois. Set between Film 2 and Film 3. Most canon-adjacent print material in the DW universe.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2019</td>
+            <td>Dragons: Titan Uprising</td>
+            <td><span class="fn-tag fn-tag-yes">Game</span> iOS/Android</td>
+            <td>App Store / Play Store</td>
+            <td>Match-3 RPG mobile. Still active. Better production values than most HTTYD phone games.</td>
+          </tr>
+          <tr class="fn-switch fn-skip">
+            <td>2019</td>
+            <td>Dragons: Dawn of New Riders</td>
+            <td><span class="fn-tag fn-tag-opt">Game</span> Switch/PS4/XBO/PC</td>
+            <td>Digital stores</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Film 3 tie-in with new protagonists Scribbler and Patch. Aimed at young players. Switch emulatable via Ryujinx.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2019</td>
+            <td>How to Train Your Dragon: The Hidden World <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Film</span></td>
+            <td>Peacock / Prime</td>
+            <td><span class="fn-star">⭐</span> Trilogy finale. The Hidden World revealed. Grimmel the Grisly as villain. Ending is genuinely emotional. Watch with tissues.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2019</td>
+            <td>How to Train Your Dragon: Homecoming</td>
+            <td><span class="fn-tag fn-tag-yes">Short Film</span></td>
+            <td>Peacock</td>
+            <td>22-min epilogue special set years after Film 3. Watch immediately after the trilogy — the closure it deserves.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2019</td>
+            <td>How to Train Your Dragon: Snoggletog Log</td>
+            <td><span class="fn-tag fn-tag-opt">Special</span></td>
+            <td>Peacock</td>
+            <td><span class="fn-tag fn-tag-opt">ambient only</span> 30-min Yule Log-style special. Not narrative. Continuity inconsistencies throughout.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2019</td>
+            <td>Dragons: Rescue Riders (S1–4 + Specials)</td>
+            <td><span class="fn-tag fn-tag-opt">TV Series</span> Netflix/Peacock</td>
+            <td>Peacock</td>
+            <td><span class="fn-tag fn-tag-opt">preschool</span> Completely different cast. Dragons speak English. Aimed at ages 3–6. Not connected to the main story. 4 seasons + 3 movie specials.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2021</td>
+            <td>Dragons: The Nine Realms (S1–6)</td>
+            <td><span class="fn-tag fn-tag-opt">TV Series</span> Hulu/Peacock</td>
+            <td>Hulu / Peacock</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 21st-century setting, 1,300 years after Film 3. Modern kids find underground dragon realms. 48 episodes across 6 seasons.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2025</td>
+            <td>How to Train Your Dragon (Live Action) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Film</span></td>
+            <td>Peacock / Prime</td>
+            <td><span class="fn-star">⭐</span> Live-action remake directed by DeBlois. Mason Thames, Nico Parker, Gerard Butler reprising Stoick. Grossed $600M+. Start of a new trilogy.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>2025</td>
+            <td>How to Train Your Dragon School (Book Series)</td>
+            <td><span class="fn-tag fn-tag-book">Novel Spinoff</span></td>
+            <td>Print / Audiobook</td>
+            <td>New Cowell spinoff series. Set inside the main book canon between Books 6 and 7. First new HTTYD prose fiction in years.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2027</td>
+            <td>How to Train Your Dragon 2 (Live Action) — Upcoming</td>
+            <td><span class="fn-tag fn-tag-varies">Upcoming</span></td>
+            <td>TBD</td>
+            <td>Announced April 2025. Cate Blanchett (Valka), Ólafur Darri Ólafsson (Drago), Phil Dunster (Eret) cast. Release June 11, 2027.</td>
+          </tr>
+        </table>
+
+        <!-- LEGEND -->
+        <div class="fn-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#4fc3f7;letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="fn-dot" style="background:#4fc3f7"></span>Blue left border = DreamWorks film/TV universe</span>
+          <span><span class="fn-dot" style="background:#81c784"></span>Green left border = Cowell book universe</span>
+          <span><span class="fn-dot" style="background:#546e7a"></span>Grey/faded row = defunct / no longer accessible</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded row = optional on first pass</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = crossover / short film insert point</span>
+        </div>
+      </div>
+
+      <!-- STORY ORDER (DreamWorks universe) -->
+      <div class="fn-view" id="fn-library-chrono">
+        <div class="fn-view-desc">
+          The DreamWorks animated universe in internal chronological order. The book universe has its own independent timeline — Books 1–12 read in publication order = story order. The two universes are parallel and non-continuous.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Type</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="4">── HICCUP'S CHILDHOOD / DRAGON INITIATION ──</td></tr>
+          <tr class="fn-movie fn-highlight"><td>1</td><td>How to Train Your Dragon (Film 1) <span class="fn-star">⭐</span></td><td>Film · 2010</td><td>Start here. Hiccup meets Toothless. Berk's war with dragons ends.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2</td><td>Legend of the Boneknapper Dragon</td><td>Short · 2010</td><td>Gobber's tall tale. Set during Film 1 era.</td></tr>
+          <tr class="fn-movie fn-skip"><td>3</td><td>Book of Dragons</td><td>Short · 2011</td><td>Lore primer. Set shortly after Film 1.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>4</td><td>Gift of the Night Fury</td><td>Short · 2011</td><td>First Snoggletog after Film 1.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── DRAGON ACADEMY ERA ──</td></tr>
+          <tr class="fn-tv fn-highlight"><td>5</td><td>Dragons: Riders of Berk (S1)</td><td>TV · 2012</td><td>Academy founded. Several months after Film 1.</td></tr>
+          <tr class="fn-tv"><td>6</td><td>Dragons: Defenders of Berk (S2)</td><td>TV · 2013</td><td>Dagur arc. ~1 year after Riders of Berk.</td></tr>
+          <tr class="fn-movie fn-skip"><td>7</td><td>Dawn of the Dragon Racers</td><td>Short · 2014</td><td>Dragon racing origins. Between S2 and Race to the Edge.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── DRAGON'S EDGE ERA (Prequel to Film 2) ──</td></tr>
+          <tr class="fn-tv fn-highlight"><td>8</td><td>Dragons: Race to the Edge (S1–2)</td><td>TV · 2015</td><td>Dragon Eye discovered. 3 years before Film 2.</td></tr>
+          <tr class="fn-tv"><td>9</td><td>Dragons: Race to the Edge (S3–4)</td><td>TV · 2016</td><td>Dragon Hunters. Viggo Grimborn arc.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>10</td><td>Dragons: Race to the Edge (S5–6)</td><td>TV · 2017</td><td>Ends directly before Film 2's events.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── HICCUP AS CHIEF ──</td></tr>
+          <tr class="fn-movie fn-highlight"><td>11</td><td>How to Train Your Dragon 2 <span class="fn-star">⭐</span></td><td>Film · 2014</td><td>5 years after Film 1. Hiccup is 20. Drago Bludvist.</td></tr>
+          <tr class="fn-book fn-highlight"><td>12</td><td>Dark Horse Comics: The Serpent's Heir arc</td><td>Comics · 2016</td><td>Between Film 2 and 3. Co-written by DeBlois.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── THE HIDDEN WORLD ERA ──</td></tr>
+          <tr class="fn-movie fn-highlight"><td>13</td><td>How to Train Your Dragon: The Hidden World <span class="fn-star">⭐</span></td><td>Film · 2019</td><td>Grimmel. Light Fury. Trilogy finale.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>14</td><td>How to Train Your Dragon: Homecoming</td><td>Short · 2019</td><td>Epilogue. Years after Film 3. Children of Hiccup and Astrid.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── 21ST CENTURY / THE NINE REALMS ERA ──</td></tr>
+          <tr class="fn-tv fn-skip"><td>15</td><td>Dragons: The Nine Realms (S1–6)</td><td>TV · 2021</td><td>1,300 years later. Modern world. Looser franchise connection.</td></tr>
+        </table>
+      </div>
+
+      <!-- BOOKS ONLY -->
+      <div class="fn-view" id="fn-library-books">
+        <div class="fn-view-desc">
+          Cressida Cowell's 12-novel series plus companion books and the new 2025 spinoff. All audiobooks narrated by David Tennant. The books and DreamWorks films are parallel universes — Toothless is a tiny green talking dragon in the books, not a Night Fury.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Format</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="4">── MAIN SERIES (Books 1–12) ──</td></tr>
+          <tr class="fn-book fn-highlight"><td>2003</td><td>Book 1: How to Train Your Dragon <span class="fn-star">⭐</span></td><td>Novel + Audiobook</td><td>Entry point. Tennant narrates. Funny, quick, excellent.</td></tr>
+          <tr class="fn-book"><td>2004</td><td>Book 2: How to Be a Pirate</td><td>Novel + Audiobook</td><td>Pirate treasure. Series expands.</td></tr>
+          <tr class="fn-book"><td>2005</td><td>Book 3: How to Speak Dragonese</td><td>Novel + Audiobook</td><td>Roman captivity. Dragon-language focus.</td></tr>
+          <tr class="fn-book"><td>2006</td><td>Book 4: How to Cheat a Dragon's Curse</td><td>Novel + Audiobook</td><td>Race against a death sentence. High stakes begin.</td></tr>
+          <tr class="fn-book"><td>2007</td><td>Book 5: How to Twist a Dragon's Tale</td><td>Novel + Audiobook</td><td>Volcano + dragon uprising seeds.</td></tr>
+          <tr class="fn-book"><td>2007</td><td>Book 6: A Hero's Guide to Deadly Dragons</td><td>Novel + Audiobook</td><td>Library heist. Camicazi introduced.</td></tr>
+          <tr class="fn-book"><td>2008</td><td>Book 7: How to Ride a Dragon's Storm</td><td>Novel + Audiobook</td><td>America discovered. Series scope explodes.</td></tr>
+          <tr class="fn-book"><td>2009</td><td>Book 8: How to Break a Dragon's Heart</td><td>Novel + Audiobook</td><td>Berserks capture Hiccup. Darker tone.</td></tr>
+          <tr class="fn-book"><td>2011</td><td>Book 9: How to Steal a Dragon's Sword</td><td>Novel + Audiobook</td><td>Dragon Rebellion begins. Series turns genuinely dark.</td></tr>
+          <tr class="fn-book"><td>2012</td><td>Book 10: How to Seize a Dragon's Jewel</td><td>Novel + Audiobook</td><td>Hiccup is hunted fugitive. No easy victories.</td></tr>
+          <tr class="fn-book"><td>2013</td><td>Book 11: How to Betray a Dragon's Hero</td><td>Novel + Audiobook</td><td>Toothless's secret identity revealed. Penultimate.</td></tr>
+          <tr class="fn-book fn-highlight"><td>2015</td><td>Book 12: How to Fight a Dragon's Fury <span class="fn-star">⭐</span></td><td>Novel + Audiobook</td><td>The finale. Epic, bittersweet, earned. Don't skip to this.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── COMPANION BOOKS ──</td></tr>
+          <tr class="fn-book fn-skip"><td>2014</td><td>The Complete Book of Dragons</td><td>Reference</td><td>Dragon species guide in Hiccup's voice. Good world-building companion.</td></tr>
+          <tr class="fn-book fn-skip"><td>2015</td><td>How to Train Your Dragon: A Journal for Heroes</td><td>Activity Book</td><td>More activity book than fiction. Skip if you just want story.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── SPINOFF / NEW SERIES (2025–) ──</td></tr>
+          <tr class="fn-book fn-highlight"><td>2025</td><td>How to Train Your Dragon School (Book 1+)</td><td>Novel + Audiobook</td><td>New ongoing spinoff by Cowell. Set between Books 6 and 7. Narrated by Tennant.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── AUDIOBOOK NOTE ──</td></tr>
+          <tr class="fn-audio fn-highlight"><td>2010+</td><td>All 12 Novels — David Tennant Audiobooks <span class="fn-star">⭐</span></td><td>Hachette Audio</td><td><span class="fn-star">⭐</span> Tennant's performance is a genuine reason to choose audio over print. Distinct voices for every character including a lisping, stuttering Toothless. Available on Audible and most library apps.</td></tr>
+        </table>
+      </div>
+
+      <!-- GAMES ONLY -->
+      <div class="fn-view" id="fn-library-games">
+        <div class="fn-view-desc">
+          All HTTYD games across console, mobile, browser, and PC. Most are licensed tie-ins of varying quality. Rise of Berk is the only one still actively maintained. Several mobile/browser games are now completely defunct.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">── CONSOLE / PC ──</td></tr>
+          <tr class="fn-wii fn-skip"><td>2010</td><td>How to Train Your Dragon (Game)</td><td>Wii, 360, PS3, DS</td><td>Playable via Dolphin/DeSmuME</td><td>Arena combat / dragon training. Metacritic 58. Low-priority but emulatable.</td></tr>
+          <tr class="fn-wii fn-skip"><td>2014</td><td>How to Train Your Dragon 2 (Game)</td><td>Wii, WiiU, 360, PS3, PC</td><td>Playable via Dolphin</td><td>Film 2 tie-in. Flight tournament gameplay. Inferior licensed title.</td></tr>
+          <tr class="fn-switch fn-skip"><td>2019</td><td>Dragons: Dawn of New Riders</td><td>Switch, PS4, XBO, PC</td><td>Digital stores / Ryujinx</td><td>Action-adventure with new protagonists. Switch emulatable. Younger audience target.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── MOBILE (ACTIVE) ──</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2014</td><td>Dragons: Rise of Berk <span class="fn-star">⭐</span></td><td>iOS / Android</td><td>✅ Active</td><td><span class="fn-star">⭐</span> Best still-playable HTTYD mobile game. Village builder + dragon collector. 760+ dragons as of 2024. Free to play.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2019</td><td>Dragons: Titan Uprising</td><td>iOS / Android</td><td>✅ Active</td><td>Match-3 RPG. Still active. Better production than most HTTYD apps. Ludia.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── MOBILE (DEFUNCT) ──</td></tr>
+          <tr class="fn-mobile fn-defunct fn-skip"><td>2012</td><td>Dragons: TapDragonDrop</td><td>iOS</td><td>💀 Delisted</td><td>PikPok physics arcade. Gone from App Store. No recovery option.</td></tr>
+          <tr class="fn-mobile fn-defunct fn-skip"><td>2013</td><td>Dragons Adventure: World Explorer</td><td>Nokia WP AR</td><td>💀 Hardware defunct</td><td>Nokia Lumia AR exclusive. Requires specific hardware no longer sold. Never widely available.</td></tr>
+          <tr class="fn-mobile fn-defunct fn-skip"><td>2013</td><td>School of Dragons</td><td>PC / iOS / Android</td><td>💀 Shut down Jun 2023</td><td>Full MMORPG. Semi-canonical story content. Shut down June 30, 2023. Fan preservation efforts ongoing.</td></tr>
+          <tr class="fn-mobile fn-defunct fn-skip"><td>2014</td><td>Dragon Training Legends</td><td>iOS / Android</td><td>💀 Delisted</td><td>Card mini-game Film 2 tie-in. Delisted. No recovery.</td></tr>
+          <tr class="fn-mobile fn-defunct fn-skip"><td>2014</td><td>HTTYD 2: Official Storybook App</td><td>iOS / Android</td><td>💀 Delisted</td><td>Interactive storybook. Delisted. Children's app.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── BROWSER (DEFUNCT) ──</td></tr>
+          <tr class="fn-browser fn-defunct fn-skip"><td>2012</td><td>Dragons: Wild Skies</td><td>CartoonNetwork.com</td><td>💀 Server dead</td><td>3D flying/training browser game. Servers shut down 2019–2020. Fan revival project exists but not fully functional.</td></tr>
+        </table>
+      </div>
+
+      <!-- BEST FIRST -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          If you're starting fresh and want to experience the franchise's best material first. Two tracks: the DreamWorks film universe and the Cowell book universe.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Why Start Here</th></tr>
+          <tr class="fn-arc-row"><td colspan="3">── DREAMWORKS UNIVERSE — Recommended Order ──</td></tr>
+          <tr class="fn-movie fn-highlight"><td>1</td><td>How to Train Your Dragon (2010) <span class="fn-star">⭐</span></td><td>The best DreamWorks film. Perfect entry point — no prior knowledge needed. John Powell's score alone justifies it.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2</td><td>Gift of the Night Fury (Short)</td><td>Watch immediately after Film 1. 22 minutes, emotionally resonant, raises the stakes for everything that follows.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>3</td><td>Riders of Berk + Defenders of Berk (TV S1–2)</td><td>Essential character development. Dagur, Maces & Talons, and the Dragon Eye foundation all matter for Film 2.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>4</td><td>Race to the Edge (S1–6)</td><td>Best-looking series. Watch all 6 seasons — it ends directly into Film 2's timeline.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>5</td><td>How to Train Your Dragon 2 <span class="fn-star">⭐</span></td><td>Significantly darker. A major character death hits much harder if you've done the TV series.</td></tr>
+          <tr class="fn-book fn-highlight"><td>6</td><td>The Serpent's Heir (Dark Horse Comics)</td><td>Co-written by DeBlois. Directly bridges Film 2 and Film 3 canonically.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>7</td><td>How to Train Your Dragon: The Hidden World <span class="fn-star">⭐</span></td><td>The emotional payoff to everything. The farewell will hit harder after the full journey.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>8</td><td>How to Train Your Dragon: Homecoming</td><td>Watch this immediately after the trilogy. True epilogue. 22 minutes of earned closure.</td></tr>
+          <tr class="fn-arc-row"><td colspan="3">── BOOK UNIVERSE — Recommended Order ──</td></tr>
+          <tr class="fn-book fn-highlight"><td>1</td><td>Book 1: How to Train Your Dragon (Audiobook) <span class="fn-star">⭐</span></td><td>David Tennant's narration is extraordinary. Start with audio if you can — it transforms the experience.</td></tr>
+          <tr class="fn-book"><td>2</td><td>Books 2–8: Continue in sequence</td><td>The series builds continuously. Don't skip — each book adds to the next.</td></tr>
+          <tr class="fn-book fn-highlight"><td>3</td><td>Books 9–12: The Dark Arc</td><td>Series shifts into genuine epic fantasy territory from Book 9 onward. The payoff for reading all 8 predecessors.</td></tr>
+        </table>
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /section -->
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 TV Series &amp; Shorts</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">🐉</div>
+      <div class="callout-body">
+        <strong>Three TV series, six short films, 223 total episodes across 22 seasons.</strong>
+        The main DreamWorks Dragons series (Riders of Berk → Defenders → Race to the Edge) is essential viewing between Films 1 and 2.
+        Rescue Riders is for preschoolers and has a completely separate cast. The Nine Realms is set 1,300 years in the future.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',    this)">📋 All Series</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','main',   this)">🐉 Main Timeline</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','shorts', this)">🎬 Short Films</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','spinoff',this)">🌀 Spinoffs</button>
+      </div>
+
+      <div class="fn-view active" id="fn-tvanime-all">
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Platform</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">── MAIN DREAMWORKS DRAGONS SERIES ──</td></tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2012</td><td>DreamWorks Dragons: Riders of Berk <span class="fn-star">⭐</span></td>
+            <td>20 eps · S1</td><td>Cartoon Network → Peacock</td>
+            <td>Original voice cast. Dragon Academy founded. Essential between Films 1 and 2.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2013</td><td>DreamWorks Dragons: Defenders of Berk <span class="fn-star">⭐</span></td>
+            <td>20 eps · S2</td><td>Cartoon Network → Peacock</td>
+            <td>Dagur the Deranged arc. Series gets darker and more serialized. Required.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2015–2018</td><td>Dragons: Race to the Edge <span class="fn-star">⭐</span></td>
+            <td>78 eps · S1–6</td><td>Netflix → Peacock</td>
+            <td>Best-looking series. Dragon Eye arc. Viggo and Ryker as villains. Ends directly before Film 2. Watch all 6 seasons.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── SHORT FILMS ──</td></tr>
+          <tr class="fn-movie fn-skip"><td>2010</td><td>Legend of the Boneknapper Dragon</td><td>17 min</td><td>Peacock</td><td>Gobber's tall tale. Set during Film 1 era. Optional but charming.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2011</td><td>Book of Dragons</td><td>18 min</td><td>Peacock</td><td>Educational dragon species lore. Solid world-building primer.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2011</td><td>Gift of the Night Fury</td><td>22 min</td><td>Peacock</td><td>Holiday special. One of the best HTTYD short films — the Toothless moment is memorable.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2014</td><td>Dawn of the Dragon Racers</td><td>25 min</td><td>Peacock</td><td>Origins of Berk's dragon racing sport. Between Defenders of Berk and Race to the Edge.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2019</td><td>How to Train Your Dragon: Homecoming</td><td>22 min</td><td>Peacock</td><td>Epilogue set years after Film 3. Watch immediately after the trilogy.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2019</td><td>How to Train Your Dragon: Snoggletog Log</td><td>30 min</td><td>Peacock</td><td>Holiday ambient "Yule Log" special. Not narrative. Continuity inconsistencies. Skip unless you want ambiance.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── SPINOFF SERIES ──</td></tr>
+          <tr class="fn-tv fn-skip">
+            <td>2019–2021</td><td>Dragons: Rescue Riders</td>
+            <td>40 eps + 3 specials · S1–2</td><td>Netflix</td>
+            <td>Preschool-aimed. Separate cast, dragons speak English. Human twins raised by dragons on Huttsgalor.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2021–2023</td><td>Dragons: Rescue Riders — Heroes of the Sky</td>
+            <td>40 eps · S3–4</td><td>Peacock</td>
+            <td>Rescue Riders continuation after moving from Netflix to Peacock.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2021–2023</td><td>Dragons: The Nine Realms</td>
+            <td>48 eps · S1–6</td><td>Hulu / Peacock</td>
+            <td>21st-century setting. 1,300 years after Film 3. Modern kids discover dragon realms underground. Loosest franchise connection.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-tvanime-main">
+        <div class="fn-view-desc">Only the DreamWorks Dragons main canon series — the TV content that directly connects Films 1 through 3.</div>
+        <table class="fn-table">
+          <tr><th>Season</th><th>Title</th><th>Year</th><th>Episodes</th><th>Story Notes</th></tr>
+          <tr class="fn-tv fn-highlight"><td>S1</td><td>Riders of Berk</td><td>2012</td><td>20</td><td>Academy founded. Outcast tribe threatens Berk. Johann introduced. Set ~months after Film 1.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>S2</td><td>Defenders of Berk</td><td>2013</td><td>20</td><td>Dagur the Deranged (Berserker tribe) main villain. Maces &amp; Talons chess metaphor arc. Dragon Eye foreshadowed.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>S3–4</td><td>Race to the Edge S1–2</td><td>2015</td><td>26</td><td>Dragon Eye artifact drives the story. Heather's arc. Dragon's Edge outpost established.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>S5–6</td><td>Race to the Edge S3–4</td><td>2016</td><td>26</td><td>Viggo Grimborn and Ryker as primary antagonists. Dragon Hunter fleet.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>S7–8</td><td>Race to the Edge S5–6</td><td>2017</td><td>26</td><td>Krogan and Johann's true allegiances revealed. Series ends leading directly into Film 2's first scene.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-tvanime-shorts">
+        <div class="fn-view-desc">All six official short films in chronological order within the DreamWorks universe.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Length</th><th>Placement</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-skip"><td>2010</td><td>Legend of the Boneknapper Dragon</td><td>17 min</td><td>During Film 1 / immediately after</td><td>Gobber tells the story of his lifelong dragon nemesis. Comedy short.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2011</td><td>Book of Dragons</td><td>18 min</td><td>After Film 1</td><td>Dragon species reference. Introduces 14 dragons across 7 classes.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2011</td><td>Gift of the Night Fury</td><td>22 min</td><td>After Film 1 / First Snoggletog</td><td>Best short. Toothless's wings situation. An unexpected emotional gut-punch for a holiday special.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2014</td><td>Dawn of the Dragon Racers</td><td>25 min</td><td>After Defenders of Berk / before Race to the Edge</td><td>Dragon racing origins. Bridges the CN and Netflix era.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2019</td><td>How to Train Your Dragon: Homecoming</td><td>22 min</td><td>Years after Film 3 epilogue</td><td>True epilogue to the trilogy. Hiccup and Astrid's children seek out the dragons. Watch it.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2019</td><td>How to Train Your Dragon: Snoggletog Log</td><td>30 min</td><td>Ambiguous / non-canon continuity</td><td>Yule Log ambient special. Continuity inconsistencies. Background viewing only.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-tvanime-spinoff">
+        <div class="fn-view-desc">Series that exist in the HTTYD universe but are not part of the main Hiccup/Toothless timeline.</div>
+        <table class="fn-table">
+          <tr><th>Years</th><th>Title</th><th>Seasons</th><th>Platform</th><th>Audience / Notes</th></tr>
+          <tr class="fn-tv fn-skip">
+            <td>2019–2021</td><td>Dragons: Rescue Riders</td><td>4 seasons + 3 movie specials</td><td>Netflix → Peacock</td>
+            <td>Ages 3–6. Dak and Leyla, human twins raised by dragons. Dragons speak English. Huttsgalor island. No connection to Hiccup's story.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2021–2023</td><td>Dragons: The Nine Realms</td><td>6 seasons (48 eps)</td><td>Hulu / Peacock</td>
+            <td>Ages 6–12. 21st century. Scientists drill into an underwater cavern and discover living dragons. 1,300 years after Film 3. Weakest franchise connection.</td>
+          </tr>
+        </table>
+      </div>
+    </div><!-- /card -->
+  </div><!-- /section -->
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Films &amp; Theatrical Releases</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','animated', this)">🎨 Animated Trilogy</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','liveaction',this)">🎥 Live Action</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','all',      this)">📋 All Films</button>
+      </div>
+
+      <div class="fn-view active" id="fn-movies-animated">
+        <div class="fn-view-desc">The three DreamWorks animated feature films (2010–2019). All three were nominated for the Academy Award for Best Animated Feature.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Director</th><th>Box Office</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2010</td><td>How to Train Your Dragon <span class="fn-star">⭐</span></td>
+            <td>Sanders &amp; DeBlois</td><td>~$495M worldwide</td>
+            <td>The first film. Nominated for Best Animated Feature and Best Original Score. Roger Deakins' cinematography consultation. The best entry point.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2014</td><td>How to Train Your Dragon 2 <span class="fn-star">⭐</span></td>
+            <td>Dean DeBlois</td><td>~$621M worldwide</td>
+            <td>Won Annie Award. Significantly darker — a major death in Act 2 that the series earns. Introduces Valka (Cate Blanchett) and Drago (Djimon Hounsou).</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2019</td><td>How to Train Your Dragon: The Hidden World <span class="fn-star">⭐</span></td>
+            <td>Dean DeBlois</td><td>~$525M worldwide</td>
+            <td>Nominated for Best Animated Feature. Grimmel (F. Murray Abraham) as villain. The Light Fury. An emotionally devastating but earned ending.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-movies-liveaction">
+        <div class="fn-view-desc">The live-action remake era — DreamWorks' first live-action franchise. Director Dean DeBlois returns for all three films.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Cast</th><th>Box Office</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2025</td><td>How to Train Your Dragon (Live Action) <span class="fn-star">⭐</span></td>
+            <td>Mason Thames, Nico Parker, Gerard Butler (reprising)</td><td>$600M+</td>
+            <td>Strong critical reception. Faithful retelling with practical and VFX dragon work. Start of the new trilogy.</td>
+          </tr>
+          <tr class="fn-movie fn-skip">
+            <td>2027</td><td>How to Train Your Dragon 2 (Live Action) — Upcoming</td>
+            <td>+Cate Blanchett (Valka), Ólafur Darri Ólafsson (Drago), Phil Dunster (Eret)</td><td>TBD</td>
+            <td>Announced April 2025 at CinemaCon. Cast additions announced January 2026. Release date June 11, 2027.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-movies-all">
+        <div class="fn-view-desc">Complete film and short film catalogue across animated and live-action.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Platform</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight"><td>2010</td><td>How to Train Your Dragon</td><td>Animated Feature</td><td>Peacock</td><td>Film 1. The entry point.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2010</td><td>Legend of the Boneknapper Dragon</td><td>Short Film</td><td>Peacock</td><td>17 min. Optional.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2011</td><td>Gift of the Night Fury</td><td>Short Film</td><td>Peacock</td><td>22 min. Best short.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2011</td><td>Book of Dragons</td><td>Short Film</td><td>Peacock</td><td>18 min. Dragon lore.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2014</td><td>Dawn of the Dragon Racers</td><td>Short Film</td><td>Peacock</td><td>25 min. Racing origins.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2014</td><td>How to Train Your Dragon 2</td><td>Animated Feature</td><td>Peacock</td><td>Film 2. Darker and bigger.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2019</td><td>How to Train Your Dragon: The Hidden World</td><td>Animated Feature</td><td>Peacock</td><td>Film 3. Trilogy finale.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2019</td><td>How to Train Your Dragon: Homecoming</td><td>Short Film / Special</td><td>Peacock</td><td>22 min. True epilogue.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2019</td><td>Snoggletog Log</td><td>Ambient Special</td><td>Peacock</td><td>30 min. Yule Log format.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2020</td><td>Rescue Riders: Hunt for the Golden Dragon</td><td>Special (Preschool)</td><td>Peacock</td><td>Rescue Riders spinoff. ~45 min.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2020</td><td>Rescue Riders: Secrets of the Deep</td><td>Special (Preschool)</td><td>Peacock</td><td>Rescue Riders spinoff. ~45 min.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2020</td><td>Rescue Riders: The Magic of Wonderglow</td><td>Special (Preschool)</td><td>Peacock</td><td>Rescue Riders holiday special. ~45 min.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2025</td><td>How to Train Your Dragon (Live Action)</td><td>Live Action Feature</td><td>Peacock</td><td>Film remake. $600M+.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2027</td><td>How to Train Your Dragon 2 (Live Action)</td><td>Live Action Feature</td><td>TBD</td><td>Upcoming. June 11, 2027.</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Merchandise</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('merch','all',     this)">📋 All Merch</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','toys',    this)">🧸 Toys &amp; Figures</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','tabletop',this)">🃏 Tabletop &amp; Games</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','history', this)">📖 Merch History</button>
+      </div>
+
+      <div class="fn-view active" id="fn-merch-all">
+        <div class="fn-view-desc">Notable merchandise across all categories. ⭐ = grail / especially notable items.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Category</th><th>Manufacturer</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">── FILM ERA TOYS (2010s) ──</td></tr>
+          <tr class="fn-merch-toy"><td>2010</td><td>Toothless Electronic Dragon</td><td><span class="fn-tag fn-tag-yes">Figure</span></td><td>Spin Master</td><td>First major toy line. Electronic Toothless with sound and jaw movement. Widely available at launch.</td></tr>
+          <tr class="fn-merch-toy"><td>2014</td><td>DreamWorks Dragons Action Dragon Figures</td><td><span class="fn-tag fn-tag-yes">Figure</span></td><td>Spin Master</td><td>Film 2 era. Multiple dragon species with wing-flap and shooting features. Most were 3"–12" scale.</td></tr>
+          <tr class="fn-merch-toy fn-highlight"><td>2019</td><td>Light Fury Dragons (Hidden World era) <span class="fn-star">⭐</span></td><td><span class="fn-tag fn-tag-yes">Figure</span></td><td>Spin Master</td><td>Film 3 wave. Light Fury figures sold very well — secondary market still active. Better sculpts than earlier waves.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── COLLECTOR / PREMIUM ──</td></tr>
+          <tr class="fn-merch-statue fn-highlight"><td>2020s</td><td>Toothless &amp; Hiccup Premium Statue <span class="fn-star">⭐</span></td><td><span class="fn-tag fn-tag-opt">Statue</span></td><td>Various (Iron Studios, etc.)</td><td>High-end resin statues. Secondary market $100–$400 depending on edition and condition.</td></tr>
+          <tr class="fn-arc-row"><td colspan="5">── TABLETOP ──</td></tr>
+          <tr class="fn-merch-card fn-highlight"><td>2014</td><td>How to Train Your Dragon Card Game <span class="fn-star">⭐</span></td><td><span class="fn-tag fn-tag-varies">Card Game</span></td><td>Various</td><td>Multiple card game adaptations over the years. Best-reviewed was the 2014 Peaceable Kingdom cooperative version for families.</td></tr>
+          <tr class="fn-merch-board"><td>2010s</td><td>DreamWorks Dragons Board Games (various)</td><td><span class="fn-tag fn-tag-opt">Board Game</span></td><td>Spin Master / Cardinal</td><td>Multiple mass-market board games (Racing, Training, etc.). Quality varies — family casual level.</td></tr>
+          <tr class="fn-merch-board fn-highlight"><td>2023</td><td>Dragons: The Board Game <span class="fn-star">⭐</span></td><td><span class="fn-tag fn-tag-varies">Board Game</span></td><td>Ravensburger</td><td>Higher-quality licensed board game from Ravensburger. 2–4 players. Better component quality than older mass-market editions.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-toys">
+        <div class="fn-view-desc">Action figures, plush, and collectible figures.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Item</th><th>Manufacturer</th><th>Scale</th><th>Notes</th></tr>
+          <tr class="fn-merch-toy fn-highlight"><td>2010</td><td>Electronic Toothless <span class="fn-star">⭐</span></td><td>Spin Master</td><td>~12"</td><td>The flagship launch toy. Sound effects, jaw open/close. Most nostalgic piece from the first film era.</td></tr>
+          <tr class="fn-merch-toy"><td>2010–2019</td><td>DreamWorks Dragons Action Figures (various waves)</td><td>Spin Master</td><td>3"–12"</td><td>Multiple waves across the trilogy. Best wave: 2019 Hidden World release — better paint and sculpts.</td></tr>
+          <tr class="fn-merch-toy fn-highlight"><td>2025</td><td>Live Action Film Toys (2025 wave) <span class="fn-star">⭐</span></td><td>Spin Master</td><td>Various</td><td>New toy line tied to the 2025 live-action film. Best contemporary availability.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-tabletop">
+        <div class="fn-view-desc">Card games, board games, and family games in the HTTYD universe.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Publisher</th><th>Players</th><th>Notes</th></tr>
+          <tr class="fn-merch-card fn-highlight">
+            <td>2014</td><td>How to Train Your Dragon Cooperative Card Game <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-varies">Card Game</span></td>
+            <td>Peaceable Kingdom</td><td>2–4</td>
+            <td>Best-reviewed HTTYD card game. Cooperative mechanic. Good for families. Currently out of print — secondary market.</td>
+          </tr>
+          <tr class="fn-merch-board">
+            <td>2010s</td><td>Various mass-market board games</td>
+            <td><span class="fn-tag fn-tag-opt">Board Game</span></td>
+            <td>Spin Master / Cardinal</td><td>2–4</td>
+            <td>Racing, training, memory games. Mass-market quality. Cheaply available at thrift stores.</td>
+          </tr>
+          <tr class="fn-merch-board fn-highlight">
+            <td>2023</td><td>Dragons: The Board Game <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Board Game</span></td>
+            <td>Ravensburger</td><td>2–4</td>
+            <td>Best-quality licensed board game in the franchise. Strategy elements, good components. Available at most game retailers.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-history">
+        <div class="fn-view-desc">A brief history of the HTTYD merchandise program.</div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Film Launch Era (2010)</div>
+          <p style="font-size:.84rem;line-height:1.7">Spin Master acquired the master toy license for the first film. The electronic Toothless figure was the flagship SKU. The 2010 toy line was broadly successful but relied on mass-market retailers — quality was functional rather than premium. Plush, basic action figures, and role-play items (Hiccup helmet, Toothless wings) were the anchor products.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Trilogy Expansion Era (2014–2019)</div>
+          <p style="font-size:.84rem;line-height:1.7">Each sequel refreshed the toy line with improved sculpts and more dragon species. The Hidden World wave (2019) had notably better quality than earlier releases, especially the Light Fury figures. The franchise never attracted the volume of high-end collector statues that some DreamWorks properties did — most collector-tier pieces came from third-party statue makers rather than official licensed products.</p>
+        </div>
+        <div class="fn-merch-history">
+          <div class="fn-merch-history-era">📅 The Modern Licensed Market (2023–present)</div>
+          <p style="font-size:.84rem;line-height:1.7">The 2025 live-action film triggered a new retail toy cycle with Spin Master again holding the license. Ravensburger's board game entry represented an upgrade in tabletop quality. The Universal Epic Universe theme park opening (May 2025) at Orlando created new venue-exclusive merchandise. Premium statues and figures remain underserved for a franchise of this size.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Filler Content — HTTYD Tunarr Channel</div>
+    <div class="callout callout-tip" style="margin-bottom:20px">
+      <div class="callout-icon">📺</div>
+      <div class="callout-body">Short-form pieces for bumpers, interstitials, and filler on a Tunarr channel built around How to Train Your Dragon. The franchise has excellent official trailers and a rich YouTube retrospective community. John Powell's score also makes excellent ambient channel music.</div>
+    </div>
+    <div class="fn-filler-grid">
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Game Trailer</div>
+        <div class="fn-filler-name">How to Train Your Dragon — Official Trailer #2 (2010)</div>
+        <div class="fn-filler-meta">2010 · ~2 min · YouTube</div>
+        <div class="fn-filler-desc">The "Test Drive" trailer featuring John Powell's iconic score over the first flight sequence. Perfect channel opener — immediately evocative of the franchise at its best.</div>
+        <div class="fn-filler-where">🔗 Search "How to Train Your Dragon Official Trailer 2010" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-trailer">Film Trailer</div>
+        <div class="fn-filler-name">The Hidden World — Official Trailer</div>
+        <div class="fn-filler-meta">2018 · ~2.5 min · YouTube / Universal</div>
+        <div class="fn-filler-desc">The Hidden World trailer introduced the Light Fury and generated massive emotional response. "Where Do We Come From" arrangement makes it an exceptional standalone piece.</div>
+        <div class="fn-filler-where">🔗 Search "How to Train Your Dragon The Hidden World Official Trailer" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music / OST</div>
+        <div class="fn-filler-name">Forbidden Friendship — John Powell (HTTYD OST)</div>
+        <div class="fn-filler-meta">2010 · ~3.5 min · Spotify / YouTube</div>
+        <div class="fn-filler-desc">The single most iconic piece of score from the trilogy. Plays over Hiccup and Toothless's first real interaction. Perfect mid-block filler or channel closer.</div>
+        <div class="fn-filler-where">🔗 Available on Spotify / Apple Music · DreamWorks Music YouTube channel</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-music">Music / OST</div>
+        <div class="fn-filler-name">Test Drive — John Powell (HTTYD OST)</div>
+        <div class="fn-filler-meta">2010 · ~3 min · Spotify / YouTube</div>
+        <div class="fn-filler-desc">The first flight sequence score. Arguably the most exhilarating 3 minutes in the DreamWorks catalogue. Works as channel bumper or block opener.</div>
+        <div class="fn-filler-where">🔗 Available on Spotify / Apple Music · DreamWorks Music YouTube channel</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+        <div class="fn-filler-name">How to Train Your Dragon — A DreamWorks Retrospective</div>
+        <div class="fn-filler-meta">Various · 15–45 min · YouTube</div>
+        <div class="fn-filler-desc">Multiple quality retrospective essays on the trilogy from channels like Schaffrillas Productions, TheRealJims, and others. Good long-form filler between film blocks.</div>
+        <div class="fn-filler-where">🔗 Search "How to Train Your Dragon retrospective" on YouTube — filter by length for 15–45 min</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-documentary">Behind the Scenes</div>
+        <div class="fn-filler-name">The Art of How to Train Your Dragon — Featurettes</div>
+        <div class="fn-filler-meta">2010–2019 · 5–15 min per piece · YouTube / Peacock</div>
+        <div class="fn-filler-desc">Official DreamWorks making-of content covering the flight choreography, dragon design process, and John Powell's recording sessions. Available as DVD bonus features and some on YouTube.</div>
+        <div class="fn-filler-where">🔗 Search "DreamWorks Animation HTTYD behind the scenes" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-hype">Hype Piece</div>
+        <div class="fn-filler-name">Every Dragon Flight in HTTYD — Supercut</div>
+        <div class="fn-filler-meta">Fan-made · ~8–15 min · YouTube</div>
+        <div class="fn-filler-desc">Fan supercuts of every flight sequence across all three films. Excellent ambient filler between episodes — no dialogue, all spectacle and score.</div>
+        <div class="fn-filler-where">🔗 Search "HTTYD every dragon flight supercut" on YouTube</div>
+      </div>
+
+      <div class="fn-filler-card">
+        <div class="fn-filler-type fn-filler-bumper">Bumper / Short</div>
+        <div class="fn-filler-name">Race to the Edge — Season Opener Title Sequences</div>
+        <div class="fn-filler-meta">2015–2018 · ~90 sec · Netflix / Peacock</div>
+        <div class="fn-filler-desc">The Race to the Edge animated title card is a clean 90-second bumper. Works as a true interstitial between content blocks on an HTTYD channel.</div>
+        <div class="fn-filler-where">🔗 Rip from Netflix/Peacock via season file · Title card appears at start of each episode</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Adding to Tunarr</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>John Powell OST tracks (Forbidden Friendship, Test Drive, Where Do We Come From) → ambient closers and mid-block atmosphere</li>
+        <li>Official trailers → channel openers, top of a content block before a film</li>
+        <li>Retrospectives / video essays → standalone filler block between TV episodes or after a film</li>
+        <li>DreamWorks making-of featurettes → between episodes in a binge block</li>
+        <li>Flight supercuts → ambient filler, no dialogue required</li>
+      </ul>
+      <p style="margin-top:10px;font-size:.83rem;color:var(--text-dim)">See the <strong>Tunarr</strong> tab for channel config and the full flex content workflow.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 A History of How to Train Your Dragon</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Overview</div>
+      <p>How to Train Your Dragon began as a children's novel by British author Cressida Cowell in 2003, inspired by the Inner Hebrides islands where she spent her childhood. DreamWorks Animation acquired the rights and produced a loose film adaptation in 2010 that diverged significantly from the books but became one of the most celebrated animated films of the 2000s. The franchise spans two parallel universes — Cowell's 12-book literary series and DreamWorks' film/TV universe — that share a protagonist name and general Viking-dragon setting but tell entirely different stories.</p>
+    </div>
+
+    <div class="fn-timeline">
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2003–2009 — The Book Years</div>
+        <div class="fn-era-title">Cressida Cowell Builds a World</div>
+        <div class="fn-era-body">Cowell published the first HTTYD novel in 2003, drawing on her childhood on a remote Scottish island to build a Viking fantasy world where dragons are trainable but dangerous. Eight books followed through 2009, establishing a dedicated readership. The books are framed as Hiccup's memoirs — "discovered" and "translated" by Cowell from the Old Norse — giving them an eccentric, fourth-wall-aware voice that set them apart from other children's adventure series. By the time DreamWorks acquired the adaptation rights, the series had sold millions of copies across Europe.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2010 — The First Film Redefines Animation</div>
+        <div class="fn-era-title">How to Train Your Dragon Changes What Animated Films Can Do</div>
+        <div class="fn-era-body">Directed by Chris Sanders and Dean DeBlois, the 2010 film fundamentally reimagined the source material — Toothless became a sleek Night Fury rather than a small talking dragon, and the story became one of mutual disability and trust between an outsider boy and a wild creature. Cinematographer Roger Deakins served as visual consultant, and the result was lighting and aerial choreography unlike anything previously seen in animation. The film earned nearly $500 million worldwide and nominations for both Best Animated Feature and Best Original Score (John Powell). It established Powell's score — particularly "Forbidden Friendship" and "Test Drive" — as some of the most iconic in modern cinema.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2010–2019 — The Animated Golden Age</div>
+        <div class="fn-era-title">A Trilogy That Grew Up With Its Audience</div>
+        <div class="fn-era-body">What distinguished HTTYD from most animated franchises was its deliberate aging of characters and darkening of tone across the trilogy. Film 2 (2014) introduced genuine loss — a principal character dies — and was significantly more emotionally demanding than its predecessor. The TV series (2012–2018) bridged the films with high-quality content that retained the original voice cast. Film 3 (2019) delivered a genuinely bittersweet ending where Hiccup chooses to release the dragons to protect them, echoing real-world themes of environmental coexistence and letting go. All three films received Best Animated Feature nominations; combined box office exceeded $1.6 billion.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2015 — The Book Series Concludes</div>
+        <div class="fn-era-title">Cowell's 12-Book Arc Reaches Its Epic Finale</div>
+        <div class="fn-era-body">Cowell concluded the novel series with Book 12: How to Fight a Dragon's Fury in 2015, completing an arc that had grown from a light children's comedy into a full-scale epic fantasy about the extermination of dragons and one boy's role as their last defender. The finale sold over 7 million copies of the series worldwide and demonstrated that the literary universe, while parallel to the films, had its own independent emotional weight. David Tennant's audiobook narrations — available for all 12 books — became celebrated in their own right.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2019–2023 — Spinoffs and the Post-Trilogy Era</div>
+        <div class="fn-era-title">Expanding the Universe for Younger Audiences</div>
+        <div class="fn-era-body">Following the trilogy's emotional conclusion, DreamWorks expanded the brand into younger demographics with Rescue Riders (preschool, 2019) and The Nine Realms (set 1,300 years in the future, 2021). Neither series connected to the main story with the same depth as the original run, and both were primarily aimed at maintaining franchise awareness rather than continuing the core narrative. School of Dragons, the fan-favorite MMORPG, shut down in June 2023 after a decade of operation.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2025 — Present: The Live Action Era</div>
+        <div class="fn-era-title">DreamWorks Enters Live Action — and Wins</div>
+        <div class="fn-era-body">The 2025 live-action remake marked DreamWorks Animation's first live-action theatrical film. Director Dean DeBlois returned, Gerard Butler reprised Stoick, and Mason Thames and Nico Parker played the younger leads. The film grossed over $600 million worldwide — more than Film 1's original run — and positioned itself as the start of a new trilogy. Universal Epic Universe theme park in Orlando opened its HTTYD: Isle of Berk land in May 2025. Cressida Cowell returned to the book universe in 2025 with How to Train Your Dragon School, a new spinoff series. A live-action Film 2 remake was officially confirmed for June 2027, with Cate Blanchett returning as Valka.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators &amp; Contributors</div>
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>Cressida Cowell</td><td>Author (Books)</td><td>Original 12-novel series (2003–2015), How to Train Your Dragon School spinoff (2025)</td></tr>
+        <tr><td>Dean DeBlois</td><td>Director / Writer</td><td>Co-directed Film 1; sole director of Films 2, 3, and the 2025 live-action remake; co-wrote Dark Horse Comics</td></tr>
+        <tr><td>Chris Sanders</td><td>Co-Director / Writer</td><td>Co-directed Film 1; left franchise after Film 1</td></tr>
+        <tr><td>John Powell</td><td>Composer</td><td>All three animated films; "Forbidden Friendship," "Test Drive," "Where Do We Come From" — Academy Award nominated</td></tr>
+        <tr><td>Jay Baruchel</td><td>Voice Actor</td><td>Voice of Hiccup in all animated films and TV series</td></tr>
+        <tr><td>David Tennant</td><td>Narrator / Voice Actor</td><td>Narrated all 12 Cowell audiobooks; voiced Spitelout in films and TV</td></tr>
+        <tr><td>Roger Deakins</td><td>Visual Consultant</td><td>Cinematography consultation for Film 1 — responsible for the revolutionary lighting approach</td></tr>
+        <tr><td>Mason Thames</td><td>Actor</td><td>Hiccup in the 2025 live-action film and upcoming 2027 sequel</td></tr>
+        <tr><td>Gerard Butler</td><td>Actor / Voice Actor</td><td>Voice of Stoick in all animated films; reprised the role in the 2025 live-action film</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">Two Universes, One Franchise Name</div>
+      <p style="font-size:.84rem;line-height:1.7">The HTTYD franchise has two fully independent canons that do not intersect:</p>
+      <p style="font-size:.84rem;line-height:1.7"><strong>Cowell Book Universe:</strong> Books 1–12 + the new School spinoff series. Toothless is a small, toothless, talking Common-or-Garden Dragon. The story is Hiccup's memoirs. David Tennant audiobooks are the recommended format. This universe has its own complete arc and ending.</p>
+      <p style="font-size:.84rem;line-height:1.7"><strong>DreamWorks Film/TV Universe:</strong> Films 1–3 + all TV series (Riders/Defenders/Race to the Edge) + Dark Horse Comics (co-written by DeBlois, bridges Films 2–3) + live-action remakes. Toothless is a Night Fury. The School of Dragons MMO was semi-canonical before shutdown. Rescue Riders and The Nine Realms exist within this universe but have minimal connection to the main story.</p>
+      <p style="font-size:.84rem;line-height:1.7">The two universes share: the protagonist's name and general personality, the Viking setting, the title of Book 1/Film 1, and the name Toothless. They diverge on virtually everything else.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+}
+
+function fnView(tabId, viewId, btn) {
+  const pane = document.getElementById('fn-pane-' + tabId) || document.querySelector('.fn-tab-pane.active');
+  if (!pane) return;
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const view = document.getElementById('fn-' + tabId + '-' + viewId);
+  if (view) view.classList.add('active');
+}
+</script>
+
+</body>
+</html>
