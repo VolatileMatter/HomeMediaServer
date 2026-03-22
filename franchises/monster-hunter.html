@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Monster Hunter</title><link rel="stylesheet" href="../shared.css">
+<style>
+/* ════════════════════════════════════════════════════
+   MH VIEW TABS
+════════════════════════════════════════════════════ */
+.mh-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.mh-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.mh-view-btn:hover { background: var(--bg3); color: var(--text); }
+.mh-view-btn.active {
+  background: rgba(192,57,43,.18);
+  border-color: #c0392b;
+  color: #e74c3c;
+}
+.mh-view { display: none; }
+.mh-view.active { display: block; }
+.mh-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid #c0392b;
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.mh-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.mh-table th {
+  background: var(--bg3);
+  color: #e74c3c;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.mh-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.mh-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/era header rows */
+.mh-arc-row td {
+  background: rgba(192,57,43,.07) !important;
+  color: #e74c3c;
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(192,57,43,.25) !important;
+  border-bottom: 1px solid rgba(192,57,43,.15) !important;
+}
+
+/* Media / anime break rows */
+.mh-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.mh-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Defunct / dead service rows */
+.mh-defunct-row td {
+  background: rgba(239,83,80,.05) !important;
+  border-top: 1px dashed rgba(239,83,80,.25) !important;
+  border-bottom: 1px dashed rgba(239,83,80,.25) !important;
+  color: var(--text-dim);
+}
+.mh-defunct-row td { border-left: 3px solid #ef5350 !important; }
+
+/* Platform left-border colour stripes */
+.mh-ps2    td:first-child { border-left: 3px solid #ff8a65; }
+.mh-psp    td:first-child { border-left: 3px solid #ffb74d; }
+.mh-wii    td:first-child { border-left: 3px solid #81c784; }
+.mh-wiiu   td:first-child { border-left: 3px solid #66bb6a; }
+.mh-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.mh-switch td:first-child { border-left: 3px solid #ef5350; }
+.mh-ps4    td:first-child { border-left: 3px solid #42a5f5; }
+.mh-ps5    td:first-child { border-left: 3px solid #1e88e5; }
+.mh-xbo    td:first-child { border-left: 3px solid #a5d6a7; }
+.mh-pc     td:first-child { border-left: 3px solid #b0bec5; }
+.mh-mobile td:first-child { border-left: 3px solid #80cbc4; }
+
+/* Gold highlight = recommended row */
+.mh-highlight td { background: rgba(192,57,43,.04) !important; }
+.mh-highlight td:first-child { border-left: 3px solid #c0392b !important; }
+
+/* Faded = optional/skip */
+.mh-skip td { opacity: .55; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.mh-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.mh-phone   { background: rgba(76,175,80,.18);  color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.mh-pconly  { background: rgba(239,83,80,.18);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.mh-either  { background: rgba(192,57,43,.18);  color: #e74c3c; border: 1px solid rgba(192,57,43,.35); }
+.mh-defunct { background: rgba(239,83,80,.14);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.3);  }
+.mh-opt     { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.mh-star    { color: #e74c3c; font-weight: 700; }
+.mh-canceled { background: rgba(255,152,0,.12); color: #ffb74d; border: 1px solid rgba(255,152,0,.3); }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.mh-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.mh-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #e74c3c; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   FRANCHISE TAB NAV (main tabs)
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem; letter-spacing: .04em;
+  padding: 6px 14px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.fn-tab-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-tab-btn.active { background: rgba(192,57,43,.15); border-color: #c0392b; color: #e74c3c; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   FILLER / MERCH CARDS
+════════════════════════════════════════════════════ */
+.fn-filler-card {
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.fn-filler-episode { background: rgba(192,57,43,.08); color: #e74c3c; border-color: rgba(192,57,43,.3); }
+.fn-filler-movie   { background: rgba(33,150,243,.08); color: #90caf9; border-color: rgba(33,150,243,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: #e74c3c; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* History eras */
+.fn-era { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px; margin-bottom: 12px; }
+.fn-era-year  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: #e74c3c; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .9rem; color: var(--text-bright); margin-bottom: 8px; }
+.fn-era-body  { font-size: .82rem; color: var(--text-dim); line-height: 1.75; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🐉</div>
+  <div>
+    <h1>Monster Hunter</h1>
+    <div class="subtitle">// PS2 · PSP · 3DS · Switch · PC · Mobile · Jellyfin //</div>
+    <p class="desc">
+      Capcom's action-RPG franchise about hunting massive creatures, harvesting their parts, and using those parts to craft better gear to hunt bigger creatures. Running since 2004, it spent its first decade as a Japanese cult hit before <em>Monster Hunter: World</em> (2018) broke it worldwide — now one of the top-10 best-selling game franchises ever. Use the Library tab to sort by release date, progression order, generation, or mobile-only. Other tabs cover the anime, movies, merch, Tunarr filler, and full franchise history including every canceled and defunct entry.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">28</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2</div><div class="fn-stat-label">Anime / TV</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2</div><div class="fn-stat-label">Movies</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">8</div><div class="fn-stat-label">Defunct / Canceled</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">2004</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="mhTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="mhTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="mhTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="mhTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="mhTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="mhTab('history', this)">📖 History</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="mh-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The Monster Hunter Library</div>
+    <div class="card">
+
+      <div class="mh-view-nav">
+        <button class="mh-view-btn active" onclick="mhView('release',   this)">📅 Release Order</button>
+        <button class="mh-view-btn"        onclick="mhView('newbie',    this)">🎯 New Hunter Order</button>
+        <button class="mh-view-btn"        onclick="mhView('platform',  this)">🕹️ By Platform</button>
+        <button class="mh-view-btn"        onclick="mhView('mobile',    this)">📱 Mobile Only</button>
+        <button class="mh-view-btn"        onclick="mhView('defunct',   this)">⚰️ Defunct &amp; Canceled</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           RELEASE ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="mh-view active" id="mh-release">
+        <div class="mh-view-desc">
+          Every game in real-world release order. Includes all spinoffs, mobile titles, defunct services, and canceled projects. ⭐ = recommended entry or standout entry. Gold rows = highlights. Red rows = defunct. Faded = optional.
+        </div>
+        <table class="mh-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core / Emulator</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="mh-arc-row"><td colspan="6">⚔️ The Foundations (2004–2009)</td></tr>
+          <tr class="mh-ps2 mh-skip"><td>2004</td><td>Monster Hunter</td><td>PS2</td><td>PCSX2</td><td><span class="mh-tag mh-pconly">🖥️ PC Only</span></td><td>The PS2 original. Online defunct. PCSX2 required. Historical value only.</td></tr>
+          <tr class="mh-psp"><td>2005</td><td>Monster Hunter Freedom</td><td>PSP</td><td>ppsspp</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td>PSP port of the original. Where Japan fell in love with the series.</td></tr>
+          <tr class="mh-ps2 mh-skip"><td>2006</td><td>Monster Hunter 2 (Dos)</td><td>PS2</td><td>PCSX2 + fan patch</td><td><span class="mh-tag mh-pconly">🖥️ PC Only</span></td><td><span class="mh-tag mh-opt">Japan only</span> Introduced seasons and most iconic monsters. Fan translation exists.</td></tr>
+          <tr class="mh-psp"><td>2006</td><td>Monster Hunter Freedom 2</td><td>PSP</td><td>ppsspp</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td>Western MH2 Dos port. Expanded quest roster and Felyne kitchen.</td></tr>
+          <tr class="mh-psp mh-highlight"><td>2008</td><td>Monster Hunter Freedom Unite <span class="mh-star">⭐</span></td><td>PSP / iOS / Android</td><td>ppsspp</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td><span class="mh-star">⭐</span> The definitive PSP entry. Hundreds of hours. Also on iOS/Android (paid, offline).</td></tr>
+          <tr class="mh-wii mh-highlight"><td>2009</td><td>Monster Hunter Tri <span class="mh-star">⭐</span></td><td>Wii</td><td>dolphin</td><td><span class="mh-tag mh-pconly">🖥️ PC Only</span></td><td><span class="mh-star">⭐</span> Clean reboot. Introduced underwater combat and Switch Axe. Online defunct.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="6">⚔️ The 3DS Era &amp; World Domination (2010–2019)</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2010</td><td>MH Diary: Poka Poka Airou Village</td><td>PSP</td><td>ppsspp + fan patch</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td><span class="mh-tag mh-opt">spinoff</span> <span class="mh-tag mh-opt">Japan only</span> Play as a Felyne. Cute chibi spinoff.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2011</td><td>Monster Hunter Dynamic Hunting</td><td>iOS</td><td>—</td><td><span class="mh-tag mh-defunct">⚰️ Defunct</span></td><td>2D iOS brawler spinoff. Delisted from App Store.</td></tr>
+          <tr class="mh-wiiu mh-highlight"><td>2011</td><td>Monster Hunter 3 Ultimate</td><td>Wii / WiiU / 3DS</td><td>dolphin / Citra</td><td><span class="mh-tag mh-phone">📱 Yes (3DS)</span></td><td><span class="mh-star">⭐</span> Expanded Tri. Best pre-World entry for newcomers. Online defunct but single-player is complete.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2011</td><td>MH Diary: Poka Poka Airou Village G</td><td>PSP</td><td>ppsspp + fan patch</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td><span class="mh-tag mh-opt">spinoff</span> <span class="mh-tag mh-opt">Japan only</span> Expanded Airou village spinoff.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2012</td><td>MH Diary: Poka Poka Airou Village DX</td><td>3DS</td><td>Citra + fan patch</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td><span class="mh-tag mh-opt">spinoff</span> <span class="mh-tag mh-opt">Japan only</span> 3DS Airou village edition.</td></tr>
+          <tr class="mh-pc mh-skip"><td>2013</td><td>Monster Hunter Online</td><td>PC (China)</td><td>—</td><td><span class="mh-tag mh-defunct">⚰️ Defunct</span></td><td><span class="mh-tag mh-opt">China only</span> Tencent PC MMO. Introduced Espinas and others now in mainline. Servers dead 2019.</td></tr>
+          <tr class="mh-3ds mh-skip"><td>2013</td><td>Monster Hunter 4 (JP)</td><td>3DS</td><td>Citra</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td><span class="mh-tag mh-opt">Japan only</span> Japan-only predecessor to 4 Ultimate. Introduced mounting.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2014</td><td>Monster Hunter: Battle Quest</td><td>iOS / Android</td><td>—</td><td><span class="mh-tag mh-defunct">⚰️ Defunct</span></td><td>Western card-combat mobile title. Delisted.</td></tr>
+          <tr class="mh-mobile"><td>2014</td><td>Monster Hunter Freedom Unite (mobile)</td><td>iOS / Android</td><td>—</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td>Full PSP port on phone. Paid, offline. Still available as of 2025.</td></tr>
+          <tr class="mh-3ds mh-highlight"><td>2014</td><td>Monster Hunter 4 Ultimate <span class="mh-star">⭐</span></td><td>3DS</td><td>Citra</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td><span class="mh-star">⭐</span> Fan-favorite portable entry. Charge Blade, Insect Glaive, Apex monsters. The 3DS pinnacle.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2014</td><td>Monster Hunter Explore</td><td>iOS / Android</td><td>—</td><td><span class="mh-tag mh-defunct">⚰️ Defunct</span></td><td><span class="mh-tag mh-opt">Japan only</span> Gacha/F2P mobile. Service terminated September 2019.</td></tr>
+          <tr class="mh-3ds"><td>2015</td><td>Monster Hunter Generations</td><td>3DS</td><td>Citra</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td>10th anniversary game. Hunting Styles + Arts. The Fated Four elder dragons.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2016</td><td>Monster Hunter Stories (mobile)</td><td>3DS / iOS / Android</td><td>Citra / native</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td>JRPG spinoff — ride monsters instead of hunt. Good entry for non-action fans.</td></tr>
+          <tr class="mh-media-row"><td colspan="6">📺 <strong>Monster Hunter Stories (anime)</strong> (2016, 48 eps) — Watch alongside or after Stories the game. Follows Lute and his Rathalos on Crunchyroll.</td></tr>
+          <tr class="mh-3ds mh-highlight"><td>2017</td><td>Monster Hunter Generations Ultimate</td><td>3DS / Switch</td><td>Citra / native</td><td><span class="mh-tag mh-either">⚡ Varies</span></td><td>Massive expanded Generations with G-Rank. Switch version recommended for portability.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2018</td><td>Monster Hunter Riders</td><td>iOS / Android</td><td>—</td><td><span class="mh-tag mh-defunct">⚰️ Defunct</span></td><td><span class="mh-tag mh-opt">Japan only</span> Stories-universe gacha RPG. Service terminated March 2022.</td></tr>
+          <tr class="mh-ps4 mh-highlight"><td>2018</td><td>Monster Hunter: World <span class="mh-star">⭐</span></td><td>PS4 / Xbox / PC</td><td>— (native)</td><td><span class="mh-tag mh-pconly">🖥️ PC/Console</span></td><td><span class="mh-star">⭐⭐ THE ENTRY POINT.</span> Open world, drop-in co-op, best-selling Capcom game ever. Start here if you're new.</td></tr>
+          <tr class="mh-ps4 mh-highlight"><td>2019</td><td>Monster Hunter World: Iceborne</td><td>PS4 / Xbox / PC</td><td>— (native)</td><td><span class="mh-tag mh-pconly">🖥️ PC/Console</span></td><td>Massive World expansion. Play immediately after finishing World's story.</td></tr>
+          <tr class="mh-mobile mh-skip"><td>2020</td><td>MH World: Iceborne Mobile (canceled beta)</td><td>iOS / Android</td><td>—</td><td><span class="mh-tag mh-canceled">🚫 Canceled</span></td><td>Japan-only beta of a mobile Iceborne port. Killed before full launch.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="6">⚔️ The Rise Era &amp; Modern (2021–Present)</td></tr>
+          <tr class="mh-switch mh-highlight"><td>2021</td><td>Monster Hunter Rise <span class="mh-star">⭐</span></td><td>Switch / PC</td><td>— (native)</td><td><span class="mh-tag mh-either">⚡ Switch/PC</span></td><td><span class="mh-star">⭐</span> Wirebug traversal, Palamute dog. Faster and more arcade-y than World. Great second game.</td></tr>
+          <tr class="mh-switch"><td>2021</td><td>Monster Hunter Stories 2: Wings of Ruin</td><td>Switch / PC</td><td>— (native)</td><td><span class="mh-tag mh-either">⚡ Switch/PC</span></td><td>Best Stories entry. JRPG, ride monsters, great story. Play after or instead of Stories 1.</td></tr>
+          <tr class="mh-switch"><td>2022</td><td>Monster Hunter Rise: Sunbreak</td><td>Switch / PC</td><td>— (native)</td><td><span class="mh-tag mh-either">⚡ Switch/PC</span></td><td>Rise expansion. Master Rank + the Three Lords. Much harder than base Rise.</td></tr>
+          <tr class="mh-mobile"><td>2023</td><td>Monster Hunter Now</td><td>iOS / Android</td><td>— (native)</td><td><span class="mh-tag mh-phone">📱 Yes</span></td><td>Niantic AR location game. Active as of 2025. Free-to-play.</td></tr>
+          <tr class="mh-ps5 mh-highlight"><td>2025</td><td>Monster Hunter Wilds <span class="mh-star">⭐</span></td><td>PS5 / Xbox / PC</td><td>— (native)</td><td><span class="mh-tag mh-pconly">🖥️ PC/Console</span></td><td><span class="mh-star">⭐</span> Current-gen flagship. Dynamic weather ecosystems. Highest pre-order count in Capcom history.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           NEW HUNTER ORDER
+      ───────────────────────────────────────────────── -->
+      <div class="mh-view" id="mh-newbie">
+        <div class="mh-view-desc">
+          You have never played Monster Hunter. This is the order that gives you the best experience without bouncing off the older entries first. Don't start on the PSP games — they will humble you into quitting. Build investment with World, then branch into the portable library.
+        </div>
+        <table class="mh-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why Here</th></tr>
+
+          <tr class="mh-arc-row"><td colspan="4">🎯 Step 1 — Get Hooked (no prior knowledge needed)</td></tr>
+          <tr class="mh-ps4 mh-highlight"><td>1</td><td>Monster Hunter: World <span class="mh-star">⭐</span></td><td>PS4 / Xbox / PC (Steam)</td><td><span class="mh-star">⭐</span> The most accessible, most polished entry. If you bounce off this, the series isn't for you. If you love it, you'll want to play everything.</td></tr>
+          <tr class="mh-ps4 mh-highlight"><td>2</td><td>Monster Hunter World: Iceborne</td><td>PS4 / Xbox / PC</td><td>Immediate sequel content. Play right after World's credits. Doubles the game.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="4">🕹️ Step 2 — Modern Portable (if you want Switch)</td></tr>
+          <tr class="mh-switch mh-highlight"><td>3</td><td>Monster Hunter Rise <span class="mh-star">⭐</span></td><td>Switch / PC</td><td>Faster, more vertical than World. Wirebug movement is exhilarating. Great second game.</td></tr>
+          <tr class="mh-switch"><td>4</td><td>Monster Hunter Rise: Sunbreak</td><td>Switch / PC</td><td>Mandatory Rise expansion. Play after completing Rise's story.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="4">🕹️ Step 3 — Go Retro (if you're now invested)</td></tr>
+          <tr class="mh-3ds mh-highlight"><td>5</td><td>Monster Hunter 4 Ultimate</td><td>3DS · Citra</td><td>The fan-favorite portable game. Better with context of what the series is building toward.</td></tr>
+          <tr class="mh-3ds"><td>6</td><td>Monster Hunter Generations Ultimate</td><td>Switch / 3DS</td><td>Celebration game — all the systems, all the monsters. Play once you know what you love.</td></tr>
+          <tr class="mh-wiiu"><td>7</td><td>Monster Hunter 3 Ultimate</td><td>Wii / WiiU / 3DS</td><td>Pre-World best entry. Underwater combat, slower pace, deep hooks.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="4">🎮 Optional: The Spinoffs</td></tr>
+          <tr class="mh-switch"><td>—</td><td>Monster Hunter Stories 2: Wings of Ruin</td><td>Switch / PC</td><td>JRPG. No hunting. Ride monsters. Recommended if you want something story-driven.</td></tr>
+          <tr class="mh-ps5 mh-highlight"><td>—</td><td>Monster Hunter Wilds</td><td>PS5 / Xbox / PC</td><td>The current-gen flagship (2025). Play if your hardware supports it.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           BY PLATFORM
+      ───────────────────────────────────────────────── -->
+      <div class="mh-view" id="mh-platform">
+        <div class="mh-view-desc">
+          All games grouped by their primary platform family. Multi-platform releases appear under their best/recommended version.
+        </div>
+        <table class="mh-table">
+          <tr><th>Platform</th><th>Title</th><th>Year</th><th>Core</th><th>Notes</th></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">PlayStation 2</td></tr>
+          <tr class="mh-ps2 mh-skip"><td>PS2</td><td>Monster Hunter (original)</td><td>2004</td><td>PCSX2</td><td>Online defunct. Historical artifact.</td></tr>
+          <tr class="mh-ps2 mh-skip"><td>PS2</td><td>Monster Hunter 2 (Dos)</td><td>2006</td><td>PCSX2 + fan patch</td><td>Japan-only. Fan translation required.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">PSP</td></tr>
+          <tr class="mh-psp"><td>PSP</td><td>Monster Hunter Freedom</td><td>2005</td><td>ppsspp</td><td>—</td></tr>
+          <tr class="mh-psp"><td>PSP</td><td>Monster Hunter Freedom 2</td><td>2006</td><td>ppsspp</td><td>—</td></tr>
+          <tr class="mh-psp mh-highlight"><td>PSP</td><td>Monster Hunter Freedom Unite <span class="mh-star">⭐</span></td><td>2008</td><td>ppsspp</td><td><span class="mh-star">⭐</span> PSP pinnacle.</td></tr>
+          <tr class="mh-psp mh-skip"><td>PSP</td><td>MH Diary: Airou Village</td><td>2010</td><td>ppsspp + fan patch</td><td>Spinoff. Japan-only.</td></tr>
+          <tr class="mh-psp mh-skip"><td>PSP</td><td>MH Diary: Airou Village G</td><td>2011</td><td>ppsspp + fan patch</td><td>Spinoff. Japan-only.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">Wii / WiiU</td></tr>
+          <tr class="mh-wii mh-highlight"><td>Wii</td><td>Monster Hunter Tri <span class="mh-star">⭐</span></td><td>2009</td><td>dolphin</td><td><span class="mh-star">⭐</span> Wii reboot. Online defunct.</td></tr>
+          <tr class="mh-wiiu mh-highlight"><td>WiiU / Wii</td><td>Monster Hunter 3 Ultimate</td><td>2011</td><td>dolphin</td><td>Best pre-portable entry.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">3DS</td></tr>
+          <tr class="mh-3ds mh-skip"><td>3DS</td><td>Monster Hunter 4 (Japan only)</td><td>2013</td><td>Citra</td><td>Japan-only. Skip in favor of 4U.</td></tr>
+          <tr class="mh-3ds mh-highlight"><td>3DS</td><td>Monster Hunter 4 Ultimate <span class="mh-star">⭐</span></td><td>2014</td><td>Citra</td><td><span class="mh-star">⭐</span> 3DS pinnacle.</td></tr>
+          <tr class="mh-3ds"><td>3DS</td><td>Monster Hunter Generations</td><td>2015</td><td>Citra</td><td>10th anniversary game.</td></tr>
+          <tr class="mh-3ds mh-skip"><td>3DS</td><td>MH Diary: Airou Village DX</td><td>2012</td><td>Citra + fan patch</td><td>Spinoff. Japan-only.</td></tr>
+          <tr class="mh-3ds"><td>3DS / Mobile</td><td>Monster Hunter Stories</td><td>2016</td><td>Citra / native</td><td>JRPG spinoff. Also iOS/Android.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">Switch / PC</td></tr>
+          <tr class="mh-switch"><td>Switch / PC</td><td>Monster Hunter Generations Ultimate</td><td>2017</td><td>— (native)</td><td>—</td></tr>
+          <tr class="mh-switch mh-highlight"><td>Switch / PC</td><td>Monster Hunter Rise <span class="mh-star">⭐</span></td><td>2021</td><td>— (native)</td><td><span class="mh-star">⭐</span></td></tr>
+          <tr class="mh-switch"><td>Switch / PC</td><td>Monster Hunter Stories 2: Wings of Ruin</td><td>2021</td><td>— (native)</td><td>Best Stories entry.</td></tr>
+          <tr class="mh-switch"><td>Switch / PC</td><td>Monster Hunter Rise: Sunbreak</td><td>2022</td><td>— (native)</td><td>Rise expansion.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">PS4 / Xbox / PC (World Era)</td></tr>
+          <tr class="mh-ps4 mh-highlight"><td>PS4 / Xbox / PC</td><td>Monster Hunter: World <span class="mh-star">⭐</span></td><td>2018</td><td>— (native)</td><td><span class="mh-star">⭐⭐ Best entry point.</span></td></tr>
+          <tr class="mh-ps4 mh-highlight"><td>PS4 / Xbox / PC</td><td>Monster Hunter World: Iceborne</td><td>2019</td><td>— (native)</td><td>Play right after World.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">PS5 / Xbox Series / PC (Current Gen)</td></tr>
+          <tr class="mh-ps5 mh-highlight"><td>PS5 / Xbox / PC</td><td>Monster Hunter Wilds <span class="mh-star">⭐</span></td><td>2025</td><td>— (native)</td><td><span class="mh-star">⭐</span> Current-gen flagship.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">Mobile (Active)</td></tr>
+          <tr class="mh-mobile mh-highlight"><td>iOS / Android</td><td>Monster Hunter Freedom Unite (mobile)</td><td>2014</td><td>— (native)</td><td>Full PSP port. Paid, offline. Still available.</td></tr>
+          <tr class="mh-mobile"><td>iOS / Android</td><td>Monster Hunter Now</td><td>2023</td><td>— (native)</td><td>Niantic AR. Active F2P.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           MOBILE ONLY
+      ───────────────────────────────────────────────── -->
+      <div class="mh-view" id="mh-mobile">
+        <div class="mh-view-desc">
+          Everything playable on phone — includes active apps, full game ports, and emulated PSP titles. PC-required entries excluded. Defunct services noted in red.
+        </div>
+        <table class="mh-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>Notes</th></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">📱 Active — Playable Right Now</td></tr>
+          <tr class="mh-mobile mh-highlight"><td>2014</td><td>Monster Hunter Freedom Unite <span class="mh-star">⭐</span></td><td>iOS / Android</td><td><span class="mh-tag mh-phone">✅ Active</span></td><td><span class="mh-star">⭐</span> Full PSP port. Paid, offline. The best mobile MH experience available.</td></tr>
+          <tr class="mh-mobile"><td>2016</td><td>Monster Hunter Stories</td><td>iOS / Android</td><td><span class="mh-tag mh-phone">✅ Active</span></td><td>JRPG spinoff. Paid, offline.</td></tr>
+          <tr class="mh-mobile"><td>2023</td><td>Monster Hunter Now</td><td>iOS / Android</td><td><span class="mh-tag mh-phone">✅ Active</span></td><td>Niantic AR location game. Free-to-play.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">📱 Via Emulator (ppsspp on Android/iOS)</td></tr>
+          <tr class="mh-psp"><td>2005</td><td>Monster Hunter Freedom</td><td>PSP → ppsspp</td><td><span class="mh-tag mh-phone">📱 ppsspp</span></td><td>—</td></tr>
+          <tr class="mh-psp"><td>2006</td><td>Monster Hunter Freedom 2</td><td>PSP → ppsspp</td><td><span class="mh-tag mh-phone">📱 ppsspp</span></td><td>—</td></tr>
+          <tr class="mh-psp mh-highlight"><td>2008</td><td>Monster Hunter Freedom Unite</td><td>PSP → ppsspp</td><td><span class="mh-tag mh-phone">📱 ppsspp</span></td><td>Also available as a native app purchase.</td></tr>
+          <tr class="mh-3ds"><td>2014</td><td>Monster Hunter 4 Ultimate</td><td>3DS → Citra Android</td><td><span class="mh-tag mh-phone">📱 Citra</span></td><td>Playable on capable Android phones.</td></tr>
+          <tr class="mh-3ds"><td>2015</td><td>Monster Hunter Generations</td><td>3DS → Citra Android</td><td><span class="mh-tag mh-phone">📱 Citra</span></td><td>—</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">⚰️ Defunct Mobile Titles</td></tr>
+          <tr class="mh-defunct-row mh-skip"><td>2011</td><td>Monster Hunter Dynamic Hunting</td><td>iOS only</td><td><span class="mh-tag mh-defunct">⚰️ Delisted</span></td><td>2D brawler spinoff. Removed from App Store.</td></tr>
+          <tr class="mh-defunct-row mh-skip"><td>2014</td><td>Monster Hunter: Battle Quest</td><td>iOS / Android</td><td><span class="mh-tag mh-defunct">⚰️ Delisted</span></td><td>Card combat. Delisted.</td></tr>
+          <tr class="mh-defunct-row mh-skip"><td>2014</td><td>Monster Hunter Explore</td><td>iOS / Android</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2019</span></td><td>Japan-only gacha F2P. Servers dead.</td></tr>
+          <tr class="mh-defunct-row mh-skip"><td>2018</td><td>Monster Hunter Riders</td><td>iOS / Android</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2022</span></td><td>Japan-only gacha RPG in Stories universe.</td></tr>
+          <tr class="mh-defunct-row mh-skip"><td>2020</td><td>MH World: Iceborne Mobile (beta)</td><td>iOS / Android</td><td><span class="mh-tag mh-canceled">🚫 Canceled</span></td><td>Japan beta only — never fully released.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           DEFUNCT & CANCELED
+      ───────────────────────────────────────────────── -->
+      <div class="mh-view" id="mh-defunct">
+        <div class="mh-view-desc">
+          Every Monster Hunter title that has been shut down, delisted, canceled before release, or is otherwise inaccessible through official means. Historical record only.
+        </div>
+        <table class="mh-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>Reason / Notes</th></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">🌐 Online Services Terminated</td></tr>
+          <tr class="mh-defunct-row"><td>2004</td><td>Monster Hunter (PS2 online)</td><td>PS2</td><td><span class="mh-tag mh-defunct">⚰️ Dead</span></td><td>PS2 Network Adaptor online — Sony shut down PS2 online services 2012.</td></tr>
+          <tr class="mh-defunct-row"><td>2009</td><td>Monster Hunter Tri (Wii online)</td><td>Wii</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2013</span></td><td>Nintendo Wi-Fi Connection shut down May 2014. Single-player still fully functional.</td></tr>
+          <tr class="mh-defunct-row"><td>2011</td><td>Monster Hunter 3 Ultimate (WiiU online)</td><td>WiiU</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2013</span></td><td>Nintendo Network services ended. 3DS local co-op still works.</td></tr>
+          <tr class="mh-defunct-row"><td>2013</td><td>Monster Hunter 4 (3DS online)</td><td>3DS</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2024</span></td><td>Nintendo 3DS online shut down May 2024. Pretendo fan servers partially active.</td></tr>
+          <tr class="mh-defunct-row"><td>2014</td><td>Monster Hunter 4 Ultimate (3DS online)</td><td>3DS</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2024</span></td><td>Same Nintendo 3DS shutdown. Pretendo fan servers active.</td></tr>
+          <tr class="mh-defunct-row"><td>2015</td><td>Monster Hunter Generations (3DS online)</td><td>3DS</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2024</span></td><td>Nintendo 3DS shutdown. Pretendo fan servers active.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">📱 Mobile Services Terminated</td></tr>
+          <tr class="mh-defunct-row"><td>2011</td><td>Monster Hunter Dynamic Hunting</td><td>iOS</td><td><span class="mh-tag mh-defunct">⚰️ Delisted</span></td><td>2D brawler spinoff. Removed from App Store — no re-release.</td></tr>
+          <tr class="mh-defunct-row"><td>2013</td><td>Monster Hunter Online</td><td>PC (China)</td><td><span class="mh-tag mh-defunct">⚰️ Dead 2019</span></td><td>Tencent China MMO — servers terminated August 2019. Private server projects ongoing.</td></tr>
+          <tr class="mh-defunct-row"><td>2014</td><td>Monster Hunter: Battle Quest</td><td>iOS / Android</td><td><span class="mh-tag mh-defunct">⚰️ Delisted</span></td><td>Western mobile card game. Delisted with no announcement.</td></tr>
+          <tr class="mh-defunct-row"><td>2014</td><td>Monster Hunter Explore</td><td>iOS / Android (JP)</td><td><span class="mh-tag mh-defunct">⚰️ Dead Sep 2019</span></td><td>Japan-only gacha mobile. Shut down September 2019 after 5 years.</td></tr>
+          <tr class="mh-defunct-row"><td>2018</td><td>Monster Hunter Riders</td><td>iOS / Android (JP)</td><td><span class="mh-tag mh-defunct">⚰️ Dead Mar 2022</span></td><td>Japan Stories-universe gacha RPG. Shut down March 2022.</td></tr>
+
+          <tr class="mh-arc-row"><td colspan="5">🚫 Canceled Before Release</td></tr>
+          <tr class="mh-defunct-row"><td>2004</td><td>Monster Hunter (DS prototype)</td><td>NDS</td><td><span class="mh-tag mh-canceled">🚫 Canceled</span></td><td>Tech demo only — Capcom demoed MH on DS hardware, abandoned in favor of PSP.</td></tr>
+          <tr class="mh-defunct-row"><td>2020</td><td>Monster Hunter World: Iceborne Mobile (beta)</td><td>iOS / Android</td><td><span class="mh-tag mh-canceled">🚫 Canceled</span></td><td>Japan limited beta test only — terminated before global launch.</td></tr>
+        </table>
+      </div>
+
+      <!-- LEGEND -->
+      <div class="mh-legend">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#e74c3c;letter-spacing:.06em;text-transform:uppercase">Legend</span>
+        <span><span class="mh-dot" style="background:#c0392b"></span>Red left border = recommended / best entry in its tier</span>
+        <span><span class="mh-dot" style="background:rgba(255,255,255,.2)"></span>Faded row = optional, skip on first playthrough</span>
+        <span><span class="mh-tag mh-phone">📱 Yes</span> Native mobile or emulated on phone</span>
+        <span><span class="mh-tag mh-pconly">🖥️ PC Only</span> Requires PC/console — not mobile</span>
+        <span><span class="mh-tag mh-defunct">⚰️ Defunct</span> Service terminated / delisted</span>
+        <span><span class="mh-tag mh-canceled">🚫 Canceled</span> Never fully shipped</span>
+        <span><span class="mh-dot" style="background:#ce93d8"></span>Purple row = anime insert point</span>
+      </div>
+
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-body">
+          <strong>Absolute newcomer?</strong> Start with <strong>Monster Hunter: World on PC (Steam)</strong>. It's €30, runs on most rigs, has 500+ hours of content, and is the series' most accessible entry point by a wide margin. Only go backward into PSP/3DS games after you know you love the loop.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="mh-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 TV &amp; Anime</div>
+    <div class="card">
+      <div class="card-title">Monster Hunter Stories (Anime)</div>
+      <p style="font-size:.84rem;line-height:1.7">
+        <strong>Studio:</strong> David Production &nbsp;|&nbsp; <strong>Year:</strong> 2016–2018 &nbsp;|&nbsp; <strong>Episodes:</strong> 48 &nbsp;|&nbsp; <strong>Seasons:</strong> 2<br>
+        Adaptation of the Stories JRPG spinoff. Follows Lute, a young Rider who hatches a Red Rathalos named Rathalos. Bright, adventure-focused tone — closer to a children's action-adventure than the grim survival of the main games. Good introduction to the franchise's lore and monster roster for younger viewers.
+        Streamed on Crunchyroll. Watch alongside or after playing Stories the game; the anime spoils the game's story beats.
+      </p>
+    </div>
+
+    <div class="callout callout-info" style="margin-top:12px">
+      <div class="callout-icon">📺</div>
+      <div class="callout-body">
+        Monster Hunter has no anime adaptation of the mainline games. The 2020 live-action film and the 2021 Netflix CGI film cover that space. No mainline anime is currently announced as of 2025.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="mh-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Movies</div>
+
+    <div class="card">
+      <div class="card-title">Monster Hunter (2020) — Live Action</div>
+      <p style="font-size:.84rem;line-height:1.7">
+        <strong>Director:</strong> Paul W.S. Anderson &nbsp;|&nbsp; <strong>Cast:</strong> Milla Jovovich, Tony Jaa, Ron Perlman<br>
+        U.S. Army Rangers are transported into the Monster Hunter world through a dimensional portal and must fight to survive. Features Rathalos, Diablos, Nerscylla, and Black Diablos. Anderson brings the same approach he used for Resident Evil — loose adaptation, maximized spectacle. Mixed reviews. Not required viewing but an accessible live-action gateway.
+        Available on digital rental and physical media.
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">Monster Hunter: Legends of the Guild (2021) — Netflix CGI</div>
+      <p style="font-size:.84rem;line-height:1.7">
+        <strong>Studio:</strong> Pure Imagination Studios &nbsp;|&nbsp; <strong>Streaming:</strong> Netflix<br>
+        CGI animated film following Aiden, a young hunter protecting his village when a massive Elder Dragon migration threatens the region. Acts as a loose prequel to Monster Hunter: World's setting, though not strictly tied to World's story. Shorter (~60 min), family-friendly tone. The better of the two MH films for franchise newcomers.
+        Available on Netflix.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="mh-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Merch &amp; Physical Media</div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">📅 2004–2017 — Japanese Collector's Market</div>
+      <p style="font-size:.82rem;line-height:1.7;color:var(--text-dim)">
+        Before World, Monster Hunter was primarily a Japanese phenomenon. Capcom produced Japan-exclusive collector's editions, Amiibo-style Monster Hunter Strap figures (Capcom's own capsule toy line), and collaboration merchandise with brands like G-Shock and Uniqlo. The Monster Hunter x Uniqlo line (UT Collection) produced T-shirts for Freedom Unite, 4 Ultimate, and Generations eras — sold only in Japan, now collector's items.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">📅 2018–Present — Western Merchandise Explosion</div>
+      <p style="font-size:.82rem;line-height:1.7;color:var(--text-dim)">
+        Monster Hunter: World's global success opened the floodgates. Capcom partnered with NECA for high-quality action figures (Rathalos, Zinogre, Rajang lines), Good Smile Company produced Nendoroid and figma figures of hunters and flagship monsters, and Dark Horse published an art book series. The Monster Hunter: World Official Art Works hardcover book is the highest-quality franchise merch available in the West. Funko Pop lines for World and Rise exist but are lower-tier collector value.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">🎮 Physical Game Collector's Editions</div>
+      <p style="font-size:.82rem;line-height:1.7;color:var(--text-dim)">
+        Notable physical editions include: Monster Hunter: World Collector's Edition (PS4/Xbox — included a Palico model kit and steelbook), Monster Hunter Rise Collector's Edition (Switch — Kamura Nendoroid figure), and the Monster Hunter 20th Anniversary Box (Japan exclusive — multiple game compilation). The Rise CE Nendoroid figure is the most sought-after collector's item in the Western market.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr channel content)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="mh-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Filler Candidates</div>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:16px">
+      Content usable as filler or background material on a Monster Hunter Tunarr channel. Anime episodes, trailers, and documentary segments.
+    </p>
+
+    <div class="fn-filler-card fn-filler-episode">
+      <div class="fn-filler-name">Monster Hunter Stories Anime — S1 Episodes</div>
+      <div class="fn-filler-meta">David Production · 2016 · 48 episodes · ~24 min each</div>
+      <div class="fn-filler-desc">The full Stories anime is solid background content for a MH channel — monster fights, colorful visuals, and familiar creature designs. Good for general-audience loops. Episodes are self-contained enough to use individually.</div>
+      <div class="fn-filler-where">📥 Source: Crunchyroll (licensed). Rip via yt-dlp with subscription. Drop into Jellyfin under Monster Hunter &gt; TV Shows.</div>
+    </div>
+
+    <div class="fn-filler-card fn-filler-movie">
+      <div class="fn-filler-name">Monster Hunter: Legends of the Guild (2021)</div>
+      <div class="fn-filler-meta">Netflix · ~60 min · CGI animated film</div>
+      <div class="fn-filler-desc">Short, high-production CGI film. Clean visuals, franchise-appropriate tone. Works as a one-off movie filler block.</div>
+      <div class="fn-filler-where">📥 Source: Netflix. Rip with yt-dlp + Netflix plugin. Import to Jellyfin as a movie.</div>
+    </div>
+
+    <div class="fn-filler-card fn-filler-episode">
+      <div class="fn-filler-name">Official Capcom Monster Hunter YouTube Shorts / Trailers</div>
+      <div class="fn-filler-meta">Capcom · 2018–2025 · ~2–10 min each</div>
+      <div class="fn-filler-desc">Capcom's official monster reveal trailers (Monster Field Guide series for World, Rise, and Wilds) are high-quality, short-form documentary-style content. Perfect filler bumpers between longer content.</div>
+      <div class="fn-filler-where">📥 Source: Capcom's official YouTube channel. Pull via yt-dlp. Tag as "Shorts" in Jellyfin.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="mh-pane-history">
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2004–2008 — The PS2 &amp; PSP Foundations</div>
+      <div class="fn-era-title">Born on PS2, conquered Japan on PSP</div>
+      <div class="fn-era-body">
+        Monster Hunter launched on PS2 in 2004 to modest sales — director Kaname Fujioka and producer Ryozo Tsujimoto had built something unique but hard to market. The game's PSP port and sequels, however, found a perfect home in Japan's commuter culture: bite-sized hunts played with friends during train rides. By 2008, Monster Hunter Freedom Unite on PSP had sold over 4 million copies in Japan alone. The series was a genuine cultural phenomenon in Japan while remaining almost unknown in the West, where sales were a fraction of Japanese numbers.
+      </div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2009–2013 — The Tri Pivot &amp; 3DS Ascent</div>
+      <div class="fn-era-title">Wii reboot and the 3DS takeover</div>
+      <div class="fn-era-body">
+        Monster Hunter Tri (2009) was a calculated pivot — Capcom rebuilt the franchise on Wii with a cleaner visual direction, underwater combat, and simplified onboarding. It performed well in the West compared to previous entries. Monster Hunter 3 Ultimate (2011/2012) brought the Tri content to 3DS and WiiU with cross-platform support. Meanwhile, Capcom deepened the 3DS relationship: Monster Hunter 4 (2013, Japan) introduced climbing and mounting mechanics, overhauled the combat loop significantly, and set up the series for its most prolific portable era. The 3DS line built an enormous dedicated fanbase in the West.
+      </div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2014–2017 — The Portable Pinnacle</div>
+      <div class="fn-era-title">4 Ultimate and Generations define the classic era</div>
+      <div class="fn-era-body">
+        Monster Hunter 4 Ultimate (2014/2015 West) is widely considered the best game in the classic portable style. It sold over 4 million copies worldwide and introduced online multiplayer on 3DS via Nintendo Wi-Fi. Monster Hunter Generations (2015/2016 West) was the series' 10th anniversary celebration: every Hunting Style and Art system, the return of classic locations, and the introduction of the Fated Four flagship monsters. Generations Ultimate (2017, Switch release 2018) expanded that to a massive G-Rank endgame. This era represented the ceiling of the classic formula — and Capcom knew it needed to reinvent for global audiences.
+      </div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2018 — The World Breakthrough</div>
+      <div class="fn-era-title">Monster Hunter: World changes everything</div>
+      <div class="fn-era-body">
+        Monster Hunter: World (January 2018) is one of the defining game launches of the 2010s. Capcom rebuilt the franchise from scratch for HD consoles and PC: seamless open zones replaced load-screen-gated areas, monsters interacted with each other and the environment dynamically, and drop-in co-op worked across platforms. The game sold 5 million copies in its first three days — previously unthinkable for the series outside Japan. It ultimately sold 21+ million copies and became the best-selling game in Capcom's history. The Iceborne expansion (2019) added equivalent volume of new content and pushed total World/Iceborne sales past 25 million combined. The franchise's mainstream identity permanently shifted from "Japanese portable cult hit" to "global action-RPG institution."
+      </div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2021–2022 — Rise and the Switch Generation</div>
+      <div class="fn-era-title">Wirebug, Palamutes, and the fastest entry in the series</div>
+      <div class="fn-era-body">
+        Monster Hunter Rise (March 2021) launched as a Switch title designed around the hybrid console's portability. The Wirebug traversal system — a grappling hook with mid-air combat applications — was the fastest, most vertical MH had ever felt. Rise sold 10 million copies in its first year. Sunbreak (2022), the Master Rank expansion, was praised as one of the best expansions in the series. Rise also marked the debut of the Palamute rideable dog companion, replacing the Poogie as the franchise's secondary mascot.
+      </div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2025 — Present</div>
+      <div class="fn-era-title">Monster Hunter Wilds — the current flagship</div>
+      <div class="fn-era-body">
+        Monster Hunter Wilds launched in February 2025 to enormous commercial performance — highest day-one concurrent players on Steam for a Capcom title, with the highest pre-order figures in company history. Wilds introduces dynamic weather ecosystems that materially alter hunting conditions, a new Seikret mount, and expanded narrative ambitions. The Forbidden Lands setting is the most visually complex environment in the series. As of 2025, Wilds is the active service game for the franchise. Monster Hunter Now (Niantic, 2023) continues as the active mobile title. The series has sold over 100 million units total across all entries.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators &amp; Contributors</div>
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>Kaname Fujioka</td><td>Director / Art Director</td><td>Original Monster Hunter (2004); Monster Hunter: World creative lead.</td></tr>
+        <tr><td>Ryozo Tsujimoto</td><td>Producer</td><td>Series producer since MH1; shepherd of the World global expansion strategy.</td></tr>
+        <tr><td>Yuya Tokuda</td><td>Director</td><td>Monster Hunter: World and Iceborne director.</td></tr>
+        <tr><td>Yasunori Ichinose</td><td>Director</td><td>Monster Hunter Rise and Sunbreak director.</td></tr>
+        <tr><td>Satoshi Tazawa</td><td>Lead Composer</td><td>Music across multiple portable titles including 4 Ultimate.</td></tr>
+        <tr><td>Akihiko Yoshida (uncredited influence)</td><td>Character Design (external)</td><td>Art direction DNA from early PlayStation era influenced MH aesthetic.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's connected?</div>
+      <p style="font-size:.84rem;line-height:1.7">
+        Monster Hunter has no strict connected universe or timeline. Each mainline game takes place in a different region with different characters. The <strong>mainline games (MH1 → Wilds)</strong> share ecological lore and monster biology but have no shared narrative continuity. The <strong>Stories series</strong> is a separate canon universe where monsters are partners rather than prey — the anime is Stories-universe, not mainline. The <strong>2020 film</strong> is standalone and non-canon. <strong>Monster Hunter Online</strong> introduced several monsters (Espinas, Goss Harag) that were later canonized into mainline entries — those monsters are canon even if the game's story isn't. <strong>Monster Hunter Now</strong> is non-canon. The series' lore focus is ecological and encyclopedic (Hunter's Notes, environmental storytelling) rather than narrative.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+function mhTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('mh-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function mhView(id, btn) {
+  document.querySelectorAll('.mh-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.mh-view-btn').forEach(b => b.classList.remove('active'));
+  const view = document.getElementById('mh-' + id);
+  if (view) view.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
