@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Fantasy - Franchise Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0c12;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        /* Header Banner */
+        .franchise-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-bottom: 4px solid #d4af37;
+            padding: 2rem 2rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .franchise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .title-section h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f3c26b, #d4af37);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .title-section .tagline {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        .metadata {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            text-align: right;
+        }
+
+        .metadata p {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .metadata .highlight {
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav-bar {
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem 0;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            background: #334155;
+            color: #d4af37;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        /* Description Section */
+        .description-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #d4af37;
+        }
+
+        .description-card h2 {
+            color: #d4af37;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .description-card p {
+            color: #cbd5e6;
+            margin-bottom: 1rem;
+        }
+
+        .genre-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .genre-tag {
+            background: #334155;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #d4af37;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Category Sections */
+        .category {
+            margin-bottom: 2.5rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #334155;
+        }
+
+        .category-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #d4af37;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .category-title .icon {
+            font-size: 1.5rem;
+        }
+
+        .category-count {
+            background: #334155;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+        }
+
+        /* Media Grid */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+
+        .media-item {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #334155;
+            transition: all 0.2s;
+        }
+
+        .media-item:hover {
+            border-color: #d4af37;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .media-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #f1f5f9;
+            margin-bottom: 0.5rem;
+        }
+
+        .media-details {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .media-details strong {
+            color: #cbd5e1;
+        }
+
+        .status-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .status-released { background: #166534; color: #86efac; }
+        .status-active { background: #1e3a8a; color: #93c5fd; }
+        .status-canceled, .status-defunct { background: #7f1a1a; color: #fecaca; }
+        .status-discontinued { background: #7f1a1a; color: #fecaca; }
+        .status-in-development { background: #854d0e; color: #fde047; }
+        .status-unclear { background: #374151; color: #d1d5db; }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .footer p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 0 1rem; }
+            .title-section h1 { font-size: 2rem; }
+            .category-title { font-size: 1.35rem; }
+            .media-grid { grid-template-columns: 1fr; }
+            .metadata { text-align: left; width: 100%; }
+            .franchise-header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="franchise-banner">
+        <div class="container">
+            <div class="franchise-header">
+                <div class="title-section">
+                    <h1>✦ FINAL FANTASY ✦</h1>
+                    <div class="tagline">A legacy of fantasy, innovation, and enduring storytelling since 1987</div>
+                </div>
+                <div class="metadata">
+                    <p><span class="highlight">Created by:</span> Hironobu Sakaguchi</p>
+                    <p><span class="highlight">Owned by:</span> Square Enix Holdings Co., Ltd.</p>
+                    <p><span class="highlight">First Release:</span> December 18, 1987</p>
+                    <p><span class="highlight">Global Sales:</span> 180+ million units</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="container">
+            <div class="nav-links">
+                <a href="#games">🎮 Games</a>
+                <a href="#mobile">📱 Mobile</a>
+                <a href="#films">🎬 Films</a>
+                <a href="#tv">📺 TV Series</a>
+                <a href="#books">📚 Books</a>
+                <a href="#audio">🎧 Audio</a>
+                <a href="#web">🌐 Web Series</a>
+                <a href="#board">🎲 Board Games</a>
+                <a href="#canceled">⚠️ Canceled</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <!-- Description -->
+            <div class="description-card">
+                <h2>About the Franchise</h2>
+                <p>Final Fantasy is a science fiction and fantasy anthology media franchise created by Hironobu Sakaguchi and developed by Square (now Square Enix). The franchise centers on a series of role-playing video games, but has expanded into films, anime, manga, novels, audio dramas, and other media. Each main installment is typically set in a different universe with distinct characters and stories, though recurring elements include chocobos, moogles, magic, crystals, and characters named Cid.</p>
+                <div class="genre-tags">
+                    <span class="genre-tag">Fantasy</span>
+                    <span class="genre-tag">Science Fiction</span>
+                    <span class="genre-tag">Role-Playing</span>
+                    <span class="genre-tag">Drama</span>
+                    <span class="genre-tag">Adventure</span>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <a href="https://na.finalfantasy.com/" target="_blank" style="color: #d4af37; text-decoration: none;">🌐 Official Website →</a>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-number">16</div><div class="stat-label">Mainline Games</div></div>
+                <div class="stat-card"><div class="stat-number">25+</div><div class="stat-label">Console/Spin-off Games</div></div>
+                <div class="stat-card"><div class="stat-number">10+</div><div class="stat-label">Mobile Games</div></div>
+                <div class="stat-card"><div class="stat-number">4</div><div class="stat-label">Feature Films</div></div>
+                <div class="stat-card"><div class="stat-number">3</div><div class="stat-label">TV/Anime Series</div></div>
+                <div class="stat-card"><div class="stat-number">12+</div><div class="stat-label">Books & Novels</div></div>
+            </div>
+
+            <!-- Video Games Section -->
+            <div id="games" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">🎮</span> Main Series & Console Games</h2>
+                    <span class="category-count">26 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy</div><div class="media-details"><strong>1987</strong> | NES, MSX, PS1, GBA, PSP, Mobile, Switch, PS4, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy II</div><div class="media-details"><strong>1988</strong> | NES, WonderSwan, PS1, GBA, PSP, Mobile, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy III</div><div class="media-details"><strong>1990</strong> | NES, DS, PSP, PS4, PC, Mobile, Switch</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy IV</div><div class="media-details"><strong>1991</strong> | SNES, PS1, GBA, DS, PSP, PC, Mobile, Switch</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy V</div><div class="media-details"><strong>1992</strong> | SNES, PS1, GBA, PC, Mobile, Switch</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VI</div><div class="media-details"><strong>1994</strong> | SNES, PS1, GBA, PC, Mobile, Switch</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII</div><div class="media-details"><strong>1997</strong> | PS1, PC, PS4, Switch, Xbox One, Mobile</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VIII</div><div class="media-details"><strong>1999</strong> | PS1, PC, PS4, Switch, Xbox One</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy IX</div><div class="media-details"><strong>2000</strong> | PS1, PC, PS4, Switch, Xbox One, Mobile</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy X</div><div class="media-details"><strong>2001</strong> | PS2, PS3, PS4, PC, Switch, Xbox One</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy X-2</div><div class="media-details"><strong>2003</strong> | PS2, PS3, PS4, PC, Switch, Xbox One</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XI</div><div class="media-details"><strong>2002</strong> | PS2, PC, Xbox 360</div><span class="status-badge status-active">Active (Servers Online)</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XII</div><div class="media-details"><strong>2006</strong> | PS2, PS4, PC, Switch, Xbox One</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIII</div><div class="media-details"><strong>2009</strong> | PS3, Xbox 360, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIII-2</div><div class="media-details"><strong>2011</strong> | PS3, Xbox 360, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Lightning Returns: Final Fantasy XIII</div><div class="media-details"><strong>2013</strong> | PS3, Xbox 360, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIV</div><div class="media-details"><strong>2010 (1.0) / 2013 (ARR)</strong> | PS3, PS4, PS5, PC, Mac</div><span class="status-badge status-active">Active (A Realm Reborn)</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XV</div><div class="media-details"><strong>2016</strong> | PS4, Xbox One, PC, Stadia</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XVI</div><div class="media-details"><strong>2023</strong> | PS5, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII Remake</div><div class="media-details"><strong>2020</strong> | PS4, PS5, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII Rebirth</div><div class="media-details"><strong>2024</strong> | PS5</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Tactics</div><div class="media-details"><strong>1997</strong> | PS1, PSP, Mobile</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Crystal Chronicles</div><div class="media-details"><strong>2003</strong> | GameCube, PS4, Switch, Mobile</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Type-0</div><div class="media-details"><strong>2011</strong> | PSP, PS4, Xbox One, PC</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Dissidia Final Fantasy</div><div class="media-details"><strong>2008</strong> | PSP, Arcade, PS4</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Stranger of Paradise: Final Fantasy Origin</div><div class="media-details"><strong>2022</strong> | PS4, PS5, Xbox, PC</div><span class="status-badge status-released">Released</span></div>
+                </div>
+            </div>
+
+            <!-- Mobile Games -->
+            <div id="mobile" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">📱</span> Mobile & Phone Games</h2>
+                    <span class="category-count">10 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy Brave Exvius</div><div class="media-details"><strong>2015</strong> | iOS/Android</div><span class="status-badge status-active">Active</span></div>
+                    <div class="media-item"><div class="media-title">War of the Visions: Final Fantasy Brave Exvius</div><div class="media-details"><strong>2019</strong> | iOS/Android</div><span class="status-badge status-active">Active</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII Ever Crisis</div><div class="media-details"><strong>2023</strong> | iOS/Android/PC</div><span class="status-badge status-active">Active</span></div>
+                    <div class="media-item"><div class="media-title">Mobius Final Fantasy</div><div class="media-details"><strong>2015</strong> | iOS/Android/PC</div><span class="status-badge status-discontinued">Discontinued (2021)</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Record Keeper</div><div class="media-details"><strong>2014</strong> | iOS/Android</div><span class="status-badge status-discontinued">Discontinued (2022)</span></div>
+                    <div class="media-item"><div class="media-title">Dissidia Final Fantasy Opera Omnia</div><div class="media-details"><strong>2017</strong> | iOS/Android</div><span class="status-badge status-discontinued">Discontinued (2024)</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Airborne Brigade</div><div class="media-details"><strong>2012</strong> | iOS/Android</div><span class="status-badge status-canceled">Discontinued</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy All the Bravest</div><div class="media-details"><strong>2013</strong> | iOS/Android</div><span class="status-badge status-canceled">Discontinued</span></div>
+                    <div class="media-item"><div class="media-title">Chocobo GP</div><div class="media-details"><strong>2022</strong> | Switch</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Pixel Remaster Series</div><div class="media-details"><strong>2021</strong> | iOS/Android/PC/Switch/PS4</div><span class="status-badge status-released">Released</span></div>
+                </div>
+            </div>
+
+            <!-- Films -->
+            <div id="films" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">🎬</span> Films & Movies</h2>
+                    <span class="category-count">5 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy: The Spirits Within</div><div class="media-details"><strong>2001</strong> | Dir: Hironobu Sakaguchi | CGI Feature Film</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII: Advent Children</div><div class="media-details"><strong>2005</strong> | Dir: Tetsuya Nomura | CGI Film</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII: Advent Children Complete</div><div class="media-details"><strong>2009</strong> | Dir: Tetsuya Nomura | Extended Edition</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Kingsglaive: Final Fantasy XV</div><div class="media-details"><strong>2016</strong> | Dir: Takeshi Nozue | CGI Feature Film</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy: The Spirits Within (Sequel)</div><div class="media-details">Planned sequel canceled after box office performance</div><span class="status-badge status-canceled">Canceled</span></div>
+                </div>
+            </div>
+
+            <!-- TV Series -->
+            <div id="tv" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">📺</span> TV Series & OVAs</h2>
+                    <span class="category-count">5 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy: Legend of the Crystals</div><div class="media-details"><strong>1994</strong> | 4 Episodes | OVA Anime</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy: Unlimited</div><div class="media-details"><strong>2001</strong> | 25 Episodes | Anime Series</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIV: Dad of Light</div><div class="media-details"><strong>2017</strong> | Live-Action Drama (Japan)</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIV: Dad of Light (Netflix)</div><div class="media-details"><strong>2017</strong> | International Release</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy IX Animated Series</div><div class="media-details">Announced 2021 by Cyber Group Studios</div><span class="status-badge status-in-development">In Development / Unclear</span></div>
+                </div>
+            </div>
+
+            <!-- Books -->
+            <div id="books" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">📚</span> Books & Novels</h2>
+                    <span class="category-count">8 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy VII: On the Way to a Smile</div><div class="media-details">Kazushige Nojima | 2005 | Short Story Collection</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII: The Kids Are Alright</div><div class="media-details">Kazushige Nojima | 2011 | Novel</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIII: Episode Zero -Promise-</div><div class="media-details">Jun Eishima | 2009 | Prequel Novel</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIII-2: Fragments Before</div><div class="media-details">Jun Eishima | 2011 | Novel</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIII-2: Fragments After</div><div class="media-details">Jun Eishima | 2012 | Novel</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XV: The Dawn of the Future</div><div class="media-details">Jun Eishima | 2019 | Novel (Canceled DLC Adaptation)</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIV: Chronicles of Light</div><div class="media-details">Various | 2018 | Short Story Collection</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Ultimania Series</div><div class="media-details">Square Enix | Various | Guidebooks/Art Books</div><span class="status-badge status-released">Released</span></div>
+                </div>
+            </div>
+
+            <!-- Audio Dramas -->
+            <div id="audio" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">🎧</span> Audio Dramas</h2>
+                    <span class="category-count">2 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy X: Will</div><div class="media-details"><strong>2013</strong> | Sequel to Final Fantasy X-2, released with HD Remaster</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XV: Prologue Parting Ways</div><div class="media-details"><strong>2016</strong> | Prequel Audio Drama</div><span class="status-badge status-released">Released</span></div>
+                </div>
+            </div>
+
+            <!-- Web Series -->
+            <div id="web" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">🌐</span> Web Series</h2>
+                    <span class="category-count">2 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy XV: Brotherhood</div><div class="media-details"><strong>2016</strong> | 5 Episodes | Anime Web Series | YouTube/Crunchyroll</div><span class="status-badge status-released">Released</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII Remake: Inside Final Fantasy VII Remake</div><div class="media-details"><strong>2020</strong> | Documentary Web Series</div><span class="status-badge status-released">Released</span></div>
+                </div>
+            </div>
+
+            <!-- Board Games -->
+            <div id="board" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">🎲</span> Board & Card Games</h2>
+                    <span class="category-count">2 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy: The Card Game</div><div class="media-details"><strong>2011</strong> | Square Enix | Trading Card Game</div><span class="status-badge status-active">Active</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII: Monopoly</div><div class="media-details"><strong>2024</strong> | Hasbro | Board Game</div><span class="status-badge status-released">Released</span></div>
+                </div>
+            </div>
+
+            <!-- Canceled / Defunct -->
+            <div id="canceled" class="category">
+                <div class="category-header">
+                    <h2 class="category-title"><span class="icon">⚠️</span> Canceled, Defunct & Inaccessible</h2>
+                    <span class="category-count">6 entries</span>
+                </div>
+                <div class="media-grid">
+                    <div class="media-item"><div class="media-title">Final Fantasy XV: Episode Aranea</div><div class="media-details">Canceled DLC episode</div><span class="status-badge status-canceled">Canceled</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XV: Episode Lunafreya</div><div class="media-details">Canceled DLC episode</div><span class="status-badge status-canceled">Canceled</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XV: Episode Noctis</div><div class="media-details">Canceled DLC episode</div><span class="status-badge status-canceled">Canceled</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy Fortress</div><div class="media-details">Canceled mobile strategy game</div><span class="status-badge status-canceled">Canceled</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy VII Remake (PS3 Tech Demo)</div><div class="media-details">2005 tech demo that led to later full remake</div><span class="status-badge status-canceled">Canceled / Reconceptualized</span></div>
+                    <div class="media-item"><div class="media-title">Final Fantasy XIV (Original 1.0)</div><div class="media-details">Original version discontinued 2012, replaced by A Realm Reborn</div><span class="status-badge status-defunct">Defunct (2012)</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>Final Fantasy Franchise Database | Compiled from all official media including released, active, canceled, defunct, and inaccessible works</p>
+            <p style="margin-top: 0.5rem;">© Square Enix Holdings Co., Ltd. | Fan-compiled reference database</p>
+        </div>
+    </div>
+</body>
+</html>
