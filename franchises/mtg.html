@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Magic: The Gathering — Franchise Navigator</title>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+/* ════════════════════════════════════════════════════
+   MTG-SPECIFIC PLATFORM STRIPE COLOURS (PLANES & MEDIA)
+════════════════════════════════════════════════════ */
+.fn-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/era rows (Planes/Blocks) */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media/TV insert rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+  border-left: 3px solid #ce93d8 !important;
+}
+
+/* Platform left-border colour stripes — MTG Planes & media */
+.fn-pc     td:first-child { border-left: 3px solid #90a4ae; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-ps     td:first-child { border-left: 3px solid #ffb74d; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-mobile td:first-child { border-left: 3px solid #ffd54f; }
+.fn-arena  td:first-child { border-left: 3px solid #4db6ac; }
+.fn-online td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-book   td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-comic  td:first-child { border-left: 3px solid #f48fb1; }
+.fn-web    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-audio  td:first-child { border-left: 3px solid #ff8a65; }
+.fn-tv     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-doc    td:first-child { border-left: 3px solid #b0bec5; }
+
+/* Gold = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional/defunct/cancelled */
+.fn-skip td { opacity: .55; }
+
+/* Inline tags */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes     { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no      { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-mobile  { background: rgba(255,213,79,.18);  color: #ffd54f; border: 1px solid rgba(255,213,79,.35); }
+.fn-tag-defunct { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); }
+.fn-tag-opt     { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-star        { color: var(--accent); font-weight: 700; }
+
+/* View tabs */
+.fn-view-nav {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .62rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 5px 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+}
+.fn-view-btn:hover  { border-color: rgba(200,168,75,.4); color: var(--text); }
+.fn-view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.06); }
+
+.fn-view        { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc   { font-size: .74rem; color: var(--text-dim); margin-bottom: 10px; font-style: italic; }
+
+/* Main page tabs */
+.fn-tab-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 7px 14px; background: transparent;
+  border: 1px solid transparent; border-bottom: none;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+  margin-bottom: -1px; border-radius: 3px 3px 0 0;
+}
+.fn-tab-btn:hover  { color: var(--text); }
+.fn-tab-btn.active { border-color: var(--border); border-bottom-color: var(--bg); color: var(--accent); background: var(--bg); }
+
+.fn-tab-pane        { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* Legend bar */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* Stat row */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* Filler cards */
+.fn-filler-card {
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.fn-filler-trailer   { background: rgba(91,141,217,.15); color: #5b8dd9; border-color: rgba(91,141,217,.3); }
+.fn-filler-documentary{ background: rgba(224,133,92,.12); color: #e0855c; border-color: rgba(224,133,92,.3); }
+.fn-filler-music     { background: rgba(78,205,196,.12); color: #4ecdc4; border-color: rgba(78,205,196,.3); }
+.fn-filler-hype      { background: rgba(200,168,75,.12); color: var(--accent); border-color: rgba(200,168,75,.3); }
+.fn-filler-name  { font-weight:700; font-size:.88rem; color:var(--text-bright); margin-bottom:4px; }
+.fn-filler-meta  { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--text-dim); margin-bottom:6px; }
+.fn-filler-desc  { font-size:.78rem; color:var(--text-dim); line-height:1.6; }
+.fn-filler-where { margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:.72rem; color:var(--text-dim); }
+
+/* Merch history blocks */
+.fn-merch-history { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:16px 18px; margin-bottom:14px; }
+.fn-merch-history-era { font-family:'Cinzel',serif; font-size:.85rem; color:var(--accent); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🃏</div>
+  <div>
+    <h1>Magic: The Gathering</h1>
+    <div class="subtitle">// CCG · Digital · Books · Comics · Web Series · Arena · Netflix (Canceled) //</div>
+    <p class="desc">
+      The world's first trading card game, created by Richard Garfield and published by Wizards of the Coast in 1993. MTG spans 30+ years of lore across the Multiverse — Dominaria, Ravnica, Innistrad, and countless planes. Beyond cards, the franchise includes novels, comics, web series, audio dramas, video games (from Shandalar to Arena), and a canceled Netflix series. Use the Library tab to explore games, books, and media by release or format. The TV &amp; Anime tab covers all screen adaptations, including fan series. Merch, Filler (Tunarr-friendly content), and History tabs complete the archive.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">50+</div><div class="fn-stat-label">Video Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">100+</div><div class="fn-stat-label">Books/Novels</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">4</div><div class="fn-stat-label">TV/Web Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">30+</div><div class="fn-stat-label">Comic Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1993</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- MAIN TABS -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY (Games, Books, Comics, Audio)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The MTG Multiverse Library</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bytype',    this)">📂 By Type</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+      </div>
+
+      <!-- RELEASE ORDER (All media combined) -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All MTG games, major novels, comics, and digital media in real-world release order. Purple rows = TV/web series milestones. Gold = standout entries. Faded = defunct, canceled, or inaccessible.</div>
+        <table class="fn-table">
+           <thead><tr><th>Year</th><th>Title</th><th>Type</th><th>Platform/Format</th><th>Status</th><th>Notes</th></tr></thead>
+           <tbody>
+             <tr class="fn-arc-row"><td colspan="6">🔮 The Dawn — 1993–1997</td></tr>
+             <tr class="fn-pc fn-highlight"><td>1993</td><td>Magic: The Gathering (Alpha/Beta)</td><td>Card Game</td><td>Physical</td><td>✅ Active</td><td><span class="fn-star">⭐</span> The origin. Richard Garfield's design. 295 cards. Changed gaming forever.</td></tr>
+             <tr class="fn-pc"><td>1997</td><td>Magic: The Gathering (MicroProse) / Shandalar</td><td>PC Game</td><td>Windows</td><td>✅ Abandonware</td><td>Open-world RPG + card duels. Ante system, wandering wizards. Still playable via DOSBox.</td></tr>
+             
+             <tr class="fn-arc-row"><td colspan="6">📖 The Novel Era — 1994–2006</td></tr>
+             <tr class="fn-book fn-highlight"><td>1994</td><td>Arena (by William R. Forstchen)</td><td>Novel</td><td>Paperback</td><td>✅ Available</td><td>First MTG novel. Garth One-Eye. Set in the Arena on Dominaria. Foundation for lore.</td></tr>
+             <tr class="fn-book"><td>1998</td><td>The Brothers' War (Jeff Grubb)</td><td>Novel</td><td>Paperback</td><td>✅ Available</td><td>Urza and Mishra saga. Definitive early MTG lore.</td></tr>
+             <tr class="fn-comic"><td>1995</td><td>Magic: The Gathering — The Shadow Mage (Armada Comics)</td><td>Comic</td><td>Acclaim/Armada</td><td>⚠️ Out of Print</td><td>First MTG comic series, 4 issues. Rare.</td></tr>
+             
+             <tr class="fn-arc-row"><td colspan="6">🎮 Console & Digital Age — 1999–2010</td></tr>
+             <tr class="fn-ps fn-skip"><td>1999</td><td>Magic: The Gathering — BattleMage</td><td>PS1/PC</td><td>PlayStation</td><td>⚠️ Defunct</td><td>Action-RPG hybrid. Poor reception. Cancelled sequel.</td></tr>
+             <tr class="fn-pc fn-highlight"><td>2002</td><td>Magic: The Gathering Online (MTGO)</td><td>PC Client</td><td>Windows</td><td>✅ Active</td><td>Digital true-to-card economy. Still running with full sets.</td></tr>
+             <tr class="fn-xbox"><td>2009</td><td>Magic: Duels of the Planeswalkers (Xbox 360/PC)</td><td>Console/PC</td><td>Xbox 360, PC</td><td>✅ Legacy</td><td>First streamlined digital MTG. Revitalized digital presence. Predecessor to Arena.</td></tr>
+             <tr class="fn-mobile fn-skip"><td>2012</td><td>Magic 2014 — Duels of the Planeswalkers (Mobile)</td><td>Mobile</td><td>iOS/Android</td><td>⚠️ Delisted</td><td>Excellent mobile version. Removed from stores 2019.</td></tr>
+             <tr class="fn-arena fn-highlight"><td>2018</td><td>MTG Arena (Open Beta)</td><td>PC/Mac/Mobile</td><td>Windows, macOS, iOS, Android</td><td>✅ Active</td><td><span class="fn-star">⭐</span> The current premier digital MTG client. Free-to-play, full rules, cross-platform.</td></tr>
+             
+             <tr class="fn-arc-row"><td colspan="6">📡 Web & Audio Dramas — 2016–Present</td></tr>
+             <tr class="fn-web fn-highlight"><td>2016</td><td>The Voice of All (Official MTG Story Podcast)</td><td>Audio Drama</td><td>Podcast</td><td>✅ Archived</td><td>Narrated lore. Kaladesh and Amonkhet blocks.</td></tr>
+             <tr class="fn-web"><td>2018</td><td>Magic: The Gathering — The Wildered Quest (Kate Elliott)</td><td>eBook/Novel</td><td>Digital</td><td>✅ Available</td><td>First Throne of Eldraine novel. Full cast audiobook also exists.</td></tr>
+             <tr class="fn-audio"><td>2020</td><td>MTG: The Lost Chapters (Audible Original)</td><td>Audiobook</td><td>Audible</td><td>✅ Available</td><td>Dramatized audio stories: War of the Spark, The Gathering Storm.</td></tr>
+             <tr class="fn-web"><td>2022</td><td>Magic: The Gathering — The Brothers' War (Web Fiction)</td><td>Web Series</td><td>Magic.gg</td><td>✅ Archived</td><td>Official short stories bridging sets.</td></tr>
+             
+             <tr class="fn-arc-row"><td colspan="6">📱 Mobile & Spin-off Games (Defunct/Canceled)</td></tr>
+             <tr class="fn-mobile fn-skip"><td>2015</td><td>Magic Duels (Steam/iOS/Android)</td><td>Mobile/PC</td><td>Cross-platform</td><td>⚠️ Delisted</td><td>Spiritual successor to DotP. Delisted 2019 when Arena launched.</td></tr>
+             <tr class="fn-mobile fn-skip"><td>2021</td><td>Magic: ManaStrike (Netmarble)</td><td>Mobile</td><td>iOS/Android</td><td>⚠️ Shut Down</td><td>Real-time strategy + card elements. Servers closed March 2022.</td></tr>
+             <tr class="fn-mobile fn-skip"><td>2019</td><td>Magic: The Gathering — Puzzle Quest</td><td>Mobile/PC</td><td>iOS/Android/Steam</td><td>✅ Still Live</td><td>Match-3 + card battles. Surprisingly long-lived. Still updated.</td></tr>
+             
+             <tr class="fn-arc-row"><td colspan="6">🎬 Canceled & Unreleased Media</td></tr>
+             <tr class="fn-tv fn-skip"><td>2025</td><td>Magic: The Gathering (Netflix Animated Series)</td><td>TV Series</td><td>Netflix</td><td>❌ Canceled</td><td>Announced 2019 with Russo Bros; creative overhaul; officially canceled in 2025. No episodes released.</td></tr>
+             <tr class="fn-pc fn-skip"><td>~2000</td><td>Magic: The Gathering — The Cardmaster (Cancelled N64)</td><td>Video Game</td><td>Nintendo 64</td><td>❌ Unreleased</td><td>Acclaim Entertainment project, never finished.</td></tr>
+           </tbody>
+         </table>
+        <div class="fn-legend"><span><span class="fn-dot" style="background:var(--accent)"></span>Gold = recommended</span><span><span class="fn-dot" style="background:#ce93d8"></span>Purple = TV/Web milestone</span><span><span style="opacity:.5">Faded</span> = defunct/canceled</span><span><span class="fn-star">⭐</span> = best entry points</span></div>
+      </div>
+
+      <!-- BY TYPE (Books, Games, Comics, Audio) -->
+      <div class="fn-view" id="fn-library-bytype">
+        <div class="fn-view-desc">All media grouped by format: novels, video games, comics, and audio dramas.</div>
+        <table class="fn-table">
+           <thead><tr><th>Year</th><th>Title</th><th>Type</th><th>Notes</th></tr></thead>
+           <tbody>
+             <tr class="fn-arc-row"><td colspan="3">📚 Novels & Anthologies</td></tr>
+             <tr class="fn-book fn-highlight"><td>1994–2018</td><td>Artifacts Cycle (Brothers' War, Planeswalker, Time Streams, Bloodlines)</td><td>Novel Series</td><td>Urza's saga. Core MTG lore.</td></tr>
+             <tr class="fn-book"><td>2000–2003</td><td>Odyssey & Onslaught Cycles (J. Robert King)</td><td>Novels</td><td>Kamahl, Chainer, the Mirari. Dark era of storytelling.</td></tr>
+             <tr class="fn-book"><td>2019</td><td>War of the Spark: Ravnica (Greg Weisman)</td><td>Novel</td><td>Finale of the Bolas arc. Mixed reception but essential.</td></tr>
+             <tr class="fn-arc-row"><td colspan="3">🎮 Digital & Console Games</td></tr>
+             <tr class="fn-pc fn-highlight"><td>1997</td><td>Shandalar (MicroProse)</td><td>PC RPG</td><td>Still beloved for open-world exploration.</td></tr>
+             <tr class="fn-pc fn-highlight"><td>2018–Present</td><td>MTG Arena</td><td>Digital CCG</td><td>The definitive MTG digital experience.</td></tr>
+             <tr class="fn-mobile"><td>2019–Present</td><td>MTG Puzzle Quest</td><td>Mobile</td><td>Longest-running MTG mobile game.</td></tr>
+             <tr class="fn-arc-row"><td colspan="3">📖 Comic Series</td></tr>
+             <tr class="fn-comic"><td>1995–1996</td><td>Armada / Acclaim Comics (5 series)</td><td>Comics</td><td>First MTG comics. Rare collectors' items.</td></tr>
+             <tr class="fn-comic"><td>2012–2015</td><td>IDW MTG Comic Series (#1–25)</td><td>Comics</td><td>Dack Fayden, "the greatest thief in the Multiverse."</td></tr>
+             <tr class="fn-comic fn-highlight"><td>2020–2023</td><td>Boom! Studios — MTG (Chandra, Jace, War of the Spark)</td><td>Comics</td><td>Modern canon stories. Fully collected in trades.</td></tr>
+             <tr class="fn-arc-row"><td colspan="3">🎧 Audio Dramas / Podcasts</td></tr>
+             <tr class="fn-audio"><td>2016–2018</td><td>Voice of All (Official Podcast)</td><td>Audio</td><td>Narrated lore for Kaladesh, Amonkhet, Ixalan.</td></tr>
+             <tr class="fn-audio"><td>2020</td><td>The Lost Chapters (Audible)</td><td>Audiobook</td><td>Full cast production. War of the Spark and more.</td></tr>
+             <tr class="fn-web"><td>2023</td><td>MTG Story Drops (Spotify/Apple)</td><td>Audio</td><td>Short vignettes for March of the Machine and Wilds of Eldraine.</td></tr>
+           </tbody>
+        </table>
+      </div>
+
+      <!-- BY PLATFORM (digital games) -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">Games only — grouped by platform, including defunct and delisted titles.</div>
+        <table class="fn-table"><thead><tr><th>Platform</th><th>Title</th><th>Year</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr class="fn-arc-row"><td colspan="4">🖥️ PC (Classic & Modern)</td></tr>
+          <tr class="fn-pc"><td>Shandalar (MicroProse)</td><td>1997</td><td>✅ Abandonware</td></tr>
+          <tr class="fn-pc fn-highlight"><td>MTG Arena</td><td>2018</td><td>✅ Active</td></tr>
+          <tr class="fn-pc"><td>MTG Online</td><td>2002</td><td>✅ Active</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">📱 Mobile (iOS/Android)</td></tr>
+          <tr class="fn-mobile"><td>Magic Duels</td><td>2015</td><td>⚠️ Delisted</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>MTG Arena Mobile</td><td>2021</td><td>✅ Active</td></tr>
+          <tr class="fn-mobile"><td>ManaStrike</td><td>2020</td><td>❌ Shutdown 2022</td></tr>
+          <tr class="fn-mobile"><td>MTG Puzzle Quest</td><td>2019</td><td>✅ Active</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">🎮 Consoles</td></tr>
+          <tr class="fn-xbox"><td>Duels of the Planeswalkers 2012–2015</td><td>2011–2015</td><td>⚠️ Legacy</td></tr>
+          <tr class="fn-switch"><td>MTG Arena (via cloud/not native)</td><td>—</td><td>✅ Via Steam Deck</td></tr>
+        </tbody></table>
+      </div>
+
+      <!-- BEST FIRST -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Curated path for newcomers — where to start with MTG media beyond the card game.</div>
+        <table class="fn-table"><thead><tr><th>#</th><th>Title</th><th>Format</th><th>Why Start Here</th></tr></thead>
+        <tbody>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>MTG Arena <span class="fn-star">⭐</span></td><td>Digital Game</td><td>Learn to play with the modern client. Free tutorial, polished experience.</td></tr>
+          <tr class="fn-book fn-highlight"><td>2</td><td>The Brothers' War (Jeff Grubb)</td><td>Novel</td><td>The definitive MTG novel. Urza and Mishra. Foundation of all lore.</td></tr>
+          <tr class="fn-audio"><td>3</td><td>The Lost Chapters (Audible)</td><td>Audiobook</td><td>Dramatized War of the Spark story. High production value.</td></tr>
+          <tr class="fn-comic"><td>4</td><td>IDW MTG: Dack Fayden series</td><td>Comics</td><td>Great art, self-contained heist story across Ravnica.</td></tr>
+          <tr class="fn-pc fn-skip"><td>5</td><td>Shandalar (if retro)</td><td>PC Game</td><td>Classic 90s RPG experience — worth it for history.</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME (Including Canceled & Web Series)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section"><div class="section-title">📺 MTG on Screen</div>
+  <div class="card">
+    <div class="fn-view-nav"><button class="fn-view-btn active" onclick="fnView('tvanime','all',this)">📋 All Screen Adaptations</button><button class="fn-view-btn" onclick="fnView('tvanime','fan',this)">✨ Notable Fan Series</button></div>
+    <div class="fn-view active" id="fn-tvanime-all">
+      <table class="fn-table"><thead><tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr class="fn-arc-row"><td colspan="6">🎬 Official & Canceled Projects</td></tr>
+        <tr class="fn-tv fn-highlight"><td>2019–2025</td><td>Magic: The Gathering (Netflix Series)</td><td>Animated Series</td><td>—</td><td>❌ Canceled</td><td>Russo Bros attached, creative reboot, then canceled. Never aired.</td></tr>
+        <tr class="fn-web"><td>2020</td><td>MTG: The Spellslingers (Geek & Sundry)</td><td>Web Series</td><td>23 episodes</td><td>✅ Archived</td><td>Day[9] hosts. Celebrity guests play paper MTG. Excellent entry point.</td></tr>
+        <tr class="fn-web"><td>2022–2023</td><td>Magic: The Gathering — The Saga of the Weatherlight (YouTube)</td><td>Web Animation</td><td>5 parts</td><td>✅ Archived</td><td>Official animated lore summary. High quality.</td></tr>
+        <tr class="fn-doc"><td>2023</td><td>Magic: The Gathering — 30th Anniversary Documentary</td><td>Documentary</td><td>1x 90min</td><td>✅ YouTube</td><td>Oral history, Richard Garfield, pro players. Essential.</td></tr>
+        <tr class="fn-arc-row"><td colspan="6">🌟 Fan-Made Series (High Popularity)</td></tr>
+        <tr class="fn-web fn-highlight"><td>2015–2020</td><td>Friday Nights (LoadingReadyRun)</td><td>Sketch Comedy</td><td>100+ episodes</td><td>✅ Active</td><td>Canadian comedy troupe. Beloved by MTG community. Not official but canonical to fans.</td></tr>
+        <tr class="fn-web"><td>2020–2024</td><td>The Vorthos Cast (YouTube Lore Series)</td><td>Lore Video Essays</td><td>50+</td><td>✅ Ongoing</td><td>Deep dives into planes, characters, and story arcs.</td></tr>
+      </tbody></table>
+    </div>
+    <div class="fn-view" id="fn-tvanime-fan">
+      <div class="fn-view-desc">Fan-made web series with significant cultural impact within the MTG community.</div>
+      <table class="fn-table"><thead><tr><th>Series</th><th>Creator</th><th>Years</th><th>Vibe</th></tr></thead>
+      <tbody><tr><td>Friday Nights</td><td>LoadingReadyRun</td><td>2015–</td><td>Sketch comedy about kitchen table Magic.</td></tr>
+      <tr><td>Rhystic Studies</td><td>Sam from Rhystic Studies</td><td>2016–</td><td>Video essays on MTG art, history, and design.</td></tr>
+      </tbody></table>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES (None yet, but planned/canceled)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section"><div class="section-title">🎬 MTG Movies & Feature-Length</div>
+  <div class="card">
+    <div class="fn-view-nav"><button class="fn-view-btn active" onclick="fnView('movies','all',this)">📋 All Films</button></div>
+    <div class="fn-view active" id="fn-movies-all">
+      <div class="fn-view-desc">No feature-length theatrical film has been released. Announced projects remain in development hell or canceled.</div>
+      <table class="fn-table"><thead><tr><th>Year (planned)</th><th>Project</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr class="fn-skip"><td>~2014</td><td>Magic: The Gathering (Fox film)</td><td>❌ Canceled</td><td>Simon Kinberg attached. Never moved forward.</td></tr>
+        <tr class="fn-skip"><td>2021 (announced)</td><td>Untitled MTG Animated Film (Netflix)</td><td>❌ Folded into series</td><td>Became the canceled series.</td></tr>
+      </tbody></table>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH (Expansions, Art books, Secret Lair)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section"><div class="section-title">🛒 MTG Merchandise & Collectibles</div>
+  <div class="card">
+    <div class="fn-merch-history"><div class="fn-merch-history-era">🃏 Trading Cards (Core)</div><p>Over 25,000 unique cards across 100+ expansions. Collector's market: Alpha Black Lotus ($500k+). Secret Lair drops since 2019. Universes Beyond (LotR, Warhammer, Fallout) crossovers.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">📚 Art Books & Lore</div><p>"The Art of Magic: The Gathering" series (Zendikar, Innistrad, Kaladesh, Ravnica, etc.) — definitive visual guides. "D&D: Guildmasters' Guide to Ravnica" crossover.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">🎲 Accessories & Premium Products</div><p>Ultra PRO playmats, dice sets, Funko Pop! Planeswalkers, LEGO-like "Mega Construx" sets, and the 30th Anniversary Countdown Kit.</p></div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr Channel Content)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section"><div class="section-title">📡 Tunarr Filler — MTG Channel</div>
+  <div class="card">
+    <div class="fn-filler-card fn-filler-trailer"><div class="fn-filler-name">MTG Arena Cinematic Trailers</div><div class="fn-filler-meta">2018–2024 · 2–4 min each · YouTube</div><div class="fn-filler-desc">High-production CG trailers for each set. Great interstitials.</div><div class="fn-filler-where">📍 Wizards MTG YouTube</div></div>
+    <div class="fn-filler-card fn-filler-documentary"><div class="fn-filler-name">The 30th Anniversary Documentary</div><div class="fn-filler-meta">2023 · 90 min · YouTube</div><div class="fn-filler-desc">Full history documentary. Ideal filler block.</div></div>
+    <div class="fn-filler-card fn-filler-hype"><div class="fn-filler-name">Friday Nights (LoadingReadyRun)</div><div class="fn-filler-meta">15–25 min episodes · 100+</div><div class="fn-filler-desc">Funny, short-form sketches perfect for channel bumpers.</div></div>
+    <div class="fn-filler-card fn-filler-music"><div class="fn-filler-name">MTG Musical — "The Might of Dominaria" (Fan)</div><div class="fn-filler-meta">2020 · 5 min</div><div class="fn-filler-desc">Fan-made epic orchestral suite.</div></div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section"><div class="section-title">📖 History of Magic: The Gathering</div>
+  <div class="card">
+    <div class="fn-merch-history"><div class="fn-merch-history-era">1993 — Invention & Alpha</div><p>Richard Garfield designs "Magic" as a game to play between roleplaying sessions. Wizards of the Coast releases Alpha, sells out in weeks. Creates the TCG genre.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">1994–2000 — Expansion Era & The Weatherlight Saga</div><p>Arabian Nights, Antiquities, the Weatherlight Saga story arc. Pro Tour launched 1996.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">2010–2020 — Digital Transformation & Arena</div><p>MTG Arena beta 2018, becomes dominant platform. Netfix series announced (later canceled).</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">2020–Present — Universes Beyond & 30th Anniversary</div><p>Crossover sets with Lord of the Rings, Warhammer, Doctor Who. 30th Anniversary celebrated 2023. Future: continued digital dominance, no announced screen adaptations after Netflix collapse.</p></div>
+  </div></div>
+</div>
+
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b  => b.classList.remove('active'));
+  document.getElementById('fn-pane-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function fnView(tabId, viewId, btn) {
+  const pane = document.getElementById('fn-pane-' + tabId);
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('fn-' + tabId + '-' + viewId);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
