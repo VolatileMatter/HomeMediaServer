@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pocket Monster Channel — Tunarr Channel</title>
+  <link rel="stylesheet" href="ch-shared.css">
+  <script>
+    const SLOT_KEY = 'pkm_slots';
+    const ACQ_KEY  = 'pkm_acq';
+  </script>
+</head>
+<body>
+
+<div class="back-nav">
+  <a class="back-btn" href="../tunarr.html">← Tunarr Admin</a>
+  <a class="back-btn" href="../tunarr.html#pane-channels">📺 All Channels</a>
+</div>
+
+<div class="page-header">
+  <div class="page-icon">🃏</div>
+  <div>
+    <h1>Pocket Monster Channel</h1>
+    <div class="subtitle">// Ch 20 · Pokémon · Digimon · Yu-Gi-Oh! · Bakugan · Battle Anime //</div>
+    <p class="desc">The four great battle-card franchises on one channel. Pokémon owns mornings. Digimon holds the afternoon block. Yu-Gi-Oh! runs primetime. Bakugan fills the late-night slot. Films from all four franchises rotate across weekends. Filler: game trailers, card game tutorials, opening themes.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="subtab-btn" onclick="switchTab('acquire',this)">✅ To Acquire</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SCHEDULE PANE
+════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-schedule">
+
+<div class="schedule-label">WEEKDAY</div>
+<table class="sched-table">
+  <thead><tr><th>Time</th><th>Content</th><th>Notes</th></tr></thead>
+  <tbody>
+
+    <!-- ── MORNING: POKÉMON BLOCK ── -->
+    <tr>
+      <td class="col-time">6:00am</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-poke-am')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-poke-am">▶</span>
+          <span class="slot-expand-title">📺 Pokémon — Main Series (rotating)</span>
+          <span class="slot-count">14 series</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-poke-am">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Pokémon: Indigo League</span><span class="slot-year">1997</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Pokémon: Adventures in the Orange Islands</span><span class="slot-year">1999</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Pokémon: Johto Journeys</span><span class="slot-year">1999</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Pokémon: Johto League Champions</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Pokémon: Master Quest</span><span class="slot-year">2001</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Pokémon: Advanced Generation</span><span class="slot-year">2002</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Pokémon: Diamond and Pearl</span><span class="slot-year">2006</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Pokémon: Black &amp; White</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Pokémon: XY</span><span class="slot-year">2013</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">10</span><span class="slot-title">Pokémon: Sun &amp; Moon</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">11</span><span class="slot-title">Pokémon Journeys</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">12</span><span class="slot-title">Pokémon Ultimate Journeys</span><span class="slot-year">2022</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">13</span><span class="slot-title">Pokémon: Aim to Be a Pokémon Master (Ash finale)</span><span class="slot-year">2023</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">14</span><span class="slot-title">Pokémon Horizons: The Series</span><span class="slot-year">2023</span><span class="slot-have">✓ owned</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes">Morning Pokémon — sequential series rotation</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">7:30am</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-poke-special')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-poke-special">▶</span>
+          <span class="slot-expand-title">📺 Pokémon Mini-Series &amp; Specials</span>
+          <span class="slot-count">4 entries</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-poke-special">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Pokémon Origins</span><span class="slot-year">2013</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Pokémon Generations (18 shorts)</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Pokémon: Twilight Wings</span><span class="slot-year">2020</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Pokémon Concierge (Netflix)</span><span class="slot-year">2023</span><span class="slot-need">⚠ need</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes">Mini-series block — short-form Pokémon content</td>
+    </tr>
+
+    <!-- ── MID-MORNING: DIGIMON BLOCK ── -->
+    <tr>
+      <td class="col-time">9:00am</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-digi-am')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-digi-am">▶</span>
+          <span class="slot-expand-title">📺 Digimon — Series Rotation</span>
+          <span class="slot-count">9 series</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-digi-am">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Digimon Adventure</span><span class="slot-year">1999</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Digimon Adventure 02</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Digimon Tamers</span><span class="slot-year">2001</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Digimon Frontier</span><span class="slot-year">2002</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Digimon Data Squad</span><span class="slot-year">2006</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Digimon Fusion</span><span class="slot-year">2010</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Digimon Adventure tri. (6 films)</span><span class="slot-year">2015</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Digimon Ghost Game</span><span class="slot-year">2021</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Digimon Adventure: (2020 reboot)</span><span class="slot-year">2020</span><span class="slot-need">⚠ need</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes">Digimon block — darker tone than Pokémon, run sequentially by series</td>
+    </tr>
+
+    <!-- ── AFTERNOON: YU-GI-OH! BLOCK ── -->
+    <tr>
+      <td class="col-time">11:00am</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-ygo-pm')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-ygo-pm">▶</span>
+          <span class="slot-expand-title">📺 Yu-Gi-Oh! — Series Rotation</span>
+          <span class="slot-count">9 series</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-ygo-pm">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Yu-Gi-Oh! (Toei 1998, Season 0)</span><span class="slot-year">1998</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Yu-Gi-Oh! Duel Monsters</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Yu-Gi-Oh! GX</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Yu-Gi-Oh! 5D's</span><span class="slot-year">2008</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Yu-Gi-Oh! Zexal</span><span class="slot-year">2011</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Yu-Gi-Oh! Arc-V</span><span class="slot-year">2014</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Yu-Gi-Oh! VRAINS</span><span class="slot-year">2017</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Yu-Gi-Oh! SEVENS</span><span class="slot-year">2020</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Yu-Gi-Oh! GO RUSH!!</span><span class="slot-year">2022</span><span class="slot-need">⚠ need</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes">YGO block — dueling primetime, run sequentially</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">1:00pm</td>
+      <td class="col-content"><span class="slot-single">Yu-Gi-Oh! Duel Monsters</span></td>
+      <td class="col-notes">Primetime duel anchor — Battle City arc priority</td>
+    </tr>
+
+    <!-- ── EARLY AFTERNOON: BAKUGAN BLOCK ── -->
+    <tr>
+      <td class="col-time">2:00pm</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-baku-pm')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-baku-pm">▶</span>
+          <span class="slot-expand-title">📺 Bakugan — Series Rotation</span>
+          <span class="slot-count">9 series</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-baku-pm">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Bakugan Battle Brawlers</span><span class="slot-year">2007</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Bakugan: New Vestroia</span><span class="slot-year">2009</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Bakugan: Gundalian Invaders</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Bakugan: Mechtanium Surge</span><span class="slot-year">2011</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Bakugan: Battle Planet</span><span class="slot-year">2018</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Bakugan: Armored Alliance</span><span class="slot-year">2020</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Bakugan: Geogan Rising</span><span class="slot-year">2021</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Bakugan: Evolutions</span><span class="slot-year">2022</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Bakugan: Legends</span><span class="slot-year">2023</span><span class="slot-need">⚠ need</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes">Bakugan block — Gen 1 first, then reboot era</td>
+    </tr>
+
+    <!-- ── EVENING FILM BLOCK ── -->
+    <tr>
+      <td class="col-time">4:00pm</td>
+      <td class="col-content"><span class="slot-single">Yu-Gi-Oh! Duel Monsters</span></td>
+      <td class="col-notes">Afternoon rerun — prestige duel arcs</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">5:00pm</td>
+      <td class="col-content"><span class="slot-single">Pokémon: Indigo League</span></td>
+      <td class="col-notes">Pre-dinner classic Pokémon</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">6:00pm</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-film-wd')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-film-wd">▶</span>
+          <span class="slot-expand-title">🎬 Film Block — Rotating all 4 franchises</span>
+          <span class="slot-count">29 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-film-wd">
+          <!-- POKÉMON FILMS -->
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Pokémon: The First Movie — Mewtwo Strikes Back</span><span class="slot-year">1998</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Pokémon: The Movie 2000 — The Power of One</span><span class="slot-year">1999</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Pokémon 3: The Movie — Spell of the Unown</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Pokémon 4Ever — Celebi: Voice of the Forest</span><span class="slot-year">2001</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Pokémon Heroes — Latios and Latias</span><span class="slot-year">2002</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Pokémon: Jirachi — Wish Maker</span><span class="slot-year">2003</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Pokémon: Destiny Deoxys</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Pokémon: Lucario and the Mystery of Mew</span><span class="slot-year">2005</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Pokémon Ranger and the Temple of the Sea</span><span class="slot-year">2006</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">10</span><span class="slot-title">Pokémon: The Rise of Darkrai</span><span class="slot-year">2007</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">11</span><span class="slot-title">Pokémon: Giratina and the Sky Warrior</span><span class="slot-year">2008</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">12</span><span class="slot-title">Pokémon: Arceus and the Jewel of Life</span><span class="slot-year">2009</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">13</span><span class="slot-title">Pokémon: Zoroark — Master of Illusions</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">14</span><span class="slot-title">Pokémon the Movie: Black/White — Victini and Reshiram/Zekrom</span><span class="slot-year">2011</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">15</span><span class="slot-title">Pokémon the Movie: Kyurem vs. the Sword of Justice</span><span class="slot-year">2012</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">16</span><span class="slot-title">Pokémon the Movie: Genesect and the Legend Awakened</span><span class="slot-year">2013</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">17</span><span class="slot-title">Pokémon the Movie: Diancie and the Cocoon of Destruction</span><span class="slot-year">2014</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">18</span><span class="slot-title">Pokémon the Movie: Hoopa and the Clash of Ages</span><span class="slot-year">2015</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">19</span><span class="slot-title">Pokémon the Movie: Volcanion and the Mechanical Marvel</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">20</span><span class="slot-title">Pokémon the Movie: I Choose You!</span><span class="slot-year">2017</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">21</span><span class="slot-title">Pokémon the Movie: The Power of Us</span><span class="slot-year">2018</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">22</span><span class="slot-title">Pokémon: Mewtwo Strikes Back — Evolution (CGI)</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">23</span><span class="slot-title">Pokémon: Secrets of the Jungle</span><span class="slot-year">2020</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">24</span><span class="slot-title">Pokémon: Detective Pikachu</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <!-- DIGIMON FILMS -->
+          <div class="slot-item"><span class="slot-num">25</span><span class="slot-title">Digimon: The Movie (US compilation)</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">26</span><span class="slot-title">Digimon Adventure: Last Evolution Kizuna</span><span class="slot-year">2020</span><span class="slot-need">⚠ need</span></div>
+          <!-- YU-GI-OH! FILMS -->
+          <div class="slot-item"><span class="slot-num">27</span><span class="slot-title">Yu-Gi-Oh! The Movie: Pyramid of Light</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">28</span><span class="slot-title">Yu-Gi-Oh!: Bonds Beyond Time</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">29</span><span class="slot-title">Yu-Gi-Oh!: The Dark Side of Dimensions</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">2hr</span> Pokémon films rotate nightly; Digimon/YGO films on Fridays</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">8:00pm</td>
+      <td class="col-content"><span class="slot-single">Digimon Tamers</span></td>
+      <td class="col-notes">Prestige evening — darkest Digimon series</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">9:00pm</td>
+      <td class="col-content"><span class="slot-single">Yu-Gi-Oh! Duel Monsters — Battle City arc</span></td>
+      <td class="col-notes">Primetime duel prestige</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">10:00pm</td>
+      <td class="col-content"><span class="slot-single">Bakugan Battle Brawlers</span></td>
+      <td class="col-notes">Late night</td>
+    </tr>
+
+    <tr class="overnight">
+      <td class="col-time">11:00pm</td>
+      <td class="col-content"><span class="slot-filler">🌙 Filler — opening themes, game trailers, card game tutorials, evolution supercuts</span></td>
+      <td class="col-notes">Overnight filler loop</td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ── WEEKEND ── -->
+<div class="schedule-label">WEEKEND</div>
+<table class="sched-table">
+  <thead><tr><th>Time</th><th>Content</th><th>Notes</th></tr></thead>
+  <tbody>
+
+    <tr>
+      <td class="col-time">7:00am</td>
+      <td class="col-content"><span class="slot-single">Pokémon: Indigo League</span></td>
+      <td class="col-notes">Morning classic — from the beginning</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">8:00am</td>
+      <td class="col-content"><span class="slot-single">Digimon Adventure</span></td>
+      <td class="col-notes">Morning Digimon</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">9:00am</td>
+      <td class="col-content"><span class="slot-single">Yu-Gi-Oh! Duel Monsters — Duelist Kingdom arc</span></td>
+      <td class="col-notes">Saturday morning card battle</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">10:00am</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-film-we1')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-film-we1">▶</span>
+          <span class="slot-expand-title">🎬 Weekend Film Block — All 4 Franchises</span>
+          <span class="slot-count">29 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-film-we1">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Pokémon: The First Movie — Mewtwo Strikes Back</span><span class="slot-year">1998</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Pokémon: The Movie 2000 — The Power of One</span><span class="slot-year">1999</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Pokémon 3: The Movie — Spell of the Unown</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Pokémon 4Ever — Celebi: Voice of the Forest</span><span class="slot-year">2001</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Pokémon Heroes — Latios and Latias</span><span class="slot-year">2002</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Pokémon: Jirachi — Wish Maker</span><span class="slot-year">2003</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Pokémon: Destiny Deoxys</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Pokémon: Lucario and the Mystery of Mew</span><span class="slot-year">2005</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Pokémon Ranger and the Temple of the Sea</span><span class="slot-year">2006</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">10</span><span class="slot-title">Pokémon: The Rise of Darkrai</span><span class="slot-year">2007</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">11</span><span class="slot-title">Pokémon: Giratina and the Sky Warrior</span><span class="slot-year">2008</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">12</span><span class="slot-title">Pokémon: Arceus and the Jewel of Life</span><span class="slot-year">2009</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">13</span><span class="slot-title">Pokémon: Zoroark — Master of Illusions</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">14</span><span class="slot-title">Pokémon: Victini and Reshiram</span><span class="slot-year">2011</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">15</span><span class="slot-title">Pokémon: Kyurem vs. the Sword of Justice</span><span class="slot-year">2012</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">16</span><span class="slot-title">Pokémon: Genesect and the Legend Awakened</span><span class="slot-year">2013</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">17</span><span class="slot-title">Pokémon: Diancie and the Cocoon of Destruction</span><span class="slot-year">2014</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">18</span><span class="slot-title">Pokémon: Hoopa and the Clash of Ages</span><span class="slot-year">2015</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">19</span><span class="slot-title">Pokémon: Volcanion and the Mechanical Marvel</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">20</span><span class="slot-title">Pokémon the Movie: I Choose You!</span><span class="slot-year">2017</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">21</span><span class="slot-title">Pokémon the Movie: The Power of Us</span><span class="slot-year">2018</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">22</span><span class="slot-title">Pokémon: Mewtwo Strikes Back — Evolution</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">23</span><span class="slot-title">Pokémon: Secrets of the Jungle</span><span class="slot-year">2020</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">24</span><span class="slot-title">Pokémon: Detective Pikachu</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">25</span><span class="slot-title">Digimon: The Movie</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">26</span><span class="slot-title">Digimon Adventure: Last Evolution Kizuna</span><span class="slot-year">2020</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">27</span><span class="slot-title">Yu-Gi-Oh! The Movie: Pyramid of Light</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">28</span><span class="slot-title">Yu-Gi-Oh!: Bonds Beyond Time</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">29</span><span class="slot-title">Yu-Gi-Oh!: The Dark Side of Dimensions</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">2hr</span> Full film block — all 4 franchises rotate</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">12:00pm</td>
+      <td class="col-content"><span class="slot-single">Digimon Tamers</span></td>
+      <td class="col-notes">Afternoon prestige Digimon</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">1:00pm</td>
+      <td class="col-content"><span class="slot-single">Pokémon Origins</span></td>
+      <td class="col-notes">Afternoon mini-series (4 eps — runs as one block)</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">2:00pm</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-film-we2')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-film-we2">▶</span>
+          <span class="slot-expand-title">🎬 Afternoon Film Block</span>
+          <span class="slot-count">29 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-film-we2">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Pokémon: The First Movie — Mewtwo Strikes Back</span><span class="slot-year">1998</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Pokémon: The Movie 2000 — The Power of One</span><span class="slot-year">1999</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Pokémon 3: The Movie — Spell of the Unown</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Pokémon 4Ever — Celebi: Voice of the Forest</span><span class="slot-year">2001</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Pokémon Heroes — Latios and Latias</span><span class="slot-year">2002</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Pokémon: Jirachi — Wish Maker</span><span class="slot-year">2003</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Pokémon: Destiny Deoxys</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Pokémon: Lucario and the Mystery of Mew</span><span class="slot-year">2005</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Yu-Gi-Oh! The Movie: Pyramid of Light</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">10</span><span class="slot-title">Yu-Gi-Oh!: Bonds Beyond Time</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">11</span><span class="slot-title">Yu-Gi-Oh!: The Dark Side of Dimensions</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">12</span><span class="slot-title">Digimon: The Movie</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">13</span><span class="slot-title">Digimon Adventure: Last Evolution Kizuna</span><span class="slot-year">2020</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">14</span><span class="slot-title">Digimon Adventure tri. Part 1 — Reunion</span><span class="slot-year">2015</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">15</span><span class="slot-title">Digimon Adventure tri. Part 2 — Determination</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">16</span><span class="slot-title">Digimon Adventure tri. Part 3 — Confession</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">17</span><span class="slot-title">Digimon Adventure tri. Part 4 — Loss</span><span class="slot-year">2017</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">18</span><span class="slot-title">Digimon Adventure tri. Part 5 — Coexistence</span><span class="slot-year">2017</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">19</span><span class="slot-title">Digimon Adventure tri. Part 6 — Future</span><span class="slot-year">2018</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">20</span><span class="slot-title">Pokémon: Detective Pikachu</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">21</span><span class="slot-title">Pokémon: The Rise of Darkrai</span><span class="slot-year">2007</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">22</span><span class="slot-title">Pokémon: Giratina and the Sky Warrior</span><span class="slot-year">2008</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">23</span><span class="slot-title">Pokémon: Arceus and the Jewel of Life</span><span class="slot-year">2009</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">24</span><span class="slot-title">Pokémon: Zoroark — Master of Illusions</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">25</span><span class="slot-title">Pokémon the Movie: I Choose You!</span><span class="slot-year">2017</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">26</span><span class="slot-title">Pokémon the Movie: The Power of Us</span><span class="slot-year">2018</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">27</span><span class="slot-title">Pokémon: Mewtwo Strikes Back — Evolution</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">28</span><span class="slot-title">Pokémon: Secrets of the Jungle</span><span class="slot-year">2020</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">29</span><span class="slot-title">Pokémon: Lucario and the Mystery of Mew</span><span class="slot-year">2005</span><span class="slot-have">✓ owned</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">2hr</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-time">4:00pm</td>
+      <td class="col-content"><span class="slot-single">Yu-Gi-Oh! 5D's</span></td>
+      <td class="col-notes">Saturday afternoon — Dark Signers arc priority</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">5:00pm</td>
+      <td class="col-content"><span class="slot-single">Bakugan Battle Brawlers</span></td>
+      <td class="col-notes">Pre-evening Bakugan</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">6:00pm</td>
+      <td class="col-content"><div class="slot-expand" onclick="toggleSlot('pkm-film-we3')">
+        <div class="slot-expand-header">
+          <span class="slot-arrow" id="arrow-pkm-film-we3">▶</span>
+          <span class="slot-expand-title">🎬 Evening Film Block</span>
+          <span class="slot-count">29 titles</span>
+        </div>
+        <div class="slot-expand-body" id="body-pkm-film-we3">
+          <div class="slot-item"><span class="slot-num">01</span><span class="slot-title">Pokémon: The First Movie — Mewtwo Strikes Back</span><span class="slot-year">1998</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">02</span><span class="slot-title">Yu-Gi-Oh!: The Dark Side of Dimensions</span><span class="slot-year">2016</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">03</span><span class="slot-title">Pokémon: Detective Pikachu</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">04</span><span class="slot-title">Digimon Adventure: Last Evolution Kizuna</span><span class="slot-year">2020</span><span class="slot-need">⚠ need</span></div>
+          <div class="slot-item"><span class="slot-num">05</span><span class="slot-title">Pokémon: Lucario and the Mystery of Mew</span><span class="slot-year">2005</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">06</span><span class="slot-title">Pokémon: Arceus and the Jewel of Life</span><span class="slot-year">2009</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">07</span><span class="slot-title">Yu-Gi-Oh!: Bonds Beyond Time</span><span class="slot-year">2010</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">08</span><span class="slot-title">Pokémon the Movie: I Choose You!</span><span class="slot-year">2017</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">09</span><span class="slot-title">Pokémon: The Movie 2000 — The Power of One</span><span class="slot-year">1999</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">10</span><span class="slot-title">Pokémon: Mewtwo Strikes Back — Evolution</span><span class="slot-year">2019</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">11</span><span class="slot-title">Digimon: The Movie</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">12</span><span class="slot-title">Yu-Gi-Oh! The Movie: Pyramid of Light</span><span class="slot-year">2004</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">13</span><span class="slot-title">Pokémon: Giratina and the Sky Warrior</span><span class="slot-year">2008</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">14</span><span class="slot-title">Pokémon 3: The Movie — Spell of the Unown</span><span class="slot-year">2000</span><span class="slot-have">✓ owned</span></div>
+          <div class="slot-item"><span class="slot-num">15</span><span class="slot-title">Pokémon: Secrets of the Jungle</span><span class="slot-year">2020</span><span class="slot-have">✓ owned</span></div>
+        </div>
+      </div></td>
+      <td class="col-notes"><span class="tag tag-film">FILM</span> <span class="tag tag-event">2hr</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-time">8:00pm</td>
+      <td class="col-content"><span class="slot-single">Yu-Gi-Oh! Duel Monsters — Battle City Finals</span></td>
+      <td class="col-notes">Prime Saturday night — tournament prestige</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">9:00pm</td>
+      <td class="col-content"><span class="slot-single">Digimon Tamers</span></td>
+      <td class="col-notes">Late night prestige</td>
+    </tr>
+
+    <tr>
+      <td class="col-time">10:00pm</td>
+      <td class="col-content"><span class="slot-single">Pokémon Origins</span></td>
+      <td class="col-notes">Late night mini-series</td>
+    </tr>
+
+    <tr class="overnight">
+      <td class="col-time">11:00pm</td>
+      <td class="col-content"><span class="slot-filler">🌙 Filler — opening themes, franchise retrospectives, card game highlights</span></td>
+      <td class="col-notes">Overnight</td>
+    </tr>
+
+  </tbody>
+</table>
+
+<div class="section"><div class="section-title">⭐ Recurring Events</div>
+  <div class="event-block"><strong>Pokémon Film Saturday</strong> — Two Pokémon films back-to-back. Rotates through all 24 in release order. Monthly.</div>
+  <div class="event-block"><strong>Digimon tri. Marathon</strong> — All 6 tri. films sequentially (approx 9hr total). Sunday once per month.</div>
+  <div class="event-block"><strong>Battle City Weekend</strong> — YGO Duel Monsters Battle City arc start-to-finish. Monthly.</div>
+  <div class="event-block"><strong>YGO Dark Side of Dimensions Night</strong> — YGO: The Movie: Pyramid of Light → Dark Side of Dimensions. Monthly Friday.</div>
+  <div class="event-block"><strong>Gen 1 Marathon</strong> — Indigo League episodes 1–39 sequentially. Saturday morning block. Quarterly.</div>
+</div>
+
+</div><!-- /pane-schedule -->
+
+
+<!-- ════════════════════════════════════════════════════════
+     ACQUIRE PANE
+════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-acquire">
+  <div class="acquire-actions">
+    <button class="acq-btn" onclick="markAllDone()">Mark all acquired</button>
+    <button class="acq-btn danger" onclick="resetAcq()">Reset</button>
+    <span class="acq-total" id="acq-total"></span>
+  </div>
+
+  <!-- POKÉMON -->
+  <div class="acquire-group" id="group-pkm-pokemon">
+    <div class="acquire-group-title">Pokémon — To Acquire<span class="acquire-count"></span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+
+    <div class="acq-item" id="acq-pkm-concierge" onclick="toggleAcq('pkm-concierge')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Pokémon Concierge</div>
+        <div class="acq-meta">2023 · 4 eps · Netflix · stop-motion · ~20min total</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">~4 GB</div>
+    </div>
+  </div>
+
+  <!-- DIGIMON -->
+  <div class="acquire-group" id="group-pkm-digimon">
+    <div class="acquire-group-title">Digimon — To Acquire<span class="acquire-count"></span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+
+    <div class="acq-item" id="acq-pkm-digi-fusion" onclick="toggleAcq('pkm-digi-fusion')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Digimon Fusion</div>
+        <div class="acq-meta">2010–2012 · 79 eps · Toei · EN dub available · ~33hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">198 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-digi-ghost" onclick="toggleAcq('pkm-digi-ghost')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Digimon Ghost Game</div>
+        <div class="acq-meta">2021–2023 · 67 eps · Toei · JP sub preferred · ~28hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">168 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-digi-reboot" onclick="toggleAcq('pkm-digi-reboot')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Digimon Adventure: (2020 reboot)</div>
+        <div class="acq-meta">2020–2021 · 67 eps · Toei · reimagining of original · ~28hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">168 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-digi-kizuna" onclick="toggleAcq('pkm-digi-kizuna')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Digimon Adventure: Last Evolution Kizuna</div>
+        <div class="acq-meta">2020 · film · ~95min · emotional sendoff for original cast</div>
+        <div class="acq-tags"><span class="tag tag-film">Movie</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">10 GB</div>
+    </div>
+  </div>
+
+  <!-- YU-GI-OH! -->
+  <div class="acquire-group" id="group-pkm-ygo">
+    <div class="acquire-group-title">Yu-Gi-Oh! — To Acquire<span class="acquire-count"></span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+
+    <div class="acq-item" id="acq-pkm-ygo-vrains" onclick="toggleAcq('pkm-ygo-vrains')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Yu-Gi-Oh! VRAINS</div>
+        <div class="acq-meta">2017–2020 · 120 eps · Studio Gallop · JP sub preferred · ~50hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">300 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-ygo-sevens" onclick="toggleAcq('pkm-ygo-sevens')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Yu-Gi-Oh! SEVENS</div>
+        <div class="acq-meta">2020–2022 · 92 eps · Studio Gallop · JP sub preferred · ~38hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">230 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-ygo-gorush" onclick="toggleAcq('pkm-ygo-gorush')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Yu-Gi-Oh! GO RUSH!!</div>
+        <div class="acq-meta">2022–2024 · 100 eps · Studio Gallop · JP sub preferred · ~42hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span><span class="tag tag-film">1080p</span></div>
+      </div>
+      <div class="acq-size">250 GB</div>
+    </div>
+  </div>
+
+  <!-- BAKUGAN -->
+  <div class="acquire-group" id="group-pkm-bakugan">
+    <div class="acquire-group-title">Bakugan — To Acquire<span class="acquire-count"></span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+
+    <div class="acq-item" id="acq-pkm-baku-bp" onclick="toggleAcq('pkm-baku-bp')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Bakugan: Battle Planet</div>
+        <div class="acq-meta">2018–2019 · 52 eps · Spin Master · Peacock · ~11hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span></div>
+      </div>
+      <div class="acq-size">66 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-baku-aa" onclick="toggleAcq('pkm-baku-aa')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Bakugan: Armored Alliance</div>
+        <div class="acq-meta">2020 · 40 eps · Spin Master · ~8hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span></div>
+      </div>
+      <div class="acq-size">48 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-baku-gr" onclick="toggleAcq('pkm-baku-gr')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Bakugan: Geogan Rising</div>
+        <div class="acq-meta">2021 · 26 eps · Spin Master · ~5hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span></div>
+      </div>
+      <div class="acq-size">32 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-baku-ev" onclick="toggleAcq('pkm-baku-ev')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Bakugan: Evolutions</div>
+        <div class="acq-meta">2022 · 26 eps · Spin Master · ~5hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span></div>
+      </div>
+      <div class="acq-size">32 GB</div>
+    </div>
+
+    <div class="acq-item" id="acq-pkm-baku-leg" onclick="toggleAcq('pkm-baku-leg')">
+      <div class="acq-cb"></div>
+      <div class="acq-body">
+        <div class="acq-title">Bakugan: Legends</div>
+        <div class="acq-meta">2023 · 26 eps · Spin Master · Netflix · ~5hr</div>
+        <div class="acq-tags"><span class="tag tag-tv">Anime</span></div>
+      </div>
+      <div class="acq-size">32 GB</div>
+    </div>
+  </div>
+
+</div><!-- /pane-acquire -->
+
+<script src="ch-shared.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => { restoreSlots(); restoreAcq(); });
+</script>
+</body>
+</html>
