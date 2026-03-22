@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SpongeBob SquarePants — Franchise Navigator</title>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+/* ════════════════════════════════════════════════════
+   SPONGEBOB-SPECIFIC STYLES & PLATFORM STRIPES
+════════════════════════════════════════════════════ */
+.fn-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/era rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media/TV insert rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+  border-left: 3px solid #ce93d8 !important;
+}
+
+/* Platform left-border colour stripes — SpongeBob themed */
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-ps2    td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps3    td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffd54f; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-pc     td:first-child { border-left: 3px solid #90a4ae; }
+.fn-wii    td:first-child { border-left: 3px solid #b0bec5; }
+.fn-mobile td:first-child { border-left: 3px solid #ffd966; }
+.fn-gamecube td:first-child { border-left: 3px solid #66bb6a; }
+.fn-movie  td:first-child { border-left: 3px solid #ffb74d; }
+.fn-tv     td:first-child { border-left: 3px solid #4fc3f7; }
+
+/* Gold = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional/defunct/cancelled */
+.fn-skip td { opacity: .55; }
+
+/* Inline tags */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes     { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no      { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-mobile  { background: rgba(255,213,79,.18);  color: #ffd54f; border: 1px solid rgba(255,213,79,.35); }
+.fn-tag-defunct { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); }
+.fn-tag-opt     { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-star        { color: var(--accent); font-weight: 700; }
+
+/* View tabs */
+.fn-view-nav {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .62rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 5px 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+}
+.fn-view-btn:hover  { border-color: rgba(200,168,75,.4); color: var(--text); }
+.fn-view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.06); }
+
+.fn-view        { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc   { font-size: .74rem; color: var(--text-dim); margin-bottom: 10px; font-style: italic; }
+
+/* Main page tabs */
+.fn-tab-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 7px 14px; background: transparent;
+  border: 1px solid transparent; border-bottom: none;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+  margin-bottom: -1px; border-radius: 3px 3px 0 0;
+}
+.fn-tab-btn:hover  { color: var(--text); }
+.fn-tab-btn.active { border-color: var(--border); border-bottom-color: var(--bg); color: var(--accent); background: var(--bg); }
+
+.fn-tab-pane        { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* Legend bar */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* Stat row */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* Filler cards */
+.fn-filler-card {
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.fn-filler-name  { font-weight:700; font-size:.88rem; color:var(--text-bright); margin-bottom:4px; }
+.fn-filler-meta  { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--text-dim); margin-bottom:6px; }
+.fn-filler-desc  { font-size:.78rem; color:var(--text-dim); line-height:1.6; }
+.fn-filler-where { margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:.72rem; color:var(--text-dim); }
+
+/* Merch history blocks */
+.fn-merch-history { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:16px 18px; margin-bottom:14px; }
+.fn-merch-history-era { font-family:'Cinzel',serif; font-size:.85rem; color:var(--accent); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🍔</div>
+  <div>
+    <h1>SpongeBob SquarePants</h1>
+    <div class="subtitle">// TV · Movies · Games · Books · Web Series · Mobile · Jellyfin //</div>
+    <p class="desc">
+      The iconic Nickelodeon franchise created by Stephen Hillenburg in 1999. Spanning 14+ seasons, three theatrical films, dozens of video games across every console generation, a Broadway musical, countless books, and a massive merchandising empire. The show’s surreal humor and optimistic absurdity made SpongeBob a global phenomenon. Use the Library tab to explore all games by release or platform. TV & Movies tabs cover the animated universe — including spin-offs like Kamp Koral and The Patrick Star Show. Filler content is curated for a Tunarr channel, and the History tab covers the full timeline from creator origins to modern streaming era.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">48+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">14</div><div class="fn-stat-label">TV Seasons</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">3</div><div class="fn-stat-label">Theatrical Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">200+</div><div class="fn-stat-label">Books</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1999</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- MAIN TABS -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn" onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn" onclick="fnTab('movies', this)">🎬 Movies</button>
+  <button class="fn-tab-btn" onclick="fnTab('merch', this)">🛒 Merch</button>
+  <button class="fn-tab-btn" onclick="fnTab('filler', this)">📡 Filler</button>
+  <button class="fn-tab-btn" onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+<!-- ======================= TAB 1 — LIBRARY ======================= -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section"><div class="section-title">📚 The SpongeBob Library</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release', this)">📅 Release Order</button>
+        <button class="fn-view-btn" onclick="fnView('library','platform', this)">🕹️ By Platform</button>
+        <button class="fn-view-btn" onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn" onclick="fnView('library','mobile', this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- RELEASE ORDER -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">Complete game library in release order. Purple rows = major movie/TV milestones. ⭐ = essential titles. Gold = best-in-class entries.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Format</th><th>Mobile?</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="6">🧽 The Classic Era (1999–2004)</td></tr>
+          <tr class="fn-gba fn-highlight"><td>2001</td><td>SpongeBob SquarePants: Legend of the Lost Spatula <span class="fn-star">⭐</span></td><td>GBC</td><td>Game</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>First SpongeBob game. 2D platformer. GBC exclusive. mGBA emulation works well.</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>2003</td><td>SpongeBob SquarePants: Battle for Bikini Bottom <span class="fn-star">⭐</span></td><td>PS2/GC/Xbox/GBA</td><td>Game</td><td><span class="fn-tag fn-tag-yes">📱 Yes (GBA)</span></td><td>Absolute fan-favorite 3D platformer. Rehydrated remake in 2020. Best entry point.</td></tr>
+          <tr class="fn-gba"><td>2003</td><td>SpongeBob SquarePants: Revenge of the Flying Dutchman</td><td>PS2/GC/GBA</td><td>Game</td><td><span class="fn-tag fn-tag-yes">GBA emu</span></td><td>Mixed reception; GBA version is a different game.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>The SpongeBob SquarePants Movie</strong> (2004) — Theatrical debut. SpongeBob & Patrick must retrieve King Neptune's crown. Essential watch after season 3.</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>2004</td><td>The SpongeBob SquarePants Movie Game <span class="fn-star">⭐</span></td><td>PS2/GC/Xbox/GBA</td><td>Game</td><td><span class="fn-tag fn-tag-yes">GBA</span></td><td>Tie-in to the film. Solid 3D platformer. GBA version is a 2D sidescroller.</td></tr>
+          <tr class="fn-arc-row"><td colspan="6">🍔 The THQ Era (2005–2014)</td></tr>
+          <tr class="fn-nds"><td>2005</td><td>SpongeBob SquarePants: Lights, Camera, Pants!</td><td>PS2/GC/Xbox/GBA/NDS</td><td>Party Game</td><td><span class="fn-tag fn-tag-yes">NDS</span></td><td>Minigame collection based on making a movie. Fun multiplayer.</td></tr>
+          <tr class="fn-wii"><td>2008</td><td>SpongeBob SquarePants: Underpants Slam!</td><td>Wii/PS2</td><td>Game</td><td><span class="fn-tag fn-tag-no">Console</span></td><td>Fighting/platformer hybrid. Campy but enjoyable.</td></tr>
+          <tr class="fn-nds fn-highlight"><td>2009</td><td>SpongeBob's Truth or Square <span class="fn-star">⭐</span></td><td>PSP/NDS/Wii/PS2</td><td>Game</td><td><span class="fn-tag fn-tag-yes">NDS</span></td><td>Tie-in to the show's 10th anniversary special. Decent platformer.</td></tr>
+          <tr class="fn-3ds"><td>2013</td><td>SpongeBob SquarePants: Plankton's Robotic Revenge</td><td>PS3/X360/WiiU/3DS</td><td>Shooter</td><td><span class="fn-tag fn-tag-yes">3DS</span></td><td>Third-person shooter. Licensed title with mixed reviews.</td></tr>
+          <tr class="fn-3ds"><td>2015</td><td>SpongeBob HeroPants</td><td>PSV/3DS/X360</td><td>Action</td><td><span class="fn-tag fn-tag-yes">3DS</span></td><td>Sponge Out of Water tie-in. Fast-paced platformer.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>The SpongeBob Movie: Sponge Out of Water</strong> (2015) — Hybrid 2D/3D. Superhero climax. Watch after season 9.</td></tr>
+          <tr class="fn-arc-row"><td colspan="6">📱 Mobile & Modern Era (2015–present)</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2018</td><td>SpongeBob: Sponge on the Run <span class="fn-star">⭐</span></td><td>iOS/Android/Netflix Games</td><td>Mobile Game</td><td><span class="fn-tag fn-tag-mobile">📱 Native</span></td><td>Endless runner with AR features. Based on the third film. High production value.</td></tr>
+          <tr class="fn-switch fn-highlight"><td>2020</td><td>SpongeBob SquarePants: Battle for Bikini Bottom – Rehydrated <span class="fn-star">⭐</span></td><td>Switch/PS4/XB1/PC</td><td>Remake</td><td><span class="fn-tag fn-tag-no">PC/Console</span></td><td>Faithful remake of the 2003 classic. Multiplayer horde mode added. Best modern entry.</td></tr>
+          <tr class="fn-mobile"><td>2021</td><td>SpongeBob: Krusty Cook-Off</td><td>iOS/Android/Switch</td><td>Time Management</td><td><span class="fn-tag fn-tag-mobile">📱 Yes</span></td><td>Tilting Point's restaurant sim. Massive download. Free-to-play.</td></tr>
+          <tr class="fn-switch"><td>2023</td><td>SpongeBob SquarePants: The Cosmic Shake</td><td>Switch/PS4/PC/XB1</td><td>3D Platformer</td><td><span class="fn-tag fn-tag-no">Console/PC</span></td><td>Spiritual successor to Battle for Bikini Bottom. Original story, great voice cast.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>2024</td><td>SpongeBob: Bubble Pop (Defunct)</td><td>iOS/Android</td><td>Match-3</td><td><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span></td><td>Removed from app stores 2024. Bubble shooter style.</td></tr>
+          <tr class="fn-pc fn-skip"><td>2025</td><td>Nickelodeon All-Star Brawl 2 (SpongeBob DLC)</td><td>PC/Switch/PS5</td><td>Fighting</td><td><span class="fn-tag fn-tag-no">PC/Console</span></td><td>SpongeBob, Patrick, Squidward as playable. Not a dedicated game but relevant.</td></tr>
+        </table>
+        <div class="fn-legend"><span><span class="fn-dot" style="background:var(--accent)"></span>Gold = recommended</span><span><span class="fn-dot" style="background:#ce93d8"></span>Purple = movie/TV milestone</span><span><span class="fn-tag fn-tag-mobile">📱 Mobile</span> playable on phone</span></div>
+      </div>
+
+      <!-- BY PLATFORM -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All games grouped by platform. Emulation cores noted where applicable.</div>
+        <table class="fn-table"><tr><th>Platform</th><th>Title</th><th>Year</th><th>Core/Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="3">🕹️ GBA / GBC</td></tr>
+          <tr class="fn-gba"><td>GBC</td><td>Legend of the Lost Spatula</td><td>2001</td><td>mGBA — first SpongeBob game</td></tr>
+          <tr class="fn-gba"><td>GBA</td><td>Battle for Bikini Bottom (GBA)</td><td>2003</td><td>mGBA — 2D sidescroller</td></tr>
+          <tr class="fn-gba"><td>GBA</td><td>The Movie Game (GBA)</td><td>2004</td><td>mGBA — 2D platformer</td></tr>
+          <tr class="fn-arc-row"><td colspan="3">🎮 PS2 / GameCube / Xbox (6th gen)</td></tr>
+          <tr class="fn-ps2"><td>PS2/GC/Xbox</td><td>Battle for Bikini Bottom</td><td>2003</td><td>PCSX2 / Dolphin — classic 3D platformer</td></tr>
+          <tr class="fn-ps2"><td>PS2/GC/Xbox</td><td>The SpongeBob Movie Game</td><td>2004</td><td>PCSX2 / Dolphin</td></tr>
+          <tr class="fn-arc-row"><td colspan="3">📱 Mobile (Native apps)</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>iOS/Android</td><td>Sponge on the Run (Endless Runner)</td><td>2018</td><td>Netflix Games / standalone — still available</td></tr>
+          <tr class="fn-mobile"><td>iOS/Android</td><td>Krusty Cook-Off</td><td>2021</td><td>Tilting Point — live service</td></tr>
+          <tr class="fn-mobile fn-skip"><td>iOS/Android</td><td>Bubble Pop (Defunct)</td><td>2022</td><td>removed 2024</td></tr>
+          <tr class="fn-arc-row"><td colspan="3">🖥️ PC / Modern Consoles</td></tr>
+          <tr class="fn-switch"><td>Switch/PC/PS4</td><td>Battle for Bikini Bottom – Rehydrated</td><td>2020</td><td>Remake — modern entry point</td></tr>
+          <tr class="fn-switch"><td>Switch/PC/PS4</td><td>The Cosmic Shake</td><td>2023</td><td>Original 3D platformer</td></tr>
+        </table>
+      </div>
+
+      <!-- BEST FIRST -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Curated order for newcomers — start with the best games.</div>
+        <table class="fn-table"><tr><th>#</th><th>Title</th><th>Platform</th><th>Why</th></tr>
+          <tr class="fn-highlight"><td>1</td><td>Battle for Bikini Bottom – Rehydrated <span class="fn-star">⭐</span></td><td>Switch/PC/PS4</td><td>Modern remake of the best classic 3D platformer. Faithful and accessible.</td></tr>
+          <tr class="fn-highlight"><td>2</td><td>The Cosmic Shake <span class="fn-star">⭐</span></td><td>Switch/PC/PS4</td><td>Spiritual successor. Fresh story, tight controls, original voice cast.</td></tr>
+          <tr class="fn-mobile"><td>3</td><td>Krusty Cook-Off</td><td>Mobile</td><td>Best mobile time management. Infinite play, very SpongeBob humor.</td></tr>
+          <tr class="fn-gba"><td>4</td><td>Legend of the Lost Spatula (GBC)</td><td>mGBA</td><td>Charming retro start if you prefer 2D.</td></tr>
+          <tr class="fn-skip"><td>5</td><td>HeroPants / Robotic Revenge</td><td>3DS/PS3</td><td>Optional: decent but not essential.</td></tr>
+        </table>
+      </div>
+
+      <!-- MOBILE ONLY -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Games playable on phone — either native apps or emulation (GBA/NDS).</div>
+        <table class="fn-table"><tr><th>Title</th><th>Platform</th><th>Status</th><th>Notes</th></tr>
+          <tr class="fn-mobile fn-highlight"><td>Sponge on the Run (Endless Runner)</td><td>iOS/Android</td><td>✅ Live</td><td>Netflix Games / App Store. High-quality runner.</td></tr>
+          <tr class="fn-mobile"><td>Krusty Cook-Off</td><td>iOS/Android</td><td>✅ Live</td><td>Time management, frequent updates.</td></tr>
+          <tr class="fn-gba"><td>Battle for Bikini Bottom (GBA)</td><td>mGBA</td><td>ROM</td><td>2D version, full mobile emulation.</td></tr>
+          <tr class="fn-nds"><td>Truth or Square (NDS)</td><td>melonDS</td><td>ROM</td><td>DS version works well on mobile.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>Bubble Pop</td><td>iOS/Android</td><td>⚠️ Defunct</td><td>Removed 2024, no longer downloadable.</td></tr>
+        </table>
+        <div class="callout callout-warn"><div class="callout-icon">📱</div><div class="callout-body">Excluded: PS2/GC/Xbox games require PC emulation (PCSX2/Dolphin). Stream via Sunshine if desired.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= TAB 2 — TV & ANIME ======================= -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section"><div class="section-title">📺 SpongeBob SquarePants — Television Universe</div>
+    <div class="card">
+      <div class="fn-view-nav"><button class="fn-view-btn active" onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button><button class="fn-view-btn" onclick="fnView('tvanime','bytype',this)">📂 By Series</button></div>
+      <div class="fn-view active" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Core series first, then spin-offs. Seasons 1–3 are the golden era. Kamp Koral and Patrick Star Show are optional modern expansions.</div>
+        <table class="fn-table"><tr><th>#</th><th>Title</th><th>Seasons/Eps</th><th>Notes</th></tr>
+          <tr class="fn-highlight"><td>1</td><td>SpongeBob SquarePants (Season 1–3) <span class="fn-star">⭐</span></td><td>60 eps</td><td>The essential Hillenburg era. Perfect animation and humor.</td></tr>
+          <tr><td>2</td><td>SpongeBob SquarePants (Season 4–5)</td><td>41 eps</td><td>Post-movie era; still high quality.</td></tr>
+          <tr><td>3</td><td>SpongeBob SquarePants (Season 6–8)</td><td>~100 eps</td><td>Mixed but includes classics.</td></tr>
+          <tr><td>4</td><td>SpongeBob SquarePants (Season 9–14)</td><td>~150 eps</td><td>Modern era, still airing.</td></tr>
+          <tr class="fn-skip"><td>5</td><td>Kamp Koral: SpongeBob's Under Years</td><td>2 seasons</td><td>CGI prequel. Optional; younger SpongeBob at summer camp.</td></tr>
+          <tr class="fn-skip"><td>6</td><td>The Patrick Star Show</td><td>2 seasons</td><td>Patrick's own surreal talk-show. Absurdist, for completionists.</td></tr>
+        </table>
+      </div>
+      <div class="fn-view" id="fn-tvanime-bytype"><div class="fn-view-desc">All animated series grouped by type.</div>
+        <table class="fn-table"><tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th></tr>
+          <tr class="fn-tv"><td>1999–present</td><td>SpongeBob SquarePants (Main)</td><td>Animated series</td><td>300+</td></tr>
+          <tr class="fn-tv"><td>2021–2024</td><td>Kamp Koral</td><td>CGI prequel</td><td>26</td></tr>
+          <tr class="fn-tv"><td>2021–present</td><td>The Patrick Star Show</td><td>Animated spin-off</td><td>40+</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📚 Notable audio & web: "SpongeBob BingePants" podcast (official), numerous audiobooks read by Tom Kenny.</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="section"><div class="section-title">📂 Jellyfin Library</div><div class="card"><pre>D:\Media\TV\SpongeBob SquarePants\
+  ├── SpongeBob SquarePants (1999)\
+  │   ├── Season 01–14\
+  │   └── Specials\
+  ├── Kamp Koral (2021)\
+  └── The Patrick Star Show (2021)\</pre></div></div>
+  </div>
+</div>
+
+<!-- ======================= TAB 3 — MOVIES ======================= -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section"><div class="section-title">🎬 SpongeBob Movies</div><div class="card">
+    <div class="fn-view-nav"><button class="fn-view-btn active" onclick="fnView('movies','all',this)">📋 All Films</button><button class="fn-view-btn" onclick="fnView('movies','watchorder',this)">🎯 Watch Order</button></div>
+    <div class="fn-view active" id="fn-movies-all">
+      <table class="fn-table"><tr><th>Year</th><th>Title</th><th>Type</th><th>Notes</th></tr>
+        <tr class="fn-movie fn-highlight"><td>2004</td><td>The SpongeBob SquarePants Movie</td><td>Theatrical</td><td>Classic. Directed by Stephen Hillenburg. David Hasselhoff cameo.</td></tr>
+        <tr class="fn-movie fn-highlight"><td>2015</td><td>The SpongeBob Movie: Sponge Out of Water</td><td>Theatrical</td><td>Hybrid live-action/CG finale. Superhero SpongeBob.</td></tr>
+        <tr class="fn-movie"><td>2020</td><td>The SpongeBob Movie: Sponge on the Run</td><td>Paramount+ (originally theatrical)</td><td>CGI/2D hybrid. Kamp Koral backstory. Streaming exclusive in US.</td></tr>
+        <tr class="fn-skip"><td>2025</td><td>Saving Bikini Bottom: The Sandy Cheeks Movie</td><td>Netflix</td><td>Spin-off film centered on Sandy. Released Aug 2025.</td></tr>
+      </table>
+    </div>
+    <div class="fn-view" id="fn-movies-watchorder"><div class="fn-view-desc">Watch after the corresponding TV seasons.</div><table class="fn-table"><tr><th>Order</th><th>Film</th><th>Watch after</th></tr><tr><td>1</td><td>The SpongeBob SquarePants Movie</td><td>After Season 3</tr><tr><td>2</td><td>Sponge Out of Water</td><td>After Season 9</td></tr><tr><td>3</td><td>Sponge on the Run</td><td>After Season 12</td></tr></table></div>
+  </div></div>
+</div>
+
+<!-- ======================= TAB 4 — MERCH ======================= -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section"><div class="section-title">🛒 SpongeBob Merchandise</div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">🍔 Plush & Toys (1999–present)</div><p>Thousands of plushies, McDonald's Happy Meal toys (over 10 different promotions), LEGO sets (Bikini Bottom, Krusty Krab, The Flying Dutchman), Funko Pops, and Jakks Pacific figures. The rarest are SDCC exclusives and first-wave plush.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">📚 Books & Comics</div><p>Over 200+ Scholastic storybooks, chapter books, and comic books from United Plankton Pictures and Titan Comics. "SpongeBob Comics" ran 60+ issues. Audiobook adaptations read by Tom Kenny (voice of SpongeBob).</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">🎮 Board Games & TCG</div><p>Monopoly: SpongeBob SquarePants Edition, Operation: SpongeBob, Uno, and a short-lived TCG "SpongeBob SquarePants Trading Card Game" by Rittenhouse Archives (2003).</p></div>
+  </div>
+</div>
+
+<!-- ======================= TAB 5 — FILLER ======================= -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section"><div class="section-title">📡 Tunarr Channel Filler — Bikini Bottom Loop</div><div class="card">
+    <div class="fn-filler-card"><div class="fn-filler-name">Best of Season 1 (Loop)</div><div class="fn-filler-meta">22 min eps · 20 episodes</div><div class="fn-filler-desc">Classic surreal humor. "Pizza Delivery," "Ripped Pants," "Jellyfishing." Perfect for 24/7 channel.</div><div class="fn-filler-where">📍 Jellyfin → SpongeBob S01</div></div>
+    <div class="fn-filler-card"><div class="fn-filler-name">SpongeBob SquarePants: The Broadway Musical (Pro-Shot)</div><div class="fn-filler-meta">~2hr · Paramount+ / Digital</div><div class="fn-filler-desc">Tony-nominated musical. Great as a long-format filler block.</div></div>
+    <div class="fn-filler-card"><div class="fn-filler-name">"Sweet Victory" + Bumper Reel</div><div class="fn-filler-meta">3 min · YouTube / Archive</div><div class="fn-filler-desc">Iconic Super Bowl tribute clip; perfect interstitial.</div></div>
+  </div></div>
+</div>
+
+<!-- ======================= TAB 6 — HISTORY ======================= -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section"><div class="section-title">📖 History of SpongeBob</div><div class="card">
+    <div class="fn-merch-history"><div class="fn-merch-history-era">1984–1998 — Creation by Stephen Hillenburg</div><p>Marine biology teacher turned animator. Hillenburg developed SpongeBob for Nickelodeon after working on Rocko's Modern Life. The pilot "Bubblestand" / "Ripped Pants" aired May 1, 1999.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">1999–2004 — Golden Age</div><p>Seasons 1–3 defined modern animation. The first movie (2004) was intended as a series finale but the show continued due to massive ratings.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">2005–2015 — Post-Hillenburg & Revival</div><p>After Hillenburg stepped back, the show had a creative lull but regained momentum. Stephen Hillenburg returned in 2015 and remained executive producer until his death in 2018. The second movie (2015) revived theatrical interest.</p></div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">2019–Present — Streaming & Expansion</div><p>Sponge on the Run (2020) launched Paramount+. Spin-offs Kamp Koral and The Patrick Star Show premiered. The franchise remains one of Nickelodeon's most profitable IPs, generating over $13 billion in retail sales.</p></div>
+  </div></div>
+</div>
+
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fn-pane-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function fnView(tabId, viewId, btn) {
+  const pane = document.getElementById('fn-pane-' + tabId);
+  if(pane) { pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('fn-' + tabId + '-' + viewId);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');}
+}
+</script>
+</body>
+</html>
