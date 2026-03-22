@@ -77,68 +77,81 @@
 
     /* ══════════════════════════════════════════════
        ROW COLOR CODING BY CONTENT TYPE
-       Faint tinted background + colored left border.
-       Kept very subtle so text remains easy to scan.
     ══════════════════════════════════════════════ */
+    .master-table tr.row-game td  { background: rgba(91,141,217,.04); border-bottom-color: rgba(91,141,217,.08); }
+    .master-table tr.row-anime td { background: rgba(200,168,75,.04); border-bottom-color: rgba(200,168,75,.08); }
+    .master-table tr.row-movie td { background: rgba(78,205,196,.04); border-bottom-color: rgba(78,205,196,.08); }
+    .master-table tr.row-tv td    { background: rgba(224,133,92,.04); border-bottom-color: rgba(224,133,92,.08); }
+    .master-table tr.row-manga td { background: rgba(180,100,220,.04); border-bottom-color: rgba(180,100,220,.08); }
 
-    /* game — blue */
-    .master-table tr.row-game td {
-      background: rgba(91, 141, 217, 0.04);
-      border-bottom-color: rgba(91, 141, 217, 0.08);
-    }
-    .master-table tr.row-game td:first-child {
-      border-left: 2px solid rgba(91, 141, 217, 0.45);
-    }
-    .master-table tr.row-game:hover td {
-      background: rgba(91, 141, 217, 0.09) !important;
-    }
+    .master-table tr.row-game td:first-child  { border-left: 2px solid rgba(91,141,217,.45); }
+    .master-table tr.row-anime td:first-child  { border-left: 2px solid rgba(200,168,75,.45); }
+    .master-table tr.row-movie td:first-child  { border-left: 2px solid rgba(78,205,196,.45); }
+    .master-table tr.row-tv td:first-child     { border-left: 2px solid rgba(224,133,92,.45); }
+    .master-table tr.row-manga td:first-child  { border-left: 2px solid rgba(180,100,220,.45); }
 
-    /* anime — gold */
-    .master-table tr.row-anime td {
-      background: rgba(200, 168, 75, 0.04);
-      border-bottom-color: rgba(200, 168, 75, 0.08);
-    }
-    .master-table tr.row-anime td:first-child {
-      border-left: 2px solid rgba(200, 168, 75, 0.45);
-    }
-    .master-table tr.row-anime:hover td {
-      background: rgba(200, 168, 75, 0.09) !important;
-    }
+    .master-table tr.row-game:hover td  { background: rgba(91,141,217,.09) !important; }
+    .master-table tr.row-anime:hover td { background: rgba(200,168,75,.09) !important; }
+    .master-table tr.row-movie:hover td { background: rgba(78,205,196,.09) !important; }
+    .master-table tr.row-tv:hover td    { background: rgba(224,133,92,.09) !important; }
+    .master-table tr.row-manga:hover td { background: rgba(180,100,220,.09) !important; }
 
-    /* movie — teal */
-    .master-table tr.row-movie td {
-      background: rgba(78, 205, 196, 0.04);
-      border-bottom-color: rgba(78, 205, 196, 0.08);
+    /* ── Title cell — clickable ── */
+    .title-cell {
+      cursor: pointer;
+      font-weight: 600;
     }
-    .master-table tr.row-movie td:first-child {
-      border-left: 2px solid rgba(78, 205, 196, 0.45);
+    .title-cell:hover { color: var(--accent); }
+    .expand-chevron {
+      display: inline-block;
+      font-size: .55rem;
+      margin-right: 5px;
+      opacity: .45;
+      transition: transform .18s;
+      vertical-align: middle;
     }
-    .master-table tr.row-movie:hover td {
-      background: rgba(78, 205, 196, 0.09) !important;
-    }
+    tr.expanded .expand-chevron { transform: rotate(90deg); opacity: .8; }
 
-    /* tv — orange */
-    .master-table tr.row-tv td {
-      background: rgba(224, 133, 92, 0.04);
-      border-bottom-color: rgba(224, 133, 92, 0.08);
+    /* ── Detail expand row ── */
+    .detail-row td {
+      padding: 0 !important;
+      border-bottom: 1px solid rgba(255,255,255,.06) !important;
+      border-left: none !important;
     }
-    .master-table tr.row-tv td:first-child {
-      border-left: 2px solid rgba(224, 133, 92, 0.45);
+    .detail-inner {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .22s ease, padding .22s ease;
+      padding: 0 16px;
     }
-    .master-table tr.row-tv:hover td {
-      background: rgba(224, 133, 92, 0.09) !important;
+    .detail-inner.open {
+      max-height: 400px;
+      padding: 12px 16px 14px;
     }
-
-    /* manga — purple */
-    .master-table tr.row-manga td {
-      background: rgba(180, 100, 220, 0.04);
-      border-bottom-color: rgba(180, 100, 220, 0.08);
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px 20px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
     }
-    .master-table tr.row-manga td:first-child {
-      border-left: 2px solid rgba(180, 100, 220, 0.45);
+    .detail-field { display: flex; flex-direction: column; gap: 2px; }
+    .detail-label {
+      font-size: .55rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: .6;
     }
-    .master-table tr.row-manga:hover td {
-      background: rgba(180, 100, 220, 0.09) !important;
+    .detail-value { color: var(--text); }
+    .detail-desc {
+      margin-top: 10px;
+      font-family: 'Raleway', sans-serif;
+      font-size: .78rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      border-top: 1px solid rgba(255,255,255,.05);
+      padding-top: 8px;
     }
 
     /* ── Type / status badges ── */
@@ -152,12 +165,8 @@
     .badge-movie   { background: rgba(78,205,196,.12); color: #4ecdc4; border: 1px solid rgba(78,205,196,.3); }
     .badge-tv      { background: rgba(224,133,92,.12); color: #e0855c; border: 1px solid rgba(224,133,92,.3); }
     .badge-manga   { background: rgba(180,100,220,.12); color: #b464dc; border: 1px solid rgba(180,100,220,.3); }
-    .badge-completed  { background: rgba(76,175,80,.1);  color: #81c784; border: 1px solid rgba(76,175,80,.25); }
-    .badge-backlog    { background: rgba(120,130,160,.08); color: var(--text-dim); border: 1px solid var(--border); }
-    .badge-inprogress { background: rgba(224,184,75,.12); color: var(--warning); border: 1px solid rgba(224,184,75,.3); }
-    .badge-skipped    { background: rgba(224,92,92,.1);  color: var(--danger); border: 1px solid rgba(224,92,92,.25); }
 
-    /* ── Franchise pill in default table view ── */
+    /* ── Franchise pill ── */
     .fn-pill {
       font-family: 'Share Tech Mono', monospace;
       font-size: .62rem; color: var(--text-dim);
@@ -174,11 +183,8 @@
       color: var(--text-dim); opacity: .7;
     }
     .legend-swatch {
-      display: inline-block;
-      width: 10px; height: 10px;
-      border-radius: 2px;
-      margin-right: 4px;
-      vertical-align: middle;
+      display: inline-block; width: 10px; height: 10px;
+      border-radius: 2px; margin-right: 4px; vertical-align: middle;
       border-left: 2px solid;
     }
 
@@ -188,15 +194,42 @@
     .stat-num { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--accent); line-height: 1; }
     .stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
 
-    /* ── Loading / error states ── */
-    .load-msg {
-      font-family: 'Share Tech Mono', monospace; font-size: .72rem;
-      color: var(--text-dim); padding: 20px 0; text-align: center;
+    /* ══════════════════════════════════════════════
+       YEAR DIVIDERS
+       Three tiers of visual weight:
+         year-div    — every new year       (faint, 1px)
+         fiveyear-div — every 5-year mark   (medium, 2px)
+         decade-div   — every decade        (bold, 3px + label)
+    ══════════════════════════════════════════════ */
+    .master-table tr.year-div td {
+      border-top: 1px solid rgba(255,255,255,.10) !important;
     }
-    .load-msg.err { color: var(--danger); }
+    .master-table tr.fiveyear-div td {
+      border-top: 2px solid rgba(255,255,255,.18) !important;
+    }
+    .master-table tr.decade-div td {
+      border-top: 3px solid rgba(200,168,75,.35) !important;
+    }
 
-    /* ── Rating stars ── */
-    .stars { color: var(--accent); font-size: .72rem; }
+    /* Decade label row */
+    .master-table tr.decade-label td {
+      background: rgba(200,168,75,.04) !important;
+      border-top: 3px solid rgba(200,168,75,.35) !important;
+      border-bottom: none !important;
+      padding: 3px 10px 2px !important;
+    }
+    .decade-label-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .56rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .45;
+    }
+
+    /* ── Loading / error ── */
+    .load-msg { font-family: 'Share Tech Mono', monospace; font-size: .72rem; color: var(--text-dim); padding: 20px 0; text-align: center; }
+    .load-msg.err { color: var(--danger); }
   </style>
 </head>
 <body>
@@ -214,7 +247,6 @@
   </div>
 </div>
 
-<!-- Live stat row — filled by JS after data loads -->
 <div class="stat-row" id="stat-row">
   <div class="stat-box"><div class="stat-num" id="s-franchises">—</div><div class="stat-label">Franchises</div></div>
   <div class="stat-box"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Entries</div></div>
@@ -224,9 +256,6 @@
   <div class="stat-box"><div class="stat-num" id="s-completed">—</div><div class="stat-label">Completed</div></div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     FRANCHISE GRID — auto-rendered
-══════════════════════════════════════════════ -->
 <div class="section">
   <div class="section-title">📂 Franchises</div>
   <div class="franchise-grid" id="franchise-grid">
@@ -234,21 +263,16 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     MASTER TABLE — auto-rendered
-══════════════════════════════════════════════ -->
 <div class="section">
   <div class="section-title">📋 All Media</div>
 
   <div class="filter-row">
     <input class="filter-inp" id="search" placeholder="Search titles, franchises, notes…" oninput="renderTable()">
-    <button class="filter-btn active" id="fb-all"       onclick="setFilter('all',       this)">All</button>
-    <button class="filter-btn"        id="fb-game"      onclick="setFilter('game',      this)">Games</button>
-    <button class="filter-btn"        id="fb-anime"     onclick="setFilter('anime',     this)">Anime</button>
-    <button class="filter-btn"        id="fb-tv"        onclick="setFilter('tv',        this)">TV</button>
-    <button class="filter-btn"        id="fb-movie"     onclick="setFilter('movie',     this)">Movies</button>
-    <button class="filter-btn"        id="fb-completed" onclick="setFilter('completed', this)">Completed</button>
-    <button class="filter-btn"        id="fb-backlog"   onclick="setFilter('backlog',   this)">Backlog</button>
+    <button class="filter-btn active" id="fb-all"   onclick="setFilter('all',   this)">All</button>
+    <button class="filter-btn"        id="fb-game"  onclick="setFilter('game',  this)">Games</button>
+    <button class="filter-btn"        id="fb-anime" onclick="setFilter('anime', this)">Anime</button>
+    <button class="filter-btn"        id="fb-tv"    onclick="setFilter('tv',    this)">TV</button>
+    <button class="filter-btn"        id="fb-movie" onclick="setFilter('movie', this)">Movies</button>
     <span class="count-lbl" id="count-lbl"></span>
   </div>
 
@@ -261,7 +285,7 @@
   </div>
 
   <div id="table-wrap">
-    <div class="load-msg" id="table-msg">Loading…</div>
+    <div class="load-msg">Loading…</div>
   </div>
 </div>
 
@@ -270,16 +294,15 @@
 // ══════════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════════
-let ALL_MEDIA         = [];   // flat merged array, each item has ._franchise* injected
-let FRANCHISE_META    = [];   // top-level franchise objects (id, franchise, icon, color, …)
+let ALL_MEDIA         = [];
+let FRANCHISE_META    = [];
 let currentFilter     = 'all';
-let activeFranchiseId = null; // set when a franchise card is clicked; cleared on free search
+let activeFranchiseId = null;
 
 // ══════════════════════════════════════════════════════════
-//  BOOT — fetch manifest, then all franchise JSONs in parallel
+//  BOOT
 // ══════════════════════════════════════════════════════════
 async function boot() {
-  // 1. Fetch the manifest
   let ids;
   try {
     const r = await fetch('franchises/index.json');
@@ -292,11 +315,10 @@ async function boot() {
   }
 
   if (!ids.length) {
-    setError('franchises/index.json is empty. Add franchise IDs to get started.');
+    setError('franchises/index.json is empty.');
     return;
   }
 
-  // 2. Fetch all franchise JSONs in parallel — failed fetches are skipped with a warning
   const results = await Promise.allSettled(
     ids.map(id => Promise.all([
       fetch('franchises/' + id + '.json').then(r => {
@@ -312,7 +334,6 @@ async function boot() {
       const [data, hasPage] = result.value;
       const id = ids[i];
       FRANCHISE_META.push({ id, franchise: data.franchise, icon: data.icon || '🎮', color: data.color || null, description: data.description || '', hasPage });
-      // Inject franchise id + name into every media entry; skip template comment stubs
       const media = (data.media || []).filter(m =>
         !Object.keys(m).some(k => k.startsWith('_comment'))
       );
@@ -356,11 +377,11 @@ function renderGrid() {
   if (!FRANCHISE_META.length) { grid.innerHTML = '<div class="load-msg">No franchises loaded.</div>'; return; }
 
   grid.innerHTML = FRANCHISE_META.map(f => {
-    const entries  = ALL_MEDIA.filter(m => m._franchiseId === f.id);
-    const games    = entries.filter(m => m.type === 'game').length;
-    const anime    = entries.filter(m => m.type === 'anime' || m.type === 'tv').length;
-    const movies   = entries.filter(m => m.type === 'movie').length;
-    const parts    = [];
+    const entries = ALL_MEDIA.filter(m => m._franchiseId === f.id);
+    const games   = entries.filter(m => m.type === 'game').length;
+    const anime   = entries.filter(m => m.type === 'anime' || m.type === 'tv').length;
+    const movies  = entries.filter(m => m.type === 'movie').length;
+    const parts   = [];
     if (games)  parts.push(games  + (games  === 1 ? ' game'    : ' games'));
     if (anime)  parts.push(anime  + (anime  === 1 ? ' anime/TV' : ' anime/TV'));
     if (movies) parts.push(movies + (movies === 1 ? ' movie'   : ' movies'));
@@ -369,7 +390,7 @@ function renderGrid() {
       <div class="franchise-card-icon">${f.icon}</div>
       <div class="franchise-card-name">${esc(f.franchise || f.id)}</div>
       <div class="franchise-card-counts">${parts.join(' · ') || 'No entries yet'}</div>
-      ${f.hasPage ? `<div style="margin-top:8px"><button onclick="event.stopPropagation();window.location.href = 'franchise-viewer.html?id=${f.id}';" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">Deep Dive →</button></div>` : ''}
+      ${f.hasPage ? `<div style="margin-top:8px"><button onclick="event.stopPropagation();window.location.href='franchise-viewer.html?id=${f.id}';" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">Deep Dive →</button></div>` : ''}
     </div>`;
   }).join('');
 }
@@ -397,25 +418,21 @@ function setFilter(type, btn) {
 }
 
 function renderTable() {
-  const q      = (document.getElementById('search').value || '').toLowerCase().trim();
-  const filter = currentFilter;
-  const wrap   = document.getElementById('table-wrap');
-  const lbl    = document.getElementById('count-lbl');
+  const q    = (document.getElementById('search').value || '').toLowerCase().trim();
+  const wrap = document.getElementById('table-wrap');
+  const lbl  = document.getElementById('count-lbl');
 
-  // Free-text search clears franchise drill-down
   if (q && activeFranchiseId) activeFranchiseId = null;
 
   const filtered = ALL_MEDIA.filter(m => {
     if (activeFranchiseId) return m._franchiseId === activeFranchiseId;
-    if (filter === 'completed' || filter === 'backlog') {
-      if (m.status !== filter) return false;
-    } else if (filter !== 'all') {
-      if (m.type !== filter) return false;
+    if (currentFilter !== 'all') {
+      if (m.type !== currentFilter) return false;
     }
     if (q) {
       const hay = [
         m.title, m._franchiseName, m.notes, m.description,
-        m.type, m.status, ...(m.platform || [])
+        m.type, ...(m.platform || [])
       ].filter(Boolean).join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
@@ -429,60 +446,161 @@ function renderTable() {
     return;
   }
 
-  // Always sort by year ascending (no year → sort last)
   filtered.sort((a, b) => (a.year || 9999) - (b.year || 9999));
 
   let rows = '';
 
   if (activeFranchiseId) {
-    // ── Franchise drill-down: single arc-row header, entries by year ──
     const meta  = FRANCHISE_META.find(f => f.id === activeFranchiseId);
     const label = meta ? meta.icon + ' ' + esc(meta.franchise || meta.id) : esc(activeFranchiseId);
     rows += `<tr class="arc-row">
-      <td colspan="7">${label}
+      <td colspan="5">${label}
         <span style="opacity:.45;font-size:.58rem;margin-left:10px;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0" onclick="clearFranchiseFilter()">✕ clear filter</span>
       </td>
     </tr>`;
-    filtered.forEach((m, i) => { rows += buildRow(m, i, false); });
+    let prevYear = null;
+    filtered.forEach((m, i) => {
+      rows += yearDividerRows(m.year, prevYear, 5);
+      rows += buildRow(m, i, false);
+      prevYear = m.year || null;
+    });
 
     wrap.innerHTML = `<table class="master-table">
-      <thead><tr>
-        <th>#</th><th>Title</th><th>Type</th><th>Year</th>
-        <th>Platform / Episodes</th><th>Rating</th><th>Status</th>
-      </tr></thead>
+      <thead><tr><th>#</th><th>Title</th><th>Type</th><th>Year</th><th>Platform / Episodes</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 
   } else {
-    // ── Default / search view: flat by year, Franchise column included ──
-    filtered.forEach((m, i) => { rows += buildRow(m, i, true); });
+    let prevYear = null;
+    filtered.forEach((m, i) => {
+      rows += yearDividerRows(m.year, prevYear, 6);
+      rows += buildRow(m, i, true);
+      prevYear = m.year || null;
+    });
 
     wrap.innerHTML = `<table class="master-table">
-      <thead><tr>
-        <th>#</th><th>Title</th><th>Type</th><th>Year</th>
-        <th>Franchise</th><th>Platform / Episodes</th><th>Rating</th><th>Status</th>
-      </tr></thead>
+      <thead><tr><th>#</th><th>Title</th><th>Type</th><th>Year</th><th>Franchise</th><th>Platform / Episodes</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   }
 }
 
+// ══════════════════════════════════════════════════════════
+//  YEAR DIVIDERS
+//  Returns zero or more <tr> rows to insert before a data row
+//  when the year changes. Three tiers:
+//    decade   (year % 10 === 0) — gold thick line + label
+//    fiveyear (year % 5  === 0) — medium line
+//    year     (any new year)    — faint line
+// ══════════════════════════════════════════════════════════
+function yearDividerRows(year, prevYear, colspan) {
+  if (!year || !prevYear || year === prevYear) return '';
+  if (year % 10 === 0) {
+    // Decade: label row + thick gold border
+    return `<tr class="decade-label"><td colspan="${colspan}"><span class="decade-label-text">${year}s</span></td></tr>`;
+  }
+  if (year % 5 === 0) {
+    // 5-year: just a medium-weight top border on the next data row via a zero-height spacer row
+    return `<tr class="fiveyear-div"><td colspan="${colspan}" style="padding:0;height:0;line-height:0;font-size:0"></td></tr>`;
+  }
+  // Plain year change: faint border
+  return `<tr class="year-div"><td colspan="${colspan}" style="padding:0;height:0;line-height:0;font-size:0"></td></tr>`;
+}
+
 function buildRow(m, i, showFranchise) {
   const rowClass = 'row-' + (m.type || 'unknown');
   const meta     = FRANCHISE_META.find(f => f.id === m._franchiseId);
+  const uid      = 'det-' + m._franchiseId + '-' + i;
+
   const franchiseCell = showFranchise
-    ? `<td><span class="fn-pill" title="Filter to ${esc(m._franchiseName || '')}" onclick="filterByFranchise('${esc(m._franchiseId || '')}')">${meta ? meta.icon + ' ' : ''}${esc(m._franchiseName || m._franchiseId || '—')}</span></td>`
+    ? `<td><span class="fn-pill" title="Filter to ${esc(m._franchiseName || '')}" onclick="event.stopPropagation();filterByFranchise('${esc(m._franchiseId || '')}')">${meta ? meta.icon + ' ' : ''}${esc(m._franchiseName || m._franchiseId || '—')}</span></td>`
     : '';
-  return `<tr class="${rowClass}">
+
+  const mainRow = `<tr class="${rowClass}" onclick="toggleDetail('${uid}', this)">
     <td style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.65rem">${i + 1}</td>
-    <td style="font-weight:600">${esc(m.title || '—')}</td>
+    <td class="title-cell"><span class="expand-chevron">▶</span>${esc(m.title || '—')}</td>
     <td>${typeBadge(m.type)}</td>
     <td style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${m.year || '—'}</td>
     ${franchiseCell}
     <td>${extraCol(m)}</td>
-    <td>${ratingStr(m.rating)}</td>
-    <td>${statusBadge(m.status)}</td>
   </tr>`;
+
+  const colspan = showFranchise ? 6 : 5;
+  const detailRow = `<tr class="detail-row" id="${uid}">
+    <td colspan="${colspan}"><div class="detail-inner" id="${uid}-inner">${buildDetail(m)}</div></td>
+  </tr>`;
+
+  return mainRow + detailRow;
+}
+
+function toggleDetail(uid, clickedRow) {
+  const inner = document.getElementById(uid + '-inner');
+  if (!inner) return;
+  const isOpen = inner.classList.contains('open');
+  // Close all others
+  document.querySelectorAll('.detail-inner.open').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.master-table tr.expanded').forEach(el => el.classList.remove('expanded'));
+  // Toggle this one
+  if (!isOpen) {
+    inner.classList.add('open');
+    clickedRow.classList.add('expanded');
+  }
+}
+
+function buildDetail(m) {
+  // Collect all meaningful fields from the JSON, excluding internal/injected ones
+  const skip = new Set(['title', 'type', 'year', '_franchiseId', '_franchiseName', '_franchiseIcon']);
+  const fields = [];
+
+  // Ordered priority fields first
+  const ordered = ['developer', 'studio', 'network', 'platform', 'episodes', 'seasons', 'volumes', 'rating', 'status', 'canon', 'notes'];
+  ordered.forEach(key => {
+    if (m[key] == null || m[key] === '') return;
+    fields.push({ key, val: m[key] });
+    skip.add(key);
+  });
+
+  // Any remaining unknown fields (future-proofing)
+  Object.keys(m).forEach(key => {
+    if (skip.has(key) || key.startsWith('_')) return;
+    if (m[key] == null || m[key] === '') return;
+    fields.push({ key, val: m[key] });
+  });
+
+  const formatKey = k => k.replace(/_/g, ' ');
+  const formatVal = (k, v) => {
+    if (Array.isArray(v)) return v.join(', ');
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    return esc(String(v));
+  };
+
+  const gridFields = fields.filter(f => f.key !== 'description' && f.key !== 'notes');
+  const desc = m.description || null;
+  const notes = m.notes || null;
+
+  let html = '';
+
+  if (gridFields.length) {
+    html += '<div class="detail-grid">';
+    gridFields.forEach(({ key, val }) => {
+      html += `<div class="detail-field">
+        <span class="detail-label">${esc(formatKey(key))}</span>
+        <span class="detail-value">${formatVal(key, val)}</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (desc || notes) {
+    html += '<div class="detail-desc">';
+    if (desc)  html += `<div style="margin-bottom:${notes ? '8px' : '0'}">${esc(desc)}</div>`;
+    if (notes) html += `<div style="opacity:.7;font-size:.74rem">📝 ${esc(notes)}</div>`;
+    html += '</div>';
+  }
+
+  if (!html) html = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:.65rem;color:var(--text-dim);opacity:.5">No additional details.</div>';
+
+  return html;
 }
 
 function clearFranchiseFilter() {
@@ -496,17 +614,6 @@ function clearFranchiseFilter() {
 function typeBadge(type) {
   const map = { game:'badge-game', anime:'badge-anime', movie:'badge-movie', tv:'badge-tv', manga:'badge-manga' };
   return `<span class="badge ${map[type] || ''}">${esc(type || '—')}</span>`;
-}
-
-function statusBadge(status) {
-  const map = { completed:'badge-completed', backlog:'badge-backlog', 'in-progress':'badge-inprogress', skipped:'badge-skipped' };
-  return `<span class="badge ${map[status] || 'badge-backlog'}">${esc(status || 'backlog')}</span>`;
-}
-
-function ratingStr(r) {
-  if (r == null) return '<span style="color:var(--text-dim)">—</span>';
-  const filled = Math.min(5, Math.round(r / 2));
-  return `<span class="stars">${'★'.repeat(filled)}${'☆'.repeat(5 - filled)}</span> <span style="font-size:.72rem">${r}</span>`;
 }
 
 function extraCol(m) {
@@ -533,7 +640,6 @@ function setError(msg) {
   document.getElementById('table-wrap').innerHTML     = `<div class="load-msg err">⚠️ ${esc(msg)}</div>`;
 }
 
-// ── Start ──
 boot();
 </script>
 </body>
