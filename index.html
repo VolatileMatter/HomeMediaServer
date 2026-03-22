@@ -94,6 +94,7 @@
   <div class="nav-group" id="g-media"><div class="nav-group-label" onclick="tg('media')"><span class="ga">▾</span>Media</div><div class="nav-group-items" id="gi-media">
     <button class="nav-item" id="nav-movies"        onclick="go('movies')"><span class="ni">🎬</span>Movies &amp; TV</button>
     <button class="nav-item" id="nav-tunarr"        onclick="go('tunarr')"><span class="ni">📺</span>"Live" TV</button>
+    <button class="nav-item" id="nav-streamarr"     onclick="go('streamarr')"><span class="ni">🎯</span>Streamarr</button>
     <button class="nav-item" id="nav-calibre"       onclick="go('calibre')"><span class="ni">📚</span>Books</button>
     <button class="nav-item" id="nav-audiobooks"    onclick="go('audiobooks')"><span class="ni">🎧</span>Audiobooks</button>
     <button class="nav-item" id="nav-navidrome"     onclick="go('navidrome')"><span class="ni">🎵</span>Music</button>
@@ -165,6 +166,7 @@
   <div class="tab-content" id="pane-feedback"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-movies"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-tunarr"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-streamarr"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-calibre"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-audiobooks"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-navidrome"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
@@ -211,10 +213,10 @@
 <footer>
   <span><span class="sdot"></span>HOME SERVER · LOCAL REFERENCE</span>
   <span>🐉 AUTHENTIK SSO · CLOUDFLARE · D:\Users\[you]\</span>
-  <span>60 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
+  <span>61 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
 </footer>
 <script>
-const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',streamarr:'streamarr.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',excalidraw:'excalidraw.html',readeck:'readeck.html',privatebin:'privatebin.html',stirling:'stirling-pdf.html',upscayl:'upscayl.html',pxls:'pxls.html',genart:'genart.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',sunshine:'sunshine.html',goglibrary:'gog-library.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html',flasharcade:'flash-arcade.html',tunarr:'tunarr.html',emulatorjs:'emulatorjs.html',franchisenavigator:'franchise-navigator.html',franchiseviewer:'franchise-viewer.html',franchiseviewer:'franchise-viewer.html'};
+const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',streamarr:'streamarr.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',excalidraw:'excalidraw.html',readeck:'readeck.html',privatebin:'privatebin.html',stirling:'stirling-pdf.html',upscayl:'upscayl.html',pxls:'pxls.html',genart:'genart.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',sunshine:'sunshine.html',goglibrary:'gog-library.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html',flasharcade:'flash-arcade.html',tunarr:'tunarr.html',streamarr:'streamarr.html',emulatorjs:'emulatorjs.html',franchisenavigator:'franchise-navigator.html',franchiseviewer:'franchise-viewer.html',franchiseviewer:'franchise-viewer.html'};
 const loaded=new Set();
 let open=localStorage.getItem('sb_open')!=='false';
 function go(n){
