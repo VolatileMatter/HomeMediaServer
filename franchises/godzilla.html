@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Godzilla</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   GODZILLA ACCENT — radioactive kaiju green
+════════════════════════════════════════════════════ */
+:root {
+  --gz-accent: #4a9e52;
+  --gz-accent-dim: rgba(74,158,82,.15);
+  --gz-accent-border: rgba(74,158,82,.4);
+  --gz-showa:     #c8a84b;
+  --gz-heisei:    #5b8dd9;
+  --gz-millennium:#9c6dd6;
+  --gz-monsterverse: #4ecdc4;
+  --gz-standalone:#e05252;
+  --gz-adjacent:  #888;
+}
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 10px 20px; background: transparent; border: none;
+  border-bottom: 3px solid transparent; color: var(--text-dim);
+  cursor: pointer; transition: all .16s; margin-bottom: -2px; white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: var(--gz-accent-border); }
+.fn-tab-btn.active { color: var(--gz-accent); border-bottom-color: var(--gz-accent); font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS (pills)
+════════════════════════════════════════════════════ */
+.fn-view-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border);
+  border-radius: 3px; background: var(--bg2); color: var(--text-dim);
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: var(--gz-accent-dim); border-color: var(--gz-accent); color: var(--gz-accent); }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid var(--gz-accent); padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.fn-table th {
+  font-family: 'Share Tech Mono', monospace; font-size: .62rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-dim); border-bottom: 2px solid var(--border);
+  padding: 6px 10px; text-align: left; background: var(--bg2);
+}
+.fn-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.fn-table tr:hover td { background: rgba(74,158,82,.05); }
+
+/* ── Era arc header rows ── */
+.fn-arc-row td {
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gz-accent); background: rgba(74,158,82,.07) !important;
+  border-top: 2px solid var(--gz-accent-border); padding: 5px 10px;
+}
+
+/* ── Era colour bands ── */
+.fn-showa td      { border-left: 3px solid var(--gz-showa); }
+.fn-heisei td     { border-left: 3px solid var(--gz-heisei); }
+.fn-millennium td { border-left: 3px solid var(--gz-millennium); }
+.fn-mv td         { border-left: 3px solid var(--gz-monsterverse); }
+.fn-standalone td { border-left: 3px solid var(--gz-standalone); }
+.fn-adjacent td   { border-left: 3px solid var(--gz-adjacent); opacity: .75; }
+.fn-noncanon td   { opacity: .65; }
+
+/* ── Highlights / skip ── */
+.fn-highlight td { background: rgba(74,158,82,.07) !important; }
+.fn-skip td { opacity: .55; }
+
+/* ── Star / tags ── */
+.fn-star { color: var(--gz-accent); }
+.fn-tag {
+  display: inline-block; font-family: 'Share Tech Mono', monospace;
+  font-size: .6rem; padding: 2px 6px; border-radius: 2px;
+  letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+}
+.fn-tag-yes     { background: rgba(74,158,82,.18);  color: #81c784; border: 1px solid rgba(74,158,82,.4); }
+.fn-tag-no      { background: rgba(239,83,80,.12);  color: #ef5350; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-opt     { background: rgba(255,183,77,.12); color: #ffb74d; border: 1px solid rgba(255,183,77,.35); }
+.fn-tag-showa      { background: rgba(200,168,75,.15);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-heisei     { background: rgba(91,141,217,.15);  color: #5b8dd9; border: 1px solid rgba(91,141,217,.35); }
+.fn-tag-millennium { background: rgba(156,109,214,.15); color: #9c6dd6; border: 1px solid rgba(156,109,214,.35); }
+.fn-tag-mv         { background: rgba(78,205,196,.15);  color: #4ecdc4; border: 1px solid rgba(78,205,196,.35); }
+.fn-tag-standalone { background: rgba(224,82,82,.15);   color: #e05252; border: 1px solid rgba(224,82,82,.35); }
+.fn-tag-adjacent   { background: rgba(136,136,136,.15); color: #aaa;    border: 1px solid rgba(136,136,136,.35); }
+
+/* ── Legend ── */
+.fn-legend {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  font-size: .68rem; color: var(--text-dim);
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+}
+.fn-dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; margin-right: 4px; vertical-align: middle;
+}
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--gz-accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   MERCH / FILLER CARDS
+════════════════════════════════════════════════════ */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--gz-accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.fn-filler-card { border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; margin-bottom: 10px; }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+
+/* ════════════════════════════════════════════════════
+   ERA KEY CALLOUT
+════════════════════════════════════════════════════ */
+.era-key {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 16px; padding: 12px 14px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+}
+.era-key-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+  color: var(--text-dim);
+}
+.era-key-swatch {
+  width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🦕</div>
+  <div>
+    <h1>Godzilla</h1>
+    <div class="subtitle">// Showa · Heisei · Millennium · MonsterVerse · Shin · Minus One · Anime · Comics · Games //</div>
+    <p class="desc">
+      The King of the Monsters. Toho's nuclear kaiju franchise began in 1954 as Ishirō Honda's allegory for atomic devastation and grew into the longest-running film series in cinema history — 38 Japanese films and counting. The wider Tohoverse spans Mothra, Rodan, King Ghidorah, Mechagodzilla, Gamera (adjacent), and a vast ecosystem of anime, manga, IDW comics, games, and the Legendary MonsterVerse. Use the Movies tab to navigate all eras with context. The Library tab covers all games, anime, and print. The History tab traces the full 70-year arc from Hiroshima allegory to Oscar-winning spectacle.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">38+</div><div class="fn-stat-label">Toho Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">6</div><div class="fn-stat-label">Western Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">4</div><div class="fn-stat-label">Anime Series/Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">15+</div><div class="fn-stat-label">Comics / Manga</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1954</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN PAGE TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch &amp; Print</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Godzilla Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','games',    this)">🎮 Games</button>
+        <button class="fn-view-btn"        onclick="fnView('library','print',    this)">📖 Comics &amp; Print</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst',this)">⭐ Where to Start</button>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           GAMES
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-games">
+        <div class="fn-view-desc">All Godzilla video games. GBA and earlier are browser-playable via EmulatorJS. GameCube / Wii require Dolphin (Sunshine streaming or PC). PS2+ require PCSX2 or later equivalents.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 Browser-Playable (EmulatorJS)</td></tr>
+          <tr class="fn-showa fn-highlight">
+            <td>1988</td>
+            <td>Godzilla: Monster of Monsters! <span class="fn-star">⭐</span></td>
+            <td>NES</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Core: fceumm. Strategy/action hybrid across a solar system grid. Godzilla + Mothra playable.</td>
+          </tr>
+          <tr class="fn-showa">
+            <td>1993</td>
+            <td>Super Godzilla</td>
+            <td>SNES</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Core: snes9x. Top-down strategy. Fight King Ghidorah, Biollante, SpaceGodzilla. Power-up to Super form.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight">
+            <td>2002</td>
+            <td>Godzilla: Domination! <span class="fn-star">⭐</span></td>
+            <td>GBA</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Core: mgba. Six playable kaiju. WayForward Technologies. Best browser-accessible Godzilla game.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🖥️ PC-Only (Dolphin / PCSX2 / Sunshine streaming)</td></tr>
+          <tr class="fn-millennium fn-skip">
+            <td>2002</td>
+            <td>Godzilla: Destroy All Monsters Melee</td>
+            <td>GC / Xbox</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Dolphin required. 11 playable kaiju. First Pipeworks arena brawler.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight fn-skip">
+            <td>2004</td>
+            <td>Godzilla: Save the Earth <span class="fn-star">⭐</span></td>
+            <td>PS2 / Xbox</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>PCSX2 required. 18 kaiju. Best of the Pipeworks trilogy. Story mode, multiplayer.</td>
+          </tr>
+          <tr class="fn-millennium fn-skip">
+            <td>2007</td>
+            <td>Godzilla: Unleashed</td>
+            <td>Wii / PS2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Dolphin required. 20+ monsters. Wii motion controls. Most content-rich Pipeworks entry.</td>
+          </tr>
+          <tr class="fn-mv fn-skip">
+            <td>2014</td>
+            <td>Godzilla (PS3/PS4)</td>
+            <td>PS3 / PS4</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>RPCS3 required (PS3 version). Slow deliberate combat. Unique feel — Godzilla moves like a suit actor. Tribute to 60 years.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📱 Mobile / Defunct</td></tr>
+          <tr class="fn-skip">
+            <td>2019</td>
+            <td>Godzilla Defense Force</td>
+            <td>iOS / Android</td>
+            <td><span class="fn-tag fn-tag-no">⚰️ Defunct</span></td>
+            <td>Servers shut down March 2022. Enormous monster roster. Archival APKs circulate.</td>
+          </tr>
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:var(--gz-showa)"></span>Showa era</span>
+          <span><span class="fn-dot" style="background:var(--gz-millennium)"></span>Millennium era</span>
+          <span><span class="fn-dot" style="background:var(--gz-mv)"></span>MonsterVerse era</span>
+          <span><span class="fn-star">⭐</span> Essential</span>
+        </div>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           COMICS & PRINT
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-print">
+        <div class="fn-view-desc">Comics, manga, novels, art books, and significant print works. MonsterVerse canon comics are marked. IDW holds the current Western license.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Publisher</th><th>Canon?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🌟 Essential / Highly Acclaimed</td></tr>
+          <tr class="fn-highlight">
+            <td>2012</td>
+            <td>Godzilla: The Half-Century War <span class="fn-star">⭐</span></td>
+            <td>IDW</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>James Stokoe. Soldier pursues Godzilla across 5 decades. The best Western Godzilla comic. Stunning art. Essential.</td>
+          </tr>
+          <tr class="fn-highlight">
+            <td>2016</td>
+            <td>Shin Godzilla: Ortho-Chronological Anatomy 2016 <span class="fn-star">⭐</span></td>
+            <td>Toho</td>
+            <td><span class="fn-tag fn-tag-yes">Canon</span></td>
+            <td>Official Shin Godzilla companion. Anatomical diagrams of all 5 evolutionary forms. Government response timeline. Extraordinary design documentation.</td>
+          </tr>
+          <tr class="fn-highlight">
+            <td>2019</td>
+            <td>Godzilla: Aftershock <span class="fn-star">⭐</span></td>
+            <td>IDW</td>
+            <td><span class="fn-tag fn-tag-yes">MonsterVerse</span></td>
+            <td>Official MonsterVerse canon prequel to King of the Monsters. Arvid Nelson. MUTO Prime origin. Essential companion to the film.</td>
+          </tr>
+          <tr>
+            <td>2015</td>
+            <td>Godzilla in Hell</td>
+            <td>IDW</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>5-issue anthology. Each issue by a different artist. Godzilla through a literal Hell dimension. Wordless surrealist horror. Acclaimed.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📖 IDW Series (Western comics)</td></tr>
+          <tr>
+            <td>2011</td>
+            <td>Godzilla: Kingdom of Monsters</td>
+            <td>IDW</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>12 issues. Monsters arise in modern day. Social media satire. First major IDW run.</td>
+          </tr>
+          <tr class="fn-highlight">
+            <td>2013</td>
+            <td>Godzilla: Rulers of Earth <span class="fn-star">⭐</span></td>
+            <td>IDW</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>25 issues — IDW's longest run. Alien invasion, massive monster roster. Fan-favourite IDW series.</td>
+          </tr>
+          <tr>
+            <td>2016</td>
+            <td>Godzilla: Oblivion</td>
+            <td>IDW</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>5-issue mini. Portal to a Godzilla-ravaged dimension. Self-contained story.</td>
+          </tr>
+          <tr>
+            <td>2017</td>
+            <td>Skull Island: The Birth of Kong</td>
+            <td>IDW</td>
+            <td><span class="fn-tag fn-tag-yes">MonsterVerse</span></td>
+            <td>4 issues. Canon MonsterVerse. Kong's origin and the Iwi people. Bridges Skull Island film to King of the Monsters.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📰 Marvel Comics (1977–1979)</td></tr>
+          <tr class="fn-noncanon">
+            <td>1977</td>
+            <td>Godzilla (Marvel Comics)</td>
+            <td>Marvel</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>24 issues. Godzilla rampages through America. SHIELD, Avengers, Fantastic Four appearances. Doug Moench. No longer licensed.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📚 Novels &amp; Non-Fiction</td></tr>
+          <tr class="fn-noncanon">
+            <td>1996</td>
+            <td>Godzilla Returns (Cerasini novel series)</td>
+            <td>Random House</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>First of 5 YA novels by Marc Cerasini (1996–1998). Original Godzilla stories. Teen/young adult audience.</td>
+          </tr>
+          <tr>
+            <td>2021</td>
+            <td>Godzilla vs. Kong: The Official Movie Novelization</td>
+            <td>Titan Books</td>
+            <td><span class="fn-tag fn-tag-yes">MonsterVerse</span></td>
+            <td>Greg Keyes. Expands Hollow Earth mythology and character motivation. Canon.</td>
+          </tr>
+          <tr>
+            <td>2024</td>
+            <td>The Art of Godzilla Minus One</td>
+            <td>Titan Books</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>Official art book. VFX breakdowns, concept art, storyboards. Essential for fans of the film.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🇯🇵 Japanese Manga &amp; Art Books</td></tr>
+          <tr>
+            <td>1977</td>
+            <td>Godzilla (Kodansha Manga)</td>
+            <td>Kodansha</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>3 volumes. Early manga adaptation of classic films. Japanese only.</td>
+          </tr>
+          <tr>
+            <td>1996</td>
+            <td>Mothra (Kodansha Manga)</td>
+            <td>Kodansha</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>Adaptation of Rebirth of Mothra. Japanese only.</td>
+          </tr>
+          <tr>
+            <td>2014</td>
+            <td>Godzilla: The Art of Destruction</td>
+            <td>Insight Editions</td>
+            <td><span class="fn-tag fn-tag-opt">Non-canon</span></td>
+            <td>Official making-of art book for Legendary 2014 film. VFX, concept art, monster design evolution. English.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ─────────────────────────────────────────────────
+           WHERE TO START
+      ───────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          The franchise is enormous. This is the recommended entry path depending on what you care about. You do not need to watch every Showa film before enjoying newer entries — each era is largely self-contained.
+        </div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Type</th><th>Why Here</th></tr>
+          <tr class="fn-highlight fn-standalone">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">1</td>
+            <td>Godzilla (1954) <span class="fn-star">⭐</span></td>
+            <td>Movie</td>
+            <td>The original. The only truly essential film for understanding what Godzilla means. Watch the Japanese version, not the Raymond Burr cut.</td>
+          </tr>
+          <tr class="fn-highlight fn-standalone">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">2</td>
+            <td>Shin Godzilla (2016) <span class="fn-star">⭐</span></td>
+            <td>Movie</td>
+            <td>Anno's standalone. The most modern restatement of the original's allegory. Standalone — no prior knowledge needed. The best Godzilla film alongside Minus One.</td>
+          </tr>
+          <tr class="fn-highlight fn-standalone">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">3</td>
+            <td>Godzilla Minus One (2023) <span class="fn-star">⭐</span></td>
+            <td>Movie</td>
+            <td>Oscar-winning standalone. Post-WWII devastation, the most frightening Godzilla depiction ever. Standalone.</td>
+          </tr>
+          <tr class="fn-highlight fn-showa">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">4</td>
+            <td>Ghidorah, the Three-Headed Monster (1964)</td>
+            <td>Movie</td>
+            <td>Best Showa ensemble entry. Godzilla's transition to hero. Introduction of King Ghidorah. Required context for the rest.</td>
+          </tr>
+          <tr class="fn-highlight fn-showa">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">5</td>
+            <td>Destroy All Monsters (1968)</td>
+            <td>Movie</td>
+            <td>Peak Showa spectacle. 11 monsters. Originally the planned series finale. The ultimate Showa party film.</td>
+          </tr>
+          <tr class="fn-heisei">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">6</td>
+            <td>Godzilla vs. Biollante (1989)</td>
+            <td>Movie</td>
+            <td>Best Heisei film. Biollante is the most unique monster design in the series. Emotionally mature.</td>
+          </tr>
+          <tr class="fn-heisei fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">7</td>
+            <td>Godzilla vs. Destoroyah (1995) <span class="fn-star">⭐</span></td>
+            <td>Movie</td>
+            <td>The death of Godzilla. One of the most emotional kaiju films ever made. Watch the Heisei arc first for full impact.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">8</td>
+            <td>GMK: Giant Monsters All-Out Attack (2001) <span class="fn-star">⭐</span></td>
+            <td>Movie</td>
+            <td>Standalone Millennium entry. Godzilla as a horror villain possessed by war dead. Dark, beautiful, disturbing. Arguably the best single kaiju film after the 1954 original.</td>
+          </tr>
+          <tr class="fn-mv">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">9</td>
+            <td>Godzilla (2014) → KOTM → GvK → The New Empire</td>
+            <td>Movies</td>
+            <td>The MonsterVerse in order. Start here for accessible action-blockbuster Godzilla with Mothra, Ghidorah, Kong, and Mechagodzilla.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">10</td>
+            <td>Godzilla: The Half-Century War (comic)</td>
+            <td>Comic</td>
+            <td>James Stokoe. The best Godzilla comic. Read after you have seen several films for maximum payoff.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\Godzilla\
+  ├── NES\       → .nes   (core: fceumm)   — Monster of Monsters
+  ├── SNES\      → .sfc   (core: snes9x)   — Super Godzilla
+  └── GBA\       → .gba   (core: mgba)     — Domination!</pre>
+      <p style="font-size:.78rem;color:var(--text-dim);margin-top:8px">Pipeworks GameCube/Wii/PS2 titles require Dolphin or PCSX2 on PC — stream via Sunshine + Moonlight.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Godzilla TV &amp; Anime</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',       this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','bytype',    this)">🏷️ By Type</button>
+      </div>
+
+      <!-- ALL ENTRIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Every anime, TV series, animated film trilogy, and web series in the Godzilla universe. Canon to MonsterVerse where noted.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Animated TV Series ──</td></tr>
+          <tr class="fn-noncanon fn-skip">
+            <td>1978</td>
+            <td>Godzilla (Hanna-Barbera)</td>
+            <td><span class="fn-tag fn-tag-opt">Western TV</span></td>
+            <td>26 eps</td>
+            <td>Jellyfin</td>
+            <td>Saturday-morning NBC cartoon. Friendly Godzilla helps a research crew. Includes Godzooky. Extremely loose adaptation. Nostalgic artifact.</td>
+          </tr>
+          <tr class="fn-noncanon">
+            <td>1998</td>
+            <td>Godzilla: The Series <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-opt">Western TV</span></td>
+            <td>40 eps</td>
+            <td>Jellyfin</td>
+            <td>Fox Kids animated sequel to the 1998 film. Nick Tatopolous bonds with a second hatchling. 40 episodes across 2 seasons. Far superior to the film. Best animated Godzilla series.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Anime (Japanese) ──</td></tr>
+          <tr class="fn-highlight">
+            <td>2021</td>
+            <td>Godzilla Singular Point <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Anime</span></td>
+            <td>13 eps</td>
+            <td>Netflix</td>
+            <td>Hard sci-fi framing. Engineer + researcher race to understand the Singular Point. Bones / Orange co-production. Intellectually demanding and unlike any other Godzilla media.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── MonsterVerse TV (Live Action) ──</td></tr>
+          <tr class="fn-mv fn-highlight">
+            <td>2023</td>
+            <td>Monarch: Legacy of Monsters <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">TV</span></td>
+            <td>22 eps</td>
+            <td>Apple TV+</td>
+            <td>Two timelines: 1950s Monarch founding and post-2014 aftermath. Kurt/Wyatt Russell play the same character in different eras. Season 2 aired 2025. Most character-driven MonsterVerse media.</td>
+          </tr>
+          <tr class="fn-mv">
+            <td>2023</td>
+            <td>Skull Island</td>
+            <td><span class="fn-tag fn-tag-yes">Animated</span></td>
+            <td>8 eps</td>
+            <td>Netflix</td>
+            <td>Animated MonsterVerse. Castaways stranded on Skull Island with Kong. Adult-skewing animation. 8 episodes.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended viewing order for TV and anime, with context about when to watch relative to the films.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Type</th><th>Watch After</th></tr>
+          <tr class="fn-mv fn-highlight">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">1</td>
+            <td>Monarch: Legacy of Monsters S1</td>
+            <td>TV</td>
+            <td>After Godzilla (2014). Directly references the film's events.</td>
+          </tr>
+          <tr class="fn-mv">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">2</td>
+            <td>Skull Island</td>
+            <td>Animated</td>
+            <td>After Kong: Skull Island.</td>
+          </tr>
+          <tr class="fn-mv">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">3</td>
+            <td>Monarch: Legacy of Monsters S2</td>
+            <td>TV</td>
+            <td>After finishing S1 and Godzilla vs. Kong.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">4</td>
+            <td>Godzilla Singular Point</td>
+            <td>Anime</td>
+            <td>Standalone — anytime. Not connected to any film continuity.</td>
+          </tr>
+          <tr class="fn-noncanon fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">5</td>
+            <td>Godzilla: The Series (1998)</td>
+            <td>Animated</td>
+            <td>After or instead of the 1998 Emmerich film. The better version of that continuity.</td>
+          </tr>
+          <tr class="fn-noncanon fn-skip">
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--gz-accent)">6</td>
+            <td>Godzilla Hanna-Barbera (1978)</td>
+            <td>Animated</td>
+            <td>Optional / curiosity only. No connection to any continuity.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- BY TYPE -->
+      <div class="fn-view" id="fn-tvanime-bytype">
+        <div class="fn-view-desc">Grouped by format.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Episodes</th><th>Canon?</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">🟣 Japanese Anime</td></tr>
+          <tr class="fn-highlight">
+            <td>2021</td><td>Godzilla Singular Point <span class="fn-star">⭐</span></td>
+            <td>13 eps</td><td>Standalone</td><td>Netflix. Bones/Orange. Hard sci-fi. Best anime Godzilla.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">🔵 Western TV Series (Live Action)</td></tr>
+          <tr class="fn-highlight">
+            <td>2023</td><td>Monarch: Legacy of Monsters <span class="fn-star">⭐</span></td>
+            <td>22 eps (2 seasons)</td><td>✅ MonsterVerse</td><td>Apple TV+. Kurt/Wyatt Russell.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">🟢 Western Animated TV</td></tr>
+          <tr>
+            <td>1998</td><td>Godzilla: The Series <span class="fn-star">⭐</span></td>
+            <td>40 eps</td><td>⚠️ Non-canon</td><td>Fox Kids. Best animated Godzilla series.</td>
+          </tr>
+          <tr class="fn-noncanon fn-skip">
+            <td>1978</td><td>Godzilla (Hanna-Barbera)</td>
+            <td>26 eps</td><td>⚠️ Non-canon</td><td>NBC. Includes Godzooky. Cultural artifact.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">🟤 Animated MonsterVerse</td></tr>
+          <tr class="fn-mv">
+            <td>2023</td><td>Skull Island</td>
+            <td>8 eps</td><td>✅ MonsterVerse</td><td>Netflix. Adult animated. Kong-focused.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Anime\Godzilla\
+  └── Godzilla Singular Point (2021)\
+      └── Season 01\
+
+D:\Media\TV\Godzilla\
+  ├── Monarch - Legacy of Monsters (2023)\
+  │   ├── Season 01\
+  │   └── Season 02\
+  ├── Skull Island (2023)\
+  │   └── Season 01\
+  └── Godzilla The Series (1998)\
+      ├── Season 01\
+      └── Season 02\</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Godzilla Movies</div>
+
+    <div class="era-key">
+      <div class="era-key-item"><span class="era-key-swatch" style="background:var(--gz-showa)"></span>Showa (1954–1975)</div>
+      <div class="era-key-item"><span class="era-key-swatch" style="background:var(--gz-heisei)"></span>Heisei (1984–1995)</div>
+      <div class="era-key-item"><span class="era-key-swatch" style="background:var(--gz-millennium)"></span>Millennium (1999–2004)</div>
+      <div class="era-key-item"><span class="era-key-swatch" style="background:var(--gz-mv)"></span>MonsterVerse (2014–present)</div>
+      <div class="era-key-item"><span class="era-key-swatch" style="background:var(--gz-standalone)"></span>Standalone (Shin / Minus One)</div>
+      <div class="era-key-item"><span class="era-key-swatch" style="background:var(--gz-adjacent)"></span>Adjacent / Non-canon</div>
+    </div>
+
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','release',   this)">📅 All Films (Release Order)</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder',this)">🎯 Recommended Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','adjacent',  this)">🗺️ Adjacent Tohoverse</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','anime',     this)">🎌 Anime Film Trilogy</button>
+      </div>
+
+      <!-- RELEASE ORDER -->
+      <div class="fn-view active" id="fn-movies-release">
+        <div class="fn-view-desc">Every theatrical Godzilla film and major Tohoverse kaiju film in real-world release order. Era colour-coded by left border. Faded rows = optional / non-canon.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Era</th><th>Jellyfin?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Showa Era  (1954–1975) — 15 films, increasing camp, Godzilla transitions from villain to hero ──</td></tr>
+          <tr class="fn-showa fn-highlight">
+            <td>1954</td>
+            <td>Godzilla (Gojira) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>The original. Watch the Japanese version first. The foundational atomic allegory. Non-negotiable viewing.</td>
+          </tr>
+          <tr class="fn-noncanon fn-skip fn-showa">
+            <td>1956</td>
+            <td>Godzilla, King of the Monsters! (US edit)</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Raymond Burr re-cut of the 1954 film. Significant tonal alterations. Non-canon. Watch original first.</td>
+          </tr>
+          <tr class="fn-showa">
+            <td>1955</td>
+            <td>Godzilla Raids Again</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>First kaiju battle — Godzilla vs. Anguirus over Osaka. First sequel.</td>
+          </tr>
+          <tr class="fn-showa">
+            <td>1962</td>
+            <td>King Kong vs. Godzilla</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>First colour Godzilla film. Toho/Universal crossover. Mount Fuji showdown.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>1964</td>
+            <td>Mothra vs. Godzilla <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Best Mothra/Godzilla crossover. Shobijin fairies. One of the best Showa films.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>1964</td>
+            <td>Ghidorah, the Three-Headed Monster <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>King Ghidorah's debut. Godzilla becomes a defender of Earth. Essential franchise context.</td>
+          </tr>
+          <tr class="fn-showa">
+            <td>1965</td>
+            <td>Invasion of Astro-Monster</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Planet X aliens weaponise Godzilla and Rodan. First US co-production.</td>
+          </tr>
+          <tr class="fn-showa fn-skip">
+            <td>1966</td>
+            <td>Ebirah, Horror of the Deep</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Giant lobster. Originally scripted for King Kong. Lighter tone. Optional.</td>
+          </tr>
+          <tr class="fn-showa fn-skip">
+            <td>1967</td>
+            <td>Son of Godzilla</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Minilla's debut. Aimed at children. Polarising. Optional.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>1968</td>
+            <td>Destroy All Monsters <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>11 monsters. Ultimate Showa ensemble. Originally planned as the final Godzilla film. Criterion release.</td>
+          </tr>
+          <tr class="fn-showa fn-skip">
+            <td>1969</td>
+            <td>All Monsters Attack</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Heavy stock footage. Minilla dream sequences. Most skippable Showa film. Children's film.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>1971</td>
+            <td>Godzilla vs. Hedorah <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>The Smog Monster. Psychedelic, dark, anti-pollution. Tonally unique — unlike any other Godzilla film.</td>
+          </tr>
+          <tr class="fn-showa">
+            <td>1972</td>
+            <td>Godzilla vs. Gigan</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Gigan's debut. Cockroach aliens. First Godzilla film with blood.</td>
+          </tr>
+          <tr class="fn-showa fn-skip">
+            <td>1973</td>
+            <td>Godzilla vs. Megalon</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Jet Jaguar's debut. The flying dropkick. Campy. Cultural artifact.</td>
+          </tr>
+          <tr class="fn-showa">
+            <td>1974</td>
+            <td>Godzilla vs. Mechagodzilla</td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Mechagodzilla's debut. Space Titanians. King Caesar. Stronger late-Showa entry.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>1975</td>
+            <td>Terror of Mechagodzilla <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-showa">Showa</span></td>
+            <td>Jellyfin</td>
+            <td>Final Showa film. Directed by Ishirō Honda. Mechagodzilla + Titanosaurus. Tragic story. Best late-Showa.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Heisei Era  (1984–1995) — 7 films, continuous serialised continuity, darker tone ──</td></tr>
+          <tr class="fn-heisei fn-highlight">
+            <td>1984</td>
+            <td>The Return of Godzilla <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-heisei">Heisei</span></td>
+            <td>Jellyfin</td>
+            <td>Ignores all sequels. Solo Godzilla vs. Cold War Japan. Serious reboot of the original.</td>
+          </tr>
+          <tr class="fn-heisei fn-highlight">
+            <td>1989</td>
+            <td>Godzilla vs. Biollante <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-heisei">Heisei</span></td>
+            <td>Jellyfin</td>
+            <td>Godzilla cells + rose + dead daughter = Biollante. Most acclaimed Heisei film. Galaxy Award winner.</td>
+          </tr>
+          <tr class="fn-heisei">
+            <td>1991</td>
+            <td>Godzilla vs. King Ghidorah</td>
+            <td><span class="fn-tag fn-tag-heisei">Heisei</span></td>
+            <td>Jellyfin</td>
+            <td>Time travel retcon plot. Mecha-King Ghidorah debut. Fun but timeline-tangled.</td>
+          </tr>
+          <tr class="fn-heisei">
+            <td>1992</td>
+            <td>Godzilla vs. Mothra</td>
+            <td><span class="fn-tag fn-tag-heisei">Heisei</span></td>
+            <td>Jellyfin</td>
+            <td>Mothra + dark counterpart Battra. Highest-grossing Heisei entry in Japan.</td>
+          </tr>
+          <tr class="fn-heisei">
+            <td>1993</td>
+            <td>Godzilla vs. Mechagodzilla II</td>
+            <td><span class="fn-tag fn-tag-heisei">Heisei</span></td>
+            <td>Jellyfin</td>
+            <td>UN builds Mechagodzilla from salvaged Mecha-King Ghidorah. Baby Godzilla debut.</td>
+          </tr>
+          <tr class="fn-heisei">
+            <td>1994</td>
+            <td>Godzilla vs. SpaceGodzilla</td>
+            <td><span class="fn-tag fn-tag-heisei">Heisei</span></td>
+            <td>Jellyfin</td>
+            <td>Crystal kaiju from Godzilla cells in space. MOGUERA debut. Striking design.</td>
+          </tr>
+          <tr class="fn-heisei fn-highlight">
+            <td>1995</td>
+            <td>Godzilla vs. Destoroyah <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-heisei">Heisei</span></td>
+            <td>Jellyfin</td>
+            <td>The death of Godzilla. Destoroyah evolved from the Oxygen Destroyer. Godzilla Junior. One of the most beloved films in the series. Do not miss.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── American Era  (1998) — one film, widely rejected ──</td></tr>
+          <tr class="fn-noncanon fn-skip fn-adjacent">
+            <td>1998</td>
+            <td>Godzilla (Emmerich)</td>
+            <td><span class="fn-tag fn-tag-adjacent">Non-canon</span></td>
+            <td>Jellyfin</td>
+            <td>Roland Emmerich. Mutant iguana in New York. Toho renamed this creature 'Zilla'. Watch Godzilla: The Series instead.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Millennium Era  (1999–2004) — 6 films, each largely standalone ──</td></tr>
+          <tr class="fn-millennium">
+            <td>1999</td>
+            <td>Godzilla 2000: Millennium</td>
+            <td><span class="fn-tag fn-tag-millennium">Millennium</span></td>
+            <td>Jellyfin</td>
+            <td>First Millennium film. Clean standalone entry point. Orga's debut. Alien organism absorbs Godzilla cells.</td>
+          </tr>
+          <tr class="fn-millennium fn-skip">
+            <td>2000</td>
+            <td>Godzilla vs. Megaguirus</td>
+            <td><span class="fn-tag fn-tag-millennium">Millennium</span></td>
+            <td>Jellyfin</td>
+            <td>Giant dragonfly queen Megaguirus. Black hole weapon subplot. Alternate history Japan.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight">
+            <td>2001</td>
+            <td>GMK: Giant Monsters All-Out Attack <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-millennium">Millennium</span></td>
+            <td>Jellyfin</td>
+            <td>Godzilla as a horror villain possessed by WWII war dead. Mothra, Baragon, Ghidorah as guardian monsters. Standalone. One of the greatest entries ever made.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight">
+            <td>2002</td>
+            <td>Godzilla Against Mechagodzilla (Kiryu) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-millennium">Millennium</span></td>
+            <td>Jellyfin</td>
+            <td>Mechagodzilla built from the original 1954 Godzilla's bones. Retains Godzilla consciousness. Kiryu is the best Mechagodzilla design. Standalone.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight">
+            <td>2003</td>
+            <td>Godzilla: Tokyo S.O.S. <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-millennium">Millennium</span></td>
+            <td>Jellyfin</td>
+            <td>Direct sequel to Against Mechagodzilla — the only Millennium sequel. Watch Kiryu first. Mothra returns. Emotional finale.</td>
+          </tr>
+          <tr class="fn-millennium">
+            <td>2004</td>
+            <td>Godzilla: Final Wars</td>
+            <td><span class="fn-tag fn-tag-millennium">Millennium</span></td>
+            <td>Jellyfin</td>
+            <td>50th anniversary. X-Men aesthetic. Every classic monster vs. Godzilla. The 1998 Zilla defeated in 14 seconds. Wild and divisive.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── MonsterVerse Era  (2014–present) — Legendary / WB ──</td></tr>
+          <tr class="fn-mv fn-highlight">
+            <td>2014</td>
+            <td>Godzilla (Gareth Edwards) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-mv">MonsterVerse</span></td>
+            <td>Jellyfin</td>
+            <td>Atmospheric reboot. MUTOs emerge; Godzilla as apex radiation predator. Start here for the MonsterVerse.</td>
+          </tr>
+          <tr class="fn-mv">
+            <td>2017</td>
+            <td>Kong: Skull Island</td>
+            <td><span class="fn-tag fn-tag-mv">MonsterVerse</span></td>
+            <td>Jellyfin</td>
+            <td>Vietnam-era expedition. King Kong's Hollow Earth origin. John C. Reilly. Post-credits ties to Godzilla.</td>
+          </tr>
+          <tr class="fn-mv fn-highlight">
+            <td>2019</td>
+            <td>Godzilla: King of the Monsters <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-mv">MonsterVerse</span></td>
+            <td>Jellyfin</td>
+            <td>Full classic monster roster — Mothra, Rodan, King Ghidorah (alien). Eco-terrorist plot. More monster screen time than 2014.</td>
+          </tr>
+          <tr class="fn-mv fn-highlight">
+            <td>2021</td>
+            <td>Godzilla vs. Kong <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-mv">MonsterVerse</span></td>
+            <td>Jellyfin</td>
+            <td>Hollow Earth revealed. Mechagodzilla piloted by Ghidorah's neural network. The full franchise crossover payoff.</td>
+          </tr>
+          <tr class="fn-mv">
+            <td>2024</td>
+            <td>Godzilla x Kong: The New Empire</td>
+            <td><span class="fn-tag fn-tag-mv">MonsterVerse</span></td>
+            <td>Jellyfin</td>
+            <td>Skar King and ice titan Shimo in the Hollow Earth. Pure action spectacle. Most blockbuster-forward MonsterVerse entry.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── Standalone / New Toho Era  (2016–present) ──</td></tr>
+          <tr class="fn-standalone fn-highlight">
+            <td>2016</td>
+            <td>Shin Godzilla <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-standalone">Standalone</span></td>
+            <td>Jellyfin</td>
+            <td>Anno + Higuchi. Body-horror evolving kaiju as government bureaucracy satire. Seven Japan Academy Prize wins. One of the greatest Godzilla films.</td>
+          </tr>
+          <tr class="fn-standalone fn-highlight">
+            <td>2023</td>
+            <td>Godzilla Minus One <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-standalone">Standalone</span></td>
+            <td>Jellyfin</td>
+            <td>Post-WWII. Traumatised kamikaze pilot faces despair and Godzilla. Won Academy Award for Best VFX. Standalone. One of the two greatest Godzilla films ever made.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- RECOMMENDED WATCH ORDER -->
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">You do not need to watch every Showa film first. Each era is self-contained. This path balances quality, context, and accessibility.</div>
+        <table class="fn-table">
+          <tr><th>Order</th><th>Title</th><th>Era</th><th>Notes</th></tr>
+          <tr class="fn-standalone fn-highlight">
+            <td>1</td><td>Godzilla (1954) <span class="fn-star">⭐</span></td><td>Original</td>
+            <td>Always first. The foundation. Japanese version only.</td>
+          </tr>
+          <tr class="fn-standalone fn-highlight">
+            <td>2</td><td>Shin Godzilla (2016) <span class="fn-star">⭐</span></td><td>Standalone</td>
+            <td>The modern restatement. No prior knowledge needed.</td>
+          </tr>
+          <tr class="fn-standalone fn-highlight">
+            <td>3</td><td>Godzilla Minus One (2023) <span class="fn-star">⭐</span></td><td>Standalone</td>
+            <td>Oscar-winner. Standalone. The current pinnacle of the franchise.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>4</td><td>Ghidorah, the Three-Headed Monster (1964)</td><td>Showa</td>
+            <td>Best Showa entry. King Ghidorah's debut. Godzilla becomes a hero.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>5</td><td>Destroy All Monsters (1968)</td><td>Showa</td>
+            <td>Peak Showa spectacle. 11 monsters.</td>
+          </tr>
+          <tr class="fn-showa fn-highlight">
+            <td>6</td><td>Godzilla vs. Hedorah (1971)</td><td>Showa</td>
+            <td>The unique dark outlier. Unlike any other film in the series.</td>
+          </tr>
+          <tr class="fn-heisei fn-highlight">
+            <td>7</td><td>The Return of Godzilla (1984)</td><td>Heisei</td>
+            <td>Start of Heisei continuity.</td>
+          </tr>
+          <tr class="fn-heisei fn-highlight">
+            <td>8</td><td>Godzilla vs. Biollante (1989)</td><td>Heisei</td>
+            <td>Best Heisei film.</td>
+          </tr>
+          <tr class="fn-heisei fn-highlight">
+            <td>9</td><td>Godzilla vs. Destoroyah (1995)</td><td>Heisei</td>
+            <td>Series finale. Death of Godzilla. Maximum emotional impact after the Heisei arc.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight">
+            <td>10</td><td>GMK: Giant Monsters All-Out Attack (2001)</td><td>Millennium</td>
+            <td>Standalone. Best Millennium film. Dark horror Godzilla.</td>
+          </tr>
+          <tr class="fn-millennium fn-highlight">
+            <td>11</td><td>Godzilla Against Mechagodzilla / Tokyo S.O.S. (2002–2003)</td><td>Millennium</td>
+            <td>Watch as a pair. The Kiryu duology.</td>
+          </tr>
+          <tr class="fn-mv fn-highlight">
+            <td>12</td><td>Godzilla (2014) → Kong: Skull Island → KOTM → GvK → New Empire</td><td>MonsterVerse</td>
+            <td>MonsterVerse in release order.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ADJACENT TOHOVERSE -->
+      <div class="fn-view" id="fn-movies-adjacent">
+        <div class="fn-view-desc">Standalone Toho films and the Heisei Gamera trilogy — essential adjacent viewing for any serious kaiju fan. Not Godzilla films, but deeply part of the same tradition.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Studio</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="4">🌺 Mothra Standalone Films (Toho)</td></tr>
+          <tr class="fn-adjacent fn-highlight">
+            <td>1961</td>
+            <td>Mothra <span class="fn-star">⭐</span></td>
+            <td>Toho</td>
+            <td>Mothra's origin film. Divine moth guardian, the Shobijin fairies, corporate exploitation allegory. Essential context for every Mothra appearance.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="4">🦅 Rodan Standalone (Toho)</td></tr>
+          <tr class="fn-adjacent">
+            <td>1956</td>
+            <td>Rodan</td>
+            <td>Toho</td>
+            <td>Rodan's origin. Supersonic pterosaur pair. Tragic ending. Second Toho kaiju film after Godzilla. Tonally serious.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="4">🐢 Heisei Gamera Trilogy (Daiei — highly recommended)</td></tr>
+          <tr class="fn-adjacent fn-highlight">
+            <td>1995</td>
+            <td>Gamera: Guardian of the Universe <span class="fn-star">⭐</span></td>
+            <td>Daiei/Kadokawa</td>
+            <td>Fire-breathing turtle defends humanity against Gyaos. The trilogy redefined kaiju cinema. Frequently cited alongside GMK as a peak of the genre.</td>
+          </tr>
+          <tr class="fn-adjacent fn-highlight">
+            <td>1996</td>
+            <td>Gamera 2: Attack of Legion <span class="fn-star">⭐</span></td>
+            <td>Daiei/Kadokawa</td>
+            <td>Silicate alien organism. Widely considered the single greatest kaiju film by some critics. Extraordinary scale and craft.</td>
+          </tr>
+          <tr class="fn-adjacent fn-highlight">
+            <td>1999</td>
+            <td>Gamera 3: Revenge of Iris <span class="fn-star">⭐</span></td>
+            <td>Daiei/Kadokawa</td>
+            <td>A grieving girl bonds with a parasitic creature. The darkest kaiju film ever made. Gamera may not survive. Completes the trilogy.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="4">🦋 Rebirth of Mothra Trilogy (Toho)</td></tr>
+          <tr class="fn-adjacent fn-skip">
+            <td>1996–1998</td>
+            <td>Rebirth of Mothra I–III</td>
+            <td>Toho</td>
+            <td>Three children-targeted Mothra films. Desghidorah, Dagahra, and a time-travelling Ghidorah plot. Aimed at young audiences. Optional.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ANIME TRILOGY -->
+      <div class="fn-view" id="fn-movies-anime">
+        <div class="fn-view-desc">Netflix's three-part animated Godzilla film series (2017–2018). Standalone continuity — no connection to any Toho or MonsterVerse film. Humanity fled Earth 20,000 years ago.</div>
+        <table class="fn-table">
+          <tr><th>Part</th><th>Title</th><th>Year</th><th>Notes</th></tr>
+          <tr>
+            <td>1</td>
+            <td>Godzilla: Planet of the Monsters</td>
+            <td>2017</td>
+            <td>Humanity returns to an Earth dominated by a continental-scale Godzilla. Establishes the premise and character dynamics.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Godzilla: City on the Edge of Battle</td>
+            <td>2018</td>
+            <td>Mechagodzilla City — a nanotechnology fortress grown from the original Mechagodzilla — is discovered. Moral dilemmas about humanity's identity.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Godzilla: The Planet Eater</td>
+            <td>2018</td>
+            <td>A religious cult summons Ghidorah as an extradimensional god. The most philosophically ambitious Godzilla film. Nihilism vs. survival. Concludes the trilogy.</td>
+          </tr>
+        </table>
+        <div class="callout callout-tip" style="margin-top:14px">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">The anime trilogy is divisive — its slow pacing and philosophical ambitions frustrated viewers expecting monster action. Planet Eater remains the most abstract Godzilla film ever made. Watch in order, all three, or skip.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Godzilla\
+  ├── Godzilla (1954)\
+  ├── Godzilla Raids Again (1955)\
+  ├── ...all Showa films...\
+  ├── The Return of Godzilla (1984)\
+  ├── ...all Heisei films...\
+  ├── Godzilla 2000 Millennium (1999)\
+  ├── ...all Millennium films...\
+  ├── Shin Godzilla (2016)\
+  ├── Godzilla Minus One (2023)\
+  └── ...MonsterVerse films (stored separately below)...
+
+D:\Media\Movies\MonsterVerse\
+  ├── Godzilla (2014)\
+  ├── Kong Skull Island (2017)\
+  ├── Godzilla King of the Monsters (2019)\
+  ├── Godzilla vs. Kong (2021)\
+  └── Godzilla x Kong The New Empire (2024)
+
+D:\Media\Movies\Adjacent Kaiju\
+  ├── Mothra (1961)\
+  ├── Rodan (1956)\
+  ├── Gamera Guardian of the Universe (1995)\
+  ├── Gamera 2 Attack of Legion (1996)\
+  └── Gamera 3 Revenge of Iris (1999)</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH & PRINT
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Godzilla Merchandise &amp; Collectibles</div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">Bandai — Vinyl Figures (1983–present)</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">Bandai's "Godzilla Island" vinyl kaiju figures are the flagship Godzilla collectibles. The Movie Monster Series (MMS) line at ~6" scale has covered virtually every kaiju design across all eras. Premium lines include Bandai Cinema Masterpiece and S.H. MonsterArts for detailed poseable figures. Prices range from ¥1,500 (standard vinyl) to ¥25,000+ (S.H. MonsterArts). A Shin Godzilla S.H. MonsterArts figure remains one of the most sought-after modern releases.</p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">NECA — US Market Figures (2013–present)</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">NECA's highly detailed 6" and 12" Godzilla figures cover Showa, Heisei, Millennium, and MonsterVerse designs at accessible prices. Their 2014 and KOTM MonsterVerse figures are among the best-value Godzilla collectibles on the US market. Available at specialty toy stores and online.</p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">Jakks Pacific — Giant Figures (2014–present)</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">24" and 11" budget-accessible Godzilla figures. Limited articulation but excellent value for display scale. MonsterVerse designs. Widely available at Target, Walmart, Amazon.</p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">Trading Cards &amp; TCG</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">No major TCG exists for Godzilla. Trading cards were produced by Bandai in Japan during the Heisei era. The MonsterVerse has produced promotional Topps cards. Godzilla vs. Kong tie-in card packs were released in 2021.</p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">Art Books &amp; Print (Recommended for the Library)</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        <strong>Shin Godzilla: Ortho-Chronological Anatomy 2016</strong> — official Japanese art/reference book. Anatomical diagrams of all Godzilla evolutionary forms. Essential.<br>
+        <strong>The Art of Godzilla Minus One</strong> (Titan Books, 2024) — concept art, storyboards, VFX breakdowns. English edition.<br>
+        <strong>Godzilla: The Art of Destruction</strong> (Insight Editions, 2014) — making-of for the Gareth Edwards film.<br>
+        <strong>Godzilla: The Half-Century War</strong> (IDW TPB, 2013) — James Stokoe. The best Western Godzilla comic collected.
+      </p>
+    </div>
+
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Godzilla Tunarr Channel Filler</div>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:16px">
+      Content suitable for a dedicated Godzilla/Kaiju Tunarr channel. Mix theatrical films with documentary bumpers, trailers, and short-form content for a continuous broadcast experience.
+    </p>
+
+    <div class="fn-filler-card">
+      <div class="fn-filler-name">🎬 Core Film Rotation</div>
+      <div class="fn-filler-meta">Primary content · Runtime: varies</div>
+      <div class="fn-filler-desc">Recommended film rotation for a Godzilla channel. Prioritise: Godzilla (1954), Shin Godzilla, Godzilla Minus One, GMK, Godzilla vs. Destoroyah, Ghidorah the Three-Headed Monster, Destroy All Monsters, Godzilla vs. Biollante. Supplement with MonsterVerse films for a lighter evening slot.</div>
+      <div class="fn-filler-where">Source: Jellyfin · D:\Media\Movies\Godzilla\</div>
+    </div>
+
+    <div class="fn-filler-card">
+      <div class="fn-filler-name">📺 Godzilla: The Series (1998)</div>
+      <div class="fn-filler-meta">Western animated TV · 40 episodes · ~22 min each</div>
+      <div class="fn-filler-desc">Excellent rotation filler between films. Each episode is self-contained — a new monster threat each week. The best animated Godzilla content and far superior to the 1998 film.</div>
+      <div class="fn-filler-where">Source: Jellyfin · D:\Media\TV\Godzilla\Godzilla The Series (1998)\</div>
+    </div>
+
+    <div class="fn-filler-card">
+      <div class="fn-filler-name">🎌 Godzilla Singular Point</div>
+      <div class="fn-filler-meta">Anime · 13 episodes · ~23 min each</div>
+      <div class="fn-filler-desc">Good late-night intellectual filler. The hard sci-fi framing rewards rewatching. Cycle through as a binge block between film marathon days.</div>
+      <div class="fn-filler-where">Source: Netflix / Jellyfin · D:\Media\Anime\Godzilla\Godzilla Singular Point (2021)\</div>
+    </div>
+
+    <div class="fn-filler-card">
+      <div class="fn-filler-name">🎥 Documentary Bumpers</div>
+      <div class="fn-filler-meta">Short-form · 5–90 min</div>
+      <div class="fn-filler-desc">Between-film documentary content: Making of Godzilla featurettes from Criterion releases, NHK special on Godzilla's 70-year history, behind-the-scenes of Shin Godzilla (from the Toho collector's edition), making of Godzilla Minus One (Titan Books companion footage).</div>
+      <div class="fn-filler-where">Source: Blu-ray extras / YouTube (official Toho channel)</div>
+    </div>
+
+    <div class="fn-filler-card">
+      <div class="fn-filler-name">🐢 Adjacent Block — Heisei Gamera Trilogy</div>
+      <div class="fn-filler-meta">Daiei films · 3 films · ~95 min each</div>
+      <div class="fn-filler-desc">The Heisei Gamera trilogy is the most critically acclaimed kaiju cinema alongside the best Toho films. Schedule as a 3-night standalone event or interleave with mid-90s Heisei Godzilla films for a peak-era kaiju block. Gamera 2 is frequently cited as the single best kaiju film by critics.</div>
+      <div class="fn-filler-where">Source: Jellyfin · D:\Media\Movies\Adjacent Kaiju\</div>
+    </div>
+
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">1954 — Origin: Hiroshima's Monster</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        Godzilla (Gojira) was created by Tomoyuki Tanaka, directed by Ishirō Honda, with special effects by Eiji Tsuburaya. The film was produced just nine years after Hiroshima and Nagasaki, and six months after the Lucky Dragon No. 5 incident — a Japanese fishing boat irradiated by the Castle Bravo hydrogen bomb test. The film was a direct allegory for nuclear trauma and the impotence of humanity against the forces it had unleashed. Honda described Godzilla as "a god of destruction" and intended no sequel.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">1955–1975 — Showa Era: From Horror to Hero</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        Commercial success of Godzilla Raids Again led to a franchise. As the Cold War shifted and Japan's postwar recovery accelerated, Godzilla's allegory faded and he became a pop culture hero — protecting Japan from alien threats, battling Mothra and Ghidorah, and gaining a son (Minilla). By the late Showa era, the films were primarily aimed at children. Eiji Tsuburaya's suitmation technique — a man in a suit on miniature sets — became the franchise's defining aesthetic. The Showa era ended with Terror of Mechagodzilla (1975) as declining box office prompted Toho to shelve the franchise.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">1984–1995 — Heisei Era: Dark Revival</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        Toho revived the franchise with The Return of Godzilla (1984), ignoring all Showa sequels except the 1954 original. The Heisei series ran a single continuous continuity across seven films, ending with the iconic Godzilla vs. Destoroyah (1995). The era restored Godzilla as a genuine threat, introduced complex serialised storytelling, and produced some of the franchise's most beloved entries — particularly Godzilla vs. Biollante (1989). The death of Godzilla in Destoroyah remains one of the most emotionally impactful moments in the series.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">1998 — TriStar American Godzilla: The Low Point</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        Roland Emmerich and Dean Devlin's American Godzilla was a commercial success but a critical and fan disaster. Toho's president stated the creature "didn't look like Godzilla at all." Toho officially renamed the creature "Zilla" (stripped of the "God" prefix) and later had the Toho Godzilla destroy it in under 14 seconds in Final Wars (2004). The animated sequel, Godzilla: The Series (1998), was far superior to the film and remains fondly regarded.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">1999–2004 — Millennium Era: Anthology Reboots</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        Toho's response to the 1998 American film was the Millennium series — six films, each a standalone reboot with no continuity between them (except the Kiryu duology). The era's standout, GMK: Giant Monsters All-Out Attack (2001), directed by Shusuke Kaneko (who made the Heisei Gamera trilogy), remains one of the greatest kaiju films. The era ended with the 50th anniversary spectacle Final Wars (2004) and another hiatus.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">2014–present — MonsterVerse &amp; Toho's New Era</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        Legendary Pictures acquired the Western Godzilla license and produced a Marvel-style "MonsterVerse" shared universe beginning with Godzilla (2014). In parallel, Toho launched a new era of high-profile standalone films: Shin Godzilla (2016, co-directed by Hideaki Anno) won seven Japan Academy Prizes; Godzilla Minus One (2023, directed by Takashi Yamazaki) won the Academy Award for Best Visual Effects — the first Japanese film to do so — on a reported budget of just $15 million. As of 2025, both the MonsterVerse (ongoing via Monarch: Legacy of Monsters S2) and Toho's new standalone productions remain active.
+      </p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">Godzilla's Cultural Legacy</div>
+      <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">
+        Godzilla is the most recognisable film monster in history, appearing in 38+ films across 70 years. The franchise directly influenced: kaiju cinema (Gamera, Ultraman, Pacific Rim), American blockbuster spectacle (Jurassic Park, Cloverfield, Interstellar), and Japanese tokusatsu television. Godzilla was awarded a star on the Hollywood Walk of Fame in 2004. In 2015, the Japanese government officially appointed Godzilla a "Tourism Ambassador" for the Shinjuku district of Tokyo. The character's endurance across seven decades — and continued reinvention as allegory for contemporary fears (nuclear anxiety, bureaucratic inertia in Shin Godzilla; WWII survival guilt in Minus One) — is without parallel in genre cinema.
+      </p>
+    </div>
+
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — Tab & View switching
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fn-pane-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function fnView(tab, view, btn) {
+  const pane = document.getElementById('fn-pane-' + tab);
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('fn-' + tab + '-' + view);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
