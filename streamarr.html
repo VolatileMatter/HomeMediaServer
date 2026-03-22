@@ -151,6 +151,8 @@
   <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
   <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
   <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
+  <button class="subtab-btn" onclick="switchTab('addshow', this)">📺 Add New Show</button>
+  <button class="subtab-btn" onclick="switchTab('jellyfinrescan', this)">🔄 Jellyfin Rescan</button>
 </nav>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1150,5 +1152,328 @@ cd ~/streamarr && docker-compose down && docker-compose up -d</pre>
     }
   });
 </script>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 8 — ADD NEW SHOW
+     How to add a virtual show to Streamarr: write a rule file,
+     trigger generation, and get it showing in Jellyfin.
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-addshow">
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🔐</div>
+    <div class="callout-body">
+      <strong>Admin-only task.</strong> Adding a virtual show means writing a YAML
+      rule file and triggering a stub generation run. Users never do this — they
+      just see the result appear in Jellyfin like any other show.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ What "Adding a Show" Actually Means</div>
+    <div class="card">
+      <p>Streamarr doesn't have a GUI "Add Show" button. Each virtual show is a
+      <strong>YAML rule file</strong> in <code>~/streamarr/rules/</code>.
+      When you run the generator, Streamarr reads that file, queries TMDB/TVDB
+      for episode metadata, and writes one <code>.strm</code> +
+      <code>.nfo</code> + <code>.jpg</code> per episode into
+      <code>D:\Media\Virtual\TV\</code>. Jellyfin picks those files up on the
+      next scan — no video is ever downloaded or stored.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🔢 Step 1 — Get the TMDB and TVDB IDs</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Find the TMDB ID</strong>
+          <p>Search at <a href="https://www.themoviedb.org/" target="_blank">themoviedb.org</a>.
+          The ID is in the URL: <code>themoviedb.org/tv/<strong>60572</strong>-pokemon</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Find the TVDB ID</strong>
+          <p>Search at <a href="https://thetvdb.com/" target="_blank">thetvdb.com</a>.
+          The ID appears in the right panel under "TheTVDB.com Series ID", or in
+          the URL: <code>thetvdb.com/series/<strong>73796</strong></code>.</p>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">For long-running anime with no consistent
+            season numbering (One Piece, Naruto, Dragon Ball Z), use
+            <code>{absolute_episode}</code> in <code>source_query</code> instead
+            of <code>{season}/{episode}</code> — this matches how uploads are
+            titled on source sites.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">📝 Step 2 — Write the Rule File</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Create <code>~/streamarr/rules/[showname].yml</code></strong>
+          <p>Minimal TV series rule:</p>
+          <pre>id:           dragon-ball-z
+type:         tv
+name:         "Dragon Ball Z"
+tmdb_id:      12971
+tvdb_id:      76107
+resolver:     yt-dlp
+source_query: "Dragon Ball Z Episode {absolute_episode} English Dub"
+auto_extend:  true     # auto-mint stubs when TMDB reports new episodes
+enabled:      true
+
+seasons:
+  - season: 1
+    episodes: all
+  - season: 2
+    episodes: all
+  # add more seasons as needed, or cap with:
+  # max_episode: 291
+
+tags:
+  - anime
+  - virtual</pre>
+          <p>For a <strong>movie</strong>, set <code>type: movie</code> and
+          omit <code>seasons</code>. Streamarr generates one stub + NFO for
+          the film.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>For a keyword watch (auto-catch new releases by TMDB tag)</strong>
+          <pre>id:               watch-pokemon-movies
+type:             keyword_watch
+name:             "Pokémon Movies (auto)"
+tmdb_keyword_id:  9643
+stub_type:        movie
+resolver:         yt-dlp
+auto_extend:      true
+min_vote_count:   25
+enabled:          true</pre>
+          <p>Silently mints a stub whenever TMDB indexes a new title tagged with
+          that keyword. No further manual action needed after initial setup.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">⚡ Step 3 — Trigger Stub Generation</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Generate stubs for the new rule only</strong>
+          <pre># Replace the id with the one from your rule file
+curl -X POST http://localhost:<span data-cfg="port:streamarr"></span>/api/generate/dragon-ball-z   -H "Authorization: Bearer YOUR_API_KEY"
+
+# Watch the log to see stubs being written:
+tail -f ~/streamarr/logs/streamarr.log</pre>
+          <p>Streamarr fetches episode metadata from TMDB/TVDB, writes
+          <code>.strm</code> + <code>.nfo</code> + <code>.jpg</code> files into
+          <code>D:\Media\Virtual\TV\Dragon Ball Z\Season 01\</code> etc., then
+          calls Jellyfin's scan API automatically (if
+          <code>jellyfin.api_key</code> is set in
+          <code>streamarr.yml</code>).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Or run all rules at once</strong>
+          <pre>curl -X POST http://localhost:<span data-cfg="port:streamarr"></span>/api/generate/all   -H "Authorization: Bearer YOUR_API_KEY"</pre>
+          <p>Safe to re-run at any time — existing stubs are not overwritten
+          unless you pass <code>force=true</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">✅ Step 4 — Verify in Jellyfin</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Check the Virtual TV library</strong>
+          <p>The show should appear in the Jellyfin grid with poster art and an
+          episode list. If it's not there yet, trigger a manual scan — see the
+          <strong>Jellyfin Rescan</strong> tab.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Test playback</strong>
+          <p>Click any episode → Play. Jellyfin reads the <code>.strm</code>,
+          hands the URL to yt-dlp, and streams it. Expect a ~2–4s delay on
+          first play while the URL is resolved. Enable URL caching in
+          <code>streamarr.yml</code> for instant repeat plays:</p>
+          <pre># In streamarr.yml → sources:
+url_cache:
+  enabled: true
+  ttl_hours: 4    # streaming URLs rotate; don't set higher than 4–6</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🗑️ Removing a Virtual Show</div>
+    <div class="card">
+      <p>Set <code>enabled: false</code> in the rule file (or delete it), then
+      delete the show folder from <code>D:\Media\Virtual\TV\[Show Name]\</code>.
+      Trigger a Jellyfin rescan — Jellyfin will notice the folder is gone and
+      drop the entry from the library automatically. No other shows are
+      affected.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-addshow -->
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 9 — JELLYFIN RESCAN
+     How to trigger a targeted Jellyfin scan after Streamarr writes
+     new stubs, without hammering the metadata fetcher.
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-jellyfinrescan">
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <strong>Never use "Replace All Metadata" or "Refresh All Metadata."</strong>
+      These wipe existing posters and episode data for every item in the library
+      and re-fetch everything from scratch — triggering hundreds of TMDB/TVDB
+      requests and potentially rate-limiting the server. Only the targeted
+      methods below are safe.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">✅ The Automatic Path — Streamarr Notifies Jellyfin</div>
+    <div class="card">
+      <p>After every successful stub generation run, Streamarr calls Jellyfin's
+      scan API directly — <strong>no manual action needed</strong> — as long as
+      the API key is set in <code>streamarr.yml</code>:</p>
+      <pre># ~/streamarr/config/streamarr.yml
+jellyfin:
+  url:     http://host.docker.internal:<span data-cfg="port:jellyfin"></span>
+  api_key: "your-jellyfin-api-key-here"   # ← must be populated</pre>
+      <p>Generate the key at <strong>Jellyfin Dashboard → API Keys → + New
+      Key</strong> (label it "streamarr"). With this in place, the Virtual TV
+      library updates automatically every time you run
+      <code>/api/generate/</code>.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🔧 Manual Scan — When You Actually Need It</div>
+    <div class="card">
+      <p>Use a manual scan when: stubs were written but Jellyfin hasn't picked
+      them up, the Streamarr → Jellyfin auto-notify failed (check the log), or
+      you edited stub files by hand outside of the generator.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Option A — Scan the Virtual library only (preferred)</strong>
+          <p>Jellyfin Dashboard → Libraries → hover "Virtual TV" → click
+          <strong>⋮ → Scan Library</strong>.</p>
+          <p>This does a file-system diff: new <code>.strm</code> files get
+          added, removed files get dropped.
+          <strong>No metadata is re-fetched for existing items.</strong> Only
+          brand-new stubs trigger a metadata read (from their accompanying
+          <code>.nfo</code> — not a live API call).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Option B — Scan via Jellyfin API (scriptable)</strong>
+          <pre># New-content-only scan — safe, won't touch existing metadata
+curl -X POST   "http://localhost:<span data-cfg="port:jellyfin"></span>/Library/Refresh?refreshtype=NewContent"   -H "X-Emby-Token: YOUR_JELLYFIN_API_KEY"</pre>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body"><code>refreshtype=NewContent</code> is
+            the safe flag — finds new files only, skips re-fetching anything
+            already in the database.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Option C — Fix metadata on one show (most surgical)</strong>
+          <p>Navigate to the show in Jellyfin → <strong>⋮ → Refresh
+          Metadata</strong> → select
+          <strong>"Search for missing metadata and images only"</strong>
+          (not "Replace all metadata"). Fills in any gaps without touching
+          what's already correct.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🚫 What Not to Do</div>
+    <div class="card">
+      <table>
+        <tr><th>Action</th><th>Why it's bad</th></tr>
+        <tr>
+          <td>Dashboard → Scan All Libraries</td>
+          <td>Scans every library at once — unnecessary if you only added
+          stubs to Virtual TV</td>
+        </tr>
+        <tr>
+          <td>⋮ → Refresh Metadata → "Replace all metadata"</td>
+          <td>Wipes all posters, synopses, and episode data then re-downloads
+          everything. Never needed unless metadata is systemically
+          corrupted.</td>
+        </tr>
+        <tr>
+          <td>Restarting Jellyfin as a scan trigger</td>
+          <td>Doesn't trigger a scan. Just causes a 30–60s outage for
+          anyone currently streaming.</td>
+        </tr>
+        <tr>
+          <td>Deleting <code>metadata\</code> folders manually</td>
+          <td>Forces a full re-fetch for every item in the library. Last
+          resort only.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🗓️ Scheduled Scans</div>
+    <div class="card">
+      <p>Jellyfin has a built-in scheduled task that scans all libraries
+      automatically. Check it at <strong>Dashboard → Scheduled Tasks →
+      "Scan Media Library"</strong>. Recommended: nightly at 3–5am — after
+      Streamarr's 12h watcher polls have had time to finish, but before
+      anyone is actively streaming. Acts as a safety net for anything the
+      Streamarr auto-notify may have missed.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-jellyfinrescan -->
+
 </body>
 </html>
