@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dungeons & Dragons — Franchise Navigator</title>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+/* ════════════════════════════════════════════════════
+   D&D-SPECIFIC PLATFORM STRIPE COLOURS & STYLES
+════════════════════════════════════════════════════ */
+.fn-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/era rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media/TV insert rows (for film/animation) */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+  border-left: 3px solid #ce93d8 !important;
+}
+
+/* Platform left-border colour stripes — D&D edition / media palette */
+.fn-odnd    td:first-child { border-left: 3px solid #b87333; }  /* Original D&D — copper */
+.fn-1e      td:first-child { border-left: 3px solid #c9ae74; }  /* AD&D 1E — gold */
+.fn-2e      td:first-child { border-left: 3px solid #b0a790; }  /* AD&D 2E — silver */
+.fn-3e      td:first-child { border-left: 3px solid #7c9c8c; }  /* 3rd/3.5 — jade */
+.fn-4e      td:first-child { border-left: 3px solid #d48c3c; }  /* 4E — rust */
+.fn-5e      td:first-child { border-left: 3px solid #b22234; }  /* 5E — crimson */
+.fn-pc      td:first-child { border-left: 3px solid #90a4ae; }
+.fn-cons    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-mobile  td:first-child { border-left: 3px solid #ffd54f; }
+.fn-tv      td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-movie   td:first-child { border-left: 3px solid #ffb74d; }
+.fn-audio   td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-book    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-board   td:first-child { border-left: 3px solid #80cbc4; }
+
+/* Gold = recommended / core */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / defunct */
+.fn-skip td { opacity: .55; }
+
+/* Inline tags */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes     { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no      { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-mobile  { background: rgba(255,213,79,.18);  color: #ffd54f; border: 1px solid rgba(255,213,79,.35); }
+.fn-tag-defunct { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); }
+.fn-tag-opt     { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-star        { color: var(--accent); font-weight: 700; }
+
+/* View tabs */
+.fn-view-nav {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .62rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 5px 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+}
+.fn-view-btn:hover  { border-color: rgba(200,168,75,.4); color: var(--text); }
+.fn-view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.06); }
+
+.fn-view        { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc   { font-size: .74rem; color: var(--text-dim); margin-bottom: 10px; font-style: italic; }
+
+/* Main page tabs */
+.fn-tab-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 7px 14px; background: transparent;
+  border: 1px solid transparent; border-bottom: none;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+  margin-bottom: -1px; border-radius: 3px 3px 0 0;
+}
+.fn-tab-btn:hover  { color: var(--text); }
+.fn-tab-btn.active { border-color: var(--border); border-bottom-color: var(--bg); color: var(--accent); background: var(--bg); }
+
+.fn-tab-pane        { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* Legend bar */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* Stat row */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* Filler cards */
+.fn-filler-card {
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.fn-filler-name  { font-weight:700; font-size:.88rem; color:var(--text-bright); margin-bottom:4px; }
+.fn-filler-meta  { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--text-dim); margin-bottom:6px; }
+.fn-filler-desc  { font-size:.78rem; color:var(--text-dim); line-height:1.6; }
+.fn-filler-where { margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:.72rem; color:var(--text-dim); }
+
+/* Merch history blocks */
+.fn-merch-history { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:16px 18px; margin-bottom:14px; }
+.fn-merch-history-era { font-family:'Cinzel',serif; font-size:.85rem; color:var(--accent); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🐉</div>
+  <div>
+    <h1>Dungeons & Dragons</h1>
+    <div class="subtitle">// TTRPG · 50+ Years · Games · Books · Movies · TV · Mobile //</div>
+    <p class="desc">
+      The original roleplaying game, created by Gary Gygax and Dave Arneson in 1974. D&D defined the fantasy gaming genre and has expanded into novels, video games, board games, film, and animation. Use the Library tab to sort by release order, edition, or platform. Other tabs cover TV/Film, books/audiobooks, merch history, and Tunarr filler.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">60+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">6</div><div class="fn-stat-label">TV/Film Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">400+</div><div class="fn-stat-label">Novels</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">8</div><div class="fn-stat-label">Editions</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1974</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- MAIN TABS -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV & Film</button>
+  <button class="fn-tab-btn"        onclick="fnTab('books',   this)">📖 Books & Audio</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch & History</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY (Games + Digital Media)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The D&D Library — Games & Digital Media</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','edition',    this)">🎲 By Edition / Setting</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+      </div>
+
+      <!-- RELEASE ORDER (Selected key games & digital media) -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">Key video games, digital tools, and major interactive releases in chronological order. Gold = genre-defining / best in class.</div>
+        <table class="fn-table">
+           <thead><tr><th>Year</th><th>Title</th><th>Platform</th><th>Type</th><th>Status</th><th>Notes</th></tr></thead>
+           <tbody>
+             <tr class="fn-arc-row"><td colspan="6">⚔️ Early Computer RPGs (1975–1990)</tr>
+             <tr class="fn-pc fn-skip"><td>1975</td><td>dnd (PLATO)</td><td>PLATO</td><td>CRPG</td><td><span class="fn-tag fn-tag-defunct">Defunct</span></td><td>The first digital D&D adaptation. Text-based dungeon crawl. Only playable via emulated PLATO.</td></tr>
+             <tr class="fn-pc fn-highlight"><td>1988</td><td>Pool of Radiance <span class="fn-star">⭐</span></td><td>PC / NES</td><td>CRPG</td><td><span class="fn-tag fn-tag-yes">Emulatable</span></td><td>First Gold Box game. AD&D 1E rules. Landmark CRPG. PC emulation via DOSBox.</td></tr>
+             <tr class="fn-arc-row"><td colspan="6">🎮 SSI Gold Box & TSR Era (1990–1997)</tr>
+             <tr class="fn-pc"><td>1991</td><td>Eye of the Beholder</td><td>PC / SNES</td><td>Dungeon Crawler</td><td><span class="fn-tag fn-tag-yes">Emulatable</span></td><td>Real-time movement, party-based. First-person grid classic.</td></tr>
+             <tr class="fn-pc fn-highlight"><td>1998</td><td>Baldur's Gate <span class="fn-star">⭐</span></td><td>PC / iOS</td><td>CRPG</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>BioWare's revival. AD&D 2E rules. Gold standard. Enhanced Edition on iOS/Android.</td></tr>
+             <tr class="fn-arc-row"><td colspan="6">🗡️ 3rd / 3.5 Era & D&D Online (2000–2010)</tr>
+             <tr class="fn-pc fn-highlight"><td>2000</td><td>Icewind Dale</td><td>PC / iOS</td><td>CRPG</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Combat-focused Infinity Engine. Enhanced Edition on mobile.</td></tr>
+             <tr class="fn-pc"><td>2002</td><td>Neverwinter Nights</td><td>PC / iOS</td><td>CRPG</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>3E rules, DM client. Aurora engine. EE on mobile.</td></tr>
+             <tr class="fn-pc"><td>2006</td><td>Neverwinter Nights 2</td><td>PC</td><td>CRPG</td><td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td><td>Obsidian. 3.5E rules. Mask of the Betrayer expansion is essential.</td></tr>
+             <tr class="fn-cons"><td>2008</td><td>D&D: Daggerdale</td><td>PS3 / X360</td><td>Action-RPG</td><td><span class="fn-tag fn-tag-opt">Delisted</span></td><td>4E tie-in, mixed reception. No longer available digitally.</td></tr>
+             <tr class="fn-arc-row"><td colspan="6">📱 Modern Era & 5th Edition (2010–present)</tr>
+             <tr class="fn-pc fn-highlight"><td>2014</td><td>Baldur's Gate: Siege of Dragonspear</td><td>PC / iOS</td><td>CRPG</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Bridge between BG1 & BG2. Canon expanded.</td></tr>
+             <tr class="fn-pc fn-highlight"><td>2020</td><td>Baldur's Gate 3 <span class="fn-star">⭐</span></td><td>PC / PS5 / XSX</td><td>CRPG</td><td><span class="fn-tag fn-tag-no">PC/Console</span></td><td>Larian Studios. 5E rules, GOTY 2023. Definitive modern D&D game.</td></tr>
+             <tr class="fn-mobile"><td>2017</td><td>D&D: Lords of Waterdeep (Board Game)</td><td>iOS / Android / PC</td><td>Digital Board</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Digital adaptation of the acclaimed worker-placement board game.</td></tr>
+             <tr class="fn-mobile"><td>2021</td><td>D&D: Dark Alliance</td><td>PC / Consoles</td><td>Action</td><td><span class="fn-tag fn-tag-opt">Mixed</span></td><td>Action-RPG set in Icewind Dale. Co-op focused.</td></tr>
+             <tr class="fn-mobile"><td>2022</td><td>D&D: Arena of War (Gameloft)</td><td>iOS / Android</td><td>Action RPG</td><td><span class="fn-tag fn-tag-defunct">Defunct</span></td><td>Gameloft free-to-play, closed 2023.</td></tr>
+             <tr class="fn-arc-row"><td colspan="6">🖥️ PC-Only / Emulation required</tr>
+             <tr class="fn-pc fn-skip"><td>1999</td><td>Planescape: Torment</td><td>PC / iOS</td><td>CRPG</td><td><span class="fn-tag fn-tag-mobile">📱 Mobile</span></td><td>Best writing in gaming. 2E rules. EE on mobile.</td></tr>
+           </tbody>
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:var(--accent)"></span>Gold = essential/iconic</span>
+          <span><span class="fn-tag fn-tag-mobile">📱 Mobile</span> Playable on phone (native/emulated)</span>
+          <span><span class="fn-tag fn-tag-no">🖥️ PC Only</span> Requires PC or streaming</span>
+          <span><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span> No longer available</span>
+        </div>
+      </div>
+
+      <!-- BY EDITION -->
+      <div class="fn-view" id="fn-library-edition">
+        <div class="fn-view-desc">Games grouped by D&D rules edition. Each edition reflects a different design era.</div>
+        <table class="fn-table"><thead><tr><th>Edition</th><th>Title</th><th>Year</th><th>Platform</th><th>Notes</th></tr></thead><tbody>
+          <tr class="fn-arc-row"><td colspan="4">🐉 Original / AD&D 1E (1974–1988)</tr>
+          <tr class="fn-1e"><td>AD&D 1E</td><td>Pool of Radiance</td><td>1988</td><td>PC</td><td>Gold Box engine.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">📖 AD&D 2E (1989–1999)</tr>
+          <tr class="fn-2e fn-highlight"><td>2E</td><td>Baldur's Gate (Series)</td><td>1998–2001</td><td>PC/Mobile</td><td>BioWare's Infinity Engine masterpieces.</td></tr>
+          <tr class="fn-2e"><td>2E</td><td>Planescape: Torment</td><td>1999</td><td>PC/Mobile</td><td>Narrative zenith.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">🎲 3rd / 3.5 Edition (2000–2007)</tr>
+          <tr class="fn-3e fn-highlight"><td>3E</td><td>Neverwinter Nights</td><td>2002</td><td>PC/Mobile</td><td>Toolset, persistent worlds.</td></tr>
+          <tr class="fn-3e"><td>3.5E</td><td>Neverwinter Nights 2</td><td>2006</td><td>PC</td><td>Mask of the Betrayer expansion.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">🔥 4th Edition (2008–2013)</tr>
+          <tr class="fn-4e"><td>4E</td><td>D&D: Daggerdale</td><td>2008</td><td>Console</td><td>Action-RPG tie-in.</td></tr>
+          <tr class="fn-4e"><td>4E</td><td>D&D: Neverwinter (MMO)</td><td>2013</td><td>PC</td><td>Cryptic Studios, still live.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">🌟 5th Edition (2014–present)</tr>
+          <tr class="fn-5e fn-highlight"><td>5E</td><td>Baldur's Gate 3</td><td>2023</td><td>PC/PS5/XSX</td><td>Larian's definitive modern D&D.</td></tr>
+          <tr class="fn-5e"><td>5E</td><td>Idle Champions of the Forgotten Realms</td><td>2017</td><td>PC/Mobile</td><td>Clicker/strategy with official characters.</td></tr>
+        </tbody></table>
+      </div>
+
+      <!-- BY PLATFORM -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">Games by platform — includes phone and console.</div>
+        <table class="fn-table"><thead><tr><th>Platform</th><th>Title</th><th>Year</th><th>Notes</th></tr></thead><tbody>
+          <tr class="fn-arc-row"><td colspan="3">📱 Mobile (Native iOS/Android)</tr>
+          <tr class="fn-mobile"><td>iOS/Android</td><td>Baldur's Gate: Enhanced Edition</td><td>2012</td><td>Full Infinity Engine. Works offline.</td></tr>
+          <tr class="fn-mobile"><td>iOS/Android</td><td>Neverwinter Nights: EE</td><td>2018</td><td>Includes premium modules.</td></tr>
+          <tr class="fn-mobile"><td>iOS/Android</td><td>Idle Champions</td><td>2017</td><td>Free-to-play. Cross-save.</td></tr>
+          <tr class="fn-mobile"><td>iOS/Android</td><td>D&D Lords of Waterdeep</td><td>2017</td><td>Digital board game.</td></tr>
+          <tr class="fn-arc-row"><td colspan="3">🖥️ PC / Console (Modern)</tr>
+          <tr class="fn-5e fn-highlight"><td>PC/PS5</td><td>Baldur's Gate 3</td><td>2023</td><td>GOTY. Native 5E rules.</td></tr>
+          <tr class="fn-cons"><td>PS4/Switch</td><td>D&D: Warriors of Waterdeep</td><td>2019</td><td>Match-3 RPG. Delisted in some regions.</td></tr>
+          <tr class="fn-cons"><td>Xbox/PS4</td><td>D&D: Dark Alliance</td><td>2021</td><td>Action co-op.</td></tr>
+        </tbody></table>
+      </div>
+
+      <!-- BEST FIRST -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Curated order for newcomers — start with the most accessible, story-rich entries.</div>
+        <table class="fn-table"><thead><tr><th>#</th><th>Title</th><th>Why Start Here</th></tr></thead><tbody>
+          <tr class="fn-5e fn-highlight"><td>1</td><td>Baldur's Gate 3 <span class="fn-star">⭐</span></td><td>Modern masterpiece, best introduction to 5E rules, incredible production values.</td></tr>
+          <tr class="fn-2e fn-highlight"><td>2</td><td>Baldur's Gate: Enhanced Edition</td><td>Where CRPG storytelling began. Still plays well on mobile.</td></tr>
+          <tr class="fn-2e"><td>3</td><td>Planescape: Torment</td><td>For narrative lovers — the best writing in gaming.</td></tr>
+          <tr class="fn-5e"><td>4</td><td>Idle Champions</td><td>Casual entry, low commitment, introduces dozens of iconic characters.</td></tr>
+          <tr class="fn-mobile"><td>5</td><td>Lords of Waterdeep (digital)</td><td>Board game intro to Forgotten Realms politics, no rules burden.</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & FILM
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 Dungeons & Dragons — Film & Television</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',this)">📋 All Entries</button>
+        <button class="fn-view-btn" onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button>
+      </div>
+      <div class="fn-view active" id="fn-tvanime-all">
+        <table class="fn-table"><thead><tr><th>Year</th><th>Title</th><th>Type</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+          <tr class="fn-tv fn-highlight"><td>1983–1985</td><td>Dungeons & Dragons (Animated Series) <span class="fn-star">⭐</span></td><td>TV Series</td><td>✅ Complete</td><td>27 episodes, cult classic. Kids trapped in D&D world. Venger, Dungeon Master.</td></tr>
+          <tr class="fn-movie"><td>2000</td><td>Dungeons & Dragons (Film)</td><td>Movie</td><td>✅</td><td>Jeremy Irons. Critical flop but camp classic. No canon.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2005</td><td>D&D: Wrath of the Dragon God</td><td>DTV Movie</td><td>✅</td><td>Direct-to-video, slightly better than 2000.</td></tr>
+          <tr class="fn-movie fn-skip"><td>2012</td><td>D&D: The Book of Vile Darkness</td><td>DTV Movie</td><td>✅</td><td>Low-budget, minor tie-in to 4E.</td></tr>
+          <tr class="fn-tv"><td>2022</td><td>D&D: The Animated Series (Retrospective doc)</td><td>Documentary</td><td>✅</td><td>Fan-made feature-length doc, widely circulated.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2023</td><td>Dungeons & Dragons: Honor Among Thieves <span class="fn-star">⭐</span></td><td>Movie</td><td>✅</td><td>Critical & commercial hit. Best D&D film. Paramount+ / Jellyfin.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 Upcoming: Live-action series in development at Paramount+ (2026–), new film sequel announced 2025.</tr>
+        </tbody></table>
+      </div>
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Start with Honor Among Thieves, then the animated series for nostalgia, and the older films for curiosity.</div>
+        <table class="fn-table"><thead><tr><th>Step</th><th>Title</th><th>Why</th></tr></thead><tbody>
+          <tr class="fn-movie fn-highlight"><td>1</td><td>Honor Among Thieves (2023)</td><td>Accessible, fun, great D&D spirit.</td></tr>
+          <tr class="fn-tv"><td>2</td><td>Animated Series (1983)</td><td>Classic tone, good for background.</td></tr>
+          <tr class="fn-movie fn-skip"><td>3</td><td>2000 film + sequels</td><td>Completionist / camp curiosity.</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — BOOKS & AUDIO
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-books">
+  <div class="section">
+    <div class="section-title">📖 Novels, Audiobooks & Audio Dramas</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('books','novels',this)">📚 Novels</button>
+        <button class="fn-view-btn" onclick="fnView('books','audio',this)">🎧 Audiobooks & Dramas</button>
+      </div>
+      <div class="fn-view active" id="fn-books-novels">
+        <div class="fn-view-desc">Hundreds of novels across Forgotten Realms, Dragonlance, Eberron, and more. Key series only.</div>
+        <table class="fn-table"><thead><tr><th>Setting</th><th>Series</th><th>Author</th><th>Years</th><th>Notable</th></tr></thead><tbody>
+          <tr class="fn-book fn-highlight"><td>Dragonlance</td><td>Chronicles <span class="fn-star">⭐</span></td><td>Weis & Hickman</td><td>1984–1986</td><td>Dragons of Autumn Twilight. Foundational D&D fiction.</td></tr>
+          <tr class="fn-book"><td>Forgotten Realms</td><td>The Legend of Drizzt</td><td>R.A. Salvatore</td><td>1988–present</td><td>39+ books, most popular D&D character.</td></tr>
+          <tr class="fn-book fn-highlight"><td>Forgotten Realms</td><td>Avatar Series</td><td>Various</td><td>1989–1991</td><td>Time of Troubles, major lore events.</td></tr>
+          <tr class="fn-book"><td>Eberron</td><td>The Dreaming Dark</td><td>Keith Baker</td><td>2004–2006</td><td>Introduced the pulp-noir setting.</td></tr>
+          <tr class="fn-book fn-skip"><td>Ravenloft</td><td>Vampire of the Mists</td><td>Christie Golden</td><td>1991</td><td>Gothic horror cornerstone.</td></tr>
+        </tbody></table>
+      </div>
+      <div class="fn-view" id="fn-books-audio">
+        <div class="fn-view-desc">Audiobooks, full-cast audio dramas, and licensed audio productions.</div>
+        <table class="fn-table"><thead><tr><th>Title</th><th>Type</th><th>Publisher</th><th>Notes</th></tr></thead><tbody>
+          <tr class="fn-audio fn-highlight"><td>The Legend of Drizzt (GraphicAudio) <span class="fn-star">⭐</span></td><td>Full-cast audio</td><td>GraphicAudio</td><td>Dramatized with music and effects; 30+ adaptations.</td></tr>
+          <tr class="fn-audio"><td>Dragonlance Chronicles (Audible)</td><td>Audiobook</td><td>Audible Studios</td><td>Narrated by Paul Boehmer, complete trilogy.</td></tr>
+          <tr class="fn-audio"><td>D&D Official Podcast</td><td>Podcast</td><td>Wizards of the Coast</td><td>2015–present, interviews and lore deep-dives.</td></tr>
+          <tr class="fn-audio"><td>Critical Role: Vox Machina Origins</td><td>Audio Drama</td><td>Critical Role</td><td>Canon-adjacent D&D actual-play spinoff audio.</td></tr>
+        </tbody> </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH & HISTORY (Condensed)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 D&D Merchandise & Legacy</div>
+    <div class="card">
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">🎲 Early Years (1974–1983)</div>
+        <p>TSR’s original boxed sets, Chainmail miniatures rules, and early modules (Keep on the Borderlands, Tomb of Horrors) sold via hobby shops. First D&D action figures by LJN (1982–1985) — Warduke, Strongheart, and the animated series toys.</p>
+      </div>
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">📚 The Novel Explosion (1988–2000)</div>
+        <p>Dragonlance and Forgotten Realms novels became bestsellers, with dozens of authors. TSR licensed board games (D&D Adventure System series), and later Hasbro expanded into video games via SSI, Interplay, and BioWare.</p>
+      </div>
+      <div class="fn-merch-history">
+        <div class="fn-merch-history-era">🃏 Modern Collectibles (2014–present)</div>
+        <p>WizKids miniatures, IDW comics, Nolzur’s Marvelous Miniatures, and D&D-branded apparel. The 2023 movie renewed mainstream merchandise, with Hasbro’s “D&D Beyond” digital tools becoming the central hub.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Filler — D&D Channel Blocks</div>
+    <div class="card">
+      <div class="fn-filler-card"><div class="fn-filler-name">Animated Series Loop</div><div class="fn-filler-meta">27 episodes · 22 min each</div><div class="fn-filler-desc">Perfect 24/7 background — episodic, nostalgic, iconic theme song.</div><div class="fn-filler-where">📍 Jellyfin → D&D Animated Series (1983)</div></div>
+      <div class="fn-filler-card"><div class="fn-filler-name">Honor Among Thieves + Trailers</div><div class="fn-filler-meta">Film (2h 14m) + Official Featurettes</div><div class="fn-filler-desc">High-energy filler block for weekends. Pair with 2023 trailers and cast interviews.</div></div>
+      <div class="fn-filler-card"><div class="fn-filler-name">Critical Role Highlight Reels</div><div class="fn-filler-meta">Various · 10–30 min</div><div class="fn-filler-desc">Official animated clips, battle compilations, and “The Legend of Vox Machina” interstitials.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY (Narrative)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">📖 D&D History — From Wargaming to Global Phenomenon</div>
+    <div class="card">
+      <div class="fn-merch-history"><div class="fn-merch-history-era">1974–1977: The Birth</div><p>Gary Gygax and Dave Arneson merge Chainmail miniatures rules with fantasy storytelling. The original white box sells out at hobby shops.</p></div>
+      <div class="fn-merch-history"><div class="fn-merch-history-era">1983–1997: The Satantic Panic & TSR Expansion</div><p>AD&D 1E and 2E released; novels and cartoon reach mass market. TSR overextends and is purchased by Wizards of the Coast in 1997.</p></div>
+      <div class="fn-merch-history"><div class="fn-merch-history-era">2000–2012: Hasbro Era & 3E/4E</div><p>3rd Edition redefines the game. D&D Online and Neverwinter Nights bring digital to the forefront. 4E splits the player base.</p></div>
+      <div class="fn-merch-history"><div class="fn-merch-history-era">2014–Present: 5E Renaissance</div><p>5E becomes the most successful edition, fueled by Critical Role, Stranger Things, and Baldur’s Gate 3. D&D Beyond goes digital-first.</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fn-pane-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function fnView(tabId, viewId, btn) {
+  const pane = document.getElementById('fn-pane-' + tabId);
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('fn-' + tabId + '-' + viewId);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
