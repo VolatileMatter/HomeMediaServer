@@ -63,7 +63,8 @@
       border-bottom: 1px solid rgba(255,255,255,.04);
       vertical-align: top; line-height: 1.5;
     }
-    .master-table tr:hover td { background: rgba(255,255,255,.025); }
+
+    /* ── Arc-row (franchise header in drill-down) ── */
     .master-table tr.arc-row td {
       background: rgba(200,168,75,.07) !important;
       color: var(--accent); font-size: .66rem;
@@ -72,6 +73,72 @@
       padding: 5px 10px;
       border-top: 1px solid rgba(200,168,75,.2) !important;
       border-bottom: 1px solid rgba(200,168,75,.12) !important;
+    }
+
+    /* ══════════════════════════════════════════════
+       ROW COLOR CODING BY CONTENT TYPE
+       Faint tinted background + colored left border.
+       Kept very subtle so text remains easy to scan.
+    ══════════════════════════════════════════════ */
+
+    /* game — blue */
+    .master-table tr.row-game td {
+      background: rgba(91, 141, 217, 0.04);
+      border-bottom-color: rgba(91, 141, 217, 0.08);
+    }
+    .master-table tr.row-game td:first-child {
+      border-left: 2px solid rgba(91, 141, 217, 0.45);
+    }
+    .master-table tr.row-game:hover td {
+      background: rgba(91, 141, 217, 0.09) !important;
+    }
+
+    /* anime — gold */
+    .master-table tr.row-anime td {
+      background: rgba(200, 168, 75, 0.04);
+      border-bottom-color: rgba(200, 168, 75, 0.08);
+    }
+    .master-table tr.row-anime td:first-child {
+      border-left: 2px solid rgba(200, 168, 75, 0.45);
+    }
+    .master-table tr.row-anime:hover td {
+      background: rgba(200, 168, 75, 0.09) !important;
+    }
+
+    /* movie — teal */
+    .master-table tr.row-movie td {
+      background: rgba(78, 205, 196, 0.04);
+      border-bottom-color: rgba(78, 205, 196, 0.08);
+    }
+    .master-table tr.row-movie td:first-child {
+      border-left: 2px solid rgba(78, 205, 196, 0.45);
+    }
+    .master-table tr.row-movie:hover td {
+      background: rgba(78, 205, 196, 0.09) !important;
+    }
+
+    /* tv — orange */
+    .master-table tr.row-tv td {
+      background: rgba(224, 133, 92, 0.04);
+      border-bottom-color: rgba(224, 133, 92, 0.08);
+    }
+    .master-table tr.row-tv td:first-child {
+      border-left: 2px solid rgba(224, 133, 92, 0.45);
+    }
+    .master-table tr.row-tv:hover td {
+      background: rgba(224, 133, 92, 0.09) !important;
+    }
+
+    /* manga — purple */
+    .master-table tr.row-manga td {
+      background: rgba(180, 100, 220, 0.04);
+      border-bottom-color: rgba(180, 100, 220, 0.08);
+    }
+    .master-table tr.row-manga td:first-child {
+      border-left: 2px solid rgba(180, 100, 220, 0.45);
+    }
+    .master-table tr.row-manga:hover td {
+      background: rgba(180, 100, 220, 0.09) !important;
     }
 
     /* ── Type / status badges ── */
@@ -98,6 +165,22 @@
       transition: color .12s;
     }
     .fn-pill:hover { color: var(--accent); }
+
+    /* ── Table legend ── */
+    .table-legend {
+      display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+      margin-bottom: 12px;
+      font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+      color: var(--text-dim); opacity: .7;
+    }
+    .legend-swatch {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+      border-left: 2px solid;
+    }
 
     /* ── Stat boxes ── */
     .stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin: 0 0 24px; }
@@ -169,6 +252,14 @@
     <span class="count-lbl" id="count-lbl"></span>
   </div>
 
+  <div class="table-legend">
+    <span><span class="legend-swatch" style="background:rgba(91,141,217,.12);border-color:rgba(91,141,217,.6)"></span>Game</span>
+    <span><span class="legend-swatch" style="background:rgba(200,168,75,.12);border-color:rgba(200,168,75,.6)"></span>Anime</span>
+    <span><span class="legend-swatch" style="background:rgba(78,205,196,.12);border-color:rgba(78,205,196,.6)"></span>Movie</span>
+    <span><span class="legend-swatch" style="background:rgba(224,133,92,.12);border-color:rgba(224,133,92,.6)"></span>TV</span>
+    <span><span class="legend-swatch" style="background:rgba(180,100,220,.12);border-color:rgba(180,100,220,.6)"></span>Manga</span>
+  </div>
+
   <div id="table-wrap">
     <div class="load-msg" id="table-msg">Loading…</div>
   </div>
@@ -179,10 +270,10 @@
 // ══════════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════════
-let ALL_MEDIA      = [];   // flat merged array, each item has ._franchise* injected
-let FRANCHISE_META = [];   // top-level franchise objects (id, franchise, icon, color, …)
-let currentFilter  = 'all';
-let activeFranchiseId = null;  // set when a franchise card is clicked; cleared on free search
+let ALL_MEDIA         = [];   // flat merged array, each item has ._franchise* injected
+let FRANCHISE_META    = [];   // top-level franchise objects (id, franchise, icon, color, …)
+let currentFilter     = 'all';
+let activeFranchiseId = null; // set when a franchise card is clicked; cleared on free search
 
 // ══════════════════════════════════════════════════════════
 //  BOOT — fetch manifest, then all franchise JSONs in parallel
@@ -284,10 +375,7 @@ function renderGrid() {
 }
 
 function filterByFranchise(id) {
-  // Set active franchise and clear the search box
   activeFranchiseId = id;
-  const f = FRANCHISE_META.find(f => f.id === id);
-  // Clear search so free-text doesn't conflict, but keep the franchise filter via activeFranchiseId
   document.getElementById('search').value = '';
   currentFilter = 'all';
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -300,8 +388,7 @@ function filterByFranchise(id) {
 //  MASTER TABLE
 // ══════════════════════════════════════════════════════════
 function setFilter(type, btn) {
-  currentFilter = type;
-  // Changing the type filter clears any active franchise drill-down
+  currentFilter     = type;
   activeFranchiseId = null;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -315,23 +402,16 @@ function renderTable() {
   const wrap   = document.getElementById('table-wrap');
   const lbl    = document.getElementById('count-lbl');
 
-  // If user types in search, clear any active franchise drill-down
-  if (q && activeFranchiseId) {
-    activeFranchiseId = null;
-  }
+  // Free-text search clears franchise drill-down
+  if (q && activeFranchiseId) activeFranchiseId = null;
 
-  let filtered = ALL_MEDIA.filter(m => {
-    // Active franchise drill-down takes priority
-    if (activeFranchiseId) {
-      return m._franchiseId === activeFranchiseId;
-    }
-    // Type / status filter
+  const filtered = ALL_MEDIA.filter(m => {
+    if (activeFranchiseId) return m._franchiseId === activeFranchiseId;
     if (filter === 'completed' || filter === 'backlog') {
       if (m.status !== filter) return false;
     } else if (filter !== 'all') {
       if (m.type !== filter) return false;
     }
-    // Search
     if (q) {
       const hay = [
         m.title, m._franchiseName, m.notes, m.description,
@@ -349,23 +429,21 @@ function renderTable() {
     return;
   }
 
-  // Always sort by year ascending (entries without a year sort last)
+  // Always sort by year ascending (no year → sort last)
   filtered.sort((a, b) => (a.year || 9999) - (b.year || 9999));
 
   let rows = '';
 
   if (activeFranchiseId) {
-    // ── Franchise drill-down view: single arc-row header, then entries by year ──
-    const meta = FRANCHISE_META.find(f => f.id === activeFranchiseId);
+    // ── Franchise drill-down: single arc-row header, entries by year ──
+    const meta  = FRANCHISE_META.find(f => f.id === activeFranchiseId);
     const label = meta ? meta.icon + ' ' + esc(meta.franchise || meta.id) : esc(activeFranchiseId);
     rows += `<tr class="arc-row">
-      <td colspan="7">${label} <span style="opacity:.5;font-size:.58rem;margin-left:8px">
-        <span style="cursor:pointer" onclick="clearFranchiseFilter()">✕ clear filter</span>
-      </span></td>
+      <td colspan="7">${label}
+        <span style="opacity:.45;font-size:.58rem;margin-left:10px;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0" onclick="clearFranchiseFilter()">✕ clear filter</span>
+      </td>
     </tr>`;
-    filtered.forEach((m, i) => {
-      rows += buildRow(m, i, false);
-    });
+    filtered.forEach((m, i) => { rows += buildRow(m, i, false); });
 
     wrap.innerHTML = `<table class="master-table">
       <thead><tr>
@@ -376,10 +454,8 @@ function renderTable() {
     </table>`;
 
   } else {
-    // ── Default / search view: flat rows sorted by year, with Franchise column ──
-    filtered.forEach((m, i) => {
-      rows += buildRow(m, i, true);
-    });
+    // ── Default / search view: flat by year, Franchise column included ──
+    filtered.forEach((m, i) => { rows += buildRow(m, i, true); });
 
     wrap.innerHTML = `<table class="master-table">
       <thead><tr>
@@ -392,11 +468,12 @@ function renderTable() {
 }
 
 function buildRow(m, i, showFranchise) {
-  const meta = FRANCHISE_META.find(f => f.id === m._franchiseId);
+  const rowClass = 'row-' + (m.type || 'unknown');
+  const meta     = FRANCHISE_META.find(f => f.id === m._franchiseId);
   const franchiseCell = showFranchise
     ? `<td><span class="fn-pill" title="Filter to ${esc(m._franchiseName || '')}" onclick="filterByFranchise('${esc(m._franchiseId || '')}')">${meta ? meta.icon + ' ' : ''}${esc(m._franchiseName || m._franchiseId || '—')}</span></td>`
     : '';
-  return `<tr>
+  return `<tr class="${rowClass}">
     <td style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.65rem">${i + 1}</td>
     <td style="font-weight:600">${esc(m.title || '—')}</td>
     <td>${typeBadge(m.type)}</td>
