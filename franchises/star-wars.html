@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Star Wars</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(255,232,31,.35); }
+.fn-tab-btn.active { color: #ffe81f; border-bottom-color: #ffe81f; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(255,232,31,.12); border-color: #ffe81f; color: #ffe81f; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid #ffe81f; padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.sw-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.sw-table th {
+  background: var(--bg3); color: #ffe81f;
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 7px 10px; text-align: left;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.sw-table td {
+  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top; line-height: 1.5;
+}
+.sw-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era group header rows */
+.sw-arc-row td {
+  background: rgba(255,232,31,.07) !important; color: #ffe81f;
+  font-size: .69rem; font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: .08em; padding: 5px 10px;
+  border-top: 1px solid rgba(255,232,31,.25) !important;
+  border-bottom: 1px solid rgba(255,232,31,.15) !important;
+}
+
+/* Media crossover rows */
+.sw-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic; color: var(--text-dim); font-size: .76rem;
+}
+.sw-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform colour stripes */
+.sw-snes   td:first-child { border-left: 3px solid #9575cd; }
+.sw-n64    td:first-child { border-left: 3px solid #a5d6a7; }
+.sw-gc     td:first-child { border-left: 3px solid #80cbc4; }
+.sw-ps1    td:first-child { border-left: 3px solid #ffb74d; }
+.sw-ps2    td:first-child { border-left: 3px solid #ff8a65; }
+.sw-pc     td:first-child { border-left: 3px solid #b0bec5; }
+.sw-xbox   td:first-child { border-left: 3px solid #81c784; }
+.sw-mobile td:first-child { border-left: 3px solid #4fc3f7; }
+.sw-modern td:first-child { border-left: 3px solid #ef5350; }
+.sw-vr     td:first-child { border-left: 3px solid #ce93d8; }
+.sw-movie  td:first-child { border-left: 3px solid #ffe81f; }
+.sw-tv     td:first-child { border-left: 3px solid #64b5f6; }
+.sw-lego   td:first-child { border-left: 3px solid #ffcc02; }
+.sw-cancel td:first-child { border-left: 3px solid #ef9a9a; }
+
+/* Gold highlight */
+.sw-highlight td { background: rgba(255,232,31,.04) !important; }
+.sw-highlight td:first-child { border-left: 3px solid #ffe81f !important; }
+
+/* Faded = optional/skip */
+.sw-skip td { opacity: .55; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.sw-tag {
+  display: inline-block; font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace; padding: 1px 5px;
+  border-radius: 3px; white-space: nowrap; vertical-align: middle;
+}
+.sw-tag-yes    { background: rgba(76,175,80,.18);  color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.sw-tag-no     { background: rgba(239,83,80,.18);  color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.sw-tag-pc     { background: rgba(176,190,197,.18); color: #b0bec5; border: 1px solid rgba(176,190,197,.35); }
+.sw-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.sw-tag-canon  { background: rgba(76,175,80,.15); color: #81c784; border: 1px solid rgba(76,175,80,.3); }
+.sw-tag-legends{ background: rgba(255,152,0,.15); color: #ffb74d; border: 1px solid rgba(255,152,0,.3); }
+.sw-tag-noncanon{ background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); }
+.sw-tag-defunct{ background: rgba(239,83,80,.15); color: #ef9a9a; border: 1px solid rgba(239,83,80,.3); }
+.sw-tag-cancel { background: rgba(239,83,80,.2); color: #e57373; border: 1px solid rgba(239,83,80,.4); font-weight:700; }
+.sw-star { color: #ffe81f; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND
+════════════════════════════════════════════════════ */
+.sw-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; font-size: .73rem; color: var(--text-dim);
+}
+.sw-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.sw-stat-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.sw-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.sw-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #ffe81f; line-height: 1; }
+.sw-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   ERA BLOCKS (History tab)
+════════════════════════════════════════════════════ */
+.sw-era {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-left: 3px solid #ffe81f; border-radius: 4px;
+  padding: 16px 18px; margin-bottom: 14px;
+}
+.sw-era-year { font-family: 'Share Tech Mono', monospace; font-size: .72rem; color: #ffe81f; margin-bottom: 4px; }
+.sw-era-title { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--text-bright); margin-bottom: 8px; }
+.sw-era-body { font-size: .84rem; color: var(--text-dim); line-height: 1.7; }
+
+/* Merch history */
+.sw-merch-history {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  padding: 16px 18px; margin-bottom: 14px;
+}
+.sw-merch-era {
+  font-family: 'Cinzel', serif; font-size: .85rem; color: #ffe81f;
+  margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+
+/* Filler blocks */
+.sw-filler-intro { background: rgba(255,232,31,.06); color: #ffe81f; border: 1px solid rgba(255,232,31,.25); }
+.sw-filler-episode { background: rgba(100,181,246,.12); color: #90caf9; border: 1px solid rgba(100,181,246,.3); }
+.sw-filler-retro { background: rgba(180,100,220,.12); color: #b464dc; border: 1px solid rgba(180,100,220,.3); }
+.sw-filler-bumper { background: rgba(76,175,80,.12); color: #81c784; border: 1px solid rgba(76,175,80,.3); }
+.sw-filler-block {
+  border-radius: 4px; padding: 12px 16px; margin-bottom: 10px;
+}
+.sw-filler-name { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.sw-filler-meta { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.sw-filler-desc { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">⚔️</div>
+  <div>
+    <h1>Star Wars</h1>
+    <div class="subtitle">// Films · TV · Games · Mobile · EmulatorJS · Jellyfin //</div>
+    <p class="desc">George Lucas's space opera spanning 1977 to the present. The franchise encompasses 11 theatrical films, a dozen live-action and animated series, and over 100 games across every platform from Atari to modern consoles. The Library tab covers every piece of media ever released — including defunct, cancelled, and mobile-only entries. Canon (Disney continuity) vs Legends (pre-2014 Expanded Universe) is marked throughout.</p>
+  </div>
+</div>
+
+<div class="sw-stat-row">
+  <div class="sw-stat-box"><div class="sw-stat-num">100+</div><div class="sw-stat-label">Games</div></div>
+  <div class="sw-stat-box"><div class="sw-stat-num">15+</div><div class="sw-stat-label">TV Series</div></div>
+  <div class="sw-stat-box"><div class="sw-stat-num">15</div><div class="sw-stat-label">Films</div></div>
+  <div class="sw-stat-box"><div class="sw-stat-num">4</div><div class="sw-stat-label">Cancelled</div></div>
+  <div class="sw-stat-box"><div class="sw-stat-num">1977</div><div class="sw-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="swTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="swTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="swTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="swTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="swTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="swTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="sw-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Star Wars Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="swView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="swView('library','chrono',    this)">🕰️ Chronological</button>
+        <button class="fn-view-btn"        onclick="swView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="swView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="swView('library','mobile',    this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- ── RELEASE ORDER ── -->
+      <div class="fn-view active" id="sw-library-release">
+        <div class="fn-view-desc">Every game, film, and series in real-world release order. Canon/Legends marked per entry. Gold rows = recommended. Faded = optional/notorious. ☠️ = defunct servers or cancelled.</div>
+        <table class="sw-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core / Access</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="sw-arc-row"><td colspan="6">── The Original Era (1977–1983) ──</td></tr>
+          <tr class="sw-movie sw-highlight">
+            <td>1977</td><td>Episode IV – A New Hope <span class="sw-star">⭐</span></td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Start here. The one that launched everything. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-movie sw-highlight">
+            <td>1980</td><td>Episode V – The Empire Strikes Back <span class="sw-star">⭐</span></td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Widely considered the greatest film in the saga. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-movie sw-skip">
+            <td>1978</td><td>The Holiday Special</td>
+            <td>TV Special</td><td>Fan copies only</td>
+            <td><span class="sw-tag sw-tag-no">⚠️ Unofficial</span></td>
+            <td>Lucas has tried to erase this. Infamously terrible. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-movie sw-highlight">
+            <td>1983</td><td>Episode VI – Return of the Jedi</td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Completes the original trilogy. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv sw-skip">
+            <td>1984</td><td>Caravan of Courage: An Ewok Adventure</td>
+            <td>TV Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> ABC TV movie. For kids. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-tv sw-skip">
+            <td>1985</td><td>Ewoks: The Battle for Endor</td>
+            <td>TV Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Sequel Ewok TV movie. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-tv sw-skip">
+            <td>1985</td><td>Star Wars: Droids (animated)</td>
+            <td>TV Series</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Saturday morning R2/3PO cartoon. 13 eps. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-tv sw-skip">
+            <td>1985</td><td>Star Wars: Ewoks (animated)</td>
+            <td>TV Series</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> 35 episodes. Aimed at children. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+
+          <tr class="sw-arc-row"><td colspan="6">── The Classic Game Era (1983–1998) ──</td></tr>
+          <tr class="sw-pc sw-skip">
+            <td>1983</td><td>Star Wars: The Arcade Game (Atari)</td>
+            <td>Arcade / Atari 2600</td><td>MAME / mess</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Vector graphics Death Star trench run. Historic. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-snes sw-highlight">
+            <td>1992</td><td>Super Star Wars <span class="sw-star">⭐</span></td>
+            <td>SNES</td><td>snes9x</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Best SNES entry. A New Hope as a brutal action-platformer. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-snes">
+            <td>1993</td><td>Super Star Wars: The Empire Strikes Back</td>
+            <td>SNES</td><td>snes9x</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>SNES trilogy part 2. Hoth speeders and Dagobah. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-snes">
+            <td>1994</td><td>Super Star Wars: Return of the Jedi</td>
+            <td>SNES</td><td>snes9x</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Completes the SNES trilogy. Endor speeder bikes. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-pc sw-highlight">
+            <td>1994</td><td>Star Wars: TIE Fighter <span class="sw-star">⭐</span></td>
+            <td>PC</td><td>Sunshine streaming</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td><span class="sw-star">⭐</span> One of the greatest space sims ever made. Play for the Empire. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc">
+            <td>1995</td><td>Star Wars: Dark Forces</td>
+            <td>PC / PS1</td><td>Sunshine / pcsx_rearmed</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>FPS origin of Kyle Katarn. 2024 remaster available. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-n64">
+            <td>1996</td><td>Star Wars: Shadows of the Empire</td>
+            <td>N64</td><td>mupen64plus_next</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Between ESB and RotJ. Dash Rendar. N64 launch era. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc">
+            <td>1997</td><td>Star Wars: Jedi Knight – Dark Forces II</td>
+            <td>PC</td><td>Sunshine streaming</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>First game with proper lightsaber combat. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-ps1 sw-skip">
+            <td>1997</td><td>Star Wars: Masters of Teräs Käsi</td>
+            <td>PS1</td><td>pcsx_rearmed</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Notoriously bad Star Wars fighting game. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-n64 sw-highlight">
+            <td>1998</td><td>Star Wars: Rogue Squadron <span class="sw-star">⭐</span></td>
+            <td>N64</td><td>mupen64plus_next</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Best starfighter arcade game. Still holds up. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+
+          <tr class="sw-arc-row"><td colspan="6">── The Prequel Era (1999–2005) ──</td></tr>
+          <tr class="sw-movie sw-highlight">
+            <td>1999</td><td>Episode I – The Phantom Menace</td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Divided audiences in 1999. Midichlorians. Pod racing. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-n64">
+            <td>1999</td><td>Star Wars: Episode I – Racer</td>
+            <td>N64 / Switch</td><td>mupen64plus_next / native</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>The best thing to come out of TPM. Remaster on Switch. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-ps1">
+            <td>1999</td><td>Episode I – The Phantom Menace (PS1)</td>
+            <td>PS1</td><td>pcsx_rearmed</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Third-person film adaptation. Functional. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-ps1 sw-skip">
+            <td>1999</td><td>Star Wars: Demolition</td>
+            <td>PS1</td><td>pcsx_rearmed</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Twisted Metal-style vehicle combat. Bizarre. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-n64 sw-skip">
+            <td>2000</td><td>Episode I – Battle for Naboo</td>
+            <td>N64</td><td>mupen64plus_next</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Spiritual Rogue Squadron prequel. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-ps1 sw-skip">
+            <td>2000</td><td>Star Wars: Jedi Power Battles</td>
+            <td>PS1 / GBA</td><td>pcsx_rearmed / mgba</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Beat-'em-up through TPM. Decent co-op. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-movie">
+            <td>2002</td><td>Episode II – Attack of the Clones</td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Anakin and Padmé. Clone Wars begins. Sand. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-ps2 sw-skip">
+            <td>2002</td><td>Star Wars: Bounty Hunter</td>
+            <td>PS2 / GC</td><td>pcsx2 / dolphin</td>
+            <td><span class="sw-tag sw-tag-no">🖥️ Upscale</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Jango Fett's origin story. Bridges to Ep. II. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-ps2 sw-skip">
+            <td>2002</td><td>Star Wars: The Clone Wars (PS2)</td>
+            <td>PS2 / GC</td><td>pcsx2 / dolphin</td>
+            <td><span class="sw-tag sw-tag-no">🖥️ Upscale</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Vehicle combat game, early Clone Wars. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc sw-highlight">
+            <td>2003</td><td>Knights of the Old Republic <span class="sw-star">⭐</span></td>
+            <td>PC / iOS / Android</td><td>Sunshine / Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Mobile</span></td>
+            <td><span class="sw-star">⭐</span> One of the greatest RPGs ever made. That twist. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-tv sw-highlight">
+            <td>2003</td><td>Clone Wars Micro-Series (Tartakovsky) <span class="sw-star">⭐</span></td>
+            <td>TV / Cartoon Network</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Genndy Tartakovsky's kinetic masterpiece. Legends now but unmissable. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc sw-highlight">
+            <td>2003</td><td>Star Wars: Jedi Knight II – Jedi Outcast</td>
+            <td>PC / GC</td><td>Sunshine / dolphin</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>Best lightsaber combat in the franchise. Kyle Katarn at his peak. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc">
+            <td>2003</td><td>Star Wars: Jedi Academy</td>
+            <td>PC</td><td>Sunshine streaming</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>Create your own Jedi. Final Jedi Knight series entry. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-ps2">
+            <td>2004</td><td>Star Wars: Battlefront (2004)</td>
+            <td>PS2 / PC</td><td>pcsx2 / Sunshine</td>
+            <td><span class="sw-tag sw-tag-no">🖥️ Upscale</span></td>
+            <td>Original Battlefront. Solid foundation. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc sw-highlight">
+            <td>2004</td><td>KOTOR II – The Sith Lords <span class="sw-star">⭐</span></td>
+            <td>PC / iOS / Android</td><td>Sunshine / Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Mobile</span></td>
+            <td><span class="sw-star">⭐</span> Darker and more philosophical than KOTOR 1. Use TSLRCM mod. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-lego">
+            <td>2005</td><td>LEGO Star Wars: The Video Game</td>
+            <td>PC / PS2 / GBA</td><td>Sunshine / pcsx2 / mgba</td>
+            <td><span class="sw-tag sw-tag-yes">📱 GBA</span></td>
+            <td>Launched the entire LEGO game genre. Prequels in bricks. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-movie sw-highlight">
+            <td>2005</td><td>Episode III – Revenge of the Sith <span class="sw-star">⭐</span></td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Best of the prequels. Order 66. Vader rises. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-ps2 sw-highlight">
+            <td>2005</td><td>Star Wars: Battlefront II (2005) <span class="sw-star">⭐</span></td>
+            <td>PS2 / PC</td><td>pcsx2 / Sunshine</td>
+            <td><span class="sw-tag sw-tag-no">🖥️ Upscale</span></td>
+            <td><span class="sw-star">⭐</span> Best of the original Battlefront games. 501st story. Space battles. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc">
+            <td>2005</td><td>Star Wars: Republic Commando</td>
+            <td>PC / Switch / PS4</td><td>Sunshine / native</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Switch</span></td>
+            <td>Tactical squad FPS. Delta Squad during the Clone Wars. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc sw-skip">
+            <td>2005</td><td>Star Wars: Starfighter</td>
+            <td>PS2 / PC</td><td>pcsx2 / Sunshine</td>
+            <td><span class="sw-tag sw-tag-no">🖥️ Upscale</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Starfighter game set during TPM. Functional. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+
+          <tr class="sw-arc-row"><td colspan="6">── The Expanded Game Era (2006–2013) ──</td></tr>
+          <tr class="sw-lego sw-highlight">
+            <td>2006</td><td>LEGO Star Wars II: The Original Trilogy <span class="sw-star">⭐</span></td>
+            <td>PC / PS2 / NDS / GBA</td><td>pcsx2 / melonds / mgba</td>
+            <td><span class="sw-tag sw-tag-yes">📱 DS/GBA</span></td>
+            <td><span class="sw-star">⭐</span> Best of the classic LEGO SW games. OT in bricks. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-lego">
+            <td>2007</td><td>LEGO Star Wars: The Complete Saga</td>
+            <td>PC / Wii / NDS / iOS / Android</td><td>dolphin / melonds / Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 DS/Mobile</span></td>
+            <td>SW 1+2 combined. Best version of the LEGO I–VI content. Mobile available. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-tv sw-highlight">
+            <td>2008</td><td>Star Wars: The Clone Wars (film + TV) <span class="sw-star">⭐</span></td>
+            <td>Film + Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> 133 eps across 7 seasons. Watch chronologically. Introduces Ahsoka. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-skip">
+            <td>2008</td><td>Clone Wars: Lightsaber Duels (Wii)</td>
+            <td>Wii</td><td>dolphin</td>
+            <td><span class="sw-tag sw-tag-no">🖥️ Upscale</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Wii motion fighting game. Clone Wars themed. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-highlight">
+            <td>2008</td><td>Star Wars: The Force Unleashed</td>
+            <td>Wii / PS3 / NDS / iOS / Android</td><td>dolphin / melonds / Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Mobile</span></td>
+            <td>Vader's secret apprentice. Explosive Force powers. Mobile port available. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-pc">
+            <td>2011</td><td>Star Wars: The Old Republic</td>
+            <td>PC</td><td>Sunshine streaming</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>Free MMO with eight single-player-quality class storylines. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-lego">
+            <td>2011</td><td>LEGO Star Wars III: The Clone Wars</td>
+            <td>Wii / 3DS / NDS</td><td>dolphin / citra / melonds</td>
+            <td><span class="sw-tag sw-tag-yes">📱 3DS/DS</span></td>
+            <td>Based on TCW series. Adds large ground battles. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-skip">
+            <td>2010</td><td>Star Wars: The Force Unleashed II</td>
+            <td>Wii / PS3 / NDS / iOS / Android</td><td>dolphin / melonds / Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Mobile</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Short and divisive sequel. Refined combat, weak story. <span class="sw-tag sw-tag-legends">Legends</span></td>
+          </tr>
+          <tr class="sw-mobile sw-skip">
+            <td>2012</td><td>Star Wars: Angry Birds Star Wars</td>
+            <td>iOS / Android / 3DS</td><td>Mobile / citra</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Surprisingly decent Angry Birds OT mashup. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-skip">
+            <td>2012</td><td>Star Wars: Kinect</td>
+            <td>Xbox 360</td><td>Requires Kinect</td>
+            <td><span class="sw-tag sw-tag-no">🖥️ Kinect</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Famous for Galactic Dance Off. Otherwise poor. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-mobile sw-skip">
+            <td>2013</td><td>Star Wars: Tiny Death Star</td>
+            <td>iOS / Android</td><td>Defunct</td>
+            <td><span class="sw-tag sw-tag-defunct">☠️ Defunct</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Pixel art tower manager. Removed from stores 2014. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-mobile sw-skip">
+            <td>2013</td><td>Angry Birds Star Wars II</td>
+            <td>iOS / Android</td><td>Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Prequel Trilogy Angry Birds. Servers defunct. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+
+          <tr class="sw-arc-row"><td colspan="6">── The Disney / Canon Era (2014–Present) ──</td></tr>
+          <tr class="sw-tv sw-highlight">
+            <td>2014</td><td>Star Wars Rebels <span class="sw-star">⭐</span></td>
+            <td>Disney XD / Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> 75 eps, 4 seasons. Ezra and Ahsoka. S3–4 are exceptional. Watch before Ahsoka TV show. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-mobile">
+            <td>2015</td><td>Star Wars: Galaxy of Heroes</td>
+            <td>iOS / Android</td><td>Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>F2P gacha RPG. Enormous roster. Still active. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-movie sw-highlight">
+            <td>2015</td><td>Episode VII – The Force Awakens</td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>New trilogy begins. Rey, Finn, Poe. Kylo Ren. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-skip">
+            <td>2015</td><td>Star Wars: Battlefront (EA 2015)</td>
+            <td>PS4 / PC</td><td>Sunshine</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Visually stunning but content-light reboot. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-mobile sw-skip">
+            <td>2015</td><td>Star Wars: Uprising</td>
+            <td>iOS / Android</td><td>Defunct</td>
+            <td><span class="sw-tag sw-tag-defunct">☠️ Defunct</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Canon RPG set after RotJ. Servers closed 2016. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-movie sw-highlight">
+            <td>2016</td><td>Rogue One: A Star Wars Story <span class="sw-star">⭐</span></td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Best anthology film. Immediately precedes ANH. Cassian and Jyn steal the Death Star plans. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-lego">
+            <td>2016</td><td>LEGO Star Wars: The Force Awakens</td>
+            <td>PC / PS4 / 3DS / iOS / Android</td><td>Sunshine / citra / Mobile</td>
+            <td><span class="sw-tag sw-tag-yes">📱 3DS/Mobile</span></td>
+            <td>TFA in LEGO plus bridging story content. Mobile available. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-mobile sw-skip">
+            <td>2017</td><td>Star Wars: Force Arena</td>
+            <td>iOS / Android</td><td>Defunct</td>
+            <td><span class="sw-tag sw-tag-defunct">☠️ Defunct</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> MOBA-style real-time mobile game. Servers closed 2019. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-movie">
+            <td>2017</td><td>Episode VIII – The Last Jedi</td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Subverts expectations. Luke in exile. Rose Tico. Divisive. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-highlight">
+            <td>2017</td><td>Star Wars Battlefront II (EA 2017)</td>
+            <td>PS4 / PC</td><td>Sunshine</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>Iden Versio campaign is canon. Infamously launched with loot boxes (since removed). <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2018</td><td>Star Wars Resistance</td>
+            <td>Disney Channel / Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>40 eps, anime-influenced. Spy during the Sequel era. Younger audience. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-movie">
+            <td>2018</td><td>Solo: A Star Wars Story</td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Han's origin. Kessel Run. Meets Chewie and Lando. Underrated. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-movie">
+            <td>2019</td><td>Episode IX – The Rise of Skywalker</td>
+            <td>Film</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Skywalker saga conclusion. Palpatine returns. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-highlight">
+            <td>2019</td><td>Star Wars Jedi: Fallen Order <span class="sw-star">⭐</span></td>
+            <td>PC / PS5</td><td>Sunshine</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td><span class="sw-star">⭐</span> Best modern SW game. Cal Kestis, Soulslike-adjacent, Metroidvania. Post-Order 66. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv sw-highlight">
+            <td>2019</td><td>The Mandalorian <span class="sw-star">⭐</span></td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> Best live-action Disney+ show. Din Djarin and Grogu. Seasons 1–2 are exceptional. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-modern">
+            <td>2020</td><td>Star Wars: Squadrons</td>
+            <td>PC / PS4</td><td>Sunshine</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>Cockpit starfighter combat, both sides. Full VR support. Canon. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-vr sw-skip">
+            <td>2020</td><td>Tales from the Galaxy's Edge (VR)</td>
+            <td>PC VR</td><td>VR only</td>
+            <td><span class="sw-tag sw-tag-no">🥽 VR Only</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Batuu action-adventure. Requires Quest or Rift. Canon. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2021</td><td>The Bad Batch</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>47 eps, 3 seasons. Clone Force 99 post-Order 66. Direct Clone Wars follow-on. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2021</td><td>The Book of Boba Fett</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>7 eps. Boba as Tatooine crime lord. Eps 5–6 are effectively Mando S2.5. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv sw-highlight">
+            <td>2021</td><td>Star Wars: Visions (Season 1)</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>9 non-canon shorts by Japanese animation studios. Stunning animation. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-lego sw-highlight">
+            <td>2022</td><td>LEGO Star Wars: The Skywalker Saga <span class="sw-star">⭐</span></td>
+            <td>PC / PS4 / PS5 / Switch</td><td>Sunshine / native</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Switch</span></td>
+            <td><span class="sw-star">⭐</span> All 9 films, redesigned from scratch. 300+ characters. Best LEGO game ever made. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-tv sw-highlight">
+            <td>2022</td><td>Andor <span class="sw-star">⭐</span></td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-star">⭐</span> 24 eps, 2 seasons. Best writing in any SW live-action. Political thriller. Prequel to Rogue One. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2022</td><td>Obi-Wan Kenobi</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>6 eps. Kenobi vs Vader, 10 years after RotS. Young Leia rescue. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2022</td><td>Tales of the Jedi</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>6 shorts — Ahsoka and Dooku at key moments. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2023</td><td>Ahsoka</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>8 eps. Watch Rebels first. Thrawn returns. Ezra resurfaces. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv sw-skip">
+            <td>2023</td><td>Star Wars: Visions (Season 2)</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>9 international studio shorts. Expands beyond Japan. <span class="sw-tag sw-tag-noncanon">Non-Canon</span></td>
+          </tr>
+          <tr class="sw-tv sw-skip">
+            <td>2023</td><td>Young Jedi Adventures</td>
+            <td>Disney Junior / Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td><span class="sw-tag sw-tag-opt">optional</span> Preschool-targeted. High Republic Jedi younglings. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-highlight">
+            <td>2023</td><td>Star Wars Jedi: Survivor</td>
+            <td>PC / PS5</td><td>Sunshine</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>Excellent sequel to Fallen Order. Play FO first. Cal five years later. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2024</td><td>The Acolyte</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>8 eps. High Republic era, 100 years before the prequels. Cancelled after one season. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2024</td><td>Skeleton Crew</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>8 eps. Four kids lost in the galaxy. Goonies tone. Jude Law. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-tv">
+            <td>2024</td><td>Tales of the Empire</td>
+            <td>Disney+</td><td>Jellyfin</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>6 shorts — Morgan Elsbeth and Barriss Offee under the Empire. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-modern sw-highlight">
+            <td>2024</td><td>Star Wars: Outlaws</td>
+            <td>PC / PS5</td><td>Sunshine</td>
+            <td><span class="sw-tag sw-tag-pc">🖥️ PC Only</span></td>
+            <td>First open-world SW game. Kay Vess in the criminal underworld between ESB and RotJ. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+          <tr class="sw-mobile sw-skip">
+            <td>2024</td><td>Star Wars: Hunters</td>
+            <td>Switch / iOS / Android</td><td>Mobile / Switch</td>
+            <td><span class="sw-tag sw-tag-yes">📱 Yes</span></td>
+            <td>Free-to-play arena combat. Post-RotJ setting. <span class="sw-tag sw-tag-canon">Canon</span></td>
+          </tr>
+
+          <tr class="sw-arc-row"><td colspan="6">── Cancelled / Never Released ──</td></tr>
+          <tr class="sw-cancel sw-skip">
+            <td>—</td><td>Star Wars 1313 ☠️</td>
+            <td>PC (cancelled)</td><td>Never released</td>
+            <td><span class="sw-tag sw-tag-cancel">☠️ Cancelled</span></td>
+            <td>Coruscant underworld game. Boba Fett protagonist. Cancelled 2012 at Disney acquisition. Considered one of the greatest lost games.</td>
+          </tr>
+          <tr class="sw-cancel sw-skip">
+            <td>—</td><td>Star Wars: First Assault ☠️</td>
+            <td>Xbox 360 (cancelled)</td><td>Never released</td>
+            <td><span class="sw-tag sw-tag-cancel">☠️ Cancelled</span></td>
+            <td>FPS Battlefront precursor. LucasArts closure 2013 killed it.</td>
+          </tr>
+          <tr class="sw-cancel sw-skip">
+            <td>—</td><td>Star Wars: Attack Squadrons ☠️</td>
+            <td>PC Browser (cancelled)</td><td>Never released</td>
+            <td><span class="sw-tag sw-tag-cancel">☠️ Cancelled</span></td>
+            <td>Free-to-play browser starfighter game. Announced 2013, cancelled 2014 before launch.</td>
+          </tr>
+          <tr class="sw-cancel sw-skip">
+            <td>—</td><td>Rogue Squadron (film) ☠️</td>
+            <td>Film (cancelled)</td><td>Never produced</td>
+            <td><span class="sw-tag sw-tag-cancel">☠️ Cancelled</span></td>
+            <td>Patty Jenkins (Wonder Woman) directing project. Departed 2022. Abandoned.</td>
+          </tr>
+
+        </table>
+
+        <div class="sw-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#ffe81f;letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="sw-dot" style="background:#ffe81f"></span>Gold border/row = essential or standout</span>
+          <span><span class="sw-dot" style="background:rgba(255,255,255,.2)"></span>Faded row = optional or infamous</span>
+          <span><span class="sw-tag sw-tag-yes">📱 Yes</span> Mobile-playable</span>
+          <span><span class="sw-tag sw-tag-pc">🖥️ PC Only</span> Sunshine streaming required</span>
+          <span><span class="sw-tag sw-tag-defunct">☠️ Defunct</span> Servers closed / inaccessible</span>
+          <span><span class="sw-tag sw-tag-cancel">☠️ Cancelled</span> Never released</span>
+          <span><span class="sw-dot" style="background:#ce93d8"></span>Purple row = TV/media insert point</span>
+          <span><span class="sw-tag sw-tag-canon">Canon</span> Disney canon continuity</span>
+          <span><span class="sw-tag sw-tag-legends">Legends</span> Pre-2014 Expanded Universe</span>
+        </div>
+      </div>
+
+      <!-- ── CHRONOLOGICAL ── -->
+      <div class="fn-view" id="sw-library-chrono">
+        <div class="fn-view-desc">In-universe timeline order — from the High Republic era through the sequel trilogy epilogue. Films and games grouped by where they fall in the galaxy's history.</div>
+        <table class="sw-table">
+          <tr><th>In-Universe Date</th><th>Title</th><th>Type</th><th>Notes</th></tr>
+          <tr class="sw-arc-row"><td colspan="4">── The High Republic (~200 BBY) ──</td></tr>
+          <tr class="sw-tv"><td>~200 BBY</td><td>Young Jedi Adventures</td><td>TV (animated)</td><td>Jedi younglings in the High Republic era.</td></tr>
+          <tr class="sw-tv"><td>~100 BBY</td><td>The Acolyte</td><td>TV (live-action)</td><td>A Sith master emerges 100 years before TPM.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">── The Prequel Era (32–19 BBY) ──</td></tr>
+          <tr class="sw-movie"><td>32 BBY</td><td>Episode I – The Phantom Menace</td><td>Film</td><td>Young Anakin. Qui-Gon. Trade Federation.</td></tr>
+          <tr class="sw-n64"><td>32 BBY</td><td>Episode I – Racer</td><td>Game</td><td>Boonta Eve Classic podrace.</td></tr>
+          <tr class="sw-n64"><td>32 BBY</td><td>Episode I – Battle for Naboo</td><td>Game</td><td>Naboo starfighter campaign.</td></tr>
+          <tr class="sw-ps1"><td>32 BBY</td><td>Jedi Power Battles</td><td>Game</td><td>Jedi through the TPM events.</td></tr>
+          <tr class="sw-movie"><td>22 BBY</td><td>Episode II – Attack of the Clones</td><td>Film</td><td>Clone Wars begin. Anakin and Padmé.</td></tr>
+          <tr class="sw-tv"><td>22–19 BBY</td><td>Clone Wars Micro-Series (Tartakovsky)</td><td>TV (Legends)</td><td>Bridge to Episode III. Superseded but exceptional.</td></tr>
+          <tr class="sw-tv"><td>22–19 BBY</td><td>Star Wars: The Clone Wars (CGI)</td><td>Film + TV</td><td>133 episodes spanning the Clone Wars. Ahsoka's story.</td></tr>
+          <tr class="sw-movie"><td>19 BBY</td><td>Episode III – Revenge of the Sith</td><td>Film</td><td>Vader rises. Republic becomes the Empire.</td></tr>
+          <tr class="sw-tv"><td>19–17 BBY</td><td>The Bad Batch</td><td>TV</td><td>Clone Force 99 post-Order 66.</td></tr>
+          <tr class="sw-tv"><td>19–14 BBY</td><td>Obi-Wan Kenobi</td><td>TV</td><td>Kenobi in hiding. Young Leia rescue.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">── The Imperial Era (19 BBY–0 BBY) ──</td></tr>
+          <tr class="sw-tv"><td>14–2 BBY</td><td>Star Wars Rebels</td><td>TV</td><td>Ezra Bridger. Ghost crew. Ahsoka. Thrawn.</td></tr>
+          <tr class="sw-tv"><td>5–0 BBY</td><td>Andor</td><td>TV</td><td>Cassian's radicalization. Finest SW writing.</td></tr>
+          <tr class="sw-movie"><td>10 BBY</td><td>Solo: A Star Wars Story</td><td>Film</td><td>Han's origin. Kessel Run. Lando.</td></tr>
+          <tr class="sw-pc"><td>~5 BBY</td><td>Star Wars: Republic Commando</td><td>Game</td><td>Delta Squad during the Clone Wars (retroactively earlier era).</td></tr>
+          <tr class="sw-modern"><td>~2 BBY</td><td>Star Wars Jedi: Fallen Order</td><td>Game</td><td>Cal Kestis. Post-Order 66.</td></tr>
+          <tr class="sw-modern"><td>0 BBY</td><td>Rogue One</td><td>Film</td><td>Death Star plans stolen. Directly precedes ANH.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">── The Galactic Civil War (0 BBY–4 ABY) ──</td></tr>
+          <tr class="sw-movie"><td>0 BBY</td><td>Episode IV – A New Hope</td><td>Film</td><td>The original film.</td></tr>
+          <tr class="sw-movie"><td>3 ABY</td><td>Episode V – The Empire Strikes Back</td><td>Film</td><td>Vader is Luke's father.</td></tr>
+          <tr class="sw-movie"><td>4 ABY</td><td>Episode VI – Return of the Jedi</td><td>Film</td><td>Second Death Star. Vader redeemed.</td></tr>
+          <tr class="sw-modern"><td>~4 ABY</td><td>Star Wars: Squadrons</td><td>Game</td><td>Post-Battle of Endor, both sides.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">── The New Republic Era (4–34 ABY) ──</td></tr>
+          <tr class="sw-modern"><td>~9 ABY</td><td>The Mandalorian</td><td>TV</td><td>Din Djarin and Grogu.</td></tr>
+          <tr class="sw-tv"><td>~9 ABY</td><td>The Book of Boba Fett</td><td>TV</td><td>Boba on Tatooine.</td></tr>
+          <tr class="sw-tv"><td>~9 ABY</td><td>Ahsoka</td><td>TV</td><td>Thrawn and Ezra. Watch Rebels first.</td></tr>
+          <tr class="sw-tv"><td>~9 ABY</td><td>Skeleton Crew</td><td>TV</td><td>Lost kids. Jude Law.</td></tr>
+          <tr class="sw-modern"><td>~28 ABY</td><td>Star Wars Jedi: Survivor</td><td>Game</td><td>Cal five years after Fallen Order.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">── The Sequel Era (34 ABY+) ──</td></tr>
+          <tr class="sw-movie"><td>34 ABY</td><td>Episode VII – The Force Awakens</td><td>Film</td><td>Rey and the First Order.</td></tr>
+          <tr class="sw-movie"><td>34 ABY</td><td>Episode VIII – The Last Jedi</td><td>Film</td><td>Luke in exile. Canto Bight.</td></tr>
+          <tr class="sw-movie"><td>35 ABY</td><td>Episode IX – The Rise of Skywalker</td><td>Film</td><td>Palpatine's return. Saga ends.</td></tr>
+        </table>
+      </div>
+
+      <!-- ── BY PLATFORM ── -->
+      <div class="fn-view" id="sw-library-platform">
+        <div class="fn-view-desc">All games grouped by primary platform. Films and TV accessible via Jellyfin on any device.</div>
+        <table class="sw-table">
+          <tr><th>Title</th><th>Year</th><th>Core</th><th>Notes</th></tr>
+          <tr class="sw-arc-row"><td colspan="4">🖥️ PC (Sunshine Streaming)</td></tr>
+          <tr class="sw-pc"><td>TIE Fighter</td><td>1994</td><td>DOSBox</td><td>Best space sim. Essential.</td></tr>
+          <tr class="sw-pc"><td>Dark Forces</td><td>1995</td><td>Native / Remaster</td><td>Kyle Katarn origin. 2024 remaster.</td></tr>
+          <tr class="sw-pc"><td>Jedi Knight – Dark Forces II</td><td>1997</td><td>Native</td><td>Lightsaber combat debut.</td></tr>
+          <tr class="sw-pc"><td>Knights of the Old Republic</td><td>2003</td><td>Native / Mobile port</td><td>Best RPG in the franchise.</td></tr>
+          <tr class="sw-pc"><td>KOTOR II – The Sith Lords</td><td>2004</td><td>Native / TSLRCM</td><td>Use restored content mod.</td></tr>
+          <tr class="sw-pc"><td>Jedi Knight II – Jedi Outcast</td><td>2002</td><td>Native</td><td>Best lightsaber combat.</td></tr>
+          <tr class="sw-pc"><td>Jedi Academy</td><td>2003</td><td>Native</td><td>Create your Jedi.</td></tr>
+          <tr class="sw-pc"><td>Republic Commando</td><td>2005</td><td>Native</td><td>Tactical squad FPS.</td></tr>
+          <tr class="sw-pc"><td>The Old Republic (MMO)</td><td>2011</td><td>Native (F2P)</td><td>Eight class stories.</td></tr>
+          <tr class="sw-pc"><td>Battlefront (EA 2015)</td><td>2015</td><td>Origin/EA</td><td>Multiplayer only.</td></tr>
+          <tr class="sw-pc"><td>Battlefront II (EA 2017)</td><td>2017</td><td>Origin/EA</td><td>Canon campaign.</td></tr>
+          <tr class="sw-pc"><td>Jedi: Fallen Order</td><td>2019</td><td>EA App</td><td>Essential modern entry.</td></tr>
+          <tr class="sw-pc"><td>Squadrons</td><td>2020</td><td>EA App</td><td>Starfighter combat, VR.</td></tr>
+          <tr class="sw-pc"><td>Jedi: Survivor</td><td>2023</td><td>EA App</td><td>Fallen Order sequel.</td></tr>
+          <tr class="sw-pc"><td>Outlaws</td><td>2024</td><td>Ubisoft Connect</td><td>Open world.</td></tr>
+          <tr class="sw-pc"><td>LEGO Skywalker Saga</td><td>2022</td><td>Steam</td><td>All 9 films.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">🟣 SNES (snes9x)</td></tr>
+          <tr class="sw-snes"><td>Super Star Wars</td><td>1992</td><td>snes9x</td><td>A New Hope platformer.</td></tr>
+          <tr class="sw-snes"><td>Super Star Wars: ESB</td><td>1993</td><td>snes9x</td><td>Empire platformer.</td></tr>
+          <tr class="sw-snes"><td>Super Star Wars: RotJ</td><td>1994</td><td>snes9x</td><td>Jedi platformer.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">🟢 N64 (mupen64plus_next)</td></tr>
+          <tr class="sw-n64"><td>Episode I – Racer</td><td>1999</td><td>mupen64plus_next</td><td>Best podracing game.</td></tr>
+          <tr class="sw-n64"><td>Shadows of the Empire</td><td>1996</td><td>mupen64plus_next</td><td>Dash Rendar.</td></tr>
+          <tr class="sw-n64"><td>Rogue Squadron</td><td>1998</td><td>mupen64plus_next</td><td>Arcade starfighter.</td></tr>
+          <tr class="sw-n64"><td>Episode I – Battle for Naboo</td><td>2000</td><td>mupen64plus_next</td><td>Rogue Squadron prequel.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">🟠 PS1 (pcsx_rearmed)</td></tr>
+          <tr class="sw-ps1"><td>Episode I – TPM</td><td>1999</td><td>pcsx_rearmed</td><td>Film adaptation.</td></tr>
+          <tr class="sw-ps1"><td>Masters of Teräs Käsi</td><td>1997</td><td>pcsx_rearmed</td><td>Infamously bad fighter.</td></tr>
+          <tr class="sw-ps1"><td>Jedi Power Battles</td><td>2000</td><td>pcsx_rearmed</td><td>Beat-'em-up, TPM era.</td></tr>
+          <tr class="sw-ps1"><td>Demolition</td><td>1999</td><td>pcsx_rearmed</td><td>Vehicular combat.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">🔴 PS2 (pcsx2)</td></tr>
+          <tr class="sw-ps2"><td>Battlefront (2004)</td><td>2004</td><td>pcsx2</td><td>Original Battlefront.</td></tr>
+          <tr class="sw-ps2"><td>Battlefront II (2005)</td><td>2005</td><td>pcsx2</td><td>Best classic Battlefront.</td></tr>
+          <tr class="sw-ps2"><td>Bounty Hunter</td><td>2002</td><td>pcsx2</td><td>Jango Fett origin.</td></tr>
+          <tr class="sw-ps2"><td>Clone Wars (2002)</td><td>2002</td><td>pcsx2</td><td>Vehicle combat.</td></tr>
+          <tr class="sw-ps2"><td>Starfighter</td><td>2001</td><td>pcsx2</td><td>TPM era starfighters.</td></tr>
+          <tr class="sw-ps2"><td>LEGO SW: The Video Game</td><td>2005</td><td>pcsx2</td><td>Prequel trilogy in LEGO.</td></tr>
+          <tr class="sw-ps2"><td>LEGO SW II</td><td>2006</td><td>pcsx2</td><td>OT in LEGO.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">🟤 GameCube / Wii (dolphin)</td></tr>
+          <tr class="sw-gc"><td>Jedi Knight II (GC)</td><td>2002</td><td>dolphin</td><td>Best lightsaber combat.</td></tr>
+          <tr class="sw-gc"><td>Rogue Squadron II – Rogue Leader</td><td>2001</td><td>dolphin</td><td>GC launch title. Stunning.</td></tr>
+          <tr class="sw-gc"><td>Rogue Squadron III – Rebel Strike</td><td>2003</td><td>dolphin</td><td>Ground missions added.</td></tr>
+          <tr class="sw-gc"><td>Bounty Hunter (GC)</td><td>2002</td><td>dolphin</td><td>Jango Fett.</td></tr>
+          <tr class="sw-gc"><td>The Force Unleashed (Wii)</td><td>2008</td><td>dolphin</td><td>Motion controls, Starkiller.</td></tr>
+          <tr class="sw-gc"><td>Clone Wars: Lightsaber Duels</td><td>2008</td><td>dolphin</td><td>Wii fighting game.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">📱 Mobile (iOS / Android)</td></tr>
+          <tr class="sw-mobile"><td>KOTOR (Mobile)</td><td>2013</td><td>iOS/Android</td><td>Full KOTOR 1 port.</td></tr>
+          <tr class="sw-mobile"><td>KOTOR II (Mobile)</td><td>2022</td><td>iOS/Android</td><td>Full KOTOR 2 port with TSLRCM.</td></tr>
+          <tr class="sw-mobile"><td>The Force Unleashed (Mobile)</td><td>2008</td><td>iOS/Android</td><td>Starkiller mobile port.</td></tr>
+          <tr class="sw-mobile"><td>LEGO Complete Saga (Mobile)</td><td>2013</td><td>iOS/Android</td><td>I–VI in LEGO.</td></tr>
+          <tr class="sw-mobile"><td>Galaxy of Heroes</td><td>2015</td><td>iOS/Android (F2P)</td><td>Gacha RPG. Still active.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>Force Arena ☠️</td><td>2017</td><td>Defunct 2019</td><td>MOBA — servers closed.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>Commander ☠️</td><td>2014</td><td>Defunct 2020</td><td>Base-builder — servers closed.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>Uprising ☠️</td><td>2015</td><td>Defunct 2016</td><td>Canon RPG — servers closed.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>Tiny Death Star ☠️</td><td>2013</td><td>Removed 2014</td><td>Pixel tower manager — delisted.</td></tr>
+          <tr class="sw-mobile"><td>Hunters</td><td>2024</td><td>iOS/Android/Switch</td><td>F2P arena combat. Active.</td></tr>
+        </table>
+      </div>
+
+      <!-- ── BEST FIRST ── -->
+      <div class="fn-view" id="sw-library-bestfirst">
+        <div class="fn-view-desc">Ranked by quality and accessibility — start here if you're new to the franchise in game form. Films are all worth watching; this list is games and TV only.</div>
+        <table class="sw-table">
+          <tr><th>#</th><th>Title</th><th>Format</th><th>Why</th></tr>
+          <tr class="sw-movie sw-highlight"><td>1</td><td>Episode IV – A New Hope <span class="sw-star">⭐</span></td><td>Film</td><td>The original. Start here, always.</td></tr>
+          <tr class="sw-movie sw-highlight"><td>2</td><td>Episode V – The Empire Strikes Back <span class="sw-star">⭐</span></td><td>Film</td><td>Often called the greatest sequel ever made.</td></tr>
+          <tr class="sw-pc sw-highlight"><td>3</td><td>Knights of the Old Republic <span class="sw-star">⭐</span></td><td>PC / Mobile</td><td>Greatest SW game ever made. That twist.</td></tr>
+          <tr class="sw-modern sw-highlight"><td>4</td><td>Star Wars Jedi: Fallen Order <span class="sw-star">⭐</span></td><td>PC</td><td>Best modern SW game. Accessible entry point.</td></tr>
+          <tr class="sw-tv sw-highlight"><td>5</td><td>Andor <span class="sw-star">⭐</span></td><td>Disney+</td><td>Best writing in the entire franchise. Political thriller.</td></tr>
+          <tr class="sw-tv sw-highlight"><td>6</td><td>The Mandalorian (S1–2) <span class="sw-star">⭐</span></td><td>Disney+</td><td>Best Disney+ live-action. Din and Grogu.</td></tr>
+          <tr class="sw-movie sw-highlight"><td>7</td><td>Rogue One <span class="sw-star">⭐</span></td><td>Film</td><td>Best anthology film. Immediately precedes ANH.</td></tr>
+          <tr class="sw-movie"><td>8</td><td>Episode III – Revenge of the Sith</td><td>Film</td><td>Best prequel. Order 66 payoff.</td></tr>
+          <tr class="sw-pc sw-highlight"><td>9</td><td>TIE Fighter</td><td>PC</td><td>Greatest space sim. Play for the Empire.</td></tr>
+          <tr class="sw-tv sw-highlight"><td>10</td><td>Clone Wars (CGI series) <span class="sw-star">⭐</span></td><td>Disney+</td><td>Watch in chronological order. Essential for Ahsoka lore.</td></tr>
+          <tr class="sw-tv"><td>11</td><td>Clone Wars Micro-Series (Tartakovsky)</td><td>Jellyfin</td><td>Legends, but visually breathtaking action.</td></tr>
+          <tr class="sw-pc"><td>12</td><td>KOTOR II – The Sith Lords (+ TSLRCM)</td><td>PC / Mobile</td><td>Darker and more philosophical KOTOR. Use the mod.</td></tr>
+          <tr class="sw-n64"><td>13</td><td>Rogue Squadron</td><td>N64</td><td>Best starfighter arcade game in the series.</td></tr>
+          <tr class="sw-pc"><td>14</td><td>Jedi Knight II – Jedi Outcast</td><td>PC</td><td>Best lightsaber combat mechanics.</td></tr>
+          <tr class="sw-ps2"><td>15</td><td>Battlefront II (2005)</td><td>PS2 / PC</td><td>501st campaign. Space battles. Classic multiplayer.</td></tr>
+          <tr class="sw-tv"><td>16</td><td>Star Wars Rebels (S3–4)</td><td>Disney+</td><td>Ezra's arc. Essential before watching Ahsoka.</td></tr>
+          <tr class="sw-lego"><td>17</td><td>LEGO Skywalker Saga</td><td>PC / Switch</td><td>Best LEGO game ever made. All 9 films.</td></tr>
+          <tr class="sw-modern"><td>18</td><td>Jedi: Survivor</td><td>PC</td><td>Excellent sequel to Fallen Order.</td></tr>
+          <tr class="sw-modern"><td>19</td><td>Star Wars: Squadrons</td><td>PC</td><td>Best modern starfighter game. Full VR.</td></tr>
+          <tr class="sw-gc"><td>20</td><td>Rogue Squadron II – Rogue Leader</td><td>GC</td><td>GC launch era graphical showcase. Death Star run.</td></tr>
+        </table>
+      </div>
+
+      <!-- ── MOBILE ONLY ── -->
+      <div class="fn-view" id="sw-library-mobile">
+        <div class="fn-view-desc">Everything playable on mobile devices — phones and tablets. Includes EmulatorJS-accessible retro titles and native mobile games.</div>
+        <table class="sw-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Notes</th></tr>
+          <tr class="sw-arc-row"><td colspan="4">📱 Retro via EmulatorJS (phone/tablet browser)</td></tr>
+          <tr class="sw-snes"><td>1992</td><td>Super Star Wars</td><td>SNES – snes9x</td><td>A New Hope platformer. Excellent on touchscreen controls.</td></tr>
+          <tr class="sw-snes"><td>1993</td><td>Super Star Wars: The Empire Strikes Back</td><td>SNES – snes9x</td><td>Hoth + Dagobah.</td></tr>
+          <tr class="sw-snes"><td>1994</td><td>Super Star Wars: Return of the Jedi</td><td>SNES – snes9x</td><td>Endor speeder bikes.</td></tr>
+          <tr class="sw-n64"><td>1996</td><td>Shadows of the Empire</td><td>N64 – mupen64plus</td><td>Playable on capable phones.</td></tr>
+          <tr class="sw-n64"><td>1998</td><td>Rogue Squadron</td><td>N64 – mupen64plus</td><td>Starfighter game. Controller recommended.</td></tr>
+          <tr class="sw-n64"><td>1999</td><td>Episode I – Racer</td><td>N64 – mupen64plus</td><td>Podracing. Very phone-friendly.</td></tr>
+          <tr class="sw-ps1"><td>1999</td><td>Episode I – Phantom Menace (PS1)</td><td>PS1 – pcsx_rearmed</td><td>Runs well on mid-range phones.</td></tr>
+          <tr class="sw-ps1"><td>2000</td><td>Jedi Power Battles</td><td>PS1 – pcsx_rearmed</td><td>Beat-'em-up. Touchscreen fine.</td></tr>
+          <tr class="sw-arc-row"><td colspan="4">📱 Native Mobile (iOS / Android)</td></tr>
+          <tr class="sw-mobile sw-highlight"><td>2013</td><td>Knights of the Old Republic</td><td>iOS / Android</td><td>Full KOTOR 1. Excellent mobile port.</td></tr>
+          <tr class="sw-mobile sw-highlight"><td>2022</td><td>KOTOR II – The Sith Lords</td><td>iOS / Android</td><td>Full KOTOR 2 including TSLRCM content.</td></tr>
+          <tr class="sw-mobile"><td>2007</td><td>LEGO Complete Saga</td><td>iOS / Android</td><td>I–VI LEGO, mobile version.</td></tr>
+          <tr class="sw-mobile"><td>2016</td><td>LEGO Force Awakens</td><td>iOS / Android</td><td>TFA LEGO, mobile.</td></tr>
+          <tr class="sw-mobile"><td>2015</td><td>Galaxy of Heroes</td><td>iOS / Android (F2P)</td><td>Gacha RPG. Still maintained.</td></tr>
+          <tr class="sw-mobile"><td>2024</td><td>Star Wars: Hunters</td><td>iOS / Android / Switch</td><td>F2P arena combat. Post-RotJ.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>2012</td><td>Angry Birds Star Wars</td><td>iOS / Android</td><td>OT-themed physics puzzler.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>2008</td><td>The Force Unleashed (Mobile)</td><td>iOS / Android</td><td>Starkiller mobile port. Dated but available.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>2010</td><td>TFU II (Mobile)</td><td>iOS / Android</td><td>Short sequel port.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>2015</td><td>Star Wars Pinball</td><td>iOS / Android</td><td>Zen Studios pinball tables.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>2015</td><td>Star Wars: Card Trader</td><td>iOS / Android</td><td>Topps digital trading cards. Still active.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>—</td><td>Force Arena ☠️</td><td>Defunct 2019</td><td>MOBA. Servers closed.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>—</td><td>Commander ☠️</td><td>Defunct 2020</td><td>Base-builder. Servers closed.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>—</td><td>Uprising ☠️</td><td>Defunct 2016</td><td>Canon RPG. Servers closed.</td></tr>
+          <tr class="sw-mobile sw-skip"><td>—</td><td>Tiny Death Star ☠️</td><td>Removed 2014</td><td>Pixel tower manager. Delisted.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="callout callout-tip" style="margin-top:12px">
+    <div class="callout-icon">⚔️</div>
+    <div class="callout-body">
+      <strong>Canon vs Legends at a glance —</strong>
+      In 2014, Disney declared all pre-acquisition Expanded Universe content <strong>Legends</strong> (non-canon). The new <strong>Canon</strong> starts with The Clone Wars CGI series and everything released after. The films are all canon. KOTOR, TIE Fighter, Shadows of the Empire — all Legends, but still excellent games worth playing.
+    </div>
+  </div>
+
+</div><!-- /sw-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="sw-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 Star Wars TV &amp; Animation</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="swView('tvanime','watchorder', this)">🎯 Watch Order</button>
+        <button class="fn-view-btn"        onclick="swView('tvanime','bytype',     this)">📂 By Type</button>
+      </div>
+
+      <div class="fn-view active" id="sw-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended viewing order for all Star Wars animated and live-action series. Film watch points marked inline.</div>
+        <table class="sw-table">
+          <tr><th>#</th><th>Title</th><th>Format</th><th>Episodes</th><th>Notes</th></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">①</td><td>Episode I–III (Prequels)</td><td>Films</td><td>3 films</td><td>Foundation for Clone Wars era. Watch first.</td></tr>
+          <tr class="sw-tv sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">②</td><td>Star Wars: The Clone Wars (2008) <span class="sw-star">⭐</span></td><td>Animated (Disney+)</td><td>133 eps · 7 seasons</td><td><span class="sw-star">⭐</span> Essential. Watch in chronological order. Includes 2008 film pilot.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">③</td><td>Episode III – Revenge of the Sith</td><td>Film</td><td>1 film</td><td>Watch between Clone Wars S6 and S7 for maximum impact.</td></tr>
+          <tr class="sw-tv sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">④</td><td>The Bad Batch <span class="sw-star">⭐</span></td><td>Animated (Disney+)</td><td>47 eps · 3 seasons</td><td>Directly follows Clone Wars finale. Clone Force 99.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑤</td><td>Tales of the Jedi</td><td>Animated (Disney+)</td><td>6 shorts</td><td>Ahsoka and Dooku shorts — watch alongside TCW/Bad Batch.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑥</td><td>Obi-Wan Kenobi</td><td>Live-action (Disney+)</td><td>6 eps</td><td>10 years post-RotS. Kenobi vs Vader.</td></tr>
+          <tr class="sw-tv sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑦</td><td>Star Wars Rebels <span class="sw-star">⭐</span></td><td>Animated (Disney XD)</td><td>75 eps · 4 seasons</td><td><span class="sw-star">⭐</span> Ezra, Ahsoka, Thrawn. S3–4 are exceptional. Required before Ahsoka series.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑧</td><td>Andor</td><td>Live-action (Disney+)</td><td>24 eps · 2 seasons</td><td>Cassian's story. Prequel to Rogue One. Can watch standalone.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑨</td><td>Rogue One / Original Trilogy</td><td>Films</td><td>4 films</td><td>Core viewings.</td></tr>
+          <tr class="sw-tv sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑩</td><td>The Mandalorian (S1–2) <span class="sw-star">⭐</span></td><td>Live-action (Disney+)</td><td>16 eps</td><td><span class="sw-star">⭐</span> Best Disney+ show. Post-RotJ. Din Djarin and Grogu.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑪</td><td>The Book of Boba Fett</td><td>Live-action (Disney+)</td><td>7 eps</td><td>Watch before Mando S3 — eps 5–6 are effectively Mando S2.5.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑫</td><td>The Mandalorian (S3)</td><td>Live-action (Disney+)</td><td>8 eps</td><td>Mandalore arc concludes.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑬</td><td>Ahsoka</td><td>Live-action (Disney+)</td><td>8 eps</td><td>Watch Rebels first. Thrawn and Ezra return.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑭</td><td>Skeleton Crew</td><td>Live-action (Disney+)</td><td>8 eps</td><td>Post-RotJ. Standalone — Goonies tone.</td></tr>
+          <tr class="sw-tv"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑮</td><td>Tales of the Empire</td><td>Animated (Disney+)</td><td>6 shorts</td><td>Morgan Elsbeth and Barriss under the Empire.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">⑯</td><td>Sequel Trilogy</td><td>Films</td><td>3 films</td><td>TFA, TLJ, TRoS. Watch Star Wars Resistance alongside if desired.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="sw-tvanime-bytype">
+        <div class="fn-view-desc">All TV entries grouped by type and era.</div>
+        <table class="sw-table">
+          <tr><th>Year</th><th>Title</th><th>Network</th><th>Episodes</th><th>Canon?</th><th>Notes</th></tr>
+          <tr class="sw-arc-row"><td colspan="6">🟡 Live-Action Series (Disney+)</td></tr>
+          <tr class="sw-tv sw-highlight"><td>2019</td><td>The Mandalorian <span class="sw-star">⭐</span></td><td>Disney+</td><td>24 eps / 3 seasons</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Essential. S1–2 are the high watermark.</td></tr>
+          <tr class="sw-tv"><td>2021</td><td>The Book of Boba Fett</td><td>Disney+</td><td>7 eps</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Watch before Mando S3.</td></tr>
+          <tr class="sw-tv"><td>2022</td><td>Obi-Wan Kenobi</td><td>Disney+</td><td>6 eps</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Ewan McGregor returns.</td></tr>
+          <tr class="sw-tv sw-highlight"><td>2022</td><td>Andor <span class="sw-star">⭐</span></td><td>Disney+</td><td>24 eps / 2 seasons</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Best writing. Political thriller. Adult tone.</td></tr>
+          <tr class="sw-tv"><td>2023</td><td>Ahsoka</td><td>Disney+</td><td>8 eps</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Watch Rebels first.</td></tr>
+          <tr class="sw-tv"><td>2024</td><td>Skeleton Crew</td><td>Disney+</td><td>8 eps</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Standalone. Goonies in space.</td></tr>
+          <tr class="sw-tv"><td>2024</td><td>The Acolyte</td><td>Disney+</td><td>8 eps</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Cancelled after S1. High Republic era.</td></tr>
+          <tr class="sw-arc-row"><td colspan="6">🟠 CGI Animated (Disney+)</td></tr>
+          <tr class="sw-tv sw-highlight"><td>2008</td><td>Star Wars: The Clone Wars <span class="sw-star">⭐</span></td><td>Cartoon Network / Disney+</td><td>133 eps / 7 seasons</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Essential. Watch chronologically.</td></tr>
+          <tr class="sw-tv sw-highlight"><td>2014</td><td>Star Wars Rebels <span class="sw-star">⭐</span></td><td>Disney XD</td><td>75 eps / 4 seasons</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Required for Ahsoka show. S3–4 exceptional.</td></tr>
+          <tr class="sw-tv"><td>2018</td><td>Star Wars Resistance</td><td>Disney Channel</td><td>40 eps / 2 seasons</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Anime-influenced. Younger audience.</td></tr>
+          <tr class="sw-tv"><td>2021</td><td>The Bad Batch</td><td>Disney+</td><td>47 eps / 3 seasons</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Clone Wars follow-on. Clone Force 99.</td></tr>
+          <tr class="sw-tv"><td>2022</td><td>Tales of the Jedi</td><td>Disney+</td><td>6 shorts</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Ahsoka + Dooku anthology.</td></tr>
+          <tr class="sw-tv"><td>2023</td><td>Young Jedi Adventures</td><td>Disney Junior</td><td>40 eps / 2 seasons</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Preschool-targeted. High Republic.</td></tr>
+          <tr class="sw-tv"><td>2024</td><td>Tales of the Empire</td><td>Disney+</td><td>6 shorts</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Morgan Elsbeth + Barriss anthology.</td></tr>
+          <tr class="sw-arc-row"><td colspan="6">🟣 Non-Canon / Visions Anthology</td></tr>
+          <tr class="sw-tv sw-highlight"><td>2021</td><td>Star Wars: Visions S1</td><td>Disney+</td><td>9 shorts</td><td><span class="sw-tag sw-tag-noncanon">Non-Canon</span></td><td>Japanese animation studios. Stunning visuals.</td></tr>
+          <tr class="sw-tv"><td>2023</td><td>Star Wars: Visions S2</td><td>Disney+</td><td>9 shorts</td><td><span class="sw-tag sw-tag-noncanon">Non-Canon</span></td><td>International studios. Artistic showcase.</td></tr>
+          <tr class="sw-arc-row"><td colspan="6">🔴 Legacy / Legends Animation</td></tr>
+          <tr class="sw-tv sw-highlight"><td>2003</td><td>Clone Wars Micro-Series (Tartakovsky) <span class="sw-star">⭐</span></td><td>Cartoon Network</td><td>25 eps</td><td><span class="sw-tag sw-tag-legends">Legends</span></td><td>Hand-drawn masterpiece. Now Legends but still unmissable.</td></tr>
+          <tr class="sw-tv sw-skip"><td>1985</td><td>Star Wars: Droids</td><td>ABC</td><td>13 eps</td><td><span class="sw-tag sw-tag-legends">Legends</span></td><td>R2 and 3PO Saturday morning cartoon.</td></tr>
+          <tr class="sw-tv sw-skip"><td>1985</td><td>Star Wars: Ewoks</td><td>ABC</td><td>35 eps</td><td><span class="sw-tag sw-tag-legends">Legends</span></td><td>Wicket on Endor. 2 seasons.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\TV\Star Wars\
+  ├── Star Wars The Clone Wars (2008)\
+  │   ├── Season 01\
+  │   └── ...
+  ├── Star Wars Rebels (2014)\
+  ├── The Mandalorian (2019)\
+  ├── Andor (2022)\
+  └── ...
+
+D:\Media\TV\Star Wars Legacy\
+  └── Clone Wars (2003) (Tartakovsky)\</pre>
+    </div>
+  </div>
+
+</div><!-- /sw-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="sw-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Star Wars Films</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="swView('movies','all',        this)">📋 All Films</button>
+        <button class="fn-view-btn"        onclick="swView('movies','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <div class="fn-view active" id="sw-movies-all">
+        <div class="fn-view-desc">Every theatrical and TV film in the franchise — theatrical releases, anthology films, and TV specials.</div>
+        <table class="sw-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Canon?</th><th>Notes</th></tr>
+          <tr class="sw-arc-row"><td colspan="5">🟡 The Original Trilogy (1977–1983)</td></tr>
+          <tr class="sw-movie sw-highlight"><td>1977</td><td>Episode IV – A New Hope <span class="sw-star">⭐</span></td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>The original. Start here.</td></tr>
+          <tr class="sw-movie sw-highlight"><td>1980</td><td>Episode V – The Empire Strikes Back <span class="sw-star">⭐</span></td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>The greatest sequel ever made.</td></tr>
+          <tr class="sw-movie"><td>1983</td><td>Episode VI – Return of the Jedi</td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>The Galactic Civil War ends.</td></tr>
+          <tr class="sw-arc-row"><td colspan="5">📺 Legacy TV Films (1978–1985)</td></tr>
+          <tr class="sw-movie sw-skip"><td>1978</td><td>The Star Wars Holiday Special</td><td>CBS TV Special</td><td><span class="sw-tag sw-tag-noncanon">Non-Canon</span></td><td>Infamously terrible. Lucas disowns it. Fan preservation only.</td></tr>
+          <tr class="sw-movie sw-skip"><td>1984</td><td>Caravan of Courage: An Ewok Adventure</td><td>ABC TV Film</td><td><span class="sw-tag sw-tag-legends">Legends</span></td><td>Children's Ewok adventure on Endor.</td></tr>
+          <tr class="sw-movie sw-skip"><td>1985</td><td>Ewoks: The Battle for Endor</td><td>ABC TV Film</td><td><span class="sw-tag sw-tag-legends">Legends</span></td><td>Ewok sequel TV movie.</td></tr>
+          <tr class="sw-arc-row"><td colspan="5">🔵 The Prequel Trilogy (1999–2005)</td></tr>
+          <tr class="sw-movie"><td>1999</td><td>Episode I – The Phantom Menace</td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Young Anakin. Podracing. Darth Maul.</td></tr>
+          <tr class="sw-movie"><td>2002</td><td>Episode II – Attack of the Clones</td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Clone Wars begins. Anakin and Padmé.</td></tr>
+          <tr class="sw-movie sw-highlight"><td>2005</td><td>Episode III – Revenge of the Sith <span class="sw-star">⭐</span></td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Best prequel. Order 66. Vader's birth.</td></tr>
+          <tr class="sw-arc-row"><td colspan="5">🟠 Animated Film (2008)</td></tr>
+          <tr class="sw-movie"><td>2008</td><td>The Clone Wars (theatrical)</td><td>Animated Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>TCW pilot in cinemas. Watch as S0/S1 intro for the show.</td></tr>
+          <tr class="sw-arc-row"><td colspan="5">🟣 The Sequel Trilogy &amp; Anthologies (2015–2019)</td></tr>
+          <tr class="sw-movie sw-highlight"><td>2015</td><td>Episode VII – The Force Awakens</td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>New trilogy begins. Rey, Finn, Kylo.</td></tr>
+          <tr class="sw-movie sw-highlight"><td>2016</td><td>Rogue One: A Star Wars Story <span class="sw-star">⭐</span></td><td>Theatrical (Anthology)</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Best anthology. Death Star plans. Cassian and Jyn.</td></tr>
+          <tr class="sw-movie"><td>2017</td><td>Episode VIII – The Last Jedi</td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Divisive. Subverts expectations.</td></tr>
+          <tr class="sw-movie"><td>2018</td><td>Solo: A Star Wars Story</td><td>Theatrical (Anthology)</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Han's origin. Underrated. Lando.</td></tr>
+          <tr class="sw-movie"><td>2019</td><td>Episode IX – The Rise of Skywalker</td><td>Theatrical</td><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>Skywalker saga conclusion. Palpatine's return.</td></tr>
+          <tr class="sw-arc-row"><td colspan="5">☠️ Cancelled Films</td></tr>
+          <tr class="sw-cancel sw-skip"><td>—</td><td>Rogue Squadron (Patty Jenkins)</td><td>Theatrical (cancelled)</td><td>—</td><td>Departed production 2022. No official release date ever set.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="sw-movies-watchorder">
+        <div class="fn-view-desc">Recommended viewing order for first-timers — release order (not episode order) with notes on when to insert the anthology films.</div>
+        <table class="sw-table">
+          <tr><th>#</th><th>Title</th><th>Why This Order</th></tr>
+          <tr class="sw-movie sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">1</td><td>Episode IV – A New Hope</td><td>The original. Sets every convention the series follows.</td></tr>
+          <tr class="sw-movie sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">2</td><td>Episode V – The Empire Strikes Back</td><td>The twist works better without knowing Vader's backstory.</td></tr>
+          <tr class="sw-movie sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">3</td><td>Episode VI – Return of the Jedi</td><td>Complete the trilogy before the prequels.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">4</td><td>Episode I – The Phantom Menace</td><td>Now that you know where Anakin ends up, the prequels hit differently.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">5</td><td>Episode II – Attack of the Clones</td><td></td></tr>
+          <tr class="sw-movie sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">6</td><td>Episode III – Revenge of the Sith</td><td>Anakin's fall. Vader's birth. The most emotionally effective prequel.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">7</td><td>Solo: A Star Wars Story</td><td>Watch before Rogue One — Han and Qi'ra introduction.</td></tr>
+          <tr class="sw-movie sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">8</td><td>Rogue One</td><td>Watch immediately before rewatching ANH. The ending flows directly into it.</td></tr>
+          <tr class="sw-movie sw-highlight"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">9</td><td>Episode VII – The Force Awakens</td><td>New trilogy. 30 years later.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">10</td><td>Episode VIII – The Last Jedi</td><td>Continues immediately from TFA.</td></tr>
+          <tr class="sw-movie"><td style="color:#ffe81f;font-family:'Share Tech Mono',monospace">11</td><td>Episode IX – The Rise of Skywalker</td><td>The Skywalker Saga's conclusion.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Star Wars\
+  ├── Star Wars Episode IV - A New Hope (1977)\
+  │   └── Star Wars Episode IV - A New Hope (1977).mkv
+  ├── Star Wars Episode V - The Empire Strikes Back (1980)\
+  ├── ...
+  ├── Rogue One - A Star Wars Story (2016)\
+  └── Solo - A Star Wars Story (2018)\</pre>
+    </div>
+  </div>
+
+</div><!-- /sw-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="sw-pane-merch">
+
+  <div class="section">
+    <div class="section-title">🛒 Star Wars Merchandise History</div>
+    <div class="card">
+      <p style="font-size:.84rem;line-height:1.7;color:var(--text-dim)">Star Wars invented modern franchise merchandising. Kenner's 1977 toy deal, struck when nobody thought a space film would succeed, became the template every franchise since has followed. The license has generated more merchandise revenue than the films themselves.</p>
+
+      <div class="sw-merch-history">
+        <div class="sw-merch-era">1977–1985 — The Kenner Era</div>
+        <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">Kenner's 3¾" action figure line became the gold standard for toy licensing. Famously, demand outstripped supply so severely at Christmas 1977 that Kenner shipped empty "Early Bird" vouchers that parents gave as gifts, redeemable for figures months later. The line eventually encompassed hundreds of figures, vehicles, and playsets.</p>
+      </div>
+
+      <div class="sw-merch-history">
+        <div class="sw-merch-era">1985–1994 — The Dark Times</div>
+        <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">After Return of the Jedi, Kenner wound down the line. Star Wars merchandise nearly disappeared from shelves for a decade. Only the Expanded Universe novels (Heir to the Empire, 1991) kept the property alive culturally during this dormant period.</p>
+      </div>
+
+      <div class="sw-merch-history">
+        <div class="sw-merch-era">1995–1999 — The Hasbro Revival</div>
+        <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">Hasbro (which acquired Kenner) relaunched the 3¾" line in 1995 in anticipation of the Special Edition theatrical releases. The Power of the Force line was enormously successful — overly muscled compared to originals, but beloved by collectors. The prequel era (The Phantom Menace, 1999) brought a new wave of products including pod racer toys, LEGO Star Wars, and video game tie-ins.</p>
+      </div>
+
+      <div class="sw-merch-history">
+        <div class="sw-merch-era">2012–Present — The Disney Era</div>
+        <p style="font-size:.82rem;color:var(--text-dim);line-height:1.7">Disney's $4 billion acquisition of Lucasfilm in 2012 brought a global merchandising operation. Black Series (6" collector figures, 2013–present) and The Vintage Collection (3¾" premium line) are current collector standards. LEGO Star Wars remains one of LEGO's most popular themes. The Mandalorian launched a secondary merchandise wave centered on Grogu ("Baby Yoda") in 2019.</p>
+      </div>
+
+      <table class="sw-table" style="margin-top:16px">
+        <tr><th>Category</th><th>Key Line</th><th>Era</th><th>Notes</th></tr>
+        <tr><td>Action Figures (3¾")</td><td>Kenner Original / POTF / Vintage Collection</td><td>1977–present</td><td>Industry-defining toy line.</td></tr>
+        <tr><td>Action Figures (6")</td><td>Black Series</td><td>2013–present</td><td>Collector-grade. High articulation.</td></tr>
+        <tr><td>Building Sets</td><td>LEGO Star Wars</td><td>1999–present</td><td>One of LEGO's top themes. UCS sets command high prices.</td></tr>
+        <tr><td>Hot Wheels / Vehicles</td><td>Micro Machines (Galoob)</td><td>1993–1999</td><td>Miniature vehicle collections. Discontinued.</td></tr>
+        <tr><td>Roleplay</td><td>Hasbro Force FX Lightsabers</td><td>2004–present</td><td>Sound + light effects. Collector and cosplay standard.</td></tr>
+        <tr><td>Statues / Premium</td><td>Sideshow Collectibles</td><td>2000–present</td><td>High-end 1:6 scale figures and polystone statues.</td></tr>
+        <tr><td>Funko Pop</td><td>Various Star Wars waves</td><td>2012–present</td><td>Hundreds of Funko SW characters produced.</td></tr>
+        <tr><td>Apparel</td><td>Her Universe / Hot Topic</td><td>2010–present</td><td>Licensed apparel, particularly fandom-targeted.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /sw-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr Channel Suggestions)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="sw-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler — Star Wars</div>
+    <div class="card">
+      <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:18px">Suggested filler content blocks for a Star Wars Tunarr channel. Mix these with main episodes to pad runtime and create a "cable channel" feel.</p>
+
+      <div class="sw-filler-block sw-filler-intro">
+        <div class="sw-filler-name">Star Wars Trailers &amp; Teasers</div>
+        <div class="sw-filler-meta">Various · 1–3 min each · ~40 trailers available</div>
+        <div class="sw-filler-desc">Every theatrical trailer from A New Hope through Andor. Official Lucasfilm/Disney uploads available on YouTube. High quality, nostalgia-inducing interstitials.</div>
+      </div>
+
+      <div class="sw-filler-block sw-filler-episode">
+        <div class="sw-filler-name">The Clone Wars Mini-Episodes (Tartakovsky)</div>
+        <div class="sw-filler-meta">2003–2005 · 2–3 min per chapter · 25 chapters</div>
+        <div class="sw-filler-desc">Each Tartakovsky chapter is 2–3 minutes — perfect short-form filler between longer episodes. Cinematic, nearly wordless action.</div>
+      </div>
+
+      <div class="sw-filler-block sw-filler-episode">
+        <div class="sw-filler-name">Tales of the Jedi &amp; Tales of the Empire Shorts</div>
+        <div class="sw-filler-meta">Disney+ · ~15 min each · 12 shorts total</div>
+        <div class="sw-filler-desc">12 self-contained animated shorts. Each stands alone. Excellent filler between Clone Wars or Rebels episodes.</div>
+      </div>
+
+      <div class="sw-filler-block sw-filler-retro">
+        <div class="sw-filler-name">Vintage Star Wars Toy Commercials</div>
+        <div class="sw-filler-meta">1977–1985 · 30–60 sec each</div>
+        <div class="sw-filler-desc">Kenner original toy commercials preserved on YouTube. "Star Wars action figures — the ones that started it all." Intensely nostalgic bumper material.</div>
+      </div>
+
+      <div class="sw-filler-block sw-filler-retro">
+        <div class="sw-filler-name">Behind the Magic / Making-Of Featurettes</div>
+        <div class="sw-filler-meta">Various · 5–20 min each</div>
+        <div class="sw-filler-desc">ILM behind-the-scenes content, official Lucasfilm YouTube channel featurettes, and disc extras. Good between feature films.</div>
+      </div>
+
+      <div class="sw-filler-block sw-filler-bumper">
+        <div class="sw-filler-name">Star Wars: Visions Shorts</div>
+        <div class="sw-filler-meta">Disney+ · 12–22 min each · 18 shorts (S1+S2)</div>
+        <div class="sw-filler-desc">Non-canon anthology shorts from global animation studios. Each is standalone and visually distinct — great palette cleansers between longer episodes.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /sw-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="sw-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+
+      <div class="sw-era">
+        <div class="sw-era-year">📅 1971–1977 — Origins</div>
+        <div class="sw-era-title">George Lucas Bets His Career on a Space Fairy Tale</div>
+        <div class="sw-era-body">After American Graffiti's success gave Lucas negotiating leverage, he secured rights to retain Star Wars sequel and merchandise rights from 20th Century Fox in exchange for a lower directorial fee — a deal Fox accepted because nobody expected a space opera to be profitable. The production was notoriously difficult: on-set breakdowns, overrunning budgets, and a film that almost every studio insider expected to fail. Star Wars opened May 25, 1977, and earned $461 million worldwide on a $11 million budget. Kenner's toy deal, signed in the same era of low expectations, made Lucas a billionaire independently of the films.</div>
+      </div>
+
+      <div class="sw-era">
+        <div class="sw-era-year">📅 1977–1986 — The Lucas Era</div>
+        <div class="sw-era-title">The Original Trilogy and the Birth of Modern Merchandising</div>
+        <div class="sw-era-body">The Empire Strikes Back (1980) and Return of the Jedi (1983) completed the trilogy while Lucasfilm's ILM division revolutionized visual effects for every film that followed. The franchise established that a movie could be a platform for toys, books, comics, and games — a model every major studio now follows. After RotJ, Lucas stepped back from active filmmaking, producing the Ewok TV movies and animated series before entering a decade of franchise dormancy.</div>
+      </div>
+
+      <div class="sw-era">
+        <div class="sw-era-year">📅 1991–1998 — The Expanded Universe Revival</div>
+        <div class="sw-era-title">Timothy Zahn and the Legends Foundation</div>
+        <div class="sw-era-body">Timothy Zahn's Heir to the Empire (1991) revived mainstream Star Wars interest with a New York Times bestselling continuation of the saga. The Expanded Universe of novels, comics (Dark Horse), and games (TIE Fighter, Dark Forces, KOTOR) built a vast secondary canon that thousands of fans considered the "real" sequel era. This period also saw the 1995 Hasbro toy relaunch and the 1997 Special Edition theatrical re-releases building anticipation for the prequel trilogy.</div>
+      </div>
+
+      <div class="sw-era">
+        <div class="sw-era-year">📅 1999–2005 — The Prequel Era</div>
+        <div class="sw-era-title">The Most Divisive Films in Blockbuster History</div>
+        <div class="sw-era-body">The Phantom Menace (1999) arrived with unprecedented hype and generated passionate debate about Jar Jar Binks, midichlorians, and young Anakin's acting. Attack of the Clones (2002) and Revenge of the Sith (2005) received progressively warmer receptions, with RotS widely considered the strongest entry. Genndy Tartakovsky's 2003 Clone Wars micro-series and the 2008 CGI Clone Wars TV show significantly deepened the era's narrative. LucasArts' game output during this period (KOTOR, Republic Commando, Battlefront, Jedi Outcast) represents the franchise's gaming peak.</div>
+      </div>
+
+      <div class="sw-era">
+        <div class="sw-era-year">📅 2012 — The Disney Acquisition</div>
+        <div class="sw-era-title">$4.05 Billion and a Legends Stamp</div>
+        <div class="sw-era-body">Disney acquired Lucasfilm for $4.05 billion in October 2012. Within months, LucasArts was shuttered (cancelling Star Wars 1313 and First Assault), and the Lucasfilm Story Group declared the entire pre-acquisition Expanded Universe non-canon under the "Legends" label. A new Story Group would manage a unified, coherent canon going forward. Fan reaction ranged from grief (for decades of beloved novels) to cautious optimism about new films.</div>
+      </div>
+
+      <div class="sw-era">
+        <div class="sw-era-year">📅 2015–2019 — The Sequel Trilogy</div>
+        <div class="sw-era-title">The Galaxy Divided Again</div>
+        <div class="sw-era-body">The Force Awakens (2015) was a commercial juggernaut but divided fans over its structural similarities to A New Hope. Rogue One (2016) was broadly celebrated as the franchise's best film since the OT. The Last Jedi (2017) became one of cinema's most contested films — critically acclaimed but fandom-divisive. Solo (2018) underperformed at the box office, signalling franchise fatigue. The Rise of Skywalker (2019) attempted course correction and divided audiences further. The Disney trilogy era ended without consensus.</div>
+      </div>
+
+      <div class="sw-era">
+        <div class="sw-era-year">📅 2019–Present — The Disney+ Era</div>
+        <div class="sw-era-title">Grogu, Andor, and the Streaming Pivot</div>
+        <div class="sw-era-body">The Mandalorian (2019) and the cultural phenomenon of Grogu revitalized mainstream enthusiasm. Andor (2022) received near-universal critical acclaim as the franchise's finest writing. The streaming model enabled more diverse storytelling than theatrical releases — though also produced mixed-reception shows (Boba Fett, Obi-Wan, The Acolyte). In games, Respawn's Jedi series (Fallen Order, Survivor) and Massive's Outlaws represent a new era of canon-integrated single-player experiences. As of 2026, several theatrical films and additional series are in development, with the franchise's future focused on recovering the post-sequel era identity.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators &amp; Contributors</div>
+    <div class="card">
+      <table class="sw-table">
+        <tr><th>Name</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>George Lucas</td><td>Creator / Director / Producer</td><td>Original trilogy, prequel trilogy, franchise foundation, ILM, Skywalker Sound</td></tr>
+        <tr><td>Irvin Kershner</td><td>Director</td><td>The Empire Strikes Back — widely considered the best film in the saga</td></tr>
+        <tr><td>John Williams</td><td>Composer</td><td>Every major film score. The most recognizable franchise music in history.</td></tr>
+        <tr><td>Ralph McQuarnie</td><td>Concept Artist</td><td>Designed the visual language of the original trilogy — Vader's helmet, the X-Wing, Tatooine</td></tr>
+        <tr><td>Dave Filoni</td><td>Writer / Director / Executive</td><td>Clone Wars, Rebels, Mandalorian, The Bad Batch, Ahsoka — steward of the Expanded Canon</td></tr>
+        <tr><td>Jon Favreau</td><td>Showrunner / Writer</td><td>The Mandalorian, The Book of Boba Fett — architect of the Disney+ live-action era</td></tr>
+        <tr><td>Kathleen Kennedy</td><td>President, Lucasfilm</td><td>Overseen the Disney era 2012–present</td></tr>
+        <tr><td>Tony Gilroy</td><td>Writer / Showrunner</td><td>Andor — credited with the franchise's best writing</td></tr>
+        <tr><td>Timothy Zahn</td><td>Author</td><td>Heir to the Empire trilogy, created Grand Admiral Thrawn</td></tr>
+        <tr><td>Genndy Tartakovsky</td><td>Animator / Director</td><td>Clone Wars 2003 Micro-Series — kinetic hand-drawn action masterpiece</td></tr>
+        <tr><td>Gareth Edwards</td><td>Director</td><td>Rogue One — best anthology film</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's Legends?</div>
+      <p style="font-size:.84rem;line-height:1.7">In April 2014, the Lucasfilm Story Group announced that all media prior to the Disney acquisition (except the six theatrical films and The Clone Wars CGI series) would be rebranded as <strong>"Legends"</strong> — a parallel continuity that "may not reflect the most current canon." Everything produced from 2014 onward under Disney's Story Group is <strong>Canon</strong>.</p>
+      <table class="sw-table" style="margin-top:12px">
+        <tr><th>Status</th><th>What's included</th></tr>
+        <tr><td><span class="sw-tag sw-tag-canon">Canon</span></td><td>All 11 theatrical films · The Clone Wars CGI (2008–2020) · All Disney+ live-action shows · All Disney+ animated shows · Games: Fallen Order, Survivor, Squadrons, Outlaws, Battlefront II (2017 story), Hunters</td></tr>
+        <tr><td><span class="sw-tag sw-tag-legends">Legends</span></td><td>All pre-2014 novels · Dark Horse Comics · KOTOR 1 &amp; 2 · TIE Fighter · Rogue Squadron · Shadows of the Empire · Battlefront I &amp; II (2004/2005) · Republic Commando · The Force Unleashed · The Old Republic MMO · Clone Wars micro-series (Tartakovsky)</td></tr>
+        <tr><td><span class="sw-tag sw-tag-noncanon">Non-Canon</span></td><td>LEGO games · Visions anthology · The Holiday Special · Ewok films · Angry Birds · Most mobile games</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /sw-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function swTab(id, btn) {
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const pane = document.getElementById('sw-pane-' + id);
+  if (pane) pane.classList.add('active');
+}
+
+function swView(tab, view, btn) {
+  const pane = document.getElementById('sw-pane-' + tab);
+  if (!pane) return;
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  btn.classList.add('active');
+  const viewEl = document.getElementById('sw-' + tab + '-' + view);
+  if (viewEl) viewEl.classList.add('active');
+}
+</script>
+
+</body>
+</html>
