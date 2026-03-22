@@ -90,6 +90,15 @@
     .badge-inprogress { background: rgba(224,184,75,.12); color: var(--warning); border: 1px solid rgba(224,184,75,.3); }
     .badge-skipped    { background: rgba(224,92,92,.1);  color: var(--danger); border: 1px solid rgba(224,92,92,.25); }
 
+    /* ── Franchise pill in default table view ── */
+    .fn-pill {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem; color: var(--text-dim);
+      cursor: pointer; white-space: nowrap;
+      transition: color .12s;
+    }
+    .fn-pill:hover { color: var(--accent); }
+
     /* ── Stat boxes ── */
     .stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin: 0 0 24px; }
     .stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
@@ -170,9 +179,10 @@
 // ══════════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════════
-let ALL_MEDIA     = [];   // flat merged array, each item has .franchise injected
-let FRANCHISE_META= [];   // top-level franchise objects (id, franchise, icon, color, …)
-let currentFilter = 'all';
+let ALL_MEDIA      = [];   // flat merged array, each item has ._franchise* injected
+let FRANCHISE_META = [];   // top-level franchise objects (id, franchise, icon, color, …)
+let currentFilter  = 'all';
+let activeFranchiseId = null;  // set when a franchise card is clicked; cleared on free search
 
 // ══════════════════════════════════════════════════════════
 //  BOOT — fetch manifest, then all franchise JSONs in parallel
@@ -184,9 +194,6 @@ async function boot() {
     const r = await fetch('franchises/index.json');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const manifest = await r.json();
-    // manifest can be:
-    //   ["castlevania", "pokemon", ...]          (simple array of IDs)
-    //   { franchises: ["castlevania", ...] }      (object with franchises key)
     ids = Array.isArray(manifest) ? manifest : (manifest.franchises || []);
   } catch (e) {
     setError('Could not load franchises/index.json — ' + e.message);
@@ -263,11 +270,10 @@ function renderGrid() {
     const anime    = entries.filter(m => m.type === 'anime' || m.type === 'tv').length;
     const movies   = entries.filter(m => m.type === 'movie').length;
     const parts    = [];
-    if (games)  parts.push(games  + (games  === 1 ? ' game'  : ' games'));
+    if (games)  parts.push(games  + (games  === 1 ? ' game'    : ' games'));
     if (anime)  parts.push(anime  + (anime  === 1 ? ' anime/TV' : ' anime/TV'));
-    if (movies) parts.push(movies + (movies === 1 ? ' movie' : ' movies'));
+    if (movies) parts.push(movies + (movies === 1 ? ' movie'   : ' movies'));
 
-    // Clicking a franchise card filters the master table to that franchise
     return `<div class="franchise-card" onclick="filterByFranchise('${f.id}')">
       <div class="franchise-card-icon">${f.icon}</div>
       <div class="franchise-card-name">${esc(f.franchise || f.id)}</div>
@@ -278,10 +284,11 @@ function renderGrid() {
 }
 
 function filterByFranchise(id) {
-  // Set search to franchise name so the table filters to it
+  // Set active franchise and clear the search box
+  activeFranchiseId = id;
   const f = FRANCHISE_META.find(f => f.id === id);
-  if (!f) return;
-  document.getElementById('search').value = f.franchise || id;
+  // Clear search so free-text doesn't conflict, but keep the franchise filter via activeFranchiseId
+  document.getElementById('search').value = '';
   currentFilter = 'all';
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('fb-all').classList.add('active');
@@ -294,11 +301,11 @@ function filterByFranchise(id) {
 // ══════════════════════════════════════════════════════════
 function setFilter(type, btn) {
   currentFilter = type;
+  // Changing the type filter clears any active franchise drill-down
+  activeFranchiseId = null;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  // Clear franchise search when changing type filter
-  const srch = document.getElementById('search');
-  if (type !== 'all' && srch.value) srch.value = '';
+  document.getElementById('search').value = '';
   renderTable();
 }
 
@@ -308,7 +315,16 @@ function renderTable() {
   const wrap   = document.getElementById('table-wrap');
   const lbl    = document.getElementById('count-lbl');
 
-  const filtered = ALL_MEDIA.filter(m => {
+  // If user types in search, clear any active franchise drill-down
+  if (q && activeFranchiseId) {
+    activeFranchiseId = null;
+  }
+
+  let filtered = ALL_MEDIA.filter(m => {
+    // Active franchise drill-down takes priority
+    if (activeFranchiseId) {
+      return m._franchiseId === activeFranchiseId;
+    }
     // Type / status filter
     if (filter === 'completed' || filter === 'backlog') {
       if (m.status !== filter) return false;
@@ -333,40 +349,68 @@ function renderTable() {
     return;
   }
 
-  // Group by franchise for arc rows
-  const grouped = {};
-  filtered.forEach(m => {
-    const key = m._franchiseName || m._franchiseId;
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(m);
-  });
+  // Always sort by year ascending (entries without a year sort last)
+  filtered.sort((a, b) => (a.year || 9999) - (b.year || 9999));
 
   let rows = '';
-  Object.entries(grouped).forEach(([franchise, items]) => {
-    const meta = FRANCHISE_META.find(f => (f.franchise || f.id) === franchise);
-    rows += `<tr class="arc-row"><td colspan="7">${meta ? meta.icon + ' ' : ''}${esc(franchise)}</td></tr>`;
-    items.forEach((m, i) => {
-      rows += `<tr>
-        <td style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.65rem">${i + 1}</td>
-        <td style="font-weight:600">${esc(m.title || '—')}</td>
-        <td>${typeBadge(m.type)}</td>
-        <td style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${m.year || '—'}</td>
-        <td>${extraCol(m)}</td>
-        <td>${ratingStr(m.rating)}</td>
-        <td>${statusBadge(m.status)}</td>
-      </tr>`;
-    });
-  });
 
-  wrap.innerHTML = `<table class="master-table">
-    <thead>
-      <tr>
+  if (activeFranchiseId) {
+    // ── Franchise drill-down view: single arc-row header, then entries by year ──
+    const meta = FRANCHISE_META.find(f => f.id === activeFranchiseId);
+    const label = meta ? meta.icon + ' ' + esc(meta.franchise || meta.id) : esc(activeFranchiseId);
+    rows += `<tr class="arc-row">
+      <td colspan="7">${label} <span style="opacity:.5;font-size:.58rem;margin-left:8px">
+        <span style="cursor:pointer" onclick="clearFranchiseFilter()">✕ clear filter</span>
+      </span></td>
+    </tr>`;
+    filtered.forEach((m, i) => {
+      rows += buildRow(m, i, false);
+    });
+
+    wrap.innerHTML = `<table class="master-table">
+      <thead><tr>
         <th>#</th><th>Title</th><th>Type</th><th>Year</th>
         <th>Platform / Episodes</th><th>Rating</th><th>Status</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  } else {
+    // ── Default / search view: flat rows sorted by year, with Franchise column ──
+    filtered.forEach((m, i) => {
+      rows += buildRow(m, i, true);
+    });
+
+    wrap.innerHTML = `<table class="master-table">
+      <thead><tr>
+        <th>#</th><th>Title</th><th>Type</th><th>Year</th>
+        <th>Franchise</th><th>Platform / Episodes</th><th>Rating</th><th>Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+}
+
+function buildRow(m, i, showFranchise) {
+  const meta = FRANCHISE_META.find(f => f.id === m._franchiseId);
+  const franchiseCell = showFranchise
+    ? `<td><span class="fn-pill" title="Filter to ${esc(m._franchiseName || '')}" onclick="filterByFranchise('${esc(m._franchiseId || '')}')">${meta ? meta.icon + ' ' : ''}${esc(m._franchiseName || m._franchiseId || '—')}</span></td>`
+    : '';
+  return `<tr>
+    <td style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.65rem">${i + 1}</td>
+    <td style="font-weight:600">${esc(m.title || '—')}</td>
+    <td>${typeBadge(m.type)}</td>
+    <td style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${m.year || '—'}</td>
+    ${franchiseCell}
+    <td>${extraCol(m)}</td>
+    <td>${ratingStr(m.rating)}</td>
+    <td>${statusBadge(m.status)}</td>
+  </tr>`;
+}
+
+function clearFranchiseFilter() {
+  activeFranchiseId = null;
+  renderTable();
 }
 
 // ══════════════════════════════════════════════════════════
