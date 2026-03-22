@@ -80,6 +80,7 @@ const CFG = {
     invidious: 'invidious',
     wordle: 'wordle',
     hoarder: 'hoarder',
+    streamarr:        null,          // LAN-only — no public subdomain
   },
 
   // ── PORTS ────────────────────────────────────────────────────────────────
@@ -115,6 +116,7 @@ const CFG = {
     radarr:            7878,
     readarr:           8787,
     prowlarr:          9696,
+    streamarr:         8102,          // virtual STRM library daemon (Docker WSL2, LAN-only)
 
     // Security
     vaultwarden:       8082,

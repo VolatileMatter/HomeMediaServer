@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Streamarr</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════
+       SUB-TAB NAVIGATION STYLES
+    ═══════════════════════════════════════════════ */
+    .subtab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .16s;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    /* ── Setup-complete checkbox bar ── */
+    .setup-complete-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76,175,125,.07);
+      border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: background .2s;
+      user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(76,175,125,.6);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; color: #4caf7d; flex-shrink: 0;
+    }
+    .setup-complete-label { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .setup-complete-sub { font-size: .74rem; color: var(--text-dim); margin-left: auto; }
+
+    /* ── Achievement cards ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
+    .ach-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; }
+    .ach-icon  { font-size: 1.3rem; margin-bottom: 5px; }
+    .ach-name  { font-weight: 700; font-size: .82rem; margin-bottom: 3px; }
+    .ach-desc  { font-size: .74rem; color: var(--text-dim); line-height: 1.5; }
+    .ach-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .ach-pts    { font-family: 'Share Tech Mono', monospace; font-size: .7rem; color: var(--accent); }
+    .ach-method { font-size: .65rem; color: var(--text-dim); background: var(--bg3); padding: 1px 5px; border-radius: 2px; }
+
+    /* ── Storage breakdown ── */
+    .storage-breakdown { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin: 14px 0; }
+    .storage-cell { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 12px 14px; }
+    .storage-cell-label { font-family: 'Share Tech Mono', monospace; font-size: .57rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+    .storage-cell-val { font-family: 'Share Tech Mono', monospace; font-size: .85rem; color: var(--text-bright); }
+
+    /* ── Troubleshooting items ── */
+    .trouble-item { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--warning); border-radius: 3px; padding: 14px 16px; margin-bottom: 12px; }
+    .trouble-item.danger { border-left-color: var(--danger); }
+    .trouble-item.ok    { border-left-color: #4caf7d; }
+    .trouble-q { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 8px; }
+    .trouble-a { font-size: .85rem; color: var(--text); line-height: 1.6; }
+
+    /* ── Streamarr-specific: Watch rule engine cards ── */
+    .rule-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 12px; }
+    .rule-card { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--accent2); border-radius: 4px; padding: 14px 16px; }
+    .rule-type { font-family: 'Share Tech Mono', monospace; font-size: .58rem; text-transform: uppercase; letter-spacing: .1em; color: var(--accent2); margin-bottom: 5px; }
+    .rule-title { font-weight: 700; font-size: .85rem; color: var(--text-bright); margin-bottom: 4px; }
+    .rule-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.55; }
+    .rule-example { font-family: 'Share Tech Mono', monospace; font-size: .7rem; background: var(--bg3); padding: 5px 8px; border-radius: 3px; margin-top: 7px; color: var(--text); }
+
+    /* ── Architecture flow diagram (pure CSS) ── */
+    .arch-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 14px 0; }
+    .arch-node {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+      padding: 8px 14px; font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+      color: var(--text); text-align: center; min-width: 90px;
+    }
+    .arch-node.highlight { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.05); }
+    .arch-node.vpn { border-color: #4caf7d; color: #4caf7d; background: rgba(76,175,125,.05); }
+    .arch-node.jellyfin { border-color: var(--accent2); color: var(--accent2); background: rgba(91,141,217,.06); }
+    .arch-arrow { font-size: .9rem; color: var(--text-dim); flex-shrink: 0; }
+
+    /* ── Preview UI mock ── */
+    .preview-todo { background: rgba(200,168,75,.06); border: 1px dashed rgba(200,168,75,.3); border-radius: 4px; padding: 14px 18px; margin-bottom: 12px; font-size: .8rem; color: var(--text-dim); }
+    .mock-status { display: flex; align-items: center; gap: 8px; }
+    .mock-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .mock-dot.green  { background: #4caf7d; box-shadow: 0 0 6px #4caf7d; }
+    .mock-dot.yellow { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .mock-dot.red    { background: var(--danger); }
+
+    .mock-library { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+    .mock-lib-header { background: var(--bg3); padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .mock-lib-title { font-family: 'Share Tech Mono', monospace; font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); }
+    .mock-lib-count { font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--text-dim); }
+    .mock-lib-row { display: grid; grid-template-columns: 2fr 1fr 1fr 80px; gap: 10px; padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,.04); font-size: .76rem; align-items: center; }
+    .mock-lib-row:last-child { border-bottom: none; }
+    .mock-lib-row.header { background: rgba(255,255,255,.02); color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: .58rem; text-transform: uppercase; }
+    .mock-badge { font-family: 'Share Tech Mono', monospace; font-size: .58rem; padding: 2px 7px; border-radius: 2px; display: inline-block; }
+    .badge-strm { background: rgba(91,141,217,.12); color: var(--accent2); border: 1px solid rgba(91,141,217,.2); }
+    .badge-watch { background: rgba(200,168,75,.1); color: var(--accent); border: 1px solid rgba(200,168,75,.2); }
+    .badge-ok    { background: rgba(76,175,125,.1); color: #4caf7d; border: 1px solid rgba(76,175,125,.2); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════ PAGE HEADER ═══════ -->
+<div class="page-header">
+  <div class="page-icon">📡</div>
+  <div>
+    <h1>Streamarr</h1>
+    <div class="subtitle">
+      // STRM Virtual Library · Port <span data-cfg="port:streamarr"></span> · Python / Docker WSL2 · LAN Only //
+    </div>
+    <p class="desc">
+      Streamarr generates lightweight <code>.strm</code> stub files that point Jellyfin at streaming URLs for very long or very popular shows (Pokémon, One Piece, Naruto, etc.) that aren't worth hundreds of gigabytes of local storage. It runs inside the seedbox's Mullvad VPN container so all outbound streaming traffic exits through the tunnel. A watch-rule engine monitors TMDB/TVDB signals and automatically mints new stubs when matching content is released.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════ SUB-TAB NAV ═══════ -->
+<nav class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('achievements', this)">🏆 Achievements</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+  <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div class="setup-complete-label">First Time Setup Complete</div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🐉 V1 Goal: Streamarr container running inside Mullvad namespace → at least one virtual show library scanning in Jellyfin → one watch rule firing on a TMDB keyword trigger.</div>
+
+  <!-- ── Architecture Overview ── -->
+  <div class="section">
+    <div class="section-title">🗺️ How It Fits Into the Seedbox Stack</div>
+    <div class="card">
+      <p>Streamarr is <strong>not</strong> a download manager — it never stores video. It creates <code>.strm</code> files: one-line text files containing a streaming URL (e.g. a direct link from an yt-dlp-resolvable source). Jellyfin treats each <code>.strm</code> as a playable media item and fetches the stream on demand. All outbound requests from Streamarr route through the Mullvad tunnel, matching the existing seedbox VPN policy.</p>
+
+      <div class="arch-flow" style="margin-top:16px">
+        <div class="arch-node vpn">Mullvad VPN<br><span style="font-size:.6rem;opacity:.7">tunnel namespace</span></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node highlight">Streamarr<br><span style="font-size:.6rem;opacity:.7">port <span data-cfg="port:streamarr"></span></span></div>
+        <div class="arch-arrow">→ writes →</div>
+        <div class="arch-node">.strm files<br><span style="font-size:.6rem;opacity:.7">D:\Media\Virtual\</span></div>
+        <div class="arch-arrow">→ scanned by →</div>
+        <div class="arch-node jellyfin">Jellyfin<br><span style="font-size:.6rem;opacity:.7">port <span data-cfg="port:jellyfin"></span></span></div>
+        <div class="arch-arrow">→ resolves URL →</div>
+        <div class="arch-node vpn">Stream source<br><span style="font-size:.6rem;opacity:.7">via VPN</span></div>
+      </div>
+
+      <div class="callout callout-warn" style="margin-top:14px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Jellyfin's outbound playback also needs to route through Mullvad</strong> — or you can configure Streamarr to act as a local proxy (see Step 5). For LAN-only playback the client connects to Jellyfin which streams through the server; the server's outbound is what counts.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── Step 1: Docker compose inside WSL2 ── -->
+  <div class="section">
+    <div class="section-title">⚙️ Step 1 — Create the Docker Compose Service (WSL2)</div>
+    <div class="card">
+      <div class="card-title">🔐 Admin only — run inside WSL2 Ubuntu</div>
+      <p>Streamarr runs as a Docker container in the same WSL2 instance as Authentik and Immich. It shares the <code>mullvad_net</code> network namespace so all outbound traffic exits through the VPN tunnel.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Create the project directory</strong>
+          <pre>mkdir -p ~/streamarr/config ~/streamarr/rules ~/streamarr/logs
+cd ~/streamarr</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create <code>docker-compose.yml</code></strong>
+          <pre>version: "3.9"
+services:
+  streamarr:
+    image: python:3.12-slim
+    container_name: streamarr
+    restart: unless-stopped
+    # ── Route all traffic through Mullvad tunnel ──────────────────
+    # Option A: network_mode shares the VPN container's namespace.
+    # Replace 'gluetun' with whatever your VPN sidecar container is named
+    # if you run one. If you bind qBittorrent via Mullvad's Windows
+    # adapter instead, use Option B below.
+    #
+    # Option A (recommended — VPN sidecar like Gluetun in WSL2):
+    network_mode: "service:gluetun"
+    #
+    # Option B (no VPN sidecar — host network, Mullvad bound on Windows):
+    # network_mode: host
+    # ─────────────────────────────────────────────────────────────
+    volumes:
+      - ./config:/app/config          # streamarr.yml + rules/
+      - ./rules:/app/rules            # watch rule YAML files
+      - ./logs:/app/logs
+      # Mount the Virtual library path where Jellyfin can see it.
+      # This is a Windows path exposed into WSL2 via /mnt/d/
+      - /mnt/d/Media/Virtual:/strm-output
+    ports:
+      # Only expose to LAN — Caddy is NOT proxying this (admin-only tool)
+      - "127.0.0.1:<span data-cfg="port:streamarr"></span>:<span data-cfg="port:streamarr"></span>"
+    environment:
+      - STREAMARR_CONFIG=/app/config/streamarr.yml
+      - STREAMARR_OUTPUT=/strm-output
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TVDB_API_KEY=${TVDB_API_KEY}
+      - TZ=America/New_York
+    working_dir: /app
+    command: >
+      bash -c "pip install -q flask requests pyyaml schedule yt-dlp &&
+               python streamarr.py"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:<span data-cfg="port:streamarr"></span>/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3</pre>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body"><strong>No Gluetun yet?</strong> If you're currently binding qBittorrent to the Windows Mullvad adapter rather than a Docker VPN sidecar, use <code>network_mode: host</code> for now and revisit adding a Gluetun container to WSL2 later (it gives you proper per-container VPN isolation without touching the Windows adapter config).</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create the <code>.env</code> file with your API keys</strong>
+          <pre># ~/streamarr/.env
+TMDB_API_KEY=your_tmdb_v3_api_key_here
+TVDB_API_KEY=your_tvdb_api_key_here</pre>
+          <p>Get TMDB key free at <a href="https://www.themoviedb.org/settings/api" target="_blank">themoviedb.org/settings/api</a>. TVDB key at <a href="https://thetvdb.com/dashboard/account/apikeys" target="_blank">thetvdb.com/dashboard/account/apikeys</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── Step 2: Config file ── -->
+  <div class="section">
+    <div class="section-title">📝 Step 2 — Write <code>streamarr.yml</code></div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Create <code>~/streamarr/config/streamarr.yml</code></strong>
+          <pre>server:
+  port: <span data-cfg="port:streamarr"></span>
+  host: 0.0.0.0
+
+output:
+  base_path: /strm-output        # maps to D:\Media\Virtual\ on Windows
+  # Subdirectory structure mirrors Jellyfin's expected TV/movie layout
+  tv_subdir:     TV              # → D:\Media\Virtual\TV\{show}\Season {N}\{ep}.strm
+  movie_subdir:  Movies          # → D:\Media\Virtual\Movies\{title} ({year})\{title}.strm
+
+jellyfin:
+  # Streamarr calls Jellyfin's API to trigger library scans after writing stubs
+  url:    http://host.docker.internal:<span data-cfg="port:jellyfin"></span>
+  api_key: ""                    # generate in Jellyfin: Dashboard → API Keys
+
+sources:
+  # Resolvers tell Streamarr how to build a streaming URL for a given show.
+  # 'yt-dlp' uses yt-dlp to extract a direct stream URL at playback time.
+  # 'static'  uses a hardcoded URL template (e.g. an Invidious instance).
+  default_resolver: yt-dlp
+  yt_dlp_opts:
+    format: "bestvideo[height<=1080]+bestaudio/best[height<=1080]"
+    # Rate-limit to be polite to source; all goes through VPN anyway
+    ratelimit: "5M"
+
+  # Optional: use your local Invidious as a YouTube proxy instead of yt-dlp
+  # invidious_base: "http://localhost:<span data-cfg="port:invidious"></span>"
+
+watcher:
+  # How often the rule engine polls TMDB/TVDB for new episodes/releases
+  poll_interval_hours: 12
+  # Run rules scan on startup in addition to schedule
+  run_on_start: true
+
+logging:
+  path: /app/logs/streamarr.log
+  level: INFO
+  rotate_days: 14</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── Step 3: Define virtual shows ── -->
+  <div class="section">
+    <div class="section-title">📺 Step 3 — Define Virtual Shows (Manual STRM Generation)</div>
+    <div class="card">
+      <p>Each show you want to virtualize gets a <strong>YAML rule file</strong> in <code>~/streamarr/rules/</code>. Streamarr reads these on startup and generates one <code>.strm</code> file per episode. New episodes are minted automatically on the next watcher poll if they match the episode range.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Example: <code>rules/pokemon.yml</code></strong>
+          <pre>id: pokemon-og
+type: tv
+name: "Pokémon"
+tmdb_id: 60572              # confirms metadata; also drives poster/synopsis fetch
+tvdb_id: 73796
+resolver: yt-dlp
+source_query: "Pokémon {season} {episode} official English dub"
+# Generate stubs for these seasons/episodes.
+# Use 'all' to generate for every episode TMDB knows about.
+# Use explicit ranges to stay conservative on stub count.
+seasons:
+  - season: 1
+    episodes: all           # all 52 of Season 1
+  - season: 2
+    episodes: all
+  - season: 3
+    episodes: all           # etc. — add seasons as you want them in Jellyfin
+
+# Optional: freeze at a specific episode if you don't want the full run
+# max_episode: 200
+
+# Tags written into Jellyfin NFO alongside the stub
+tags:
+  - anime
+  - pokemon
+  - nostalgic
+notes: "Classic series. Not worth 800 GB. Watch on demand via VPN."</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Example: <code>rules/onepiece.yml</code></strong>
+          <pre>id: one-piece
+type: tv
+name: "One Piece"
+tmdb_id: 37854
+tvdb_id: 81797
+resolver: yt-dlp
+source_query: "One Piece Episode {absolute_episode} English Sub"
+seasons:
+  - season: 1
+    episodes: all           # Toei's S1 numbering (episodes 1-61)
+  # Add more seasons as desired — One Piece has ~20 Toei seasons
+max_episode: 1100           # cap stub generation; extend when you catch up</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Trigger a manual stub generation run</strong>
+          <pre># On WSL2 host — fires the generator against all rule files immediately
+curl -X POST http://localhost:<span data-cfg="port:streamarr"></span>/api/generate/all
+
+# Or generate a single show by its rule ID:
+curl -X POST http://localhost:<span data-cfg="port:streamarr"></span>/api/generate/pokemon-og
+
+# Watch output:
+tail -f ~/streamarr/logs/streamarr.log</pre>
+          <p>After this runs, <code>D:\Media\Virtual\TV\Pokémon\Season 01\Pokémon S01E01.strm</code> etc. will exist. Add <code>D:\Media\Virtual\TV</code> as a TV Shows library in Jellyfin — it'll scan and pick them up within 30 minutes (or trigger a manual scan).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── Step 4: Add Jellyfin virtual library ── -->
+  <div class="section">
+    <div class="section-title">🎬 Step 4 — Add Virtual Library in Jellyfin</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add the virtual TV library</strong>
+          <p>Jellyfin Dashboard → Libraries → Add Media Library:</p>
+          <pre>Content type:   TV Shows
+Display name:   Virtual TV
+Folder:         D:\Media\Virtual\TV
+Metadata:       TheTVDB + TheMovieDB (same as your real TV library)
+
+☑ Enable real time monitoring (picks up new .strm stubs instantly)
+☑ Merge with other TV libraries (optional — merges into your main TV grid)</pre>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">You can keep virtual shows in a <strong>separate library</strong> ("Virtual TV") or merge them into your main TV library. Separate is cleaner for management; merged looks more seamless to users. Start separate.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Verify playback of a stub</strong>
+          <p>In Jellyfin, navigate to Pokémon S01E01 → Play. Jellyfin reads the <code>.strm</code>, gets the URL, and streams it. The first play may be slow (yt-dlp resolves the URL live). Subsequent plays are faster if you enable URL caching in <code>streamarr.yml</code>.</p>
+          <pre># In streamarr.yml, under sources:
+url_cache:
+  enabled: true
+  ttl_hours: 4         # cached URL expires after 4 hrs (streaming URLs rotate)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── Step 5: Add to startup script ── -->
+  <div class="section">
+    <div class="section-title">🔁 Step 5 — Add to WSL2 Docker Startup Task</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add to <code>D:\Server\Scripts\start_docker_services.bat</code></strong>
+          <pre>:: ... existing services ...
+wsl -d Ubuntu -- bash -c "cd ~/streamarr && docker-compose up -d >> ~/startup.log 2>&1"</pre>
+          <p>Streamarr must start <em>after</em> the Mullvad/Gluetun VPN container if you're using <code>network_mode: service:gluetun</code>. Add a brief <code>timeout /t 10</code> between the VPN container line and the Streamarr line in the batch script.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ── SSO ── -->
+  <div class="section">
+    <div class="section-title">🔐 Step 6 — SSO / Access Control</div>
+    <div class="card">
+      <div class="card-title">No external SSO — admin-only LAN tool</div>
+      <p>Streamarr's web UI (<code>http://localhost:<span data-cfg="port:streamarr"></span></code>) is bound to <code>127.0.0.1</code> only and is <strong>never proxied through Caddy</strong>. It is not exposed to users. All user-facing access to virtual shows is through Jellyfin as usual — Streamarr is invisible to them.</p>
+      <p>Protect the Streamarr API with a static bearer token set in <code>streamarr.yml</code>:</p>
+      <pre># In streamarr.yml → server:
+api_key: "generate-a-strong-random-token-and-store-in-vaultwarden"</pre>
+      <p>All API calls then require: <code>Authorization: Bearer &lt;token&gt;</code></p>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">📡</div>
+    <div class="callout-body">Streamarr keeps infinite-run shows in Jellyfin without burning storage. A Pokémon library with 1,000+ episodes costs <strong>&lt; 1 MB on disk</strong> (one tiny <code>.strm</code> file per episode). The VPN ensures streaming traffic is private.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points (Admin Only)</div>
+        <table>
+          <tr><th>Type</th><th>URL / Address</th></tr>
+          <tr><td>Web UI (local)</td><td><code>http://localhost:<span data-cfg="port:streamarr"></span></code></td></tr>
+          <tr><td>API base</td><td><code>http://localhost:<span data-cfg="port:streamarr"></span>/api</code></td></tr>
+          <tr><td>Health check</td><td><code>http://localhost:<span data-cfg="port:streamarr"></span>/health</code></td></tr>
+          <tr><td>Trigger full gen</td><td><code>POST /api/generate/all</code></td></tr>
+          <tr><td>Trigger one rule</td><td><code>POST /api/generate/{id}</code></td></tr>
+          <tr><td>List rules</td><td><code>GET /api/rules</code></td></tr>
+          <tr><td>VPN status</td><td><code>GET /api/vpn/status</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port</td><td><span data-cfg="port:streamarr"></span></td></tr>
+          <tr><td>Install type</td><td>Docker WSL2</td></tr>
+          <tr><td>VPN routing</td><td>Mullvad / Gluetun namespace</td></tr>
+          <tr><td>Auth method</td><td>Static bearer token (admin API only)</td></tr>
+          <tr><td>User-facing?</td><td>No — Jellyfin is the interface</td></tr>
+          <tr><td>Version</td><td><span data-cfg="version:streamarr"></span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Virtual Library Layout</div>
+    <div class="card">
+      <pre>D:\Media\Virtual\
+  TV\
+    Pokémon\
+      Season 01\
+        Pokémon S01E01.strm         ← one-line file: "https://..."
+        Pokémon S01E01.nfo          ← episode metadata (title, synopsis, thumb)
+        Pokémon S01E01.jpg          ← episode thumbnail
+        Pokémon S01E02.strm
+        ...
+      Season 02\
+        ...
+    One Piece\
+      ...
+    Naruto\
+      ...
+  Movies\
+    Spider-Man Across the Spider-Verse (2023)\
+      Spider-Man Across the Spider-Verse (2023).strm
+      Spider-Man Across the Spider-Verse (2023).nfo</pre>
+      <p style="margin-top:10px;font-size:.84rem;color:var(--text-dim)">Jellyfin reads <code>.nfo</code> sidecar files for metadata, so episodes display with correct titles, thumbnails, and synopses even though no video is stored locally. Streamarr fetches this metadata from TMDB/TVDB and writes it alongside each stub.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 Watch Rule Engine</div>
+    <div class="card">
+      <p>The watcher polls TMDB and TVDB every <strong>12 hours</strong> (configurable). For any rule marked <code>auto_extend: true</code>, it automatically generates new stubs when new episodes appear. Rules can also trigger on broader signals — franchise keywords, director credits, production companies, etc.</p>
+    </div>
+
+    <div class="rule-grid">
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Show Series</div>
+        <div class="rule-title">Auto-extend running series</div>
+        <div class="rule-desc">When TMDB reports a new episode for a tracked show ID, Streamarr mints the <code>.strm</code> stub and triggers a Jellyfin library scan.</div>
+        <div class="rule-example">auto_extend: true<br>tmdb_id: 60572</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Franchise / Keyword</div>
+        <div class="rule-title">Keyword-triggered mock entries</div>
+        <div class="rule-desc">Monitor a TMDB keyword (e.g. "pokemon" keyword ID 9643). Any new movie or show tagged with it gets a stub entry — good for catching new Pokémon movies or spin-offs automatically.</div>
+        <div class="rule-example">type: keyword_watch<br>tmdb_keyword_id: 9643<br>stub_type: movie</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Director</div>
+        <div class="rule-title">Director watch</div>
+        <div class="rule-desc">Any new TMDB credit matching a given director ID triggers a stub. Good for following auteur directors whose complete output you want visible without storing it.</div>
+        <div class="rule-example">type: person_watch<br>tmdb_person_id: 138<br>role: director</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Actor</div>
+        <div class="rule-title">Actor / cast watch</div>
+        <div class="rule-desc">Monitor a cast member's TMDB filmography. New theatrical releases matching minimum vote threshold get stubs added to the virtual Movies library.</div>
+        <div class="rule-example">type: person_watch<br>tmdb_person_id: 1136406<br>role: actor<br>min_vote_count: 50</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Production Company</div>
+        <div class="rule-title">Studio output watch</div>
+        <div class="rule-desc">Watch all new releases from a production company (e.g. A24, Studio Ghibli). Every new theatrical release with a valid TMDB entry gets a stub.</div>
+        <div class="rule-example">type: company_watch<br>tmdb_company_id: 21<br># 21 = Lucasfilm</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Collection</div>
+        <div class="rule-title">Movie collection / saga</div>
+        <div class="rule-desc">Monitor a TMDB Collection (e.g. the MCU collection). Any new entry in the collection gets a stub. Perfect for long film sagas where you want stubs but not 50 GB of storage.</div>
+        <div class="rule-example">type: collection_watch<br>tmdb_collection_id: 131296<br># Dragon Ball films</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Network / Channel</div>
+        <div class="rule-title">Network output watch</div>
+        <div class="rule-desc">Monitor a broadcast network or streaming service. All new shows from a TVDB network ID above a vote threshold get tracked. Good for following a specific anime studio's seasonal releases.</div>
+        <div class="rule-example">type: network_watch<br>tvdb_network_id: 349<br># 349 = Cartoon Network<br>min_episodes: 10</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-type">Rule Type · Manual Override</div>
+        <div class="rule-title">One-off static stub</div>
+        <div class="rule-desc">Write a stub for a specific URL you already have — bypasses the resolver engine entirely. Useful for content not indexable by yt-dlp.</div>
+        <div class="rule-example">type: static<br>name: "Show Name"<br>url: "https://direct-url"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Full Watch Rule YAML Reference</div>
+    <div class="card">
+      <pre># ~/streamarr/rules/example-watch-rule.yml
+# ─────────────────────────────────────────────────────────────
+# COMMON FIELDS (all rule types)
+# ─────────────────────────────────────────────────────────────
+id:            my-rule-id          # unique, used in API calls
+type:          tv                  # tv | movie | keyword_watch |
+                                   # person_watch | company_watch |
+                                   # collection_watch | network_watch | static
+name:          "Display Name"      # shown in Jellyfin
+resolver:      yt-dlp              # yt-dlp | static | invidious
+auto_extend:   true                # automatically add new episodes/films
+enabled:       true
+
+# ─────────────────────────────────────────────────────────────
+# TV-SPECIFIC
+# ─────────────────────────────────────────────────────────────
+tmdb_id:       60572
+tvdb_id:       73796
+source_query:  "Pokémon {season} {episode} English dub"
+seasons:
+  - season: 1
+    episodes: all           # or: [1, 2, 3, 5] for sparse picks
+max_episode:   200          # optional cap to avoid generating stubs for
+                            # episodes you haven't watched yet
+
+# ─────────────────────────────────────────────────────────────
+# KEYWORD / PERSON / COMPANY WATCH FIELDS
+# ─────────────────────────────────────────────────────────────
+tmdb_keyword_id:    9643    # keyword_watch only
+tmdb_person_id:     138     # person_watch only
+tmdb_company_id:    21      # company_watch only
+tmdb_collection_id: 131296  # collection_watch only
+tvdb_network_id:    349     # network_watch only
+role:               director        # director | actor | producer (person_watch)
+stub_type:          movie           # tv | movie (for watch triggers)
+min_vote_count:     25              # ignore TMDB entries below this vote count
+min_vote_average:   5.0             # ignore entries rated below this
+
+# ─────────────────────────────────────────────────────────────
+# NOTIFICATION
+# ─────────────────────────────────────────────────────────────
+notify_on_new: true         # log + optional webhook when new stub is minted
+webhook_url: ""             # POST JSON payload to this URL on new stub
+
+# ─────────────────────────────────────────────────────────────
+# METADATA OVERRIDES
+# ─────────────────────────────────────────────────────────────
+tags:
+  - anime
+  - virtual
+poster_override: ""         # local path or URL — overrides TMDB poster</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">📅 Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th></tr>
+        <tr><td>Automatic (12h)</td><td>Watcher poll — checks TMDB/TVDB for new episodes, mints stubs</td></tr>
+        <tr><td>Weekly</td><td>Review <code>streamarr.log</code> for failed URL resolutions or yt-dlp errors</td></tr>
+        <tr><td>Monthly</td><td>Run <code>GET /api/stubs/dead</code> to find stubs whose source URLs are gone</td></tr>
+        <tr><td>Monthly</td><td>Check yt-dlp version — update if upstream sites changed extractors</td></tr>
+        <tr><td>Quarterly</td><td>Audit watch rules — prune rules for content you're no longer interested in</td></tr>
+        <tr><td>On demand</td><td>If a show's streaming source changes, update <code>source_query</code> or swap resolver</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 Updating yt-dlp</div>
+    <div class="card">
+      <p>yt-dlp extractors break regularly when platforms update their front-ends. Update yt-dlp inside the running container:</p>
+      <pre># Quick update (persists until container rebuild):
+docker exec streamarr pip install -U yt-dlp
+
+# Permanent: rebuild the image so the updated version is baked in:
+cd ~/streamarr
+docker-compose down && docker-compose up -d --build</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧹 Purging Dead Stubs</div>
+    <div class="card">
+      <p>Dead stubs are <code>.strm</code> files whose URLs can no longer be resolved. Streamarr can validate the full library and remove or flag them:</p>
+      <pre># List dead stubs (dry run):
+curl http://localhost:<span data-cfg="port:streamarr"></span>/api/stubs/dead \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Remove dead stubs (irreversible — they'll be re-created on next
+# generate run if the source comes back):
+curl -X DELETE http://localhost:<span data-cfg="port:streamarr"></span>/api/stubs/dead \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📦 Version</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Current</th><th>Check</th></tr>
+        <tr><td>Streamarr</td><td><span data-cfg="version:streamarr"></span></td><td><code>GET /api/version</code></td></tr>
+        <tr><td>yt-dlp</td><td>check in container</td><td><code>docker exec streamarr yt-dlp --version</code></td></tr>
+        <tr><td>Python image</td><td>3.12-slim</td><td><code>docker inspect streamarr | grep Image</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 4 — ACHIEVEMENTS
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-achievements">
+
+  <div class="section">
+    <div class="section-title">🏆 Achievement Trigger Method</div>
+    <div class="card">
+      <p>Streamarr is admin-only infrastructure — achievements are not awarded for admin actions. However, if users watch virtual-library content through Jellyfin, those playback events flow through Jellyfin's normal webhook pipeline exactly like real local media. Tag virtual-library shows in Jellyfin with <code>virtual</code> so achievement definitions can filter on that tag.</p>
+      <pre># In Jellyfin achievement definitions — example filter:
+# Award "Marathoner" if user watches 10+ episodes tagged 'virtual' in one session
+{
+  "id": "virtual-marathoner",
+  "trigger": "jellyfin.playback.stop",
+  "filter": { "library_tag": "virtual", "session_episodes": { "gte": 10 } },
+  "award": { "name": "Stream Marathoner", "points": 150 }
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 Achievement Cards</div>
+    <div class="ach-grid">
+      <div class="ach-card">
+        <div class="ach-icon">📡</div>
+        <div class="ach-name">First Contact</div>
+        <div class="ach-desc">Watch your first episode from the virtual library.</div>
+        <div class="ach-footer">
+          <div class="ach-pts">50 pts</div>
+          <div class="ach-method">Jellyfin webhook</div>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">🌀</div>
+        <div class="ach-name">Endless Runner</div>
+        <div class="ach-desc">Watch 100 episodes from virtual shows across any series.</div>
+        <div class="ach-footer">
+          <div class="ach-pts">200 pts</div>
+          <div class="ach-method">Jellyfin webhook</div>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">⚡</div>
+        <div class="ach-name">Gotta Watch 'Em All</div>
+        <div class="ach-desc">Watch every episode stub in a single virtual show library (e.g. all Pokémon stubs you've generated).</div>
+        <div class="ach-footer">
+          <div class="ach-pts">500 pts</div>
+          <div class="ach-method">Jellyfin webhook</div>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">🌊</div>
+        <div class="ach-name">Going to the New World</div>
+        <div class="ach-desc">Reach episode 100 in a virtual series with 500+ episodes (e.g. One Piece).</div>
+        <div class="ach-footer">
+          <div class="ach-pts">300 pts</div>
+          <div class="ach-method">Jellyfin webhook</div>
+        </div>
+      </div>
+      <div class="ach-card">
+        <div class="ach-icon">🔭</div>
+        <div class="ach-name">The Watcher</div>
+        <div class="ach-desc">Admin only — a watch rule fires automatically for the first time and mints a new stub without manual intervention.</div>
+        <div class="ach-footer">
+          <div class="ach-pts">100 pts</div>
+          <div class="ach-method">Streamarr log poll</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-achievements -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">💾 Storage Overview</div>
+    <div class="storage-breakdown">
+      <div class="storage-cell">
+        <div class="storage-cell-label">App (Docker image)</div>
+        <div class="storage-cell-val">~800 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">Rule files</div>
+        <div class="storage-cell-val">&lt; 1 MB</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">STRM stubs</div>
+        <div class="storage-cell-val">~2 KB / episode</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">NFO + thumbnails</div>
+        <div class="storage-cell-val">~100 KB / episode</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">1,000 episode library</div>
+        <div class="storage-cell-val">~100 MB total</div>
+      </div>
+      <div class="storage-cell">
+        <div class="storage-cell-label">URL cache DB</div>
+        <div class="storage-cell-val">&lt; 50 MB</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Where Everything Lives</div>
+    <div class="card">
+      <pre>D:\Media\Virtual\              ← Jellyfin-facing output (read by Jellyfin)
+  TV\
+    {Show Name}\
+      Season {N}\
+        {Show} S{N}E{E}.strm   ← one-liner: streaming URL
+        {Show} S{N}E{E}.nfo    ← episode metadata XML
+        {Show} S{N}E{E}.jpg    ← thumbnail
+
+~/streamarr/                   ← WSL2 service home (not visible to Jellyfin)
+  config/
+    streamarr.yml              ← main config 🔴 back up
+    url_cache.db               ← SQLite URL cache (safe to delete — rebuilt on demand)
+  rules/
+    pokemon.yml                ← per-show / per-watch-rule YAML files 🔴 back up
+    onepiece.yml
+    ...
+  logs/
+    streamarr.log              ← rotated 14 days</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Per-User Data (Pattern A)</div>
+    <div class="card">
+      <p>Streamarr stores no per-user data. All watch history, progress, and preferences for virtual library content are stored in Jellyfin's database exactly like real media — see the <a href="#" onclick="document.querySelector('[onclick*=&quot;movies&quot;]').click(); return false;">Movies/Jellyfin tab</a> for details.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💼 Backup Priority</div>
+    <div class="card">
+      <table>
+        <tr><th>File</th><th>Priority</th><th>Reason</th></tr>
+        <tr><td><code>~/streamarr/config/streamarr.yml</code></td><td>🔴 High</td><td>Jellyfin API key + all config</td></tr>
+        <tr><td><code>~/streamarr/rules/*.yml</code></td><td>🔴 High</td><td>All your watch rules — took time to write</td></tr>
+        <tr><td><code>D:\Media\Virtual\</code></td><td>🟡 Medium</td><td>Re-generatable from rules, but regeneration takes time</td></tr>
+        <tr><td><code>url_cache.db</code></td><td>🟢 Low</td><td>Ephemeral — automatically rebuilt</td></tr>
+        <tr><td><code>logs/</code></td><td>🟢 Low</td><td>Diagnostic only</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="trouble-item danger">
+    <div class="trouble-q">🔴 Playback fails: "Unable to connect to stream"</div>
+    <div class="trouble-a">
+      yt-dlp failed to resolve the source URL. Check in order:
+      <ul style="margin:6px 0 0 18px">
+        <li>Is Streamarr running? <code>docker ps | grep streamarr</code></li>
+        <li>Is Mullvad/Gluetun up? <code>curl http://localhost:<span data-cfg="port:streamarr"></span>/api/vpn/status</code></li>
+        <li>Is yt-dlp outdated? <code>docker exec streamarr yt-dlp --version</code> — update if &gt; 2 weeks old</li>
+        <li>Is the source query finding anything? Test manually: <code>docker exec streamarr yt-dlp --get-url "ytsearch1:Pokémon S01E01 English dub"</code></li>
+        <li>Check logs: <code>docker logs streamarr --tail 50</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">⚠️ Virtual shows don't appear in Jellyfin after generation</div>
+    <div class="trouble-a">
+      <ul style="margin:0 0 0 18px">
+        <li>Verify <code>.strm</code> files exist: <code>ls "D:\Media\Virtual\TV\Pokémon\Season 01\"</code></li>
+        <li>Trigger a manual Jellyfin library scan: Dashboard → Libraries → Virtual TV → Scan Library</li>
+        <li>Check folder naming — Jellyfin requires <code>Show Name\Season NN\Show Name SXXEXX.strm</code></li>
+        <li>Confirm Jellyfin has read access to <code>D:\Media\Virtual\</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">⚠️ Watch rules not firing automatically</div>
+    <div class="trouble-a">
+      <ul style="margin:0 0 0 18px">
+        <li>Check <code>watcher.enabled: true</code> in <code>streamarr.yml</code></li>
+        <li>Verify TMDB/TVDB API keys are set: <code>docker exec streamarr env | grep API_KEY</code></li>
+        <li>Check the log for watcher cycle entries: <code>grep "watcher" ~/streamarr/logs/streamarr.log</code></li>
+        <li>Test manually: <code>curl -X POST http://localhost:<span data-cfg="port:streamarr"></span>/api/watcher/run -H "Authorization: Bearer YOUR_API_KEY"</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="trouble-item">
+    <div class="trouble-q">⚠️ VPN check fails — traffic may not be tunneled</div>
+    <div class="trouble-a">
+      <ul style="margin:0 0 0 18px">
+        <li>If using Gluetun: <code>docker inspect streamarr | grep NetworkMode</code> — should show <code>container:gluetun</code></li>
+        <li>If using host network mode: verify Mullvad Windows client is connected before Streamarr starts</li>
+        <li>IP leak test from inside the container: <code>docker exec streamarr curl https://am.i.mullvad.net/json</code> — should show a Mullvad IP</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="trouble-item ok">
+    <div class="trouble-q">💡 Playback is slow / buffers on first play</div>
+    <div class="trouble-a">
+      Expected behaviour on first play — yt-dlp is resolving the URL live. Enable the URL cache (<code>url_cache.enabled: true</code>, <code>ttl_hours: 4</code>) in <code>streamarr.yml</code> to cache resolved URLs. Subsequent plays within the TTL window will be instant. Note that streaming URLs typically expire within a few hours, so don't set TTL above 4–6 hours.
+    </div>
+  </div>
+
+  <div class="trouble-item ok">
+    <div class="trouble-q">💡 Metadata / poster is wrong for a virtual show</div>
+    <div class="trouble-a">
+      Streamarr writes <code>.nfo</code> sidecars fetched from TMDB. If the poster is wrong: delete the <code>.jpg</code> file and the <code>.nfo</code> file for that show's folder (not the <code>.strm</code> files), then call <code>POST /api/metadata/refresh/{rule-id}</code>. Jellyfin will re-read the corrected NFOs after the next scan.
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:20px">
+    <div class="section-title">🔧 Useful Admin Commands</div>
+    <div class="card">
+      <pre># Container status
+docker ps | grep streamarr
+docker logs streamarr --tail 100 --follow
+
+# VPN / IP verification (critical — run after every Mullvad reconnect)
+docker exec streamarr curl -s https://am.i.mullvad.net/json | python3 -m json.tool
+
+# Manual stub generation
+curl -X POST http://localhost:<span data-cfg="port:streamarr"></span>/api/generate/all \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Validate all stubs (check for dead URLs — slow, use off-peak)
+curl -X POST http://localhost:<span data-cfg="port:streamarr"></span>/api/stubs/validate \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Restart the container cleanly
+cd ~/streamarr && docker-compose restart streamarr
+
+# Full rebuild (after yt-dlp or config changes)
+cd ~/streamarr && docker-compose down && docker-compose up -d</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANE 7 — UI PREVIEW
+══════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-uipreview">
+
+  <div class="section">
+    <div class="section-title">🖥️ Admin Web UI (Port <span data-cfg="port:streamarr"></span>)</div>
+    <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:16px">Admin-only dashboard — not exposed to users. Shows rule status, stub counts, VPN health, and watcher log.</p>
+
+    <!-- Status bar -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">System Status</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:8px">
+        <div class="mock-status">
+          <div class="mock-dot green"></div>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.75rem">VPN CONNECTED · Mullvad · SE Stockholm</span>
+        </div>
+        <div class="mock-status">
+          <div class="mock-dot green"></div>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.75rem">WATCHER RUNNING · next poll in 4h 22m</span>
+        </div>
+        <div class="mock-status">
+          <div class="mock-dot yellow"></div>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.75rem">3 DEAD STUBS · run /api/stubs/dead</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rule library mock -->
+    <div class="mock-library">
+      <div class="mock-lib-header">
+        <div class="mock-lib-title">Active Rules</div>
+        <div class="mock-lib-count">7 rules · 2,843 stubs</div>
+      </div>
+      <div class="mock-lib-row header">
+        <div>Show / Rule</div>
+        <div>Type</div>
+        <div>Stubs</div>
+        <div>Status</div>
+      </div>
+      <div class="mock-lib-row">
+        <div>⚡ Pokémon</div>
+        <div><span class="mock-badge badge-strm">tv</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.76rem">1,092</div>
+        <div><span class="mock-badge badge-ok">ok</span></div>
+      </div>
+      <div class="mock-lib-row">
+        <div>🌊 One Piece</div>
+        <div><span class="mock-badge badge-strm">tv</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.76rem">1,100</div>
+        <div><span class="mock-badge badge-ok">ok</span></div>
+      </div>
+      <div class="mock-lib-row">
+        <div>🍃 Naruto</div>
+        <div><span class="mock-badge badge-strm">tv</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.76rem">220</div>
+        <div><span class="mock-badge badge-ok">ok</span></div>
+      </div>
+      <div class="mock-lib-row">
+        <div>🏆 Pokémon keyword watch</div>
+        <div><span class="mock-badge badge-watch">keyword</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.76rem">27 movies</div>
+        <div><span class="mock-badge badge-ok">ok</span></div>
+      </div>
+      <div class="mock-lib-row">
+        <div>🎬 A24 company watch</div>
+        <div><span class="mock-badge badge-watch">company</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.76rem">312</div>
+        <div><span class="mock-badge badge-ok">ok</span></div>
+      </div>
+      <div class="mock-lib-row">
+        <div>🔭 Director: Satoshi Kon</div>
+        <div><span class="mock-badge badge-watch">person</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.76rem">6</div>
+        <div><span class="mock-badge badge-ok">ok</span></div>
+      </div>
+      <div class="mock-lib-row">
+        <div>📡 Dragon Ball Collection</div>
+        <div><span class="mock-badge badge-watch">collection</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.76rem">23 films</div>
+        <div><span class="mock-badge badge-ok">ok</span></div>
+      </div>
+    </div>
+
+    <div class="preview-todo" style="margin-top:14px">
+      📋 TODO: Recent watcher activity log — shows last 20 "new stub minted" events with rule ID, show name, and timestamp. Useful for confirming the watcher fired correctly.
+    </div>
+    <div class="preview-todo">
+      📋 TODO: Dead stub list — expandable panel listing stubs whose URLs returned 404/403 on last validation pass, with a "regenerate" button per entry.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎬 What Users See in Jellyfin (Virtual Library)</div>
+    <div class="card">
+      <p>Users see Pokémon, One Piece, etc. in Jellyfin exactly like any other show — poster art, episode synopses, thumbnails, watch progress. The only difference is a ~2–4s delay on first play while yt-dlp resolves the URL. With URL caching enabled, repeat plays are instant.</p>
+      <div class="preview-todo">
+        📋 TODO: Screenshot or mock of Jellyfin virtual library grid — shows how the shows look to users (poster grid view vs episode list view).
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📝 UI Notes &amp; Iteration Log</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;color:var(--text-dim)">
+        <li>[ ] Admin UI is minimal MVP — consider adding a React frontend later if rule count grows</li>
+        <li>[ ] The watcher poll interval (12h) may be too slow for daily-release shows — add per-rule override</li>
+        <li>[ ] URL caching TTL needs tuning per-source; YouTube URLs expire faster than others</li>
+        <li>[ ] Consider Invidious as the default resolver for YouTube-sourced shows to avoid yt-dlp breakage</li>
+        <li>[ ] VPN leak detection should run as a cron inside the container, not just on API call</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /pane-uipreview -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'streamarr_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar         = document.getElementById('setup-complete-bar');
+    const checkbox    = document.getElementById('setup-checkbox');
+    const sub         = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      overviewBtn.style.fontWeight = '700';
+      overviewBtn.style.color = 'var(--accent3)';
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      overviewBtn.style.fontWeight = '';
+      overviewBtn.style.color = '';
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      switchTab('overview', overviewBtn);
+    }
+  });
+</script>
+</body>
+</html>
