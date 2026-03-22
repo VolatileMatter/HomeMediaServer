@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sonic the Hedgehog</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 10px 20px; background: transparent; border: none;
+  border-bottom: 3px solid transparent; color: var(--text-dim);
+  cursor: pointer; transition: all .16s; margin-bottom: -2px; white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(0,102,204,.4); }
+.fn-tab-btn.active { color: #4da6ff; border-bottom-color: #4da6ff; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS
+════════════════════════════════════════════════════ */
+.fn-view-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(0,102,204,.15); border-color: #4da6ff; color: #4da6ff; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid #4da6ff; padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3); color: #4da6ff;
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 7px 10px; text-align: left;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top; line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc header rows */
+.fn-arc-row td {
+  background: rgba(0,102,204,.07) !important; color: #4da6ff;
+  font-size: .69rem; font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: .08em; padding: 5px 10px;
+  border-top: 1px solid rgba(0,102,204,.25) !important;
+  border-bottom: 1px solid rgba(0,102,204,.15) !important;
+}
+
+/* Media break rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic; color: var(--text-dim); font-size: .76rem;
+}
+.fn-media-row td:first-child { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform colour stripes */
+.fn-gen   td:first-child { border-left: 3px solid #4db6ac; }
+.fn-gg    td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-scd   td:first-child { border-left: 3px solid #80deea; }
+.fn-32x   td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-sat   td:first-child { border-left: 3px solid #7986cb; }
+.fn-dc    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-gba   td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds   td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds   td:first-child { border-left: 3px solid #ff8a65; }
+.fn-gc    td:first-child { border-left: 3px solid #9575cd; }
+.fn-wii   td:first-child { border-left: 3px solid #b0bec5; }
+.fn-wiiu  td:first-child { border-left: 3px solid #80cbc4; }
+.fn-switch td:first-child { border-left: 3px solid #e57373; }
+.fn-ps1   td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps2   td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps34  td:first-child { border-left: 3px solid #29b6f6; }
+.fn-xbox  td:first-child { border-left: 3px solid #81c784; }
+.fn-pc    td:first-child { border-left: 3px solid #90a4ae; }
+.fn-mobile td:first-child { border-left: 3px solid #f06292; }
+.fn-anime td:first-child { border-left: 3px solid #ce93d8; }
+.fn-tv    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-movie td:first-child { border-left: 3px solid #ffb74d; }
+.fn-book  td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-web   td:first-child { border-left: 3px solid #f06292; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(0,102,204,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid #4da6ff !important; }
+
+/* Faded = optional/skip */
+.fn-skip td { opacity: .52; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block; font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px; border-radius: 3px; white-space: nowrap; vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-varies { background: rgba(0,102,204,.18);   color: #4da6ff; border: 1px solid rgba(0,102,204,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-dead   { background: rgba(239,83,80,.1);    color: #ef9a9a; border: 1px solid rgba(239,83,80,.25); }
+.fn-tag-canon  { background: rgba(76,175,80,.1);    color: #81c784; border: 1px solid rgba(76,175,80,.25); }
+.fn-tag-noncan { background: rgba(120,120,120,.1);  color: var(--text-dim); border: 1px solid var(--border); }
+.fn-star       { color: #4da6ff; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #4da6ff; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #4da6ff; border: 3px solid var(--bg);
+}
+.fn-era-year { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: .1em; color: #4da6ff; text-transform: uppercase; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">💙</div>
+  <div>
+    <h1>Sonic the Hedgehog</h1>
+    <div class="subtitle">// Genesis · GBA · DS · Modern Consoles · Mobile · TV · Movies · Comics · EmulatorJS //</div>
+    <p class="desc">
+      SEGA's flagship franchise since 1991. Sonic the Hedgehog spans over 50 games across nearly every platform ever made, plus five animated series, four theatrical films, and two decades of comics. Use the Library tab for games and emulation info. TV &amp; Anime, Movies, Books, and History cover everything else.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">50+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">6</div><div class="fn-stat-label">TV Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">4</div><div class="fn-stat-label">Movies</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">500+</div><div class="fn-stat-label">Comics</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1991</div><div class="fn-stat-label">Founded</div></div>
+</div>
+
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('books',   this)">📖 Comics &amp; Books</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">🌀 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The Sonic Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','chrono',    this)">🕰️ By Era</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile Only</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+      </div>
+
+      <!-- RELEASE ORDER -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All games in real-world release order. TV/anime watch points noted inline. ⭐ = recommended entry points. Blue rows = standout. Faded = optional.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Emulator / Core</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE CLASSIC ERA (1991–1997) ──</td></tr>
+          <tr class="fn-gen fn-highlight">
+            <td>1991</td><td>Sonic the Hedgehog <span class="fn-star">⭐</span></td>
+            <td>Genesis</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> The original. Green Hill Zone. Six zones, classic bosses. Best starting point for newcomers.</td>
+          </tr>
+          <tr class="fn-gg fn-skip">
+            <td>1991</td><td>Sonic the Hedgehog (Game Gear)</td>
+            <td>Game Gear</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Different zone layout — not a straight port. GG mode in core.</td>
+          </tr>
+          <tr class="fn-gg fn-skip">
+            <td>1992</td><td>Sonic the Hedgehog 2 (Game Gear)</td>
+            <td>Game Gear</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Tails' first appearance — before the Genesis sequel.</td>
+          </tr>
+          <tr class="fn-gen fn-highlight">
+            <td>1992</td><td>Sonic the Hedgehog 2 <span class="fn-star">⭐</span></td>
+            <td>Genesis</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Introduces Tails and the Spin Dash. Bigger and faster. Essential.</td>
+          </tr>
+          <tr class="fn-scd fn-highlight">
+            <td>1993</td><td>Sonic CD <span class="fn-star">⭐</span></td>
+            <td>Sega CD</td><td>genesis_plus_gx + CD BIOS</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Time travel mechanic. Introduces Metal Sonic and Amy. Also on Steam (2011 remaster).</td>
+          </tr>
+          <tr class="fn-gen fn-skip">
+            <td>1993</td><td>Sonic Spinball</td>
+            <td>Genesis</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Pinball spinoff. Non-canon. Fun but not essential.</td>
+          </tr>
+          <tr class="fn-gen fn-skip">
+            <td>1993</td><td>Dr. Robotnik's Mean Bean Machine</td>
+            <td>Genesis</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Puyo Puyo reskin. Puzzle game.</td>
+          </tr>
+          <tr class="fn-gg fn-skip">
+            <td>1993</td><td>Sonic Chaos</td>
+            <td>Game Gear</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> First GG Sonic with nonlinear world map.</td>
+          </tr>
+          <tr class="fn-gen fn-highlight">
+            <td>1994</td><td>Sonic the Hedgehog 3 &amp; Knuckles <span class="fn-star">⭐</span></td>
+            <td>Genesis</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Play Sonic 3 locked on to Sonic &amp; Knuckles for the full experience. The pinnacle of classic Sonic.</td>
+          </tr>
+          <tr class="fn-gg fn-skip">
+            <td>1994</td><td>Sonic Triple Trouble</td>
+            <td>Game Gear</td><td>genesis_plus_gx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Nack the Weasel's debut. Handheld original.</td>
+          </tr>
+          <tr class="fn-32x fn-skip">
+            <td>1995</td><td>Knuckles' Chaotix</td>
+            <td>32X</td><td>picodrive + 32X BIOS</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Introduces Espio, Vector, Charmy. 32X exclusive — requires BIOS.</td>
+          </tr>
+          <tr class="fn-sat fn-skip">
+            <td>1996</td><td>Sonic 3D Blast</td>
+            <td>Genesis / Saturn</td><td>genesis_plus_gx or Mednafen</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Isometric pseudo-3D. Non-canon. Saturn version has better music.</td>
+          </tr>
+          <tr class="fn-sat fn-skip">
+            <td>1997</td><td>Sonic R</td>
+            <td>Saturn / PC</td><td>Mednafen Saturn</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> On-foot racer with an infamous pop soundtrack. Cult classic.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE ADVENTURE ERA (1998–2004) ──</td></tr>
+          <tr class="fn-dc fn-highlight">
+            <td>1998</td><td>Sonic Adventure <span class="fn-star">⭐</span></td>
+            <td>Dreamcast / PC</td><td>flycast (DC) / Steam (DX)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> First 3D Sonic. Six-character campaign, Chao Garden. DX remaster on Steam.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>1999</td><td>Sonic Pocket Adventure</td>
+            <td>Neo Geo Pocket</td><td>mednafen_ngp</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Rare NGPC exclusive with remixed Sonic 2 zones.</td>
+          </tr>
+          <tr class="fn-dc fn-highlight">
+            <td>2001</td><td>Sonic Adventure 2 <span class="fn-star">⭐</span></td>
+            <td>Dreamcast / PC</td><td>flycast (DC) / Steam (HD)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Introduces Shadow. Hero/Dark split campaign. The Prison Island escape is iconic.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2001</td><td>Sonic Advance</td>
+            <td>GBA</td><td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>First GBA Sonic. Four characters, connects to SA2 Battle Chao Garden.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2002</td><td>Sonic Advance 2</td>
+            <td>GBA</td><td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Speed-focused sequel. Introduces Cream the Rabbit. Boost precursor mechanics.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2003</td><td>Sonic Battle</td>
+            <td>GBA</td><td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Arena fighter. Emerl the Gizoid absorbs others' movesets. Connects to SA2.</td>
+          </tr>
+          <tr class="fn-gc">
+            <td>2003</td><td>Sonic Heroes</td>
+            <td>GC / PS2 / Xbox</td><td>dolphin (GC) / PCSX2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Team-based gameplay. Reintroduces Chaotix. Four parallel stories.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2004</td><td>Sonic Advance 3</td>
+            <td>GBA</td><td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Tag-team pairs with unique abilities. Final Advance entry.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Sonic X</strong> (2003–2006) — TMS anime adapting Adventure 1, Adventure 2, Heroes, and an original Metarex arc. Watch after SA2 for best impact. 78 eps.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE DARK AGE (2005–2009) ──</td></tr>
+          <tr class="fn-gc fn-skip">
+            <td>2005</td><td>Shadow the Hedgehog</td>
+            <td>GC / PS2 / Xbox</td><td>dolphin / PCSX2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Shadow's standalone game with guns and branching paths. Infamously edgy but plot-relevant.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>2005</td><td>Sonic Rush</td>
+            <td>DS</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Introduces Blaze the Cat. True debut of the Boost mechanic. Dual-screen spectacle.</td>
+          </tr>
+          <tr class="fn-gc fn-skip">
+            <td>2006</td><td>Sonic the Hedgehog (2006)</td>
+            <td>PS3 / 360</td><td>RPCS3 / xenia</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> The infamous "Sonic 06". Buggy reboot attempt. No PC port. Historically significant.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2007</td><td>Sonic and the Secret Rings</td>
+            <td>Wii</td><td>dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Arabian Nights on-rails platformer. Motion controls.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>2007</td><td>Sonic Rush Adventure</td>
+            <td>DS</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Rush sequel. Marine the Raccoon. Sea exploration between stages.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>2008</td><td>Sonic Chronicles: The Dark Brotherhood</td>
+            <td>DS</td><td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> BioWare RPG. Legally inaccessible digitally (Ken Penders lawsuit). Physical only.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2008</td><td>Sonic Unleashed</td>
+            <td>PS3 / 360 / Wii</td><td>dolphin (Wii) / RPCS3</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Day stages = best boost Sonic of the era. Night werehog stages divisive. Daytime is worth it.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2009</td><td>Sonic and the Black Knight</td>
+            <td>Wii</td><td>dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Arthurian legends. Sword waggle combat.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE RENAISSANCE (2010–2016) ──</td></tr>
+          <tr class="fn-wii fn-highlight">
+            <td>2010</td><td>Sonic Colors <span class="fn-star">⭐</span></td>
+            <td>Wii / DS</td><td>dolphin / melonds</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Wisp powers, tight level design, beloved writing. Colors Ultimate on PC/Switch is the best version.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2010</td><td>Sonic the Hedgehog 4: Episode I</td>
+            <td>PC / Mobile / Console</td><td>Steam (PC)</td>
+            <td><span class="fn-tag fn-tag-varies">📱 Delisted</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Episodic 2D sequel. Physics don't match the classics. Mobile versions delisted.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2011</td><td>Sonic Generations <span class="fn-star">⭐</span></td>
+            <td>PS3 / 360 / PC</td><td>Steam (PC)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> 25 years of reimagined levels. Classic + Modern Sonic. Near-universal acclaim. Start here for modern Sonic.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2012</td><td>Sonic the Hedgehog 4: Episode II</td>
+            <td>PC / Mobile / Console</td><td>Steam (PC)</td>
+            <td><span class="fn-tag fn-tag-varies">📱 Delisted</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Metal Sonic returns. Better physics than Ep I.</td>
+          </tr>
+          <tr class="fn-wiiu fn-skip">
+            <td>2013</td><td>Sonic Lost World</td>
+            <td>Wii U / PC</td><td>dolphin / Steam</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Cylindrical world platforming. Deadly Six. Divisive.</td>
+          </tr>
+          <tr class="fn-wiiu fn-skip">
+            <td>2014</td><td>Sonic Boom: Rise of Lyric</td>
+            <td>Wii U</td><td>dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Boom alternate universe. Critically panned 3D brawler.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Sonic Boom TV Series</strong> (2014–2017) — 104-episode comedy series set in the Boom alternate universe. Watch parallel to this era. Strong self-aware humour.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE MODERN ERA (2017–PRESENT) ──</td></tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2017</td><td>Sonic Mania <span class="fn-star">⭐</span></td>
+            <td>Switch / PS4 / XBO / PC</td><td>Steam / Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> The best 2D Sonic since the Genesis era. Fan-developed, SEGA-published. Mania Plus adds Encore mode + Mighty &amp; Ray.</td>
+          </tr>
+          <tr class="fn-switch">
+            <td>2017</td><td>Sonic Forces</td>
+            <td>Switch / PS4 / XBO / PC</td><td>Steam / Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Custom Avatar character. Eggman wins at the start. Divisive but story-important.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2017</td><td>Sonic Forces: Speed Battle</td>
+            <td>iOS / Android</td><td>App Stores</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Multiplayer mobile racing. Still active.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Sonic Mania Adventures</strong> (2018) — Official animated web shorts bridging Mania and Forces. 5 eps + holiday special. Free on SEGA YouTube. Highly recommended.</td></tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2021</td><td>Sonic Colors: Ultimate</td>
+            <td>Switch / PS4 / XBO / PC</td><td>Steam / Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>HD remaster of Colors with new Rival Rush mode. Best version of a great game.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2022</td><td>Sonic Origins <span class="fn-star">⭐</span></td>
+            <td>Switch / PS4/5 / XBO / PC</td><td>Steam / Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Official collection: Sonic 1, 2, CD, and 3&amp;K. New animated cutscenes, Anniversary mode.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2022</td><td>Sonic Frontiers <span class="fn-star">⭐</span></td>
+            <td>Switch / PS4/5 / XBO / PC</td><td>Steam / Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> First open-world Sonic. Starfall Islands with Cyber Space interiors. Final Horizon DLC completes the story.</td>
+          </tr>
+          <tr class="fn-switch">
+            <td>2023</td><td>Sonic Superstars</td>
+            <td>Switch / PS4/5 / XBO / PC</td><td>Steam / Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>4-player co-op 2D with Emerald Powers. Trip the Sungazer is a new character.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2024</td><td>Sonic x Shadow Generations <span class="fn-star">⭐</span></td>
+            <td>Switch / PS4/5 / XBO / PC</td><td>Steam / Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Remaster of Generations + all-new Shadow Generations campaign. Shadow campaign is significant new story content.</td>
+          </tr>
+
+        </table>
+        <div class="fn-legend">
+          <span><span class="fn-dot" style="background:#4db6ac"></span>Genesis</span>
+          <span><span class="fn-dot" style="background:#80deea"></span>Sega CD</span>
+          <span><span class="fn-dot" style="background:#ffcc02"></span>Dreamcast</span>
+          <span><span class="fn-dot" style="background:#4fc3f7"></span>GBA</span>
+          <span><span class="fn-dot" style="background:#f48fb1"></span>DS/3DS</span>
+          <span><span class="fn-dot" style="background:#9575cd"></span>GameCube</span>
+          <span><span class="fn-dot" style="background:#b0bec5"></span>Wii</span>
+          <span><span class="fn-dot" style="background:#e57373"></span>Switch/PS4+</span>
+          <span><span class="fn-dot" style="background:#f06292"></span>Mobile</span>
+        </div>
+      </div><!-- /release -->
+
+      <!-- BY ERA / CHRONO -->
+      <div class="fn-view" id="fn-library-chrono">
+        <div class="fn-view-desc">Games grouped by narrative/design era — useful for understanding how the franchise evolved tonally and mechanically.</div>
+        <table class="fn-table">
+          <tr><th>Era</th><th>Years</th><th>Key Games</th><th>Design Philosophy</th></tr>
+          <tr class="fn-arc-row"><td colspan="4">── CLASSIC ERA ──</td></tr>
+          <tr><td>Classic 2D</td><td>1991–1997</td><td>Sonic 1–3&amp;K, CD, Spinball</td><td>Momentum-based 2D platforming. Collect rings, avoid spikes, defeat Robotnik. Pure kinetic joy.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── ADVENTURE ERA ──</td></tr>
+          <tr><td>3D Adventure</td><td>1998–2004</td><td>SA1, SA2, Heroes, Advance trilogy</td><td>Multiple playable characters, hub worlds, story-driven. Mix of 3D adventure stages and faster 2D sections.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── DARK AGE ──</td></tr>
+          <tr><td>Dark / Experimental</td><td>2005–2009</td><td>Shadow, Sonic 06, Unleashed, Rush</td><td>Identity crisis. Gritty tones, guns, werehog brawling. Boost mechanics begin to crystallise in Rush and Unleashed.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── RENAISSANCE ──</td></tr>
+          <tr><td>Boost Era</td><td>2010–2016</td><td>Colors, Generations, Lost World</td><td>Speed as spectacle. Boost button, automated sections. Colors and Generations define this aesthetic at its best.</td></tr>
+          <tr class="fn-arc-row"><td colspan="4">── MODERN ERA ──</td></tr>
+          <tr><td>Modern / Open</td><td>2017–present</td><td>Mania, Forces, Frontiers, Origins</td><td>Split identity: Mania revives classic 2D, Frontiers opens the world. Lore deepens. Fan involvement increases.</td></tr>
+        </table>
+      </div>
+
+      <!-- BEST FIRST -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Curated entry points ranked by recommendation. Start at #1 — each is accessible to new players.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Why Start Here</th><th>What's Next</th></tr>
+          <tr class="fn-switch fn-highlight">
+            <td>1</td><td>Sonic Mania <span class="fn-star">⭐</span></td>
+            <td>The best Sonic game. Pure 2D. No prior knowledge needed. Celebrates the whole franchise's history while being approachable.</td><td>Sonic Origins, then Sonic Generations</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2</td><td>Sonic Origins</td>
+            <td>Official collection of the four classic games. If you want the originals in authentic form, start here.</td><td>Sonic Mania, Sonic Generations</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>3</td><td>Sonic Generations</td>
+            <td>Greatest hits tour of 20 years of levels. Best entry point for modern 3D Sonic.</td><td>Sonic Colors: Ultimate, Sonic Frontiers</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>4</td><td>Sonic x Shadow Generations</td>
+            <td>Remaster of Generations + Shadow's expanded storyline. Best version of a classic.</td><td>Sonic Frontiers for the deeper lore</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>5</td><td>Sonic Frontiers</td>
+            <td>Most ambitious modern Sonic. Start here if you want the current direction of the franchise.</td><td>Sonic Forces (backstory), IDW comics</td>
+          </tr>
+          <tr class="fn-dc">
+            <td>6</td><td>Sonic Adventure 2</td>
+            <td>The beloved 3D classic. Shadow's origin story. Play SA1 first for full context.</td><td>Sonic Heroes, Sonic Battle (GBA)</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- MOBILE ONLY -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Games fully playable via EmulatorJS on phone. Modern PC-only releases excluded.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core</th><th>Notes</th></tr>
+          <tr class="fn-gen"><td>1991</td><td>Sonic the Hedgehog</td><td>Genesis</td><td>genesis_plus_gx</td><td>The original. Runs perfectly.</td></tr>
+          <tr class="fn-gen"><td>1992</td><td>Sonic the Hedgehog 2</td><td>Genesis</td><td>genesis_plus_gx</td><td>Full game. Includes 2-player race mode (local).</td></tr>
+          <tr class="fn-scd"><td>1993</td><td>Sonic CD</td><td>Sega CD</td><td>genesis_plus_gx</td><td>Requires Sega CD BIOS in bios folder.</td></tr>
+          <tr class="fn-gen"><td>1994</td><td>Sonic the Hedgehog 3</td><td>Genesis</td><td>genesis_plus_gx</td><td>Best played locked on with S&amp;K ROM.</td></tr>
+          <tr class="fn-gen"><td>1994</td><td>Sonic &amp; Knuckles</td><td>Genesis</td><td>genesis_plus_gx</td><td>Lock-on Sonic 3 for full experience.</td></tr>
+          <tr class="fn-gba"><td>2001</td><td>Sonic Advance</td><td>GBA</td><td>mgba</td><td>Four characters.</td></tr>
+          <tr class="fn-gba"><td>2002</td><td>Sonic Advance 2</td><td>GBA</td><td>mgba</td><td>Boost mechanic precursor.</td></tr>
+          <tr class="fn-gba"><td>2003</td><td>Sonic Battle</td><td>GBA</td><td>mgba</td><td>Arena fighter.</td></tr>
+          <tr class="fn-gba"><td>2004</td><td>Sonic Advance 3</td><td>GBA</td><td>mgba</td><td>Tag-team mechanics.</td></tr>
+          <tr class="fn-nds"><td>2005</td><td>Sonic Rush</td><td>DS</td><td>melonds</td><td>Boost debut. Dual-screen spectacle.</td></tr>
+          <tr class="fn-nds"><td>2007</td><td>Sonic Rush Adventure</td><td>DS</td><td>melonds</td><td>Rush sequel.</td></tr>
+          <tr class="fn-nds"><td>2008</td><td>Sonic Chronicles</td><td>DS</td><td>melonds</td><td>BioWare RPG. Physical only.</td></tr>
+          <tr class="fn-gg"><td>1991–1996</td><td>All Game Gear Sonics</td><td>Game Gear</td><td>genesis_plus_gx (GG)</td><td>Six GG titles. See release order tab for list.</td></tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body"><strong>PC-only releases:</strong> Sonic Adventure 1/2, Heroes, Colors, Generations, Mania, Forces, Frontiers, and Superstars all require a PC or native console. Stream via Sunshine + Moonlight for couch play.</div>
+        </div>
+      </div>
+
+      <!-- BY PLATFORM -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All games grouped by original platform.</div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Games</th><th>Emulator</th></tr>
+          <tr class="fn-gen"><td>Sega Genesis / Mega Drive</td><td>Sonic 1, 2, 3, S&amp;K, CD (SCD), Spinball, Mean Bean, 3D Blast, Sonic &amp; Knuckles</td><td>genesis_plus_gx</td></tr>
+          <tr class="fn-gg"><td>Game Gear</td><td>Sonic GG 1, GG 2, Chaos, Triple Trouble, Sonic Blast, Drift, Drift 2</td><td>genesis_plus_gx (GG mode)</td></tr>
+          <tr class="fn-32x"><td>Sega 32X</td><td>Knuckles' Chaotix</td><td>picodrive + 32X BIOS</td></tr>
+          <tr class="fn-sat"><td>Sega Saturn</td><td>Sonic 3D Blast, Sonic R, Sonic Jam (compilation)</td><td>Mednafen Saturn</td></tr>
+          <tr class="fn-dc"><td>Dreamcast</td><td>Sonic Adventure, Adventure 2, Shuffle, Pocket Adventure (NGPC)</td><td>flycast</td></tr>
+          <tr class="fn-gba"><td>GBA / NGPC</td><td>Advance 1/2/3, Battle, Pocket Adventure</td><td>mgba / mednafen_ngp</td></tr>
+          <tr class="fn-gc"><td>GameCube / PS2</td><td>Heroes, Shadow, Adventure DX/2 Battle ports</td><td>dolphin / PCSX2</td></tr>
+          <tr class="fn-nds"><td>Nintendo DS</td><td>Rush, Rush Adventure, Chronicles</td><td>melonds</td></tr>
+          <tr class="fn-wii"><td>Wii / Wii U</td><td>Secret Rings, Unleashed (Wii), Colors, Black Knight, Lost World, Boom: Rise of Lyric</td><td>dolphin</td></tr>
+          <tr class="fn-ps34"><td>PS3 / Xbox 360</td><td>Sonic 06, Unleashed HD, Generations</td><td>RPCS3 / xenia</td></tr>
+          <tr class="fn-switch"><td>Switch / PS4+ / PC</td><td>Mania, Forces, TSR, Origins, Colors Ultimate, Frontiers, Superstars, S×S Generations</td><td>Native / Steam</td></tr>
+        </table>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\Sonic\
+  ├── Genesis\     → .md / .bin    (core: genesis_plus_gx)
+  ├── SegaCD\      → .chd / .bin   (core: genesis_plus_gx — needs bios: bios_CD_U.bin)
+  ├── 32X\         → .32x          (core: picodrive — needs 32X_M_BIOS.bin)
+  ├── GameGear\    → .gg           (core: genesis_plus_gx in GG mode)
+  ├── Saturn\      → .chd          (Mednafen Saturn — needs sega_101.bin / mpr-17933.bin)
+  ├── Dreamcast\   → .chd          (core: flycast — needs dc_boot.bin)
+  ├── GBA\         → .gba          (core: mgba)
+  ├── NGPC\        → .ngc          (core: mednafen_ngp)
+  └── NDS\         → .nds          (core: melonds)</pre>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 Sonic TV &amp; Anime</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',        this)">📋 All Series</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder', this)">🎯 Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','bytype',     this)">🏷️ By Continuity</button>
+      </div>
+
+      <!-- ALL SERIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Every animated Sonic series. Note that most exist in separate, non-game-canon continuities. Only Sonic X and Mania Adventures have meaningful game crossover.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE DiC ERA (1993–1999) ──</td></tr>
+          <tr class="fn-tv fn-highlight">
+            <td>1993</td><td>Sonic the Hedgehog (SatAM) <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-noncan">Alt. Canon</span></td>
+            <td>26 eps · 2 seasons</td><td>Archive.org / fan sites</td>
+            <td>Darker serialised plot. Freedom Fighters vs Robotnik's empire. Beloved by fans. Cancelled on a cliffhanger.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>1993</td><td>Adventures of Sonic the Hedgehog</td>
+            <td><span class="fn-tag fn-tag-noncan">Alt. Canon</span></td>
+            <td>65 eps</td><td>Archive.org</td>
+            <td>Comedy counterpart to SatAM. Scratch, Grounder, Robotnik's slapstick antics. Aired simultaneously but completely separate.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>1999</td><td>Sonic Underground</td>
+            <td><span class="fn-tag fn-tag-noncan">Alt. Canon</span></td>
+            <td>40 eps</td><td>Archive.org</td>
+            <td>Sonic has royal siblings who form a band. Musical numbers every episode. Cancelled before its planned ending.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── ANIME &amp; MODERN SERIES ──</td></tr>
+          <tr class="fn-anime fn-highlight">
+            <td>2003</td><td>Sonic X <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-noncan">Soft Canon</span></td>
+            <td>78 eps · 3 seasons</td><td>Jellyfin</td>
+            <td>TMS anime. Adapts SA1, SA2, Heroes arcs, then goes original with the Metarex saga. Watch JP version — dub censors plot content. S3 (26 eps) only aired in Japan.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2014</td><td>Sonic Boom</td>
+            <td><span class="fn-tag fn-tag-noncan">Boom Universe</span></td>
+            <td>104 eps · 2 seasons</td><td>Netflix (some regions)</td>
+            <td>Comedy-first. Self-aware humour, strong character writing. Best Sonic comedy show. Fully separate Boom universe.</td>
+          </tr>
+          <tr class="fn-web fn-highlight">
+            <td>2018</td><td>Sonic Mania Adventures <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-canon">Game Canon</span></td>
+            <td>6 shorts</td><td>SEGA YouTube</td>
+            <td>Official animated shorts bridging Mania and Forces. Wordless slapstick. Free on YouTube. Highly recommended.</td>
+          </tr>
+          <tr class="fn-web fn-skip">
+            <td>2019</td><td>Team Sonic Racing Overdrive</td>
+            <td><span class="fn-tag fn-tag-noncan">Promo</span></td>
+            <td>2 eps</td><td>SEGA YouTube</td>
+            <td>Promotional web series for Team Sonic Racing. Short and fun.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2022</td><td>Sonic Prime</td>
+            <td><span class="fn-tag fn-tag-noncan">Alt. Canon</span></td>
+            <td>24 eps · 3 seasons</td><td>Netflix</td>
+            <td>Sonic shatters the Paradox Prism and splinters reality. Dark, action-heavy CG. Netflix original. Strong design work.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended watch order if you want to experience Sonic animation alongside games.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>When to Watch</th><th>Why</th></tr>
+          <tr class="fn-tv">
+            <td>1</td><td>Sonic the Hedgehog (SatAM)</td>
+            <td>Any time — standalone continuity</td>
+            <td>The best classic-era Sonic show. Darker tone. Doesn't require game knowledge.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td>2</td><td>Sonic X (Seasons 1–2)</td>
+            <td>After Sonic Adventure 2</td>
+            <td>Adapts SA1 and SA2 arcs. Spoils both games' plots.</td>
+          </tr>
+          <tr class="fn-anime">
+            <td>3</td><td>Sonic X (Season 3)</td>
+            <td>After Sonic Heroes</td>
+            <td>The Metarex saga is original content but benefits from Heroes familiarity.</td>
+          </tr>
+          <tr class="fn-web">
+            <td>4</td><td>Sonic Mania Adventures</td>
+            <td>After Sonic Mania</td>
+            <td>Direct bridge between Mania and Forces. Spoils Mania's ending.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td>5</td><td>Sonic Boom</td>
+            <td>Any time — Boom universe</td>
+            <td>Comedy series. Great on its own terms. No game prerequisite.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td>6</td><td>Sonic Prime</td>
+            <td>After Sonic Frontiers</td>
+            <td>Thematically adjacent to Frontiers' multiverse ideas.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- BY CONTINUITY -->
+      <div class="fn-view" id="fn-tvanime-bytype">
+        <div class="fn-view-desc">Grouped by universe/continuity — Sonic has more separate cartoon continuities than almost any other franchise.</div>
+        <table class="fn-table">
+          <tr><th>Continuity</th><th>Series</th><th>Notes</th></tr>
+          <tr><td>DiC Slapstick (AoStH)</td><td>Adventures of Sonic the Hedgehog (1993)</td><td>Comedy. Separate from SatAM despite airing simultaneously.</td></tr>
+          <tr><td>DiC SatAM</td><td>Sonic SatAM (1993)</td><td>Dark serialised post-apocalyptic world. Different from all others.</td></tr>
+          <tr><td>DiC Underground</td><td>Sonic Underground (1999)</td><td>Royal family premise. Standalone from SatAM.</td></tr>
+          <tr><td>Game-Adjacent (Soft)</td><td>Sonic X (2003)</td><td>Adapts game events but is its own continuity. Japanese version preferred.</td></tr>
+          <tr><td>Game Canon</td><td>Sonic Mania Adventures (2018)</td><td>SEGA-official. Fits between Mania and Forces.</td></tr>
+          <tr><td>Boom Universe</td><td>Sonic Boom (2014)</td><td>Alternate universe with redesigned characters. Tied to the Boom games.</td></tr>
+          <tr><td>Netflix Original</td><td>Sonic Prime (2022)</td><td>Multiverse story. Self-contained. Separate from game continuity.</td></tr>
+          <tr><td>Movie Universe</td><td>Knuckles (2024 series)</td><td>Set in the Paramount film universe between Movies 2 and 3.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Anime\Sonic\
+  └── Sonic X (2003)\
+      ├── Season 01\
+      └── Season 03\   ← Japanese-only season, separate import
+
+D:\Media\TV\Sonic\
+  ├── Sonic the Hedgehog (1993)\   ← SatAM
+  ├── Sonic Boom (2014)\
+  ├── Sonic Prime (2022)\
+  └── Knuckles (2024)\</pre>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Sonic Movies</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',        this)">📋 All Films</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder', this)">🎯 Watch Order</button>
+      </div>
+
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">All Sonic films — theatrical, OVA, and direct-to-video.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Where</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-skip">
+            <td>1996</td><td>Sonic the Hedgehog: The Movie (OVA)</td>
+            <td>Japanese OVA</td><td>Archive.org / physical</td>
+            <td>Two-part Japanese OVA. High production quality. Sonic vs Metal Sonic. Released US 1999. Non-canon but beloved.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2020</td><td>Sonic the Hedgehog <span class="fn-star">⭐</span></td>
+            <td>Live-action/CG</td><td>Paramount+ / Jellyfin</td>
+            <td>The redesign controversy, Jim Carrey's Eggman, and a genuinely fun family film. Huge box office. Start of the Paramount universe.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2022</td><td>Sonic the Hedgehog 2</td>
+            <td>Live-action/CG</td><td>Paramount+ / Jellyfin</td>
+            <td>Knuckles and Tails introduced. Master Emerald MacGuffin. Bigger and louder. Strong fan reception.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2024</td><td>Sonic the Hedgehog 3</td>
+            <td>Live-action/CG</td><td>Paramount+ / Jellyfin</td>
+            <td>Shadow introduced as the antagonist. Loosely based on SA2 origin story. Keanu Reeves as Shadow.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2024</td><td>Knuckles (Paramount+ Series)</td>
+            <td>Live-action spinoff</td><td>Paramount+</td>
+            <td>6-episode miniseries set between Movies 2 and 3. Buddy comedy with Wade Whipple in Reno. Knuckles teaching the way of the echidna warrior.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">Paramount universe watch order (chronological by in-universe events).</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Year</th><th>Notes</th></tr>
+          <tr class="fn-movie"><td>1</td><td>Sonic the Hedgehog</td><td>2020</td><td>Start here. Sonic arrives on Earth, meets Tom Wachowski, Eggman's debut.</td></tr>
+          <tr class="fn-movie"><td>2</td><td>Sonic the Hedgehog 2</td><td>2022</td><td>Knuckles and Tails. Master Emerald. Super Sonic.</td></tr>
+          <tr class="fn-tv"><td>3</td><td>Knuckles (Series)</td><td>2024</td><td>Set between movies 2 and 3. Watch before Movie 3.</td></tr>
+          <tr class="fn-movie"><td>4</td><td>Sonic the Hedgehog 3</td><td>2024</td><td>Shadow. References events from Knuckles series.</td></tr>
+          <tr class="fn-movie fn-skip"><td>–</td><td>Sonic OVA (1996)</td><td>1996/1999</td><td>Separate continuity entirely. Watch any time as a standalone.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\Sonic\
+  ├── Sonic the Hedgehog (2020)\
+  ├── Sonic the Hedgehog 2 (2022)\
+  └── Sonic the Hedgehog 3 (2024)\
+
+D:\Media\Anime\Sonic OVA (1996)\   ← classify as anime, not film</pre>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — COMICS & BOOKS
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-books">
+  <div class="section">
+    <div class="section-title">📖 Comics &amp; Print Media</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('books','all',       this)">📋 All Publications</button>
+        <button class="fn-view-btn"        onclick="fnView('books','reading',   this)">🎯 Reading Order</button>
+        <button class="fn-view-btn"        onclick="fnView('books','byuniverse',this)">🗺️ By Universe</button>
+      </div>
+
+      <div class="fn-view active" id="fn-books-all">
+        <div class="fn-view-desc">Sonic has had three major comic publishers across three decades. None of the Western comics are game-canon, but IDW is the closest.</div>
+        <table class="fn-table">
+          <tr><th>Years</th><th>Title</th><th>Publisher</th><th>Canon?</th><th>Issues</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── WESTERN COMICS ──</td></tr>
+          <tr class="fn-book fn-highlight">
+            <td>1993–2017</td><td>Sonic the Hedgehog (Archie) <span class="fn-star">⭐</span></td>
+            <td>Archie Comics</td>
+            <td><span class="fn-tag fn-tag-noncan">Non-canon</span></td>
+            <td>290+ issues</td>
+            <td>The original long-run comic. Introduced Sally, Bunnie, Antoine, NICOLE, Naugus, and dozens of original characters. Universe wiped and rebooted in 2013 after Ken Penders lawsuit. Extraordinary lore depth.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>1993–2017</td><td>Sonic the Hedgehog Universe (Archie)</td>
+            <td>Archie Comics</td>
+            <td><span class="fn-tag fn-tag-noncan">Non-canon</span></td>
+            <td>96 issues</td>
+            <td>Sister series to main Archie run. Features extended cast storylines.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>1997–2012</td><td>Knuckles the Echidna / Sonic X (Archie)</td>
+            <td>Archie Comics</td>
+            <td><span class="fn-tag fn-tag-noncan">Non-canon</span></td>
+            <td>~50 issues</td>
+            <td>Multiple Archie spin-off series. Includes Knuckles solo, Sonic X adaptation, Super Specials, and Archives reprintings.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>1993–2002</td><td>Sonic the Comic (Fleetway)</td>
+            <td>Fleetway (UK)</td>
+            <td><span class="fn-tag fn-tag-noncan">Non-canon</span></td>
+            <td>223 issues</td>
+            <td>UK publication. Radically different interpretations — Super Sonic is a separate evil entity, Robotnik is terrifyingly competent, Sonic has a complex supporting cast. Entirely distinct from Archie.</td>
+          </tr>
+          <tr class="fn-book fn-highlight">
+            <td>2018–present</td><td>Sonic the Hedgehog (IDW) <span class="fn-star">⭐</span></td>
+            <td>IDW Publishing</td>
+            <td><span class="fn-tag fn-tag-canon">Game-Adjacent</span></td>
+            <td>70+ ongoing</td>
+            <td>Current comic. Picks up after Sonic Forces. Metal Virus saga, Surge and Kit, Restoration vs Eggman Empire. Closest to game continuity. Ongoing as of 2026.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2022</td><td>Sonic: Scrapnik Island (IDW)</td>
+            <td>IDW Publishing</td>
+            <td><span class="fn-tag fn-tag-canon">Game-Adjacent</span></td>
+            <td>4 issues</td>
+            <td>Standalone mini-series. Sonic and Tails discover a forgotten island of decommissioned robots.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2022</td><td>Sonic: Imposter Syndrome (IDW)</td>
+            <td>IDW Publishing</td>
+            <td><span class="fn-tag fn-tag-canon">Game-Adjacent</span></td>
+            <td>4 issues</td>
+            <td>Introduces Surge and Kit — dark counterparts to Sonic and Tails created by Starline.</td>
+          </tr>
+          <tr class="fn-book">
+            <td>2024</td><td>Sonic: Fang the Hunter (IDW)</td>
+            <td>IDW Publishing</td>
+            <td><span class="fn-tag fn-tag-canon">Game-Adjacent</span></td>
+            <td>4 issues</td>
+            <td>Nack/Fang the Weasel returns to IDW continuity with his own mini-series.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── MANGA &amp; BOOKS ──</td></tr>
+          <tr class="fn-book fn-skip">
+            <td>1992–1994</td><td>Sonic the Hedgehog (Shogakukan Manga)</td>
+            <td>Shogakukan (JP)</td>
+            <td><span class="fn-tag fn-tag-noncan">Non-canon</span></td>
+            <td>3 volumes</td>
+            <td>Japanese manga by Sango Norimoto. Sonic's family and daily life in a more slice-of-life style. Japan only.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>2012</td><td>Sonic the Comic Encyclopedia</td>
+            <td>Archie Comics</td>
+            <td><span class="fn-tag fn-tag-noncan">Reference</span></td>
+            <td>1 vol</td>
+            <td>Reference compendium for the entire Archie Sonic universe lore.</td>
+          </tr>
+          <tr class="fn-book fn-skip">
+            <td>2016</td><td>Sonic Mega Drive (Archie)</td>
+            <td>Archie Comics</td>
+            <td><span class="fn-tag fn-tag-noncan">Non-canon</span></td>
+            <td>2 issues</td>
+            <td>Post-reboot Archie story in a classic-game-inspired continuity. Archie's last creative gasp before losing the license.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-books-reading">
+        <div class="fn-view-desc">Where to start if you want to read Sonic comics for the first time.</div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Series</th><th>Entry Point</th><th>Why</th></tr>
+          <tr class="fn-book fn-highlight"><td>1</td><td>IDW Sonic #1 (2018)</td><td>Issue #1 — clean start after Forces</td><td>Most accessible. Game-adjacent. No prior comic knowledge needed.</td></tr>
+          <tr class="fn-book fn-highlight"><td>2</td><td>Archie Sonic #1 (1993)</td><td>Issue #1 or Sonic Archives Vol 1</td><td>The landmark run. Best read alongside the classic games. Pre-reboot is richer but sprawling.</td></tr>
+          <tr class="fn-book"><td>3</td><td>Sonic the Comic (Fleetway) #1</td><td>Issue #1</td><td>Brilliant UK alternative. Evil Super Sonic is a highlight. Collected in digital archives by fans.</td></tr>
+          <tr class="fn-book fn-skip"><td>4</td><td>Archie Post-Reboot (#252+)</td><td>Issue #252</td><td>If you want Archie after the lawsuit wipe. Less beloved than pre-reboot but still solid.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-books-byuniverse">
+        <div class="fn-view-desc">The three major Sonic comic universes at a glance.</div>
+        <table class="fn-table">
+          <tr><th>Universe</th><th>Publisher</th><th>Era</th><th>Key Characters</th><th>Tone</th></tr>
+          <tr><td>Archie (Pre-Reboot)</td><td>Archie Comics</td><td>1993–2013</td><td>Sally Acorn, Bunnie Rabbot, Antoine, NICOLE, Naugus, Hershey, Scourge</td><td>Adventure/drama. Grew increasingly complex with long-running plotlines.</td></tr>
+          <tr><td>Archie (Post-Reboot)</td><td>Archie Comics</td><td>2013–2017</td><td>Streamlined cast — closer to game roster</td><td>Simpler, more game-aligned after the reboot. Ended due to legal reasons.</td></tr>
+          <tr><td>Fleetway</td><td>Fleetway (UK)</td><td>1993–2002</td><td>Amy, Tails, Knuckles, Johnny Lightfoot, Porker Lewis, Tekno</td><td>Dark, episodic, distinctly British. Evil Super Sonic as a separate being.</td></tr>
+          <tr><td>IDW</td><td>IDW Publishing</td><td>2018–present</td><td>Tangle, Whisper, Jewel, Surge, Kit, Belle</td><td>Game-adjacent. Action/character drama. Introduces great new characters.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Channel Filler Content</div>
+    <div class="card">
+      <div class="card-title">Sonic Filler for Tunarr</div>
+      <p style="font-size:.84rem;line-height:1.7;margin-bottom:14px">Short clips, bumpers, trailers, and documentaries to use as interstitial content on the Sonic Tunarr channel.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:14px">
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(91,141,217,.15);color:#5b8dd9;border:1px solid rgba(91,141,217,.3)">Trailer</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">Sonic Frontiers — Various Trailers</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">2022 · ~2 min each · SEGA YouTube</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Cinematic trailers for Frontiers, including the atmospheric "Convergence" and gameplay reveals. Good channel openers.</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--text-dim)">🔗 SEGA YouTube channel</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(78,205,196,.12);color:#4ecdc4;border:1px solid rgba(78,205,196,.3)">Music</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">Sonic OST Compilations / "Live &amp; Learn" (SA2)</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">Various · ~4 min · YouTube</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Iconic vocal tracks: Live &amp; Learn (SA2), His World (Sonic 06), Endless Possibility (Unleashed), Escape from the City (SA2). Strong end-of-block closers.</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--text-dim)">🔗 YouTube — official SEGA uploads</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(224,133,92,.12);color:#e0855c;border:1px solid rgba(224,133,92,.3)">Documentary</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">Sonic the Hedgehog Documentary (YouTube)</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">Various · 20–40 min · YouTube</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Multiple retrospective docs covering the history of Sonic from Genesis to Frontiers. Search "Sonic documentary" on YouTube for 2M+ view retrospectives by channels like Slopes Game Room.</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--text-dim)">🔗 YouTube search: "sonic hedgehog history documentary"</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(200,168,75,.12);color:var(--accent);border:1px solid rgba(200,168,75,.3)">Hype</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">Sonic Mania: Development Diary</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">2017 · ~8 min total · SEGA YouTube</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">Behind-the-scenes development diaries showing Christian Whitehead, PagodaWest, and Headcannon building Mania. Excellent context filler before Mania episodes.</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--text-dim)">🔗 SEGA YouTube</div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:7px;display:inline-block;background:rgba(76,175,80,.12);color:#81c784;border:1px solid rgba(76,175,80,.3)">Bumper</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text-bright);margin-bottom:4px">Sonic Mania Adventures (Full Series)</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--text-dim);margin-bottom:6px">2018 · ~3 min each · SEGA YouTube</div>
+          <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6">The 6 official animated shorts are ideal interstitial bumpers. Wordless, self-contained, high quality. Add all six as flex content.</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--text-dim)">🔗 youtube.com/@sega — "Mania Adventures" playlist</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📺 Adding to Tunarr</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.8">
+        <li>Download clips → store in a <code>Sonic Filler</code> Jellyfin collection</li>
+        <li>Mania Adventures shorts → add as <strong>Flex content</strong> (3 min duration, between episodes)</li>
+        <li>Game trailers → use as channel openers before a game-themed block</li>
+        <li>OST music videos → end-of-block closers</li>
+        <li>Documentary segments → 20–40 min filler blocks between episode runs</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">🌀 A History of Sonic the Hedgehog</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Overview</div>
+      <p style="font-size:.84rem;line-height:1.7">Sonic the Hedgehog was created in 1991 by Yuji Naka, Naoto Ohshima, and Hirokazu Yasuhara as SEGA's answer to Nintendo's Mario. Designed to be fast and attitude-forward, Sonic became SEGA's mascot and one of the bestselling video game franchises in history, with over 1.5 billion units sold across games, merchandise, and media. The franchise is as known for its highs — the Genesis trilogy, Adventure 2, Colors, Mania, Frontiers — as for its controversies and misfires.</p>
+    </div>
+
+    <div class="fn-timeline">
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1991–1994 — The Genesis Trilogy</div>
+        <div class="fn-era-title">Birth of an Icon</div>
+        <div class="fn-era-body">Yuji Naka and Naoto Ohshima designed Sonic specifically to compete with Mario on the NES. His speed was a technical showcase for the Genesis's "BLAST PROCESSING" marketing. The original game sold 15 million copies. Sonic 2 introduced Tails and co-op play. Sonic 3 &amp; Knuckles — designed as one game, split for manufacturing reasons — remains the pinnacle of the classic formula. Michael Jackson reportedly contributed to Sonic 3's music, though this was never officially confirmed.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1993–1999 — The Media Explosion</div>
+        <div class="fn-era-title">Three Cartoons, Countless Comics</div>
+        <div class="fn-era-body">At Sonic's peak popularity, three simultaneous animated series aired — SatAM, Adventures of Sonic, and later Sonic Underground — each with entirely different tones and casts. Archie Comics launched an ongoing series in 1993 that would run for 290+ issues. The UK got its own Fleetway comic with radically different interpretations. By the mid-90s, Sonic was a cultural presence rivalling Disney properties in merchandise reach.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1998–2002 — The Dreamcast Leap</div>
+        <div class="fn-era-title">Sonic Goes 3D</div>
+        <div class="fn-era-body">Sonic Adventure was a landmark launch title for the Dreamcast — the first fully 3D mainline Sonic, featuring six character campaigns, a hub world, and the Chao Garden. It sold over 2.5 million copies. Sonic Adventure 2 (2001) introduced Shadow the Hedgehog, expanded the Chao system, and is considered by many fans to be the best 3D Sonic game. Both were later ported to GameCube and PC, cementing their legacy.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2003–2006 — The Dark Age Begins</div>
+        <div class="fn-era-title">Drift and Disaster</div>
+        <div class="fn-era-body">Sonic Heroes introduced team-based gameplay but felt bloated. Shadow the Hedgehog gave Shadow his own game complete with guns and a branching "good vs evil" narrative — widely mocked, but important to the canon. Sonic 06, intended as a grand anniversary reboot, shipped in a broken state and became infamous for bugs, lengthy loading times, and a controversial plot. It effectively ended the Adventure-era design philosophy.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2008–2013 — The Renaissance</div>
+        <div class="fn-era-title">Boost, Colors, and Redemption</div>
+        <div class="fn-era-body">Sonic Unleashed (2008) split its runtime between beloved boost-speed daytime stages and divisive nighttime werehog brawling — but the daytime gameplay pointed toward the future. Sonic Colors (2010) refined the boost formula, introduced the Wisps, and featured unusually witty writing. Sonic Generations (2011) brought back Classic Sonic alongside Modern Sonic for a greatest-hits celebration of the franchise's first 20 years, earning near-universal acclaim.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2014–2016 — The Boom Detour</div>
+        <div class="fn-era-title">Alternate Universe, Mixed Results</div>
+        <div class="fn-era-body">SEGA launched the Sonic Boom sub-brand — alternate-universe redesigns of the core cast, two video games (Rise of Lyric and Shattered Crystal), and a 104-episode TV series. The games were critically panned, particularly Rise of Lyric. The TV show, however, was a genuine success — a self-aware comedy with sharp writing that found a devoted following entirely independent of the games.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2017–2020 — Fan Power</div>
+        <div class="fn-era-title">Mania, Films, and the IDW Era</div>
+        <div class="fn-era-body">Sonic Mania — developed by longtime fan modders Christian Whitehead, PagodaWest, and Headcannon — became the most critically acclaimed Sonic game in over two decades. It proved fan involvement could revitalise the franchise. The Paramount films (2020–) became massive commercial successes, reaching audiences far beyond the game fanbase. IDW Publishing launched a new comic series, directly following Sonic Forces and building original characters like Tangle, Whisper, Surge, and Kit.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2022–Present — Open World and the Long Game</div>
+        <div class="fn-era-title">Frontiers and the New Direction</div>
+        <div class="fn-era-body">Sonic Frontiers (2022) launched the franchise's first open-world game, set against the mystery-laden Starfall Islands. It received mixed-to-positive reviews but sold well and is considered a pivot point for the franchise's future. The Final Horizon DLC deepened the story significantly. Sonic x Shadow Generations (2024) revisited the acclaimed Generations formula while adding substantial Shadow-focused new content, setting up Shadow's arc for future games. A new mainline Sonic game ("Project: Sonic") is in development.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What counts as canon?</div>
+      <p style="font-size:.84rem;line-height:1.7">SEGA has never published an official canon document, and the franchise's canon is notoriously loose. The modern game series (Sonic 1 through Frontiers) is generally treated as the "main" continuity. Cartoons, comics, and films are all separate universes.</p>
+      <table style="margin-top:12px;width:100%;border-collapse:collapse;font-size:.8rem">
+        <tr><th style="text-align:left;padding:6px 8px;color:#4da6ff;font-family:'Share Tech Mono',monospace;font-size:.68rem;text-transform:uppercase;border-bottom:2px solid var(--border)">Property</th><th style="text-align:left;padding:6px 8px;color:#4da6ff;font-family:'Share Tech Mono',monospace;font-size:.68rem;text-transform:uppercase;border-bottom:2px solid var(--border)">Canon Status</th><th style="text-align:left;padding:6px 8px;color:#4da6ff;font-family:'Share Tech Mono',monospace;font-size:.68rem;text-transform:uppercase;border-bottom:2px solid var(--border)">Notes</th></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Main game series (Sonic 1–Frontiers)</td><td style="padding:6px 8px">✅ Canon</td><td style="padding:6px 8px">SEGA's primary continuity</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">IDW Comics</td><td style="padding:6px 8px">⚠️ Game-adjacent</td><td style="padding:6px 8px">Picks up post-Forces but is not referenced by games</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Sonic X (anime)</td><td style="padding:6px 8px">⚠️ Soft canon / alternate</td><td style="padding:6px 8px">Adapts game events in its own universe</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Mania Adventures (web shorts)</td><td style="padding:6px 8px">✅ Canon</td><td style="padding:6px 8px">Official SEGA production bridging Mania/Forces</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">SatAM / AoStH / Underground</td><td style="padding:6px 8px">❌ Non-canon</td><td style="padding:6px 8px">Entirely separate DiC cartoon universes</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Archie Comics</td><td style="padding:6px 8px">❌ Non-canon</td><td style="padding:6px 8px">Own universe. Pre-reboot Archie is wiped/inaccessible legally</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Fleetway Comics</td><td style="padding:6px 8px">❌ Non-canon</td><td style="padding:6px 8px">UK continuity, entirely separate</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Paramount Films</td><td style="padding:6px 8px">❌ Non-canon</td><td style="padding:6px 8px">Film universe. Inspired by but separate from games</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Sonic Boom (games/TV)</td><td style="padding:6px 8px">❌ Non-canon</td><td style="padding:6px 8px">Official alternate universe, explicitly separate</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:6px 8px">Sonic 06</td><td style="padding:6px 8px">⚠️ Retconned</td><td style="padding:6px 8px">Events erased in-universe by the ending; treated as non-canon by SEGA</td></tr>
+        <tr><td style="padding:6px 8px">Sonic Chronicles (BioWare)</td><td style="padding:6px 8px">❌ Non-canon</td><td style="padding:6px 8px">Legally removed from digital stores; SEGA has distanced itself</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Notable Facts &amp; Trivia</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.85rem;line-height:1.9">
+        <li>Sonic was originally designed with fangs and a human girlfriend named "Madonna" — both were cut before release to appeal to a broader audience.</li>
+        <li>The Sonic 3 soundtrack controversy: multiple tracks are nearly identical to Michael Jackson songs. Jackson is believed to have contributed, but a contract dispute led to his credit being removed before release.</li>
+        <li>Sonic CD has two separate soundtracks: the Japanese/European version by Naofumi Hataya (more ambient/jazz) and the US version by Spencer Nilsen. The 2011 remaster lets you choose between them.</li>
+        <li>Sonic Mania was developed almost entirely by fans before SEGA officially greenlit it. Developer Christian Whitehead had already produced fan remasters of Sonic 1, 2, and CD that SEGA sold commercially.</li>
+        <li>The Archie Sonic Comics lawsuit (Ken Penders v. Archie) was one of the most significant IP battles in comics history — Penders successfully reclaimed characters he created, leading to a continuity-destroying reboot of the entire universe.</li>
+        <li>Sonic is the first video game character to appear as a balloon in the Macy's Thanksgiving Day Parade (1993).</li>
+        <li>At peak Genesis dominance, SEGA held 65% of the 16-bit console market in North America — largely driven by Sonic's popularity.</li>
+        <li>The Sonic the Hedgehog 2 release date — "Sonic 2sday" (November 24, 1992) — was one of gaming's first coordinated global launch events.</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+function fnView(tabGroup, viewId, btn) {
+  const prefix = 'fn-' + tabGroup + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.fn-view-nav').querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
