@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Legend of Zelda — Franchise Navigator</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   PAGE HEADER
+════════════════════════════════════════════════════ */
+.page-header {
+  display: flex; align-items: flex-start; gap: 18px;
+  padding: 24px 0 18px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
+}
+.page-icon { font-size: 2.6rem; line-height: 1; flex-shrink: 0; }
+.page-header h1 {
+  font-family: 'Cinzel', serif; font-size: 1.55rem;
+  color: #5dab47; margin: 0 0 4px; letter-spacing: .04em;
+}
+.subtitle {
+  font-family: 'Share Tech Mono', monospace; font-size: .7rem;
+  color: var(--text-dim); margin-bottom: 8px; letter-spacing: .04em;
+}
+.desc { font-size: .84rem; line-height: 1.7; color: var(--text); margin: 0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #5dab47; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   MAIN TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.fn-tab-btn.active { color: #5dab47; border-bottom-color: #5dab47; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   VIEW PILLS
+════════════════════════════════════════════════════ */
+.fn-view-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  padding: 5px 13px; border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); color: var(--text-dim); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(93,171,71,.15); border-color: #5dab47; color: #5dab47; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem; color: var(--text-dim); margin-bottom: 12px;
+  line-height: 1.6; border-left: 3px solid #5dab47; padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3); color: #5dab47;
+  font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .06em; padding: 7px 10px;
+  text-align: left; border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top; line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+.fn-arc-row td {
+  background: rgba(93,171,71,.07) !important; color: #5dab47;
+  font-size: .69rem; font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: .08em; padding: 5px 10px;
+  border-top: 1px solid rgba(93,171,71,.25) !important;
+  border-bottom: 1px solid rgba(93,171,71,.15) !important;
+}
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic; color: var(--text-dim); font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+.fn-highlight td { background: rgba(93,171,71,.06) !important; }
+.fn-skip { opacity: .65; }
+.fn-star { color: #5dab47; }
+
+/* Platform stripes */
+.fn-nes    td:first-child { border-left: 3px solid #e57373; }
+.fn-snes   td:first-child { border-left: 3px solid #9575cd; }
+.fn-gb     td:first-child { border-left: 3px solid #aed581; }
+.fn-gbc    td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-wii    td:first-child { border-left: 3px solid #80cbc4; }
+.fn-wiiu   td:first-child { border-left: 3px solid #26c6da; }
+.fn-gc     td:first-child { border-left: 3px solid #a1887f; }
+.fn-pc     td:first-child { border-left: 3px solid #78909c; }
+.fn-multi  td:first-child { border-left: 3px solid #b0bec5; }
+
+/* Tags */
+.fn-tag {
+  display: inline-block; font-family: 'Share Tech Mono', monospace;
+  font-size: .6rem; letter-spacing: .04em; text-transform: uppercase;
+  padding: 1px 5px; border-radius: 2px; margin-right: 3px; white-space: nowrap;
+}
+.fn-tag-yes     { background: rgba(93,171,71,.15);  color: #7cb86a; border: 1px solid rgba(93,171,71,.4); }
+.fn-tag-no      { background: rgba(120,120,120,.12); color: #909090; border: 1px solid rgba(120,120,120,.3); }
+.fn-tag-opt     { background: rgba(200,168,75,.12);  color: var(--accent); border: 1px solid rgba(200,168,75,.3); }
+.fn-tag-jponly  { background: rgba(224,133,92,.12);  color: #e0855c; border: 1px solid rgba(224,133,92,.3); }
+.fn-tag-varies  { background: rgba(78,205,196,.12);  color: #4ecdc4; border: 1px solid rgba(78,205,196,.3); }
+.fn-tag-defunct { background: rgba(239,83,80,.12);   color: #ef5350; border: 1px solid rgba(239,83,80,.3); }
+
+/* Timeline */
+.fn-timeline { border-left: 2px solid rgba(93,171,71,.4); margin-left: 12px; padding-left: 24px; }
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #5dab47; border: 3px solid var(--bg);
+}
+.fn-era-year { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: .1em; color: #5dab47; text-transform: uppercase; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+/* Callout */
+.callout { display: flex; gap: 12px; padding: 12px 14px; border-radius: 4px; margin: 12px 0; border-left: 3px solid; font-size: .82rem; line-height: 1.6; }
+.callout-info { background: rgba(93,171,71,.06); border-color: #5dab47; }
+.callout-warn { background: rgba(200,168,75,.06); border-color: var(--accent); }
+.callout-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-icon">🗡️</div>
+  <div>
+    <h1>The Legend of Zelda</h1>
+    <div class="subtitle">// NES · SNES · N64 · GBA · DS · 3DS · Wii · WiiU · Switch · PC · Anime · Manga //</div>
+    <p class="desc">Nintendo's legendary action-adventure series spanning 40 years of Hyrule, dungeons, and the eternal struggle between Link, Zelda, and Ganon(dorf). One of the most critically acclaimed franchises in gaming history, with entries across every Nintendo platform and a timeline so complex Nintendo published an official book to explain it.</p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">29</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">TV / Anime</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1</div><div class="fn-stat-label">Manga Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1986</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- MAIN TABS -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 The Legend of Zelda Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','chrono',    this)">🕰️ Timeline Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+      </div>
+
+      <!-- RELEASE ORDER -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          All mainline games, spinoffs, and media in real-world release order. ⭐ = recommended entry points.
+          Gold rows = standout entries. Faded rows = optional, spinoff, or non-canon. Purple rows = TV/anime/manga watch points.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Emulator / Core</th><th>Mobile?</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="6">── The Classic Era (1986–1992) ──</td></tr>
+          <tr class="fn-nes">
+            <td>1986</td>
+            <td>The Legend of Zelda</td>
+            <td>NES</td>
+            <td>fceumm</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>NES version or FDS original. GBA port also playable.</td>
+          </tr>
+          <tr class="fn-nes fn-skip">
+            <td>1987</td>
+            <td>Zelda II: The Adventure of Link</td>
+            <td>NES</td>
+            <td>fceumm</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Optional — most skip it. Worth trying for curiosity.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>📺 The Legend of Zelda (TV, 1989)</strong> (1989, 13 eps) — 13-episode Saturday morning cartoon. Link is annoying, Zelda shoots arrows. Famous for 'Well excuuuse me, princess!' Campy fun. Watch before or after ALttP.</td></tr>
+          <tr class="fn-snes fn-highlight">
+            <td>1991</td>
+            <td>A Link to the Past <span class="fn-star">⭐</span></td>
+            <td>SNES</td>
+            <td>snes9x</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Essential. GBA port (Four Swords bundle) also recommended.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="6">── The Dark Ages &amp; Handheld Experiments (1993–1997) ──</td></tr>
+          <tr class="fn-gb">
+            <td>1993</td>
+            <td>Link's Awakening (GB)</td>
+            <td>GB</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Remake available on Switch (2019). Either version is great.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>1993</td>
+            <td>Zelda: The Wand of Gamelon</td>
+            <td>PC</td>
+            <td>Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> CD-i only — emulate via Nuvee/OpenMSX. Meme value only.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>1993</td>
+            <td>Link: The Faces of Evil</td>
+            <td>PC</td>
+            <td>Native</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> CD-i only. Non-canon curiosity.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Zelda: The Wand of Gamelon / Faces of Evil (cartoon cutscenes)</strong> (1993, 2 eps) — The infamous CD-i animated cutscenes. Meme origin point for the entire YouTube Poop era. Watch on YouTube — not worth emulating the full games just for these.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📖 <strong>Akira Himekawa Zelda Manga (various)</strong> (1997, 19 vols) — Official manga adaptations of OoT, MM, TWW, TP, SS, ALttP, and others by duo Akira Himekawa. High quality Nintendo-approved comics. Published by Viz Media in English. Collected in box sets.</td></tr>
+          <tr class="fn-arc-row"><td colspan="6">── The N64 Golden Age (1998–2001) ──</td></tr>
+          <tr class="fn-gc fn-highlight">
+            <td>1998</td>
+            <td>Ocarina of Time <span class="fn-star">⭐</span></td>
+            <td>GC/PC</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> Essential. GC version (Master Quest) or Citra (3DS remake) recommended over N64.</td>
+          </tr>
+          <tr class="fn-gc">
+            <td>2000</td>
+            <td>Majora's Mask</td>
+            <td>GC/PC</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>3DS remake is excellent — adds saving improvements. GC version also fine.</td>
+          </tr>
+          <tr class="fn-gbc">
+            <td>2001</td>
+            <td>Oracle of Ages</td>
+            <td>GBC</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Play both oracles together for the full story.</td>
+          </tr>
+          <tr class="fn-gbc">
+            <td>2001</td>
+            <td>Oracle of Seasons</td>
+            <td>GBC</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Play alongside Ages. Link them for the true ending.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="6">── The GameCube / GBA Era (2002–2006) ──</td></tr>
+          <tr class="fn-gba fn-skip">
+            <td>2002</td>
+            <td>Four Swords</td>
+            <td>GBA</td>
+            <td>mGBA</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Skip unless you have a group setup. Non-canonical spinoff feel.</td>
+          </tr>
+          <tr class="fn-gc">
+            <td>2002</td>
+            <td>The Wind Waker <span class="fn-star">⭐</span></td>
+            <td>GC/WiiU</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> WiiU HD version recommended — fixes the Triforce shard fetch quest significantly.</td>
+          </tr>
+          <tr class="fn-gc fn-skip">
+            <td>2004</td>
+            <td>Four Swords Adventures</td>
+            <td>GC</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Optional. Interesting experiment but not essential.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2004</td>
+            <td>The Minish Cap</td>
+            <td>GBA</td>
+            <td>mGBA</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Great GBA Zelda — well worth playing.</td>
+          </tr>
+          <tr class="fn-wii">
+            <td>2006</td>
+            <td>Twilight Princess <span class="fn-star">⭐</span></td>
+            <td>Wii/GC/WiiU</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> WiiU HD version fixes some pacing. GC version has correct (non-mirrored) world.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="6">── The Wii &amp; DS Era (2007–2011) ──</td></tr>
+          <tr class="fn-nds">
+            <td>2007</td>
+            <td>Phantom Hourglass</td>
+            <td>NDS</td>
+            <td>melonDS</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Worth playing as WW follow-up. Touch controls hold up reasonably.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>2009</td>
+            <td>Spirit Tracks</td>
+            <td>NDS</td>
+            <td>melonDS</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Underrated. Zelda's role makes it memorable.</td>
+          </tr>
+          <tr class="fn-wii">
+            <td>2011</td>
+            <td>Skyward Sword</td>
+            <td>Wii/Switch</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Switch HD (2021) is the definitive version — button controls fix the divisive motion gameplay.</td>
+          </tr>
+          <tr class="fn-3ds">
+            <td>2011</td>
+            <td>Ocarina of Time 3D</td>
+            <td>3DS</td>
+            <td>Citra</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Best way to play OoT today. Emulate via Citra.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="6">── The 3DS Era (2012–2016) ──</td></tr>
+          <tr class="fn-3ds fn-highlight">
+            <td>2013</td>
+            <td>A Link Between Worlds <span class="fn-star">⭐</span></td>
+            <td>3DS</td>
+            <td>Citra</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Essential. Play after ALttP for full effect.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2014</td>
+            <td>Hyrule Warriors</td>
+            <td>Wii/WiiU/3DS/Switch/PC</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Definitive Edition on Switch includes all DLC.</td>
+          </tr>
+          <tr class="fn-3ds fn-skip">
+            <td>2015</td>
+            <td>Tri Force Heroes</td>
+            <td>3DS</td>
+            <td>Citra</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Skip unless you have a group. Online servers still functional as of 2024.</td>
+          </tr>
+          <tr class="fn-3ds">
+            <td>2015</td>
+            <td>Majora's Mask 3D</td>
+            <td>3DS</td>
+            <td>Citra</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Citra emulation works well. Recommended for newcomers.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>The Legend of Zelda (Netflix — canceled)</strong> (2015) — Nintendo and Netflix were reportedly developing a live-action Zelda series, described as 'Game of Thrones for families.' Canceled before announcement. Never produced. Listed as franchise history curiosity.</td></tr>
+          <tr class="fn-arc-row"><td colspan="6">── The Switch Era (2017–Present) ──</td></tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2017</td>
+            <td>Breath of the Wild <span class="fn-star">⭐</span></td>
+            <td>Switch/WiiU</td>
+            <td>Yuzu/Ryujinx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Essential. Switch version is definitive. DLC (Champion's Ballad) adds a tough final dungeon.</td>
+          </tr>
+          <tr class="fn-switch">
+            <td>2019</td>
+            <td>Link's Awakening (Switch)</td>
+            <td>Switch</td>
+            <td>Yuzu/Ryujinx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Recommended over the original for first-timers.</td>
+          </tr>
+          <tr class="fn-switch fn-skip">
+            <td>2019</td>
+            <td>Cadence of Hyrule</td>
+            <td>Switch</td>
+            <td>Yuzu/Ryujinx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Great short experience. Unique rhythm mechanic.</td>
+          </tr>
+          <tr class="fn-switch fn-skip">
+            <td>2020</td>
+            <td>Hyrule Warriors: Age of Calamity</td>
+            <td>Switch</td>
+            <td>Yuzu/Ryujinx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Good if you enjoyed BotW's story. Musou gameplay — very different from mainline.</td>
+          </tr>
+          <tr class="fn-switch fn-highlight">
+            <td>2023</td>
+            <td>Tears of the Kingdom <span class="fn-star">⭐</span></td>
+            <td>Switch</td>
+            <td>Yuzu/Ryujinx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Essential. Best on Switch OLED. One of the highest-rated games ever made.</td>
+          </tr>
+          <tr class="fn-switch">
+            <td>2024</td>
+            <td>Echoes of Wisdom</td>
+            <td>Switch</td>
+            <td>Yuzu/Ryujinx</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>New 2024 release. First true Zelda-as-playable mainline entry.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- TIMELINE / CHRONO ORDER -->
+      <div class="fn-view" id="fn-library-chrono">
+        <div class="fn-view-desc">
+          In-universe chronological order per the official Hyrule Historia and Nintendo Encyclopedia. The timeline splits into three branches after Ocarina of Time. BotW/TotK are considered a convergence point.
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">📖</div>
+          <div>Nintendo published the official timeline in <strong>Hyrule Historia</strong> (2011) and <strong>Encyclopedia</strong> (2017). The three branches are: <em>Adult Timeline</em> (WW/PH/ST), <em>Child Timeline</em> (MM/TP/FSA), and <em>Fallen Hero Timeline</em> (ALttP/LA/ALBW/NES). BotW/TotK may represent a convergence of all three.</div>
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="3">── Official Hyrule Historia Timeline (Hyrule Historia / Encyclopedia) ──</td></tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">1</td>
+            <td>Skyward Sword</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">The origin. Hylia, the first Zelda, Demise's curse.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">2</td>
+            <td>The Minish Cap</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Vaati introduced. The Picori Festival.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">3</td>
+            <td>Four Swords</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Early Hyrule. Vaati again.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">4</td>
+            <td>Ocarina of Time</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">The Sacred Realm, Ganondorf's rise.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">5</td>
+            <td>The Wind Waker</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Hyrule flooded. 100 years after OoT's adult ending.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">6</td>
+            <td>Phantom Hourglass</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">WW sequel. Ocean King's realm.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">7</td>
+            <td>Spirit Tracks</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">New Hyrule. 100 years after WW.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">8</td>
+            <td>Majora's Mask</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Termina. Link sent back as a child.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">9</td>
+            <td>Twilight Princess</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Twilight Realm. Zant and Midna. Child timeline Ganon.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">10</td>
+            <td>Four Swords Adventures</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Much later in child timeline.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">11</td>
+            <td>A Link to the Past</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">The Sacred Realm corrupted. Seven Sages.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">12</td>
+            <td>Oracle of Ages / Seasons</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">After ALttP, before LA.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">13</td>
+            <td>Link's Awakening</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Dream world. Koholint Island.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">14</td>
+            <td>A Link Between Worlds</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">ALttP sequel. Lorule mirror world.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">15</td>
+            <td>Legend of Zelda (NES)</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Final chapter of fallen hero branch.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">16</td>
+            <td>Zelda II: Adventure of Link</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Sequel to NES original.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">17</td>
+            <td>Breath of the Wild</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Timeline convergence point. 10,000 years post-Calamity.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">18</td>
+            <td>Tears of the Kingdom</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">BotW sequel. Ganondorf's true origin.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.72rem">19</td>
+            <td>Echoes of Wisdom</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Placement TBD. Possibly BotW era.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- BY PLATFORM -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">
+          All Zelda games grouped by platform family. Emulator cores listed per platform.
+          GBA/DS/3DS/Switch titles are playable on mobile via EmulatorJS or dedicated apps.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">── Nintendo Switch ──</td></tr>
+          <tr>
+            <td>2011</td><td>Skyward Sword</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Switch HD (2021) is the definitive version — button controls fix the divisive motion gameplay.</td>
+          </tr>
+          <tr>
+            <td>2014</td><td>Hyrule Warriors</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Definitive Edition on Switch includes all DLC.</td>
+          </tr>
+          <tr>
+            <td>2017</td><td>Breath of the Wild <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ Essential. Switch version is definitive. DLC (Champion's Ballad) adds a tough final dungeon.</td>
+          </tr>
+          <tr>
+            <td>2019</td><td>Link's Awakening (Switch)</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Recommended over the original for first-timers.</td>
+          </tr>
+          <tr>
+            <td>2019</td><td>Cadence of Hyrule</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Great short experience. Unique rhythm mechanic.</td>
+          </tr>
+          <tr>
+            <td>2020</td><td>Hyrule Warriors: Age of Calamity</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Good if you enjoyed BotW's story. Musou gameplay — very different from mainline.</td>
+          </tr>
+          <tr>
+            <td>2023</td><td>Tears of the Kingdom <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ Essential. Best on Switch OLED. One of the highest-rated games ever made.</td>
+          </tr>
+          <tr>
+            <td>2024</td><td>Echoes of Wisdom</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">New 2024 release. First true Zelda-as-playable mainline entry.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── Nintendo 3DS ──</td></tr>
+          <tr>
+            <td>2011</td><td>Ocarina of Time 3D</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Best way to play OoT today. Emulate via Citra.</td>
+          </tr>
+          <tr>
+            <td>2013</td><td>A Link Between Worlds <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ Essential. Play after ALttP for full effect.</td>
+          </tr>
+          <tr>
+            <td>2014</td><td>Hyrule Warriors</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Definitive Edition on Switch includes all DLC.</td>
+          </tr>
+          <tr>
+            <td>2015</td><td>Tri Force Heroes</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Skip unless you have a group. Online servers still functional as of 2024.</td>
+          </tr>
+          <tr>
+            <td>2015</td><td>Majora's Mask 3D</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Citra emulation works well. Recommended for newcomers.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── Nintendo DS ──</td></tr>
+          <tr>
+            <td>2007</td><td>Phantom Hourglass</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Worth playing as WW follow-up. Touch controls hold up reasonably.</td>
+          </tr>
+          <tr>
+            <td>2009</td><td>Spirit Tracks</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Underrated. Zelda's role makes it memorable.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── Game Boy Advance ──</td></tr>
+          <tr>
+            <td>2002</td><td>Four Swords</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Skip unless you have a group setup. Non-canonical spinoff feel.</td>
+          </tr>
+          <tr>
+            <td>2004</td><td>The Minish Cap</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Great GBA Zelda — well worth playing.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── Game Boy / Color ──</td></tr>
+          <tr>
+            <td>1993</td><td>Link's Awakening (GB)</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Remake available on Switch (2019). Either version is great.</td>
+          </tr>
+          <tr>
+            <td>2001</td><td>Oracle of Ages</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Play both oracles together for the full story.</td>
+          </tr>
+          <tr>
+            <td>2001</td><td>Oracle of Seasons</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Play alongside Ages. Link them for the true ending.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── NES ──</td></tr>
+          <tr>
+            <td>1986</td><td>The Legend of Zelda</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">NES version or FDS original. GBA port also playable.</td>
+          </tr>
+          <tr>
+            <td>1987</td><td>Zelda II: The Adventure of Link</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Optional — most skip it. Worth trying for curiosity.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── SNES ──</td></tr>
+          <tr>
+            <td>1991</td><td>A Link to the Past <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ Essential. GBA port (Four Swords bundle) also recommended.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── Nintendo 64 / GameCube ──</td></tr>
+          <tr>
+            <td>1998</td><td>Ocarina of Time <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ Essential. GC version (Master Quest) or Citra (3DS remake) recommended over N64.</td>
+          </tr>
+          <tr>
+            <td>2000</td><td>Majora's Mask</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">3DS remake is excellent — adds saving improvements. GC version also fine.</td>
+          </tr>
+          <tr>
+            <td>2002</td><td>The Wind Waker <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ WiiU HD version recommended — fixes the Triforce shard fetch quest significantly.</td>
+          </tr>
+          <tr>
+            <td>2004</td><td>Four Swords Adventures</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Optional. Interesting experiment but not essential.</td>
+          </tr>
+          <tr>
+            <td>2006</td><td>Twilight Princess <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ WiiU HD version fixes some pacing. GC version has correct (non-mirrored) world.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── Wii / Wii U ──</td></tr>
+          <tr>
+            <td>2002</td><td>The Wind Waker <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ WiiU HD version recommended — fixes the Triforce shard fetch quest significantly.</td>
+          </tr>
+          <tr>
+            <td>2006</td><td>Twilight Princess <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ WiiU HD version fixes some pacing. GC version has correct (non-mirrored) world.</td>
+          </tr>
+          <tr>
+            <td>2011</td><td>Skyward Sword</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Switch HD (2021) is the definitive version — button controls fix the divisive motion gameplay.</td>
+          </tr>
+          <tr>
+            <td>2014</td><td>Hyrule Warriors</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Definitive Edition on Switch includes all DLC.</td>
+          </tr>
+          <tr>
+            <td>2017</td><td>Breath of the Wild <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ Essential. Switch version is definitive. DLC (Champion's Ballad) adds a tough final dungeon.</td>
+          </tr>
+          <tr class="fn-arc-row"><td colspan="5">── PC / Other ──</td></tr>
+          <tr>
+            <td>1993</td><td>Zelda: The Wand of Gamelon</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">CD-i only — emulate via Nuvee/OpenMSX. Meme value only.</td>
+          </tr>
+          <tr>
+            <td>1993</td><td>Link: The Faces of Evil</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">CD-i only. Non-canon curiosity.</td>
+          </tr>
+          <tr>
+            <td>1998</td><td>Ocarina of Time <span class="fn-star">⭐</span></td>
+            <td style="font-size:.76rem;color:var(--text-dim)">⭐ Essential. GC version (Master Quest) or Citra (3DS remake) recommended over N64.</td>
+          </tr>
+          <tr>
+            <td>2000</td><td>Majora's Mask</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">3DS remake is excellent — adds saving improvements. GC version also fine.</td>
+          </tr>
+          <tr>
+            <td>2014</td><td>Hyrule Warriors</td>
+            <td style="font-size:.76rem;color:var(--text-dim)">Definitive Edition on Switch includes all DLC.</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- BEST FIRST -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          Recommended play order for newcomers — not release order, not timeline order. Designed to show the best of the series first and build appreciation for older entries.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Why This Order</th></tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">1</td>
+            <td>Breath of the Wild</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Start here for modern Zelda. Genre-defining open world.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">2</td>
+            <td>Ocarina of Time</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Then go back to the N64 classic that shaped 3D gaming.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">3</td>
+            <td>A Link to the Past</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">The definitive top-down Zelda. Still perfect.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">4</td>
+            <td>Tears of the Kingdom</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">BotW sequel — even bigger. Play after BotW.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">5</td>
+            <td>Majora's Mask</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">OoT's darker sibling. Mandatory after OoT.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">6</td>
+            <td>The Wind Waker</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Sail the Great Sea. Beautiful and heartfelt.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">7</td>
+            <td>Twilight Princess</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Dark Hyrule, great dungeons, best partner character.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">8</td>
+            <td>Link's Awakening</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Switch remake is gorgeous. Weird, dreamlike, essential.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">9</td>
+            <td>A Link Between Worlds</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Best 3DS Zelda. Play right after ALttP.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">10</td>
+            <td>Skyward Sword HD</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">The origin story. Play after you've sampled others.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">11</td>
+            <td>Oracle of Ages / Seasons</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Two-game pair. Great if you want more top-down Zelda.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">12</td>
+            <td>Echoes of Wisdom</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">New 2024 — Zelda protagonist at last.</td>
+          </tr>
+          <tr>
+            <td style="font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:.75rem">13</td>
+            <td>Minish Cap</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">Hidden GBA gem. Worth hunting down.</td>
+          </tr>
+        </table>
+      </div>
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 ROM Folder Structure</div>
+    <div class="card">
+      <pre>D:\Emulation\Zelda\
+  ├── NES\        → .nes   (core: fceumm)
+  ├── SNES\       → .smc   (core: snes9x)
+  ├── GB\         → .gb    (core: gambatte)
+  ├── GBC\        → .gbc   (core: gambatte)
+  ├── GBA\        → .gba   (core: mGBA)
+  ├── NDS\        → .nds   (core: melonDS — requires NDS firmware)
+  ├── 3DS\        → .3ds   (emulator: Citra)
+  └── Wii-GC\    → .iso   (emulator: Dolphin)</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div><strong>Switch titles</strong> (BotW, TotK, EoW) require Yuzu or Ryujinx with prod.keys and a Switch firmware dump. Stream via Sunshine + Moonlight from PC — not mobile-compatible via EmulatorJS.</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 Zelda TV &amp; Anime</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all', this)">📋 All Entries</button>
+      </div>
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">
+          All official and notable screen adaptations of the Zelda franchise. The 1989 cartoon is the only fully produced animated series.
+          A live-action Netflix series was in development circa 2015 but never produced.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Canon</th><th>Episodes</th><th>Network</th><th>Notes</th></tr>
+          <tr>
+            <td>1989</td><td>📺 The Legend of Zelda (TV, 1989)</td><td><span class="fn-tag fn-tag-no">Non-Canon</span></td>
+            <td>13 eps</td><td>DiC/NBC</td>
+            <td>13-episode Saturday morning cartoon. Link is annoying, Zelda shoots arrows. Famous for 'Well excuuuse me, princess!' Campy fun. Watch before or after ALttP.</td>
+          </tr>
+          <tr>
+            <td>1993</td><td>Zelda: The Wand of Gamelon / Faces of Evil (cartoon cutscenes)</td><td><span class="fn-tag fn-tag-no">Non-Canon</span></td>
+            <td>2 eps</td><td>CD-i</td>
+            <td>The infamous CD-i animated cutscenes. Meme origin point for the entire YouTube Poop era. Watch on YouTube — not worth emulating the full games just for these.</td>
+          </tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:14px">
+          <div class="callout-icon">📺</div>
+          <div><strong>The 1989 cartoon</strong> is available via archive.org and Jellyfin. 13 episodes, ~22 min each. Campy fun but not representative of the games' tone. The "Well excuuuse me, princess!" meme originates here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Zelda Films</div>
+    <div class="card">
+      <div class="fn-view-desc">
+        No theatrical Zelda films have been produced as of 2024. A live-action film was announced by Nintendo and Sony Pictures in 2023, in development with Wes Ball (Maze Runner) directing.
+      </div>
+      <table class="fn-table">
+        <tr><th>Year</th><th>Title</th><th>Description</th><th>Notes</th></tr>
+          <tr>
+            <td>2015</td><td>The Legend of Zelda (Netflix — canceled)</td>
+            <td>Nintendo and Netflix were reportedly developing a live-action Zelda series, described as 'Game of Thrones for families.' Canceled before announcement.</td><td>Never produced. Listed as franchise history curiosity.</td>
+          </tr>
+        <tr class="fn-highlight">
+          <td>TBD</td>
+          <td>Legend of Zelda Live-Action Film <span class="fn-star">⭐</span></td>
+          <td>Nintendo and Sony Pictures live-action theatrical film. Wes Ball directing. Shigeru Miyamoto producing.</td>
+          <td><span class="fn-tag fn-tag-varies">Announced</span> In active development as of 2023. Release date TBD.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Zelda Merchandise</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('merch','figures',  this)">🗿 Figures &amp; Statues</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','books',    this)">📚 Books &amp; Artbooks</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','music',    this)">🎵 Music &amp; Soundtracks</button>
+        <button class="fn-view-btn"        onclick="fnView('merch','apparel',  this)">👕 Apparel &amp; Accessories</button>
+      </div>
+
+      <div class="fn-view active" id="fn-merch-figures">
+        <div class="fn-view-desc">Notable figures, statues, and amiibo in the Zelda line.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Maker</th><th>Type</th><th>Notes</th></tr>
+          <tr class="fn-highlight"><td>2014+</td><td>Zelda amiibo Line <span class="fn-star">⭐</span></td><td>Nintendo</td><td>amiibo (NFC)</td><td>Link, Zelda, Ganondorf, Toon Link, Wolf Link, BotW Link, Bokoblin. In-game unlocks in BotW/TotK. Wolf Link summons a companion wolf.</td></tr>
+          <tr><td>2022</td><td>Great Deku Tree Lego Set (77092)</td><td>LEGO</td><td>Build Set</td><td>2500+ pieces. Fully detailed interior. Excellent shelf piece. Retired sets command premiums.</td></tr>
+          <tr><td>2016</td><td>Link (BotW) — First 4 Figures</td><td>First 4 Figures</td><td>Resin Statue</td><td>Premium collector statue. Limited edition with illuminated Sheikah Slate. Secondary market $300–$600+.</td></tr>
+          <tr><td>2023</td><td>Tears of the Kingdom Master Sword Replica</td><td>Nintendo/JAKKS</td><td>Prop Replica</td><td>Life-size foam replica. Wide retail release. Good display piece.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-books">
+        <div class="fn-view-desc">Official books, artbooks, and lore publications.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Publisher</th><th>Notes</th></tr>
+          <tr class="fn-highlight"><td>2011</td><td>Hyrule Historia <span class="fn-star">⭐</span></td><td>Dark Horse</td><td>Official timeline, concept art, lore. The authoritative Zelda lore document. Widely available.</td></tr>
+          <tr class="fn-highlight"><td>2017</td><td>The Legend of Zelda Encyclopedia <span class="fn-star">⭐</span></td><td>Dark Horse</td><td>Expanded lore for every game through Skyward Sword. Companion to Historia.</td></tr>
+          <tr><td>2017</td><td>Breath of the Wild — Creating a Champion</td><td>Dark Horse</td><td>Behind-the-scenes BotW artbook. Interviews, concept art, design philosophy. Essential for BotW fans.</td></tr>
+          <tr><td>2023</td><td>Tears of the Kingdom — The Complete Official Guide</td><td>Piggyback</td><td>Full walkthrough + collectible maps. Excellent physical reference.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-music">
+        <div class="fn-view-desc">Official Zelda soundtrack releases and notable concert recordings.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Format</th><th>Notes</th></tr>
+          <tr class="fn-highlight"><td>2017</td><td>BotW Original Soundtrack <span class="fn-star">⭐</span></td><td>CD / Digital</td><td>4-disc set. Piano-heavy ambient score by Manaka Kataoka. Japan release — import or digital.</td></tr>
+          <tr><td>2023</td><td>TotK Original Soundtrack</td><td>CD / Digital</td><td>Expanded score. Dragon themes and Depths music. Available digitally on Nintendo platforms in some regions.</td></tr>
+          <tr><td>2012</td><td>Symphony of the Goddesses</td><td>Live Concert</td><td>Official touring concert series featuring full orchestral Zelda medleys. Check for local dates.</td></tr>
+          <tr><td>1998</td><td>Ocarina of Time OST</td><td>CD (Japan)</td><td>Koji Kondo classic. Japan release — widely available via import or digital.</td></tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-merch-apparel">
+        <div class="fn-view-desc">Official apparel, accessories, and lifestyle merchandise.</div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Source</th><th>Notes</th></tr>
+          <tr><td>My Nintendo Store Apparel</td><td>Nintendo.com</td><td>T-shirts, hoodies, hats. Rotating seasonal designs. Ships US/EU/JP.</td></tr>
+          <tr><td>The Legend of Zelda x Uniqlo UT Line</td><td>Uniqlo</td><td>Periodic collaboration drops. Clean graphic tees. Watch for new releases around major game launches.</td></tr>
+          <tr><td>Hylian Shield / Kokiri Sword Replicas</td><td>Various</td><td>Official and third-party. JAKKS Pacific makes wide-release versions. First 4 Figures does premium.</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Filler Content</div>
+    <div class="card">
+      <div class="fn-view-desc">
+        Content suitable for a Zelda Tunarr channel. Mix of documentary, retrospective, and ambient content
+        that plays well between longer blocks.
+      </div>
+
+      <div class="fn-filler-grid">
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">Legend of Zelda: Breath of the Wild — Creating a Champion (Documentary)</div>
+          <div class="fn-filler-meta">Nintendo / YouTube · ~30 min</div>
+          <div class="fn-filler-desc">Official BotW behind-the-scenes content. Art direction, world design, systems philosophy. Great ambient viewing.</div>
+          <div class="fn-filler-where">📺 YouTube → Jellyfin download via yt-dlp</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+          <div class="fn-filler-name">Did You Know Gaming — Zelda Series</div>
+          <div class="fn-filler-meta">DYKG / YouTube · ~15 min each</div>
+          <div class="fn-filler-desc">Deep-dive trivia episodes covering OoT, MM, WW, TP, BotW, and more. Great filler between game sessions.</div>
+          <div class="fn-filler-where">📺 YouTube → yt-dlp playlist download</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-hype">Trailer</div>
+          <div class="fn-filler-name">Zelda Game Trailers Compilation</div>
+          <div class="fn-filler-meta">Nintendo · 2–5 min each</div>
+          <div class="fn-filler-desc">Official trailers for every modern Zelda. BotW E3 2016, TotK reveal, EoW announcement. High production value bumpers.</div>
+          <div class="fn-filler-where">📺 Nintendo YouTube → yt-dlp individual downloads</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-music">Music / Ambient</div>
+          <div class="fn-filler-name">Zelda Symphony of the Goddesses — Concert Recordings</div>
+          <div class="fn-filler-meta">Various · 2–4 hr full concerts</div>
+          <div class="fn-filler-desc">Official and fan-recorded full orchestral concert footage. Hyrule Field, Gerudo Valley, Ballad of the Wind Fish performed live. Perfect channel atmosphere music.</div>
+          <div class="fn-filler-where">📺 YouTube → Navidrome playlist (audio) or Jellyfin (video)</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-retrospective">Retrospective</div>
+          <div class="fn-filler-name">The Zelda Timeline Explained (multiple creators)</div>
+          <div class="fn-filler-meta">YouTube · 20–45 min</div>
+          <div class="fn-filler-desc">Various YouTubers (Zeltik, Commonwealth Realm, Game Theorists) covering the three-branch timeline. Good for confused newcomers discovering the channel.</div>
+          <div class="fn-filler-where">📺 YouTube → yt-dlp</div>
+        </div>
+
+        <div class="fn-filler-card">
+          <div class="fn-filler-type fn-filler-documentary">Documentary</div>
+          <div class="fn-filler-name">GDC Talks: Making of BotW / TotK (Developer Sessions)</div>
+          <div class="fn-filler-meta">GDC / YouTube · 30–60 min each</div>
+          <div class="fn-filler-desc">Nintendo developers presenting design philosophy at GDC. Physics engine, climbing system, Ultrahand mechanics. High quality insider content.</div>
+          <div class="fn-filler-where">📺 GDC YouTube → yt-dlp</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">1986 — The Origin</div>
+          <div class="fn-era-title">Shigeru Miyamoto &amp; Takashi Tezuka Create Hyrule</div>
+          <div class="fn-era-body">
+            Miyamoto conceived Zelda as the opposite of Mario — exploration over linear progression, puzzles over reaction. Inspired by his childhood explorations of the countryside near Kyoto, the original game let players roam freely. The name "Zelda" came from Zelda Fitzgerald. The Famicom Disk System original (1986) and NES cartridge (1987) established the gold cartridge, the Master Sword, and the Triforce as icons. Koji Kondo composed the overworld theme that remains one of gaming's most recognizable pieces of music.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1987–1993 — Experimentation</div>
+          <div class="fn-era-title">Zelda II, ALttP, and Finding the Formula</div>
+          <div class="fn-era-body">
+            Zelda II (1987) was a radical departure — side-scrolling RPG combat that confused players expecting the original's top-down format. It remains the outlier. A Link to the Past (1991) returned to top-down gameplay but vastly expanded the formula with the Light/Dark World, a proper narrative, and the iconic Master Sword quest. ALttP defined "Zelda" as a concept for a generation. Link's Awakening (1993) brought the formula to Game Boy with surprising emotional depth — no Triforce, no Ganon, just a dream.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">1998–2000 — The N64 Revolution</div>
+          <div class="fn-era-title">Ocarina of Time and Majora's Mask Redefine the Medium</div>
+          <div class="fn-era-body">
+            Ocarina of Time (1998) achieved what seemed impossible — a perfect translation of the Zelda formula into 3D. Z-targeting, context-sensitive controls, and a sweeping orchestral score (MIDI) made it a landmark. It received perfect scores from nearly every major publication and held the title of highest-rated game on Metacritic for over a decade. Majora's Mask (2000) was developed in 1.5 years with the same engine — darker, stranger, built around a three-day time loop and masks that absorbed the souls of the dead. It found its audience slowly and is now considered equally essential.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2002–2006 — Style and Controversy</div>
+          <div class="fn-era-title">Wind Waker's Cel Shading and Twilight Princess's Redemption</div>
+          <div class="fn-era-body">
+            The Wind Waker (2002) was unveiled at Space World 2000 as a realistic tech demo, then re-revealed as a cel-shaded cartoon — sparking the "Celda" backlash. It shipped late and undersold. Time has been kind: WW is now widely considered one of the most beautiful games ever made. Twilight Princess (2006) was developed as a direct response to WW's reception — dark, grounded, photorealistic. Launched on both Wii and GC, it gave the "realistic Zelda" crowd what they wanted while introducing Midna, the franchise's most beloved partner character.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2011–2016 — The HD Gap and Handheld Excellence</div>
+          <div class="fn-era-title">Skyward Sword Divides, 3DS Delivers</div>
+          <div class="fn-era-body">
+            Skyward Sword (2011) was designed around Wii MotionPlus — every puzzle and combat encounter tuned to 1:1 sword tracking. The motion controls divided critics and players sharply. The 3DS era quietly produced some of the best Zelda games: Ocarina of Time 3D (2011) and Majora's Mask 3D (2015) were near-perfect remakes, while A Link Between Worlds (2013) was an original masterpiece that proved top-down Zelda still had room to innovate. The WiiU received Wind Waker HD (2013) and Twilight Princess HD (2016) but never its promised original Zelda title.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">2017–Present — Open World Revolution</div>
+          <div class="fn-era-title">Breath of the Wild, Tears of the Kingdom, and a Live-Action Film</div>
+          <div class="fn-era-body">
+            Breath of the Wild (2017) launched alongside the Nintendo Switch and dismantled 30 years of Zelda conventions. No prescribed dungeon order. Climb any surface. Cook ingredients into meals. Approach every encounter creatively. It won Game of the Year at every major ceremony and redefined open-world design industry-wide. Tears of the Kingdom (2023) expanded on BotW's foundation with Ultrahand construction mechanics, a vast underground Depths layer, and sky islands — receiving 10/10 scores and near-universal acclaim. In 2023, Nintendo and Sony Pictures announced a live-action theatrical film directed by Wes Ball (The Maze Runner), with Shigeru Miyamoto producing — the first major live-action Nintendo film since the 1993 Super Mario Bros. disaster.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-history -->
+
+
+<script>
+// ── Tab switching ──
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+// ── Inner view switching ──
+function fnView(tab, view, btn) {
+  const pane = document.getElementById('fn-pane-' + tab);
+  if (!pane) return;
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('fn-' + tab + '-' + view);
+  if (el) el.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
