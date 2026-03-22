@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resident Evil — Franchise Navigator</title>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+/* ════════════════════════════════════════════════════
+   RESIDENT EVIL — PLATFORM / MEDIA STRIPES
+════════════════════════════════════════════════════ */
+.fn-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/era rows */
+.fn-arc-row td {
+  background: rgba(200,168,75,.07) !important;
+  color: var(--accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(200,168,75,.25) !important;
+  border-bottom: 1px solid rgba(200,168,75,.15) !important;
+}
+
+/* Media/TV/film insert rows */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+  border-left: 3px solid #ce93d8 !important;
+}
+
+/* Platform stripes */
+.fn-ps1     td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps2     td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps3     td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4     td:first-child { border-left: 3px solid #ffcc02; }
+.fn-ps5     td:first-child { border-left: 3px solid #ffaa00; }
+.fn-xbox    td:first-child { border-left: 3px solid #81c784; }
+.fn-pc      td:first-child { border-left: 3px solid #90a4ae; }
+.fn-gc      td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-wii     td:first-child { border-left: 3px solid #b0bec5; }
+.fn-switch  td:first-child { border-left: 3px solid #ef5350; }
+.fn-ds      td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds     td:first-child { border-left: 3px solid #ce93d8; }
+.fn-mobile  td:first-child { border-left: 3px solid #ffd54f; }
+.fn-arcade  td:first-child { border-left: 3px solid #ef9a9a; }
+.fn-movie   td:first-child { border-left: 3px solid #ffb74d; }
+.fn-tv      td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-anime   td:first-child { border-left: 3px solid #ce93d8; }
+.fn-book    td:first-child { border-left: 3px solid #90a4ae; }
+.fn-audio   td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-board   td:first-child { border-left: 3px solid #80cbc4; }
+
+/* Gold = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+.fn-skip td { opacity: .55; }
+
+/* Inline tags */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes     { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no      { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-defunct { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); }
+.fn-tag-mobile  { background: rgba(255,213,79,.18);  color: #ffd54f; border: 1px solid rgba(255,213,79,.35); }
+.fn-tag-opt     { background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-star        { color: var(--accent); font-weight: 700; }
+
+/* View navigation */
+.fn-view-nav {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .62rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 5px 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+}
+.fn-view-btn:hover  { border-color: rgba(200,168,75,.4); color: var(--text); }
+.fn-view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.06); }
+
+.fn-view        { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc   { font-size: .74rem; color: var(--text-dim); margin-bottom: 10px; font-style: italic; }
+
+/* Main page tabs */
+.fn-tab-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 7px 14px; background: transparent;
+  border: 1px solid transparent; border-bottom: none;
+  color: var(--text-dim); cursor: pointer; transition: all .15s;
+  margin-bottom: -1px; border-radius: 3px 3px 0 0;
+}
+.fn-tab-btn:hover  { color: var(--text); }
+.fn-tab-btn.active { border-color: var(--border); border-bottom-color: var(--bg); color: var(--accent); background: var(--bg); }
+
+.fn-tab-pane        { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* Legend bar */
+.fn-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  font-size: .73rem; color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* Stat row */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* Filler cards */
+.fn-filler-card {
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.fn-filler-name  { font-weight:700; font-size:.88rem; color:var(--text-bright); margin-bottom:4px; }
+.fn-filler-meta  { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--text-dim); margin-bottom:6px; }
+.fn-filler-desc  { font-size:.78rem; color:var(--text-dim); line-height:1.6; }
+.fn-filler-where { margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:.72rem; color:var(--text-dim); }
+
+/* Merch history blocks */
+.fn-merch-history { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:16px 18px; margin-bottom:14px; }
+.fn-merch-history-era { font-family:'Cinzel',serif; font-size:.85rem; color:var(--accent); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+/* Timeline */
+.fn-timeline { position: relative; padding-left: 32px; }
+.fn-timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.fn-era { position: relative; margin-bottom: 28px; }
+.fn-era::before { content: ''; position: absolute; left: -26px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); }
+.fn-era-year { font-family: 'Share Tech Mono', monospace; font-size: .68rem; letter-spacing: .1em; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 6px; }
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-icon">🧟</div>
+  <div>
+    <h1>Resident Evil</h1>
+    <div class="subtitle">// Survival Horror · Biohazard · Games · Films · Books · Comics · Mobile //</div>
+    <p class="desc">
+      Capcom's genre-defining survival horror franchise, launched in 1996. Spanning mainline games, remakes, spin-offs, a live-action film hexalogy, CG animated films, Netflix series, novels, comics, audio dramas, and countless defunct mobile games. Use the Library tab to sort by release order, timeline, or platform. Other tabs cover movies/TV, books/audio, merch, filler, and the full 25+ year history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">32+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">11</div><div class="fn-stat-label">Movies / Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">20+</div><div class="fn-stat-label">Books / Comics</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">7</div><div class="fn-stat-label">Audio Dramas</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1996</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- MAIN TABS -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('media', this)">🎬 Movies & TV</button>
+  <button class="fn-tab-btn"        onclick="fnTab('books', this)">📖 Books & Audio</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch', this)">🛒 Merch & Games</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler', this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY (Games + all interactive media)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+  <div class="section">
+    <div class="section-title">📚 Resident Evil Interactive Library</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','timeline',this)">🕰️ Chronological</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst',this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- RELEASE ORDER -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All games in real-world release order. Gold = essential, faded = defunct/cancelled/skip-friendly. Purple rows = major film/TV watch points.</div>
+        <table class="fn-table">
+          <thead><tr><th>Year</th><th>Title</th><th>Platform</th><th>Mobile?</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr class="fn-arc-row"><td colspan="5">🔫 The Classic Era (1996–2002)</td></tr>
+            <tr class="fn-ps1 fn-highlight"><td>1996</td><td>Resident Evil <span class="fn-star">⭐</span></td><td>PS1/PC/Saturn</td><td><span class="fn-tag fn-tag-no">🖥️ Emu</span></td><td>The origin of survival horror. Fixed cameras, mansion, iconic voice acting.</td></tr>
+            <tr class="fn-ps1 fn-highlight"><td>1998</td><td>Resident Evil 2 <span class="fn-star">⭐</span></td><td>PS1/PC/N64</td><td><span class="fn-tag fn-tag-no">🖥️ Emu</span></td><td>Raccoon City outbreak, Leon & Claire. Gold standard for classic RE.</td></tr>
+            <tr class="fn-ps1"><td>1999</td><td>Resident Evil 3: Nemesis</td><td>PS1/PC/DC</td><td><span class="fn-tag fn-tag-no">🖥️ Emu</span></td><td>Nemesis pursues Jill. Escape from Raccoon City.</td></tr>
+            <tr class="fn-ps2 fn-highlight"><td>2000</td><td>Resident Evil – Code: Veronica</td><td>DC/PS2/GC</td><td><span class="fn-tag fn-tag-no">🖥️ Emu</span></td><td>Claire’s journey to Rockfort Island. Direct sequel to RE2.</td></tr>
+            <tr class="fn-media-row"><td colspan="5">📺 <strong>Resident Evil: Welcome to Raccoon City</strong> (2021) — Reboot film covering RE1+RE2, but watch after playing classics.</td></tr>
+            <tr class="fn-arc-row"><td colspan="5">🌪️ Action Era (2005–2012)</td></tr>
+            <tr class="fn-ps2 fn-highlight"><td>2005</td><td>Resident Evil 4 <span class="fn-star">⭐</span></td><td>GC/PS2/PC/PS4/Switch</td><td><span class="fn-tag fn-tag-no">🖥️ Emu/PC</span></td><td>Reinvented third-person shooter. Leon in Spain. Peak RE.</td></tr>
+            <tr class="fn-ps3"><td>2009</td><td>Resident Evil 5</td><td>PS3/360/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>Co-op action, Chris in Africa. Controversial but commercial high point.</td></tr>
+            <tr class="fn-ps3"><td>2012</td><td>Resident Evil 6</td><td>PS3/360/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>Over-the-top action, 4 campaigns. Divisive but massive scale.</td></tr>
+            <tr class="fn-arc-row"><td colspan="5">🔄 Revival & Remakes (2015–present)</td></tr>
+            <tr class="fn-ps4 fn-highlight"><td>2017</td><td>Resident Evil 7: Biohazard <span class="fn-star">⭐</span></td><td>PS4/XB1/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>First-person horror, return to roots. Ethan Winters saga begins.</td></tr>
+            <tr class="fn-ps4 fn-highlight"><td>2019</td><td>Resident Evil 2 (Remake) <span class="fn-star">⭐</span></td><td>PS4/XB1/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>Modern classic, over-the-shoulder, faithful yet fresh.</td></tr>
+            <tr class="fn-ps4"><td>2020</td><td>Resident Evil 3 (Remake)</td><td>PS4/XB1/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>Streamlined, Nemesis in modern engine. Shorter but solid.</td></tr>
+            <tr class="fn-ps5 fn-highlight"><td>2021</td><td>Resident Evil Village <span class="fn-star">⭐</span></td><td>PS4/PS5/XSX/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>Gothic horror sequel to RE7. Lady Dimitrescu phenomenon.</td></tr>
+            <tr class="fn-ps5"><td>2023</td><td>Resident Evil 4 (Remake)</td><td>PS5/XSX/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>Definitive RE4 experience. Separate Ways DLC.</td></tr>
+            <tr class="fn-arc-row"><td colspan="5">📱 Spin-offs & Defunct Mobile</td></tr>
+            <tr class="fn-mobile fn-skip"><td>2007</td><td>Resident Evil: The Missions</td><td>J2ME (Java)</td><td><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span></td><td>Early mobile top-down shooter. No longer available.</td></tr>
+            <tr class="fn-mobile fn-skip"><td>2008</td><td>Resident Evil: Genesis</td><td>iOS (iPhone)</td><td><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span></td><td>First iOS RE, prequel to RE5. Removed from App Store.</td></tr>
+            <tr class="fn-mobile fn-skip"><td>2011</td><td>Resident Evil: Mercenaries VS.</td><td>iOS</td><td><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span></td><td>Multiplayer Mercenaries. Servers shut down.</td></tr>
+            <tr class="fn-mobile fn-skip"><td>2017</td><td>Resident Evil: Umbrella Corps</td><td>PS4/PC</td><td><span class="fn-tag fn-tag-opt">Multiplayer</span></td><td>Low-budget competitive shooter. Widely panned, skip.</td></tr>
+            <tr class="fn-mobile"><td>2022</td><td>Resident Evil RE:Verse</td><td>PS4/XB1/PC</td><td><span class="fn-tag fn-tag-no">🖥️ PC</span></td><td>6-player PvP bundled with Village. Playerbase minimal.</td></tr>
+            <tr class="fn-switch"><td>2022</td><td>Resident Evil: Cloud Versions</td><td>Switch (cloud)</td><td><span class="fn-tag fn-tag-no">Cloud</span></td><td>RE2/3/7/8 streamed on Switch. Requires stable internet.</td></tr>
+          </tbody>
+        </table>
+        <div class="fn-legend"><span><span class="fn-dot" style="background:var(--accent)"></span>Gold = essential</span><span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded = defunct/skip</span><span><span class="fn-tag fn-tag-defunct">⚠️ Defunct</span> No longer playable</span></div>
+      </div>
+
+      <!-- PLATFORM VIEW (simplified) -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">Grouped by platform — mainline & spin-offs.</div>
+        <table class="fn-table"><thead><tr><th>Platform</th><th>Title</th><th>Year</th><th>Notes</th></tr></thead><tbody>
+          <tr class="fn-arc-row"><td colspan="3">🟠 PlayStation</td></tr>
+          <tr class="fn-ps1"><td>PS1</td><td>RE1, RE2, RE3, Survivor</td><td>1996–2000</td><td>Classics via emulation.</td></tr>
+          <tr class="fn-ps2"><td>PS2</td><td>RE4, Outbreak 1/2, Code Veronica X</td><td>2001–2005</td><td>Outbreak online defunct but fan servers exist.</td></tr>
+          <tr class="fn-ps4"><td>PS4/PS5</td><td>RE2R, RE3R, RE7, Village, RE4R</td><td>2017–2023</td><td>Modern catalog, playable on console.</td></tr>
+          <tr class="fn-arc-row"><td colspan="3">📱 Mobile (defunct / discontinued)</td></tr>
+          <tr class="fn-mobile fn-skip"><td>iOS (pre-2018)</td><td>RE: Degeneration, RE: Mercenaries VS, RE4 Mobile Edition</td><td>2009–2017</td><td>RE4 Mobile was a port but delisted. All gone from stores.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>Java (J2ME)</td><td>RE: The Missions, RE: Confidential Report</td><td>2004–2009</td><td>Java-era titles. Emulation possible but obscure.</td></tr>
+        </tbody></table>
+      </div>
+
+      <!-- BEST FIRST -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Recommended order for newcomers: modern remakes + RE7/8 then classics.</div>
+        <table class="fn-table"><thead><tr><th>#</th><th>Title</th><th>Why</th></tr></thead><tbody>
+          <tr class="fn-highlight"><td>1</td><td>Resident Evil 2 Remake <span class="fn-star">⭐</span></td><td>Modern classic, best entry point. Survival horror perfected.</td></tr>
+          <tr><td>2</td><td>Resident Evil 4 Remake</td><td>Action-horror pinnacle. Excellent pacing.</td></tr>
+          <tr><td>3</td><td>Resident Evil 7: Biohazard</td><td>First-person horror reboot. Perfect standalone.</td></tr>
+          <tr><td>4</td><td>Resident Evil Village</td><td>Direct sequel to RE7, gothic action.</td></tr>
+          <tr><td>5</td><td>Resident Evil (2002 Remake)</td><td>The classic fixed-camera experience, available via HD remaster.</td></tr>
+          <tr class="fn-skip"><td>6+</td><td>RE5, RE6, spin-offs</td><td>Co-op focused, save for later or if you have a partner.</td></tr>
+        </tbody></table>
+      </div>
+
+      <!-- MOBILE ONLY -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">All mobile titles (including defunct). Most are no longer downloadable; only emulation or apk archives remain.</div>
+        <table class="fn-table"><thead><tr><th>Title</th><th>Platform</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+          <tr class="fn-mobile fn-skip"><td>Resident Evil: Degeneration</td><td>iOS (2008)</td><td>⚠️ Defunct</td><td>Rail shooter tie-in to CG film.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>Resident Evil 4 Mobile Edition</td><td>iOS (2010)</td><td>⚠️ Defunct</td><td>Impressive port, 32-bit, removed 2017.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>Resident Evil: Mercenaries VS.</td><td>iOS (2011)</td><td>⚠️ Defunct</td><td>Online MP, servers dead.</td></tr>
+          <tr class="fn-mobile fn-skip"><td>Resident Evil: Confidential Report</td><td>J2ME (2006)</td><td>⚠️ Defunct</td><td>Text-adventure / investigation, rare.</td></tr>
+          <tr class="fn-mobile"><td>Resident Evil: The Missions</td><td>J2ME</td><td>⚠️ Defunct</td><td>Top-down shooter, can be found in old phone archives.</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2 — MOVIES & TV -->
+<div class="fn-tab-pane" id="fn-pane-media">
+  <div class="section"><div class="section-title">🎬 Resident Evil — Films & Series</div>
+  <div class="card">
+    <div class="fn-view-nav"><button class="fn-view-btn active" onclick="fnView('media','all',this)">📋 All</button><button class="fn-view-btn" onclick="fnView('media','watchorder',this)">🎯 Watch Order</button></div>
+    <div class="fn-view active" id="fn-media-all">
+      <table class="fn-table"><thead><tr><th>Year</th><th>Title</th><th>Type</th><th>Canon</th><th>Notes</th></tr></thead><tbody>
+        <tr class="fn-movie fn-highlight"><td>2002</td><td>Resident Evil (Anderson)</td><td>Live-action</td><td>❌ Non-canon</td><td>First film, Mila Jovovich. Separate universe.</td></tr>
+        <tr class="fn-movie"><td>2004</td><td>Resident Evil: Apocalypse</td><td>Live-action</td><td>❌ Non-canon</td><td>Jill Valentine appears, Raccoon City.</td></tr>
+        <tr class="fn-movie"><td>2007</td><td>Resident Evil: Extinction</td><td>Live-action</td><td>❌ Non-canon</td><td>Desert road trip, clones.</td></tr>
+        <tr class="fn-anime fn-highlight"><td>2008</td><td>Resident Evil: Degeneration</td><td>CG Film</td><td>✅ Canon (games)</td><td>First CG, Leon & Claire, 2005 timeline.</td></tr>
+        <tr class="fn-movie"><td>2010</td><td>Resident Evil: Afterlife</td><td>Live-action</td><td>❌ Non-canon</td><td>3D, prison setpiece.</td></tr>
+        <tr class="fn-anime"><td>2012</td><td>Resident Evil: Damnation</td><td>CG Film</td><td>✅ Canon</td><td>Leon in Eastern Slav republic, Ada Wong.</td></tr>
+        <tr class="fn-movie"><td>2012</td><td>Resident Evil: Retribution</td><td>Live-action</td><td>❌ Non-canon</td><td>Underwater base, fan-service cast.</td></tr>
+        <tr class="fn-anime"><td>2017</td><td>Resident Evil: Vendetta</td><td>CG Film</td><td>✅ Canon</td><td>Chris, Leon, Rebecca. Over-the-top action.</td></tr>
+        <tr class="fn-tv fn-skip"><td>2021</td><td>Resident Evil: Infinite Darkness</td><td>CG Series (Netflix)</td><td>✅ Canon</td><td>4 eps, set between RE4 & RE5. Leon/Claire.</td></tr>
+        <tr class="fn-tv fn-skip"><td>2022</td><td>Resident Evil (Live-action series)</td><td>Netflix Series</td><td>❌ Non-canon</td><td>Two timelines, cancelled after one season.</td></tr>
+        <tr class="fn-movie fn-skip"><td>2021</td><td>Resident Evil: Welcome to Raccoon City</td><td>Live-action reboot</td><td>❌ Reboot</td><td>Closer to games but flawed adaptation.</td></tr>
+      </tbody></table>
+    </div>
+    <div class="fn-view" id="fn-media-watchorder"><div class="fn-view-desc">Canon order: CG films and Infinite Darkness fit between games.</div>
+      <table class="fn-table"><thead><tr><th>Step</th><th>Watch after</th><th>Title</th></tr></thead><tbody>
+        <tr><td>1</td><td>After RE2 (1998)</td><td>Degeneration (2008) – 2005 setting, Leon/Claire.</td></tr>
+        <tr><td>2</td><td>After RE4 (2005)</td><td>Damnation (2012) – 2011 setting.</td></tr>
+        <tr><td>3</td><td>After RE5 & RE6</td><td>Vendetta (2017) – 2014, Chris/Rebecca/Leon.</td></tr>
+        <tr><td>4</td><td>Between RE4 and RE5</td><td>Infinite Darkness (2021) – 2006.</td></tr>
+      </tbody></table>
+    </div>
+  </div></div>
+</div>
+
+<!-- TAB 3 — BOOKS & AUDIO -->
+<div class="fn-tab-pane" id="fn-pane-books">
+  <div class="section"><div class="section-title">📖 Books, Comics & Audio Dramas</div>
+  <div class="card">
+    <table class="fn-table"><thead><tr><th>Year</th><th>Title</th><th>Type</th><th>Notes</th></tr></thead><tbody>
+      <tr class="fn-book fn-highlight"><td>1998–2004</td><td>S.D. Perry Novelizations (7 books)</td><td>Novel</td><td>Zero Hour, Umbrella Conspiracy, City of the Dead, Nemesis, Code Veronica, Underworld, Caliban Cove. Definitive RE books.</td></tr>
+      <tr class="fn-book"><td>2006</td><td>Resident Evil: Rose Blank (Japan-only)</td><td>Short Story</td><td>Official Japanese short story collection.}^</tr>
+      <tr class="fn-audio"><td>2007–2008倍<td>Resident Evil: The Umbrella Conspiracy (Audio Drama)倍<td>Audio Drama (German)倍<td>German audio drama adaptation. Rare, fan-translated.倍</tr>
+      <tr class="fn-book"><td>2009–2017倍<td>Marvel / WildStorm Comics (RE, RE0, RE5)倍<td>Comic series倍<td>Digital & print miniseries. Adaptation of games.倍</tr>
+      <tr class="fn-audio fn-skip"><td>2021倍<td>Resident Evil: The Official Audio Drama (China)倍<td>Audio Drama倍<td>Tencent-produced, Chinese language. Dramatization of RE2/RE3.}^</tr>
+      <tr class="fn-book fn-skip"><td>2015–2020倍<td>Resident Evil: The Marhawa Desire / Heavenly Island (manga)倍<td>Manga倍<td>Prequel to RE6, and between RE5/RE6. Official manga.倍</tr>
+      <tr class="fn-audio fn-skip"><td>2012倍<td>Resident Evil: Damnation – The Audio Drama倍<td>Audio Drama (Japan)倍<td>Prequel to Damnation film. Japanese only, rare.倍</tr>
+    </tbody>}~
+  </div></div>
+</div>
+
+<!-- TAB 4 — MERCH & BOARD GAMES -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section"><div class="section-title">🛒 Merch & Collectibles / Board Games</div>
+  <div class="card">
+    <div class="fn-merch-history"><div class="fn-merch-history-era">🧟 Board & Card Games</div>
+    <p><strong>Resident Evil: The Board Game (2022)</strong> – Steamforged Games, campaign co-op based on RE1-RE3. Expansions: RE2, RE3, and Mansion expansions. Digital tabletop via Tabletop Simulator. <br/>
+    <strong>Resident Evil Deck Building Game (2010)</strong> – Bandai, out of print. Fun deck-builder with game scenarios. <br/>
+    <strong>Resident Evil: The Card Game (2025)</strong> – announced by Steamforged.</p>
+    </div>
+    <div class="fn-merch-history"><div class="fn-merch-history-era">🎮 Collector's Editions & Figures</div>
+    <p>Numskull, Gecco, Hot Toys, and Kotobukiya produce premium statues. RE4 Remake Collector's Edition (2023) included a Leon statue. Grail items: original PS1 longbox RE1, RE2 Game.Com version (rare), Biohazard steelbooks.</p>
+    </div>
+  </div></div>
+</div>
+
+<!-- TAB 5 — FILLER (Tunarr) -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section"><div class="section-title">📡 Filler / Tunarr Channel Ideas</div>
+  <div class="card">
+    <div class="fn-filler-card"><div class="fn-filler-name">"Umbrella Briefing" – Trailers & Commercials</div><div class="fn-filler-meta">2-3 min each</div><div class="fn-filler-desc">All game launch trailers (RE2R, RE4R, RE7, Village) as interstitials. Also 90s PS1 commercials.</div></div>
+    <div class="fn-filler-card"><div class="fn-filler-name">Wesker Reports (Audio Logs)</div><div class="fn-filler-meta">1-2 min</div><div class="fn-filler-desc">Fan-made or extracted in-game files — use as bumpers between episodes.</div></div>
+    <div class="fn-filler-card"><div class="fn-filler-name">Retrospectives (NoClip / Game Maker's Toolkit)</div><div class="fn-filler-meta">15-40 min</div><div class="fn-filler-desc">High-quality docs on RE development history. Good for filler blocks.</div></div>
+  </div></div>
+</div>
+
+<!-- TAB 6 — HISTORY -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section"><div class="section-title">📖 History of Resident Evil</div>
+  <div class="card">
+    <div class="fn-timeline">
+      <div class="fn-era"><div class="fn-era-year">1996–1999</div><div class="fn-era-title">Birth of Survival Horror</div><div class="fn-era-body">Shinji Mikami directed RE1 on PS1, inventing the genre. RE2 became a cultural phenomenon with 5M+ sales. Fixed cameras, limited saves, puzzle-box mansion.</div></div>
+      <div class="fn-era"><div class="fn-era-year">2005–2012</div><div class="fn-era-title">Action Era & RE4 Revolution</div><div class="fn-era-body">RE4 redefined third-person shooting. RE5 became Capcom's best-selling game (14M+). RE6 oversaturated with action.</div></div>
+      <div class="fn-era"><div class="fn-era-year">2017–Present</div><div class="fn-era-title">Horror Renaissance</div><div class="fn-era-body">RE7 brought back horror in first-person. RE2 Remake and RE4 Remake cemented the series as Capcom's flagship. Cumulative sales >150 million.</div></div>
+    </div>
+  </div></div>
+</div>
+
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fn-pane-' + id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function fnView(tabId, viewId, btn) {
+  const pane = document.getElementById('fn-pane-' + tabId);
+  if(!pane) return;
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('fn-' + tabId + '-' + viewId);
+  if(target) target.classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
