@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Yu-Gi-Oh!</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); border-bottom-color: rgba(123,47,190,.45); }
+.fn-tab-btn.active { color: #a87fe8; border-bottom-color: #a87fe8; font-weight: 700; }
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS (pill buttons)
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active { background: rgba(123,47,190,.15); border-color: #a87fe8; color: #a87fe8; }
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid #a87fe8;
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: #a87fe8;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era header rows */
+.fn-arc-row td {
+  background: rgba(123,47,190,.07) !important;
+  color: #a87fe8;
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(123,47,190,.25) !important;
+  border-bottom: 1px solid rgba(123,47,190,.15) !important;
+}
+
+/* Anime / TV watch-point rows — purple italic */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Platform left-border colour stripes */
+.fn-gb      td:first-child { border-left: 3px solid #aed581; }
+.fn-gbc     td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-gba     td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds     td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds     td:first-child { border-left: 3px solid #ce93d8; }
+.fn-switch  td:first-child { border-left: 3px solid #ef5350; }
+.fn-ps1     td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps2     td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps3     td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4     td:first-child { border-left: 3px solid #ffcc02; }
+.fn-ps5     td:first-child { border-left: 3px solid #fff176; }
+.fn-psp     td:first-child { border-left: 3px solid #80cbc4; }
+.fn-xbox    td:first-child { border-left: 3px solid #81c784; }
+.fn-xbox360 td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-wii     td:first-child { border-left: 3px solid #90caf9; }
+.fn-gc      td:first-child { border-left: 3px solid #9fa8da; }
+.fn-pc      td:first-child { border-left: 3px solid #bcaaa4; }
+.fn-mobile  td:first-child { border-left: 3px solid #80deea; }
+.fn-multi   td:first-child { border-left: 3px solid #a87fe8; }
+
+/* Gold highlight = recommended row */
+.fn-highlight td { background: rgba(123,47,190,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid #a87fe8 !important; }
+
+/* Faded = optional/skip */
+.fn-skip td { opacity: .58; }
+
+/* ════════════════════════════════════════════════════
+   INLINE TAGS
+════════════════════════════════════════════════════ */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-multi  { background: rgba(123,47,190,.18);  color: #ce93d8; border: 1px solid rgba(123,47,190,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06);  color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-defunct{ background: rgba(239,83,80,.12);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.25); font-size:.59rem; padding:1px 4px; }
+.fn-tag-jponly { background: rgba(255,193,7,.12);   color: #ffd54f; border: 1px solid rgba(255,193,7,.3);  font-size:.59rem; padding:1px 4px; }
+.fn-star { color: #a87fe8; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════
+   LEGEND BAR
+════════════════════════════════════════════════════ */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #a87fe8; line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   HISTORY / TIMELINE
+════════════════════════════════════════════════════ */
+.fn-timeline {
+  border-left: 2px solid rgba(123,47,190,.4);
+  margin-left: 12px;
+  padding-left: 24px;
+}
+.fn-era {
+  position: relative;
+  margin-bottom: 28px;
+}
+.fn-era::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #a87fe8;
+  border: 3px solid var(--bg);
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: #a87fe8;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fn-era-title {
+  font-family: 'Cinzel', serif;
+  font-size: .95rem;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+.fn-era-body { font-size: .84rem; color: var(--text); line-height: 1.7; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🃏</div>
+  <div>
+    <h1>Yu-Gi-Oh! Franchise</h1>
+    <div class="subtitle">// GB · GBC · GBA · NDS · PSP · PS1 · PS2 · PS3 · PS4 · PS5 · Switch · Xbox · PC · Mobile · Wii · GC · Anime · Film //</div>
+    <p class="desc">
+      The complete Yu-Gi-Oh! franchise library — all 59 official video games, nine anime series, four films, including every defunct, canceled, and inaccessible entry.
+      Based on Kazuki Takahashi's manga, Yu-Gi-Oh! grew from a dark shadow-game anthology into the world's best-selling trading card game (35+ billion cards sold).
+      Use the Library tab to sort by release order, anime watch order, platform, or best-first. Other tabs cover the anime series in depth, films, merchandise, Tunarr filler, and the full franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">59</div><div class="fn-stat-label">Video Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">9</div><div class="fn-stat-label">Anime Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">4</div><div class="fn-stat-label">Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">6+</div><div class="fn-stat-label">Defunct/Dead</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1996</div><div class="fn-stat-label">Manga Est.</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">🃏 The Yu-Gi-Oh! Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','watch',     this)">📺 Anime Watch Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','defunct',   this)">🚫 Defunct &amp; Dead</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile / Handheld</button>
+      </div>
+
+      <!-- ─── RELEASE ORDER ─────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          All games and anime in real-world release order. Anime series noted inline at key watch points. ⭐ = recommended entry points. Purple rows = watch-point inserts. Red tags = defunct/shutdown. Yellow tags = Japan-only. Faded rows = optional or skip-friendly.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Core / App</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── PRE-CARD GAME ERA (1996–1999) ──</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! (Toei, Season 0)</strong> (1998, 27 eps) — The dark original Toei anime. Shadow Games, no duel monsters. Fansub only — not officially licensed in English.</td></tr>
+
+          <tr class="fn-ps1 fn-skip">
+            <td>1998</td>
+            <td>Monster Capsule: Breed &amp; Battle</td>
+            <td>PS1</td>
+            <td>Duckstation</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> <span class="fn-tag fn-tag-opt">non-canon</span> Monster-raising sim — not a card game. Pre-TCG prototype.</td>
+          </tr>
+          <tr class="fn-gb fn-skip">
+            <td>1998</td>
+            <td>Duel Monsters (Game Boy)</td>
+            <td>GB</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> First ever YGO card game. Predates the international TCG launch. Now in Early Days Collection.</td>
+          </tr>
+          <tr class="fn-ps1">
+            <td>1999</td>
+            <td>Forbidden Memories</td>
+            <td>PS1</td>
+            <td>Duckstation</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Ancient Egypt story mode. Brutally grindy RNG — use save states. Cult classic.</td>
+          </tr>
+          <tr class="fn-gbc fn-skip">
+            <td>1999</td>
+            <td>Duel Monsters II: Dark Duel Stories</td>
+            <td>GBC</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> GBC sequel to the first GB game. Now in Early Days Collection.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── CLASSIC GAME BOY ERA (2000–2004) ──</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! Duel Monsters</strong> (2000–2004, 224 eps) — The definitive series. Duelist Kingdom → Battle City → Dawn of the Duel. Watch EN dub or JP sub.</td></tr>
+
+          <tr class="fn-gbc fn-skip">
+            <td>2000</td>
+            <td>Monster Capsule GB</td>
+            <td>GBC</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> <span class="fn-tag fn-tag-opt">non-canon</span> Grid monster battles — not a card game. Now in Early Days Collection.</td>
+          </tr>
+          <tr class="fn-gbc fn-highlight">
+            <td>2000</td>
+            <td>Dark Duel Stories <span class="fn-star">⭐</span></td>
+            <td>GBC</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> First Western release. Best starting point for the classic GB era. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-gbc fn-skip">
+            <td>2000</td>
+            <td>Duel Monsters 4: Battle of Great Duelists</td>
+            <td>GBC</td>
+            <td>gambatte</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> 3 separate deck versions (Yugi/Kaiba/Joey). Now in Early Days Collection.</td>
+          </tr>
+          <tr class="fn-gba fn-highlight">
+            <td>2001</td>
+            <td>The Eternal Duelist Soul <span class="fn-star">⭐</span></td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Massive card pool, best classic GBA dueling sim. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>2001</td>
+            <td>The Duelists of the Roses</td>
+            <td>PS2</td>
+            <td>PCSX2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Wars of the Roses AU. Board-game/card hybrid — completely unique movement system. Cult classic.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2001</td>
+            <td>Dungeon Dice Monsters</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Dice-based dungeon builder. Based on the Duke Devlin arc. Not a card game.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2001</td>
+            <td>Duel Monsters 6: Expert 2</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> Iterative card pool update. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2002</td>
+            <td>The Sacred Cards</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>RPG-style Battle City retelling — roam Domino City. Pre-official rules. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-gc fn-skip">
+            <td>2002</td>
+            <td>The Falsebound Kingdom</td>
+            <td>GameCube</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> RTS game — monster army command. No card mechanics. Completionists only.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2003</td>
+            <td>Reshef of Destruction</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Notoriously difficult sequel to Sacred Cards. Broken AI. One of the worst-received entries. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-gba fn-highlight">
+            <td>2003</td>
+            <td>Worldwide Edition: Stairway to the Destined Duel</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> More accurate TCG rules than predecessors. Good duelist roster. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2003</td>
+            <td>Power of Chaos: Yugi the Destiny</td>
+            <td>PC</td>
+            <td>Standalone EXE</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Part 1 of PC trilogy (Yugi/Kaiba/Joey). Official TCG rules. Abandonware.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2004</td>
+            <td>World Championship Tournament 2004</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Accurate TCG sim, large card pool. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2004</td>
+            <td>Destiny Board Traveler</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Mario Party-style board game. Multiplayer spinoff. Early Days Collection.</td>
+          </tr>
+          <tr class="fn-xbox fn-skip">
+            <td>2004</td>
+            <td>The Dawn of Destiny</td>
+            <td>Xbox</td>
+            <td>Xemu</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Only original Xbox YGO game. Poorly received. Completionists only.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2004</td>
+            <td>Power of Chaos: Kaiba the Revenge</td>
+            <td>PC</td>
+            <td>Standalone EXE</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Part 2 of PC trilogy. Abandonware.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2004</td>
+            <td>Power of Chaos: Joey the Passion</td>
+            <td>PC</td>
+            <td>Standalone EXE</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Part 3 of PC trilogy. All three PoC games bundled together. Abandonware.</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>2004</td>
+            <td>Capsule Monster Coliseum</td>
+            <td>PS2</td>
+            <td>PCSX2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Hex-grid monster combat sim. No card mechanics. Niche spinoff.</td>
+          </tr>
+          <tr class="fn-gba">
+            <td>2004</td>
+            <td>7 Trials to Glory: WCT 2005</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Final GBA World Championship entry. Official TCG rules. Early Days Collection.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── DS / PSP ERA (2005–2011) ──</td></tr>
+
+          <tr class="fn-pc fn-skip">
+            <td>2005</td>
+            <td>Yu-Gi-Oh! Online (all versions)</td>
+            <td>PC</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> Three iterations (2005/2007/2009). All servers permanently closed. Inaccessible.</td>
+          </tr>
+          <tr class="fn-nds fn-highlight">
+            <td>2005</td>
+            <td>Nightmare Troubadour <span class="fn-star">⭐</span></td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> First DS game, best classic-era touchscreen experience. Duelist Kingdom + Battle City.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2005</td>
+            <td>GX: Duel Academy</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Last GBA entry, first GX game. Watch GX anime first to appreciate the cast.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! GX</strong> (2004–2008, 180 eps) — Duel Academy era. Watch alongside or after Duel Academy game. Season 4 (40 eps, JP only) is the darkest and best arc in the GX run.</td></tr>
+
+          <tr class="fn-gba fn-skip">
+            <td>2006</td>
+            <td>Ultimate Masters: WCT 2006</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Best GBA card sim — released on GBA after DS was already current. Highly accurate rules.</td>
+          </tr>
+          <tr class="fn-psp fn-highlight">
+            <td>2006</td>
+            <td>GX: Tag Force <span class="fn-star">⭐</span></td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> First Tag Force entry. Partner with GX characters, build friendships via food gifts. Best story-mode series starts here.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>2006</td>
+            <td>GX: Spirit Caller</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>DS GX dueling. Duel Academy island with spirit encounters. Good touchscreen interface.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>2007</td>
+            <td>World Championship 2007</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>GX-era card pool, minimal story. Sim-focused.</td>
+          </tr>
+          <tr class="fn-psp">
+            <td>2007</td>
+            <td>GX: Tag Force 2</td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>GX Season 2 content. Larger than TF1 in every way.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>2007</td>
+            <td>GX: Card Almanac</td>
+            <td>NDS</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">—</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> <span class="fn-tag fn-tag-opt">database app</span> Not a game — digital card encyclopedia only. Skip.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>2007</td>
+            <td>GX: World Championship 2008</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Final GX-era DS entry. Full GX cast with current card pool.</td>
+          </tr>
+          <tr class="fn-ps2 fn-skip">
+            <td>2007</td>
+            <td>GX: The Beginning of Destiny</td>
+            <td>PS2</td>
+            <td>PCSX2</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> PS2 GX compilation. Enhanced Tag Force 1. EU released as GX Tag Force Evolution.</td>
+          </tr>
+          <tr class="fn-psp fn-skip">
+            <td>2008</td>
+            <td>GX: Tag Force 3</td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Final GX Tag Force. Season 3 content, complete cast. Never released in North America. Fan translation available.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! 5D's</strong> (2008–2011, 154 eps) — Future New Domino City. Turbo Duels, Signer Dragons, Dark Signers. JP sub essential — English dub cuts off mid-final arc.</td></tr>
+
+          <tr class="fn-nds">
+            <td>2009</td>
+            <td>5D's Stardust Accelerator: WC 2009</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>First 5D's DS game. Synchro Monsters introduced. Parallel 5D's story.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2009</td>
+            <td>5D's: Wheelie Breakers</td>
+            <td>Wii</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">non-canon</span> Kart racer where you play trap cards mid-race. Each racer has 4000 LP. Delightfully absurd spinoff.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2009</td>
+            <td>5D's Mobile (i-mode)</td>
+            <td>Mobile</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> <span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> Japanese feature-phone only. Permanently delisted and inaccessible.</td>
+          </tr>
+          <tr class="fn-psp">
+            <td>2009</td>
+            <td>5D's: Tag Force 4</td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>First 5D's Tag Force. Dark Signers arc. Synchro Monsters.</td>
+          </tr>
+          <tr class="fn-nds">
+            <td>2010</td>
+            <td>5D's WC 2010: Reverse of Arcadia</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>Synchro-era card pool, Aerial Fortress Seibal arc.</td>
+          </tr>
+          <tr class="fn-psp fn-highlight">
+            <td>2010</td>
+            <td>5D's: Tag Force 5 <span class="fn-star">⭐</span></td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Often cited as the best Tag Force game. 4,500+ cards, 300+ hours, WRGP arc.</td>
+          </tr>
+          <tr class="fn-xbox360 fn-skip">
+            <td>2010</td>
+            <td>5D's: Decade Duels</td>
+            <td>Xbox 360 / PS3</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> XBLA/PSN digital only. Online servers gone. Offline only via preserved copy.</td>
+          </tr>
+          <tr class="fn-wii fn-skip">
+            <td>2010</td>
+            <td>5D's: Master of the Cards</td>
+            <td>Wii</td>
+            <td>Dolphin</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td>Wii motion control dueling. EU only.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>Bonds Beyond Time</strong> (2010) — 10th anniversary crossover film. Yugi + Jaden + Yusei vs. Paradox. Watch after completing Duel Monsters, GX, and starting 5D's.</td></tr>
+
+          <tr class="fn-nds fn-highlight">
+            <td>2011</td>
+            <td>5D's WC 2011: Over the Nexus <span class="fn-star">⭐</span></td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Best 5D's DS game. Custom protagonist, WRGP arc original story.</td>
+          </tr>
+          <tr class="fn-psp fn-skip">
+            <td>2011</td>
+            <td>5D's: Tag Force 6</td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> Japan PSN only. WRGP arc through finale. Fan translation available.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── ZEXAL / ARC-V ERA (2011–2019) ──</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! Zexal / Zexal II</strong> (2011–2014, 146 eps) — Yuma + Astral collect Number cards. Introduces Xyz Summoning. The only post-original series with a complete English dub.</td></tr>
+
+          <tr class="fn-3ds fn-skip">
+            <td>2013</td>
+            <td>Zexal World Duel Carnival</td>
+            <td>3DS</td>
+            <td>Citra</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td>3DS Zexal-era dueling. Xyz Monsters supported.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! Arc-V</strong> (2014–2017, 148 eps) — Yuya Sakaki discovers Pendulum Summoning; multiverse war begins. Incorporates all prior summoning methods.</td></tr>
+
+          <tr class="fn-xbox360 fn-skip">
+            <td>2014</td>
+            <td>Millennium Duels</td>
+            <td>Xbox 360 / PS3</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> XBLA/PSN sequel to Decade Duels. No longer purchasable.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2014</td>
+            <td>Duel Arena</td>
+            <td>PC</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> Browser F2P game by Miniclip. Servers closed 2016.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2014</td>
+            <td>Duel Generation</td>
+            <td>iOS / Android</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> First official mobile app. Removed from stores circa 2019.</td>
+          </tr>
+          <tr class="fn-psp fn-skip">
+            <td>2015</td>
+            <td>Arc-V Tag Force Special</td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> Final Tag Force game, last PSP release. Massive cast from all series. Partial fan translation.</td>
+          </tr>
+          <tr class="fn-multi fn-skip">
+            <td>2015</td>
+            <td>Legacy of the Duelist</td>
+            <td>PS4 / XBO / PC</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC/Console</span></td>
+            <td>Story arcs from Duel Monsters–Arc-V. Superseded by Link Evolution — skip in favor of LE.</td>
+          </tr>
+          <tr class="fn-3ds fn-skip">
+            <td>2016</td>
+            <td>Saikyo Card Battle</td>
+            <td>3DS</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> <span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> 3DS eShop. eShop closed 2023 — no longer accessible.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">🎬 <strong>The Dark Side of Dimensions</strong> (2016) — Canonical epilogue to original Duel Monsters. Made with Kazuki Takahashi directly. Watch after finishing all of original Duel Monsters.</td></tr>
+
+          <tr class="fn-mobile fn-highlight">
+            <td>2016</td>
+            <td>Duel Links <span class="fn-star">⭐</span></td>
+            <td>iOS / Android / PC</td>
+            <td>App / Steam</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Best mobile YGO experience. Speed Duels, all anime series represented, still actively updated. Free-to-play.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! VRAINS</strong> (2017–2019, 120 eps) — VR dueling network cyberpunk thriller. Introduces Link Summoning. Last Gallop-produced series.</td></tr>
+
+          <tr class="fn-multi fn-highlight">
+            <td>2019</td>
+            <td>Legacy of the Duelist: Link Evolution <span class="fn-star">⭐</span></td>
+            <td>Switch / PS4 / XBO / PC</td>
+            <td>Native</td>
+            <td><span class="fn-tag fn-tag-multi">⚡ Console/PC</span></td>
+            <td><span class="fn-star">⭐</span> Best console entry point. All anime arcs from Duel Monsters through VRAINS, 150+ iconic duelists. Start here for console.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── RUSH DUEL ERA (2020–PRESENT) ──</td></tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! Sevens</strong> (2020–2021, 92 eps) — Yuga invents Rush Duels. First Bridge-animated series. Lighter, younger-audience tone. Disney XD (US).</td></tr>
+
+          <tr class="fn-switch fn-skip">
+            <td>2021</td>
+            <td>Rush Duel: Dawn of the Battle Royale</td>
+            <td>Switch</td>
+            <td>Native</td>
+            <td><span class="fn-tag fn-tag-multi">⚡ Console</span></td>
+            <td>Rush Duel format (draw to 5 each turn). Single-player + multiplayer. Sevens tie-in.</td>
+          </tr>
+          <tr class="fn-multi fn-highlight">
+            <td>2022</td>
+            <td>Master Duel <span class="fn-star">⭐</span></td>
+            <td>All Platforms</td>
+            <td>App / Steam / Native</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> The definitive digital TCG. 10,000+ cards, competitive ranked play, solo story mode. Free-to-play everywhere including iOS/Android.</td>
+          </tr>
+          <tr class="fn-mobile fn-skip">
+            <td>2022</td>
+            <td>Cross Duel</td>
+            <td>iOS / Android</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🚫 Defunct</span></td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> 4-player simultaneous mobile dueling. Servers terminated September 2023 — lasted exactly one year.</td>
+          </tr>
+
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Yu-Gi-Oh! Go Rush!!</strong> (2022–present, ~100 eps) — Sequel to Sevens. Alien protagonist Yudias learns Rush Dueling. Watch Sevens first.</td></tr>
+
+          <tr class="fn-switch fn-skip">
+            <td>2022</td>
+            <td>RUSH DUEL: Saikyo Battle Royale Let's Go Go Rush!!</td>
+            <td>Switch</td>
+            <td>Native</td>
+            <td><span class="fn-tag fn-tag-multi">⚡ Console</span></td>
+            <td><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> Go Rush!! tie-in. Expanded version of Dawn of the Battle Royale.</td>
+          </tr>
+          <tr class="fn-multi fn-highlight">
+            <td>2025</td>
+            <td>Early Days Collection <span class="fn-star">⭐</span></td>
+            <td>Switch / PC</td>
+            <td>Native / Steam</td>
+            <td><span class="fn-tag fn-tag-multi">⚡ Console/PC</span></td>
+            <td><span class="fn-star">⭐</span> 14 classic GB/GBC/GBA games (1998–2004) including 5 Japan-exclusives. The best legal way to play the classic era.</td>
+          </tr>
+
+        </table>
+      </div><!-- /release -->
+
+      <!-- ─── ANIME WATCH ORDER ─────────────────────────────── -->
+      <div class="fn-view" id="fn-library-watch">
+        <div class="fn-view-desc">
+          Recommended watch order for the anime series only. The franchise has three rough continuity blocs: the original trilogy (DM → GX → 5D's), the standalone modern era (Zexal, Arc-V, VRAINS), and the Rush Duel era (Sevens → Go Rush!!). Films are noted inline.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Year</th><th>Episodes</th><th>Studio</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── OPTIONAL PREQUEL ──</td></tr>
+          <tr class="fn-skip">
+            <td>0</td>
+            <td>Yu-Gi-Oh! (Toei, Season 0)</td>
+            <td>1998</td>
+            <td>27</td>
+            <td>Toei Animation</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Dark proto-series. No official EN release. Shadow Games anthology — very different tone. Completionists only.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── THE ORIGINAL TRILOGY ──</td></tr>
+          <tr class="fn-highlight">
+            <td>1</td>
+            <td>Yu-Gi-Oh! Duel Monsters <span class="fn-star">⭐</span></td>
+            <td>2000</td>
+            <td>224</td>
+            <td>Studio Gallop</td>
+            <td><span class="fn-star">⭐</span> The definitive starting point. All 5 seasons — EN dub or JP sub. Season 4 (Waking the Dragons) better in JP sub. 224 episodes total.</td>
+          </tr>
+          <tr class="fn-skip">
+            <td>1a</td>
+            <td>Yu-Gi-Oh! The Movie: Pyramid of Light</td>
+            <td>2004</td>
+            <td>Film</td>
+            <td>Studio Gallop</td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Watch between DM seasons 3 and 4. Western-produced. Generally considered non-canon.</td>
+          </tr>
+          <tr class="fn-highlight">
+            <td>2</td>
+            <td>Yu-Gi-Oh! GX <span class="fn-star">⭐</span></td>
+            <td>2004</td>
+            <td>180</td>
+            <td>Studio Gallop</td>
+            <td><span class="fn-star">⭐</span> Duel Academy. Seasons 1–3 are dubbed; Season 4 (40 eps, JP only) is the darkest content in all of YGO. Do NOT skip S4.</td>
+          </tr>
+          <tr class="fn-highlight">
+            <td>3</td>
+            <td>Yu-Gi-Oh! 5D's <span class="fn-star">⭐</span></td>
+            <td>2008</td>
+            <td>154</td>
+            <td>Studio Gallop</td>
+            <td><span class="fn-star">⭐</span> Future dystopia, motorcycle dueling, dark mythology. JP sub essential — EN dub never completed the final arc.</td>
+          </tr>
+          <tr class="fn-highlight">
+            <td>3a</td>
+            <td>Yu-Gi-Oh!: Bonds Beyond Time</td>
+            <td>2010</td>
+            <td>Film</td>
+            <td>Studio Gallop</td>
+            <td><span class="fn-star">⭐</span> Yugi + Jaden + Yusei crossover. Watch after finishing all three series or at least starting 5D's.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── MODERN STANDALONE SERIES (any order after the trilogy) ──</td></tr>
+          <tr>
+            <td>4</td>
+            <td>Yu-Gi-Oh! Zexal + Zexal II</td>
+            <td>2011</td>
+            <td>146</td>
+            <td>Studio Gallop</td>
+            <td>Yuma + Astral collect Number cards. Xyz Summoning. The only modern YGO with a complete English dub. Zexal II is the peak.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Yu-Gi-Oh! Arc-V</td>
+            <td>2014</td>
+            <td>148</td>
+            <td>Studio Gallop</td>
+            <td>Pendulum Summoning + multiverse war. Best experienced after the prior four series — contains heavy callbacks. EN dub incomplete.</td>
+          </tr>
+          <tr class="fn-skip">
+            <td>5a</td>
+            <td>Yu-Gi-Oh!: The Dark Side of Dimensions</td>
+            <td>2016</td>
+            <td>Film</td>
+            <td>Studio Gallop</td>
+            <td>Canonical epilogue to the original Duel Monsters series. Kazuki Takahashi involved directly. Watch after finishing original DM.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>Yu-Gi-Oh! VRAINS</td>
+            <td>2017</td>
+            <td>120</td>
+            <td>Studio Gallop</td>
+            <td>VR dueling cyberpunk thriller. Link Summoning. Most divisive modern series. Last Gallop production. JP sub on Crunchyroll.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── RUSH DUEL ERA (watch Sevens first, then Go Rush!!) ──</td></tr>
+          <tr>
+            <td>7</td>
+            <td>Yu-Gi-Oh! Sevens</td>
+            <td>2020</td>
+            <td>92</td>
+            <td>Bridge</td>
+            <td>Yuga invents Rush Duels. Lighter tone, younger audience. First Bridge production. Rush Duel format — draw to 5 each turn.</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>Yu-Gi-Oh! Go Rush!!</td>
+            <td>2022</td>
+            <td>~100</td>
+            <td>Bridge</td>
+            <td>Sequel to Sevens. Alien protagonist, sci-fi comedy. Watch Sevens first — direct continuation.</td>
+          </tr>
+        </table>
+      </div><!-- /watch -->
+
+      <!-- ─── BEST FIRST ─────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          Recommended path for newcomers — start with the best of each platform/format, skip the obligatory content until invested. Numbers are suggested order, not strict ranking.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🎮 Start Here — Best Modern Entry Points</td></tr>
+          <tr class="fn-multi fn-highlight"><td>1</td><td>Master Duel</td><td>Any — Free</td><td>The current definitive experience. Full rules, competitive play, solo mode. Zero barrier to entry.</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>2</td><td>Duel Links</td><td>Mobile / PC</td><td>Casual-friendly Speed Duels with all anime characters. Great for anime fans who want to experience the shows' cast in-game.</td></tr>
+          <tr class="fn-multi fn-highlight"><td>3</td><td>Legacy of the Duelist: Link Evolution</td><td>Switch / Console</td><td>Best narrative experience — relive all anime story arcs. Best console entry point.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">📺 Best Anime Entry Points</td></tr>
+          <tr class="fn-highlight"><td>4</td><td>Yu-Gi-Oh! Duel Monsters</td><td>Streaming</td><td>The franchise foundation. Duelist Kingdom through Battle City is peak YGO storytelling.</td></tr>
+          <tr class="fn-highlight"><td>5</td><td>Yu-Gi-Oh! 5D's</td><td>Streaming (JP sub)</td><td>Strongest serialized storytelling of any spin-off. Watch if you want the most cohesive narrative.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🕹️ Best Classic Game Entry Points</td></tr>
+          <tr class="fn-highlight"><td>6</td><td>Early Days Collection</td><td>Switch / PC</td><td>14 classic games in one — the legal, clean way to experience the entire Game Boy era.</td></tr>
+          <tr class="fn-highlight"><td>7</td><td>5D's: Tag Force 5</td><td>PSP (PPSSPP)</td><td>Best Tag Force entry — 4,500+ cards and 300+ hours. The deepest classic story experience.</td></tr>
+          <tr class="fn-highlight"><td>8</td><td>5D's WC 2011: Over the Nexus</td><td>NDS (melonds)</td><td>Best DS game. Good handheld story mode, final DS entry in the series.</td></tr>
+          <tr class="fn-highlight"><td>9</td><td>Forbidden Memories</td><td>PS1 (Duckstation)</td><td>Cult classic for atmosphere alone. Ancient Egypt setting, brutal grind — save states essential.</td></tr>
+        </table>
+      </div><!-- /bestfirst -->
+
+      <!-- ─── BY PLATFORM ─────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">
+          All games grouped by their original platform. Gold = standout entry for that platform.
+        </div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Title</th><th>Year</th><th>Core</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟩 Game Boy / Game Boy Color — Core: gambatte</td></tr>
+          <tr class="fn-gb fn-skip"><td>GB</td><td>Duel Monsters (Game Boy)</td><td>1998</td><td>gambatte</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> First ever YGO card game. Early Days Collection.</td></tr>
+          <tr class="fn-gbc fn-skip"><td>GBC</td><td>Duel Monsters II: Dark Duel Stories</td><td>1999</td><td>gambatte</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> Early Days Collection.</td></tr>
+          <tr class="fn-gbc fn-skip"><td>GBC</td><td>Monster Capsule GB</td><td>2000</td><td>gambatte</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> Monster grid combat, not cards. Early Days Collection.</td></tr>
+          <tr class="fn-gbc fn-highlight"><td>GBC</td><td>Dark Duel Stories <span class="fn-star">⭐</span></td><td>2000</td><td>gambatte</td><td><span class="fn-star">⭐</span> Best GBC entry. First Western release. Early Days Collection.</td></tr>
+          <tr class="fn-gbc fn-skip"><td>GBC</td><td>Duel Monsters 4: Battle of Great Duelists</td><td>2000</td><td>gambatte</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> 3 versions. Early Days Collection.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🔵 Game Boy Advance — Core: mgba</td></tr>
+          <tr class="fn-gba fn-skip"><td>GBA</td><td>Dungeon Dice Monsters</td><td>2001</td><td>mgba</td><td>Dice game. Early Days Collection.</td></tr>
+          <tr class="fn-gba fn-highlight"><td>GBA</td><td>The Eternal Duelist Soul <span class="fn-star">⭐</span></td><td>2001</td><td>mgba</td><td><span class="fn-star">⭐</span> Best early GBA card sim. Early Days Collection.</td></tr>
+          <tr class="fn-gba fn-skip"><td>GBA</td><td>Duel Monsters 6: Expert 2</td><td>2001</td><td>mgba</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> Early Days Collection.</td></tr>
+          <tr class="fn-gba"><td>GBA</td><td>The Sacred Cards</td><td>2002</td><td>mgba</td><td>Battle City RPG. Early Days Collection.</td></tr>
+          <tr class="fn-gba fn-skip"><td>GBA</td><td>Reshef of Destruction</td><td>2003</td><td>mgba</td><td>Infamously difficult sequel. Early Days Collection.</td></tr>
+          <tr class="fn-gba fn-highlight"><td>GBA</td><td>Worldwide Edition: Stairway to the Destined Duel <span class="fn-star">⭐</span></td><td>2003</td><td>mgba</td><td><span class="fn-star">⭐</span> Best mid-era GBA sim. Early Days Collection.</td></tr>
+          <tr class="fn-gba"><td>GBA</td><td>World Championship Tournament 2004</td><td>2004</td><td>mgba</td><td>Good TCG rules. Early Days Collection.</td></tr>
+          <tr class="fn-gba fn-skip"><td>GBA</td><td>Destiny Board Traveler</td><td>2004</td><td>mgba</td><td>Party spinoff. Early Days Collection.</td></tr>
+          <tr class="fn-gba"><td>GBA</td><td>7 Trials to Glory: WCT 2005</td><td>2004</td><td>mgba</td><td>Final GBA WC entry. Early Days Collection.</td></tr>
+          <tr class="fn-gba fn-skip"><td>GBA</td><td>GX: Duel Academy</td><td>2005</td><td>mgba</td><td>First GX game.</td></tr>
+          <tr class="fn-gba fn-highlight"><td>GBA</td><td>Ultimate Masters: WCT 2006 <span class="fn-star">⭐</span></td><td>2006</td><td>mgba</td><td><span class="fn-star">⭐</span> Best GBA card sim overall. Peak of the GBA era.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🩷 Nintendo DS — Core: melonds</td></tr>
+          <tr class="fn-nds fn-highlight"><td>NDS</td><td>Nightmare Troubadour <span class="fn-star">⭐</span></td><td>2005</td><td>melonds</td><td><span class="fn-star">⭐</span> Best classic-era DS game.</td></tr>
+          <tr class="fn-nds"><td>NDS</td><td>GX: Spirit Caller</td><td>2006</td><td>melonds</td><td>GX-era touchscreen dueling.</td></tr>
+          <tr class="fn-nds fn-skip"><td>NDS</td><td>World Championship 2007</td><td>2007</td><td>melonds</td><td>Sim-focused.</td></tr>
+          <tr class="fn-nds fn-skip"><td>NDS</td><td>GX: Card Almanac</td><td>2007</td><td>—</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> Card database app — not a game.</td></tr>
+          <tr class="fn-nds fn-skip"><td>NDS</td><td>GX: World Championship 2008</td><td>2007</td><td>melonds</td><td>Final GX DS entry.</td></tr>
+          <tr class="fn-nds"><td>NDS</td><td>5D's Stardust Accelerator: WC 2009</td><td>2009</td><td>melonds</td><td>First 5D's DS game.</td></tr>
+          <tr class="fn-nds"><td>NDS</td><td>5D's WC 2010: Reverse of Arcadia</td><td>2010</td><td>melonds</td><td>Synchro era card pool.</td></tr>
+          <tr class="fn-nds fn-highlight"><td>NDS</td><td>5D's WC 2011: Over the Nexus <span class="fn-star">⭐</span></td><td>2011</td><td>melonds</td><td><span class="fn-star">⭐</span> Best DS entry overall. Custom protagonist, WRGP story.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟦 PSP — Core: PPSSPP</td></tr>
+          <tr class="fn-psp fn-highlight"><td>PSP</td><td>GX: Tag Force <span class="fn-star">⭐</span></td><td>2006</td><td>PPSSPP</td><td><span class="fn-star">⭐</span> Best GX game. Start of the Tag Force story series.</td></tr>
+          <tr class="fn-psp"><td>PSP</td><td>GX: Tag Force 2</td><td>2007</td><td>PPSSPP</td><td>Season 2 content — larger than TF1.</td></tr>
+          <tr class="fn-psp fn-skip"><td>PSP</td><td>GX: Tag Force 3</td><td>2008</td><td>PPSSPP</td><td>EU/JP only. Season 3 content. Fan translation available.</td></tr>
+          <tr class="fn-psp"><td>PSP</td><td>5D's: Tag Force 4</td><td>2009</td><td>PPSSPP</td><td>Dark Signers arc.</td></tr>
+          <tr class="fn-psp fn-highlight"><td>PSP</td><td>5D's: Tag Force 5 <span class="fn-star">⭐</span></td><td>2010</td><td>PPSSPP</td><td><span class="fn-star">⭐</span> Best Tag Force game. 4,500+ cards, WRGP arc.</td></tr>
+          <tr class="fn-psp fn-skip"><td>PSP</td><td>5D's: Tag Force 6</td><td>2011</td><td>PPSSPP</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> JP PSN only. Fan translation available.</td></tr>
+          <tr class="fn-psp fn-skip"><td>PSP</td><td>Arc-V: Tag Force Special</td><td>2015</td><td>PPSSPP</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> Final Tag Force. All-series cast. Partial fan translation.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟠 PlayStation 1 — Core: pcsx_rearmed / Duckstation</td></tr>
+          <tr class="fn-ps1 fn-skip"><td>PS1</td><td>Monster Capsule: Breed &amp; Battle</td><td>1998</td><td>Duckstation</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> Monster sim, not card game.</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>PS1</td><td>Forbidden Memories <span class="fn-star">⭐</span></td><td>1999</td><td>Duckstation</td><td><span class="fn-star">⭐</span> Cult classic. Ancient Egypt story. Grind with save states.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟡 PlayStation 2 — Core: PCSX2</td></tr>
+          <tr class="fn-ps2 fn-highlight"><td>PS2</td><td>The Duelists of the Roses <span class="fn-star">⭐</span></td><td>2001</td><td>PCSX2</td><td><span class="fn-star">⭐</span> Wars of the Roses alternate history board hybrid. Unique and worth experiencing.</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>PS2</td><td>Capsule Monster Coliseum</td><td>2004</td><td>PCSX2</td><td>Hex-grid monster combat. Niche spinoff.</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>PS2</td><td>GX: The Beginning of Destiny</td><td>2007</td><td>PCSX2</td><td><span class="fn-tag fn-tag-jponly">🇯🇵</span> GX compilation.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🟢 PC — Run via Sunshine or standalone</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC</td><td>Power of Chaos: Yugi the Destiny</td><td>2003</td><td>EXE</td><td>Abandonware trilogy pt.1.</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC</td><td>Power of Chaos: Kaiba the Revenge</td><td>2004</td><td>EXE</td><td>Abandonware trilogy pt.2.</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC</td><td>Power of Chaos: Joey the Passion</td><td>2004</td><td>EXE</td><td>Abandonware trilogy pt.3.</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC</td><td>Yu-Gi-Oh! Online (all versions)</td><td>2005</td><td>—</td><td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> All three versions shut down.</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC</td><td>Duel Arena</td><td>2014</td><td>—</td><td><span class="fn-tag fn-tag-defunct">💀 Defunct</span> Browser F2P — servers closed 2016.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC/All</td><td>Master Duel <span class="fn-star">⭐</span></td><td>2022</td><td>Steam / Native</td><td><span class="fn-star">⭐</span> Current definitive experience. Free-to-play.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC/All</td><td>Legacy of the Duelist: Link Evolution <span class="fn-star">⭐</span></td><td>2019</td><td>Steam / Native</td><td><span class="fn-star">⭐</span> Best narrative retrospective. All anime arcs.</td></tr>
+        </table>
+      </div><!-- /platform -->
+
+      <!-- ─── DEFUNCT & DEAD ─────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-defunct">
+        <div class="fn-view-desc">
+          All defunct, delisted, server-shutdown, or permanently inaccessible Yu-Gi-Oh! games. Includes closed online services, delisted mobile apps, and games whose digital storefronts are gone.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>What Happened</th></tr>
+
+          <tr class="fn-pc">
+            <td>2005–2009</td>
+            <td>Yu-Gi-Oh! Online (all 3 versions)</td>
+            <td>PC</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Shut Down</span></td>
+            <td>Three iterations: Online (2005), Duel Evolution (2007), Duel Accelerator (2009). Final version (Duel Accelerator) servers closed 2012. All client software obsolete.</td>
+          </tr>
+          <tr class="fn-xbox360">
+            <td>2010</td>
+            <td>5D's: Decade Duels / Decade Duels Plus</td>
+            <td>Xbox 360 / PS3</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Delisted</span></td>
+            <td>XBLA/PSN digital only — no physical release. Xbox Live and PSN storefronts closed for 360/PS3 era; online servers long gone. Offline via preserved backup only.</td>
+          </tr>
+          <tr class="fn-xbox360">
+            <td>2014</td>
+            <td>Millennium Duels</td>
+            <td>Xbox 360 / PS3</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Delisted</span></td>
+            <td>Same situation as Decade Duels — XBLA/PSN digital only. No longer purchasable.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>2014–2016</td>
+            <td>Duel Arena</td>
+            <td>PC (Browser)</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Shut Down</span></td>
+            <td>Free-to-play browser/PC game by Miniclip. Lasted less than two years — servers permanently closed 2016.</td>
+          </tr>
+          <tr class="fn-mobile">
+            <td>2014–2019</td>
+            <td>Duel Generation</td>
+            <td>iOS / Android</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Delisted</span></td>
+            <td>First official mobile app. Removed from App Store and Google Play circa 2019. No longer downloadable or accessible.</td>
+          </tr>
+          <tr class="fn-mobile">
+            <td>2009</td>
+            <td>5D's Mobile</td>
+            <td>Feature Phone (Japan)</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Delisted</span></td>
+            <td>Japan-only i-mode / EZweb / Yahoo! Mobile release. Feature phone networks largely dismantled; app delisted. Permanently inaccessible.</td>
+          </tr>
+          <tr class="fn-3ds">
+            <td>2016</td>
+            <td>Saikyo Card Battle</td>
+            <td>3DS eShop</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Delisted</span></td>
+            <td>Japan-only 3DS eShop game. Nintendo shut down the 3DS eShop in March 2023 — no longer downloadable.</td>
+          </tr>
+          <tr class="fn-mobile">
+            <td>2022–2023</td>
+            <td>Cross Duel</td>
+            <td>iOS / Android</td>
+            <td><span class="fn-tag fn-tag-defunct">💀 Shut Down</span></td>
+            <td>4-player simultaneous mobile card game. Launched September 6, 2022 — servers terminated exactly one year later on September 4, 2023.</td>
+          </tr>
+        </table>
+      </div><!-- /defunct -->
+
+      <!-- ─── MOBILE / HANDHELD ──────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">
+          Games playable on phone or portable device — includes original handheld games via emulator (RetroArch/PPSSPP/Citra), native mobile apps currently live, and the Switch library. Defunct mobile apps excluded.
+        </div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Platform</th><th>Emulator / App</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">📱 Native Mobile Apps (Currently Live)</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>Master Duel <span class="fn-star">⭐</span></td><td>iOS / Android</td><td>App Store / Google Play</td><td><span class="fn-star">⭐</span> The definitive YGO digital experience. Free-to-play. Cross-platform saves.</td></tr>
+          <tr class="fn-mobile fn-highlight"><td>Duel Links <span class="fn-star">⭐</span></td><td>iOS / Android</td><td>App Store / Google Play</td><td><span class="fn-star">⭐</span> Speed Duels, all anime series. Best narrative mobile experience.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🎮 Nintendo Switch (Native)</td></tr>
+          <tr class="fn-switch fn-highlight"><td>Master Duel <span class="fn-star">⭐</span></td><td>Switch</td><td>Native (eShop)</td><td><span class="fn-star">⭐</span> Same experience as mobile/PC. Free-to-play.</td></tr>
+          <tr class="fn-switch fn-highlight"><td>Legacy of the Duelist: Link Evolution <span class="fn-star">⭐</span></td><td>Switch</td><td>Native (eShop)</td><td><span class="fn-star">⭐</span> Best story retrospective. All anime arcs DM through VRAINS.</td></tr>
+          <tr class="fn-switch fn-highlight"><td>Early Days Collection <span class="fn-star">⭐</span></td><td>Switch</td><td>Native (eShop)</td><td><span class="fn-star">⭐</span> 14 classic Game Boy/GBA games — best legal classic era access.</td></tr>
+          <tr class="fn-switch fn-skip"><td>Rush Duel: Dawn of the Battle Royale</td><td>Switch</td><td>Native (eShop)</td><td>Rush Duel format only. Sevens tie-in.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🕹️ Game Boy / GBC Era via Emulator (gambatte)</td></tr>
+          <tr class="fn-gbc fn-highlight"><td>Dark Duel Stories <span class="fn-star">⭐</span></td><td>GBC → gambatte</td><td>RetroArch</td><td><span class="fn-star">⭐</span> Best GBC entry. Best played via Early Days Collection.</td></tr>
+          <tr class="fn-gb fn-skip"><td>Duel Monsters (Game Boy)</td><td>GB → gambatte</td><td>RetroArch</td><td>First game. Historical interest.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🔵 GBA Era via Emulator (mgba)</td></tr>
+          <tr class="fn-gba fn-highlight"><td>The Eternal Duelist Soul <span class="fn-star">⭐</span></td><td>GBA → mgba</td><td>RetroArch</td><td><span class="fn-star">⭐</span> Best classic GBA dueling sim.</td></tr>
+          <tr class="fn-gba fn-highlight"><td>Worldwide Edition: Stairway to the Destined Duel</td><td>GBA → mgba</td><td>RetroArch</td><td>Best TCG-accurate mid-era GBA game.</td></tr>
+          <tr class="fn-gba fn-highlight"><td>Ultimate Masters: WCT 2006</td><td>GBA → mgba</td><td>RetroArch</td><td>Peak GBA card sim.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🩷 NDS Era via Emulator (melonds)</td></tr>
+          <tr class="fn-nds fn-highlight"><td>Nightmare Troubadour <span class="fn-star">⭐</span></td><td>NDS → melonds</td><td>RetroArch</td><td><span class="fn-star">⭐</span> Best classic DS game. Touchscreen card placement.</td></tr>
+          <tr class="fn-nds fn-highlight"><td>5D's WC 2011: Over the Nexus</td><td>NDS → melonds</td><td>RetroArch</td><td>Best 5D's DS game. Custom story.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🟦 PSP Era via PPSSPP</td></tr>
+          <tr class="fn-psp fn-highlight"><td>5D's: Tag Force 5 <span class="fn-star">⭐</span></td><td>PSP → PPSSPP</td><td>PPSSPP</td><td><span class="fn-star">⭐</span> Best Tag Force game. 4,500+ cards. Best PSP handheld experience.</td></tr>
+          <tr class="fn-psp fn-highlight"><td>GX: Tag Force</td><td>PSP → PPSSPP</td><td>PPSSPP</td><td>Start of the Tag Force story series — social sim + dueling.</td></tr>
+        </table>
+      </div><!-- /mobile -->
+
+      <div class="fn-legend">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#a87fe8;letter-spacing:.06em;text-transform:uppercase">Legend</span>
+        <span><span class="fn-dot" style="background:#a87fe8"></span>Purple left border / gold row = recommended / standout entry</span>
+        <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded row = optional, skip on first playthrough</span>
+        <span><span class="fn-tag fn-tag-yes">📱 Yes</span> Playable on Android/iOS via emulator or native app</span>
+        <span><span class="fn-tag fn-tag-no">🖥️ PC Only</span> Requires emulator on a PC — not mobile-friendly</span>
+        <span><span class="fn-tag fn-tag-defunct">💀 Defunct</span> Server shutdown or delisted — inaccessible</span>
+        <span><span class="fn-tag fn-tag-jponly">🇯🇵 JP Only</span> Japan-exclusive release</span>
+        <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = anime / film watch-point insert</span>
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /section -->
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 Yu-Gi-Oh! TV &amp; Anime</div>
+    <div class="card">
+      <div class="card-title">Nine Series, Three Eras</div>
+      <p style="font-size:.84rem;line-height:1.7;margin-bottom:16px">
+        Yu-Gi-Oh! has produced nine anime series across three eras. The original trilogy (Duel Monsters / GX / 5D's) shares a rough connected continuity. The modern era (Zexal, Arc-V, VRAINS) exists as standalone series. The Rush Duel era (Sevens / Go Rush!!) is its own independent continuity. Each series introduces a new summoning mechanic alongside the new protagonist.
+      </p>
+      <table class="fn-table">
+        <tr><th>Series</th><th>Year</th><th>Episodes</th><th>Protagonist</th><th>Summon Type</th><th>Watch Status</th></tr>
+        <tr><td>Yu-Gi-Oh! (Toei Season 0)</td><td>1998</td><td>27</td><td>Yugi Muto</td><td>Shadow Games (no cards)</td><td>Fansub only</td></tr>
+        <tr class="fn-highlight"><td>Yu-Gi-Oh! Duel Monsters <span class="fn-star">⭐</span></td><td>2000</td><td>224</td><td>Yugi / Yami Yugi</td><td>Normal / Ritual / Fusion</td><td>Crunchyroll / Hulu</td></tr>
+        <tr class="fn-highlight"><td>Yu-Gi-Oh! GX <span class="fn-star">⭐</span></td><td>2004</td><td>180</td><td>Jaden Yuki</td><td>Fusion (Elemental Heroes)</td><td>Crunchyroll (JP sub full)</td></tr>
+        <tr class="fn-highlight"><td>Yu-Gi-Oh! 5D's <span class="fn-star">⭐</span></td><td>2008</td><td>154</td><td>Yusei Fudo</td><td>Synchro</td><td>Crunchyroll (JP sub full)</td></tr>
+        <tr><td>Yu-Gi-Oh! Zexal + Zexal II</td><td>2011</td><td>146</td><td>Yuma Tsukumo</td><td>Xyz</td><td>Crunchyroll (full dub)</td></tr>
+        <tr><td>Yu-Gi-Oh! Arc-V</td><td>2014</td><td>148</td><td>Yuya Sakaki</td><td>Pendulum + all prior</td><td>Crunchyroll (JP sub)</td></tr>
+        <tr><td>Yu-Gi-Oh! VRAINS</td><td>2017</td><td>120</td><td>Yusaku Fujiki</td><td>Link</td><td>Crunchyroll (JP sub)</td></tr>
+        <tr><td>Yu-Gi-Oh! Sevens</td><td>2020</td><td>92</td><td>Yuga Ohdo</td><td>Rush Duel</td><td>Disney XD / limited</td></tr>
+        <tr><td>Yu-Gi-Oh! Go Rush!!</td><td>2022</td><td>~100</td><td>Yudias Velgear</td><td>Rush Duel</td><td>Fansubs primarily</td></tr>
+      </table>
+
+      <div class="callout callout-tip" style="margin-top:14px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          <strong>Dub completeness warning:</strong> GX Season 4 was never dubbed in English. 5D's EN dub stops mid-final arc (around episode 123). Arc-V EN dub is incomplete. For any series past Zexal, watch JP sub on Crunchyroll for the full story.
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Yu-Gi-Oh! Films</div>
+    <div class="card">
+      <table class="fn-table">
+        <tr><th>Year</th><th>Title</th><th>Canon?</th><th>When to Watch</th><th>Notes</th></tr>
+        <tr>
+          <td>2004</td>
+          <td>Yu-Gi-Oh! The Movie: Pyramid of Light</td>
+          <td>Disputed</td>
+          <td>Between DM Seasons 3–4</td>
+          <td>Anubis attacks using a card that counters the Egyptian Gods. Produced for Western audiences. Generally considered non-canon but officially connected to the series.</td>
+        </tr>
+        <tr class="fn-highlight">
+          <td>2010</td>
+          <td>Yu-Gi-Oh!: Bonds Beyond Time <span class="fn-star">⭐</span></td>
+          <td>Canon</td>
+          <td>After DM, GX, and starting 5D's</td>
+          <td>10th anniversary crossover: Yugi + Jaden + Yusei vs. time-traveling villain Paradox. Recommended watch for fans of the trilogy. Crunchyroll.</td>
+        </tr>
+        <tr class="fn-highlight">
+          <td>2016</td>
+          <td>Yu-Gi-Oh!: The Dark Side of Dimensions <span class="fn-star">⭐</span></td>
+          <td>Canon</td>
+          <td>After finishing all of Duel Monsters</td>
+          <td>Canonical Duel Monsters epilogue. Kazuki Takahashi directly involved — his final major creative contribution. New villain Aigami challenges both Yugi and Kaiba. Available on most streaming platforms.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Yu-Gi-Oh! Merchandise</div>
+    <div class="card">
+      <div class="card-title">Physical TCG &amp; Collectibles</div>
+      <p style="font-size:.84rem;line-height:1.7">
+        The Yu-Gi-Oh! TRADING CARD GAME is the #1 TCG in the world by total cards sold (35+ billion). Physical cards are published by Konami. Structure Decks are beginner-friendly pre-built decks. Booster Packs expand the collection. Tin sets and special editions include hard-to-find cards. For digital card collecting without physical storage, Master Duel is the recommended alternative.
+      </p>
+      <table class="fn-table" style="margin-top:14px">
+        <tr><th>Category</th><th>Examples</th><th>Notes</th></tr>
+        <tr><td>Structure Decks</td><td>Yugi Muto, Seto Kaiba, Joey Wheeler starter sets</td><td>Best starting point for physical play. Pre-built, playable out of the box.</td></tr>
+        <tr><td>Booster Packs</td><td>Various sets by era and theme</td><td>Core expansion method. Buy sealed or singles.</td></tr>
+        <tr><td>Tin Sets</td><td>Annual mega-tins with guaranteed rares</td><td>Good value for current-meta cards.</td></tr>
+        <tr><td>Anniversary Sets</td><td>25th Anniversary items (2023), Early Days Collection physical</td><td>Early Days Collection physical Switch edition included Quarter Century Secret Rare Harpie's Feather Duster.</td></tr>
+        <tr><td>Figures / Statues</td><td>Dark Magician, Blue-Eyes White Dragon statues</td><td>Third-party and official figurines widely available.</td></tr>
+        <tr><td>Manga Volumes</td><td>Original 38-volume manga by Kazuki Takahashi</td><td>Viz Media English release. Darker and more complete than the anime.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler</div>
+    <div class="card">
+      <div class="card-title">Best episodes and arcs for background/channel use</div>
+      <p style="font-size:.84rem;line-height:1.7">Yu-Gi-Oh! is well-suited for Tunarr rotation given its high episode count and self-contained duel structure. Best arcs for standalone viewing:</p>
+      <table class="fn-table" style="margin-top:12px">
+        <tr><th>Arc</th><th>Series</th><th>Episodes</th><th>Why It Works for Filler</th></tr>
+        <tr><td>Duelist Kingdom</td><td>Duel Monsters</td><td>S1 (eps 1–40)</td><td>Iconic, self-contained tournament. Sets the tone of the entire franchise.</td></tr>
+        <tr><td>Battle City</td><td>Duel Monsters</td><td>S2–S3 (eps 41–144)</td><td>Peak Duel Monsters content. High-production duels, dramatic stakes.</td></tr>
+        <tr><td>Dark Signers</td><td>5D's</td><td>S1 eps 27–64</td><td>Best 5D's arc. Standalone dramatic duels with mythological stakes.</td></tr>
+        <tr><td>World Dueling Grand Prix</td><td>5D's</td><td>S2 eps 98–119</td><td>Tournament format — good episodic rotation material.</td></tr>
+        <tr><td>Duel Academy Season 1</td><td>GX</td><td>S1 (eps 1–52)</td><td>Episodic school-tournament format. Accessible standalone eps.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="fn-timeline">
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 1996–1998 — Origin</div>
+          <div class="fn-era-title">From Manga to Monster</div>
+          <div class="fn-era-body">
+            Kazuki Takahashi began serializing Yu-Gi-Oh! in Weekly Shonen Jump in 1996. The early manga was a dark gaming anthology — Yugi Muto could challenge bullies to Shadow Games with lethal stakes. The card game "Duel Monsters" was one of many mini-games in the manga, but Toei Animation adapted the early chapters into a 27-episode anime in 1998 that largely ignored it. Reader response to the Duel Monsters card segments was overwhelmingly positive, leading Konami and Bandai to produce the first physical card game — and the first video game (GB, 1998) — before the manga even centered on it.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 1999–2004 — Global Explosion</div>
+          <div class="fn-era-title">Duel Monsters Conquers the World</div>
+          <div class="fn-era-body">
+            Studio Gallop's Yu-Gi-Oh! Duel Monsters (2000) ran for 224 episodes and made the franchise a global phenomenon. The physical TCG launched internationally through Upper Deck (North America) and expanded across dozens of countries. The video game line exploded across Game Boy, GBC, GBA, PS1, and PS2 — culminating in iconic handheld titles like The Eternal Duelist Soul and Forbidden Memories. The manga concluded in 2004, the same year GX launched to hand off the torch.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2004–2011 — The Spinoff Era</div>
+          <div class="fn-era-title">GX, 5D's, and the PSP/DS Golden Age</div>
+          <div class="fn-era-body">
+            GX (2004–2008) and 5D's (2008–2011) continued the franchise through two critically respected series. GX remains divisive but its final arc is some of the darkest storytelling in the franchise; 5D's is broadly considered the best-plotted spin-off. The PSP Tag Force series (TF1–TF6) defined the era for handheld fans — Tag Force 5 alone contains over 4,500 cards and 300+ hours. The DS World Championship series ran parallel, providing accessible annual card sim updates.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2011–2019 — Diversification</div>
+          <div class="fn-era-title">Zexal, Arc-V, VRAINS — and the Rise of Mobile</div>
+          <div class="fn-era-body">
+            Zexal introduced Xyz Summoning and ran to 146 episodes. Arc-V (2014) introduced Pendulum Summoning and a multiverse-spanning story that directly references all prior series. VRAINS (2017) brought a cyberpunk aesthetic and Link Summoning. On the games side, Konami shifted strategy: Duel Links (2016) was the mobile breakthrough — Speed Duels with short sessions proved enormously successful. Legacy of the Duelist (2015, expanded as Link Evolution 2019) brought narrative retrospectives to console. The Tag Force and World Championship handheld lines ended; console and mobile became the new focus.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2020–2022 — Tragedy and the Rush Duel Era</div>
+          <div class="fn-era-title">Kazuki Takahashi's Death and the New Generation</div>
+          <div class="fn-era-body">
+            Yu-Gi-Oh! Sevens (2020) launched a new era with Rush Duels — a simplified format aimed at younger audiences with a new generation of characters. In July 2022, franchise creator Kazuki Takahashi passed away unexpectedly at age 60. His final major work had been The Dark Side of Dimensions (2016), which he personally oversaw. Master Duel launched in January 2022 to widespread acclaim as the definitive digital TCG — 10,000+ cards, competitive ranked play, and full official rules. Cross Duel (a 4-player mobile experiment) launched and was shuttered in the same year, lasting exactly 12 months.
+          </div>
+        </div>
+
+        <div class="fn-era">
+          <div class="fn-era-year">📅 2022–Present</div>
+          <div class="fn-era-title">Go Rush!!, Early Days Collection, and the 25th Anniversary</div>
+          <div class="fn-era-body">
+            Go Rush!! (2022) continues as the current anime series in Japan. Master Duel remains the dominant competitive digital experience with consistent updates. Konami celebrated the franchise's 25th anniversary in 2023–2025 with events, commemorative products, and the Early Days Collection (February 2025) — a Digital Eclipse-developed compilation of 14 classic Game Boy/GBA games, including five released outside Japan for the first time. The physical TCG continues to expand with new sets, summoning mechanics, and yearly world championships. The franchise shows no signs of slowing; it remains one of Konami's most valuable IP.
+          </div>
+        </div>
+
+      </div><!-- /fn-timeline -->
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators</div>
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Contribution</th></tr>
+        <tr><td>Kazuki Takahashi</td><td>Manga Author / Creator</td><td>Created the original Yu-Gi-Oh! manga (1996–2004). Involved in The Dark Side of Dimensions (2016). Passed away July 2022.</td></tr>
+        <tr><td>Hiroyuki Kakudou</td><td>Chief Director</td><td>Directed the original Duel Monsters anime series (2000–2004).</td></tr>
+        <tr><td>Kenichi Hara</td><td>Director</td><td>Directed GX (2004–2008).</td></tr>
+        <tr><td>Katsumi Ono</td><td>Director</td><td>Directed 5D's (2008–2011) and ZEXAL (2011–2014).</td></tr>
+        <tr><td>Satoshi Kuwahara</td><td>Director</td><td>Directed Arc-V (2014–2017).</td></tr>
+        <tr><td>Masahiro Hosoda / Katsuya Asano</td><td>Directors</td><td>Co-directed VRAINS (2017–2019) — director changed mid-series at episode 14.</td></tr>
+        <tr><td>Nobuhiro Kondo</td><td>Director</td><td>Directed Sevens (2020–2021) and Go Rush!! (2022–present).</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon, what's not?</div>
+      <p style="font-size:.84rem;line-height:1.7">
+        The franchise has three rough continuity blocs. The <strong>original trilogy</strong> (Duel Monsters → GX → 5D's) shares a connected future-timeline: GX is set ~10 years after DM, 5D's is set centuries further in the future. Bonds Beyond Time explicitly crossovers all three. Zexal, Arc-V, and VRAINS are standalone continuities with no direct connection to the trilogy (though Arc-V pays heavy homage). Sevens and Go Rush!! form their own Rush Duel continuity.
+        <br><br>
+        The Toei Season 0 anime is based on the early manga chapters but diverges significantly from both the manga and Gallop anime — it's generally considered a standalone adaptation. The Pyramid of Light movie is disputed canon. The Dark Side of Dimensions was made with Takahashi's direct involvement and is considered fully canonical to the manga ending. Video games are generally non-canon unless they adapt anime story arcs directly.
+      </p>
+    </div>
+  </div>
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     SHARED JS (tab switching + view switching)
+═══════════════════════════════════════════════════ -->
+<script>
+function fnTab(name, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + name);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function fnView(tab, view, btn) {
+  const pane = document.getElementById('fn-pane-' + tab);
+  if (!pane) return;
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('fn-' + tab + '-' + view);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

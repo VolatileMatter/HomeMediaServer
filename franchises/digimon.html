@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Digimon</title><link rel="stylesheet" href="../shared.css">
+<style>
+/* ════════════════════════════════════════════════════
+   DIGIMON FRANCHISE — custom colour vars
+════════════════════════════════════════════════════ */
+:root {
+  --digi-accent: #2979ff;
+  --digi-accent2: #80d8ff;
+  --digi-purple: #ce93d8;
+  --digi-warn: #ef9a9a;
+}
+
+/* ════════════════════════════════════════════════════
+   VIEW TABS (inner sub-tabs)
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-view-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-view-btn.active {
+  background: rgba(41,121,255,.15);
+  border-color: var(--digi-accent);
+  color: var(--digi-accent);
+}
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--digi-accent);
+  padding-left: 10px;
+}
+
+/* ════════════════════════════════════════════════════
+   MAIN PAGE TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.fn-tab-btn:hover { background: var(--bg3); color: var(--text); }
+.fn-tab-btn.active {
+  background: rgba(41,121,255,.15);
+  border-color: var(--digi-accent);
+  color: var(--digi-accent);
+}
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   TABLE BASE
+════════════════════════════════════════════════════ */
+.fn-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.fn-table th {
+  background: var(--bg3);
+  color: var(--digi-accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc/era group header rows */
+.fn-arc-row td {
+  background: rgba(41,121,255,.07) !important;
+  color: var(--digi-accent);
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(41,121,255,.25) !important;
+  border-bottom: 1px solid rgba(41,121,255,.15) !important;
+}
+
+/* Anime/TV crossover note rows — purple italic */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Defunct/shutdown rows — red tint */
+.fn-defunct td {
+  background: rgba(239,83,80,.04) !important;
+}
+.fn-defunct td:first-child { border-left: 3px solid #ef5350 !important; }
+
+/* Gold highlight = recommended row */
+.fn-highlight td { background: rgba(41,121,255,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--digi-accent) !important; }
+
+/* Skip/optional rows */
+.fn-skip td { opacity: .58; }
+
+/* Platform left-border colour stripes */
+.fn-ps1    td:first-child { border-left: 3px solid #ffb74d; }
+.fn-ps2    td:first-child { border-left: 3px solid #ff8a65; }
+.fn-ps3    td:first-child { border-left: 3px solid #ffd54f; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-ps5    td:first-child { border-left: 3px solid #ffe57f; }
+.fn-psp    td:first-child { border-left: 3px solid #ff6e40; }
+.fn-vita   td:first-child { border-left: 3px solid #ffab40; }
+.fn-gba    td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-nds    td:first-child { border-left: 3px solid #f48fb1; }
+.fn-3ds    td:first-child { border-left: 3px solid #ce93d8; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-gc     td:first-child { border-left: 3px solid #9575cd; }
+.fn-xbox   td:first-child { border-left: 3px solid #81c784; }
+.fn-pc     td:first-child { border-left: 3px solid #90caf9; }
+.fn-mobile td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-ws     td:first-child { border-left: 3px solid #bcaaa4; }
+.fn-sat    td:first-child { border-left: 3px solid #eeeeee; }
+.fn-multi  td:first-child { border-left: 3px solid var(--digi-accent); }
+
+/* Inline tags */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-pc     { background: rgba(144,202,249,.18); color: #90caf9; border: 1px solid rgba(144,202,249,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06);  color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-dead   { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-jp     { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-star { color: var(--digi-accent); font-weight: 700; }
+
+/* Stat row */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--digi-accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* Legend */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* Era history blocks */
+.fn-era {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--digi-accent);
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+}
+.fn-era-year { font-family: 'Share Tech Mono', monospace; font-size: .68rem; color: var(--digi-accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.fn-era-title { font-family: 'Cinzel', serif; font-size: .95rem; color: var(--text-bright); margin-bottom: 8px; }
+.fn-era-body { font-size: .82rem; color: var(--text-dim); line-height: 1.7; }
+
+/* Merch history blocks */
+.fn-merch-history { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 14px; }
+.fn-merch-history-era { font-family: 'Cinzel', serif; font-size: .85rem; color: var(--digi-accent); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* Filler cards */
+.fn-filler-card { border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; margin-bottom: 10px; }
+.fn-filler-episode     { background: rgba(41,121,255,.08);   color: #90caf9;  border-color: rgba(41,121,255,.3); }
+.fn-filler-movie       { background: rgba(33,150,243,.08);   color: #90caf9;  border-color: rgba(33,150,243,.3); }
+.fn-filler-retrospective{ background: rgba(180,100,220,.12); color: #b464dc;  border-color: rgba(180,100,220,.3); }
+.fn-filler-bumper      { background: rgba(76,175,80,.12);   color: #81c784;  border-color: rgba(76,175,80,.3); }
+.fn-filler-name  { font-weight: 700; font-size: .88rem; color: var(--text-bright); margin-bottom: 4px; }
+.fn-filler-meta  { font-family: 'Share Tech Mono', monospace; font-size: .65rem; color: var(--text-dim); margin-bottom: 6px; }
+.fn-filler-desc  { font-size: .78rem; color: var(--text-dim); line-height: 1.6; }
+.fn-filler-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: .72rem; color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">🦕</div>
+  <div>
+    <h1>Digimon</h1>
+    <div class="subtitle">// V-Pet · Anime · Console · Mobile · WonderSwan · EmulatorJS · Jellyfin //</div>
+    <p class="desc">
+      Bandai's Digital Monsters franchise, born in 1997 as a virtual pet for boys. Ten anime series, 19+ films, dozens of console RPGs, and a sprawling graveyard of shuttered mobile games.
+      Digimon is darker and more serialised than Pokémon — each series stands alone, and the best entries (Tamers, Cyber Sleuth) hold up as genuine sci-fi fiction.
+      Use the Library tab to sort by release order, story arc, or platform. Other tabs cover TV/Anime, Movies, Merch, Tunarr filler, and franchise history.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">50+</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">10</div><div class="fn-stat-label">Anime Series</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">19+</div><div class="fn-stat-label">Films</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">10+</div><div class="fn-stat-label">Mobile (defunct)</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1997</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Merch</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Digimon Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','arc',       this)">🕰️ By Story Arc</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile Only</button>
+      </div>
+
+      <!-- ─── RELEASE ORDER ─────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">
+          All games and media in real-world release order. ⭐ = recommended. Gold rows = standout entries. Faded = optional/skip. Red tags = defunct/shutdown. Purple rows = anime watch points.
+        </div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Emulator / Core</th><th>Mobile?</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The Origin (1997–1999) ──</td></tr>
+          <tr class="fn-multi fn-skip">
+            <td>1997</td>
+            <td>Digital Monster v-pet (Ver. 1–6 / Pendulum)</td>
+            <td>Hardware</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ Hardware</span></td>
+            <td>Physical v-pet. Franchise origin. Mentioned for context only.</td>
+          </tr>
+          <tr class="fn-sat fn-skip">
+            <td>1998</td>
+            <td>Digital Monster Ver. S: Digimon Tamers</td>
+            <td>Sega Saturn</td>
+            <td>SSF / Kronos</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> <span class="fn-tag fn-tag-opt">optional</span> First Digimon game ever. Saturn exclusive, no English release.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Adventure</strong> (1999, 54 eps) — Start here. The original DigiDestined. Watch before or alongside any of the 1999 console games.</td></tr>
+          <tr class="fn-ps1 fn-highlight">
+            <td>1999</td>
+            <td>Digimon World <span class="fn-star">⭐</span></td>
+            <td>PS1 / PC</td>
+            <td>pcsx_rearmed / Steam</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-star">⭐</span> The v-pet formula as a full RPG. Raise one Digimon from baby to mega, repopulate File Island. Demanding and weird. Available on Steam.</td>
+          </tr>
+          <tr class="fn-ps1 fn-skip">
+            <td>1999</td>
+            <td>Digimon Digital Card Battle</td>
+            <td>PS1</td>
+            <td>pcsx_rearmed</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Card battler based on the official CCG.</td>
+          </tr>
+          <tr class="fn-ws fn-skip">
+            <td>1999</td>
+            <td>Digimon Adventure: Anode Tamer / Cathode Tamer</td>
+            <td>WonderSwan</td>
+            <td>SwanEmu (limited)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Canon — Ryo Akiyama's story begins here. No English release.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Adventure 02 &amp; WonderSwan Arc (2000–2001) ──</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Adventure 02</strong> (2000, 50 eps) — Watch immediately after Adventure. Direct sequel, same cast plus new DigiDestined.</td></tr>
+          <tr class="fn-ps1 fn-skip">
+            <td>2000</td>
+            <td>Digimon World 2</td>
+            <td>PS1</td>
+            <td>pcsx_rearmed</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Dungeon-crawler sequel. Grind-heavy.</td>
+          </tr>
+          <tr class="fn-ws fn-skip">
+            <td>2000</td>
+            <td>Adventure 02: Tag Tamers / D1 Tamers</td>
+            <td>WonderSwan / WSC</td>
+            <td>SwanEmu (limited)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Canon WS RPGs — Ryo partners with Ken, then crosses into the Tamers universe.</td>
+          </tr>
+          <tr class="fn-ps1 fn-skip">
+            <td>2001</td>
+            <td>Digimon Rumble Arena</td>
+            <td>PS1</td>
+            <td>pcsx_rearmed</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 24-character platform fighter. Accessible party game.</td>
+          </tr>
+          <tr class="fn-ws fn-skip">
+            <td>2001</td>
+            <td>Digimon Tamers: Brave Tamers</td>
+            <td>WonderSwan Color</td>
+            <td>SwanEmu (limited)</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Canon — Ryo's final WonderSwan adventure before entering the Tamers universe.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Tamers Arc (2001–2002) ──</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Tamers</strong> (2001, 51 eps) — Standalone universe. Best entry point for adult fans. Written by Chiaki J. Konaka (Serial Experiments Lain). Watch before Tamers film.</td></tr>
+          <tr class="fn-ps1 fn-skip">
+            <td>2002</td>
+            <td>Digimon World 3</td>
+            <td>PS1</td>
+            <td>pcsx_rearmed</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Kids trapped in an online Digimon RPG. Lighter tone. PAL: Digimon World 2003.</td>
+          </tr>
+          <tr class="fn-gba fn-skip">
+            <td>2003</td>
+            <td>Digimon Battle Spirit (GBA)</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> 2D platform fighter — Adventure + Tamers cast. Fun budget game.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Frontier &amp; Early DS Era (2002–2008) ──</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Frontier</strong> (2002, 50 eps) — Standalone. Kids transform INTO Digimon using Ancient Spirits — no partner Digimon mechanic.</td></tr>
+          <tr class="fn-gba fn-skip">
+            <td>2003</td>
+            <td>Digimon Battle Spirit 2 (GBA)</td>
+            <td>GBA</td>
+            <td>mgba</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Sequel fighter with Frontier characters.</td>
+          </tr>
+          <tr class="fn-multi fn-skip">
+            <td>2004</td>
+            <td>Digimon Rumble Arena 2</td>
+            <td>PS2 / GCN / Xbox</td>
+            <td>PCSX2 / Dolphin / Xemu</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Best Rumble Arena game — expanded roster from multiple series.</td>
+          </tr>
+          <tr class="fn-multi fn-skip">
+            <td>2005</td>
+            <td>Digimon World 4</td>
+            <td>PS2 / GCN / Xbox</td>
+            <td>PCSX2 / Dolphin / Xemu</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Action RPG co-op spinoff. Divisive — very different from other World games.</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Savers (Data Squad)</strong> (2006, 48 eps) — Standalone. Government agency battles rogue Digimon. Older-skewing — watch the Japanese sub.</td></tr>
+          <tr class="fn-nds fn-highlight">
+            <td>2006</td>
+            <td>Digimon Story (World DS) <span class="fn-star">⭐</span></td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> First entry in the best handheld Digimon series. Turn-based RPG with a large roster and farm mechanics. Great portable entry point.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>2007</td>
+            <td>Digimon Story: Sunburst / Moonlight</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Dual-version Story sequel. Light/Dark themed teams.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>2008</td>
+            <td>Digimon World Championship</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> V-pet meets tournament battler. Not Story series despite branding.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── Xros Wars Era (2010–2014) ──</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Fusion (Xros Wars)</strong> (2010, 79 eps / 3 seasons) — Standalone. Longest series. DigiXros mechanic combines Digimon. Season 3 sub-only (never dubbed).</td></tr>
+          <tr class="fn-nds fn-skip">
+            <td>2010</td>
+            <td>Digimon Story: Lost Evolution</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> <span class="fn-tag fn-tag-opt">optional</span> Japan-only. Fan translation exists.</td>
+          </tr>
+          <tr class="fn-nds fn-skip">
+            <td>2011</td>
+            <td>Digimon Story: Super Xros Wars Red/Blue</td>
+            <td>NDS</td>
+            <td>melonds</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> <span class="fn-tag fn-tag-opt">optional</span> Xros Wars tie-in dual games. Final DS Story titles.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct">
+            <td>2011</td>
+            <td>Digimon Collectors (mobile)</td>
+            <td>Mobile</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span></td>
+            <td>Card-collecting mobile game. <strong>Servers shut down July 2014.</strong></td>
+          </tr>
+          <tr class="fn-psp fn-skip">
+            <td>2012</td>
+            <td>Digimon World Re:Digitize (PSP)</td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Spiritual World 1 successor. Play the 3DS Decode version instead.</td>
+          </tr>
+          <tr class="fn-psp fn-skip">
+            <td>2013</td>
+            <td>Digimon Adventure (PSP)</td>
+            <td>PSP</td>
+            <td>PPSSPP</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> VN + RPG retelling of the Adventure anime. Fan translation patch available.</td>
+          </tr>
+          <tr class="fn-3ds fn-highlight">
+            <td>2013</td>
+            <td>Digimon World Re:Digitize Decode <span class="fn-star">⭐</span></td>
+            <td>3DS</td>
+            <td>Citra / Lime3DS</td>
+            <td><span class="fn-tag fn-tag-yes">📱 Yes</span></td>
+            <td><span class="fn-star">⭐</span> Definitive Re:Digitize. Enhanced 3DS port with added story chapters. Fan English patch available.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct">
+            <td>2013</td>
+            <td>Digimon Crusader / Digimon Heroes! (mobile)</td>
+            <td>Mobile</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span></td>
+            <td>Card battle RPG. Original debut Digimon and Aegiomon storyline. <strong>JP closed 2014, Global 2017.</strong></td>
+          </tr>
+          <tr class="fn-multi fn-skip">
+            <td>2014</td>
+            <td>Digimon All-Star Rumble</td>
+            <td>PS3 / Xbox 360</td>
+            <td>RPCS3 / Xenia</td>
+            <td><span class="fn-tag fn-tag-no">🖥️ PC Only</span></td>
+            <td><span class="fn-tag fn-tag-opt">optional</span> Built specifically for western audiences. Middling reception.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── The Modern Revival (2015–Present) ──</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Adventure tri.</strong> (2015–2018, 6 films) — Adventure cast returns as older teens. Watch Adventure + 02 first.</td></tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2015</td>
+            <td>Digimon Story: Cyber Sleuth <span class="fn-star">⭐</span></td>
+            <td>PS4 / PC / Switch</td>
+            <td>Steam (native)</td>
+            <td><span class="fn-tag fn-tag-pc">🖥️ Steam</span></td>
+            <td><span class="fn-star">⭐</span> Best modern entry point. 200+ Digimon, excellent writing, adult cast. Available on Steam (Complete Edition).</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct">
+            <td>2016</td>
+            <td>Digimon Linkz (mobile)</td>
+            <td>Mobile</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span></td>
+            <td>Farm-building RPG. <strong>Servers shut down July 2019.</strong></td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Universe: App Monsters</strong> (2016, 52 eps) — Standalone Appmon spinoff franchise, now defunct. Social media / internet themes. Sub-only.</td></tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2016</td>
+            <td>Digimon World: Next Order <span class="fn-star">⭐</span></td>
+            <td>PS4 / Switch / PC</td>
+            <td>Steam (native)</td>
+            <td><span class="fn-tag fn-tag-pc">🖥️ Steam</span></td>
+            <td><span class="fn-star">⭐</span> Best modern World game. Raise two Digimon simultaneously. Steam and Switch.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2017</td>
+            <td>Digimon Story: Cyber Sleuth – Hacker's Memory</td>
+            <td>PS4 / PC / Switch</td>
+            <td>Steam (native)</td>
+            <td><span class="fn-tag fn-tag-pc">🖥️ Steam</span></td>
+            <td>Side-story to Cyber Sleuth. 300+ Digimon. Play Cyber Sleuth first — bundled in Complete Edition.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct">
+            <td>2018</td>
+            <td>Digimon ReArise (mobile)</td>
+            <td>Mobile</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span></td>
+            <td>Most narrative-rich mobile Digimon game. <strong>Servers shut down April 2022.</strong> APK for offline story.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct">
+            <td>2018</td>
+            <td>Digimon Encounters (mobile)</td>
+            <td>Mobile</td>
+            <td>—</td>
+            <td><span class="fn-tag fn-tag-dead">💀 Defunct</span></td>
+            <td>Asia-only. <strong>Servers shut down November 2020.</strong></td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Adventure: (2020 reboot)</strong> (2020, 67 eps) — Full reboot set in 2020. Better animation; divisive pacing. Standalone.</td></tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Ghost Game</strong> (2021, 67 eps) — Horror-inflected episodic format. Digimon as urban legend monsters. English dub Dec 2025.</td></tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2022</td>
+            <td>Digimon Survive <span class="fn-star">⭐</span></td>
+            <td>PS4 / Switch / PC</td>
+            <td>Steam (native)</td>
+            <td><span class="fn-tag fn-tag-pc">🖥️ Steam</span></td>
+            <td><span class="fn-star">⭐</span> Tactical RPG + visual novel hybrid. Branching routes, permanent deaths. Underrated and emotionally punishing.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>2025</td>
+            <td>Digimon Story: Time Stranger</td>
+            <td>PS5 / PC</td>
+            <td>Steam (native)</td>
+            <td><span class="fn-tag fn-tag-pc">🖥️ Steam</span></td>
+            <td>Successor to Cyber Sleuth. Olympos XII as central characters. Latest major title (Oct 2025).</td>
+          </tr>
+          <tr class="fn-media-row"><td colspan="6">📺 <strong>Digimon Beatbreak</strong> (2025, ongoing) — Tenth anime series. Currently airing in Japan. No English release yet.</td></tr>
+        </table>
+
+        <div class="fn-legend">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--digi-accent);letter-spacing:.06em;text-transform:uppercase">Legend</span>
+          <span><span class="fn-dot" style="background:var(--digi-accent)"></span>Blue border = recommended / best entry in its tier</span>
+          <span><span class="fn-dot" style="background:rgba(255,255,255,.2)"></span>Faded row = optional, skip on first run</span>
+          <span><span class="fn-dot" style="background:#ef5350"></span>Red border = DEFUNCT mobile/server-dependent game</span>
+          <span><span class="fn-tag fn-tag-yes">📱 Yes</span> EmulatorJS / RetroArch mobile</span>
+          <span><span class="fn-tag fn-tag-pc">🖥️ Steam</span> Native PC release via Steam</span>
+          <span><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Japan-exclusive / fan translation required</span>
+          <span><span class="fn-dot" style="background:#ce93d8"></span>Purple row = anime watch point</span>
+        </div>
+      </div>
+
+      <!-- ─── BY STORY ARC ─────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-arc">
+        <div class="fn-view-desc">
+          Digimon has no unified timeline — each series is its own standalone universe. The Adventure continuity (Adventure → 02 → tri. → Kizuna → The Beginning) is the only multi-series story thread. All other series are self-contained.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Type</th><th>Platform</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📺 The Adventure Continuity (Single connected universe)</td></tr>
+          <tr class="fn-media-row"><td colspan="5">Watch / play these in order — they form one continuous story across 24 years.</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>1</td><td>Digimon Adventure (1999 short film)</td><td>Film</td><td>Crunchyroll / Discotek</td><td><span class="fn-star">⭐</span> 20-min origin. Tai and Kari's first encounter with a Digimon.</td></tr>
+          <tr class="fn-media-row"><td colspan="5">📺 <strong>Digimon Adventure</strong> (1999, 54 eps)</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>2</td><td>Our War Game! (film)</td><td>Film</td><td>Crunchyroll</td><td><span class="fn-star">⭐</span> The best Digimon film. Internet virus fight in real time. Watch after ep 54.</td></tr>
+          <tr class="fn-media-row"><td colspan="5">📺 <strong>Digimon Adventure 02</strong> (2000, 50 eps)</td></tr>
+          <tr class="fn-ps1"><td>3</td><td>Hurricane Touchdown!! (film)</td><td>Film</td><td>Crunchyroll</td><td>Set during 02. Willis arc.</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>4</td><td>Revenge of Diaboromon (film)</td><td>Film</td><td>Crunchyroll</td><td><span class="fn-star">⭐</span> Direct Our War Game! sequel. Watch after 02.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>5</td><td>Digimon Adventure tri. (6 films, 2015–2018)</td><td>Film series</td><td>Crunchyroll</td><td><span class="fn-star">⭐</span> Original cast as teens. Watch chapters 1–6 in order after 02.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>6</td><td>Digimon Adventure: Last Evolution Kizuna (film)</td><td>Film</td><td>Crunchyroll</td><td><span class="fn-star">⭐</span> Emotional finale for the original cast. Watch tri. first.</td></tr>
+          <tr class="fn-pc"><td>7</td><td>Digimon Adventure 02: The Beginning (film)</td><td>Film</td><td>Crunchyroll</td><td>Set post-Kizuna. First human / Digimon partner origin story.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📺 Standalone Universes (any order, each self-contained)</td></tr>
+          <tr class="fn-media-row"><td colspan="5">These series have no connection to Adventure. Start any of them independently.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>—</td><td>Digimon Tamers (2001, 51 eps + 2 films)</td><td>Anime</td><td>Crunchyroll</td><td><span class="fn-star">⭐</span> Written by Chiaki J. Konaka. Best series. Ryo Akiyama appears (from WonderSwan games).</td></tr>
+          <tr class="fn-ps1"><td>—</td><td>Digimon Frontier (2002, 50 eps + 1 film)</td><td>Anime</td><td>Crunchyroll</td><td>Kids transform into Digimon. No partner mechanic. Divisive but mythologically rich.</td></tr>
+          <tr class="fn-ps1"><td>—</td><td>Digimon Savers / Data Squad (2006, 48 eps + 1 film)</td><td>Anime</td><td>Crunchyroll</td><td>Government DATS agency. Fistfight protagonist. Watch sub for intended tone.</td></tr>
+          <tr class="fn-ps1"><td>—</td><td>Digimon Fusion / Xros Wars (2010, 79 eps)</td><td>Anime</td><td>Crunchyroll</td><td>DigiXros combining mechanic. Longest series. Season 3 sub-only.</td></tr>
+          <tr class="fn-ps1"><td>—</td><td>Digimon Universe: App Monsters (2016, 52 eps)</td><td>Anime</td><td>Crunchyroll</td><td>Appmon spinoff franchise. Social media themes. Sub only.</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>—</td><td>Digimon Ghost Game (2021, 67 eps)</td><td>Anime</td><td>Crunchyroll</td><td><span class="fn-star">⭐</span> Horror-inflected episodic format. Best recent series. English dub Dec 2025.</td></tr>
+          <tr class="fn-ps1"><td>—</td><td>Digimon Beatbreak (2025, ongoing)</td><td>Anime</td><td>TBA</td><td>Currently airing. Tenth series.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🕹️ Game Continuities (standalone, not connected to any anime)</td></tr>
+          <tr class="fn-pc fn-highlight"><td>—</td><td>Cyber Sleuth + Hacker's Memory</td><td>RPG duo</td><td>Steam</td><td><span class="fn-star">⭐</span> The best Digimon games. Self-contained story, no anime knowledge needed.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>—</td><td>Digimon Survive</td><td>Tactical VN</td><td>Steam</td><td><span class="fn-star">⭐</span> Dark, branching narrative. Completely standalone.</td></tr>
+          <tr class="fn-pc"><td>—</td><td>Digimon World / Next Order</td><td>RPG sim</td><td>Steam</td><td>V-pet loop as RPG. Self-contained.</td></tr>
+          <tr class="fn-nds fn-highlight"><td>—</td><td>Digimon Story (DS) series</td><td>RPG</td><td>NDS (melonds)</td><td><span class="fn-star">⭐</span> Best handheld Digimon games. Standalone.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─── BY PLATFORM ─────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">All games grouped by platform. Purple rows = anime available on streaming.</div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Title</th><th>Year</th><th>Emulator / Core</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📺 Streaming Anime (Crunchyroll)</td></tr>
+          <tr class="fn-media-row"><td colspan="5">Adventure (1999) · Adventure 02 (2000) · Tamers (2001) · Frontier (2002) · Savers/Data Squad (2006) · Fusion/Xros Wars (2010) · App Monsters (2016) · Adventure: reboot (2020) · Ghost Game (2021) · Beatbreak (2025)</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">💻 PC / Steam (native, no emulation)</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC / Steam</td><td>Digimon Story: Cyber Sleuth Complete Edition</td><td>2019</td><td>Native</td><td><span class="fn-star">⭐</span> Includes Cyber Sleuth + Hacker's Memory. Best starting point.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC / Steam</td><td>Digimon World: Next Order</td><td>2023</td><td>Native</td><td><span class="fn-star">⭐</span> Most accessible modern World game.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC / Steam</td><td>Digimon Survive</td><td>2022</td><td>Native</td><td><span class="fn-star">⭐</span> Tactical RPG + visual novel.</td></tr>
+          <tr class="fn-pc"><td>PC / Steam</td><td>Digimon Story: Time Stranger</td><td>2025</td><td>Native</td><td>Latest Digimon game.</td></tr>
+          <tr class="fn-pc fn-skip"><td>PC / Steam</td><td>Digimon World (original)</td><td>2002</td><td>Native</td><td><span class="fn-tag fn-tag-opt">optional</span> PC port of the PS1 original.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 Nintendo DS (melonds)</td></tr>
+          <tr class="fn-nds fn-highlight"><td>NDS</td><td>Digimon Story (World DS)</td><td>2006</td><td>melonds</td><td><span class="fn-star">⭐</span> Best NDS entry. Start here.</td></tr>
+          <tr class="fn-nds"><td>NDS</td><td>Digimon Story: Sunburst / Moonlight</td><td>2007</td><td>melonds</td><td>Dual-version sequel.</td></tr>
+          <tr class="fn-nds"><td>NDS</td><td>Digimon World Championship</td><td>2008</td><td>melonds</td><td>V-pet meets tournament.</td></tr>
+          <tr class="fn-nds fn-skip"><td>NDS</td><td>Digimon Story: Lost Evolution</td><td>2010</td><td>melonds</td><td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Japan-only. Fan translation exists.</td></tr>
+          <tr class="fn-nds fn-skip"><td>NDS</td><td>Digimon Story: Super Xros Wars R/B</td><td>2011</td><td>melonds</td><td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Japan-only. Xros Wars tie-in.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 Game Boy Advance (mgba)</td></tr>
+          <tr class="fn-gba"><td>GBA</td><td>Digimon Battle Spirit</td><td>2003</td><td>mgba</td><td>Platform fighter — Adventure + Tamers cast.</td></tr>
+          <tr class="fn-gba fn-skip"><td>GBA</td><td>Digimon Battle Spirit 2</td><td>2003</td><td>mgba</td><td>Frontier characters.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 3DS (Citra / Lime3DS)</td></tr>
+          <tr class="fn-3ds fn-highlight"><td>3DS</td><td>Digimon World Re:Digitize Decode</td><td>2013</td><td>Citra</td><td><span class="fn-star">⭐</span> <span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Best Re:Digitize. English fan patch available.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 PSP (PPSSPP)</td></tr>
+          <tr class="fn-psp fn-skip"><td>PSP</td><td>Digimon World Re:Digitize</td><td>2012</td><td>PPSSPP</td><td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Play Decode instead.</td></tr>
+          <tr class="fn-psp fn-skip"><td>PSP</td><td>Digimon Adventure (PSP)</td><td>2013</td><td>PPSSPP</td><td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> VN retelling of the anime. Fan translation.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 PlayStation 1 (pcsx_rearmed)</td></tr>
+          <tr class="fn-ps1 fn-highlight"><td>PS1</td><td>Digimon World</td><td>1999</td><td>pcsx_rearmed</td><td><span class="fn-star">⭐</span> The original v-pet RPG.</td></tr>
+          <tr class="fn-ps1 fn-skip"><td>PS1</td><td>Digimon World 2</td><td>2000</td><td>pcsx_rearmed</td><td><span class="fn-tag fn-tag-opt">optional</span></td></tr>
+          <tr class="fn-ps1 fn-skip"><td>PS1</td><td>Digimon Digital Card Battle</td><td>2000</td><td>pcsx_rearmed</td><td><span class="fn-tag fn-tag-opt">optional</span></td></tr>
+          <tr class="fn-ps1 fn-skip"><td>PS1</td><td>Digimon World 3</td><td>2002</td><td>pcsx_rearmed</td><td><span class="fn-tag fn-tag-opt">optional</span></td></tr>
+          <tr class="fn-ps1 fn-skip"><td>PS1</td><td>Digimon Rumble Arena</td><td>2001</td><td>pcsx_rearmed</td><td><span class="fn-tag fn-tag-opt">optional</span></td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">🎮 PlayStation 2 (PCSX2)</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>PS2</td><td>Digimon World Data Squad</td><td>2006</td><td>PCSX2</td><td><span class="fn-tag fn-tag-opt">optional</span> Savers tie-in.</td></tr>
+          <tr class="fn-ps2 fn-skip"><td>PS2 / GCN / Xbox</td><td>Digimon Rumble Arena 2</td><td>2004</td><td>PCSX2 / Dolphin / Xemu</td><td><span class="fn-tag fn-tag-opt">optional</span></td></tr>
+          <tr class="fn-ps2 fn-skip"><td>PS2 / GCN / Xbox</td><td>Digimon World 4</td><td>2005</td><td>PCSX2 / Dolphin / Xemu</td><td><span class="fn-tag fn-tag-opt">optional</span></td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">💀 Mobile (All Defunct)</td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Mobile</td><td>Digimon Life</td><td>2010</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 2012</span></td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Mobile</td><td>Digimon Collectors</td><td>2011</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 2014</span></td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Mobile</td><td>Digimon Crusader / Heroes!</td><td>2013</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 JP 2014 / Global 2017</span></td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Mobile</td><td>Digimon Linkz</td><td>2016</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 2019</span></td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Mobile</td><td>Digimon Encounters</td><td>2018</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 2020</span></td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Mobile</td><td>Digimon ReArise</td><td>2018</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 2022</span> Most narrative-rich. APK exists.</td></tr>
+          <tr class="fn-mobile"><td>Mobile / PC</td><td>Digimon Super Rumble</td><td>2022</td><td>PC client</td><td>Still active (some regions). MMO.</td></tr>
+          <tr class="fn-mobile"><td>Mobile</td><td>Digimon New Century</td><td>2020</td><td>—</td><td>China / Japan only. Still active.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─── BEST FIRST ─────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">
+          Chronologically-agnostic. Where to start if you want to play / watch the best Digimon has to offer immediately — regardless of release order.
+        </div>
+        <table class="fn-table">
+          <tr><th>#</th><th>Title</th><th>Platform</th><th>Why Here</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🎯 Start Here — Hook Yourself</td></tr>
+          <tr class="fn-pc fn-highlight"><td>1</td><td>Digimon Story: Cyber Sleuth Complete Edition</td><td>PC / Steam</td><td><span class="fn-star">⭐</span> No prior knowledge needed. The franchise's best game. 200+ Digimon, adult cast, strong writing. Steam-native.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📺 <em>OR start here (anime path):</em> <strong>Digimon Tamers</strong> — 51 eps, standalone. Written by Chiaki J. Konaka. Darker, smarter, no prior anime knowledge needed.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">⭐ Best Games (any order after Cyber Sleuth)</td></tr>
+          <tr class="fn-pc fn-highlight"><td>2</td><td>Digimon Survive</td><td>PC / Switch</td><td><span class="fn-star">⭐</span> Tactical RPG + visual novel. Branching deaths. Emotionally punishing and underrated.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>Digimon World: Next Order</td><td>PC / Switch</td><td><span class="fn-star">⭐</span> Most accessible World game. Raise two Digimon, rebuild File Island city.</td></tr>
+          <tr class="fn-nds fn-highlight"><td>4</td><td>Digimon Story (World DS)</td><td>NDS · melonds</td><td><span class="fn-star">⭐</span> Best handheld entry. Play on phone via RetroArch.</td></tr>
+          <tr class="fn-3ds fn-highlight"><td>5</td><td>Digimon World Re:Digitize Decode</td><td>3DS · Citra</td><td><span class="fn-star">⭐</span> Best File Island v-pet RPG. Fan English patch available.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">📺 Best Anime (any order)</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Digimon Tamers</strong> — The best series by almost any measure. Start here for adults.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Our War Game!</strong> (film) — 45 minutes, standalone-ish. The best Digimon film. Watch Adventure first.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Digimon Ghost Game</strong> — Horror-episodic format. Best recent series. Standalone.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Digimon Adventure</strong> — The original. Still holds up. Best watched as a kid, but effective for adults too.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">📚 Backlog / Completionist</td></tr>
+          <tr class="fn-pc fn-skip"><td>—</td><td>Cyber Sleuth – Hacker's Memory</td><td>PC / Steam</td><td>Play after Cyber Sleuth. Same engine, parallel story.</td></tr>
+          <tr class="fn-ps1 fn-skip"><td>—</td><td>Digimon World (original, PS1)</td><td>PS1 / Steam</td><td>The original v-pet RPG — historic value. Demanding and obtuse.</td></tr>
+          <tr class="fn-media-row"><td colspan="4">📺 <strong>Digimon Adventure tri.</strong> (6 films) — Original cast reunion. Watch Adventure + 02 first.</td></tr>
+        </table>
+      </div>
+
+      <!-- ─── MOBILE ONLY ─────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">
+          Mobile-accessible Digimon games — includes emulable GBA/DS titles and defunct mobile games (documented for completeness). Most mobile-specific Digimon games are dead.
+        </div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Platform</th><th>Core</th><th>Status</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📱 Emulable on Android/iOS (RetroArch / Citra)</td></tr>
+          <tr class="fn-gba fn-highlight"><td>Digimon Battle Spirit (GBA) <span class="fn-star">⭐</span></td><td>GBA</td><td>mgba</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Best mobile-playable Digimon game. Platform fighter.</td></tr>
+          <tr class="fn-gba fn-skip"><td>Digimon Battle Spirit 2 (GBA)</td><td>GBA</td><td>mgba</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Frontier fighter sequel.</td></tr>
+          <tr class="fn-nds fn-highlight"><td>Digimon Story (World DS) <span class="fn-star">⭐</span></td><td>NDS</td><td>melonds</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Best mobile JRPG in the series.</td></tr>
+          <tr class="fn-nds fn-skip"><td>Digimon Story: Sunburst / Moonlight</td><td>NDS</td><td>melonds</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Dual-version sequel.</td></tr>
+          <tr class="fn-nds fn-skip"><td>Digimon World Championship</td><td>NDS</td><td>melonds</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>V-pet tournament game.</td></tr>
+          <tr class="fn-3ds fn-highlight"><td>Digimon World Re:Digitize Decode <span class="fn-star">⭐</span></td><td>3DS</td><td>Citra mobile</td><td><span class="fn-tag fn-tag-yes">📱 Yes</span></td><td>Best handheld v-pet RPG. Fan English patch.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">💀 Defunct Mobile Games (documented, inaccessible)</td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Digimon Life</td><td>Mobile</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 Shut Down 2012</span></td><td>Digimon encyclopedia app. 596 species at shutdown.</td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Digimon Collectors</td><td>Mobile</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 Shut Down 2014</span></td><td>Card-collecting game.</td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Digimon Crusader / Heroes!</td><td>Mobile</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 JP 2014 / Global 2017</span></td><td>Card battle RPG. Debut Digimon, Aegiomon storyline.</td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Digimon Linkz</td><td>Mobile</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 Shut Down 2019</span></td><td>Farm RPG. Shut down to make way for ReArise.</td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Digimon Encounters</td><td>Mobile</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 Shut Down 2020</span></td><td>Asia-only.</td></tr>
+          <tr class="fn-mobile fn-defunct"><td>Digimon ReArise</td><td>Mobile</td><td>—</td><td><span class="fn-tag fn-tag-dead">💀 Shut Down 2022</span></td><td>Best narrative mobile Digimon game. APK floating around.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">📱 Still Active (2025)</td></tr>
+          <tr class="fn-mobile"><td>Digimon New Century</td><td>Mobile</td><td>—</td><td><span class="fn-tag fn-tag-yes">📱 Active</span></td><td>China/Japan only. VPN required.</td></tr>
+          <tr class="fn-mobile"><td>Digimon Super Rumble</td><td>Mobile / PC</td><td>PC client</td><td><span class="fn-tag fn-tag-yes">📱 Active</span></td><td>MMO. Some regions active. PC client available.</td></tr>
+        </table>
+      </div>
+
+    </div><!-- end card -->
+  </div><!-- end section -->
+</div><!-- end library pane -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+  <div class="section">
+    <div class="section-title">📺 Digimon Anime Series</div>
+    <div class="card">
+      <div class="card-title">Digimon has 10 anime series — each is largely standalone</div>
+      <p style="font-size:.84rem;line-height:1.7;margin-bottom:16px">Most series are unconnected. Only the Adventure continuity (Adventure → 02 → tri. → Kizuna → The Beginning) tells a single ongoing story. All other series are set in separate universes and can be watched in any order.</p>
+      <table class="fn-table">
+        <tr><th>#</th><th>Series</th><th>Year</th><th>Eps</th><th>Studio</th><th>Where to Watch</th><th>Notes</th></tr>
+        <tr class="fn-ps1 fn-highlight">
+          <td>1</td><td>Digimon Adventure</td><td>1999</td><td>54</td><td>Toei Animation</td><td>Crunchyroll / Discotek BR</td>
+          <td><span class="fn-star">⭐</span> The foundational series. Seven DigiDestined kids. Start here for the Adventure continuity.</td>
+        </tr>
+        <tr class="fn-ps1">
+          <td>2</td><td>Digimon Adventure 02</td><td>2000</td><td>50</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td>Direct sequel. Watch immediately after Adventure. Controversial epilogue.</td>
+        </tr>
+        <tr class="fn-ps1 fn-highlight">
+          <td>3</td><td>Digimon Tamers</td><td>2001</td><td>51</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td><span class="fn-star">⭐</span> Written by Chiaki J. Konaka. Darkest, most sophisticated series. Best starting point for adults. Standalone universe.</td>
+        </tr>
+        <tr class="fn-ps1">
+          <td>4</td><td>Digimon Frontier</td><td>2002</td><td>50</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td>Kids transform into Digimon. No partner mechanic. Divisive but mythologically rich. Standalone.</td>
+        </tr>
+        <tr class="fn-ps1">
+          <td>5</td><td>Digimon Savers (Data Squad)</td><td>2006</td><td>48</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td>Government DATS agency. Older-skewing tone. Watch the Japanese sub — the Disney dub is sanitised. Standalone.</td>
+        </tr>
+        <tr class="fn-ps1">
+          <td>6</td><td>Digimon Fusion (Xros Wars)</td><td>2010</td><td>79</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td>DigiXros combining mechanic. Longest series (3 arcs). Season 3 never dubbed in English. Standalone.</td>
+        </tr>
+        <tr class="fn-ps1 fn-skip">
+          <td>7</td><td>Digimon Universe: App Monsters</td><td>2016</td><td>52</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td><span class="fn-tag fn-tag-opt">optional</span> Appmon spinoff sub-franchise (now defunct). Sub only. Social media / AI themes. Standalone.</td>
+        </tr>
+        <tr class="fn-ps1 fn-skip">
+          <td>8</td><td>Digimon Adventure: (2020 reboot)</td><td>2020</td><td>67</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td><span class="fn-tag fn-tag-opt">optional</span> Full reboot of Adventure. Better animation, polarising pacing. Standalone — not a sequel.</td>
+        </tr>
+        <tr class="fn-ps1 fn-highlight">
+          <td>9</td><td>Digimon Ghost Game</td><td>2021</td><td>67</td><td>Toei Animation</td><td>Crunchyroll</td>
+          <td><span class="fn-star">⭐</span> Horror-episodic format. Digimon as urban legend monsters. English dub released December 2025. Standalone.</td>
+        </tr>
+        <tr class="fn-ps1">
+          <td>10</td><td>Digimon Beatbreak</td><td>2025</td><td>TBA</td><td>Toei Animation</td><td>TBA (Crunchyroll expected)</td>
+          <td>Currently airing in Japan. No English release announced. Standalone.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Watch Order for the Adventure Continuity</div>
+      <p style="font-size:.83rem;line-height:1.7">The Adventure universe spans 24 years of media. Watch in this order:
+      <strong>(1)</strong> Digimon Adventure (1999 film) →
+      <strong>(2)</strong> Digimon Adventure (series, 54 eps) →
+      <strong>(3)</strong> Our War Game! (film) →
+      <strong>(4)</strong> Digimon Adventure 02 (50 eps) →
+      <strong>(5)</strong> Hurricane Touchdown!! (film) →
+      <strong>(6)</strong> Revenge of Diaboromon (film) →
+      <strong>(7)</strong> Digimon Adventure tri. (6 films, 2015–2018) →
+      <strong>(8)</strong> Digimon Adventure: Last Evolution Kizuna (film, 2020) →
+      <strong>(9)</strong> Digimon Adventure 02: The Beginning (film, 2023).</p>
+    </div>
+
+    <div class="callout callout-tip" style="margin-top:12px">
+      <div class="callout-icon">🎌</div>
+      <div class="callout-body">
+        <strong>Dub note:</strong> Saban's original 1999–2007 dubs are nostalgic but contain notable edits and localisations. Toei's rights reverted around 2020; Discotek Media now distributes the series on Blu-ray with both the Saban dub and uncut Japanese audio. Digimon Ghost Game's English dub (BBC, Dec 2025) is the first new dub in years.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+  <div class="section">
+    <div class="section-title">🎬 Digimon Films</div>
+    <div class="card">
+      <table class="fn-table">
+        <tr><th>Year</th><th>Title</th><th>Continuity</th><th>Runtime</th><th>Notes</th></tr>
+
+        <tr class="fn-arc-row"><td colspan="5">── Adventure Continuity Films ──</td></tr>
+        <tr class="fn-ps1 fn-highlight"><td>1999</td><td>Digimon Adventure (short film)</td><td>Adventure</td><td>~20 min</td><td><span class="fn-star">⭐</span> True beginning. Tai and Kari's first encounter with a Digimon. Watch before the series.</td></tr>
+        <tr class="fn-ps1 fn-highlight"><td>2000</td><td>Our War Game!</td><td>Adventure</td><td>~40 min</td><td><span class="fn-star">⭐</span> Widely considered the best Digimon film. Internet virus battle in real time. Inspired Summer Wars.</td></tr>
+        <tr class="fn-ps1"><td>2000</td><td>Digimon Adventure 02: Hurricane Touchdown!!</td><td>Adventure 02</td><td>~40 min</td><td>Two-part film set during 02. Willis and the corrupted Kokomon. The weakest Adventure film.</td></tr>
+        <tr class="fn-ps1 fn-highlight"><td>2001</td><td>Adventure 02: Revenge of Diaboromon</td><td>Adventure 02</td><td>~30 min</td><td><span class="fn-star">⭐</span> Direct sequel to Our War Game. Watch after 02.</td></tr>
+        <tr class="fn-ps1 fn-highlight"><td>2015–18</td><td>Digimon Adventure tri. (Chapters 1–6)</td><td>Adventure</td><td>~6 × 80 min</td><td><span class="fn-star">⭐</span> Original cast as older teens. Controversial but emotionally resonant. Watch Adventure + 02 first.</td></tr>
+        <tr class="fn-ps1 fn-highlight"><td>2020</td><td>Digimon Adventure: Last Evolution Kizuna</td><td>Adventure</td><td>~96 min</td><td><span class="fn-star">⭐</span> Theatrical finale for the original cast. Emotionally punishing.</td></tr>
+        <tr class="fn-ps1"><td>2023</td><td>Digimon Adventure 02: The Beginning</td><td>Adventure 02</td><td>~90 min</td><td>First human / Digimon partner origin. Watch Kizuna first.</td></tr>
+
+        <tr class="fn-arc-row"><td colspan="5">── Standalone / Non-Adventure Films ──</td></tr>
+        <tr class="fn-ps1"><td>2001</td><td>Digimon Tamers: Battle of Adventurers</td><td>Tamers</td><td>~50 min</td><td>Set during Tamers. Digimon from a rogue AI. Watch the Tamers series first.</td></tr>
+        <tr class="fn-ps1"><td>2002</td><td>Digimon Tamers: Runaway Locomon</td><td>Tamers</td><td>~45 min</td><td>Epilogue to Tamers. Rika's send-off. Watch Tamers first.</td></tr>
+        <tr class="fn-ps1"><td>2002</td><td>Digimon Frontier: Island of Lost Digimon</td><td>Frontier</td><td>~50 min</td><td>Standalone Frontier film. Human-type vs. beast-type Digimon conflict.</td></tr>
+        <tr class="fn-ps1 fn-skip"><td>2006</td><td>Digimon Savers 3D / Burst Mode!! (film)</td><td>Savers</td><td>~10 min</td><td><span class="fn-tag fn-tag-jp">🇯🇵 JP</span> Jump Festa exclusive short. Never released in English.</td></tr>
+
+        <tr class="fn-arc-row"><td colspan="5">── Western Compilation / Inaccessible ──</td></tr>
+        <tr class="fn-ps1 fn-skip"><td>2000</td><td>Digimon: The Movie (western compilation)</td><td>Mixed</td><td>~88 min</td><td><span class="fn-tag fn-tag-opt">nostalgia only</span> Three JP films spliced together with connecting narration. Watch the originals instead.</td></tr>
+        <tr class="fn-multi fn-defunct"><td>2000</td><td>Digimon Adventure 3D: Digimon Grand Prix!</td><td>Adventure</td><td>~7 min</td><td><span class="fn-tag fn-tag-dead">💀 Inaccessible</span> Sanrio Puroland theme park CG exclusive. Never released commercially.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — MERCH
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+  <div class="section">
+    <div class="section-title">🛒 Merchandise History</div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">📅 1997–2001 — V-Pet Era</div>
+      <p style="font-size:.82rem;line-height:1.7;color:var(--text-dim)">The Digital Monster v-pet launched in June 1997 and sold 14 million units worldwide by 2004. Six base generations followed, along with the Pendulum series (1998), D-3 and D-Terminal (2000), and Digivice variants tied to each anime series. This era defined Digimon's hardware identity — each new anime came with a new v-pet device to buy. Trading cards (Bandai CCG) launched 1997 alongside the v-pet and ran through the early 2000s.</p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">📅 2002–2009 — The Middle Years</div>
+      <p style="font-size:.82rem;line-height:1.7;color:var(--text-dim)">Merchandise declined as the franchise lost cultural momentum after Frontier underperformed. v-pets continued (Digivice iC, Digivice Burst for Savers; Xros Loader for Xros Wars), but toy volume decreased. Japanese card game continued through multiple updates. Western merchandise largely dried up post-Frontier.</p>
+    </div>
+
+    <div class="fn-merch-history">
+      <div class="fn-merch-history-era">📅 2020–Present — Card Game Revival</div>
+      <p style="font-size:.82rem;line-height:1.7;color:var(--text-dim)">The Digimon Card Game (2020) became a genuine competitive TCG with worldwide distribution and regular English releases — the franchise's biggest merchandise resurgence since the v-pet era. Vital Bracelet wearable v-pet (2021) bridged physical and digital. 25th anniversary merchandise wave (2022) included art books, premium v-pet reissues, and retroactive re-releases. The card game continues to expand actively as of 2025.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Current Acquirable Merchandise</div>
+      <table class="fn-table">
+        <tr><th>Item</th><th>Status</th><th>Notes</th></tr>
+        <tr><td>Digimon Card Game (2020 TCG)</td><td>Active</td><td>English-language. Regular set releases. Competitive scene.</td></tr>
+        <tr><td>Vital Bracelet Digital Monster</td><td>Active</td><td>Wearable v-pet with DIM card expansion. Feeds into the Vital Bracelet Arena app.</td></tr>
+        <tr><td>Digital Monster Anniversary reissues</td><td>Active</td><td>Official reissues of original v-pet hardware with updated firmware.</td></tr>
+        <tr><td>Digimon figure lines (GEM, Precious G.E.M., etc.)</td><td>Active</td><td>High-end collector figures. Agumon, Omnimon, and popular Digimon regularly produced.</td></tr>
+        <tr><td>Original Digital Monster v-pet (1st–6th gen)</td><td>Secondary market</td><td>No longer produced. Find on eBay, Japan auction sites.</td></tr>
+        <tr><td>Pendulum v-pet series</td><td>Secondary market</td><td>Original units; Pendulum Z series had limited reissues.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Tunarr channel content)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler</div>
+    <div class="card">
+      <div class="card-title">Suggested content for a Digimon channel</div>
+      <p style="font-size:.83rem;line-height:1.7;margin-bottom:16px">A Digimon channel works best as a series-rotation block. The franchise's standalone-series structure makes it easy to air complete series without complex watch-order dependency. Suggested structure below.</p>
+
+      <div class="fn-filler-card fn-filler-episode">
+        <div class="fn-filler-name">Digimon Adventure (rotating anchor block)</div>
+        <div class="fn-filler-meta">54 episodes · Toei Animation · 1999</div>
+        <div class="fn-filler-desc">The franchise anchor — highest name recognition. Run episodes in order as the channel's "home series." Pairs well with the original films as special event slots.</div>
+        <div class="fn-filler-where">Source: Crunchyroll / Discotek Blu-ray rip</div>
+      </div>
+
+      <div class="fn-filler-card fn-filler-episode">
+        <div class="fn-filler-name">Digimon Tamers (prestige block)</div>
+        <div class="fn-filler-meta">51 episodes · Toei Animation · 2001</div>
+        <div class="fn-filler-desc">Runs as the "serious" rotation after Adventure ends. Tone contrast is striking — same Digimon concept, radically different execution. Works well as late-night programming.</div>
+        <div class="fn-filler-where">Source: Crunchyroll</div>
+      </div>
+
+      <div class="fn-filler-card fn-filler-movie">
+        <div class="fn-filler-name">Our War Game! (event slot)</div>
+        <div class="fn-filler-meta">~40 minutes · Toei Animation · 2000</div>
+        <div class="fn-filler-desc">Short enough to air as a standalone event. Pairs well after Adventure episode 54 or as a "Digimon movie night" slot. The franchise's best single piece of content.</div>
+        <div class="fn-filler-where">Source: Crunchyroll / Discotek Blu-ray</div>
+      </div>
+
+      <div class="fn-filler-card fn-filler-episode">
+        <div class="fn-filler-name">Digimon Ghost Game (modern block)</div>
+        <div class="fn-filler-meta">67 episodes · Toei Animation · 2021</div>
+        <div class="fn-filler-desc">Horror-episodic format — each episode stands alone, making it ideal for shuffle or late-night horror blocks. Minimal prior knowledge needed. English dub available from Dec 2025.</div>
+        <div class="fn-filler-where">Source: Crunchyroll</div>
+      </div>
+
+      <div class="fn-filler-card fn-filler-retrospective">
+        <div class="fn-filler-name">Digimon Adventure tri. (film marathon)</div>
+        <div class="fn-filler-meta">6 films (~8 hrs total) · 2015–2018</div>
+        <div class="fn-filler-desc">Film marathon event. Best scheduled as a multi-day special after Adventure + 02 have aired on the channel. Requires those to air first for maximum emotional impact.</div>
+        <div class="fn-filler-where">Source: Crunchyroll</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 1997 — The Origin</div>
+      <div class="fn-era-title">Tamagotchi for Boys</div>
+      <div class="fn-era-body">Bandai product planner Aki Maita pitched a fighting virtual pet to counter the female-skewing Tamagotchi. Designer Kenji Watanabe created the original Digimon characters with a harder, American-comics-influenced aesthetic. The Digital Monster v-pet launched June 26, 1997 and sold 14 million units. The one-shot manga C'mon Digimon in V-Jump the same year established the first Digimon narrative. The concept was intentionally antagonistic — Digimon fight.</div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 1999–2002 — The Golden Era</div>
+      <div class="fn-era-title">The Pokémon Rival</div>
+      <div class="fn-era-body">Digimon Adventure premiered March 1999, one month after Pokémon's Japanese premiere. The franchises became direct rivals globally, though Digimon always operated at a smaller scale. Digimon World (PS1, 1999) established the console game lineage. The franchise peaked culturally during the Adventure and Tamers eras — Tamers in particular earned critical acclaim for its Chiaki J. Konaka writing and adult themes. The 2000 film Our War Game! directly inspired Mamoru Hosoda's later theatrical hit Summer Wars.</div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2002–2006 — The Difficult Middle</div>
+      <div class="fn-era-title">Declining Ratings, Experimental Entries</div>
+      <div class="fn-era-body">Digimon Frontier (2002) replaced partner Digimon with kids who transform into Digimon themselves — the format divided the fanbase and toy sales declined. Savers (2006) attempted to recapture older fans with a government-agency premise and an adult male protagonist but reached a smaller audience than the earlier series. The franchise went dark for three years after Savers ended in 2007, with no new anime until Xros Wars in 2010.</div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2010–2014 — Xros Wars &amp; Stagnation</div>
+      <div class="fn-era-title">Longest Series, Lowest Momentum</div>
+      <div class="fn-era-body">Digimon Fusion/Xros Wars ran 79 episodes across three arcs and was the franchise's longest series, but critical reception was mixed — the simplified story and heavy DigiXros mechanic felt like a merchandise delivery vehicle. Internationally, Saban's rights to the older dubs expired in this period. Western game releases also dried up — no major titles received English localisation between 2008 and 2014.</div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2015–2019 — The Cyber Sleuth Revival</div>
+      <div class="fn-era-title">Digimon Comes Back</div>
+      <div class="fn-era-body">Digimon Story: Cyber Sleuth (2015, localised 2016) was the franchise's most commercially and critically successful game in over a decade. Adventure tri.'s six-film series reunited the original cast and sold to a nostalgia-ready adult audience. App Monsters (2016) experimented with a radical theme change to smartphone apps. Localisation improved dramatically — multiple Story series games and films received English releases.</div>
+    </div>
+
+    <div class="fn-era">
+      <div class="fn-era-year">📅 2020–Present</div>
+      <div class="fn-era-title">Card Game Renaissance, Streaming Era, Tenth Anime</div>
+      <div class="fn-era-body">The Digimon Card Game (2020) became a serious competitive TCG with global distribution — the franchise's biggest merchandising win since the v-pet era. Ghost Game (2021) was critically well-received for its horror-episodic format. The franchise turned 25 in 2022 with a major anniversary merchandise wave. Digimon Story: Time Stranger (2025) continued the Cyber Sleuth RPG lineage, and Beatbreak (2025) launched as the tenth anime series. As of 2026, Digimon is in its most active state in over a decade.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators &amp; Contributors</div>
+    <div class="card">
+      <table class="fn-table">
+        <tr><th>Name</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>Akiyoshi Hongo</td><td>Creator (pen name / brand identity)</td><td>Listed as franchise creator on all official media. Represents Bandai's collective ownership of the concept.</td></tr>
+        <tr><td>Kenji Watanabe</td><td>Original Digimon designer</td><td>Designed the original Digital Monster v-pet Digimon with American-comics influence. Continues designing new Digimon.</td></tr>
+        <tr><td>Hiroyuki Kakudo</td><td>Director</td><td>Digimon Adventure, Adventure 02.</td></tr>
+        <tr><td>Chiaki J. Konaka</td><td>Series writer</td><td>Digimon Tamers (head writer). Also wrote for Serial Experiments Lain and The Big O.</td></tr>
+        <tr><td>Katsuyoshi Nakatsuru</td><td>Character designer</td><td>Original Adventure character designs. Returned for Digimon ReArise mobile game.</td></tr>
+        <tr><td>Hiromi Seki</td><td>Series producer</td><td>Producer for Adventure through Frontier — the defining production era.</td></tr>
+        <tr><td>Tetsuya Endō</td><td>Director</td><td>Digimon Xros Wars.</td></tr>
+        <tr><td>Tomohisa Taguchi</td><td>Director</td><td>Digimon Adventure: Last Evolution Kizuna, Adventure 02: The Beginning.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">What's canon? What's not?</div>
+      <p style="font-size:.84rem;line-height:1.7">Digimon has no single unified canon. Each series is its own alternate continuity. The only true multi-entry continuity is the <strong>Adventure universe</strong>: Adventure → 02 → tri. → Kizuna → The Beginning (plus their associated films). Everything else — Tamers, Frontier, Savers, Xros Wars, Ghost Game, Beatbreak — is its own standalone universe. Games are almost universally not connected to any anime continuity, with the exception of the WonderSwan RPGs (Anode Tamer, Cathode Tamer, Tag Tamers, D1 Tamers, Brave Tamers) which are explicitly canon to the Adventure/02/Tamers anime timeline and explain how Ryo Akiyama crosses universes.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JS — tab and view switching
+═══════════════════════════════════════════════════════════════ -->
+<script>
+function fnTab(name, btn) {
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('fn-pane-' + name);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function fnView(tab, view, btn) {
+  const pane = document.getElementById('fn-pane-' + tab);
+  if (!pane) return;
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  const v = document.getElementById('fn-' + tab + '-' + view);
+  if (v) v.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
