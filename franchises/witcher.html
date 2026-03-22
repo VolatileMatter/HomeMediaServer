@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Witcher — Franchise Navigator</title>
+  <link rel="stylesheet" href="../shared.css">
+  <script src="../config.js"></script>
+  <style>
+
+/* ════════════════════════════════════════════════════
+   PAGE HEADER
+════════════════════════════════════════════════════ */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 24px 0 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.page-icon { font-size: 2.6rem; line-height: 1; flex-shrink: 0; }
+.page-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.55rem;
+  color: var(--accent);
+  margin: 0 0 4px;
+  letter-spacing: .04em;
+}
+.subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .7rem;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  letter-spacing: .04em;
+}
+.desc { font-size: .84rem; line-height: 1.7; color: var(--text); margin: 0; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.fn-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.fn-stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.fn-stat-num { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.fn-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   MAIN TABS
+════════════════════════════════════════════════════ */
+.fn-tab-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.fn-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .7rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.fn-tab-btn:hover { color: var(--text); }
+.fn-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.fn-tab-pane { display: none; }
+.fn-tab-pane.active { display: block; }
+
+/* ════════════════════════════════════════════════════
+   VIEW NAV (inner pills)
+════════════════════════════════════════════════════ */
+.fn-view-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.fn-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .05em;
+  padding: 5px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .15s;
+}
+.fn-view-btn:hover { border-color: rgba(200,168,75,.4); color: var(--text); }
+.fn-view-btn.active { background: rgba(200,168,75,.12); border-color: var(--accent); color: var(--accent); }
+
+.fn-view { display: none; }
+.fn-view.active { display: block; }
+.fn-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  line-height: 1.6;
+  padding: 8px 10px;
+  background: var(--bg3);
+  border-radius: 3px;
+  border-left: 3px solid var(--accent);
+}
+
+/* ════════════════════════════════════════════════════
+   MAIN TABLE
+════════════════════════════════════════════════════ */
+.fn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .8rem;
+}
+.fn-table th {
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.fn-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.fn-table tr:hover td { background: rgba(255,255,255,.025); }
+
+/* Arc / era header rows */
+.fn-arc-row td {
+  background: rgba(192,57,43,.07) !important;
+  color: #e74c3c;
+  font-size: .69rem;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 5px 10px;
+  border-top: 1px solid rgba(192,57,43,.25) !important;
+  border-bottom: 1px solid rgba(192,57,43,.15) !important;
+}
+
+/* Media / TV crossover rows — purple */
+.fn-media-row td {
+  background: rgba(171,71,188,.07) !important;
+  border-top: 1px dashed rgba(171,71,188,.4) !important;
+  border-bottom: 1px dashed rgba(171,71,188,.4) !important;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+.fn-media-row td { border-left: 3px solid #ce93d8 !important; }
+
+/* Defunct / canceled rows — red-tinted */
+.fn-defunct td {
+  background: rgba(192,57,43,.04) !important;
+  opacity: .65;
+}
+.fn-defunct td:first-child { border-left: 3px solid #c0392b !important; }
+
+/* Gold highlight = recommended */
+.fn-highlight td { background: rgba(200,168,75,.04) !important; }
+.fn-highlight td:first-child { border-left: 3px solid var(--accent) !important; }
+
+/* Faded = optional / skip */
+.fn-skip td { opacity: .58; }
+
+/* Platform left-border colour stripes */
+.fn-pc     td:first-child { border-left: 3px solid #81c784; }
+.fn-ps4    td:first-child { border-left: 3px solid #ffcc02; }
+.fn-ps5    td:first-child { border-left: 3px solid #fff176; }
+.fn-xbox   td:first-child { border-left: 3px solid #66bb6a; }
+.fn-switch td:first-child { border-left: 3px solid #ef5350; }
+.fn-mobile td:first-child { border-left: 3px solid #4fc3f7; }
+.fn-book   td:first-child { border-left: 3px solid #a5d6a7; }
+.fn-comic  td:first-child { border-left: 3px solid #ffb74d; }
+.fn-tv     td:first-child { border-left: 3px solid #ce93d8; }
+.fn-movie  td:first-child { border-left: 3px solid #f48fb1; }
+
+/* Tags */
+.fn-tag {
+  display: inline-block;
+  font-size: .61rem;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.fn-tag-yes    { background: rgba(76,175,80,.18);   color: #81c784; border: 1px solid rgba(76,175,80,.35); }
+.fn-tag-no     { background: rgba(239,83,80,.18);   color: #ef9a9a; border: 1px solid rgba(239,83,80,.35); }
+.fn-tag-either { background: rgba(200,168,75,.18);  color: #c8a84b; border: 1px solid rgba(200,168,75,.35); }
+.fn-tag-opt    { background: rgba(255,255,255,.06);  color: var(--text-dim); border: 1px solid var(--border); font-size:.59rem; padding:1px 4px; }
+.fn-tag-dead   { background: rgba(192,57,43,.18);   color: #e74c3c; border: 1px solid rgba(192,57,43,.35); }
+.fn-tag-coming { background: rgba(100,149,237,.18); color: #90caf9; border: 1px solid rgba(100,149,237,.35); }
+.fn-star { color: var(--accent); font-weight: 700; }
+
+/* Legend */
+.fn-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: .73rem;
+  color: var(--text-dim);
+}
+.fn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; flex-shrink:0; }
+
+/* ════════════════════════════════════════════════════
+   ERA HISTORY BLOCKS
+════════════════════════════════════════════════════ */
+.fn-era {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid #c0392b;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+}
+.fn-era-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .68rem;
+  color: #e74c3c;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fn-era-title {
+  font-family: 'Cinzel', serif;
+  font-size: .95rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.fn-era-body { font-size: .83rem; line-height: 1.7; color: var(--text); }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">⚔️</div>
+  <div>
+    <h1>The Witcher</h1>
+    <div class="subtitle">// PC · PS4/5 · Switch · iOS/Android · Netflix · Books · Comics //</div>
+    <p class="desc">
+      Andrzej Sapkowski's dark fantasy saga about Geralt of Rivia — a mutant monster hunter navigating a world where humans are often more monstrous than the beasts. Born in Polish literary magazines in 1986, the franchise became a global phenomenon through CD Projekt Red's RPG trilogy, with The Witcher 3: Wild Hunt (2015) widely considered one of the greatest games ever made. Use the Library tab for all games and media in release order. The TV &amp; Anime tab covers Netflix and legacy Polish adaptations.
+    </p>
+  </div>
+</div>
+
+<div class="fn-stat-row">
+  <div class="fn-stat-box"><div class="fn-stat-num">12</div><div class="fn-stat-label">Games</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">7</div><div class="fn-stat-label">TV / Film</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">9</div><div class="fn-stat-label">Books</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">7</div><div class="fn-stat-label">Comics</div></div>
+  <div class="fn-stat-box"><div class="fn-stat-num">1986</div><div class="fn-stat-label">Est. Founded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN TABS
+═══════════════════════════════════════════════════ -->
+<div class="fn-tab-nav">
+  <button class="fn-tab-btn active" onclick="fnTab('library', this)">📚 Library</button>
+  <button class="fn-tab-btn"        onclick="fnTab('tvanime', this)">📺 TV &amp; Anime</button>
+  <button class="fn-tab-btn"        onclick="fnTab('movies',  this)">🎬 Movies</button>
+  <button class="fn-tab-btn"        onclick="fnTab('merch',   this)">🛒 Books &amp; Comics</button>
+  <button class="fn-tab-btn"        onclick="fnTab('filler',  this)">📡 Filler</button>
+  <button class="fn-tab-btn"        onclick="fnTab('history', this)">📖 History</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — LIBRARY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane active" id="fn-pane-library">
+
+  <div class="section">
+    <div class="section-title">📚 The Witcher Game Library</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('library','release',   this)">📅 Release Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','chrono',    this)">🕰️ Story Order</button>
+        <button class="fn-view-btn"        onclick="fnView('library','platform',  this)">🕹️ By Platform</button>
+        <button class="fn-view-btn"        onclick="fnView('library','bestfirst', this)">⭐ Best First</button>
+        <button class="fn-view-btn"        onclick="fnView('library','mobile',    this)">📱 Mobile / Active</button>
+        <button class="fn-view-btn"        onclick="fnView('library','defunct',   this)">💀 Defunct / Canceled</button>
+      </div>
+
+      <!-- ──────────────────────────────────────────────
+           RELEASE ORDER
+      ────────────────────────────────────────────── -->
+      <div class="fn-view active" id="fn-library-release">
+        <div class="fn-view-desc">All games in real-world release order. <span class="fn-tag fn-tag-dead">DEFUNCT</span> = servers closed or inaccessible. <span class="fn-tag fn-tag-coming">UPCOMING</span> = announced not released. Gold = standout entries.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Platform</th><th>Status</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── PRE-CDPR ERA ──</td></tr>
+          <tr class="fn-defunct fn-skip">
+            <td>1997</td>
+            <td>The Witcher (Metropolis Software) <span class="fn-tag fn-tag-dead">CANCELED</span></td>
+            <td>PC (unreleased)</td>
+            <td><span class="fn-tag fn-tag-dead">Never Released</span></td>
+            <td>Adrian Chmielarz's abandoned game — historically notable as the origin of the English word "witcher." Never saw a build.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── THE GERALT TRILOGY (CDPR) ──</td></tr>
+          <tr class="fn-pc">
+            <td>2007</td>
+            <td>The Witcher (Enhanced Edition)</td>
+            <td>PC (GOG/Steam)</td>
+            <td><span class="fn-tag fn-tag-yes">Active</span></td>
+            <td>CDPR's debut. Unconventional combo-click combat. Enhanced Edition (2008) is the one to play. ~40-50h. PC only via Sunshine streaming.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2007</td>
+            <td>The Witcher: Crimson Trail <span class="fn-tag fn-tag-dead">DEFUNCT</span></td>
+            <td>Mobile (J2ME)</td>
+            <td><span class="fn-tag fn-tag-dead">Abandonware</span></td>
+            <td>Java feature-phone side-scroller. Young Geralt prequel. Abandonware — original app store long dead. Can be found as a .jar file on abandonware sites.</td>
+          </tr>
+          <tr class="fn-defunct fn-skip">
+            <td>2008</td>
+            <td>The Witcher: Versus <span class="fn-tag fn-tag-dead">DEFUNCT</span></td>
+            <td>Browser (Flash)</td>
+            <td><span class="fn-tag fn-tag-dead">Dead (Flash EOL)</span></td>
+            <td>Flash-based browser PvP game. Three classes. Died with Flash in 2020. Some community archives may still exist via Ruffle.</td>
+          </tr>
+          <tr class="fn-defunct fn-skip">
+            <td>2009</td>
+            <td>The Witcher: Rise of the White Wolf <span class="fn-tag fn-tag-dead">CANCELED</span></td>
+            <td>PS3 / Xbox 360 (unreleased)</td>
+            <td><span class="fn-tag fn-tag-dead">Never Released</span></td>
+            <td>Planned console port of TW1 with rebuilt engine. Canceled due to publisher dispute with Atari. Would have been the first console Witcher.</td>
+          </tr>
+          <tr class="fn-xbox">
+            <td>2011</td>
+            <td>The Witcher 2: Assassins of Kings (Enhanced Ed.)</td>
+            <td>PC / Xbox 360</td>
+            <td><span class="fn-tag fn-tag-yes">Active</span></td>
+            <td>Geralt framed for regicide. Enhanced Edition (2012) recommended. Chapter 2 splits completely based on one timed choice. ~30-40h.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2015</td>
+            <td>The Witcher 3: Wild Hunt <span class="fn-star">⭐</span></td>
+            <td>PC / PS4 / PS5 / XBO / Switch</td>
+            <td><span class="fn-tag fn-tag-yes">Active</span></td>
+            <td><span class="fn-star">⭐</span> One of the greatest games ever made. Next-Gen Edition (2022) on PC/PS5. Complete Edition includes both DLCs. Switch port exists but visually degraded.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>2015</td>
+            <td>Hearts of Stone (TW3 DLC)</td>
+            <td>PC / PS4 / PS5 / XBO / Switch</td>
+            <td><span class="fn-tag fn-tag-yes">Active</span></td>
+            <td>~10-15h. Geralt in a cursed contract with immortal trickster Gaunter O'Dimm. Often called the best Witcher writing ever. Included in Complete Edition.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2016</td>
+            <td>Blood and Wine (TW3 DLC) <span class="fn-star">⭐</span></td>
+            <td>PC / PS4 / PS5 / XBO / Switch</td>
+            <td><span class="fn-tag fn-tag-yes">Active</span></td>
+            <td><span class="fn-star">⭐</span> ~20h. Sun-soaked Toussaint. Geralt's proper send-off. Play after Hearts of Stone. Included in Complete Edition.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── SPINOFFS &amp; CARD GAMES ──</td></tr>
+          <tr class="fn-pc">
+            <td>2014</td>
+            <td>The Witcher Adventure Game</td>
+            <td>PC / Mobile (iOS/Android)</td>
+            <td><span class="fn-tag fn-tag-yes">Active</span></td>
+            <td>Digital board game adaptation. 4 playable characters (Geralt, Triss, Yarpen, Dandelion). Casual multiplayer or solo. Still on App Store/Play Store.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2014</td>
+            <td>The Witcher Battle Arena <span class="fn-tag fn-tag-dead">DEFUNCT</span></td>
+            <td>Mobile (iOS/Android/WP)</td>
+            <td><span class="fn-tag fn-tag-dead">Shut Dec 2015</span></td>
+            <td>MOBA for mobile. 8 heroes, 6-player battles. Servers shut December 31, 2015 after just over a year. Classic MOBA-rush casualty.</td>
+          </tr>
+          <tr class="fn-pc">
+            <td>2018</td>
+            <td>GWENT: The Witcher Card Game</td>
+            <td>PC / Mobile (iOS/Android)</td>
+            <td><span class="fn-tag fn-tag-yes">Active / F2P</span></td>
+            <td>Standalone digital CCG based on the beloved TW3 minigame. Free-to-play. Mobile version 2019. Still actively supported as of 2026.</td>
+          </tr>
+          <tr class="fn-pc fn-highlight">
+            <td>2018</td>
+            <td>Thronebreaker: The Witcher Tales <span class="fn-star">⭐</span></td>
+            <td>PC / Switch / PS4 / XBO / Mobile</td>
+            <td><span class="fn-tag fn-tag-yes">Active</span></td>
+            <td><span class="fn-star">⭐</span> Single-player RPG using GWENT mechanics. Queen Meve vs Nilfgaard invasion. ~30h. Mobile version (iOS 2020, Android 2021). Premium paid title.</td>
+          </tr>
+          <tr class="fn-mobile fn-defunct fn-skip">
+            <td>2021</td>
+            <td>The Witcher: Monster Slayer <span class="fn-tag fn-tag-dead">DEFUNCT</span></td>
+            <td>Mobile (iOS/Android)</td>
+            <td><span class="fn-tag fn-tag-dead">Shut June 2023</span></td>
+            <td>Pokémon GO-style AR game. 500k downloads in 3 days, 100M+ monsters slain. Shut June 30, 2023 — no longer downloadable.</td>
+          </tr>
+          <tr class="fn-mobile">
+            <td>2022</td>
+            <td>The Witcher: Roach Race</td>
+            <td>Mobile (iOS/Android)</td>
+            <td><span class="fn-tag fn-tag-yes">Active / Free</span></td>
+            <td>Endless runner as Roach (Geralt's horse). Free. Also embedded in Cyberpunk 2077 as an arcade minigame (Patch 1.6). Silly fan-service delight.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── NEW ERA (UPCOMING) ──</td></tr>
+          <tr class="fn-pc fn-skip">
+            <td>TBD</td>
+            <td>The Witcher 4 (Project Polaris) <span class="fn-tag fn-tag-coming">UPCOMING</span></td>
+            <td>PC / PS5 (likely)</td>
+            <td><span class="fn-tag fn-tag-coming">In Development</span></td>
+            <td>Ciri as protagonist. Revealed at The Game Awards 2024. UE5. Won't release before 2027 per CDPR March 2025 earnings call. First of a new trilogy.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>TBD</td>
+            <td>Project Sirius (Witcher Spinoff) <span class="fn-tag fn-tag-coming">UPCOMING</span></td>
+            <td>PC (likely)</td>
+            <td><span class="fn-tag fn-tag-coming">Rebooted 2023</span></td>
+            <td>Co-op/multiplayer Witcher spinoff by The Molasses Flood (now absorbed into CDPR). Rebooted early 2023. No release window.</td>
+          </tr>
+          <tr class="fn-pc fn-skip">
+            <td>TBD</td>
+            <td>Canis Majoris (Witcher 1 Remake) <span class="fn-tag fn-tag-coming">UPCOMING</span></td>
+            <td>PC (likely)</td>
+            <td><span class="fn-tag fn-tag-coming">Early Concept</span></td>
+            <td>Full UE5 remake of The Witcher (2007) by Fool's Theory under CDPR supervision. Still in concept phase as of early 2025.</td>
+          </tr>
+
+        </table>
+      </div><!-- /release -->
+
+      <!-- ──────────────────────────────────────────────
+           STORY ORDER
+      ────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-chrono">
+        <div class="fn-view-desc">Recommended play/read order for the CDPR game canon. The books and games share characters but have parallel continuities — Sapkowski stated games are non-canonical sequels. Within the CDPR universe, this is the intended flow.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Platform</th><th>Hours</th><th>Notes</th></tr>
+          <tr class="fn-arc-row"><td colspan="5">── OPTIONAL: BOOKS FIRST (best context, not required) ──</td></tr>
+          <tr class="fn-book fn-skip"><td>0a</td><td>The Last Wish (book)</td><td>Novel</td><td>~8h</td><td>Short stories. Introduces Geralt, Yennefer, Dandelion. Netflix S1 adapts most of this. Not required for games.</td></tr>
+          <tr class="fn-book fn-skip"><td>0b</td><td>Sword of Destiny (book)</td><td>Novel</td><td>~8h</td><td>Introduces Ciri. Read before Blood of Elves.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── CDPR GAME TRILOGY (play in this order) ──</td></tr>
+          <tr class="fn-pc"><td>1</td><td>The Witcher (Enhanced Edition)</td><td>PC</td><td>~50h</td><td>Amnesia plotline. Salamandra conspiracy. Establishes CDPR's Geralt. PC only — stream via Sunshine.</td></tr>
+          <tr class="fn-xbox"><td>2</td><td>The Witcher 2: Assassins of Kings</td><td>PC / Xbox 360</td><td>~35h</td><td>Regicide mystery. Branching Chapter 2. Don't skip this — TW3 references it heavily.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>3</td><td>The Witcher 3: Wild Hunt <span class="fn-star">⭐</span></td><td>PC / PS4/5 / XBO</td><td>~100h+</td><td><span class="fn-star">⭐</span> The masterpiece. This is why you're here. Play before the DLCs.</td></tr>
+          <tr class="fn-pc"><td>4</td><td>Hearts of Stone (DLC)</td><td>With TW3</td><td>~12h</td><td>Play after reaching Act 2 of TW3 or after the main story. Best writing in the series.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>5</td><td>Blood and Wine (DLC) <span class="fn-star">⭐</span></td><td>With TW3</td><td>~20h</td><td><span class="fn-star">⭐</span> Play last. Geralt's farewell. Perfect ending.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="5">── PARALLEL CONTINUITY: THRONEBREAKER ──</td></tr>
+          <tr class="fn-pc"><td>6</td><td>Thronebreaker: The Witcher Tales</td><td>PC / Mobile</td><td>~30h</td><td>Set before TW1 in timeline. Can be played anytime — standalone story about Queen Meve. No prior game knowledge needed.</td></tr>
+        </table>
+      </div><!-- /chrono -->
+
+      <!-- ──────────────────────────────────────────────
+           BY PLATFORM
+      ────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-platform">
+        <div class="fn-view-desc">Games grouped by the primary platform you'd play them on today.</div>
+        <table class="fn-table">
+          <tr><th>Platform</th><th>Title</th><th>Year</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">🖥️ PC (GOG / Steam / Sunshine Streaming)</td></tr>
+          <tr class="fn-pc"><td>PC</td><td>The Witcher (Enhanced Edition)</td><td>2007</td><td>PC exclusive. GOG recommended (DRM-free).</td></tr>
+          <tr class="fn-pc"><td>PC</td><td>The Witcher 2: Assassins of Kings EE</td><td>2011</td><td>PC primary; also on Xbox 360.</td></tr>
+          <tr class="fn-pc fn-highlight"><td>PC / PS5</td><td>The Witcher 3: Wild Hunt (Next-Gen Edition) <span class="fn-star">⭐</span></td><td>2015</td><td>Next-Gen Edition best on PC or PS5.</td></tr>
+          <tr class="fn-pc"><td>PC / PS4 / Switch</td><td>Thronebreaker: The Witcher Tales</td><td>2018</td><td>Also iOS/Android mobile.</td></tr>
+          <tr class="fn-pc"><td>PC</td><td>GWENT: The Witcher Card Game</td><td>2018</td><td>Also mobile. Free-to-play.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">📱 Mobile (iOS / Android) — Currently Available</td></tr>
+          <tr class="fn-mobile"><td>iOS / Android</td><td>The Witcher Adventure Game</td><td>2014</td><td>Digital board game. Paid. Still on stores.</td></tr>
+          <tr class="fn-mobile"><td>iOS / Android</td><td>GWENT: The Witcher Card Game</td><td>2019</td><td>Free. The mobile port of the PC card game.</td></tr>
+          <tr class="fn-mobile"><td>iOS / Android</td><td>Thronebreaker: The Witcher Tales</td><td>2020/2021</td><td>Premium paid. iOS 2020, Android 2021.</td></tr>
+          <tr class="fn-mobile"><td>iOS / Android</td><td>The Witcher: Roach Race</td><td>2022</td><td>Free endless runner. Also in Cyberpunk 2077.</td></tr>
+
+          <tr class="fn-arc-row"><td colspan="4">💀 Mobile — DEFUNCT (Servers Closed)</td></tr>
+          <tr class="fn-defunct fn-skip"><td>J2ME (dead)</td><td>The Witcher: Crimson Trail</td><td>2007</td><td>Java feature phones. Abandonware only.</td></tr>
+          <tr class="fn-defunct fn-skip"><td>iOS/Android (dead)</td><td>The Witcher Battle Arena</td><td>2014</td><td>MOBA. Shut Dec 31 2015.</td></tr>
+          <tr class="fn-defunct fn-skip"><td>iOS/Android (dead)</td><td>The Witcher: Monster Slayer</td><td>2021</td><td>AR game. Shut June 30 2023.</td></tr>
+        </table>
+      </div><!-- /platform -->
+
+      <!-- ──────────────────────────────────────────────
+           BEST FIRST
+      ────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-bestfirst">
+        <div class="fn-view-desc">Ranked by quality and playability today. Start at the top if you're new to the franchise. The Witcher 3 is always the right answer.</div>
+        <table class="fn-table">
+          <tr><th>Rank</th><th>Title</th><th>Platform</th><th>Why</th></tr>
+          <tr class="fn-pc fn-highlight"><td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">1</td><td>The Witcher 3: Wild Hunt (Complete Edition) <span class="fn-star">⭐</span></td><td>PC / PS5</td><td>Start here. Masterpiece. Includes both DLCs. No prior game knowledge needed — it eases you in.</td></tr>
+          <tr class="fn-pc fn-highlight"><td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">2</td><td>Blood and Wine (DLC) <span class="fn-star">⭐</span></td><td>With TW3</td><td>Play immediately after TW3 main story. Best map, best music, perfect ending.</td></tr>
+          <tr class="fn-pc"><td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">3</td><td>Hearts of Stone (DLC)</td><td>With TW3</td><td>Best writing in any Witcher game. Gaunter O'Dimm is iconic. ~12h.</td></tr>
+          <tr class="fn-pc fn-highlight"><td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">4</td><td>Thronebreaker: The Witcher Tales <span class="fn-star">⭐</span></td><td>PC / Mobile</td><td>Best standalone non-Geralt story. Emotional, long, great on mobile.</td></tr>
+          <tr class="fn-xbox"><td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">5</td><td>The Witcher 2: Assassins of Kings</td><td>PC / Xbox 360</td><td>Aged but excellent. Required if you care about the narrative thread into TW3.</td></tr>
+          <tr class="fn-pc fn-skip"><td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">6</td><td>The Witcher (Enhanced Edition)</td><td>PC only</td><td><span class="fn-tag fn-tag-opt">optional</span> Combat shows its age. Atmospheric. Worth it for die-hards; skip if casuals.</td></tr>
+          <tr class="fn-mobile"><td style="font-family:'Share Tech Mono',monospace;color:var(--accent)">7</td><td>GWENT: The Witcher Card Game</td><td>PC / Mobile</td><td>If you loved Gwent in TW3. Free. Long-term hobby game.</td></tr>
+        </table>
+      </div><!-- /bestfirst -->
+
+      <!-- ──────────────────────────────────────────────
+           MOBILE / ACTIVE
+      ────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-mobile">
+        <div class="fn-view-desc">Games currently playable on mobile devices (iOS/Android). All actively available as of 2026.</div>
+        <table class="fn-table">
+          <tr><th>Title</th><th>Platform</th><th>Price</th><th>Notes</th></tr>
+          <tr class="fn-mobile fn-highlight"><td>Thronebreaker: The Witcher Tales <span class="fn-star">⭐</span></td><td>iOS / Android</td><td>Paid (~$9.99)</td><td><span class="fn-star">⭐</span> Best mobile Witcher experience. Full 30h RPG. Cloud save across PC/mobile. iOS first (2020), Android June 2021.</td></tr>
+          <tr class="fn-mobile"><td>GWENT: The Witcher Card Game</td><td>iOS / Android</td><td>Free</td><td>Full card game. All factions. Cross-platform with PC.</td></tr>
+          <tr class="fn-mobile"><td>The Witcher Adventure Game</td><td>iOS / Android</td><td>Paid (~$2.99)</td><td>Digital board game. 4 players. Good couch co-op on tablet.</td></tr>
+          <tr class="fn-mobile"><td>The Witcher: Roach Race</td><td>iOS / Android</td><td>Free</td><td>Silly endless runner as Geralt's horse. 5 levels. Takes 20 minutes total.</td></tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:12px">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body"><strong>PC-streaming via Sunshine+Moonlight:</strong> TW1, TW2, and TW3 are not natively mobile — but stream beautifully via Sunshine to a tablet. TW3 with a controller on iPad is essentially the definitive experience.</div>
+        </div>
+      </div><!-- /mobile -->
+
+      <!-- ──────────────────────────────────────────────
+           DEFUNCT / CANCELED
+      ────────────────────────────────────────────── -->
+      <div class="fn-view" id="fn-library-defunct">
+        <div class="fn-view-desc">Every game in the Witcher franchise that is no longer playable, was canceled before release, or has been shut down. Historical record only.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Why Dead</th><th>Notes</th></tr>
+          <tr class="fn-defunct"><td>1997</td><td>The Witcher (Metropolis Software)</td><td>Never completed</td><td>Abandoned mid-development. Origin of the word "witcher" in English. No builds known to exist publicly.</td></tr>
+          <tr class="fn-defunct"><td>2007</td><td>The Witcher: Crimson Trail</td><td>Platform obsolete (J2ME)</td><td>Java phone game. Abandonware. .jar files exist on abandonware sites. Not runnable on modern smartphones without emulation.</td></tr>
+          <tr class="fn-defunct"><td>2008</td><td>The Witcher: Versus</td><td>Flash EOL (2020)</td><td>Flash browser PvP. Tied to thewitcher.com forums. Some community archive attempts exist via Ruffle (may have partial functionality).</td></tr>
+          <tr class="fn-defunct"><td>2009</td><td>The Witcher: Rise of the White Wolf</td><td>Publisher dispute / canceled</td><td>PS3/360 port of TW1. Canceled spring 2009 after dispute with Atari. No build ever released.</td></tr>
+          <tr class="fn-defunct"><td>2014–2015</td><td>The Witcher Battle Arena</td><td>Servers shut Dec 31 2015</td><td>Mobile MOBA. Ran for ~14 months. Wikipedia article preserved; game completely inaccessible.</td></tr>
+          <tr class="fn-defunct"><td>2021–2023</td><td>The Witcher: Monster Slayer</td><td>Servers shut June 30 2023</td><td>AR mobile game. 500k downloads in 3 days. CD Projekt determined it didn't meet business expectations. 100M+ monsters were slain in its lifetime.</td></tr>
+        </table>
+      </div><!-- /defunct -->
+
+    </div><!-- /card -->
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Storage &amp; Setup Notes</div>
+    <div class="card">
+      <div class="card-title">PC Games — Sunshine Streaming</div>
+      <p style="font-size:.84rem;line-height:1.7">All three main Witcher games are PC-only (or have PC as primary platform). Stream via Sunshine + Moonlight to play on any screen. TW3 with a controller is the recommended experience — it was designed for it.</p>
+      <pre>D:\Games\
+  ├── The Witcher (Enhanced Edition)\
+  ├── The Witcher 2 Enhanced Edition\
+  └── The Witcher 3 Wild Hunt (Complete Edition)\    ← Next-Gen Edition preferred</pre>
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>GOG vs Steam:</strong> Buy Witcher games on GOG (CD Projekt's own store) where possible. DRM-free, better sale prices, and supports the developers directly. All three games are permanently on GOG.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-library -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — TV & ANIME
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-tvanime">
+
+  <div class="section">
+    <div class="section-title">📺 The Witcher TV &amp; Adaptations</div>
+    <div class="card">
+
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('tvanime','all',       this)">📋 All Entries</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','netflix',   this)">🎬 Netflix Universe</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','legacy',    this)">📼 Legacy Polish</button>
+        <button class="fn-view-btn"        onclick="fnView('tvanime','watchorder',this)">🎯 Watch Order</button>
+      </div>
+
+      <!-- ALL ENTRIES -->
+      <div class="fn-view active" id="fn-tvanime-all">
+        <div class="fn-view-desc">Every screen adaptation of The Witcher in release order, including the legacy Polish productions.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Type</th><th>Episodes</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── LEGACY POLISH ADAPTATIONS (Non-canonical) ──</td></tr>
+          <tr class="fn-tv fn-skip fn-defunct">
+            <td>2001</td>
+            <td>The Hexer (Wiedźmin) — Film <span class="fn-tag fn-tag-dead">NON-CANON</span></td>
+            <td><span class="fn-tag fn-tag-opt">Film</span></td>
+            <td>~120 min</td>
+            <td>Polish-only</td>
+            <td>Theatrical cut of unreleased TV footage. 2 hours of what was 13 episodes. Critically panned. Sapkowski called it obscene. Historical curiosity only — Polish language.</td>
+          </tr>
+          <tr class="fn-tv fn-skip fn-defunct">
+            <td>2002</td>
+            <td>The Hexer (Wiedźmin) — TV Series <span class="fn-tag fn-tag-dead">NON-CANON</span></td>
+            <td><span class="fn-tag fn-tag-opt">TV</span></td>
+            <td>13 eps</td>
+            <td>Polish-only (TVP)</td>
+            <td>More coherent than the film. Michał Żebrowski as Geralt. Covers Geralt's childhood through early adventures. Canceled after 13 eps. Never officially released internationally.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── NETFLIX UNIVERSE ──</td></tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2019</td>
+            <td>The Witcher — Season 1 <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span></td>
+            <td>8 eps</td>
+            <td>Netflix</td>
+            <td><span class="fn-star">⭐</span> Henry Cavill as Geralt. Non-linear three-timeline story (confusing but intentional). Adapts The Last Wish + Sword of Destiny. All timelines converge at episode 6.</td>
+          </tr>
+          <tr class="fn-tv fn-highlight">
+            <td>2021</td>
+            <td>The Witcher — Season 2</td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span></td>
+            <td>8 eps</td>
+            <td>Netflix</td>
+            <td>Linear timeline. Kaer Morhen. Adapts Blood of Elves loosely. Received better than S1 for cleaner storytelling. Watch Nightmare of the Wolf first.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>2021</td>
+            <td>The Witcher: Nightmare of the Wolf <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Anime Film</span></td>
+            <td>~80 min</td>
+            <td>Netflix</td>
+            <td><span class="fn-star">⭐</span> Vesemir origin story. Studio Mir animation. Watch before Season 2. Voiced by Theo James. Excellent standalone.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2022</td>
+            <td>The Witcher: Blood Origin</td>
+            <td><span class="fn-tag fn-tag-yes">Mini-Series</span></td>
+            <td>4 eps</td>
+            <td>Netflix</td>
+            <td>Prequel set 1200 years before Geralt. Origin of the first Witcher and Conjunction of Spheres. Weakest Netflix entry. Michelle Yeoh. Optional world-building.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td>2023</td>
+            <td>The Witcher — Season 3</td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span></td>
+            <td>8 eps</td>
+            <td>Netflix</td>
+            <td>Henry Cavill's final season. Adapts Time of Contempt. Split release (Vol.1 June, Vol.2 July 2023). Cavill's farewell performance.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2025</td>
+            <td>The Witcher: Sirens of the Deep <span class="fn-star">⭐</span></td>
+            <td><span class="fn-tag fn-tag-yes">Anime Film</span></td>
+            <td>~90 min</td>
+            <td>Netflix</td>
+            <td><span class="fn-star">⭐</span> Adapts "A Little Sacrifice." Doug Cockle (game voice actor) as Geralt. Praised as the best Netflix Witcher since Nightmare of the Wolf.</td>
+          </tr>
+          <tr class="fn-tv">
+            <td>2025</td>
+            <td>The Witcher — Season 4</td>
+            <td><span class="fn-tag fn-tag-yes">TV Series</span></td>
+            <td>8 eps</td>
+            <td>Netflix</td>
+            <td>Liam Hemsworth replaces Cavill. Divisive reception driven largely by recasting. Continues the main storyline.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>2025</td>
+            <td>The Rats: A Witcher Tale</td>
+            <td><span class="fn-tag fn-tag-yes">Animated Film</span></td>
+            <td>Feature</td>
+            <td>Netflix</td>
+            <td>Follows The Rats — the outlaw gang Ciri runs with in The Tower of the Swallow. Quietly released on Netflix. Ciri-centric story.</td>
+          </tr>
+          <tr class="fn-tv fn-skip">
+            <td>2026</td>
+            <td>The Witcher — Season 5 <span class="fn-tag fn-tag-coming">UPCOMING</span></td>
+            <td><span class="fn-tag fn-tag-coming">TV Series</span></td>
+            <td>TBD</td>
+            <td>Netflix</td>
+            <td>Confirmed final season. Liam Hemsworth. Will conclude the Netflix continuity.</td>
+          </tr>
+        </table>
+      </div><!-- /all -->
+
+      <!-- NETFLIX UNIVERSE -->
+      <div class="fn-view" id="fn-tvanime-netflix">
+        <div class="fn-view-desc">The Netflix Witcher universe — all entries in chronological order within that continuity.</div>
+        <table class="fn-table">
+          <tr><th>Chrono Order</th><th>Title</th><th>Year Released</th><th>When in Story</th><th>Notes</th></tr>
+          <tr class="fn-tv fn-highlight"><td>1</td><td>The Witcher: Blood Origin</td><td>2022</td><td>~1200 years before Geralt</td><td>First in timeline. Optional — standalone world-building about elves and the first Witcher.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2</td><td>The Witcher: Nightmare of the Wolf</td><td>2021</td><td>~100 years before S1</td><td>Vesemir's origin. Watch before Season 2 for maximum impact.</td></tr>
+          <tr class="fn-tv fn-highlight"><td>3</td><td>The Witcher — Season 1</td><td>2019</td><td>Multiple eras converging</td><td>Non-linear. The main Geralt/Ciri/Yennefer story begins here.</td></tr>
+          <tr class="fn-tv"><td>4</td><td>The Witcher — Season 2</td><td>2021</td><td>Follows S1</td><td>Linear from here on.</td></tr>
+          <tr class="fn-tv"><td>5</td><td>The Witcher — Season 3</td><td>2023</td><td>Follows S2</td><td>Henry Cavill's exit.</td></tr>
+          <tr class="fn-movie"><td>6</td><td>The Witcher: Sirens of the Deep</td><td>2025</td><td>Standalone (adapts a short story)</td><td>Can be watched anytime — standalone short-story adaptation.</td></tr>
+          <tr class="fn-movie"><td>7</td><td>The Rats: A Witcher Tale</td><td>2025</td><td>Ciri's "Rats" period</td><td>Watch after S3 for context on Ciri's arc.</td></tr>
+          <tr class="fn-tv"><td>8</td><td>The Witcher — Season 4</td><td>2025</td><td>Follows S3</td><td>Liam Hemsworth era.</td></tr>
+          <tr class="fn-tv fn-skip"><td>9</td><td>The Witcher — Season 5</td><td>2026</td><td>Follows S4</td><td>Final season. Upcoming.</td></tr>
+        </table>
+      </div><!-- /netflix -->
+
+      <!-- LEGACY POLISH -->
+      <div class="fn-view" id="fn-tvanime-legacy">
+        <div class="fn-view-desc">The 2001-2002 Polish adaptations. Non-canonical to games or Netflix. Polish language only. Included for completeness.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Director</th><th>Geralt</th><th>Notes</th></tr>
+          <tr class="fn-tv fn-defunct"><td>2001</td><td>The Hexer (Wiedźmin) — Film</td><td>Marek Brodzki</td><td>Michał Żebrowski</td><td>Compilation film of unreleased TV footage. Polish theatrical only. Never internationally distributed. Available online with fan subtitles.</td></tr>
+          <tr class="fn-tv fn-defunct"><td>2002</td><td>The Hexer (Wiedźmin) — TV Series</td><td>Marek Brodzki</td><td>Michał Żebrowski</td><td>13 episodes. Polish TVP broadcast. More coherent than the film. Covers Geralt's origin and early adventures. Fan-subbed copies online. Sapkowski despised both.</td></tr>
+        </table>
+      </div><!-- /legacy -->
+
+      <!-- WATCH ORDER -->
+      <div class="fn-view" id="fn-tvanime-watchorder">
+        <div class="fn-view-desc">Recommended watch order for a newcomer to the Netflix universe.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Notes</th></tr>
+          <tr class="fn-tv fn-highlight"><td>1</td><td>The Witcher — Season 1</td><td>Start here. Non-linear timeline is confusing by design — stick with it. The mystery unravels by episode 6.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2</td><td>Nightmare of the Wolf</td><td>Watch before S2. Gives Kaer Morhen and Vesemir their full weight.</td></tr>
+          <tr class="fn-tv"><td>3</td><td>The Witcher — Season 2</td><td>Linear and more accessible than S1.</td></tr>
+          <tr class="fn-tv"><td>4</td><td>The Witcher — Season 3</td><td>Henry Cavill's farewell. Split release Vol.1/Vol.2.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>5</td><td>Sirens of the Deep</td><td>Can be watched here or after S4. Best Netflix Witcher animation.</td></tr>
+          <tr class="fn-movie fn-skip"><td>6</td><td>Blood Origin</td><td><span class="fn-tag fn-tag-opt">optional</span> Can be watched anytime — 1200-years-ago prequel. Standalone.</td></tr>
+          <tr class="fn-movie"><td>7</td><td>The Rats: A Witcher Tale</td><td>After S3 for Ciri arc context.</td></tr>
+          <tr class="fn-tv"><td>8</td><td>The Witcher — Season 4</td><td>Liam Hemsworth begins.</td></tr>
+        </table>
+      </div><!-- /watchorder -->
+
+    </div>
+  </div>
+</div><!-- /fn-pane-tvanime -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MOVIES
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-movies">
+
+  <div class="section">
+    <div class="section-title">🎬 Witcher Films &amp; Animated Movies</div>
+    <div class="card">
+      <div class="fn-view-nav">
+        <button class="fn-view-btn active" onclick="fnView('movies','all',this)">📋 All Films</button>
+        <button class="fn-view-btn"        onclick="fnView('movies','watchorder',this)">🎯 Watch Order</button>
+      </div>
+
+      <div class="fn-view active" id="fn-movies-all">
+        <div class="fn-view-desc">All theatrical and streaming films in the franchise, including the legacy Polish film and Netflix animated entries.</div>
+        <table class="fn-table">
+          <tr><th>Year</th><th>Title</th><th>Runtime</th><th>Type</th><th>Where</th><th>Notes</th></tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── LEGACY ──</td></tr>
+          <tr class="fn-movie fn-defunct fn-skip">
+            <td>2001</td>
+            <td>The Hexer (Wiedźmin)</td>
+            <td>~120 min</td>
+            <td><span class="fn-tag fn-tag-opt">Polish theatrical</span></td>
+            <td>Fan subtitles online</td>
+            <td><span class="fn-tag fn-tag-dead">NON-CANON</span> Compilation film from TV footage. Critically failed. Sapkowski's one-word review was unprintable. Polish only.</td>
+          </tr>
+
+          <tr class="fn-arc-row"><td colspan="6">── NETFLIX ANIMATED ──</td></tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2021</td>
+            <td>The Witcher: Nightmare of the Wolf <span class="fn-star">⭐</span></td>
+            <td>~80 min</td>
+            <td><span class="fn-tag fn-tag-yes">Animated</span></td>
+            <td>Netflix</td>
+            <td><span class="fn-star">⭐</span> Vesemir origin. Studio Mir. Best Netflix Witcher entry alongside Sirens. Watch before TW Season 2.</td>
+          </tr>
+          <tr class="fn-movie fn-highlight">
+            <td>2025</td>
+            <td>The Witcher: Sirens of the Deep <span class="fn-star">⭐</span></td>
+            <td>~90 min</td>
+            <td><span class="fn-tag fn-tag-yes">Animated</span></td>
+            <td>Netflix</td>
+            <td><span class="fn-star">⭐</span> Adapts "A Little Sacrifice." Doug Cockle as Geralt (game VA). Critically well-received. Can be watched standalone.</td>
+          </tr>
+          <tr class="fn-movie">
+            <td>2025</td>
+            <td>The Rats: A Witcher Tale</td>
+            <td>Feature</td>
+            <td><span class="fn-tag fn-tag-yes">Animated</span></td>
+            <td>Netflix</td>
+            <td>Follows Ciri's outlaw gang from Tower of the Swallow. Quietly released. Ciri-centric.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="fn-view" id="fn-movies-watchorder">
+        <div class="fn-view-desc">Watch order for the films only.</div>
+        <table class="fn-table">
+          <tr><th>Step</th><th>Title</th><th>Watch After</th><th>Notes</th></tr>
+          <tr class="fn-movie fn-highlight"><td>1</td><td>Nightmare of the Wolf</td><td>Before or after TW S1</td><td>Best watched before S2. Can be first entry into the franchise.</td></tr>
+          <tr class="fn-movie fn-highlight"><td>2</td><td>Sirens of the Deep</td><td>Anytime after S1</td><td>Standalone. Can be watched before or after S4.</td></tr>
+          <tr class="fn-movie"><td>3</td><td>The Rats: A Witcher Tale</td><td>After TW S3</td><td>Ciri's Rats period — after S3 for context.</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📂 Jellyfin Library Location</div>
+    <div class="card">
+      <pre>D:\Media\Movies\The Witcher\
+  ├── The Witcher Nightmare of the Wolf (2021)\
+  │   └── The Witcher Nightmare of the Wolf (2021).mkv
+  ├── The Witcher Sirens of the Deep (2025)\
+  │   └── The Witcher Sirens of the Deep (2025).mkv
+  └── The Rats A Witcher Tale (2025)\
+      └── The Rats A Witcher Tale (2025).mkv</pre>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-movies -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — BOOKS & COMICS  (replaces Merch for this franchise)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-merch">
+
+  <div class="section">
+    <div class="section-title">📚 Andrzej Sapkowski's Books</div>
+    <div class="card">
+      <div class="card-title">Reading Order (English editions)</div>
+      <table class="fn-table">
+        <tr><th>Order</th><th>Title</th><th>Year (EN)</th><th>Type</th><th>Notes</th></tr>
+        <tr class="fn-book fn-highlight"><td>1</td><td>The Last Wish <span class="fn-star">⭐</span></td><td>2007</td><td>Short stories</td><td><span class="fn-star">⭐</span> Start here. Introduces Geralt, Yennefer, Dandelion. Netflix S1 adapts most of this.</td></tr>
+        <tr class="fn-book fn-highlight"><td>2</td><td>Sword of Destiny <span class="fn-star">⭐</span></td><td>2015</td><td>Short stories</td><td><span class="fn-star">⭐</span> Introduces Ciri. Read before Blood of Elves.</td></tr>
+        <tr class="fn-book"><td>3</td><td>Blood of Elves</td><td>2008</td><td>Novel</td><td>Novel 1 of 5. The Saga begins. Geralt and Ciri travel together.</td></tr>
+        <tr class="fn-book"><td>4</td><td>Time of Contempt</td><td>2013</td><td>Novel</td><td>Novel 2. Nilfgaard invasion escalates. Major upheaval.</td></tr>
+        <tr class="fn-book"><td>5</td><td>Baptism of Fire</td><td>2014</td><td>Novel</td><td>Novel 3. Road-trip saga — Geralt's Hansa marches to find Ciri.</td></tr>
+        <tr class="fn-book fn-highlight"><td>6</td><td>The Tower of the Swallow <span class="fn-star">⭐</span></td><td>2016</td><td>Novel</td><td>Novel 4. Saga peak. Ciri on the run.</td></tr>
+        <tr class="fn-book fn-highlight"><td>7</td><td>The Lady of the Lake <span class="fn-star">⭐</span></td><td>2017</td><td>Novel</td><td>Novel 5. Saga conclusion. CDPR games pick up ~5 years after this.</td></tr>
+        <tr class="fn-book"><td>+</td><td>Season of Storms</td><td>2018</td><td>Standalone novel</td><td>Prequel. Read anytime after The Last Wish. TW3 Blood and Wine draws from it.</td></tr>
+        <tr class="fn-book"><td>+</td><td>Crossroads of Ravens</td><td>2025 (EN)</td><td>Prequel novel</td><td>Newest book (2024). International English release late 2025. CDPR hinted at TW4 tie-ins.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 Comic Books</div>
+    <div class="card">
+      <div class="card-title">Dark Horse Comics (Game Universe Canon)</div>
+      <table class="fn-table">
+        <tr><th>Year</th><th>Title</th><th>Writer</th><th>Notes</th></tr>
+        <tr class="fn-comic"><td>1993–95</td><td>Wiedźmin (Polish Comics)</td><td>Parowski / Polch</td><td>Original Polish comics adapting The Last Wish short stories. Polish only; fan translations exist. First Witcher visual media.</td></tr>
+        <tr class="fn-comic fn-highlight"><td>2014</td><td>House of Glass <span class="fn-star">⭐</span></td><td>Paul Tobin / Dark Horse</td><td>Original game-universe story. Geralt investigates a haunted manor. Best entry point for Dark Horse run.</td></tr>
+        <tr class="fn-comic"><td>2015</td><td>Fox Children</td><td>Paul Tobin / Dark Horse</td><td>Adapts Season of Storms chapter. Geralt in a swamp mystery.</td></tr>
+        <tr class="fn-comic"><td>2016</td><td>Curse of Crows</td><td>Paul Tobin / Dark Horse</td><td>Post-TW3 story. Ciri and Geralt vs a vengeful witch.</td></tr>
+        <tr class="fn-comic"><td>2018</td><td>Of Flesh and Flame</td><td>Aleksandra Motyka / Dark Horse</td><td>Desert caravan adventure. Original story.</td></tr>
+        <tr class="fn-comic fn-skip"><td>2022</td><td>The Witcher: Ronin (Manga)</td><td>CD Projekt Red / Kickstarter</td><td><span class="fn-tag fn-tag-opt">non-canon</span> Alternate universe — Geralt in feudal Japan. Crowdfunded. Fun what-if.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-merch -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — FILLER (Channel content notes)
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-filler">
+
+  <div class="section">
+    <div class="section-title">📡 Tunarr Channel Filler Notes</div>
+    <div class="card">
+      <div class="card-title">Witcher Content for Rotation</div>
+      <p style="font-size:.84rem;line-height:1.7">The Witcher franchise has strong filler potential for a Fantasy/RPG channel. The Netflix series seasons run ~8 episodes at ~60 min each — good for a 2-day binge block. The animated films (Nightmare of the Wolf, Sirens of the Deep) are self-contained enough for standalone programming slots.</p>
+
+      <table class="fn-table" style="margin-top:12px">
+        <tr><th>Content</th><th>Runtime</th><th>Best Slot</th><th>Notes</th></tr>
+        <tr><td>Nightmare of the Wolf</td><td>~80 min</td><td>Friday night movie slot</td><td>Best standalone entry. High production value. Good hook for new viewers.</td></tr>
+        <tr><td>Sirens of the Deep</td><td>~90 min</td><td>Friday/Saturday movie slot</td><td>Doug Cockle as Geralt — sells it to game fans.</td></tr>
+        <tr><td>The Witcher S1–S3 (Henry Cavill)</td><td>8 eps × ~60 min each</td><td>Multi-day block</td><td>3 full seasons. S1 is the hook, S2/S3 are the payoff.</td></tr>
+        <tr><td>The Rats: A Witcher Tale</td><td>Feature</td><td>After S3 block</td><td>Good bookend to a Ciri-focused viewing session.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-filler -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 6 — HISTORY
+═══════════════════════════════════════════════════════════════ -->
+<div class="fn-tab-pane" id="fn-pane-history">
+
+  <div class="section">
+    <div class="section-title">📖 Franchise History</div>
+    <div class="card">
+      <div class="card-title">The Continent's Story — How a Polish short story became a global franchise</div>
+      <p style="font-size:.84rem;line-height:1.7">The Witcher's journey from a 1986 Fantastyka magazine competition to one of the world's most recognized fantasy franchises is genuinely unlikely. Andrzej Sapkowski entered a short story on a whim, urged by his son — and won third prize. The result was "The Witcher" (Wiedźmin), a subversive fairy-tale riff about a mutant monster-hunter that rejected the conventions of heroic fantasy. Poland fell in love. The rest of the world took another two decades to catch up.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📅 Franchise Timeline</div>
+    <div class="card">
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 1986–1999 — The Book Era</div>
+        <div class="fn-era-title">Sapkowski Builds the Continent</div>
+        <div class="fn-era-body">Sapkowski published two short story collections (The Last Wish, 1993; Sword of Destiny, 1992) and five novels (Blood of Elves through Lady of the Lake, 1994–1999). The saga was a phenomenon in Poland and across Central and Eastern Europe, but remained largely unknown in the West due to limited translations. Sapkowski concluded the saga in 1999 with Lady of the Lake and largely stepped away — he would not return with new Witcher material until 2013.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2001–2002 — The Failed Adaptation</div>
+        <div class="fn-era-title">The Hexer: A Cautionary Tale</div>
+        <div class="fn-era-body">Polish TV produced a theatrical film and 13-episode series based on the short stories. Both were critically derided — the film was an incoherent compilation of unreleased TV footage, and the series overcorrected in ways that deeply departed from the source material. Sapkowski famously dismissed both in one obscene word. The experience soured him on adaptations for years and made him initially reluctant to deal with CD Projekt Red when they approached in 2003.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2007–2012 — CD Projekt Red Changes Everything</div>
+        <div class="fn-era-title">The Games Arrive</div>
+        <div class="fn-era-body">CD Projekt Red (a Polish game developer) licensed the rights and released The Witcher in 2007 — their first game, and it received strong reviews in Europe and North America. Sapkowski famously signed away the rights for a flat fee, claiming not to believe in games, a decision he later called "stupid." The Witcher 2: Assassins of Kings (2011) expanded the console audience with an Xbox 360 version and established CDPR as a world-class RPG developer. These games introduced Geralt to an international audience that had never read the books.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2015–2016 — The Wild Hunt Moment</div>
+        <div class="fn-era-title">One of the Greatest Games Ever Made</div>
+        <div class="fn-era-body">The Witcher 3: Wild Hunt (2015) was a cultural moment. Over 800 game of the year awards. A world that felt genuinely alive. Moral choices with real consequences. The Hearts of Stone and Blood and Wine DLCs in 2015–2016 extended what many considered the best game of its generation. TW3 sold over 50 million copies and singlehandedly elevated the franchise from a European cult property to a global phenomenon. The series' books sold out worldwide after the game launched.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2018–2021 — The Card Games and Netflix Expansion</div>
+        <div class="fn-era-title">GWENT, Thronebreaker, and Henry Cavill</div>
+        <div class="fn-era-body">GWENT (the beloved minigame from TW3) became a standalone card game in 2018, and Thronebreaker (a narrative RPG using GWENT mechanics) demonstrated CDPR's ability to tell compelling non-Geralt stories. Netflix launched The Witcher series in 2019 with Henry Cavill as Geralt — it became one of Netflix's biggest originals, reportedly 76 million households in its first four weeks. The animated film Nightmare of the Wolf (2021) followed. The franchise was at its commercial peak.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2021–2023 — Turbulence and Loss</div>
+        <div class="fn-era-title">Mobile Failures and the Cavill Departure</div>
+        <div class="fn-era-body">The Witcher: Monster Slayer (2021) was a well-built AR mobile game that simply failed to retain players — shut down in June 2023. Henry Cavill's shock departure from the Netflix series (announced October 2022) dominated entertainment news and divided the fanbase. CDPR simultaneously announced three new Witcher games — TW4 (Polaris), a Witcher remake (Canis Majoris), and a spinoff (Sirius) — signaling a long-term future even as short-term turbulence hit.</div>
+      </div>
+
+      <div class="fn-era">
+        <div class="fn-era-year">📅 2024–Present — The Ciri Era Begins</div>
+        <div class="fn-era-title">Witcher 4 Reveal and the New Trilogy</div>
+        <div class="fn-era-body">The Witcher 4 was officially revealed at The Game Awards in December 2024 with a stunning cinematic trailer confirming Ciri as the new protagonist. CDPR's March 2025 earnings report confirmed the game won't ship before 2027. Sapkowski published Crossroads of Ravens in 2024 — his first new Witcher novel in 11 years. Netflix's Season 4 arrived with Liam Hemsworth; Season 5 (the final season) is in production. The franchise is actively building toward a new era even as the Geralt chapter draws to a close on both screens and in games.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 Key Creators</div>
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Notable Contributions</th></tr>
+        <tr><td>Andrzej Sapkowski</td><td>Author (Books)</td><td>Created the entire Witcher universe. 9 novels/story collections (1986–2024). Creative consultant on games and Netflix series.</td></tr>
+        <tr><td>Michał Kiciński &amp; Marcin Iwiński</td><td>CD Projekt Red Co-founders</td><td>Shepherded CDPR from game distributor to one of the world's most respected RPG studios.</td></tr>
+        <tr><td>Adam Badowski</td><td>Game Director (TW2, TW3)</td><td>Directed Assassins of Kings and Wild Hunt. Currently head of CD Projekt Red studio.</td></tr>
+        <tr><td>Konrad Tomaszkiewicz</td><td>Game Director (TW3)</td><td>Lead director of The Witcher 3 — the game that made the franchise global.</td></tr>
+        <tr><td>Marcin Przybyłowicz</td><td>Composer (TW3)</td><td>Composed the iconic TW3 score including "The Wolven Storm (Priscilla's Song)".</td></tr>
+        <tr><td>Doug Cockle</td><td>Voice Actor (Games)</td><td>Voice of Geralt in the game trilogy and Sirens of the Deep. His gravelly portrayal became the definitive Geralt for millions.</td></tr>
+        <tr><td>Lauren Schmidt Hissrich</td><td>Showrunner (Netflix)</td><td>Created and ran the Netflix series Seasons 1–4. Oversaw the Cavill-to-Hemsworth transition.</td></tr>
+        <tr><td>Henry Cavill</td><td>Actor (Netflix S1–S3)</td><td>Portrayed Geralt in Seasons 1–3. Known to be a genuine Witcher fan who read all the books. His departure was widely mourned.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗺️ Canon Map</div>
+    <div class="card">
+      <div class="card-title">Three separate canons — they share a world but not a timeline</div>
+      <p style="font-size:.84rem;line-height:1.7"><strong>Sapkowski's Books:</strong> The original and most authoritative canon. The games are explicitly non-canonical sequels according to Sapkowski himself — they share characters and lore but diverge from the book ending. The Netflix series is "inspired by" the books, not a direct adaptation, and has its own continuity with different timeline dates.</p>
+      <p style="font-size:.84rem;line-height:1.7"><strong>CD Projekt Red Games:</strong> Their own canon. The Witcher 1–3 are set roughly 5 years after Lady of the Lake and treat the books as backstory. Thronebreaker is canon to the game universe. The Witcher 4 (Ciri protagonist) continues this game canon.</p>
+      <p style="font-size:.84rem;line-height:1.7"><strong>Netflix Universe:</strong> Adapts book events with different dates, character changes, and story beats. Nightmare of the Wolf, Blood Origin, Sirens of the Deep, and The Rats are all Netflix canon. The Polish Hexer (2001–2002) is <em>not</em> canonical to either.</p>
+    </div>
+  </div>
+
+</div><!-- /fn-pane-history -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════ -->
+<script>
+function fnTab(id, btn) {
+  document.querySelectorAll('.fn-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.fn-tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const pane = document.getElementById('fn-pane-' + id);
+  if (pane) pane.classList.add('active');
+}
+
+function fnView(tab, view, btn) {
+  const pane = document.getElementById('fn-pane-' + tab);
+  if (!pane) return;
+  pane.querySelectorAll('.fn-view-btn').forEach(b => b.classList.remove('active'));
+  pane.querySelectorAll('.fn-view').forEach(v => v.classList.remove('active'));
+  btn.classList.add('active');
+  const target = document.getElementById('fn-' + tab + '-' + view);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
