@@ -233,6 +233,14 @@
           <div class="rule-body">Sunshine must run as the <code>stream-user</code> Standard Windows account (not admin). Playnite fullscreen is the only Sunshine application — it replaces Explorer.exe as the shell for stream-user. <code>terminate_on_app_close = true</code> must be set so that if Playnite exits, the stream disconnects immediately rather than exposing the Windows desktop. Alt+Tab and system hotkeys are blocked via an AutoHotkey startup script. No exceptions — a user who escapes to the desktop has unrestricted access to the server.</div>
         </div>
       </div>
+
+      <div class="rule rule-block">
+        <div class="rule-num">XI</div>
+        <div>
+          <div class="rule-title">Game streaming runs in a hardened sandbox — users never see the desktop</div>
+          <div class="rule-body">Sunshine must run as the <code>stream-user</code> Standard Windows account (not admin). Playnite fullscreen is the only Sunshine application — it replaces Explorer.exe as the shell for stream-user. <code>terminate_on_app_close = true</code> must be set so that if Playnite exits, the stream disconnects immediately rather than exposing the Windows desktop. Alt+Tab and system hotkeys are blocked via an AutoHotkey startup script. No exceptions — a user who escapes to the desktop has unrestricted access to the server.</div>
+        </div>
+      </div>
         </div>
       </div>
 
@@ -269,6 +277,27 @@
 
 # Restart session manager:
 nssm restart SessionManager</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Sunshine kiosk — add a game to Playnite (not to Sunshine)</div>
+      <pre># Do NOT add individual games as Sunshine applications.
+# Sunshine has ONE app: "Game Library" (Playnite fullscreen).
+# Add games inside Playnite instead:
+#   Playnite -&gt; Add Game -&gt; Manual -&gt; set Name, Platform, Executable
+#   Or use Playnite's built-in library scanners for Steam/GOG/emulators
+
+# Grant stream-user access to the game folder (PowerShell):
+$acl = Get-Acl "D:\Games\MyGame"
+$rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    "stream-user","ReadAndExecute","ContainerInherit,ObjectInherit","None","Allow")
+$acl.SetAccessRule($rule)
+Set-Acl "D:\Games\MyGame" $acl
+
+# Security checklist before going live:
+# [x] terminate_on_app_close = true in Sunshine web UI
+# [x] Playnite is stream-user's shell (HKCU Winlogon\Shell)
+# [x] AHK blocker in stream-user startup folder
+# [x] Alt+Tab tested and confirmed blocked</pre>
     </div>
     <div class="card">
       <div class="card-title">Sunshine kiosk — add a game to Playnite (not to Sunshine)</div>
