@@ -86,8 +86,8 @@
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Determine: does this service store per-user data (saves, progress, preferences, files)?</div></div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Per-user data goes in <code>D:\Users\[username]\[service-name]\</code> — not anywhere else</div></div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>For browser-based services:</strong> use the <code>X-authentik-username</code> header to resolve the save path. No symlink needed.</div></div>
-    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div><strong>For Sunshine-streamed apps:</strong> add a pre-launch curl call to the Session Manager (port 9004) and add the app's save folder to <code>SYMLINK_MAP</code> in <code>session_manager.py</code></div></div>
-    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add the new subfolder to <code>USER_SUBDIRS</code> in session_manager.py so <code>ensure_user_dirs()</code> creates it for new users</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div><strong>For Sunshine-streamed apps:</strong> games are launched through <strong>Playnite</strong> — the single Sunshine application. The pre-launch curl call to Session Manager (port 9004) is on the Playnite app entry, not individual games. Add each game's save folder to <code>SYMLINK_MAP</code> in <code>session_manager.py</code> as normal.</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>Add the new subfolder to
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Verify <code>D:\Users\[username]\[service-name]\</code> appears under the user's App Data in Nextcloud and counts toward their quota</div></div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Verify that deleting a user (or running user cleanup) removes this folder correctly</div></div>
   </div>
@@ -126,7 +126,20 @@
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>All ports, URLs, and paths use <code>data-cfg</code> attributes — no hardcoded values</div></div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>UI Preview pane has at least a placeholder chrome frame — complete the mock when time allows</div></div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Reference the service from the Roadmap (home.html) with a clickable link to the new tab</div></div>
-    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Service added to services.json catalogue (do not edit services.html directly)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>Service added to services.json catalogue (do not edit services.html directly)</div></div>
+  </div>
+
+  <div class="checklist-box">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">10 · Sunshine-Streamed Game Security</div>
+    <div style="font-size:.78rem;color:var(--text-dim);margin-bottom:10px">Required for any game added to the Playnite library and streamed via Sunshine.</div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>Sunshine runs as the <code>stream-user</code> Standard Windows account — not your admin account</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div><code>terminate_on_app_close = true</code> is set in Sunshine Configuration → General (verified in web UI)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>Playnite (fullscreen) is configured as the shell replacement for stream-user — not Windows Explorer</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>AutoHotkey hotkey-blocker script is in stream-user's startup folder (blocks Alt+Tab, Win key, Ctrl+Esc)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>Game executable is accessible by stream-user (NTFS ACL grants ReadAndExecute on the game folder)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>Game added to Playnite library — NOT as a separate Sunshine application. Moonlight shows one tile only: "Game Library"</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>E2E test: connect Moonlight → launch game → exit game → verify returns to Playnite, NOT desktop</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'\u2713':''"></div><div>E2E test: Alt+Tab during a game → verify nothing happens (AHK blocker active)</div></div>
   </div>
 </div>
 
@@ -212,6 +225,14 @@
         <div>
           <div class="rule-title">Config is code — no hardcoded values in HTML</div>
           <div class="rule-body">All ports, domains, paths, and version strings in service documentation must use <code>data-cfg</code> attributes that resolve from config.js. When the server IP changes, or a port is reassigned, config.js is the single place to update. Hardcoded values in HTML become wrong and stay wrong.</div>
+
+      <div class="rule rule-block">
+        <div class="rule-num">XI</div>
+        <div>
+          <div class="rule-title">Game streaming runs in a hardened sandbox — users never see the desktop</div>
+          <div class="rule-body">Sunshine must run as the <code>stream-user</code> Standard Windows account (not admin). Playnite fullscreen is the only Sunshine application — it replaces Explorer.exe as the shell for stream-user. <code>terminate_on_app_close = true</code> must be set so that if Playnite exits, the stream disconnects immediately rather than exposing the Windows desktop. Alt+Tab and system hotkeys are blocked via an AutoHotkey startup script. No exceptions — a user who escapes to the desktop has unrestricted access to the server.</div>
+        </div>
+      </div>
         </div>
       </div>
 
@@ -248,6 +269,27 @@
 
 # Restart session manager:
 nssm restart SessionManager</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Sunshine kiosk — add a game to Playnite (not to Sunshine)</div>
+      <pre># Do NOT add individual games as Sunshine applications.
+# Sunshine has ONE app: "Game Library" (Playnite fullscreen).
+# Add games inside Playnite instead:
+#   Playnite -&gt; Add Game -&gt; Manual -&gt; set Name, Platform, Executable
+#   Or use Playnite's built-in library scanners for Steam/GOG/emulators
+
+# Grant stream-user access to the game folder (PowerShell):
+$acl = Get-Acl "D:\Games\MyGame"
+$rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    "stream-user","ReadAndExecute","ContainerInherit,ObjectInherit","None","Allow")
+$acl.SetAccessRule($rule)
+Set-Acl "D:\Games\MyGame" $acl
+
+# Security checklist before going live:
+# [x] terminate_on_app_close = true in Sunshine web UI
+# [x] Playnite is stream-user's shell (HKCU Winlogon\Shell)
+# [x] AHK blocker in stream-user startup folder
+# [x] Alt+Tab tested and confirmed blocked</pre>
     </div>
     <div class="card">
       <div class="card-title">Cloudflare Tunnel — new public entry</div>
