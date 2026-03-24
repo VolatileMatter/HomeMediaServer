@@ -1,130 +1,436 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>Domain</title><link rel="stylesheet" href="shared.css"></head>
+<head><meta charset="UTF-8"><title>Network</title><link rel="stylesheet" href="shared.css"><script src="config.js"></script></head>
 <body>
 
 <div class="page-header">
   <div class="page-icon">🌐</div>
   <div>
-    <h1>Custom Domain</h1>
-    <div class="subtitle">// yourdomain.com → Your Home Server · Cost · Security Impact //</div>
-    <p class="desc">Everything about getting a domain name, pointing it at your home server, costs, and whether it actually improves security.</p>
+    <h1>Network &amp; Domain</h1>
+    <div class="subtitle">// ixo.lol · Tailscale · Caddy · DDNS · Jellyfin TV Carve-out //</div>
+    <p class="desc">How the server is accessible from outside your home. Tailscale handles 99% of access with zero open ports. One deliberate exception exists for Smart TV Jellyfin apps that cannot run Tailscale.</p>
   </div>
 </div>
 
-<div class="v1-banner">🐉 Short answer: A domain costs ~$10–15/year. It improves usability and enables free HTTPS certificates. It does <em>not</em> inherently improve security — but combined with Cloudflare (free), it hides your home IP and adds DDoS protection.</div>
+<div class="v1-banner">🐉 Architecture summary: All services run behind Tailscale — WireGuard-encrypted, zero open ports, free with no bandwidth cap. The domain <code data-cfg="domain"></code> gives services pretty URLs. One port (8096) is forwarded publicly at <code data-cfg="tv-url"></code> for Smart TV Jellyfin apps only. Cloudflare is not used.</div>
 
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 1: HOW IT ALL FITS TOGETHER
+══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title">💰 Cost Breakdown</div>
+  <div class="section-title">🗺️ Access Architecture Overview</div>
+  <div class="card">
+    <table>
+      <tr><th>Who / What</th><th>How they connect</th><th>Auth</th></tr>
+      <tr><td>Friends &amp; family (phones, laptops, tablets)</td><td>Tailscale → <code data-cfg="url:jellyfin"></code> etc.</td><td>Authentik SSO (Google)</td></tr>
+      <tr><td>You (admin)</td><td>Tailscale → any service, including admin ports</td><td>Authentik SSO + admin group</td></tr>
+      <tr><td>Jeremy's LG TV / Roku / Fire TV / Tizen</td><td>Internet → <code data-cfg="tv-url"></code> (port 8096)</td><td>Jellyfin native password</td></tr>
+      <tr><td>Moonlight (game streaming clients)</td><td>Tailscale → Sunshine UDP/TCP ports</td><td>Sunshine PIN pairing</td></tr>
+      <tr><td>Friend nodes (minecraft servers etc.)</td><td>Tailscale → hub proxies to them</td><td>Service-specific, via hub</td></tr>
+    </table>
+  </div>
+  <div class="callout callout-tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body"><strong>Tailscale is free for up to 100 devices with no bandwidth cap.</strong> Traffic flows peer-to-peer (WireGuard) — it doesn't pass through Tailscale's servers in most cases. Streaming 4K video to ten people costs $0 extra.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 2: DOMAIN
+══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">💰 Domain — <span data-cfg="domain"></span></div>
   <div class="card">
     <table>
       <tr><th>Item</th><th>Cost</th><th>Notes</th></tr>
-      <tr><td>Domain registration (.com)</td><td>$10–15/year</td><td>Namecheap, Cloudflare Registrar (~$9/yr), Porkbun</td></tr>
-      <tr><td>Domain (.dev, .app, .net)</td><td>$12–20/year</td><td>.dev requires HTTPS — actually good for servers</td></tr>
-      <tr><td>DNS hosting</td><td>FREE</td><td>Cloudflare DNS is free and excellent</td></tr>
-      <tr><td>TLS/HTTPS certificates</td><td>FREE</td><td>Let's Encrypt via Caddy — automatic, free forever</td></tr>
-      <tr><td>Cloudflare proxy (hides home IP)</td><td>FREE</td><td>Free tier covers personal use</td></tr>
-      <tr><td>Dynamic DNS (home IP changes)</td><td>FREE</td><td>Cloudflare DDNS script (see below)</td></tr>
-      <tr><td><strong>Total annual cost</strong></td><td><strong>~$10–15/yr</strong></td><td>Just the domain registration</td></tr>
+      <tr><td>Domain registration (<code data-cfg="domain"></code>)</td><td>~$5–8/yr</td><td>Registered at Porkbun. Renews annually.</td></tr>
+      <tr><td>DNS hosting</td><td>FREE</td><td>Porkbun DNS — included with registration</td></tr>
+      <tr><td>TLS/HTTPS certificates</td><td>FREE</td><td>Let's Encrypt via Caddy — automatic, renews itself</td></tr>
+      <tr><td>Tailscale (all services except Jellyfin TV)</td><td>FREE</td><td>Personal plan, up to 100 devices, no bandwidth cap</td></tr>
+      <tr><td>Cloudflare</td><td>$0</td><td>Not used. Not needed.</td></tr>
+      <tr><td><strong>Total annual cost</strong></td><td><strong>~$5–8/yr</strong></td><td>Just the domain registration</td></tr>
     </table>
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 3: TAILSCALE SETUP
+══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title">🔒 Does a Domain Improve Security?</div>
-  <div class="card">
-    <div class="card-title">Direct answer: Not by itself — but it enables things that do</div>
-    <p><strong>A domain name alone doesn't make you more secure.</strong> It just gives your home IP a name. Someone scanning the internet would find your server either way.</p>
-    <p><strong>What actually improves security when combined with a domain:</strong></p>
-    <ul style="margin:6px 0 0 18px">
-      <li><strong>Free HTTPS certificates</strong> — Caddy uses your domain to get Let's Encrypt certs. Encrypts all traffic to your services.</li>
-      <li><strong>Cloudflare proxy</strong> — Routes traffic through Cloudflare's network. Your home IP is never exposed. Attackers see Cloudflare's IP, not yours. Includes free DDoS protection.</li>
-      <li><strong>Cloudflare Tunnel</strong> — Completely eliminates the need to open any inbound ports on your router. Zero attack surface from the internet side.</li>
-    </ul>
-    <div class="callout callout-tip">
-      <div class="callout-icon">🐉</div>
-      <div class="callout-body"><strong>Recommendation:</strong> Get a domain from Cloudflare Registrar (~$9/yr for .com). Use Cloudflare DNS + Cloudflare proxy on public services. Use Cloudflare Tunnel instead of port forwarding. Your home IP stays completely private.</div>
+  <div class="section-title">☁️ Step 1 — Set Up Tailscale</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Create a Tailscale account</strong>
+        <p>Go to <a href="https://tailscale.com" target="_blank">tailscale.com</a> → Sign up. Use your Google account (same one as Authentik's admin). During setup you'll choose your network/organization name — use <code data-cfg="tailnet"></code>. Your machines will get addresses like <code>server.<span data-cfg="tailnet"></span>.ts.net</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Install Tailscale on the server (Windows)</strong>
+        <pre>winget install Tailscale.Tailscale
+# Or download from tailscale.com/download/windows</pre>
+        <p>After install, open Tailscale from the system tray → Log In → authenticate with Google. The server joins your Tailnet automatically.</p>
+        <p>Set it to start with Windows (it does this by default). Confirm it's running: look for the Tailscale icon in the system tray — it should show a green checkmark.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Enable Tailscale HTTPS (MagicDNS)</strong>
+        <p>In the Tailscale admin panel (<a href="https://login.tailscale.com/admin/dns" target="_blank">tailscale.com/admin/dns</a>):</p>
+        <ul style="margin:6px 0 0 18px">
+          <li>Enable <strong>MagicDNS</strong> — gives your machines stable hostnames on the Tailnet</li>
+          <li>Enable <strong>HTTPS Certificates</strong> — Tailscale provisions Let's Encrypt certs for <code>*.ts.net</code> hostnames automatically</li>
+        </ul>
+        <p style="margin-top:8px">After enabling, your server is reachable at <code>server.<span data-cfg="tailnet"></span>.ts.net</code> from any device on the Tailnet. Caddy will use this for TLS.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Set ACL rules (hub-and-spoke)</strong>
+        <p>In the Tailscale admin panel → Access Controls, paste the ACL policy from <code>nodes.json → tailscaleACLNotes.policy</code>. This enforces that user devices can reach the hub, the hub can reach friend nodes, but user devices cannot reach friend nodes directly.</p>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">Until ACL rules are set, the default Tailscale policy allows all devices to reach all other devices. Set ACLs before adding friend nodes to the Tailnet.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Fill in nodes.json once the server is on the Tailnet</strong>
+        <p>Open <code data-cfg="path:nodes_json"></code> and update the <code>hub</code> node entry:</p>
+        <pre># In nodes.json → nodes[0] (hub):
+"tailscaleIP":       "100.x.x.x",          ← from Tailscale admin panel → Machines
+"tailscaleHostname": "server.ixo.ts.net",   ← confirm in admin panel
+"lanIP":             "192.168.x.x"          ← set DHCP reservation in router first</pre>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 4: DOMAIN + DNS
+══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title">🛒 Step 1: Register a Domain</div>
+  <div class="section-title">🌍 Step 2 — Configure DNS at Porkbun</div>
   <div class="card">
-    <p>Best registrars (by price and trustworthiness):</p>
+    <p>All subdomains of <code data-cfg="domain"></code> point at your server's Tailscale IP. Because these resolve to a Tailscale IP (100.x.x.x), only devices on the Tailnet can actually connect — but the domain gives you pretty URLs and valid TLS certs.</p>
+    <p>Log in to <a href="https://porkbun.com" target="_blank">porkbun.com</a> → your domain → DNS. Create the following A records:</p>
     <table>
-      <tr><th>Registrar</th><th>.com price</th><th>Why</th></tr>
-      <tr><td><strong>Cloudflare Registrar</strong></td><td>~$9.15/yr</td><td>At-cost pricing, no renewal markup, best DNS integration</td></tr>
-      <tr><td>Porkbun</td><td>~$9.73/yr</td><td>Cheap, includes WhoisGuard free</td></tr>
-      <tr><td>Namecheap</td><td>~$9–13/yr</td><td>Long-standing, reliable</td></tr>
+      <tr><th>Name (subdomain)</th><th>Type</th><th>Value</th><th>TTL</th></tr>
+      <tr><td><code>@</code> (root)</td><td>A</td><td>[hub Tailscale IP]</td><td>300</td></tr>
+      <tr><td><code>*</code> (wildcard)</td><td>A</td><td>[hub Tailscale IP]</td><td>300</td></tr>
+      <tr><td><code>tv</code></td><td>A</td><td>[home public IP — see DDNS below]</td><td>60</td></tr>
     </table>
-    <p style="margin-top:8px">Go to <a href="https://dash.cloudflare.com/registrar" target="_blank">dash.cloudflare.com</a> → Registrar → search for your domain. Pick something like <code>myservername.com</code> or <code>dragon-server.net</code> — it doesn't need to be public-facing, just memorable.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">The wildcard record <code>*.ixo.lol</code> covers every subdomain automatically — <code>jellyfin.ixo.lol</code>, <code>music.ixo.lol</code>, all of them — without adding individual records for each service. The only exception is <code>tv.ixo.lol</code> which points at your real home IP instead.</div>
+    </div>
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 5: CADDY
+══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title">🌩️ Step 2: Configure Cloudflare DNS</div>
+  <div class="section-title">⚙️ Step 3 — Configure Caddy</div>
   <div class="card">
-    <p>After registration (or after transferring an existing domain to Cloudflare), go to your domain's DNS tab and create A records for each subdomain:</p>
+    <p>Caddy listens on port 443 and routes subdomains to local services. It gets TLS certificates automatically via Let's Encrypt using your domain. All services are reachable at <code>service.ixo.lol</code> from any Tailscale device.</p>
+    <p>Install Caddy: download the binary from <a href="https://caddyserver.com/download" target="_blank">caddyserver.com</a> → place at <code data-cfg="path:caddy_bin"></code> → run as a Windows service via NSSM.</p>
+    <pre>nssm install Caddy "C:\caddy\caddy.exe"
+nssm set Caddy AppParameters "run --config C:\caddy\Caddyfile"
+nssm set Caddy Start SERVICE_AUTO_START
+nssm start Caddy</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Caddyfile structure — <code data-cfg="path:caddyfile"></code></div>
+    <pre># ── Global options ──────────────────────────────────────────────────
+{
+    email admin@ixo.lol
+}
+
+# ── Authentik SSO (protected by itself — no forward_auth wrapper) ──
+auth.ixo.lol {
+    reverse_proxy localhost:9000
+}
+
+# ── Standard protected service (forward_auth pattern) ───────────────
+jellyfin.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:8096
+}
+
+# ── TV endpoint — NO forward_auth, Jellyfin native auth only ────────
+# This block handles the port-forwarded public exception for Smart TVs.
+# Only add this block after configuring the router port forward (Step 5).
+tv.ixo.lol {
+    reverse_proxy localhost:8096
+    # No forward_auth — TV apps authenticate directly to Jellyfin.
+    # Jellyfin's own login handles auth for this endpoint.
+    # Rate limiting: add Caddy rate_limit plugin if brute-force is a concern.
+}
+
+# ── Repeat the protected pattern for every other service ────────────
+# music.ixo.lol    → localhost:4533  (Navidrome)
+# books.ixo.lol    → localhost:8083  (Calibre-Web)
+# audio.ixo.lol    → localhost:13378 (Audiobookshelf)
+# photos.ixo.lol   → localhost:2283  (Immich)
+# ... etc — see ports.html for the full list</pre>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 6: JELLYFIN TV CARVE-OUT
+══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">📺 Step 4 — Jellyfin Smart TV Exception</div>
+  <div class="card">
+    <div class="card-title">Why this exists</div>
+    <p>Smart TV Jellyfin apps (LG WebOS, Samsung Tizen, Roku, Fire TV, older Apple TV) cannot install Tailscale. They need a plain HTTP/HTTPS endpoint they can reach directly from the internet. Port 8096 is the one deliberate hole in the otherwise fully Tailscale-gated setup.</p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>SSO does not work for TV apps.</strong> TV apps use Jellyfin's native username/password login. Each user who needs TV access needs a Jellyfin-native password set by you in the admin panel. See the Jellyfin tab → Setup for instructions.</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Set a static LAN IP for your server</strong>
+        <p>Log into your router → DHCP reservations → find your server's MAC address → assign a permanent IP (e.g. <code>192.168.1.10</code>). Without this, the port forward breaks when your server reboots and gets a different IP.</p>
+        <p>Update <code>nodes.json → nodes[0].lanIP</code> once set.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Create the router port forward</strong>
+        <p>Router admin panel → Port Forwarding → Add rule:</p>
+        <pre>External port:  8096
+Internal IP:    [your server's static LAN IP]
+Internal port:  8096
+Protocol:       TCP</pre>
+        <p>Test it: from a phone on mobile data (not WiFi), go to <code>http://[your-home-ip]:8096</code>. You should see the Jellyfin login page.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Open Windows Firewall for port 8096</strong>
+        <p>The firewall rule for Jellyfin already exists from initial setup. Confirm it's allowing inbound TCP on 8096:</p>
+        <pre>netsh advfirewall firewall show rule name="Jellyfin" dir=in</pre>
+        <p>If missing: <code>netsh advfirewall firewall add rule name="Jellyfin" dir=in action=allow protocol=TCP localport=8096</code></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Add the tv.ixo.lol block to Caddyfile</strong>
+        <p>See the Caddyfile example in Step 3 above. The <code>tv.ixo.lol</code> block proxies to Jellyfin without the <code>forward_auth</code> wrapper. Reload Caddy after saving:</p>
+        <pre>caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Tell TV app users their server address</strong>
+        <p>When Jeremy sets up the Jellyfin app on his LG TV:</p>
+        <pre>Server address:  https://tv.ixo.lol
+Username:        jeremy          ← his Jellyfin-native username
+Password:        [set by admin]  ← NOT his Google password</pre>
+        <p>After first login the app saves these — he won't need to re-enter them unless he reinstalls.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 7: DDNS
+══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">🔄 Step 5 — DDNS for tv.ixo.lol (Home IP Changes)</div>
+  <div class="card">
+    <p>Your home internet IP changes occasionally. When it does, <code>tv.ixo.lol</code> stops working until the DNS record is updated. This script runs every 5 minutes as a scheduled task and updates the Porkbun DNS record automatically.</p>
+    <p>Save as <code data-cfg="path:ddns"></code>\ddns_porkbun.ps1:</p>
+    <pre># ddns_porkbun.ps1
+# Requires a Porkbun API key pair — create at porkbun.com/account/api
+$API_KEY        = "pk1_YOUR_API_KEY_HERE"
+$SECRET_API_KEY = "sk1_YOUR_SECRET_KEY_HERE"
+$DOMAIN         = "ixo.lol"
+$SUBDOMAIN      = "tv"
+
+# Get current public IP
+$currentIP = (Invoke-WebRequest -Uri "https://api.ipify.org" -UseBasicParsing).Content.Trim()
+
+# Get existing DNS record
+$existing = Invoke-RestMethod `
+    -Uri "https://porkbun.com/api/json/v3/dns/retrieveByNameType/$DOMAIN/A/$SUBDOMAIN" `
+    -Method POST `
+    -ContentType "application/json" `
+    -Body (@{ apikey = $API_KEY; secretapikey = $SECRET_API_KEY } | ConvertTo-Json)
+
+$recordIP = $existing.records[0].content
+
+if ($currentIP -ne $recordIP) {
+    $recordID = $existing.records[0].id
+    Invoke-RestMethod `
+        -Uri "https://porkbun.com/api/json/v3/dns/edit/$DOMAIN/$recordID" `
+        -Method POST `
+        -ContentType "application/json" `
+        -Body (@{
+            apikey       = $API_KEY
+            secretapikey = $SECRET_API_KEY
+            name         = $SUBDOMAIN
+            type         = "A"
+            content      = $currentIP
+            ttl          = "60"
+        } | ConvertTo-Json)
+    Write-Host "$(Get-Date) — Updated tv.ixo.lol: $recordIP → $currentIP"
+} else {
+    Write-Host "$(Get-Date) — No change: tv.ixo.lol = $currentIP"
+}</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Schedule as a Windows task</div>
+    <pre># Run once to register the scheduled task (PowerShell as Admin):
+$action  = New-ScheduledTaskAction -Execute "powershell.exe" `
+           -Argument "-NonInteractive -File D:\Server\ddns\ddns_porkbun.ps1"
+$trigger = New-ScheduledTaskTrigger -RepetitionInterval (New-TimeSpan -Minutes 5) `
+           -Once -At (Get-Date)
+$settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 1)
+Register-ScheduledTask -TaskName "DDNS-tv.ixo.lol" `
+    -Action $action -Trigger $trigger -Settings $settings `
+    -RunLevel Highest -Force
+
+# Confirm it's registered:
+Get-ScheduledTask -TaskName "DDNS-tv.ixo.lol"</pre>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 8: ONBOARDING FRIENDS TO TAILSCALE
+══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">👥 Step 6 — Adding Friends to the Tailnet</div>
+  <div class="card">
+    <p>Every friend or family member who wants to access the server (other than Smart TV Jellyfin) needs Tailscale installed on their device. This is a one-time setup that takes about 5 minutes.</p>
     <table>
-      <tr><th>Name (subdomain)</th><th>Type</th><th>Content</th><th>Proxy?</th></tr>
-      <tr><td>status</td><td>A</td><td>[your home IP]</td><td>✅ Proxied (hides IP)</td></tr>
-      <tr><td>cloud</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
-      <tr><td>books</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
-      <tr><td>audio</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
-      <tr><td>@</td><td>A</td><td>[your home IP]</td><td>✅ Proxied</td></tr>
+      <tr><th>Device</th><th>Install</th></tr>
+      <tr><td>Windows / Mac / Linux</td><td><a href="https://tailscale.com/download" target="_blank">tailscale.com/download</a></td></tr>
+      <tr><td>iPhone / iPad</td><td>App Store → "Tailscale"</td></tr>
+      <tr><td>Android</td><td>Play Store → "Tailscale"</td></tr>
+      <tr><td>Apple TV (tvOS)</td><td>App Store on Apple TV → "Tailscale"</td></tr>
+      <tr><td>Android TV</td><td>Play Store → "Tailscale"</td></tr>
+      <tr><td>LG WebOS / Samsung Tizen / Roku / Fire TV</td><td>Cannot install Tailscale — use <code data-cfg="tv-url"></code> for Jellyfin only</td></tr>
+    </table>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">After a friend installs Tailscale and logs in with their Google account, you need to approve their device in the Tailscale admin panel → Machines → Approve. Until approved, they can't reach the server. This is the access control gate — don't approve devices you don't recognise.</div>
+    </div>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Send the invite (Tailscale admin panel)</strong>
+        <p>Tailscale admin → Users → Invite User → enter their email. They get a link that adds them to your Tailnet after they install the app and sign in.</p>
+        <p>Alternatively, share your Tailnet name (<code data-cfg="tailnet"></code>) and tell them to join at <a href="https://tailscale.com" target="_blank">tailscale.com</a> — they'll be prompted to join your network on login.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Approve the device</strong>
+        <p>Admin panel → Machines. The new device appears as pending. Review it, confirm it's theirs, approve it. Once approved, they can reach <code data-cfg="url:jellyfin"></code> and any other service you've given them access to via Authentik.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Tell them how to connect</strong>
+        <p>Once on the Tailnet, they open a browser and go to <code data-cfg="url:home"></code>. They click the Google sign-in, Authentik validates them, and they land on the server homepage. Tailscale must be running on their device — they'll see it in the system tray or phone status bar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 9: ADDING FRIEND NODES
+══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">🖥️ Adding a Friend's Machine as a Service Node</div>
+  <div class="card">
+    <p>A friend can host services (Minecraft, a second Sunshine instance, etc.) on their own machine. Your server acts as the hub — users always connect to your server, which proxies to their machine over Tailscale. Users never need to know their friend's IP.</p>
+    <p>If the friend's machine goes offline, any service routed through it shows as unavailable on the dashboard with a message identifying whose machine it is (e.g. "Dave's PC is currently offline").</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <strong>Friend installs Tailscale and joins the Tailnet</strong>
+        <p>Same process as above. After their machine is approved, note its Tailscale IP from the admin panel.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Update nodes.json with the new node</strong>
+        <p>Fill in one of the stub entries (node-a, node-b) in <code data-cfg="path:nodes_json"></code>:</p>
+        <pre>"id":                "node-a",
+"displayName":       "Dave's Gaming PC",
+"owner":             "dave",               ← must match Authentik username
+"tailscaleIP":       "100.x.x.x",          ← from Tailscale admin panel
+"tailscaleHostname": "daves-pc.ixo.ts.net",
+"services":          ["minecraft-vanilla"], ← service IDs from services.json
+"healthCheckPort":   25565,
+"offlineMessage":    "Dave's PC is currently offline — Minecraft is unavailable."</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Add a Caddy reverse proxy entry pointing at their Tailscale IP</strong>
+        <pre># In Caddyfile — proxy Minecraft (TCP passthrough, not HTTP):
+# For game servers, use Caddy's layer4 plugin or a direct port forward
+# from the hub to the friend node's Tailscale IP.
+
+# For HTTP services on a friend node:
+friendservice.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy 100.x.x.x:PORT  ← friend node's Tailscale IP:port
+}</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <strong>🔐 Add the service to services.json</strong>
+        <p>Add an entry to <code>services.json</code> with the service details. The dashboard will automatically pick it up, poll the friend node's health check port, and display the red/green status dot with the owner attribution.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 10: SECURITY NOTES
+══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">🔒 Security Notes</div>
+  <div class="card">
+    <div class="card-title">What is and isn't exposed to the internet</div>
+    <table>
+      <tr><th>Surface</th><th>Exposed?</th><th>Protected by</th></tr>
+      <tr><td>All services except Jellyfin</td><td>No — Tailscale only</td><td>WireGuard encryption + Tailscale device approval</td></tr>
+      <tr><td>Jellyfin web UI (<code data-cfg="url:jellyfin"></code>)</td><td>No — Tailscale only</td><td>WireGuard + Authentik SSO</td></tr>
+      <tr><td>Jellyfin TV endpoint (<code data-cfg="tv-url"></code>:8096)</td><td>Yes — public internet</td><td>Jellyfin native auth (username/password)</td></tr>
+      <tr><td>Your home IP</td><td>Partially — only in <code>tv.ixo.lol</code> DNS record</td><td>DDNS record is for TV endpoint only; all other subdomains point at Tailscale IP</td></tr>
     </table>
     <div class="callout callout-warn">
       <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>Don't proxy game server records</strong> (Minecraft, ARK) — Cloudflare proxy only works for HTTP/HTTPS traffic. For game servers, use a raw A record without the proxy (grey cloud in Cloudflare). Your home IP will be visible for those records.</div>
+      <div class="callout-body"><strong>The tv.ixo.lol DNS record contains your real home IP.</strong> This is unavoidable for Smart TV support. Anyone who looks up <code>tv.ixo.lol</code> can see your home IP. This is an acceptable tradeoff for a personal server — it only enables access to Jellyfin's login page, which requires a valid username and password to proceed.</div>
     </div>
   </div>
-</div>
-
-<div class="section">
-  <div class="section-title">🔄 Step 3: Dynamic DNS (Your Home IP Changes)</div>
   <div class="card">
-    <div class="card-title">Cloudflare DDNS Script</div>
-    <p>Most home internet connections have a dynamic IP that changes occasionally. This script auto-updates your Cloudflare DNS records when your IP changes. Run it as a scheduled task every 5 minutes.</p>
-    <pre># ddns.ps1 — save to D:\Server\ddns.ps1
-$CF_API_TOKEN = "YOUR_CLOUDFLARE_API_TOKEN"
-$ZONE_ID      = "YOUR_ZONE_ID"       # Cloudflare dashboard → Overview → Zone ID
-$RECORD_ID    = "YOUR_A_RECORD_ID"   # Get via Cloudflare API
-$DOMAIN       = "yourdomain.com"
-
-$currentIP = (Invoke-WebRequest -Uri "https://api.ipify.org" -UseBasicParsing).Content.Trim()
-
-$body = @{
-    type    = "A"
-    name    = $DOMAIN
-    content = $currentIP
-    ttl     = 1
-    proxied = $true
-} | ConvertTo-Json
-
-Invoke-RestMethod `
-    -Uri "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$RECORD_ID" `
-    -Method PUT `
-    -Headers @{ "Authorization" = "Bearer $CF_API_TOKEN"; "Content-Type" = "application/json" } `
-    -Body $body</pre>
-    <p>Create a scheduled task to run this every 5 minutes. Get your API token from Cloudflare → My Profile → API Tokens → Create Token → "Edit zone DNS" template.</p>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">🏗️ Step 4: Subdomain Architecture</div>
-  <div class="card">
-    <p>Suggested subdomain layout for <code>yourdomain.com</code>:</p>
-    <pre>status.yourdomain.com   → Public read-only status page
-cloud.yourdomain.com    → Nextcloud
-books.yourdomain.com    → Calibre-Web
-audio.yourdomain.com    → Audiobookshelf
-mc.yourdomain.com       → Minecraft server IP (raw A record, no proxy)
-ark.yourdomain.com      → ARK server IP (raw A record, no proxy)
-
-# These are LAN/Tailscale only — not in public DNS:
-# dashboard.local        → Full control dashboard
-# qbit.local             → qBittorrent</pre>
+    <div class="card-title">Certificate transparency and subdomain enumeration</div>
+    <p>When Caddy requests TLS certificates for <code>*.ixo.lol</code>, Let's Encrypt logs this to public certificate transparency logs (visible at <a href="https://crt.sh" target="_blank">crt.sh</a>). Anyone can see that <code>ixo.lol</code> has a wildcard certificate. They cannot see which subdomains are actually in use, and they cannot connect to them — all non-TV subdomains resolve to a Tailscale IP which is unreachable without being on the Tailnet. This is not a meaningful security concern for a personal server.</p>
   </div>
 </div>
 

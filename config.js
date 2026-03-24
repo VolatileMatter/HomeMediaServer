@@ -2,10 +2,12 @@
  * ╔══════════════════════════════════════════════════════════════════════╗
  * ║                 SERVER CONFIGURATION — config.js                    ║
  * ║                                                                      ║
- * ║  THE ONLY FILE YOU NEED TO EDIT for domain, port, and path changes. ║
+ * ║  THE ONLY FILE YOU NEED TO EDIT for port and path changes.          ║
+ * ║  Domain, Tailscale network, and node topology live in nodes.json.   ║
  * ║  Every HTML page loads this. Every value flows from here.           ║
  * ║                                                                      ║
  * ║  Companion data files (same directory):                             ║
+ * ║    nodes.json     — domain, Tailscale net, machine topology         ║
  * ║    services.json  — full service registry (catalogue, ports, tabs)  ║
  * ║    versions.json  — last confirmed working versions per service     ║
  * ║                                                                      ║
@@ -15,30 +17,44 @@
  * ║  JS:  CFG.domain  CFG.url('jellyfin')  CFG.ports.jellyfin          ║
  * ║       CFG.authentikAdmin  CFG.paths.caddyfile                       ║
  * ║       CFG.oidcIssuer('jellyfin')                                    ║
- * ║       await CFG.loadServices()  await CFG.getVersion('jellyfin')    ║
+ * ║       await CFG.loadNodes()                                         ║
+ * ║       await CFG.loadServices()                                      ║
+ * ║       await CFG.getVersion('jellyfin')                              ║
  * ║                                                                      ║
  * ║  HTML auto-render attributes (data-cfg):                            ║
- * ║    data-cfg="domain"                → yourdomain.com                ║
- * ║    data-cfg="url:jellyfin"          → https://jellyfin.yourdomain.com║
+ * ║    data-cfg="domain"                → ixo.lol                       ║
+ * ║    data-cfg="tailnet"               → ixo                           ║
+ * ║    data-cfg="url:jellyfin"          → https://jellyfin.ixo.lol      ║
+ * ║    data-cfg="tailscale:jellyfin"    → http://100.x.x.x:8096         ║
  * ║    data-cfg="local:jellyfin"        → http://localhost:8096          ║
  * ║    data-cfg="port:jellyfin"         → 8096                          ║
  * ║    data-cfg="path:users"            → D:\Users                      ║
  * ║    data-cfg="path:caddyfile"        → C:\caddy\Caddyfile            ║
  * ║    data-cfg="userpath"              → D:\Users\[username]           ║
  * ║    data-cfg="userpath:calibre"      → D:\Users\[username]\calibre   ║
- * ║    data-cfg="authentik-admin"       → https://auth.domain/if/admin/ ║
- * ║    data-cfg="authentik-base"        → https://auth.domain           ║
- * ║    data-cfg="authentik-api"         → https://auth.domain/api/v3   ║
- * ║    data-cfg="oidc-issuer:jellyfin"  → https://auth.domain/applic…  ║
+ * ║    data-cfg="authentik-admin"       → https://auth.ixo.lol/if/admin/║
+ * ║    data-cfg="authentik-base"        → https://auth.ixo.lol          ║
+ * ║    data-cfg="authentik-api"         → https://auth.ixo.lol/api/v3   ║
+ * ║    data-cfg="oidc-issuer:jellyfin"  → https://auth.ixo.lol/applic…  ║
  * ║    data-cfg="version:jellyfin"      → async from versions.json      ║
+ * ║    data-cfg="tv-url"                → https://tv.ixo.lol             ║
  * ╚══════════════════════════════════════════════════════════════════════╝
  */
 
 const CFG = {
 
-  // ── YOUR DOMAIN ─────────────────────────────────────────────────────────
-  // Change this ONE value. Every URL across every page updates automatically.
-  domain: 'yourdomain.com',
+  // ── DOMAIN ───────────────────────────────────────────────────────────────
+  // Source of truth lives in nodes.json.
+  // This value is the synchronous fallback used before nodes.json loads.
+  // After loadNodes() resolves, CFG.domain is overwritten from nodes.json.
+  // In practice all data-cfg rendering is sync using this value — nodes.json
+  // is only needed for topology (node IPs, friend machines, etc.).
+  domain: 'ixo.lol',
+
+  // ── TAILNET ───────────────────────────────────────────────────────────────
+  // Tailscale organization name. Used to build ts.net hostnames.
+  // Source of truth: nodes.json → tailnet
+  tailnet: 'ixo',
 
   // ── SUBDOMAINS ───────────────────────────────────────────────────────────
   // Maps service keys to subdomain prefix.
@@ -77,10 +93,10 @@ const CFG = {
     pxls:             'pxls',
     genart:           'art',
     jukebox:          'jukebox',
-    invidious: 'invidious',
-    wordle: 'wordle',
-    hoarder: 'hoarder',
-    streamarr:        null,          // LAN-only — no public subdomain
+    invidious:        'invidious',
+    wordle:           'wordle',
+    hoarder:          'hoarder',
+    streamarr:        null,   // LAN/Tailscale only — no public subdomain
   },
 
   // ── PORTS ────────────────────────────────────────────────────────────────
@@ -110,13 +126,13 @@ const CFG = {
     kavita_dnd:        5001,
     invidious:         8097,
 
-    // Downloads / automation (LAN-only, admin-only)
+    // Downloads / automation (Tailscale/LAN-only, admin-only)
     qbittorrent:       8090,
     sonarr:            8989,
     radarr:            7878,
     readarr:           8787,
     prowlarr:          9696,
-    streamarr:         8102,          // virtual STRM library daemon (Docker WSL2, LAN-only)
+    streamarr:         8102,
 
     // Security
     vaultwarden:       8082,
@@ -139,8 +155,8 @@ const CFG = {
     upscayl:           8094,
     pxls:              8095,
     genart:            5052,
-    hoarder: 8101,
-    hoarder_meili: 7700,   // internal only, no subdomain needed
+    hoarder:           8101,
+    hoarder_meili:     7700,
 
     // Gaming
     emulatorjs:        8085,
@@ -155,7 +171,7 @@ const CFG = {
     ss13:              1337,
     foundry:           30000,
     mtg_server:        8099,
-    wordle: 8081,
+    wordle:            8081,
 
     // Legacy
     plex_legacy:       32400,
@@ -184,10 +200,12 @@ const CFG = {
     recommendations:  'D:\\Server\\Recommendations',
     dashboard:        'D:\\Server\\Dashboard',
     backups:          'D:\\Backups',
+    ddns:             'D:\\Server\\ddns',
 
     // Config files
     caddyfile:        'C:\\caddy\\Caddyfile',
     caddy_bin:        'C:\\caddy\\caddy.exe',
+    nodes_json:       'D:\\Server\\Dashboard\\nodes.json',
   },
 
   // ── AUTHENTIK COMPUTED URLS ──────────────────────────────────────────────
@@ -196,11 +214,16 @@ const CFG = {
   get authentikAdmin() { return `https://auth.${this.domain}/if/admin/`; },
   get authentikApi()   { return `https://auth.${this.domain}/api/v3`; },
 
+  // ── JELLYFIN PUBLIC TV URL ────────────────────────────────────────────────
+  // The single port-forwarded public exception for Smart TV apps.
+  // Source of truth: nodes.json → jellyfinPublic
+  get jellyfinTvUrl()  { return `https://tv.${this.domain}`; },
+
   // ── HELPER METHODS ───────────────────────────────────────────────────────
 
   /**
-   * Full HTTPS URL for a service subdomain.
-   * CFG.url('jellyfin') → 'https://jellyfin.yourdomain.com'
+   * Full HTTPS URL for a service subdomain (Tailscale-accessible via Caddy).
+   * CFG.url('jellyfin') → 'https://jellyfin.ixo.lol'
    */
   url(serviceKey) {
     const sub = this.subdomains[serviceKey];
@@ -209,13 +232,26 @@ const CFG = {
   },
 
   /**
-   * Local URL for a service.
+   * Local URL for a service (same machine, no proxy).
    * CFG.local('jellyfin') → 'http://localhost:8096'
    */
   local(serviceKey) {
     const port = this.ports[serviceKey];
     if (!port) return `[no port for "${serviceKey}"]`;
     return `http://localhost:${port}`;
+  },
+
+  /**
+   * Tailscale direct URL for a service on the hub node.
+   * Only useful in docs explaining the Tailscale IP access path.
+   * CFG.tailscaleUrl('jellyfin') → 'http://[hub-tailscale-ip]:8096'
+   * (IP is a placeholder until nodes.json is filled in.)
+   */
+  tailscaleUrl(serviceKey) {
+    const port = this.ports[serviceKey];
+    if (!port) return `[no port for "${serviceKey}"]`;
+    const ip = this._hubTailscaleIP || '[hub-tailscale-ip]';
+    return `http://${ip}:${port}`;
   },
 
   /**
@@ -230,62 +266,77 @@ const CFG = {
 
   /**
    * Authentik OIDC issuer URL for a given application slug.
-   * CFG.oidcIssuer('jellyfin') → 'https://auth.yourdomain.com/application/o/jellyfin/'
-   * The slug is the value set in Authentik when creating the application.
+   * CFG.oidcIssuer('jellyfin') → 'https://auth.ixo.lol/application/o/jellyfin/'
    */
   oidcIssuer(slug) {
     return `${this.authentikBase}/application/o/${slug}/`;
   },
 
-  // ── JSON DATA LOADERS ────────────────────────────────────────────────────
-  // Async loaders for companion data files.
-  // Results are cached after first load — safe to call multiple times.
+  /**
+   * Tailscale ts.net hostname for a named node.
+   * CFG.tsHostname('hub') → 'server.ixo.ts.net'
+   * Requires loadNodes() to have been called first.
+   */
+  tsHostname(nodeId) {
+    const node = (this._nodes || []).find(n => n.id === nodeId);
+    return node?.tailscaleHostname ?? `[${nodeId}.${this.tailnet}.ts.net]`;
+  },
 
+  // ── JSON DATA LOADERS ────────────────────────────────────────────────────
   _cache: {},
+  _nodes: null,
+  _hubTailscaleIP: null,
+
+  /**
+   * Load nodes from nodes.json.
+   * Caches result. Also overwrites CFG.domain and CFG.tailnet from the file
+   * so a single edit to nodes.json keeps everything in sync.
+   */
+  async loadNodes() {
+    if (this._cache.nodes) return this._cache.nodes;
+    try {
+      const r = await fetch('nodes.json');
+      const data = await r.json();
+      this._cache.nodes = data;
+      this._nodes = data.nodes || [];
+
+      // Sync domain + tailnet from nodes.json into runtime CFG
+      if (data.domain) this.domain = data.domain;
+      if (data.tailnet) this.tailnet = data.tailnet;
+
+      // Cache hub IP for tailscaleUrl() helper
+      const hub = this._nodes.find(n => n.role === 'hub');
+      if (hub?.tailscaleIP && !hub.tailscaleIP.startsWith('FILL')) {
+        this._hubTailscaleIP = hub.tailscaleIP;
+      }
+
+      return data;
+    } catch (e) {
+      console.warn('nodes.json not found or invalid — using defaults', e);
+      return null;
+    }
+  },
 
   /**
    * Load all services from services.json.
    * Returns array of service objects (metadata entry filtered out).
-   * const services = await CFG.loadServices();
    */
   async loadServices() {
     if (this._cache.services) return this._cache.services;
     try {
       const r = await fetch('services.json');
-      const data = await r.json();
-      this._cache.services = data.filter(s => !s._comment);
-      return this._cache.services;
-    } catch(e) {
-      console.error('CFG.loadServices() failed:', e);
+      const raw = await r.json();
+      const services = raw.filter(e => !e._comment && !e._note);
+      this._cache.services = services;
+      return services;
+    } catch (e) {
+      console.warn('services.json not found or invalid', e);
       return [];
     }
   },
 
   /**
-   * Load all version data from versions.json.
-   * Returns object keyed by service id.
-   * const versions = await CFG.loadVersions();
-   */
-  async loadVersions() {
-    if (this._cache.versions) return this._cache.versions;
-    try {
-      const r = await fetch('versions.json');
-      const data = await r.json();
-      const clean = {};
-      for (const [k, v] of Object.entries(data)) {
-        if (!k.startsWith('_')) clean[k] = v;
-      }
-      this._cache.versions = clean;
-      return this._cache.versions;
-    } catch(e) {
-      console.error('CFG.loadVersions() failed:', e);
-      return {};
-    }
-  },
-
-  /**
-   * Get a single service entry by id.
-   * const svc = await CFG.getService('jellyfin');
+   * Get a single service by id from services.json.
    */
   async getService(id) {
     const services = await this.loadServices();
@@ -293,9 +344,23 @@ const CFG = {
   },
 
   /**
+   * Load all versions from versions.json.
+   */
+  async loadVersions() {
+    if (this._cache.versions) return this._cache.versions;
+    try {
+      const r = await fetch('versions.json');
+      const data = await r.json();
+      this._cache.versions = data;
+      return data;
+    } catch (e) {
+      console.warn('versions.json not found or invalid', e);
+      return {};
+    }
+  },
+
+  /**
    * Get last confirmed version info for a service.
-   * const v = await CFG.getVersion('jellyfin');
-   * Returns: { version, checkedDate, notes } or null.
    */
   async getVersion(id) {
     const versions = await this.loadVersions();
@@ -304,10 +369,6 @@ const CFG = {
 
   /**
    * Render a version badge into a DOM element.
-   * CFG.renderVersion('jellyfin', document.getElementById('ver-badge'));
-   *
-   * If version is recorded: "v10.9.0  ·  last confirmed 2025-03-01"
-   * If not yet recorded:    "version not yet recorded — update versions.json after first install"
    */
   async renderVersion(serviceId, el) {
     if (!el) return;
@@ -322,11 +383,27 @@ const CFG = {
       el.textContent = parts.join('  ·  ');
     }
   },
+
+  /**
+   * Get node info by id from nodes.json.
+   * Requires loadNodes() to have been called first, or calls it lazily.
+   */
+  async getNode(nodeId) {
+    if (!this._nodes) await this.loadNodes();
+    return (this._nodes || []).find(n => n.id === nodeId) ?? null;
+  },
+
+  /**
+   * Get all friend nodes (role === 'friend-node') from nodes.json.
+   */
+  async getFriendNodes() {
+    if (!this._nodes) await this.loadNodes();
+    return (this._nodes || []).filter(n => n.role === 'friend-node');
+  },
 };
 
 // ── AUTO-RENDER [data-cfg] ATTRIBUTES ─────────────────────────────────────
 // Fills elements with data-cfg attributes from CFG values at DOM load.
-// See the header comment block above for the full list of supported values.
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-cfg]').forEach(el => {
     const val      = el.getAttribute('data-cfg');
@@ -336,20 +413,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let replacement = '';
 
     switch (type) {
-      case 'domain':          replacement = CFG.domain;                                          break;
-      case 'url':             replacement = key ? CFG.url(key)   : '';                           break;
-      case 'local':           replacement = key ? CFG.local(key) : '';                           break;
-      case 'port':            replacement = key ? String(CFG.ports[key] ?? `[unknown port: ${key}]`) : ''; break;
-      case 'path':            replacement = key ? (CFG.paths[key] ?? `[unknown path: ${key}]`)   : ''; break;
-      case 'userpath':        replacement = CFG.userPath(key || undefined);                       break;
-      case 'authentik-admin': replacement = CFG.authentikAdmin;                                   break;
-      case 'authentik-base':  replacement = CFG.authentikBase;                                    break;
-      case 'authentik-api':   replacement = CFG.authentikApi;                                     break;
-      case 'oidc-issuer':     replacement = key ? CFG.oidcIssuer(key) : '';                       break;
+      case 'domain':          replacement = CFG.domain;                                                       break;
+      case 'tailnet':         replacement = CFG.tailnet;                                                      break;
+      case 'url':             replacement = key ? CFG.url(key) : '';                                          break;
+      case 'tailscale':       replacement = key ? CFG.tailscaleUrl(key) : '';                                 break;
+      case 'local':           replacement = key ? CFG.local(key) : '';                                        break;
+      case 'port':            replacement = key ? String(CFG.ports[key] ?? `[unknown port: ${key}]`) : '';    break;
+      case 'path':            replacement = key ? (CFG.paths[key] ?? `[unknown path: ${key}]`) : '';          break;
+      case 'userpath':        replacement = CFG.userPath(key || undefined);                                    break;
+      case 'authentik-admin': replacement = CFG.authentikAdmin;                                                break;
+      case 'authentik-base':  replacement = CFG.authentikBase;                                                 break;
+      case 'authentik-api':   replacement = CFG.authentikApi;                                                  break;
+      case 'oidc-issuer':     replacement = key ? CFG.oidcIssuer(key) : '';                                   break;
+      case 'tv-url':          replacement = CFG.jellyfinTvUrl;                                                 break;
       case 'version':
-        // Async render — data comes from versions.json
         if (key) CFG.renderVersion(key, el);
-        return; // skip the synchronous set below
+        return;
     }
 
     if (replacement) el.textContent = replacement;
