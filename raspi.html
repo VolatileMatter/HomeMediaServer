@@ -110,7 +110,21 @@
     <div style="font-size:.73rem;color:var(--text-dim);margin-left:auto" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <div class="v1-banner">🍓 V1 Goal: Pi 5 running 24/7 with 15TB mounted via Penta SATA HAT. Docker services live (Kavita, Audiobookshelf, EmulatorJS, Nextcloud, RomM, Portainer). Tailscale enrolled. Smart plug controlling the Windows PC's power. SMB share mapped as Z:\ on the PC. Jellyfin on PC has Z:\Movies and Z:\TV added as library paths.</div>
+  
+  <!-- ── Pi Sentry Compatibility ── -->
+  <div class="pi-compat-callout" style="display:flex;align-items:flex-start;gap:14px;background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.35);border-radius:4px;padding:14px 18px;margin-bottom:20px">
+    <div style="font-size:1.4rem;flex-shrink:0">🍓</div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text)">Pi Sentry Compatibility</span>
+        <span style="background:rgba(76,175,125,.2);color:#4caf7d;font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:2px 8px;border-radius:3px;letter-spacing:.08em">RUNNING ON PI</span>
+      </div>
+      <p style="margin:0 0 4px;font-size:.83rem;line-height:1.5;color:var(--text)">This service is already deployed on the Pi Sentry.</p>
+      <p style="margin:0;font-size:.8rem;line-height:1.5;color:var(--text-dim)">This page documents the Pi Sentry itself — the node that runs all Pi-deployed services. Portainer, Watchtower, and Docker management live here by definition.</p>
+    </div>
+  </div>
+
+<div class="v1-banner">🍓 V1 Goal: Pi 5 running 24/7 with 15TB mounted via Penta SATA HAT. Docker services live (Kavita, Audiobookshelf, EmulatorJS, Nextcloud, RomM, Portainer). Tailscale enrolled. Smart plug controlling the Windows PC's power. SMB share mapped as Z:\ on the PC. Jellyfin on PC has Z:\Movies and Z:\TV added as library paths.</div>
 
   <hr>
 
@@ -528,6 +542,28 @@ docker compose ps         # all services should show "running"</pre>
   <div class="v1-banner">🍓 Pi 5 Sentry — 24/7 always-on node. 15TB archive. All low-power services. Controls PC power. ~10W draw vs ~150W for the PC.</div>
 
   <div class="section">
+    <div class="section-title">🏛️ Family Digital Vault — Philosophy</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🛡️ Sovereignty</div>
+        <p style="font-size:.84rem;line-height:1.6">No subscriptions. No "delisting" of content. No data mining. Every movie, game, book, and photo is owned outright and stored on hardware you control. Nothing disappears because a streaming deal expired.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ Efficiency</div>
+        <p style="font-size:.84rem;line-height:1.6">The Pi Sentry (~10W) runs 24/7 and handles everything that doesn't need a GPU. The Windows PC (~200W) only powers on when someone wants Jellyfin or game streaming — cutting idle electricity to near zero overnight.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📂 Organization</div>
+        <p style="font-size:.84rem;line-height:1.6">Centralized libraries for all ages, accessible from any device on the network. One unified catalog for ROMs, one for movies, one for books — no scattered drives or duplicated folders.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🔄 Longevity</div>
+        <p style="font-size:.84rem;line-height:1.6">The Penta SATA HAT supports up to 5 drives. As the family's collection grows, slide in another HDD — no reinstall, no migration. Monthly cold-storage backups protect against drive failure.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
     <div class="section-title">📡 Quick Reference</div>
     <div class="grid-2">
       <div class="card">
@@ -935,8 +971,10 @@ echo "Drive safely unmounted. Remove backup drive." | tee -a $LOG</pre>
         <tr><td>Pi 5 + 2 HDDs (24/7)</td><td>~25W</td><td>24</td><td>~$6</td></tr>
         <tr><td>PC via smart plug (4 hrs/day)</td><td>~200W</td><td>4</td><td>~$8</td></tr>
         <tr><td>PC always-on 24/7</td><td>~150W idle</td><td>24</td><td>~$36</td></tr>
-        <tr><td colspan="3"><strong>Monthly saving (smart plug vs always-on)</strong></td><td><strong>~$28</strong></td></tr>
+        <tr><td colspan="3"><strong>Monthly saving (smart plug vs always-on)</strong></td><td><strong>~$28/month</strong></td></tr>
+        <tr><td colspan="3"><strong>Annual saving</strong></td><td><strong>~$250–$340/year</strong> <span style="color:var(--text-dim);font-size:.8em">†</span></td></tr>
       </table>
+      <p style="font-size:.77rem;color:var(--text-dim);margin-top:8px">† Range reflects actual PC usage variance. At 4 hrs/day the saving is ~$336/year; at 2 hrs/day (light-use months) it narrows to ~$250/year. San Diego residential rate ~$0.33/kWh (Tier 1 SDG&amp;E, 2025).</p>
     </div>
   </div>
 
@@ -1099,6 +1137,41 @@ else: print("Usage: power_manager.py [wake|shutdown|idle|on|off]")</pre>
         <tr><td>As needed</td><td>Prune unused Docker images</td><td><code>docker system prune -f</code></td></tr>
         <tr><td>As needed</td><td>Check disk usage</td><td><code>df -h /mnt/archive</code></td></tr>
       </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐋 Optional: Watchtower (Automated Docker Updates)</div>
+    <div class="card">
+      <p>Watchtower monitors running Docker containers and automatically pulls updated images, then restarts containers with the new version. It's optional — this server prefers <strong>manual, deliberate updates</strong> — but can be useful for low-risk containers like EmulatorJS or Portainer where you want updates without SSH.</p>
+      <div class="callout callout-warn" style="margin-top:10px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Use with caution.</strong> Auto-updates can break things silently — especially for services like Nextcloud or RomM that occasionally have breaking schema changes between versions. If you enable Watchtower, exclude critical services explicitly.</div>
+      </div>
+      <pre style="margin-top:12px"># Add to docker-compose.yml on the Pi (optional, disabled by default):
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_SCHEDULE: "0 0 4 * * *"
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_NOTIFICATIONS: stdout
+      WATCHTOWER_CLEANUP: "true"
+
+# To opt a container IN to Watchtower management:
+# labels:
+#   - "com.centurylinklabs.watchtower.enable=true"
+
+# To opt OUT (when monitoring all by default):
+# labels:
+#   - "com.centurylinklabs.watchtower.enable=false"
+
+# Dry-run to see what it would update:
+docker run --rm   -v /var/run/docker.sock:/var/run/docker.sock   containrrr/watchtower --run-once --dry-run</pre>
     </div>
   </div>
 
