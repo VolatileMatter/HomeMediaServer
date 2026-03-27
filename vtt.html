@@ -95,7 +95,15 @@ caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
       <p>Players visit <code data-cfg="url:foundry"></code> — Tailscale must be running on their device. No download, no account — they just enter the game password you set.</p>
       <div class="callout callout-warn">
         <div class="callout-icon">⚠️</div>
-        <div class="callout-body"><strong>Foundry + Cloudflare proxy note:</strong> Cloudflare's free tier has a 100 MB file upload limit. If players are uploading large asset files (maps, audio), use <code>cloudflared</code> tunnel with Cloudflare's proxy disabled (grey cloud) for the VTT subdomain to avoid this limit, or use Cloudflare's bypass cache rules.</div>
+        <div class="callout-body"><strong>Tailscale required for all players.</strong> Foundry VTT is Tailscale-only — there is no public URL. Players on phones, laptops, and tablets can all install Tailscale free. Gaming consoles (PS5, Xbox) cannot install Tailscale and cannot connect to Foundry.</div>
+      </div>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Tailscale required for all players.</strong> Foundry VTT is Tailscale-only — there is no public URL. Players on phones, laptops, and tablets can all install Tailscale free. Gaming consoles (PS5, Xbox) cannot install Tailscale and cannot connect to Foundry.</div>
+      </div>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>Large asset uploads:</strong> Foundry allows GMs to upload maps and audio to the server. Because Foundry is behind Tailscale + Caddy, there are no proxy upload limits — files go directly to your server. The only limit is your disk space.</div>
       </div>
     </div></div>
   </div>
@@ -108,13 +116,13 @@ caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
   <div class="card">
     <p>Foundry VTT has its own user/password system. For your home server, the simplest approach is to use Caddy <code>forward_auth</code> in front of it to require Authentik login before players can even reach the Foundry login page:</p>
     <pre># Caddyfile:
-vtt.yourdomain.com {
+<span data-cfg="url:foundry"></span> {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username
         trusted_proxies private_ranges
     }
-    reverse_proxy localhost:30000
+    reverse_proxy localhost:<span data-cfg="port:foundry"></span>
 }</pre>
     <p>This means players need a Google login (via Authentik) AND then a Foundry game password. This adds a layer that prevents random internet visitors from even seeing your Foundry instance.</p>
   </div>
@@ -209,9 +217,9 @@ Get-ChildItem $dst -Directory | Sort-Object CreationTime | Select-Object -SkipLa
 <div class="section">
   <div class="section-title">🔗 Connection to DnD Rulebooks (Kavita)</div>
   <div class="card">
-    <p>Your Kavita DnD instance (port 5001) holds all your PDFs. When players need to reference a rulebook mid-session, they can open a browser tab to <code>dnd.yourdomain.com</code> alongside the VTT. A Foundry journal entry can link directly to specific rulebook PDFs stored in Kavita:</p>
+    <p>Your Kavita DnD instance (port 5001) holds all your PDFs. When players need to reference a rulebook mid-session, they can open a browser tab to <code>dnd.ixo.lol</code> alongside the VTT. A Foundry journal entry can link directly to specific rulebook PDFs stored in Kavita:</p>
     <pre># In a Foundry Journal Entry (HTML mode):
-&lt;a href="https://dnd.yourdomain.com/book/12" target="_blank"&gt;
+&lt;a href="https://dnd.ixo.lol/book/12" target="_blank"&gt;
   📖 Players Handbook — Chapter 7: Combat
 &lt;/a&gt;</pre>
   </div>

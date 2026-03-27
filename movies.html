@@ -1194,9 +1194,10 @@ Get-ChildItem "E:\Backups\Jellyfin\*.db" | Sort-Object LastWriteTime -Descending
         <ul style="margin:0 0 0 18px">
           <li>Is Jellyfin running? → <code>Get-Service JellyfinServer</code></li>
           <li>Is Caddy running and proxying correctly? → check <code data-cfg="url:jellyfin"></code> in browser</li>
-          <li>Is the Cloudflare DNS record correct for <code data-cfg="url:jellyfin"></code>?</li>
-          <li>Is Cloudflare Tunnel running? → check cloudflared service status</li>
-          <li>Note: Jellyfin's port <span data-cfg="port:jellyfin"></span> does NOT need router port-forwarding — Caddy handles all external traffic on 443 via the tunnel.</li>
+          <li>Is Tailscale running on the client device? Check system tray or phone status bar.</li>
+          <li>Is the DNS record for <code data-cfg="url:jellyfin"></code> pointing at the hub Tailscale IP?</li>
+          <li>Is Caddy running? → <code>Get-Service Caddy</code> or check the Caddy service in services.msc</li>
+          <li>Smart TV users (LG WebOS, Tizen, Roku, Fire TV): connect to <code data-cfg="tv-url"></code> instead — TV apps cannot use Tailscale and use Jellyfin-native passwords, not Google SSO. Port 8096 must be forwarded on your router.</li>
         </ul>
       </div>
     </div>

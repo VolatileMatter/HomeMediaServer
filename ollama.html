@@ -188,9 +188,9 @@ nssm start OpenWebUI</pre>
 <div class="section">
   <div class="section-title">🌍 Remote Access</div>
   <div class="card">
-    <p>The cleanest approach: put Open WebUI behind Caddy with a login requirement, exposed via Tailscale or Cloudflare Tunnel. Users go to <code>ai.yourdomain.com</code>, log in, and chat — all traffic stays within your infrastructure.</p>
+    <p>The cleanest approach: put Open WebUI behind Caddy with a login requirement, exposed via Tailscale — add a Caddyfile block for <code>ai.ixo.lol</code> with Authentik forward_auth. Users go to <code>ai.ixo.lol</code>, log in, and chat — all traffic stays within your infrastructure.</p>
     <pre># Caddyfile entry:
-ai.yourdomain.com {
+ai.ixo.lol {
     reverse_proxy localhost:3000
     # Open WebUI has its own login — no need for Caddy basicauth
 }</pre>
