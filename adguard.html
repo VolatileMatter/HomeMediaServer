@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AdGuard Home</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .subtab-nav { display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border);flex-wrap:wrap; }
+    .subtab-btn { font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-1px;white-space:nowrap; }
+    .subtab-btn:hover { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+    .subtab-btn.active { color:var(--accent);border-bottom-color:var(--accent); }
+    .subtab-pane { display:none; }
+    .subtab-pane.active { display:block; }
+    .setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+    .setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background:rgba(76,175,125,.18);border-color:rgba(76,175,125,.5); }
+    .setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.5);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem; }
+    .setup-complete-bar.done .setup-checkbox::after { content:'✓';color:#4caf7d; }
+    .setup-complete-label { font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--accent3); }
+    .device-table td:first-child { font-family:'Share Tech Mono',monospace;font-size:.78rem; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🛡️</div>
+  <div>
+    <h1>AdGuard Home</h1>
+    <div class="subtitle">// DNS-Level Ad Blocker · Port 3000 (UI) / 53 (DNS) · Pi Sentry · Docker · Opt-In Per Device //</div>
+    <p class="desc">
+      AdGuard Home runs as a DNS server on the Pi Sentry, blocking ads and trackers at the network level before they ever reach a device. It is <strong>not</strong> the default DNS for the whole house — only specific devices that can't run browser extensions (Smart TVs, game consoles, streaming sticks) are pointed at it. PCs and phones use normal DNS and manage their own ad blocking via uBlock Origin.
+    </p>
+  </div>
+</div>
+
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when AdGuard Home is running on the Pi, Smart TVs are pointed at it as DNS, and ad blocking is confirmed working on those devices.</div>
+    </div>
+    <div style="font-size:.73rem;color:var(--text-dim);margin-left:auto" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <!-- Pi compat callout -->
+  <div class="pi-compat-callout" style="display:flex;align-items:flex-start;gap:14px;background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.35);border-radius:4px;padding:14px 18px;margin-bottom:20px">
+    <div style="font-size:1.4rem;flex-shrink:0">🍓</div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text)">Pi Sentry Compatibility</span>
+        <span style="background:rgba(76,175,125,.2);color:#4caf7d;font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:2px 8px;border-radius:3px;letter-spacing:.08em">RUNNING ON PI</span>
+      </div>
+      <p style="margin:0 0 4px;font-size:.83rem;line-height:1.5;color:var(--text)">AdGuard Home runs on the Pi Sentry as a Docker container.</p>
+      <p style="margin:0;font-size:.8rem;line-height:1.5;color:var(--text-dim)">The Pi's 24/7 uptime is essential here — DNS must always be available. The Pi's static LAN IP (192.168.1.20) is what gets set as the DNS server in router or device settings.</p>
+    </div>
+  </div>
+
+  <div class="v1-banner">🛡️ V1 Goal: AdGuard Home running on the Pi at port 3000 (UI) with DNS on port 53. Smart TVs, Roku, Fire TV, and game consoles configured to use 192.168.1.20 as their DNS. PCs and phones left on normal DNS — no blanket filtering.</div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Deploy AdGuard Home on the Pi</div>
+    <div class="card">
+      <p>AdGuard Home needs access to port 53 (DNS). On most Linux systems port 53 is held by <code>systemd-resolved</code> — disable it first.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>SSH into the Pi and free port 53</strong>
+          <pre>ssh ixora@192.168.1.20
+
+# Disable systemd-resolved's stub listener:
+sudo sed -i 's/#DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
+sudo systemctl restart systemd-resolved
+
+# Verify port 53 is free:
+sudo ss -tulpn | grep :53
+# Should return nothing</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add AdGuard Home to docker-compose.yml</strong>
+          <p>Add this service block to <code>/home/ixora/docker/docker-compose.yml</code>:</p>
+          <pre>  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard
+    restart: unless-stopped
+    network_mode: host   # Required for DNS — must use host networking
+    volumes:
+      - /mnt/archive/Docker/adguard/work:/opt/adguardhome/work
+      - /mnt/archive/Docker/adguard/conf:/opt/adguardhome/conf</pre>
+          <div class="callout callout-warn" style="margin-top:10px">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-body"><code>network_mode: host</code> is required so AdGuard can bind to port 53 directly. This means it bypasses Docker's port mapping — there is no <code>ports:</code> section needed.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create data directories and start</strong>
+          <pre>sudo mkdir -p /mnt/archive/Docker/adguard/{work,conf}
+sudo chown -R ixora:ixora /mnt/archive/Docker/adguard
+
+cd ~/docker
+docker compose up -d adguard
+docker compose logs -f adguard   # wait for "AdGuard Home is ready"</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Complete the web setup wizard</strong>
+          <p>Open <code>http://192.168.1.20:3000</code> from your browser. The first-run wizard asks you to:</p>
+          <ul style="margin:6px 0 0 18px;font-size:.85rem;line-height:1.8">
+            <li>Set admin username and password</li>
+            <li>Confirm DNS listens on <code>0.0.0.0:53</code> and web UI on <code>0.0.0.0:3000</code></li>
+          </ul>
+          <p>After the wizard, the UI moves to port 80 by default — change it back to 3000 in Settings → General if needed to avoid conflict with other Pi services.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Configure Blocklists</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add recommended blocklists</strong>
+          <p>Settings → Filters → DNS Blocklists → Add blocklist:</p>
+          <table>
+            <tr><th>List</th><th>URL</th><th>Coverage</th></tr>
+            <tr><td>AdGuard DNS</td><td><code>https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt</code></td><td>General ads + trackers</td></tr>
+            <tr><td>OISD (Big)</td><td><code>https://big.oisd.nl/domainswild</code></td><td>Comprehensive — best overall</td></tr>
+            <tr><td>EasyList</td><td><code>https://easylist.to/easylist/easylist.txt</code></td><td>Web ads</td></tr>
+            <tr><td>Samsung Smart TV</td><td><code>https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt</code></td><td>Samsung-specific telemetry</td></tr>
+            <tr><td>LG Smart TV</td><td><code>https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt</code></td><td>LG WebOS telemetry</td></tr>
+          </table>
+          <div class="callout callout-tip" style="margin-top:10px">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">Start with OISD Big — it alone covers the vast majority of ad/tracker domains and has very few false positives. Add others only if you notice specific leakage.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure upstream DNS</strong>
+          <p>Settings → DNS Settings → Upstream DNS servers. Use fast, privacy-respecting upstream resolvers:</p>
+          <pre># Cloudflare (fast, privacy policy):
+1.1.1.1
+1.0.0.1
+
+# Or Quad9 (blocks malware domains at upstream level):
+9.9.9.9
+149.112.112.112</pre>
+          <p>Enable <strong>Parallel requests</strong> for speed. Enable <strong>DNSSEC</strong> if your upstream supports it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add safe search and parental controls (optional)</strong>
+          <p>Settings → DNS Settings → Blocking mode. You can enable Google/YouTube Safe Search, Bing Safe Search, and DuckDuckGo Safe Search here — useful for devices used by children. Leave off for adult devices.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">📺 Step 3 — Point Devices at AdGuard DNS</div>
+    <div class="card">
+      <p>Do <strong>not</strong> change your router's primary DNS. Instead, configure DNS per-device or per-VLAN on the devices you want filtered. This keeps your PC and phone on normal DNS.</p>
+      <table>
+        <tr><th>Device type</th><th>Where to set DNS</th><th>Value</th></tr>
+        <tr><td>LG WebOS (Smart TV)</td><td>Settings → Network → Wired/WiFi → Edit → DNS: Manual</td><td><code>192.168.1.20</code></td></tr>
+        <tr><td>Samsung Tizen (Smart TV)</td><td>Settings → General → Network → Network Status → IP Settings → DNS: Manual</td><td><code>192.168.1.20</code></td></tr>
+        <tr><td>Roku</td><td>Settings → Network → Set up connection → Manual → DNS</td><td><code>192.168.1.20</code></td></tr>
+        <tr><td>Fire TV</td><td>Settings → My Fire TV → About → Network → (manual DNS via router VLAN preferred)</td><td><code>192.168.1.20</code></td></tr>
+        <tr><td>Game console (PS5/Switch)</td><td>Network settings → Manual DNS</td><td><code>192.168.1.20</code></td></tr>
+        <tr><td>Router IoT VLAN (future)</td><td>DHCP DNS option for that VLAN</td><td><code>192.168.1.20</code></td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:.83rem;color:var(--text-dim)">For the secondary DNS on each device, use <code>1.1.1.1</code> — this is a fallback only used if the Pi is unreachable. Normally all queries go to AdGuard.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 4 — Add to Caddy (Admin UI Access)</div>
+    <div class="card">
+      <p>AdGuard's web UI runs on port 3000 on the Pi. Access it directly at <code>http://192.168.1.20:3000</code> on the LAN, or add a Caddy block if you want it accessible via subdomain over Tailscale.</p>
+      <pre># Optional — add to Caddyfile on the Pi:
+adguard.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:3000
+}</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">🛡️ AdGuard Home provides DNS-level ad blocking for devices that can't run browser extensions. It runs 24/7 on the Pi Sentry. Your PC uses uBlock Origin — it does not go through AdGuard.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>Address</th></tr>
+          <tr><td>Web UI (LAN)</td><td><code>http://192.168.1.20:3000</code></td></tr>
+          <tr><td>Web UI (Tailscale subdomain)</td><td><code>https://adguard.ixo.lol</code></td></tr>
+          <tr><td>DNS server address</td><td><code>192.168.1.20</code> (port 53)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Port (UI)</td><td>3000</td></tr>
+          <tr><td>Port (DNS)</td><td>53 (UDP + TCP)</td></tr>
+          <tr><td>Install type</td><td>Docker (host network mode)</td></tr>
+          <tr><td>Auth</td><td>Built-in AdGuard login (admin only)</td></tr>
+          <tr><td>Data path</td><td><code>/mnt/archive/Docker/adguard/</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎯 Which Devices Use AdGuard DNS</div>
+    <div class="card">
+      <table class="device-table">
+        <tr><th>Device</th><th>Uses AdGuard DNS?</th><th>Why</th></tr>
+        <tr><td>Smart TVs (LG, Samsung, Roku, Fire TV)</td><td>✅ Yes</td><td>Cannot run browser extensions</td></tr>
+        <tr><td>Game consoles (PS5, Switch)</td><td>✅ Yes</td><td>Cannot run extensions; significant telemetry</td></tr>
+        <tr><td>Windows PC</td><td>❌ No — uses uBlock Origin</td><td>Extension-level blocking is more effective and doesn't risk breaking sites</td></tr>
+        <tr><td>Phone / tablet</td><td>❌ No — uses browser extension or system-level blocker</td><td>AdGuard Android app or Brave browser handles this better per-app</td></tr>
+        <tr><td>Router IoT VLAN (future)</td><td>✅ Yes</td><td>Entire VLAN DNS pointed at Pi</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ YouTube Ads on Smart TVs</div>
+    <div class="card">
+      <p>DNS-level blocking gets most ads on Smart TVs but <strong>YouTube ads are partially resistant</strong>. Google serves YouTube ads from the same CDN domains as regular video content, so blocking those domains breaks video playback entirely. AdGuard will block some pre-roll ads (especially third-party ones) but cannot reliably block YouTube's first-party ad injection.</p>
+      <p>The best YouTube experience on your household is through the <a href="invidious.html">Invidious</a> instance, which has no ads by design. For Smart TVs specifically, SponsorBlock is not available at the DNS level — it requires a client that supports it (browser extension, or a client app built with SponsorBlock integration).</p>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Routine Maintenance</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th><th>Where</th></tr>
+        <tr><td>Automatic</td><td>Blocklist updates</td><td>AdGuard updates lists on its own schedule (default: every 12 hours)</td></tr>
+        <tr><td>As needed</td><td>Whitelist a broken domain</td><td>Filters → DNS Allowlist → Add domain</td></tr>
+        <tr><td>Monthly</td><td>Review query log for false positives</td><td>Query Log tab — look for legitimate domains being blocked</td></tr>
+        <tr><td>On Docker update</td><td>Pull new image</td><td><code>docker compose pull adguard && docker compose up -d adguard</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🩹 Adding a Whitelist Entry</div>
+    <div class="card">
+      <p>If a device stops working after pointing it at AdGuard DNS, a legitimate domain is probably being blocked. Check the Query Log, find the blocked domain (shown in red), and add it to the allowlist:</p>
+      <pre># In the AdGuard UI:
+Filters → DNS Allowlist → Add Rule
+# Enter the domain:
+||example.com^
+
+# Or add via CLI if the UI is inaccessible:
+# Edit /mnt/archive/Docker/adguard/conf/AdGuardHome.yaml
+# Under: user_rules:
+#   - '||example.com^'
+# Then restart: docker compose restart adguard</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">📁 File Locations</div>
+    <div class="card">
+      <pre>/mnt/archive/Docker/adguard/
+├── conf/
+│   └── AdGuardHome.yaml    ← main config (blocklists, upstream DNS, auth)
+└── work/
+    ├── data/
+    │   ├── querylog.json   ← rolling query log (auto-pruned)
+    │   └── stats.db        ← statistics database
+    └── filters/            ← cached blocklist files</pre>
+      <p style="margin-top:10px;font-size:.83rem">Storage footprint is small — config is a few KB, blocklist cache is 10–50 MB depending on lists enabled, query log is auto-pruned based on your retention setting (default 90 days).</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Backup</div>
+    <div class="card">
+      <p>The only file worth backing up is <code>AdGuardHome.yaml</code> — it contains your entire configuration including blocklists, upstream DNS, auth credentials, and custom rules. The query log and statistics are not worth backing up.</p>
+      <pre># Back up config:
+cp /mnt/archive/Docker/adguard/conf/AdGuardHome.yaml \
+   /mnt/archive/Backups/adguard-config-$(date +%Y%m%d).yaml</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+    <div class="card">
+      <div class="trouble-item">
+        <div class="trouble-q">Device can't reach the internet after setting DNS to 192.168.1.20</div>
+        <div class="trouble-a">Check that AdGuard is actually running: <code>docker compose ps adguard</code>. Check port 53 is bound: <code>sudo ss -tulpn | grep :53</code>. If systemd-resolved reclaimed port 53 after a reboot, re-run the DNSStubListener fix from setup.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">Port 53 conflict — AdGuard fails to start</div>
+        <div class="trouble-a"><code>sudo systemctl stop systemd-resolved && sudo systemctl disable systemd-resolved</code>. Then set a static DNS for the Pi itself in <code>/etc/resolv.conf</code>: add <code>nameserver 1.1.1.1</code>. Restart AdGuard.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">Smart TV app broken after enabling AdGuard DNS</div>
+        <div class="trouble-a">A legitimate domain is blocked. Open AdGuard Query Log, filter by the device's IP, look for red (blocked) entries around the time the app broke. Add the domain to the allowlist.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">AdGuard UI is inaccessible at port 3000</div>
+        <div class="trouble-a">AdGuard may have moved its UI to port 80 during setup. Try <code>http://192.168.1.20:80</code>. To force it back to 3000, edit <code>/mnt/archive/Docker/adguard/conf/AdGuardHome.yaml</code> and set <code>bind_port: 3000</code> under the <code>http:</code> section, then restart.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'adguard_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = '700'; overviewBtn.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = ''; overviewBtn.style.color = ''; }
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      if (overviewBtn) switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      if (overviewBtn) switchTab('overview', overviewBtn);
+    }
+  });
+</script>
+
+</body>
+</html>

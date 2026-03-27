@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Torrent Streaming</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .subtab-nav { display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border);flex-wrap:wrap; }
+    .subtab-btn { font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-1px;white-space:nowrap; }
+    .subtab-btn:hover { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+    .subtab-btn.active { color:var(--accent);border-bottom-color:var(--accent); }
+    .subtab-pane { display:none; }
+    .subtab-pane.active { display:block; }
+    .setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+    .setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background:rgba(76,175,125,.18);border-color:rgba(76,175,125,.5); }
+    .setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.5);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem; }
+    .setup-complete-bar.done .setup-checkbox::after { content:'✓';color:#4caf7d; }
+    .setup-complete-label { font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--accent3); }
+
+    .sovereignty-warning {
+      display:flex;align-items:flex-start;gap:14px;
+      background:rgba(200,150,50,.08);border:1px solid rgba(200,150,50,.3);
+      border-radius:4px;padding:14px 18px;margin-bottom:20px;
+    }
+    .stack-flow {
+      display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:12px 0;
+    }
+    .stack-node {
+      background:var(--bg2);border:1px solid var(--border);border-radius:4px;
+      padding:8px 14px;font-family:'Share Tech Mono',monospace;font-size:.72rem;
+      text-align:center;min-width:90px;
+    }
+    .stack-node .sn-label { color:var(--text-dim);font-size:.6rem;margin-bottom:2px; }
+    .stack-node .sn-name { color:var(--accent);font-size:.78rem; }
+    .stack-arrow {
+      color:var(--text-dim);font-size:1.1rem;padding:0 6px;flex-shrink:0;
+    }
+    .list-config-block {
+      background:var(--bg3);border:1px solid var(--border);border-radius:4px;
+      padding:14px 16px;margin:10px 0;
+    }
+    .list-config-title {
+      font-family:'Share Tech Mono',monospace;font-size:.65rem;text-transform:uppercase;
+      letter-spacing:.1em;color:var(--accent);margin-bottom:8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🧲</div>
+  <div>
+    <h1>Torrent Streaming</h1>
+    <div class="subtitle">// Real-Debrid · Zurg · Rclone · Stream on Demand · No Local Storage · PC //</div>
+    <p class="desc">
+      A cloud-based streaming stack that lets Jellyfin play movies on demand without downloading or storing them locally. Real-Debrid caches torrents on their servers and serves them as direct HTTPS streams. Zurg exposes the Real-Debrid library as a virtual filesystem, Rclone mounts it as a local drive, and Jellyfin sees it as a normal media folder. Press play — the file streams instantly.
+    </p>
+  </div>
+</div>
+
+<!-- Sovereignty warning -->
+<div class="sovereignty-warning">
+  <div style="font-size:1.3rem;flex-shrink:0">⚠️</div>
+  <div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#c8a84b;margin-bottom:5px">Sovereignty Note</div>
+    <p style="margin:0;font-size:.83rem;line-height:1.5;color:var(--text)">Real-Debrid is a <strong>paid third-party service (~$4/month)</strong>. Unlike every other service in this Grimoire, this stack depends on an external provider — if Real-Debrid goes down or closes, the virtual library disappears. This is a deliberate tradeoff: $4/month is cheaper than the electricity and storage to download and keep everything. No genuinely self-hosted FOSS equivalent exists — the closest option would be running a personal seedbox on a VPS (~$5–10/month) and mounting it via Rclone, which costs more and requires more maintenance.</p>
+  </div>
+</div>
+
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('letterboxd', this)">🎬 Letterboxd Sync</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the Rclone mount is live, Jellyfin can see the virtual library, and a test movie plays from Real-Debrid without downloading.</div>
+    </div>
+    <div style="font-size:.73rem;color:var(--text-dim);margin-left:auto" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <!-- Pi compat callout -->
+  <div class="pi-compat-callout" style="display:flex;align-items:flex-start;gap:14px;background:rgba(200,100,80,.07);border:1px solid rgba(200,100,80,.25);border-radius:4px;padding:14px 18px;margin-bottom:20px">
+    <div style="font-size:1.4rem;flex-shrink:0">💪</div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text)">Pi Sentry Compatibility</span>
+        <span style="background:rgba(200,100,80,.12);color:#e05c5c;font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:2px 8px;border-radius:3px;letter-spacing:.08em">PC ONLY</span>
+      </div>
+      <p style="margin:0 0 4px;font-size:.83rem;line-height:1.5;color:var(--text)">Runs on the Windows PC — co-located with Jellyfin, which mounts the virtual drive.</p>
+      <p style="margin:0;font-size:.8rem;line-height:1.5;color:var(--text-dim)">Rclone mounts a virtual drive that Jellyfin reads directly. Jellyfin runs on the PC, so the Rclone mount must also be on the PC. Moving this to the Pi would require Jellyfin to also move to the Pi (which requires GPU transcoding — see Movies tab).</p>
+    </div>
+  </div>
+
+  <div class="v1-banner">🧲 V1 Goal: Real-Debrid account active. Zurg running as a Windows service exposing the RD library via WebDAV. Rclone mounting that as <code>D:\Debrid\</code>. Jellyfin library "Debrid Movies" pointed at <code>D:\Debrid\movies\</code>. A test movie plays instantly with no download.</div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🔑 Step 1 — Real-Debrid Account</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Subscribe to Real-Debrid</strong>
+          <p>Go to <a href="https://real-debrid.com" target="_blank">real-debrid.com</a> and purchase a plan. The 15-day plan is ~$3, the 180-day plan works out to ~$4/month. Payment accepts card and cryptocurrency.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Get your API key</strong>
+          <p>Log in → <a href="https://real-debrid.com/apitoken" target="_blank">real-debrid.com/apitoken</a> → copy the token. You'll need this for Zurg.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🦋 Step 2 — Install Zurg</div>
+    <div class="card">
+      <p>Zurg connects to Real-Debrid's API and exposes your RD library as a WebDAV server. It also handles automatic torrent addition when Radarr sends a download request.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Download Zurg for Windows</strong>
+          <p>Get the latest release from <a href="https://github.com/debridmediamanager/zurg-testing/releases" target="_blank">github.com/debridmediamanager/zurg-testing/releases</a> — download <code>zurg-windows-amd64.exe</code>. Save to <code>D:\Server\Zurg\zurg.exe</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create config.yml</strong>
+          <p>Save as <code>D:\Server\Zurg\config.yml</code>:</p>
+          <pre>zurg: v1
+token: YOUR_REAL_DEBRID_API_TOKEN
+
+# WebDAV server settings:
+host: 0.0.0.0
+port: 9999
+
+# Organise library by type:
+on_library_update: sh -c "curl http://localhost:32400/library/sections/all/refresh"
+
+directories:
+  movies:
+    type: movies
+    min_size_mb: 200
+    only_show_the_biggest_file: true
+  shows:
+    type: shows
+    min_size_mb: 200
+    only_show_the_biggest_file: false</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Run Zurg and verify WebDAV</strong>
+          <pre>cd D:\Server\Zurg
+.\zurg.exe
+
+# Test WebDAV in browser:
+# http://localhost:9999/dav/
+# You should see movies/ and shows/ directories listed</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Install Zurg as a Windows service via NSSM</strong>
+          <pre>nssm install Zurg "D:\Server\Zurg\zurg.exe"
+nssm set Zurg AppDirectory "D:\Server\Zurg"
+nssm set Zurg DisplayName "Zurg (RealDebrid WebDAV)"
+nssm set Zurg Description "Exposes Real-Debrid library as WebDAV for Rclone"
+nssm set Zurg Start SERVICE_AUTO_START
+nssm set Zurg AppStdout "D:\Server\Zurg\logs\zurg.log"
+nssm set Zurg AppStderr "D:\Server\Zurg\logs\zurg_err.log"
+
+mkdir "D:\Server\Zurg\logs"
+nssm start Zurg</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🔗 Step 3 — Mount with Rclone</div>
+    <div class="card">
+      <p>Rclone mounts the Zurg WebDAV server as a local drive that Windows applications (including Jellyfin) can read as if it were a local folder.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install Rclone for Windows</strong>
+          <p>Download from <a href="https://rclone.org/downloads/" target="_blank">rclone.org/downloads/</a> — get the Windows amd64 zip. Extract <code>rclone.exe</code> to <code>D:\Server\Rclone\rclone.exe</code>.</p>
+          <p>Also install <strong>WinFsp</strong> (required for Rclone to create virtual drives on Windows): <a href="https://winfsp.dev/rel/" target="_blank">winfsp.dev/rel/</a></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure the Zurg WebDAV remote</strong>
+          <pre>D:\Server\Rclone\rclone.exe config
+
+# Create new remote:
+# Name: zurg
+# Type: webdav
+# URL: http://localhost:9999/dav
+# Vendor: other
+# User: (blank)
+# Password: (blank)
+# No further options needed</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Test the remote</strong>
+          <pre>D:\Server\Rclone\rclone.exe ls zurg:
+# Should list your Real-Debrid library contents</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Mount as a virtual drive</strong>
+          <pre># Mount command — run this manually first to verify it works:
+D:\Server\Rclone\rclone.exe mount zurg: D:\Debrid ^
+  --vfs-cache-mode full ^
+  --vfs-cache-max-size 10G ^
+  --vfs-read-ahead 128M ^
+  --buffer-size 256M ^
+  --dir-cache-time 10s ^
+  --poll-interval 10s ^
+  --log-level INFO ^
+  --log-file D:\Server\Rclone\logs\rclone.log
+
+# D:\Debrid\ should now contain your RD library
+# Open it in Explorer to verify</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Install Rclone mount as a Windows service via NSSM</strong>
+          <pre>mkdir "D:\Debrid"
+mkdir "D:\Server\Rclone\logs"
+
+nssm install RcloneDebrid "D:\Server\Rclone\rclone.exe"
+nssm set RcloneDebrid AppParameters "mount zurg: D:\Debrid --vfs-cache-mode full --vfs-cache-max-size 10G --vfs-read-ahead 128M --buffer-size 256M --dir-cache-time 10s --poll-interval 10s --log-level INFO --log-file D:\Server\Rclone\logs\rclone.log"
+nssm set RcloneDebrid DisplayName "Rclone Debrid Mount"
+nssm set RcloneDebrid Start SERVICE_AUTO_START
+nssm set RcloneDebrid AppStdout "D:\Server\Rclone\logs\rclone_out.log"
+
+# Zurg must be running before Rclone starts:
+nssm set RcloneDebrid DependOnService Zurg
+
+nssm start RcloneDebrid</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">🎬 Step 4 — Add Jellyfin Library</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Add a new Movies library in Jellyfin</strong>
+          <p>Jellyfin Dashboard → Libraries → Add Media Library:</p>
+          <ul style="margin:6px 0 0 18px;font-size:.85rem;line-height:1.8">
+            <li>Content type: <strong>Movies</strong></li>
+            <li>Display name: <strong>Debrid Library</strong> (or "Stream Library")</li>
+            <li>Folder: <code>D:\Debrid\movies\</code></li>
+            <li>Preferred language: English</li>
+            <li>Real-time monitoring: <strong>OFF</strong> — Rclone handles refresh via Zurg's on_library_update hook</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure Radarr's debrid download client</strong>
+          <p>Settings → Download Clients → Add → <strong>Rclone</strong> (or use qBittorrent pointed at Real-Debrid via a Torrent-to-RD browser extension).</p>
+          <p>The recommended approach is the <strong>Real-Debrid Radarr integration</strong>: install the <a href="https://github.com/rogerfar/rdt-client" target="_blank">rdt-client</a> (RealDebrid Torrent Client), which acts as a fake qBittorrent that actually sends torrents to Real-Debrid instead of downloading them locally.</p>
+          <pre># rdt-client in Docker (WSL2):
+services:
+  rdtclient:
+    image: rogerfar/rdtclient:latest
+    container_name: rdtclient
+    restart: unless-stopped
+    ports:
+      - "6500:6500"
+    volumes:
+      - /mnt/d/Server/rdtclient:/data/db
+      - /mnt/d/Debrid:/data/downloads  # maps to D:\Debrid
+    environment:
+      - PUID=1000
+      - PGID=1000</pre>
+          <p>In Radarr: Settings → Download Clients → Add qBittorrent → point at <code>localhost:6500</code>. rdt-client intercepts the magnet link, sends it to Real-Debrid, and the file appears in <code>D:\Debrid\</code> via Rclone.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">🧲 Torrent Streaming lets Jellyfin play movies on demand from Real-Debrid's servers without storing files locally. The virtual drive at <code>D:\Debrid\</code> contains the entire RD library as if it were local storage.</div>
+
+  <div class="section">
+    <div class="section-title">🔄 How It All Fits Together</div>
+    <div class="card">
+      <div class="stack-flow">
+        <div class="stack-node"><div class="sn-label">List B</div><div class="sn-name">Letterboxd</div></div>
+        <div class="stack-arrow">→</div>
+        <div class="stack-node"><div class="sn-label">Adds movies</div><div class="sn-name">Radarr</div></div>
+        <div class="stack-arrow">→</div>
+        <div class="stack-node"><div class="sn-label">Sends magnet</div><div class="sn-name">rdt-client</div></div>
+        <div class="stack-arrow">→</div>
+        <div class="stack-node"><div class="sn-label">Caches torrent</div><div class="sn-name">Real-Debrid</div></div>
+        <div class="stack-arrow">→</div>
+        <div class="stack-node"><div class="sn-label">Exposes as WebDAV</div><div class="sn-name">Zurg</div></div>
+        <div class="stack-arrow">→</div>
+        <div class="stack-node"><div class="sn-label">Mounts as drive</div><div class="sn-name">Rclone</div></div>
+        <div class="stack-arrow">→</div>
+        <div class="stack-node"><div class="sn-label">Plays file</div><div class="sn-name">Jellyfin</div></div>
+      </div>
+      <p style="font-size:.83rem;color:var(--text-dim);margin-top:8px">Nothing is stored on disk. <code>D:\Debrid\</code> is a virtual filesystem — files stream from Real-Debrid's servers on demand when someone presses play.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Services & Ports</div>
+        <table>
+          <tr><th>Service</th><th>Port</th><th>Purpose</th></tr>
+          <tr><td>Zurg</td><td>9999</td><td>WebDAV bridge to Real-Debrid API</td></tr>
+          <tr><td>rdt-client</td><td>6500</td><td>Fake qBittorrent → sends to RD instead of downloading</td></tr>
+          <tr><td>Rclone</td><td>—</td><td>Mounts Zurg WebDAV as <code>D:\Debrid\</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Virtual Drive Layout</div>
+        <pre>D:\Debrid\
+├── movies\     → Jellyfin "Debrid Library"
+└── shows\      → (future use)</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💡 List A vs List B — Which Goes Where</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📋 List A — Own Locally (Radarr → qBittorrent)</div>
+        <p style="font-size:.83rem;line-height:1.6">Movies you want to keep permanently in high quality. Downloaded by the regular Radarr → qBittorrent pipeline. Stored on the PC's local drive. Appear in the main Jellyfin Movies library. 1080p quality profile, stored forever.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🧲 List B — Stream on Demand (Radarr → rdt-client → RD)</div>
+        <p style="font-size:.83rem;line-height:1.6">Movies you want to watch without storing. Added to Radarr's debrid profile. Radarr sends the magnet to rdt-client → Real-Debrid caches it → appears in <code>D:\Debrid\movies\</code> → Jellyfin plays it. Nothing stored locally. Purely additive — manual deletion only.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — LETTERBOXD SYNC
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-letterboxd">
+
+  <div class="v1-banner">🎬 The Letterboxd sync script reads two .txt files of Letterboxd list URLs and syncs them to Radarr every 24 hours. List A goes to the local-storage Radarr profile. List B goes to the debrid Radarr profile. Purely additive — nothing is ever removed automatically.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Config Files</div>
+    <div class="card">
+      <p>Two plain text files, one URL per line. Save them at:</p>
+      <pre>D:\Server\Letterboxd\lists_local.txt     ← List A: own locally (→ qBittorrent)
+D:\Server\Letterboxd\lists_debrid.txt    ← List B: stream on demand (→ rdt-client)</pre>
+
+      <div class="list-config-block">
+        <div class="list-config-title">Example: lists_local.txt</div>
+        <pre>https://letterboxd.com/yourname/list/films-to-own/
+https://letterboxd.com/yourname/list/family-classics/
+https://letterboxd.com/yourname/watchlist/</pre>
+      </div>
+
+      <div class="list-config-block">
+        <div class="list-config-title">Example: lists_debrid.txt</div>
+        <pre>https://letterboxd.com/yourname/list/watch-once/
+https://letterboxd.com/yourname/list/curious-about/</pre>
+      </div>
+
+      <p style="font-size:.83rem;color:var(--text-dim)">Letterboxd watchlists use the URL pattern <code>/username/watchlist/</code>. Regular lists use <code>/username/list/list-name/</code>. Both work — Letterboxd exposes both as RSS feeds.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐍 The Sync Script</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install dependencies</strong>
+          <pre>pip install requests feedparser</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create the script at <code>D:\Server\Letterboxd\letterboxd_sync.py</code></strong>
+          <pre>#!/usr/bin/env python3
+"""
+letterboxd_sync.py
+==================
+Reads Letterboxd list RSS feeds and adds movies to Radarr.
+  List A (lists_local.txt)  → Radarr local quality profile (1080p, stored forever)
+  List B (lists_debrid.txt) → Radarr debrid quality profile (1080p, stream via RD)
+
+Run manually or via Task Scheduler (daily at 2am).
+"""
+
+import feedparser, requests, sys
+from pathlib import Path
+
+# ── Config ──────────────────────────────────────────────────────────────────
+RADARR_URL     = "http://localhost:7878"
+RADARR_API_KEY = "YOUR_RADARR_API_KEY"   # Radarr → Settings → General → API Key
+
+# Radarr quality profile IDs — get these from:
+# GET http://localhost:7878/api/v3/qualityprofile
+# Common IDs: 1=Any, 4=HD-1080p, 5=Ultra-HD
+PROFILE_LOCAL  = 4   # 1080p → qBittorrent → local storage
+PROFILE_DEBRID = 4   # 1080p → rdt-client → Real-Debrid
+
+# Radarr root folder paths — get from:
+# GET http://localhost:7878/api/v3/rootfolder
+ROOT_LOCAL  = "D:\\Media\\Movies"        # permanent local library
+ROOT_DEBRID = "D:\\Debrid\\movies"       # virtual RD drive
+
+# List files (one Letterboxd URL per line):
+SCRIPT_DIR    = Path(__file__).parent
+LIST_LOCAL    = SCRIPT_DIR / "lists_local.txt"
+LIST_DEBRID   = SCRIPT_DIR / "lists_debrid.txt"
+
+TMDB_BASE = "https://api.themoviedb.org/3"
+
+# ── Helpers ─────────────────────────────────────────────────────────────────
+
+def radarr_get(endpoint):
+    r = requests.get(f"{RADARR_URL}/api/v3/{endpoint}",
+                     headers={"X-Api-Key": RADARR_API_KEY}, timeout=15)
+    r.raise_for_status()
+    return r.json()
+
+def radarr_post(endpoint, payload):
+    r = requests.post(f"{RADARR_URL}/api/v3/{endpoint}",
+                      json=payload,
+                      headers={"X-Api-Key": RADARR_API_KEY}, timeout=15)
+    return r
+
+def get_existing_tmdb_ids():
+    movies = radarr_get("movie")
+    return {m["tmdbId"] for m in movies}
+
+def letterboxd_rss_url(list_url: str) -> str:
+    """Convert a Letterboxd list URL to its RSS feed URL."""
+    url = list_url.rstrip("/")
+    return url + "/rss/"
+
+def fetch_titles_from_list(list_url: str) -> list[dict]:
+    """Parse a Letterboxd RSS feed and return list of {title, year} dicts."""
+    rss_url = letterboxd_rss_url(list_url)
+    feed = feedparser.parse(rss_url)
+    movies = []
+    for entry in feed.entries:
+        title = entry.get("letterboxd_filmtitle") or entry.get("title", "")
+        year  = entry.get("letterboxd_filmyear")
+        if title:
+            movies.append({"title": title, "year": int(year) if year else None})
+    return movies
+
+def lookup_tmdb(title: str, year: int | None) -> dict | None:
+    """Look up a movie on TMDB via Radarr's lookup endpoint."""
+    params = {"term": f"{title} {year}" if year else title}
+    results = radarr_get(f"movie/lookup?term={requests.utils.quote(params['term'])}")
+    if results:
+        return results[0]
+    return None
+
+def add_to_radarr(tmdb_result: dict, quality_profile_id: int, root_folder: str) -> bool:
+    """Add a movie to Radarr. Returns True if added, False if already exists."""
+    payload = {
+        "title":            tmdb_result["title"],
+        "tmdbId":           tmdb_result["tmdbId"],
+        "qualityProfileId": quality_profile_id,
+        "rootFolderPath":   root_folder,
+        "monitored":        True,
+        "minimumAvailability": "released",
+        "addOptions": {
+            "searchForMovie": True
+        }
+    }
+    r = radarr_post("movie", payload)
+    if r.status_code == 201:
+        return True
+    elif r.status_code == 400 and "already" in r.text.lower():
+        return False   # already in Radarr
+    else:
+        print(f"    [WARN] Unexpected response {r.status_code}: {r.text[:200]}")
+        return False
+
+def process_list_file(list_file: Path, profile_id: int, root_folder: str,
+                      existing_ids: set, label: str):
+    if not list_file.exists():
+        print(f"[SKIP] {list_file.name} not found")
+        return
+
+    urls = [u.strip() for u in list_file.read_text().splitlines()
+            if u.strip() and not u.strip().startswith("#")]
+
+    print(f"\n── {label} ({len(urls)} lists) ──────────────────────────────")
+
+    for list_url in urls:
+        print(f"  Fetching: {list_url}")
+        try:
+            movies = fetch_titles_from_list(list_url)
+        except Exception as e:
+            print(f"  [ERR] Failed to fetch RSS: {e}")
+            continue
+
+        for movie in movies:
+            try:
+                result = lookup_tmdb(movie["title"], movie.get("year"))
+                if not result:
+                    print(f"    [MISS] Not found on TMDB: {movie['title']}")
+                    continue
+                if result["tmdbId"] in existing_ids:
+                    continue   # already in Radarr, skip silently
+                added = add_to_radarr(result, profile_id, root_folder)
+                if added:
+                    existing_ids.add(result["tmdbId"])
+                    print(f"    [ADD ] {result['title']} ({result.get('year', '?')})")
+            except Exception as e:
+                print(f"    [ERR] {movie['title']}: {e}")
+
+# ── Main ────────────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    print("Letterboxd → Radarr sync starting...")
+    try:
+        existing = get_existing_tmdb_ids()
+        print(f"Radarr has {len(existing)} movies already.")
+    except Exception as e:
+        print(f"[FATAL] Cannot reach Radarr: {e}")
+        sys.exit(1)
+
+    process_list_file(LIST_LOCAL,  PROFILE_LOCAL,  ROOT_LOCAL,  existing, "List A — Local Storage")
+    process_list_file(LIST_DEBRID, PROFILE_DEBRID, ROOT_DEBRID, existing, "List B — Debrid Stream")
+
+    print("\nSync complete.")</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Set up two Radarr quality profiles + download clients</strong>
+          <p>In Radarr, you need two download clients configured:</p>
+          <table>
+            <tr><th>Profile</th><th>Download client</th><th>Root folder</th></tr>
+            <tr><td>HD-1080p (local)</td><td>qBittorrent (existing)</td><td><code>D:\Media\Movies</code></td></tr>
+            <tr><td>HD-1080p (debrid)</td><td>rdt-client (port 6500)</td><td><code>D:\Debrid\movies</code></td></tr>
+          </table>
+          <p style="margin-top:8px;font-size:.83rem">Use Radarr's <strong>Download Client Tags</strong> or separate quality profiles to route List A movies to qBittorrent and List B movies to rdt-client. The script assigns each movie to the correct root folder — Radarr uses the root folder to determine which download client to use.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Schedule via Windows Task Scheduler</strong>
+          <pre># Create a task to run daily at 2:00 AM:
+schtasks /create /tn "Letterboxd Sync" ^
+  /tr "python D:\Server\Letterboxd\letterboxd_sync.py >> D:\Server\Letterboxd\sync.log 2>&1" ^
+  /sc daily /st 02:00 ^
+  /ru SYSTEM /f
+
+# Verify it was created:
+schtasks /query /tn "Letterboxd Sync"
+
+# Run manually to test:
+python D:\Server\Letterboxd\letterboxd_sync.py</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 Getting Radarr API Values</div>
+    <div class="card">
+      <pre># Get your API key:
+# Radarr → Settings → General → API Key
+
+# Get quality profile IDs:
+curl "http://localhost:7878/api/v3/qualityprofile" \
+  -H "X-Api-Key: YOUR_API_KEY"
+# Returns JSON array — note the "id" and "name" for each profile
+
+# Get root folder IDs:
+curl "http://localhost:7878/api/v3/rootfolder" \
+  -H "X-Api-Key: YOUR_API_KEY"
+# Returns JSON array — note the "id" and "path" for each root folder</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-letterboxd -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Routine Tasks</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th><th>How</th></tr>
+        <tr><td>Automatic (daily 2am)</td><td>Letterboxd sync</td><td>Task Scheduler runs letterboxd_sync.py</td></tr>
+        <tr><td>Monthly</td><td>Update Zurg</td><td>Download new release, replace zurg.exe, <code>nssm restart Zurg</code></td></tr>
+        <tr><td>Monthly</td><td>Update Rclone</td><td>Download new release, replace rclone.exe, <code>nssm restart RcloneDebrid</code></td></tr>
+        <tr><td>Monthly</td><td>Update rdt-client</td><td><code>docker compose pull rdtclient && docker compose up -d rdtclient</code></td></tr>
+        <tr><td>When RD subscription renews</td><td>Verify API token still valid</td><td>Check <a href="https://real-debrid.com/apitoken" target="_blank">real-debrid.com/apitoken</a></td></tr>
+        <tr><td>As needed</td><td>Remove a movie from debrid library</td><td>Radarr → movie → Delete → also remove from Real-Debrid torrent list if desired</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Checking Sync Logs</div>
+    <div class="card">
+      <pre># View last sync output:
+type D:\Server\Letterboxd\sync.log
+
+# Zurg logs:
+type D:\Server\Zurg\logs\zurg.log
+
+# Rclone mount logs:
+type D:\Server\Rclone\logs\rclone.log</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — DATA STORAGE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">📁 File Locations</div>
+    <div class="card">
+      <pre>D:\Server\
+├── Zurg\
+│   ├── zurg.exe
+│   ├── config.yml          ← RD API token + directory config
+│   └── logs\
+│       └── zurg.log
+├── Rclone\
+│   ├── rclone.exe
+│   └── logs\
+│       └── rclone.log
+├── rdtclient\              ← rdt-client database (via Docker volume)
+│   └── db\
+└── Letterboxd\
+    ├── letterboxd_sync.py  ← sync script
+    ├── lists_local.txt     ← List A Letterboxd URLs
+    ├── lists_debrid.txt    ← List B Letterboxd URLs
+    └── sync.log            ← daily sync output
+
+D:\Debrid\                  ← virtual mount (no real files here)
+├── movies\                 → Jellyfin "Debrid Library"
+└── shows\</pre>
+      <p style="margin-top:10px;font-size:.83rem;color:var(--text-dim)"><code>D:\Debrid\</code> uses zero disk space — it is a virtual filesystem backed by Real-Debrid's servers. The Rclone VFS cache (<code>--vfs-cache-max-size 10G</code>) uses up to 10GB of your main drive as a read-ahead buffer during playback — this is temporary and auto-purged.</p>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+    <div class="card">
+      <div class="trouble-item">
+        <div class="trouble-q">D:\Debrid\ is empty or shows no files</div>
+        <div class="trouble-a">Check that Zurg is running (<code>nssm status Zurg</code>) and responding at <code>http://localhost:9999/dav/</code>. Then check Rclone is running (<code>nssm status RcloneDebrid</code>). Rclone depends on Zurg — if Zurg starts slowly, Rclone may have failed. Restart RcloneDebrid after Zurg is confirmed running.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">Movie in Jellyfin but won't play — buffering immediately</div>
+        <div class="trouble-a">Real-Debrid hasn't cached this torrent yet, or the torrent is not a cached "instant" item. Check Real-Debrid's "Downloads" page to see if the item is fully cached. Zurg's <code>only_show_the_biggest_file: true</code> setting should prevent broken files from appearing, but occasionally a bad torrent gets through.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">Letterboxd sync script failing — "Cannot reach Radarr"</div>
+        <div class="trouble-a">Verify Radarr is running and the API key in the script is correct. Run manually: <code>python D:\Server\Letterboxd\letterboxd_sync.py</code>. Check that <code>RADARR_URL</code> is set to <code>http://localhost:7878</code>.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">Movies showing as "Missing" in Radarr debrid profile</div>
+        <div class="trouble-a">rdt-client may not have received the search request, or the torrent indexer didn't find a match. Check rdt-client at <code>http://localhost:6500</code> for pending/failed items. Verify Prowlarr has YTS and other movie indexers configured.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q">Rclone mount disappears after PC restart</div>
+        <div class="trouble-a">NSSM service startup order issue. Make sure RcloneDebrid has <code>DependOnService Zurg</code> set, and both services are set to <code>SERVICE_AUTO_START</code>. WinFsp must also be running — verify it starts automatically in Services (services.msc).</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'torrentstreaming_setup_complete';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const checkbox = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done');
+      checkbox.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = '700'; overviewBtn.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done');
+      checkbox.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (overviewBtn) { overviewBtn.style.fontWeight = ''; overviewBtn.style.color = ''; }
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      if (overviewBtn) switchTab('overview', overviewBtn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const overviewBtn = document.querySelector('[onclick*="overview"]');
+      if (overviewBtn) switchTab('overview', overviewBtn);
+    }
+  });
+</script>
+
+</body>
+</html>

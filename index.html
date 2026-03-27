@@ -75,6 +75,7 @@
     <button class="nav-item" id="nav-sso"           onclick="go('sso')"><span class="ni">🔐</span>Authentik SSO</button>
     <button class="nav-item" id="nav-security"      onclick="go('security')"><span class="ni">🛡️</span>Security</button>
     <button class="nav-item" id="nav-raspi"         onclick="go('raspi')"><span class="ni">🍓</span>Pi Sentry</button>
+    <button class="nav-item" id="nav-adguard"       onclick="go('adguard')"><span class="ni">🛡️</span>AdGuard DNS</button>
     <button class="nav-item" id="nav-domain"        onclick="go('domain')"><span class="ni">🌐</span>Networke</button>
     <button class="nav-item" id="nav-linux"         onclick="go('linux')"><span class="ni">🐧</span>Linux Fallback</button>
   </div></div>
@@ -96,6 +97,7 @@
     <button class="nav-item" id="nav-movies"        onclick="go('movies')"><span class="ni">🎬</span>Movies &amp; TV</button>
     <button class="nav-item" id="nav-tunarr"        onclick="go('tunarr')"><span class="ni">📺</span>"Live" TV</button>
     <button class="nav-item" id="nav-metube"     onclick="go('metube')"><span class="ni">📥</span>Filler DL</button>
+    <button class="nav-item" id="nav-torrentstreaming" onclick="go('torrentstreaming')"><span class="ni">🧲</span>Torrent Streaming</button>
     <button class="nav-item" id="nav-streamarr"     onclick="go('streamarr')"><span class="ni">🎯</span>Streamarr</button>
     <button class="nav-item" id="nav-calibre"       onclick="go('calibre')"><span class="ni">📚</span>Books</button>
     <button class="nav-item" id="nav-audiobooks"    onclick="go('audiobooks')"><span class="ni">🎧</span>Audiobooks</button>
@@ -210,6 +212,8 @@
   <div class="tab-content" id="pane-marioparty"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-flasharcade"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-emulatorjs"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-adguard"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
+  <div class="tab-content" id="pane-torrentstreaming"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-franchisenavigator"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
   <div class="tab-content" id="pane-franchiseviewer"><div class="tab-loading"><div class="spinner"></div>Loading…</div></div>
 </div></div>
@@ -217,10 +221,10 @@
 <footer>
   <span><span class="sdot"></span>HOME SERVER · LOCAL REFERENCE</span>
   <span>🐉 AUTHENTIK SSO · TAILSCALE · ixo.lol</span>
-  <span>62 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
+  <span>65 TABS · SIDEBAR NAV · PRESS [ TO COLLAPSE</span>
 </footer>
 <script>
-const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',raspi:'raspi.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',streamarr:'streamarr.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',excalidraw:'excalidraw.html',readeck:'readeck.html',privatebin:'privatebin.html',stirling:'stirling-pdf.html',upscayl:'upscayl.html',pxls:'pxls.html',genart:'genart.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',sunshine:'sunshine.html',goglibrary:'gog-library.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html',flasharcade:'flash-arcade.html',tunarr:'tunarr.html',metube:'metube.html',streamarr:'streamarr.html',emulatorjs:'emulatorjs.html',franchisenavigator:'franchise-navigator.html',franchiseviewer:'franchise-viewer.html',franchiseviewer:'franchise-viewer.html'};
+const FILES={home:'home.html',overview:'overview.html',hardware:'hardware.html',ports:'ports.html',restarting:'restarting.html',memory:'memory.html',sso:'sso.html',security:'security.html',domain:'domain.html',linux:'linux.html',raspi:'raspi.html',bestpractices:'best-practices.html',services:'services.html',achievements:'achievements.html',newuser:'new-user.html',dashboard:'monitor-control.html',dashsetup:'dashboard-setup.html',userhomepage:'user-homepage.html',homepagesetup:'user-homepage-setup.html',usersettings:'user-settings.html',feedback:'feedback.html',movies:'movies.html',calibre:'calibre.html',audiobooks:'audiobooks.html',navidrome:'navidrome.html',immich:'immich.html',kavita:'kavita.html',nextcloud:'owncloud.html',seedbox:'seedbox.html',streamarr:'streamarr.html',ollama:'ollama.html',recommendations:'recommendations.html',jukebox:'jukebox.html',wikipedia:'wikipedia.html',languages:'languages.html',utilities:'utilities.html',excalidraw:'excalidraw.html',readeck:'readeck.html',privatebin:'privatebin.html',stirling:'stirling-pdf.html',upscayl:'upscayl.html',pxls:'pxls.html',genart:'genart.html',minecraft:'minecraft.html',ark:'ark.html',ss13:'ss13.html',mtg:'mtg.html',vtt:'vtt.html',steam:'steam.html',sunshine:'sunshine.html',goglibrary:'gog-library.html',gamecube:'gamecube.html',xbox360:'xbox360.html',sims2:'sims2.html',romm:'romm.html',pokemon:'pokemon.html',castlevania:'castlevania.html',fireemblem:'fireemblem.html',marioparty:'marioparty.html',flasharcade:'flash-arcade.html',tunarr:'tunarr.html',metube:'metube.html',streamarr:'streamarr.html',emulatorjs:'emulatorjs.html',franchisenavigator:'franchise-navigator.html',franchiseviewer:'franchise-viewer.html',franchiseviewer:'franchise-viewer.html',adguard:'adguard.html',torrentstreaming:'torrent-streaming.html'};
 const loaded=new Set();
 let open=localStorage.getItem('sb_open')!=='false';
 function go(n){

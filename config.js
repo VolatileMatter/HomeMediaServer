@@ -97,6 +97,7 @@ const CFG = {
     wordle:           'wordle',
     hoarder:          'hoarder',
     streamarr:        null,   // LAN/Tailscale only — no public subdomain
+    adguard:          'adguard',
   },
 
   // ── PORTS ────────────────────────────────────────────────────────────────
@@ -173,6 +174,9 @@ const CFG = {
     mtg_server:        8099,
     wordle:            8081,
 
+    adguard_ui:        3000,   // Pi AdGuard Home web UI
+    adguard_dns:       53,     // Pi AdGuard DNS port
+
     // Pi Sentry services (ports on the Pi — accessed via Tailscale IP)
     // These are not on localhost — Caddy proxies to SENTRY_TAILSCALE_IP:port
     pi_portainer:      9000,   // Pi Portainer — sentry.ixo.ts.net:9000 (Tailscale only)
@@ -218,8 +222,9 @@ const CFG = {
     pi_compose:       '/home/ixora/docker/docker-compose.yml',
 
     // Config files
-    caddyfile:        'C:\\caddy\\Caddyfile',
-    caddy_bin:        'C:\\caddy\\caddy.exe',
+    caddyfile:        'C:\\caddy\\Caddyfile',    // legacy — Caddy now runs on Pi
+    caddy_bin:        'C:\\caddy\\caddy.exe',    // legacy — Caddy now runs on Pi
+    pi_caddyfile:     '/etc/caddy/Caddyfile',   // Caddy config on the Pi Sentry
     nodes_json:       'D:\\Server\\Dashboard\\nodes.json',
   },
 
