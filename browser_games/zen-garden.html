@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zen Garden</title>
+  <link rel="stylesheet" href="../../shared.css">
+  <script src="../../config.js"></script>
+  <style>
+    .subtab-nav { display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .subtab-btn { font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; padding:9px 18px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text-dim); cursor:pointer; transition:all .16s; margin-bottom:-1px; white-space:nowrap; }
+    .subtab-btn:hover { color:var(--text); border-bottom-color:rgba(200,168,75,.35); }
+    .subtab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .subtab-pane { display:none; }
+    .subtab-pane.active { display:block; }
+    .setup-complete-bar { display:flex; align-items:center; gap:12px; background:rgba(76,175,125,.07); border:1px solid rgba(76,175,125,.25); border-radius:4px; padding:12px 18px; margin-bottom:24px; cursor:pointer; transition:background .2s; user-select:none; }
+    .setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background:rgba(76,175,125,.15); border-color:rgba(76,175,125,.5); }
+    .setup-checkbox { width:20px; height:20px; border:2px solid rgba(76,175,125,.6); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:.9rem; color:#4caf7d; flex-shrink:0; }
+    .setup-complete-label { font-weight:700; font-size:.85rem; color:var(--text-bright); }
+    .setup-complete-sub { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .source-link { display:flex; align-items:center; gap:14px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:14px 18px; text-decoration:none; transition:border-color .15s; margin-bottom:10px; }
+    .source-link:hover { border-color:var(--accent); }
+    .source-link-icon { font-size:1.5rem; flex-shrink:0; }
+    .source-link-name { font-family:'Cinzel',serif; font-size:.88rem; color:var(--accent); }
+    .source-link-desc { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .controls-grid { display:grid; grid-template-columns:auto 1fr; gap:6px 18px; font-size:.82rem; }
+    .ctrl-key { font-family:'Share Tech Mono',monospace; background:var(--bg2); border:1px solid var(--border); border-radius:3px; padding:2px 8px; color:var(--accent); white-space:nowrap; display:inline-block; }
+    .ctrl-desc { color:var(--text-dim); align-self:center; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">☯️</div>
+  <div>
+    <h1>Zen Garden</h1>
+    <div class="subtitle">// Generative Art · Singleplayer · Static Files (HTML/JS/Canvas) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A digital Japanese rock garden where you rake sand with your mouse. Smooth, parallel lines form behind your cursor, curving naturally around placed stones. The canvas fills with raked patterns that look like a miniature karesansui. Part of the science-art GitHub project collection.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup',this)">🚀 Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview',this)">🕹️ Overview</button>
+  <button class="subtab-btn" onclick="switchTab('source',this)">📦 Source</button>
+</div>
+
+<!-- SETUP -->
+<div class="subtab-pane active" id="pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Zen Garden loads and raking works in the Browser Games hub.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">☯️ V1 Goal: Zen Garden accessible at <code>games.<span data-cfg="domain"></span>/zen-garden/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/science-art/zen-garden.git zen-garden</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Pure HTML/JS canvas project — no build step required. Entry point is <code>index.html</code>. Serve the folder directly.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in games.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "zen-garden",
+  "name":        "Zen Garden",
+  "icon":        "☯️",
+  "description": "Digital Japanese rock garden — rake sand with your mouse, place stones, find peace.",
+  "folder":      "zen-garden",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["interactive", "relaxing", "drawing", "zen"]
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. Inherits the hub's <code>forward_auth</code>. All raking state is client-side only — nothing is stored server-side.</p>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="subtab-pane" id="pane-overview">
+  <div class="v1-banner">✅ Fully client-side canvas interaction. Your garden exists only in the browser tab — refreshing resets the sand. No data is transmitted.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/zen-garden/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — garden resets on refresh</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML5 Canvas + JavaScript</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, fully offline capable</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — touch raking is very natural</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Zen Garden simulates the act of raking a Japanese rock garden (karesansui). Your cursor becomes a rake, and dragging it through the sand canvas leaves parallel grooves behind. The lines curve gracefully to flow around any stones you've placed, mimicking the way real zen garden raking flows around obstacles.</p>
+      <p>The traditional Japanese rock garden is a meditative art form — the act of raking is itself the practice, not the end result. This digital version captures that spirit: slow, deliberate movements produce satisfying patterns; hurried scribbling produces chaos. It rewards patience.</p>
+      <p>From the science-art GitHub project, which focuses on browser-based scientific and artistic simulations. The aesthetic is appropriately minimal — beige sand, dark grooves, round stones.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Use</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Click and drag slowly to rake lines through the sand</li>
+        <li>Lines curve automatically around placed stones — don't fight them</li>
+        <li>Right-click (or use a tool selector) to place or remove stones</li>
+        <li>Move slowly for clean, smooth lines; fast movement produces irregular grooves</li>
+        <li>Screenshot to preserve a pattern you like before refreshing</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click + Drag</span>    <span class="ctrl-desc">Rake lines through the sand</span>
+        <span class="ctrl-key">Right Click</span>     <span class="ctrl-desc">Place or remove a stone (check build)</span>
+        <span class="ctrl-key">C / Reset</span>       <span class="ctrl-desc">Clear the sand back to a flat state</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>No persistence</td><td>Your garden is lost when you close or refresh the tab. This is philosophically appropriate for a zen toy, but take a screenshot if you want to keep a pattern.</td></tr>
+        <tr><td>Mobile</td><td>Touch raking is natural and intuitive — arguably better than mouse on mobile. Finger = rake tip.</td></tr>
+        <tr><td>Repo uncertainty</td><td>The science-art GitHub organisation may have sparse documentation. If the clone URL doesn't resolve, search "zen-garden" in the org's repository list.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCE -->
+<div class="subtab-pane" id="pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/science-art/zen-garden" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — science-art/zen-garden</div>
+          <div class="source-link-desc">Original repository from the science-art project organisation.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license details — the science-art organisation varies. Self-hosted for private use within the server's friend group. No modifications made to source.</p></div>
+  </div>
+</div>
+
+<script>
+  function switchTab(id,btn){document.querySelectorAll('.subtab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');btn.classList.add('active');}
+  const STORAGE_KEY='browsergame_zengarden_setup_complete';
+  let isComplete=localStorage.getItem(STORAGE_KEY)==='true';
+  function renderComplete(){const bar=document.getElementById('setup-complete-bar');const cb=document.getElementById('setup-checkbox');const sub=document.getElementById('complete-sub');const ov=document.querySelector('[onclick*="overview"]');if(isComplete){bar.classList.add('done');cb.textContent='✓';sub.textContent='✅ Setup complete — Overview is now the default tab';ov.style.fontWeight='700';ov.style.color='var(--accent3)';}else{bar.classList.remove('done');cb.textContent='';sub.textContent='Mark as done → activates Overview tab';ov.style.fontWeight='';ov.style.color='';}}
+  function toggleComplete(){isComplete=!isComplete;localStorage.setItem(STORAGE_KEY,isComplete);renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}}
+  window.addEventListener('DOMContentLoaded',()=>{renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}});
+</script>
+</body>
+</html>

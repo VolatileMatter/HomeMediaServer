@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generative Trees</title>
+  <link rel="stylesheet" href="../../shared.css">
+  <script src="../../config.js"></script>
+  <style>
+    .subtab-nav { display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .subtab-btn { font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; padding:9px 18px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text-dim); cursor:pointer; transition:all .16s; margin-bottom:-1px; white-space:nowrap; }
+    .subtab-btn:hover { color:var(--text); border-bottom-color:rgba(200,168,75,.35); }
+    .subtab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .subtab-pane { display:none; }
+    .subtab-pane.active { display:block; }
+    .setup-complete-bar { display:flex; align-items:center; gap:12px; background:rgba(76,175,125,.07); border:1px solid rgba(76,175,125,.25); border-radius:4px; padding:12px 18px; margin-bottom:24px; cursor:pointer; transition:background .2s; user-select:none; }
+    .setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background:rgba(76,175,125,.15); border-color:rgba(76,175,125,.5); }
+    .setup-checkbox { width:20px; height:20px; border:2px solid rgba(76,175,125,.6); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:.9rem; color:#4caf7d; flex-shrink:0; }
+    .setup-complete-label { font-weight:700; font-size:.85rem; color:var(--text-bright); }
+    .setup-complete-sub { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .source-link { display:flex; align-items:center; gap:14px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:14px 18px; text-decoration:none; transition:border-color .15s; margin-bottom:10px; }
+    .source-link:hover { border-color:var(--accent); }
+    .source-link-icon { font-size:1.5rem; flex-shrink:0; }
+    .source-link-name { font-family:'Cinzel',serif; font-size:.88rem; color:var(--accent); }
+    .source-link-desc { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .controls-grid { display:grid; grid-template-columns:auto 1fr; gap:6px 18px; font-size:.82rem; }
+    .ctrl-key { font-family:'Share Tech Mono',monospace; background:var(--bg2); border:1px solid var(--border); border-radius:3px; padding:2px 8px; color:var(--accent); white-space:nowrap; display:inline-block; }
+    .ctrl-desc { color:var(--text-dim); align-self:center; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🌳</div>
+  <div>
+    <h1>Generative Trees</h1>
+    <div class="subtitle">// Generative Art · Singleplayer · Static Files (p5.js) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A fractal tree generator built with p5.js. Recursive branching algorithms produce stylised trees that grow outward from a trunk, with randomised angles, lengths, and leaf densities. Each tree is unique and grows in real-time — watching the branches emerge is half the experience.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup',this)">🚀 Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview',this)">🕹️ Overview</button>
+  <button class="subtab-btn" onclick="switchTab('source',this)">📦 Source</button>
+</div>
+
+<!-- SETUP -->
+<div class="subtab-pane active" id="pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Generative Trees loads and draws correctly in the Browser Games hub.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🌳 V1 Goal: Generative Trees accessible at <code>games.<span data-cfg="domain"></span>/generative-trees/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>The p5.js template version is a static sketch. No build step required.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/p5js-templates/generative-trees.git generative-trees</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">p5.js is loaded from CDN in most template setups. After the first browser load, it caches locally. If offline support is important, download <code>p5.min.js</code> and replace the CDN link in <code>index.html</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in games.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "generative-trees",
+  "name":        "Generative Trees",
+  "icon":        "🌳",
+  "description": "Fractal tree generator — recursive branching rendered live in p5.js.",
+  "folder":      "generative-trees",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["generative", "fractal", "p5js", "nature"]
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. Inherits the hub's <code>forward_auth</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="subtab-pane" id="pane-overview">
+  <div class="v1-banner">✅ Fully client-side p5.js sketch. The branching animation runs entirely in your browser. No data is transmitted.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/generative-trees/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None (stateless)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>p5.js JavaScript canvas</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>After first load (p5.js caches)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — canvas renders well on mobile</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Generative Trees uses recursive branching to produce stylised tree illustrations in real-time. Starting from a single trunk, the algorithm splits into two branches at a random angle, then each branch splits again, and so on until branches become leaves. The randomness at each split means no two trees are ever the same.</p>
+      <p>The p5.js framework makes this kind of sketch approachable and the result is visible growing in real-time — branches emerge from the centre outward in a satisfying sequence. It is one of the canonical examples of L-system-style procedural generation.</p>
+      <p>This is a calming, visual toy. You can click to regenerate a new tree, or watch a sequence of trees grow and settle.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Use</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>The tree begins growing as soon as the page loads</li>
+        <li>Click the canvas to generate a new tree with fresh randomisation</li>
+        <li>Watch branches emerge from the trunk outward — the growth animation is part of the experience</li>
+        <li>The final shape settles in a few seconds and remains static until you regenerate</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click / Tap</span>    <span class="ctrl-desc">Generate a new tree</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>No export</td><td>No built-in save. Right-click the canvas and "Save image as" works in most browsers if you want to capture a tree.</td></tr>
+        <tr><td>CDN dependency</td><td>p5.js loaded from CDN on first use. Caches after that. Users need internet access for the very first load.</td></tr>
+        <tr><td>Mobile</td><td>Renders well on mobile. Tap to regenerate works. Small branch detail may be harder to see on phone screens.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCE -->
+<div class="subtab-pane" id="pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/p5js-templates/generative-trees" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — p5js-templates/generative-trees</div>
+          <div class="source-link-desc">p5.js template organisation. The generative-trees sketch from their collection.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://p5js.org" target="_blank">
+        <div class="source-link-icon">🎨</div>
+        <div>
+          <div class="source-link-name">p5js.org</div>
+          <div class="source-link-desc">The p5.js framework used by this sketch. Documentation and reference for understanding the code.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\generative-trees\</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Template repository — stable, infrequent updates</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>MIT License (p5.js templates are MIT). No modifications made to source for this server.</p></div>
+  </div>
+</div>
+
+<script>
+  function switchTab(id,btn){document.querySelectorAll('.subtab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');btn.classList.add('active');}
+  const STORAGE_KEY='browsergame_generativetrees_setup_complete';
+  let isComplete=localStorage.getItem(STORAGE_KEY)==='true';
+  function renderComplete(){const bar=document.getElementById('setup-complete-bar');const cb=document.getElementById('setup-checkbox');const sub=document.getElementById('complete-sub');const ov=document.querySelector('[onclick*="overview"]');if(isComplete){bar.classList.add('done');cb.textContent='✓';sub.textContent='✅ Setup complete — Overview is now the default tab';ov.style.fontWeight='700';ov.style.color='var(--accent3)';}else{bar.classList.remove('done');cb.textContent='';sub.textContent='Mark as done → activates Overview tab';ov.style.fontWeight='';ov.style.color='';}}
+  function toggleComplete(){isComplete=!isComplete;localStorage.setItem(STORAGE_KEY,isComplete);renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}}
+  window.addEventListener('DOMContentLoaded',()=>{renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}});
+</script>
+</body>
+</html>

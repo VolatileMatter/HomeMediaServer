@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sandspiel</title>
+  <link rel="stylesheet" href="../../shared.css">
+  <script src="../../config.js"></script>
+  <style>
+    .subtab-nav { display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .subtab-btn { font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; padding:9px 18px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text-dim); cursor:pointer; transition:all .16s; margin-bottom:-1px; white-space:nowrap; }
+    .subtab-btn:hover { color:var(--text); border-bottom-color:rgba(200,168,75,.35); }
+    .subtab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .subtab-pane { display:none; }
+    .subtab-pane.active { display:block; }
+    .setup-complete-bar { display:flex; align-items:center; gap:12px; background:rgba(76,175,125,.07); border:1px solid rgba(76,175,125,.25); border-radius:4px; padding:12px 18px; margin-bottom:24px; cursor:pointer; transition:background .2s; user-select:none; }
+    .setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background:rgba(76,175,125,.15); border-color:rgba(76,175,125,.5); }
+    .setup-checkbox { width:20px; height:20px; border:2px solid rgba(76,175,125,.6); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:.9rem; color:#4caf7d; flex-shrink:0; }
+    .setup-complete-label { font-weight:700; font-size:.85rem; color:var(--text-bright); }
+    .setup-complete-sub { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .source-link { display:flex; align-items:center; gap:14px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:14px 18px; text-decoration:none; transition:border-color .15s; margin-bottom:10px; }
+    .source-link:hover { border-color:var(--accent); }
+    .source-link-icon { font-size:1.5rem; flex-shrink:0; }
+    .source-link-name { font-family:'Cinzel',serif; font-size:.88rem; color:var(--accent); }
+    .source-link-desc { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .controls-grid { display:grid; grid-template-columns:auto 1fr; gap:6px 18px; font-size:.82rem; }
+    .ctrl-key { font-family:'Share Tech Mono',monospace; background:var(--bg2); border:1px solid var(--border); border-radius:3px; padding:2px 8px; color:var(--accent); white-space:nowrap; display:inline-block; }
+    .ctrl-desc { color:var(--text-dim); align-self:center; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🏖️</div>
+  <div>
+    <h1>Sandspiel</h1>
+    <div class="subtitle">// Generative Art · Singleplayer · Static Files (Rust/WASM) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A falling-sand physics simulation running entirely in the browser via WebAssembly. Draw with sand, water, fire, plant, and dozens of other elements and watch emergent reactions unfold. Originally written in Rust and compiled to WASM by Max Bittker.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup',this)">🚀 Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview',this)">🕹️ Overview</button>
+  <button class="subtab-btn" onclick="switchTab('source',this)">📦 Source</button>
+</div>
+
+<!-- SETUP -->
+<div class="subtab-pane active" id="pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Sandspiel loads correctly in the Browser Games hub behind Authentik.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🏖️ V1 Goal: Sandspiel accessible at <code>games.<span data-cfg="domain"></span>/sandspiel/</code> via Tailscale, gated by Authentik forward_auth, running fully client-side with no external network calls.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>Sandspiel requires a build step — it is written in Rust and compiled to WebAssembly. The built output is what gets served.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/maxbittker/sandspiel.git sandspiel</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Build required.</strong> The raw repo cannot be served directly. You need the compiled <code>dist/</code> or <code>build/</code> output. See Step 2.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Step 2 — Build</div>
+    <div class="card">
+      <p>Sandspiel uses Rust + wasm-pack. You need Rust and Node.js installed.</p>
+      <pre># Install wasm-pack if not already installed
+cargo install wasm-pack
+
+cd D:\Server\BrowserGames\sandspiel
+
+# Build the WASM module
+wasm-pack build --target web
+
+# Install JS deps and bundle
+npm install
+npm run build
+# Serve the www/ folder (or dist/ — check the repo's README for current output location)</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Alternatively, check the repo's Releases page on GitHub — a pre-built static version may be available and avoids the Rust toolchain requirement entirely.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in games.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "sandspiel",
+  "name":        "Sandspiel",
+  "icon":        "🏖️",
+  "description": "Falling sand physics simulation in WebAssembly.",
+  "folder":      "sandspiel/www",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["sandbox", "physics", "generative"]
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 4 — Access Control</div>
+    <div class="card">
+      <p>Sandspiel is served under the Browser Games hub. Access is restricted to <strong>Tailscale-enrolled devices only</strong> — the hub subdomain is not publicly reachable. Authentik <code>forward_auth</code> at the hub level gates all sub-paths including <code>/sandspiel/</code>.</p>
+      <p>No additional Caddy block or Authentik Application entry is needed for this game specifically. It inherits the hub's auth.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Sandspiel's WASM bundle is large (~5–15 MB). Ensure Caddy is not applying gzip to <code>.wasm</code> files incorrectly — <code>Content-Type: application/wasm</code> must be set for browsers to accept it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="subtab-pane" id="pane-overview">
+  <div class="v1-banner">✅ Sandspiel is a fully client-side WASM toy — after the initial page load, it makes zero network requests. All physics runs locally in the browser.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/sandspiel/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None (stateless)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Rust → WebAssembly + JavaScript canvas</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first page load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial — touch draws, but small UI</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Sandspiel is a falling-sand simulator — a genre of toy where you paint with different materials and watch them interact according to physical rules. Sand falls and piles, water flows and evaporates near fire, plant spreads and burns, fungus grows through moisture, and lava hardens into stone.</p>
+      <p>It was created by Max Bittker and is notable for being one of the first falling-sand toys built entirely in Rust compiled to WebAssembly, making it genuinely fast compared to JavaScript-based equivalents. The physics simulation runs at 60fps in modern browsers.</p>
+      <p>There is no goal and no way to lose. It is a creative sandbox — you paint, experiment, and see what happens. Some people build elaborate contraptions; others just enjoy watching fire spread through a field of plants.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Select an element from the palette on the right (sand, water, fire, plant, wall, etc.)</li>
+        <li>Click and drag on the canvas to place that element</li>
+        <li>Watch elements interact — fire burns plant, water extinguishes fire, sand piles up</li>
+        <li>Experiment with combinations: lava + water = stone; fire + plant = spread of flame</li>
+        <li>Use the brush size slider to place large or fine amounts</li>
+        <li>The canvas is finite — elements that fall off the bottom disappear</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click + Drag</span>    <span class="ctrl-desc">Place selected element on canvas</span>
+        <span class="ctrl-key">Right Click</span>     <span class="ctrl-desc">Erase / place empty</span>
+        <span class="ctrl-key">Scroll Wheel</span>    <span class="ctrl-desc">Adjust brush size</span>
+        <span class="ctrl-key">Palette</span>         <span class="ctrl-desc">Select active element from the sidebar</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧪 Element Reference</div>
+    <div class="card">
+      <table>
+        <tr><th>Element</th><th>Behaviour</th></tr>
+        <tr><td>🏖️ Sand</td><td>Falls, piles on surfaces and other sand. Displaced by water flowing beneath it.</td></tr>
+        <tr><td>💧 Water</td><td>Flows laterally and downward. Evaporates near fire. Fills enclosed spaces.</td></tr>
+        <tr><td>🔥 Fire</td><td>Spreads to flammable materials (plant, wood, oil). Burns out over time.</td></tr>
+        <tr><td>🌿 Plant</td><td>Grows when near water. Burns when near fire. Static once dry.</td></tr>
+        <tr><td>🌋 Lava</td><td>Flows slowly. Hardens into stone on contact with water. Sets fire to flammables.</td></tr>
+        <tr><td>⬛ Wall</td><td>Solid, immovable. Useful for building enclosures and channels.</td></tr>
+        <tr><td>🍄 Fungus</td><td>Spreads through moisture. Will consume plant and other organic materials.</td></tr>
+        <tr><td>💨 Gas</td><td>Rises and disperses. Ignites explosively near fire.</td></tr>
+      </table>
+      <p style="margin-top:12px;font-size:.8rem;color:var(--text-dim)">The full element list is in the in-game palette. The above are the most commonly used.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Browser support</td><td>Requires WebAssembly support. All modern browsers (Chrome, Firefox, Edge, Safari 14+) work. Very old browsers will not.</td></tr>
+        <tr><td>Mobile</td><td>Touch input works for drawing. The element palette is small on phone screens — tablet or desktop recommended.</td></tr>
+        <tr><td>Performance</td><td>Runs well on mid-range hardware. Filling the entire canvas with active elements (fire spreading through dense plant) may cause minor frame drops on older machines.</td></tr>
+        <tr><td>No save</td><td>Closing or refreshing the tab clears the canvas. There is no save/load feature.</td></tr>
+        <tr><td>WASM load time</td><td>First load downloads ~5–15 MB of WASM. Subsequent loads use the browser cache — effectively instant.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCE -->
+<div class="subtab-pane" id="pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/maxbittker/sandspiel" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — maxbittker/sandspiel</div>
+          <div class="source-link-desc">Original repository by Max Bittker. Rust source, WASM build pipeline, and issue tracker.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://sandspiel.club" target="_blank">
+        <div class="source-link-icon">🌐</div>
+        <div>
+          <div class="source-link-name">sandspiel.club — Live original</div>
+          <div class="source-link-desc">The public hosted version. Our copy is self-hosted for privacy and offline availability.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Version in use</td><td>Latest main branch at time of clone — check <code>git log -1</code> in the folder</td></tr>
+        <tr><td style="color:var(--text-dim)">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\sandspiel\</code> then rebuild</td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Mostly stable — the public site runs independently; the repo receives occasional updates</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p>MIT License — free to self-host and use. No modifications made to the source for this server; served as built output only.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(id,btn){document.querySelectorAll('.subtab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');btn.classList.add('active');}
+  const STORAGE_KEY='browsergame_sandspiel_setup_complete';
+  let isComplete=localStorage.getItem(STORAGE_KEY)==='true';
+  function renderComplete(){const bar=document.getElementById('setup-complete-bar');const cb=document.getElementById('setup-checkbox');const sub=document.getElementById('complete-sub');const ov=document.querySelector('[onclick*="overview"]');if(isComplete){bar.classList.add('done');cb.textContent='✓';sub.textContent='✅ Setup complete — Overview is now the default tab';ov.style.fontWeight='700';ov.style.color='var(--accent3)';}else{bar.classList.remove('done');cb.textContent='';sub.textContent='Mark as done → activates Overview tab';ov.style.fontWeight='';ov.style.color='';}}
+  function toggleComplete(){isComplete=!isComplete;localStorage.setItem(STORAGE_KEY,isComplete);renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}}
+  window.addEventListener('DOMContentLoaded',()=>{renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}});
+</script>
+</body>
+</html>

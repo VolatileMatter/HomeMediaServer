@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Particle Life</title>
+  <link rel="stylesheet" href="../../shared.css">
+  <script src="../../config.js"></script>
+  <style>
+    .subtab-nav { display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .subtab-btn { font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; padding:9px 18px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text-dim); cursor:pointer; transition:all .16s; margin-bottom:-1px; white-space:nowrap; }
+    .subtab-btn:hover { color:var(--text); border-bottom-color:rgba(200,168,75,.35); }
+    .subtab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .subtab-pane { display:none; }
+    .subtab-pane.active { display:block; }
+    .setup-complete-bar { display:flex; align-items:center; gap:12px; background:rgba(76,175,125,.07); border:1px solid rgba(76,175,125,.25); border-radius:4px; padding:12px 18px; margin-bottom:24px; cursor:pointer; transition:background .2s; user-select:none; }
+    .setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background:rgba(76,175,125,.15); border-color:rgba(76,175,125,.5); }
+    .setup-checkbox { width:20px; height:20px; border:2px solid rgba(76,175,125,.6); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:.9rem; color:#4caf7d; flex-shrink:0; }
+    .setup-complete-label { font-weight:700; font-size:.85rem; color:var(--text-bright); }
+    .setup-complete-sub { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .source-link { display:flex; align-items:center; gap:14px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:14px 18px; text-decoration:none; transition:border-color .15s; margin-bottom:10px; }
+    .source-link:hover { border-color:var(--accent); }
+    .source-link-icon { font-size:1.5rem; flex-shrink:0; }
+    .source-link-name { font-family:'Cinzel',serif; font-size:.88rem; color:var(--accent); }
+    .source-link-desc { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .controls-grid { display:grid; grid-template-columns:auto 1fr; gap:6px 18px; font-size:.82rem; }
+    .ctrl-key { font-family:'Share Tech Mono',monospace; background:var(--bg2); border:1px solid var(--border); border-radius:3px; padding:2px 8px; color:var(--accent); white-space:nowrap; display:inline-block; }
+    .ctrl-desc { color:var(--text-dim); align-self:center; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔮</div>
+  <div>
+    <h1>Particle Life</h1>
+    <div class="subtitle">// Generative Art · Singleplayer · Static Files (HTML/JS) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">An emergent life simulation where coloured particles attract and repel each other according to a configurable rule matrix. Simple rules produce surprisingly complex, lifelike behaviour — flocking, clustering, oscillation, and predator-prey dynamics emerge spontaneously. Created by Hunar Ahmad.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup',this)">🚀 Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview',this)">🕹️ Overview</button>
+  <button class="subtab-btn" onclick="switchTab('source',this)">📦 Source</button>
+</div>
+
+<!-- SETUP -->
+<div class="subtab-pane active" id="pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Particle Life loads correctly in the Browser Games hub behind Authentik.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔮 V1 Goal: Particle Life accessible at <code>games.<span data-cfg="domain"></span>/particle-life/</code> via Tailscale, gated by Authentik forward_auth, running fully client-side.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>Particle Life is pure HTML + JavaScript — no build step required. Clone and serve directly.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/hunar4321/particle-life.git particle-life</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">The entry point is <code>index.html</code> at the repo root. No build step, no dependencies to install. Serve the folder as-is.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in games.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "particle-life",
+  "name":        "Particle Life",
+  "icon":        "🔮",
+  "description": "Emergent life simulation — particles attract and repel to create complex behaviour.",
+  "folder":      "particle-life",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["simulation", "emergent", "generative"]
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. No additional Caddy block or Authentik Application entry is needed — it inherits the hub's <code>forward_auth</code>.</p>
+      <p>The simulation is fully client-side after load. No data leaves the browser.</p>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="subtab-pane" id="pane-overview">
+  <div class="v1-banner">✅ Particle Life is pure HTML/JS — zero build step, zero external calls. After the initial page load it is entirely offline-capable.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/particle-life/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None (stateless)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Pure HTML + JavaScript canvas</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Viewable, but sliders are fiddly on touch</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Particle Life is an implementation of the "particle life" algorithm, a type of artificial life simulation. Hundreds or thousands of coloured particles move around a canvas, each attracted to or repelled by particles of other colours according to a matrix of rules you control. Despite the simplicity of the rules, the resulting behaviour is remarkably organic — particles form stable clusters, hunting chains, and pulsing blobs reminiscent of microscopic life.</p>
+      <p>The original concept draws from work on artificial chemistry and emergence. Hunar Ahmad's browser implementation makes the rule matrix directly editable via sliders, letting you sculpt the emergent behaviour in real-time. Change a single attraction value and the entire ecosystem responds.</p>
+      <p>There is no goal. It is a scientific toy — part simulation, part art, part experiment. Watching a random configuration spontaneously self-organise into stable, repeating patterns is genuinely mesmerising.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>The simulation starts automatically with a random rule matrix</li>
+        <li>Use the sliders to set attraction/repulsion between each pair of particle colours (positive = attract, negative = repel)</li>
+        <li>Hit <strong>Randomise</strong> to get a new rule matrix and watch behaviour shift</li>
+        <li>Adjust particle count and simulation speed with the top controls</li>
+        <li>Look for stable configurations — some rule sets produce remarkably persistent structures</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Sliders</span>         <span class="ctrl-desc">Set attraction/repulsion between colour pairs</span>
+        <span class="ctrl-key">Randomise</span>       <span class="ctrl-desc">Generate a new random rule matrix</span>
+        <span class="ctrl-key">Reset</span>           <span class="ctrl-desc">Scatter particles to random positions</span>
+        <span class="ctrl-key">Count slider</span>    <span class="ctrl-desc">Adjust total particle count (more = slower)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Performance</td><td>Particle count is CPU-bound. 500 particles runs smoothly on any modern machine; 2000+ may slow older hardware. The simulation is single-threaded JavaScript.</td></tr>
+        <tr><td>Mobile</td><td>The simulation renders fine on mobile, but the control sliders are small and difficult to use on a phone. Tablet or desktop recommended.</td></tr>
+        <tr><td>No save</td><td>There is no way to save a rule configuration. If you find a pattern you love, note down the slider values manually.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCE -->
+<div class="subtab-pane" id="pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/hunar4321/particle-life" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — hunar4321/particle-life</div>
+          <div class="source-link-desc">Original repository by Hunar Ahmad. HTML/JS source, no build step required.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://www.youtube.com/watch?v=Z_zmZ23grXE" target="_blank">
+        <div class="source-link-icon">📺</div>
+        <div>
+          <div class="source-link-name">YouTube — Particle Life explainer by Hunar Ahmad</div>
+          <div class="source-link-desc">The creator's video introducing the simulation and explaining the algorithm. Good context for understanding what you're looking at.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\particle-life\</code> — no rebuild needed</td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Mostly stable; the browser version is mature</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>MIT License. No modifications made to source for this server.</p></div>
+  </div>
+</div>
+
+<script>
+  function switchTab(id,btn){document.querySelectorAll('.subtab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');btn.classList.add('active');}
+  const STORAGE_KEY='browsergame_particlelife_setup_complete';
+  let isComplete=localStorage.getItem(STORAGE_KEY)==='true';
+  function renderComplete(){const bar=document.getElementById('setup-complete-bar');const cb=document.getElementById('setup-checkbox');const sub=document.getElementById('complete-sub');const ov=document.querySelector('[onclick*="overview"]');if(isComplete){bar.classList.add('done');cb.textContent='✓';sub.textContent='✅ Setup complete — Overview is now the default tab';ov.style.fontWeight='700';ov.style.color='var(--accent3)';}else{bar.classList.remove('done');cb.textContent='';sub.textContent='Mark as done → activates Overview tab';ov.style.fontWeight='';ov.style.color='';}}
+  function toggleComplete(){isComplete=!isComplete;localStorage.setItem(STORAGE_KEY,isComplete);renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}}
+  window.addEventListener('DOMContentLoaded',()=>{renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}});
+</script>
+</body>
+</html>

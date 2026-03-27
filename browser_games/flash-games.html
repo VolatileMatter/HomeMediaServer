@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flash Arcade</title>
+  <link rel="stylesheet" href="../../shared.css">
+  <script src="../../config.js"></script>
+  <style>
+    .subtab-nav { display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .subtab-btn { font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; padding:9px 18px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text-dim); cursor:pointer; transition:all .16s; margin-bottom:-1px; white-space:nowrap; }
+    .subtab-btn:hover { color:var(--text); border-bottom-color:rgba(200,168,75,.35); }
+    .subtab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .subtab-pane { display:none; }
+    .subtab-pane.active { display:block; }
+    .setup-complete-bar { display:flex; align-items:center; gap:12px; background:rgba(76,175,125,.07); border:1px solid rgba(76,175,125,.25); border-radius:4px; padding:12px 18px; margin-bottom:24px; cursor:pointer; transition:background .2s; user-select:none; }
+    .setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background:rgba(76,175,125,.15); border-color:rgba(76,175,125,.5); }
+    .setup-checkbox { width:20px; height:20px; border:2px solid rgba(76,175,125,.6); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:.9rem; color:#4caf7d; flex-shrink:0; }
+    .setup-complete-label { font-weight:700; font-size:.85rem; color:var(--text-bright); }
+    .setup-complete-sub { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .source-link { display:flex; align-items:center; gap:14px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:14px 18px; text-decoration:none; transition:border-color .15s; margin-bottom:10px; }
+    .source-link:hover { border-color:var(--accent); }
+    .source-link-icon { font-size:1.5rem; flex-shrink:0; }
+    .source-link-name { font-family:'Cinzel',serif; font-size:.88rem; color:var(--accent); }
+    .source-link-desc { font-size:.75rem; color:var(--text-dim); margin-top:2px; }
+    .controls-grid { display:grid; grid-template-columns:auto 1fr; gap:6px 18px; font-size:.82rem; }
+    .ctrl-key { font-family:'Share Tech Mono',monospace; background:var(--bg2); border:1px solid var(--border); border-radius:3px; padding:2px 8px; color:var(--accent); white-space:nowrap; display:inline-block; }
+    .ctrl-desc { color:var(--text-dim); align-self:center; }
+    /* Ruffle badge */
+    .ruffle-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      font-family:'Share Tech Mono',monospace; font-size:.62rem;
+      letter-spacing:.08em; padding:4px 12px;
+      background:rgba(200,168,75,.07); border:1px solid rgba(200,168,75,.3);
+      border-radius:3px; color:var(--accent);
+    }
+    /* Saves note */
+    .saves-path {
+      font-family:'Share Tech Mono',monospace; font-size:.78rem;
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:3px; padding:8px 14px; color:var(--text);
+      margin:10px 0;
+    }
+    .saves-path span { color:var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🕹️</div>
+  <div>
+    <h1>Flash Arcade</h1>
+    <div class="subtitle">// Browser Game Collection · Singleplayer · Ruffle WASM · Per-User .sol Saves · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A private arcade of preserved Flash games, running in the browser via Ruffle — a WebAssembly-based Flash Player emulator. No Flash plugin required. Games load from a shared library; save files are stored per-user so your progress is always yours. The old internet, kept alive.</p>
+  </div>
+</div>
+
+<div class="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup',this)">🚀 Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview',this)">🕹️ Overview</button>
+  <button class="subtab-btn" onclick="switchTab('source',this)">📦 Source</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 1 — SETUP
+     (See also: flash-arcade.html in the Grimoire for the
+     full service-level setup with Docker, nginx config, etc.)
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the Flash Arcade loads, games run via Ruffle, and per-user saves are verified.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">
+    🕹️ V1 Goal: Flash Arcade accessible at <code>flash.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, at least 5 games loading, per-user .sol saves confirmed working.
+    <br><br>
+    <strong>Full setup lives in the Grimoire:</strong> The Docker/nginx configuration, Ruffle installation, library.json format, and MIME type fixes are all documented in <code>flash-arcade.html</code>. This page covers the hub integration and player-facing documentation.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Hub Registration</div>
+    <div class="card">
+      <p>The Flash Arcade is pre-registered in <code>browser_games/index.json</code> as an <code>externalHub</code> entry. When a user clicks Play from the Browser Games lobby, it opens the Flash Arcade at <code>flash.<span data-cfg="domain"></span></code> in a new tab rather than loading inside an iframe.</p>
+      <p>This is because the Flash Arcade is its own nginx + Docker service on a separate subdomain — it cannot be served as a sub-path of the Browser Games hub without reconfiguring the arcade's own routing.</p>
+      <pre>// In browser_games/index.json — already present:
+{
+  "id":          "flash-games",
+  "externalHub": true,
+  "externalUrl": "/flash/"   // ← update to the actual subdomain URL
+}</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Update <code>externalUrl</code> in <code>index.json</code> to the full Tailscale-accessible URL of the Flash Arcade: <code>https://flash.<span data-cfg="domain"></span></code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Access Control</div>
+    <div class="card">
+      <p>The Flash Arcade subdomain (<code>flash.<span data-cfg="domain"></span></code>) is gated by Authentik <code>forward_auth</code> at the Caddy reverse proxy level. Access requires:</p>
+      <ul style="margin:8px 0 0 18px;font-size:.84rem;line-height:2;color:var(--text)">
+        <li><strong>Tailscale enrollment</strong> — the subdomain is only reachable from inside the Tailnet</li>
+        <li><strong>Authentik SSO session</strong> — Caddy <code>forward_auth</code> checks for a valid session before allowing access</li>
+      </ul>
+      <p style="margin-top:10px">The <code>X-authentik-username</code> header is injected by Caddy and used by the arcade to route saves to the correct per-user directory. No separate login screen is shown — if you're on Tailscale and logged into Authentik, you go straight in.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Per-User Save Setup</div>
+    <div class="card">
+      <p>Save files (.sol) are stored per-user. When a new user is onboarded to the server, create their saves folder:</p>
+      <pre># Run on the server (in WSL2 or PowerShell, where the arcade files live)
+mkdir -p userdata/{NAME}/arcade/saves
+# {NAME} must exactly match their Authentik username</pre>
+      <div class="callout callout-dragon">
+        <div class="callout-icon">🐉</div>
+        <div class="callout-body"><strong>Username must match exactly.</strong> Caddy injects <code>X-authentik-username</code> verbatim. If the folder name differs from the Authentik username (capitalisation, spaces), saves will fail silently or go to the wrong user.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 Adding Games to the Library</div>
+    <div class="card">
+      <p>Drop a <code>.swf</code> file into the shared library and register it in <code>library.json</code>:</p>
+      <pre>userdata/common/arcade/library/
+  mygame.swf
+  library.json    ← add an entry here
+
+// library.json entry format:
+{
+  "id":        "mygame",
+  "file":      "mygame.swf",
+  "title":     "My Game",
+  "icon":      "🎮",
+  "thumbnail": "mygame.png",    // optional
+  "genre":     "Arcade",
+  "year":      2006,
+  "author":    "Author Name",
+  "notes":     "Original source: Newgrounds."
+}</pre>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+  <div class="v1-banner">✅ The Flash Arcade runs all games via Ruffle WASM — no Flash plugin required. Games load in any modern browser. Per-user saves mean your progress is never shared with or overwritten by other players.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>flash.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1 per session (saves are isolated)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Per-user .sol files (server-side)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Ruffle WebAssembly Flash emulator</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>Per-game (in-game only, not aggregated)</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>After first WASM load (files cache)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial — depends on game controls</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>The Flash Arcade is a self-hosted preservation effort. Flash Player was officially discontinued by Adobe in January 2021, making billions of browser games, animations, and interactive toys from the early internet era inaccessible. Ruffle — an open-source Flash Player re-implementation written in Rust and compiled to WebAssembly — allows Flash content to run again without any plugins, in any modern browser.</p>
+      <p>This server's arcade collects a curated set of classic Flash games from the era of Newgrounds, Kongregate, and Flash game portals of the mid-2000s to mid-2010s. Each game is preserved locally as a <code>.swf</code> file, served through a private nginx container, and played via Ruffle.</p>
+      <p>Save files (<code>.sol</code> files — Flash's native save format) are stored server-side, separately per user. This means multiple people can share the same game library but maintain completely independent progress and high scores within each game.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>Ruffle compatibility:</strong> Not every Flash game works perfectly in Ruffle — it is an ongoing reverse-engineering project. ActionScript 2 games (most games from before 2008) have very good compatibility. ActionScript 3 games (2008+) have partial support. If a game doesn't load or behaves incorrectly, check the Ruffle compatibility tracker.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Use</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Navigate to <code>flash.<span data-cfg="domain"></span></code> — you'll be taken straight to the arcade lobby</li>
+        <li>Browse the game library and click a game to launch it</li>
+        <li>Ruffle loads the <code>.swf</code> file and runs it in the browser — no plugin, no installer</li>
+        <li>Save files are automatically stored under your username — progress persists across sessions</li>
+        <li>The game runs in a dedicated Ruffle player area; use your browser's Back button or the arcade UI to return to the library</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Mouse</span>            <span class="ctrl-desc">Primary input for most Flash games</span>
+        <span class="ctrl-key">Arrow Keys</span>       <span class="ctrl-desc">Movement in most platformers and shooters</span>
+        <span class="ctrl-key">Z / X / C</span>        <span class="ctrl-desc">Common action keys (varies per game)</span>
+        <span class="ctrl-key">Esc</span>              <span class="ctrl-desc">Back to the arcade library</span>
+      </div>
+      <p style="margin-top:12px;font-size:.8rem;color:var(--text-dim)">Controls vary entirely per game — most Flash games display their own control instructions on a title or help screen.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Your Saves</div>
+    <div class="card">
+      <p>Save files are stored on the server at:</p>
+      <div class="saves-path">userdata/<span>YOUR_USERNAME</span>/arcade/saves/</div>
+      <p>Your saves are completely isolated from other users. Two people can play the same game simultaneously and their saves never collide. If you want to check or back up a specific save, the files are standard <code>.sol</code> format (Local Shared Objects — Flash's native save format) and can be read with any SharedObject editor.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Ruffle compatibility</td><td>Some Flash games use advanced ActionScript 3 features that Ruffle doesn't fully support yet. Games from before ~2008 work best. If a game doesn't load, it's usually a Ruffle compatibility issue, not a server issue.</td></tr>
+        <tr><td>Sound in some games</td><td>Audio playback in Ruffle has improved significantly but some games may have missing or distorted sound — known Ruffle limitation.</td></tr>
+        <tr><td>Online features</td><td>Any game that required connecting to external servers (online leaderboards, multiplayer, DRM checks) will not work. Single-player offline content works fine.</td></tr>
+        <tr><td>Mobile</td><td>Flash games were designed for mouse and keyboard. Many are unplayable on touch without a physical keyboard. Simple point-and-click games work fine on touch.</td></tr>
+        <tr><td>External URLs</td><td>The Flash Arcade opens in a new tab rather than embedded in the Browser Games hub iframe. This is because it runs on its own subdomain and Docker service.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 3 — SOURCE
+═══════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source — Ruffle</div>
+    <div class="card">
+      <a class="source-link" href="https://ruffle.rs" target="_blank">
+        <div class="source-link-icon">🦀</div>
+        <div>
+          <div class="source-link-name">ruffle.rs — Official Ruffle site</div>
+          <div class="source-link-desc">Download the latest self-hosted Ruffle build. Check here for updates — compatibility improves with every release.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://github.com/ruffle-rs/ruffle" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — ruffle-rs/ruffle</div>
+          <div class="source-link-desc">Open-source repository. Issue tracker for compatibility problems, release notes, and the roadmap for ActionScript 3 support.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📦 Game Preservation Sources</div>
+    <div class="card">
+      <a class="source-link" href="https://www.newgrounds.com" target="_blank">
+        <div class="source-link-icon">🎨</div>
+        <div>
+          <div class="source-link-name">Newgrounds</div>
+          <div class="source-link-desc">The primary home of Flash games for two decades. Still online and still hosting .swf files for most classic games. Download originals here when possible.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://flashpoint.bluemaxima.org" target="_blank">
+        <div class="source-link-icon">⚡</div>
+        <div>
+          <div class="source-link-name">BlueMaxima's Flashpoint</div>
+          <div class="source-link-desc">The largest Flash game preservation project — 100,000+ games archived. Good source for games that have been removed from their original hosts.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://archive.org/details/softwarelibrary_flash" target="_blank">
+        <div class="source-link-icon">📦</div>
+        <div>
+          <div class="source-link-name">Internet Archive — Flash Software Library</div>
+          <div class="source-link-desc">Massive archive of Flash games and animations. Many are playable directly via the Archive's own Ruffle integration.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:150px">Ruffle version</td><td>Check <code>userdata/common/arcade/bin/</code> — look at the release date in the filenames</td></tr>
+        <tr><td style="color:var(--text-dim)">Update Ruffle</td><td>Download new self-hosted build from ruffle.rs, replace files in <code>bin/</code>. No container restart needed.</td></tr>
+        <tr><td style="color:var(--text-dim)">Update frequency</td><td>Monthly — Ruffle releases frequently improve compatibility. Worth updating regularly.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License &amp; Preservation Note</div>
+    <div class="card">
+      <p>Ruffle is open-source under the MIT and Apache 2.0 licenses. The game library consists of individually sourced <code>.swf</code> files. Where possible, games are sourced directly from Newgrounds or other sites where the original creator still hosts them.</p>
+      <p>Flash game preservation occupies a legal grey area similar to ROM preservation — the original creators often cannot be contacted (many studios have closed), the content is otherwise inaccessible, and the cultural value of preserving these works is significant. This server's arcade is strictly private, accessible only to enrolled friends and family, with no commercial use.</p>
+      <p>If a game creator contacts us with a takedown request, it will be honoured immediately.</p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function switchTab(id,btn){document.querySelectorAll('.subtab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');btn.classList.add('active');}
+  const STORAGE_KEY='browsergame_flasharcade_setup_complete';
+  let isComplete=localStorage.getItem(STORAGE_KEY)==='true';
+  function renderComplete(){const bar=document.getElementById('setup-complete-bar');const cb=document.getElementById('setup-checkbox');const sub=document.getElementById('complete-sub');const ov=document.querySelector('[onclick*="overview"]');if(isComplete){bar.classList.add('done');cb.textContent='✓';sub.textContent='✅ Setup complete — Overview is now the default tab';ov.style.fontWeight='700';ov.style.color='var(--accent3)';}else{bar.classList.remove('done');cb.textContent='';sub.textContent='Mark as done → activates Overview tab';ov.style.fontWeight='';ov.style.color='';}}
+  function toggleComplete(){isComplete=!isComplete;localStorage.setItem(STORAGE_KEY,isComplete);renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}}
+  window.addEventListener('DOMContentLoaded',()=>{renderComplete();if(isComplete){const ov=document.querySelector('[onclick*="overview"]');switchTab('overview',ov);}});
+</script>
+</body>
+</html>

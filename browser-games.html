@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Browser Games</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    /* ══════════════════════════════════════════════════════
+       RESET & ROOT
+    ══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Raleway', sans-serif;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       TOP BAR  (mirrors franchise-viewer return bar)
+    ══════════════════════════════════════════════════════ */
+    .return-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      height: 38px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .return-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .return-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .return-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .return-crumb {
+      font-family: 'Cinzel', serif;
+      font-size: .78rem;
+      color: var(--accent);
+    }
+    .return-bar-right {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .nav-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .06em;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .nav-btn:disabled { opacity: .3; cursor: default; }
+
+    /* ── Mode toggle (lobby vs game) ── */
+    .mode-pill {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all .15s;
+      background: transparent;
+      color: var(--text-dim);
+    }
+    .mode-pill.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.08); }
+
+    /* ══════════════════════════════════════════════════════
+       BODY LAYOUT — sidebar + content
+    ══════════════════════════════════════════════════════ */
+    .viewer-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════════════════════ */
+    .sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+      transition: width .2s;
+    }
+    .sidebar.collapsed { width: 0; }
+
+    .sidebar-header {
+      padding: 12px 12px 8px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-title {
+      font-family: 'Cinzel', serif;
+      font-size: .72rem;
+      color: var(--accent);
+      letter-spacing: .1em;
+    }
+    .sidebar-subtitle {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .55rem;
+      color: var(--text-dim);
+      margin-top: 3px;
+      letter-spacing: .06em;
+    }
+
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      padding: 6px 0 16px;
+    }
+
+    /* Category divider inside sidebar */
+    .sb-section {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .52rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: .5;
+      padding: 10px 12px 4px;
+    }
+
+    .bg-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 5px 12px;
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      color: var(--text-dim);
+      font-family: 'Raleway', sans-serif;
+      font-size: .71rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all .12s;
+    }
+    .bg-nav-item:hover { background: rgba(255,255,255,.03); color: var(--text); border-left-color: var(--border); }
+    .bg-nav-item.active { background: rgba(200,168,75,.10); color: var(--accent); border-left-color: var(--accent); font-weight: 700; }
+    .bg-nav-icon { font-size: .9rem; width: 18px; text-align: center; flex-shrink: 0; }
+
+    /* Lobby special button */
+    .bg-nav-lobby {
+      margin: 8px 8px 2px;
+      padding: 7px 10px;
+      background: rgba(200,168,75,.07);
+      border: 1px solid rgba(200,168,75,.25);
+      border-radius: 3px;
+      color: var(--accent);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: calc(100% - 16px);
+      text-align: center;
+      transition: all .15s;
+    }
+    .bg-nav-lobby:hover { background: rgba(200,168,75,.14); border-color: rgba(200,168,75,.5); }
+    .bg-nav-lobby.active { background: rgba(200,168,75,.18); border-color: var(--accent); font-weight: 700; }
+
+    /* ══════════════════════════════════════════════════════
+       COLLAPSE BUTTON
+    ══════════════════════════════════════════════════════ */
+    .collapse-btn {
+      position: absolute;
+      top: 48px;
+      left: 200px;
+      z-index: 20;
+      width: 18px;
+      height: 40px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 3px 3px 0;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: .6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: left .2s, color .15s;
+    }
+    .collapse-btn:hover { color: var(--accent); }
+    .collapse-btn.cs { left: 0; border-left: 1px solid var(--border); border-radius: 0 3px 3px 0; }
+
+    /* ══════════════════════════════════════════════════════
+       CONTENT AREA — lobby or game iframe
+    ══════════════════════════════════════════════════════ */
+    .viewer-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Loading overlay */
+    .load-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 5;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      color: var(--text-dim);
+    }
+    .load-overlay.hidden { display: none; }
+    .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Game iframe */
+    #game-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: var(--bg);
+      display: block;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       LOBBY VIEW — card grid shown when no game selected
+    ══════════════════════════════════════════════════════ */
+    #lobby-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: none;  /* shown by JS when in lobby mode */
+    }
+    #lobby-view.visible { display: block; }
+
+    .lobby-header {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+    .lobby-icon { font-size: 2.4rem; }
+    .lobby-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .lobby-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .1em;
+      color: var(--text-dim);
+      margin-top: 5px;
+    }
+    .lobby-count {
+      margin-left: auto;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      color: var(--text-dim);
+    }
+
+    /* Filter bar */
+    .lobby-filters {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .lf-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .lf-btn:hover { border-color: rgba(200,168,75,.4); color: var(--text); }
+    .lf-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.07); }
+    .lf-search {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .68rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      padding: 5px 12px;
+      outline: none;
+      width: 200px;
+      margin-left: auto;
+    }
+    .lf-search:focus { border-color: var(--accent); }
+
+    /* Section header in lobby */
+    .lobby-section-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: .55;
+      margin: 18px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Game cards */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .game-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .game-card:hover { border-color: var(--accent); background: rgba(200,168,75,.04); }
+    .game-card.active-card { border-color: var(--accent); background: rgba(200,168,75,.09); }
+    .gc-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .gc-name {
+      font-family: 'Cinzel', serif;
+      font-size: .8rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+    .gc-desc {
+      font-size: .72rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .gc-meta {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .gc-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .55rem;
+      letter-spacing: .06em;
+      padding: 2px 7px;
+      border-radius: 2px;
+      border: 1px solid rgba(200,168,75,.25);
+      color: var(--text-dim);
+      background: rgba(200,168,75,.04);
+    }
+    .gc-launch {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 6px;
+      background: rgba(200,168,75,.08);
+      border: 1px solid rgba(200,168,75,.3);
+      border-radius: 3px;
+      color: var(--accent);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .gc-launch:hover { background: rgba(200,168,75,.18); border-color: var(--accent); }
+
+    /* Wiki link */
+    .gc-wiki {
+      display: block;
+      margin-top: 5px;
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .56rem;
+      letter-spacing: .06em;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: color .12s;
+    }
+    .gc-wiki:hover { color: var(--accent); }
+
+    /* "no results" */
+    .no-results {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      color: var(--text-dim);
+      padding: 30px 0;
+      text-align: center;
+      grid-column: 1 / -1;
+    }
+
+    /* ── Stats strip ── */
+    .lobby-stats {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .lstat {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      color: var(--text-dim);
+    }
+    .lstat strong {
+      font-family: 'Cinzel', serif;
+      font-size: .9rem;
+      color: var(--accent);
+      margin-right: 4px;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       IFRAME WRAPPER (shown when a game is active)
+    ══════════════════════════════════════════════════════ */
+    #frame-wrap {
+      flex: 1;
+      display: none;
+      position: relative;
+    }
+    #frame-wrap.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ── Top bar ── -->
+<div class="return-bar">
+  <button class="return-btn" onclick="goBack()">◀ Back</button>
+  <span class="return-label">Browser Games</span>
+  <span style="color:var(--text-dim);font-size:.7rem">›</span>
+  <span class="return-crumb" id="crumb-name">Lobby</span>
+
+  <div class="return-bar-right">
+    <button class="mode-pill active" id="pill-lobby"  onclick="showLobby()">🏠 Lobby</button>
+    <button class="mode-pill"        id="pill-game"   id="pill-game" onclick="showGame(currentGameId)" disabled>▶ Play</button>
+    <button class="nav-btn" id="btn-prev" onclick="navigateTo(currentIndex - 1)" disabled>◀ Prev</button>
+    <button class="nav-btn" id="btn-next" onclick="navigateTo(currentIndex + 1)" disabled>Next ▶</button>
+  </div>
+</div>
+
+<!-- ── Body ── -->
+<div class="viewer-body">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">🕹️ Game Library</div>
+      <div class="sidebar-subtitle">Tailscale + Authentik only</div>
+    </div>
+    <div class="sidebar-scroll" id="sidebar-scroll">
+      <button class="bg-nav-lobby active" id="sb-lobby" onclick="showLobby()">🏠 Lobby</button>
+      <div style="padding:4px 8px 0;font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--text-dim);opacity:.4;letter-spacing:.1em;text-transform:uppercase">Loading…</div>
+    </div>
+  </nav>
+
+  <button class="collapse-btn" id="cbtn" onclick="toggleSidebar()">☰</button>
+
+  <div class="viewer-content">
+
+    <!-- Loading overlay -->
+    <div class="load-overlay hidden" id="load-overlay">
+      <div class="spinner"></div>
+      Loading game…
+    </div>
+
+    <!-- Lobby view -->
+    <div id="lobby-view" class="visible">
+
+      <div class="lobby-header">
+        <div class="lobby-icon">🕹️</div>
+        <div>
+          <div class="lobby-title">Browser Games</div>
+          <div class="lobby-sub">// Tailscale + Authentik required · All games run in your browser · No installs //</div>
+        </div>
+        <div class="lobby-count" id="lobby-count"></div>
+      </div>
+
+      <div class="lobby-stats" id="lobby-stats"></div>
+
+      <div class="lobby-filters">
+        <button class="lf-btn active" id="lf-all"        onclick="setFilter('all', this)">All</button>
+        <button class="lf-btn"        id="lf-generative" onclick="setFilter('generative', this)">🌀 Generative Art</button>
+        <button class="lf-btn"        id="lf-sandbox"    onclick="setFilter('sandbox', this)">🧪 Sandbox</button>
+        <button class="lf-btn"        id="lf-interactive" onclick="setFilter('interactive', this)">✋ Interactive</button>
+        <button class="lf-btn"        id="lf-relaxing"   onclick="setFilter('relaxing', this)">😌 Relaxing</button>
+        <button class="lf-btn"        id="lf-flash"      onclick="setFilter('flash', this)">⚡ Flash</button>
+        <input  class="lf-search" id="lf-search" placeholder="Search games…" oninput="renderLobby()">
+      </div>
+
+      <div id="lobby-grid-wrap"></div>
+
+    </div><!-- /lobby-view -->
+
+    <!-- Game iframe -->
+    <div id="frame-wrap">
+      <iframe id="game-frame" title="Browser Game" onload="onFrameLoad()"></iframe>
+    </div>
+
+  </div><!-- /viewer-content -->
+
+</div><!-- /viewer-body -->
+
+
+<script>
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let GAMES         = [];   // loaded from index.json
+let currentIndex  = -1;
+let currentGameId = null;
+let sidebarOpen   = localStorage.getItem('bg_sb') !== 'false';
+let activeFilter  = 'all';
+
+// ══════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════
+async function boot() {
+  applySidebar();
+
+  // Read ?id= from URL
+  const params    = new URLSearchParams(location.search);
+  const targetId  = params.get('id') || '';
+
+  try {
+    const r = await fetch('browser_games/index.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const manifest = await r.json();
+    GAMES = manifest.games || [];
+  } catch (e) {
+    document.getElementById('lobby-grid-wrap').innerHTML =
+      '<p style="font-family:\'Share Tech Mono\',monospace;font-size:.72rem;color:var(--danger);padding:20px">Could not load browser_games/index.json — ' + esc(e.message) + '</p>';
+    return;
+  }
+
+  renderSidebar();
+  renderLobby();
+
+  // Stats
+  const total = GAMES.length;
+  document.getElementById('lobby-count').textContent = total + ' game' + (total === 1 ? '' : 's');
+  document.getElementById('lobby-stats').innerHTML =
+    `<div class="lstat"><strong>${GAMES.filter(g=>g.category==='singleplayer').length}</strong>Singleplayer</div>` +
+    `<div class="lstat"><strong>${GAMES.filter(g=>g.category==='multiplayer').length}</strong>Multiplayer</div>` +
+    `<div class="lstat"><strong>${GAMES.filter(g=>g.highScores).length}</strong>High Scores</div>` +
+    `<div class="lstat"><strong>${GAMES.filter(g=>g.hasPage).length}</strong>Wiki Pages</div>`;
+
+  // Auto-navigate if URL has ?id=
+  if (targetId) {
+    const idx = GAMES.findIndex(g => g.id === targetId);
+    if (idx !== -1) navigateTo(idx);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  LOBBY RENDERING
+// ══════════════════════════════════════════════════════
+function setFilter(tag, btn) {
+  activeFilter = tag;
+  document.querySelectorAll('.lf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLobby();
+}
+
+function renderLobby() {
+  const query  = (document.getElementById('lf-search')?.value || '').toLowerCase();
+  const wrap   = document.getElementById('lobby-grid-wrap');
+
+  let filtered = GAMES.filter(g => {
+    const matchesFilter = activeFilter === 'all' || (g.tags || []).includes(activeFilter);
+    const matchesSearch = !query ||
+      g.name.toLowerCase().includes(query) ||
+      g.description.toLowerCase().includes(query) ||
+      (g.tags || []).some(t => t.includes(query));
+    return matchesFilter && matchesSearch;
+  });
+
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="game-grid"><div class="no-results">No games match that filter.</div></div>';
+    return;
+  }
+
+  // Split into SP and MP sections
+  const sp = filtered.filter(g => g.category !== 'multiplayer');
+  const mp = filtered.filter(g => g.category === 'multiplayer');
+
+  let html = '';
+
+  if (sp.length) {
+    html += '<div class="lobby-section-title">🎮 Singleplayer · Generative Art &amp; Toys</div>';
+    html += '<div class="game-grid">' + sp.map(gameCard).join('') + '</div>';
+  }
+  if (mp.length) {
+    html += '<div class="lobby-section-title">👥 Multiplayer</div>';
+    html += '<div class="game-grid">' + mp.map(gameCard).join('') + '</div>';
+  }
+
+  wrap.innerHTML = html;
+}
+
+function gameCard(g) {
+  const isActive = g.id === currentGameId;
+  const idx      = GAMES.indexOf(g);
+  const tags     = (g.tags || []).slice(0, 3).map(t => `<span class="gc-tag">${esc(t)}</span>`).join('');
+
+  return `
+    <div class="game-card ${isActive ? 'active-card' : ''}" id="gc-${g.id}">
+      <div class="gc-icon">${g.icon}</div>
+      <div class="gc-name">${esc(g.name)}</div>
+      <div class="gc-desc">${esc(g.description)}</div>
+      <div class="gc-meta">${tags}</div>
+      <button class="gc-launch" onclick="navigateTo(${idx}); showGame('${g.id}')">▶ Play</button>
+      ${g.hasPage ? `<span class="gc-wiki" onclick="navigateTo(${idx}); showWiki()">📖 Wiki / Setup</span>` : ''}
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function navigateTo(idx) {
+  if (idx < 0 || idx >= GAMES.length) return;
+  currentIndex  = idx;
+  currentGameId = GAMES[idx].id;
+  const g = GAMES[idx];
+
+  history.pushState({ gameId: g.id }, '', 'browser-games.html?id=' + g.id);
+  document.getElementById('crumb-name').textContent = g.name;
+  document.title = g.name + ' — Browser Games';
+
+  // Highlight sidebar
+  document.querySelectorAll('.bg-nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sb-lobby')?.classList.remove('active');
+  const btn = document.getElementById('sb-' + g.id);
+  if (btn) { btn.classList.add('active'); btn.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+
+  // Prev/Next
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === GAMES.length - 1;
+
+  // Enable play pill
+  const playPill = document.getElementById('pill-game');
+  playPill.disabled = false;
+  playPill.textContent = '▶ Play';
+}
+
+function showGame(id) {
+  if (!id) return;
+  const g   = GAMES.find(g => g.id === id);
+  if (!g) return;
+
+  // External hub (Flash Arcade)
+  if (g.externalHub && g.externalUrl) {
+    window.open(g.externalUrl, '_blank');
+    return;
+  }
+
+  if (!g.folder || !g.entry) {
+    alert('This game does not have a playable folder configured in index.json yet.');
+    return;
+  }
+
+  document.getElementById('load-overlay').classList.remove('hidden');
+  document.getElementById('lobby-view').classList.remove('visible');
+  document.getElementById('frame-wrap').classList.add('visible');
+
+  document.getElementById('pill-lobby').classList.remove('active');
+  document.getElementById('pill-game').classList.add('active');
+  document.getElementById('pill-game').textContent = '▶ Playing';
+
+  document.getElementById('game-frame').src = 'browser_games/' + g.folder + '/' + g.entry;
+
+  // Refresh lobby card highlight
+  document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active-card'));
+  const card = document.getElementById('gc-' + id);
+  if (card) card.classList.add('active-card');
+}
+
+function showWiki() {
+  if (currentIndex < 0) return;
+  const g = GAMES[currentIndex];
+
+  document.getElementById('load-overlay').classList.remove('hidden');
+  document.getElementById('lobby-view').classList.remove('visible');
+  document.getElementById('frame-wrap').classList.add('visible');
+
+  document.getElementById('pill-lobby').classList.remove('active');
+  document.getElementById('pill-game').classList.remove('active');
+
+  document.getElementById('game-frame').src = 'browser_games/' + g.id + '.html';
+}
+
+function showLobby() {
+  document.getElementById('lobby-view').classList.add('visible');
+  document.getElementById('frame-wrap').classList.remove('visible');
+  document.getElementById('game-frame').src = '';
+  document.getElementById('crumb-name').textContent = 'Lobby';
+
+  document.getElementById('pill-lobby').classList.add('active');
+  document.getElementById('pill-game').classList.remove('active');
+
+  document.getElementById('sb-lobby')?.classList.add('active');
+  document.querySelectorAll('.bg-nav-item').forEach(el => el.classList.remove('active'));
+
+  renderLobby();
+}
+
+function onFrameLoad() {
+  document.getElementById('load-overlay').classList.add('hidden');
+}
+
+// ══════════════════════════════════════════════════════
+//  SIDEBAR
+// ══════════════════════════════════════════════════════
+function renderSidebar() {
+  const scroll = document.getElementById('sidebar-scroll');
+
+  const sp = GAMES.filter(g => g.category !== 'multiplayer');
+  const mp = GAMES.filter(g => g.category === 'multiplayer');
+
+  let html = `<button class="bg-nav-lobby" id="sb-lobby" onclick="showLobby()">🏠 Lobby</button>`;
+
+  if (sp.length) {
+    html += `<div class="sb-section">Singleplayer</div>`;
+    sp.forEach(g => {
+      const idx = GAMES.indexOf(g);
+      html += `<button class="bg-nav-item" id="sb-${g.id}" onclick="navigateTo(${idx}); showWiki()">
+        <span class="bg-nav-icon">${g.icon}</span>${esc(g.name)}
+      </button>`;
+    });
+  }
+
+  if (mp.length) {
+    html += `<div class="sb-section">Multiplayer</div>`;
+    mp.forEach(g => {
+      const idx = GAMES.indexOf(g);
+      html += `<button class="bg-nav-item" id="sb-${g.id}" onclick="navigateTo(${idx}); showWiki()">
+        <span class="bg-nav-icon">${g.icon}</span>${esc(g.name)}
+      </button>`;
+    });
+  }
+
+  scroll.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+//  SIDEBAR TOGGLE
+// ══════════════════════════════════════════════════════
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  localStorage.setItem('bg_sb', sidebarOpen);
+  applySidebar();
+}
+
+function applySidebar() {
+  const sb   = document.getElementById('sidebar');
+  const cbtn = document.getElementById('cbtn');
+  if (sidebarOpen) {
+    sb.classList.remove('collapsed');
+    cbtn.classList.remove('cs');
+    cbtn.style.left = '200px';
+  } else {
+    sb.classList.add('collapsed');
+    cbtn.classList.add('cs');
+    cbtn.style.left = '0';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  BACK
+// ══════════════════════════════════════════════════════
+function goBack() {
+  if (window.parent && window.parent !== window) {
+    const p = window.parent;
+    if (p.loaded) p.loaded.delete('browsergames');
+    if (p.go) p.go('browsergames');
+  } else if (history.length > 1) {
+    history.back();
+  } else {
+    location.href = 'index.html';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  UTIL
+// ══════════════════════════════════════════════════════
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Browser back/forward
+window.addEventListener('popstate', e => {
+  const id = e.state?.gameId;
+  if (id) {
+    const idx = GAMES.findIndex(g => g.id === id);
+    if (idx !== -1) { navigateTo(idx); showWiki(); }
+  } else {
+    showLobby();
+  }
+});
+
+boot();
+</script>
+</body>
+</html>
