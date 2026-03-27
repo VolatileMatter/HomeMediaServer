@@ -322,18 +322,31 @@ Set-Acl "D:\Games\MyGame" $acl
     </div>
     <div class="card">
       <div class="card-title">Caddyfile — new service block</div>
-      <pre># In C:\caddy\Caddyfile — add block for the new service:
+      <p style="font-size:.84rem;margin-bottom:10px">Caddy runs natively on the Pi Sentry (<code>/etc/caddy/Caddyfile</code>). The <code>reverse_proxy</code> target depends on <strong>where the service is hosted</strong>:</p>
+      <pre># ── Pi-hosted service (service runs ON the Pi) ──────────────────────
+# Edit on the Pi: /etc/caddy/Caddyfile
 SERVICEKEY.ixo.lol {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username X-authentik-groups X-authentik-email
         trusted_proxies private_ranges
     }
-    reverse_proxy localhost:[PORT]
+    reverse_proxy localhost:[PORT]          # same machine → localhost
 }
 
-# Reload Caddy (no restart needed):
-caddy reload --config C:\caddy\Caddyfile</pre>
+# ── PC-hosted service (service runs on the Windows PC) ──────────────
+# Caddy is on the Pi, so it reaches the PC over Tailscale MagicDNS:
+SERVICEKEY.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy server.ixo.ts.net:[PORT] # PC hub via Tailscale MagicDNS
+}
+
+# Reload Caddy after saving (SSH into Pi or run locally on Pi):
+sudo systemctl reload caddy</pre>
       <p style="font-size:.82rem;color:var(--text-dim);margin-top:6px">The *.ixo.lol wildcard DNS record already covers any new subdomain — no DNS change needed. Just add the Caddy block and reload.</p>
     </div>
     <div class="card">

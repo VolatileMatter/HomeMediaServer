@@ -598,23 +598,38 @@ docker compose ps         # all services should show "running"</pre>
     <div class="dist-grid">
       <div class="dist-col">
         <div class="dist-col-title sentry">🍓 Pi Sentry — always available</div>
+        <div class="dist-item" style="opacity:.7;font-size:.75rem;font-style:italic;padding:2px 0 6px">— Infrastructure —</div>
+        <div class="dist-item"><span>🌐</span> Caddy reverse proxy <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;background:rgba(200,168,75,.15);color:var(--accent);padding:1px 5px;border-radius:2px;margin-left:4px">INFRA</span></div>
+        <div class="dist-item"><span>🔐</span> Authentik SSO <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;background:rgba(200,168,75,.15);color:var(--accent);padding:1px 5px;border-radius:2px;margin-left:4px">INFRA</span></div>
+        <div class="dist-item"><span>🛡️</span> AdGuard Home <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;background:rgba(200,168,75,.15);color:var(--accent);padding:1px 5px;border-radius:2px;margin-left:4px">INFRA</span></div>
+        <div class="dist-item" style="opacity:.7;font-size:.75rem;font-style:italic;padding:6px 0 6px">— Services —</div>
         <div class="dist-item"><span>📕</span> Kavita (Comics &amp; DnD PDFs)</div>
         <div class="dist-item"><span>🎧</span> Audiobookshelf (audiobooks)</div>
         <div class="dist-item"><span>⚡</span> EmulatorJS (retro browser gaming)</div>
         <div class="dist-item"><span>☁️</span> Nextcloud (family files)</div>
         <div class="dist-item"><span>🕹️</span> RomM (unified ROM catalog)</div>
+        <div class="dist-item"><span>🎵</span> Navidrome (music streaming)</div>
+        <div class="dist-item"><span>📚</span> Calibre-Web (e-books)</div>
+        <div class="dist-item"><span>📷</span> Immich base app (photos)</div>
+        <div class="dist-item"><span>🍲</span> Mealie, Vikunja, Vaultwarden</div>
+        <div class="dist-item"><span>🌍</span> LinguaCafe, Anki, LibreLingo</div>
+        <div class="dist-item"><span>📖</span> Kiwix, Foundry VTT, Monica</div>
         <div class="dist-item"><span>🐳</span> Portainer (Docker admin UI)</div>
         <div class="dist-item"><span>💾</span> 15TB archive → Z:\ on PC</div>
       </div>
       <div class="dist-col">
         <div class="dist-col-title muscle">💪 PC — on demand (smart plug)</div>
-        <div class="dist-item"><span>🎬</span> Jellyfin (GPU transcoding)</div>
+        <div class="dist-item" style="opacity:.7;font-size:.75rem;font-style:italic;padding:2px 0 6px">— GPU required —</div>
+        <div class="dist-item"><span>🎬</span> Jellyfin (NVENC transcoding)</div>
         <div class="dist-item"><span>☀️</span> Sunshine (game streaming)</div>
-        <div class="dist-item"><span>🎮</span> Steam library</div>
-        <div class="dist-item"><span>🟢</span> Xenia (Xbox 360)</div>
         <div class="dist-item"><span>🤖</span> Ollama + Open WebUI (GPU AI)</div>
-        <div class="dist-item"><span>📷</span> Immich (GPU face recognition)</div>
-        <div class="dist-item"><span>🔐</span> Authentik SSO + Caddy</div>
+        <div class="dist-item"><span>🧠</span> Immich ML Worker (face/CLIP)</div>
+        <div class="dist-item" style="opacity:.7;font-size:.75rem;font-style:italic;padding:6px 0 6px">— Windows-native —</div>
+        <div class="dist-item"><span>🎮</span> Steam + emulators (Dolphin, Xenia)</div>
+        <div class="dist-item"><span>🌱</span> Streamarr (Mullvad VPN namespace)</div>
+        <div class="dist-item"><span>🗂️</span> Hoarder/Karakeep (arm64 unstable)</div>
+        <div class="dist-item"><span>🔽</span> qBittorrent + arr stack</div>
+        <div class="dist-item"><span>⛏️</span> Minecraft, ARK, SS13 servers</div>
       </div>
     </div>
   </div>
@@ -638,10 +653,81 @@ docker compose ps         # all services should show "running"</pre>
         <tr><td>Open WebUI</td><td>Depends on Ollama being on the same machine (or close to it via LAN). Moves only if Ollama moves.</td></tr>
         <tr><td>Immich</td><td>The ML pipeline (face recognition, CLIP embeddings for smart search) requires GPU for practical indexing speed. On Pi CPU, a 10,000-photo library would take ~8 hours to index and peg the Pi at 100% CPU the entire time.</td></tr>
         <tr><td>Sunshine</td><td>Game streaming requires direct GPU access for NVENC encoding. Pi 5's VideoCore VII GPU has no NVENC equivalent and cannot encode at the required bitrates.</td></tr>
-        <tr><td>Authentik + Caddy</td><td>These are the authentication and routing layer for the entire server. They must stay on the machine that is most reliably online. Currently that's the PC — revisit if the Pi becomes the primary machine.</td></tr>
+        <!-- Authentik + Caddy: REMOVED — both now run on the Pi Sentry. See "Must Run on Pi" section. -->
         <tr><td>Streamarr</td><td>Requires the Mullvad VPN network namespace configured in WSL2. Architecturally belongs near qBittorrent on the PC.</td></tr>
         <tr><td>Hoarder/Karakeep</td><td>The arm64 image for the embedded Chromium headless browser has a history of instability on Pi. Low risk to try, but not worth the debugging time for an optional service.</td></tr>
       </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔒 Services That MUST Run on the Pi</div>
+    <div class="card">
+      <p>These services are required to stay on the Pi because the Pi is the only always-on node. If they ran on the PC, they would be unavailable whenever the PC is off — which is most of the time.</p>
+      <table>
+        <tr><th>Service</th><th>Why it must be on the Pi</th></tr>
+        <tr><td>Caddy</td><td>All *.ixo.lol subdomains route through Caddy. If Caddy is off, no service is reachable — even Pi-hosted ones. Must be always-on.</td></tr>
+        <tr><td>Authentik</td><td>Every service login goes through Authentik. If Authentik is off, nobody can authenticate to anything. Must be always-on.</td></tr>
+        <tr><td>AdGuard Home</td><td>DNS-level ad blocking for Smart TVs and consoles. If it goes down, DNS resolution for opted-in devices fails. Must be always-on.</td></tr>
+        <tr><td>Achievement Manager</td><td>Central achievement store for all nodes. Pi tracking agent, PC tracking agent, and future nodes all report here. Must be reachable at all times.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧠 RAM Budget — Pi 5 (16 GB)</div>
+    <div class="card">
+      <p>Idle RAM is what each service uses when running but not actively being accessed. The 12 GB threshold is the "add a second Pi" warning — if idle usage crosses this, you're too close to the ceiling for comfort.</p>
+      <table>
+        <tr><th>Service</th><th>Idle RAM</th><th>Peak RAM</th><th>Notes</th></tr>
+        <tr style="background:rgba(200,168,75,.04)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em">INFRASTRUCTURE</td></tr>
+        <tr><td>Caddy (native apt)</td><td>30–60 MB</td><td>100 MB</td><td>TLS + routing for all services</td></tr>
+        <tr><td>Authentik server</td><td>300–500 MB</td><td>700 MB</td><td>Peaks on auth storms (many logins at once)</td></tr>
+        <tr><td>Authentik worker</td><td>150–250 MB</td><td>400 MB</td><td>Background tasks, token cleanup</td></tr>
+        <tr><td>Authentik PostgreSQL</td><td>80–150 MB</td><td>250 MB</td><td>Grows slowly with user count</td></tr>
+        <tr><td>Authentik Redis</td><td>20–40 MB</td><td>80 MB</td><td>Session cache</td></tr>
+        <tr><td>AdGuard Home</td><td>30–80 MB</td><td>120 MB</td><td>Filter lists loaded into RAM</td></tr>
+        <tr><td>Portainer</td><td>50–120 MB</td><td>200 MB</td><td>Docker management UI</td></tr>
+        <tr><td>Achievement Manager</td><td>20–50 MB</td><td>80 MB</td><td>Custom Python service</td></tr>
+        <tr><td>Stats Agent (Pi)</td><td>20–40 MB</td><td>60 MB</td><td>Lightweight metrics collector</td></tr>
+        <tr style="background:rgba(200,168,75,.04)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em">MEDIA &amp; LIBRARY</td></tr>
+        <tr><td>Kavita (Comics)</td><td>80–150 MB</td><td>300 MB</td><td>Peaks during library scan</td></tr>
+        <tr><td>Kavita (DnD PDFs)</td><td>60–120 MB</td><td>250 MB</td><td>Separate instance, same pattern</td></tr>
+        <tr><td>Audiobookshelf</td><td>100–200 MB</td><td>400 MB</td><td>Peaks during transcoding/sync</td></tr>
+        <tr><td>Navidrome</td><td>50–100 MB</td><td>200 MB</td><td>Very lightweight Go binary</td></tr>
+        <tr><td>Calibre-Web</td><td>80–150 MB</td><td>300 MB</td><td>Python + SQLite</td></tr>
+        <tr><td>Invidious</td><td>80–150 MB</td><td>300 MB</td><td>Go binary + PostgreSQL (~100 MB)</td></tr>
+        <tr><td>Immich base app</td><td>300–500 MB</td><td>800 MB</td><td>ML worker on PC; base app is lighter</td></tr>
+        <tr style="background:rgba(200,168,75,.04)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em">GAMING</td></tr>
+        <tr><td>EmulatorJS</td><td>40–80 MB</td><td>150 MB</td><td>Static file server; games run in browser</td></tr>
+        <tr><td>RomM</td><td>150–300 MB</td><td>500 MB</td><td>Includes RomM PostgreSQL</td></tr>
+        <tr style="background:rgba(200,168,75,.04)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);letter-spacing:.1em">APPS &amp; TOOLS</td></tr>
+        <tr><td>Nextcloud</td><td>200–400 MB</td><td>700 MB</td><td>Includes Nextcloud MariaDB + Redis</td></tr>
+        <tr><td>Mealie</td><td>80–150 MB</td><td>250 MB</td><td>Recipe manager + PostgreSQL</td></tr>
+        <tr><td>Vikunja</td><td>50–100 MB</td><td>200 MB</td><td>Go binary + PostgreSQL</td></tr>
+        <tr><td>Vaultwarden</td><td>30–80 MB</td><td>150 MB</td><td>Rust binary — very efficient</td></tr>
+        <tr><td>Uptime Kuma</td><td>50–100 MB</td><td>200 MB</td><td>Node.js</td></tr>
+        <tr><td>Monica CRM</td><td>100–200 MB</td><td>350 MB</td><td>PHP + MySQL</td></tr>
+        <tr><td>Excalidraw</td><td>30–60 MB</td><td>100 MB</td><td>Static SPA</td></tr>
+        <tr><td>Stirling-PDF</td><td>200–350 MB</td><td>600 MB</td><td>Java — heaviest lightweight app</td></tr>
+        <tr><td>Readeck, PrivateBin, Pxls, GenArt</td><td>20–60 MB each</td><td>100 MB each</td><td>Lightweight; negligible together</td></tr>
+        <tr><td>Kiwix</td><td>80–150 MB</td><td>400 MB</td><td>ZIM files memory-mapped; peaks on search</td></tr>
+        <tr><td>Foundry VTT</td><td>150–300 MB</td><td>600 MB</td><td>Node.js — peaks during active sessions</td></tr>
+        <tr><td>LinguaCafe + Anki + LibreLingo</td><td>50–100 MB each</td><td>200 MB each</td><td>Lightweight; rarely all active at once</td></tr>
+        <tr><td>Jukebox</td><td>30–60 MB</td><td>100 MB</td><td>Custom Python Flask service</td></tr>
+        <tr><td>Watchtower</td><td>20–40 MB</td><td>60 MB</td><td>Runs briefly on schedule; otherwise dormant</td></tr>
+        <tr style="background:rgba(76,175,125,.06);font-weight:600"><td><strong>Total idle estimate (all services)</strong></td><td><strong>~3.5–5.5 GB</strong></td><td><strong>~9–12 GB</strong></td><td>Under normal conditions, idle is well within 16 GB</td></tr>
+      </table>
+      <div class="callout callout-warn" style="margin-top:16px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          <strong>Add a second Pi when idle RAM consistently exceeds 12 GB.</strong>
+          Peak usage (all services active simultaneously) can approach 12 GB, but this scenario is extremely unlikely in practice — nobody is using every single service at the same moment.
+          The real trigger is if your <em>baseline idle</em> (services just running, nobody using them) exceeds 12 GB. That means you're adding new services faster than the Pi can absorb them comfortably.
+          <br><br>
+          <strong>Good candidates to migrate to a second Pi first:</strong> Stirling-PDF (Java, heaviest), Foundry VTT (Node.js, 300 MB idle), Immich base app (500 MB idle), Nextcloud (400 MB idle with DB).
+        </div>
+      </div>
     </div>
   </div>
 
@@ -794,10 +880,10 @@ services:
   </div>
 
   <div class="section">
-    <div class="section-title">🔐 Caddyfile Blocks for Pi Services (add to PC's Caddyfile)</div>
+    <div class="section-title">🔐 Caddyfile — /etc/caddy/Caddyfile on the Pi</div>
     <div class="card">
-      <pre># Replace SENTRY_IP with Pi's Tailscale IP from nodes.json → nodes[pi].tailscaleIP
-# Or use sentry.ixo.ts.net if MagicDNS is enabled.
+      <p style="font-size:.84rem;margin-bottom:10px">Caddy runs natively on the Pi. Pi-hosted services use <code>localhost</code>. PC-hosted services (GPU/Windows-only) use <code>server.ixo.ts.net</code> (Tailscale MagicDNS hostname for the PC hub).</p>
+      <pre># ── Pi-hosted services → localhost ──────────────────────────────
 
 comics.ixo.lol {
     forward_auth localhost:9000 {
@@ -805,31 +891,31 @@ comics.ixo.lol {
         copy_headers X-authentik-username X-authentik-groups X-authentik-email
         trusted_proxies private_ranges
     }
-    reverse_proxy SENTRY_IP:5000
+    reverse_proxy localhost:5000   # Kavita — same machine
 }
 
 audio.ixo.lol {
     forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
-    reverse_proxy SENTRY_IP:13378
+    reverse_proxy localhost:13378   # Audiobookshelf — same machine
 }
 
 games.ixo.lol {
     forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
-    reverse_proxy SENTRY_IP:8085
+    reverse_proxy localhost:8085    # EmulatorJS — same machine
 }
 
 cloud.ixo.lol {
     forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
-    reverse_proxy SENTRY_IP:8080
+    reverse_proxy localhost:8080    # Nextcloud — same machine
 }
 
 romm.ixo.lol {
     forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
-    reverse_proxy SENTRY_IP:8098
+    reverse_proxy localhost:8098    # RomM — same machine
 }
 
-# Reload after saving:
-# caddy reload --config C:\caddy\Caddyfile</pre>
+# Reload after saving (run on the Pi):
+sudo systemctl reload caddy</pre>
     </div>
   </div>
 

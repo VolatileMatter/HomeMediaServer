@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>SSO & Users</title><link rel="stylesheet" href="shared.css">
-<style>
-  .user-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:6px;flex-wrap:wrap;}
-  .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;}
-  .user-name{font-weight:700;font-size:.88rem;flex:1;min-width:100px;}
-  .user-meta{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text-dim);}
-  .ustatus{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:2px;}
-  .u-active{background:rgba(76,175,125,.15);color:#4caf7d;border:1px solid rgba(76,175,125,.25);}
-  .u-blocked{background:rgba(224,92,92,.12);color:var(--danger);border:1px solid rgba(224,92,92,.2);}
-  .ab{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:3px 8px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap;}
-  .ab:hover{border-color:var(--accent);color:var(--accent);}
-  .ab.warn:hover{border-color:#e0b84b;color:#e0b84b;}
-  .ab.nuke-btn{border-color:rgba(224,92,92,.3);color:var(--danger);}
-  .ab.nuke-btn:hover{background:rgba(224,92,92,.1);}
-  .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;}
-  .mo.open{display:flex;}
-  .mc{background:#141820;border:1px solid var(--border);border-radius:6px;padding:24px;max-width:500px;width:95%;max-height:85vh;overflow-y:auto;}
-  .mc h3{font-family:'Cinzel',serif;margin-bottom:14px;}
-  .mclose{float:right;background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:2px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.65rem;}
-  .mclose:hover{border-color:var(--danger);color:var(--danger);}
-  .nuke-box{background:rgba(224,92,92,.07);border:1px solid rgba(224,92,92,.3);border-radius:4px;padding:14px;margin-bottom:12px;}
-  .nuke-box h4{color:var(--danger);font-family:'Cinzel',serif;margin-bottom:8px;}
-  .finput{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:.78rem;}
-  .sect-nav{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
-  .snav{font-family:'Share Tech Mono',monospace;font-size:.63rem;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
-  .snav.active{border-color:var(--accent);color:var(--accent);}
-  .group-tag{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:1px 6px;border-radius:2px;margin-left:4px;}
-  .gt-admin{background:rgba(200,168,75,.15);color:var(--accent);border:1px solid rgba(200,168,75,.2);}
-  .gt-family{background:rgba(91,141,217,.12);color:var(--accent2);border:1px solid rgba(91,141,217,.2);}
-  .gt-friends{background:rgba(78,205,196,.1);color:var(--accent3);border:1px solid rgba(78,205,196,.2);}
-</style>
+<head>
+  <meta charset="UTF-8">
+  <title>SSO &amp; User Management</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .snav-row{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+    .snav{font-family:'Share Tech Mono',monospace;font-size:.63rem;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
+    .snav:hover{border-color:rgba(200,168,75,.4);color:var(--text);}
+    .snav.active{border-color:var(--accent);color:var(--accent);}
+    .group-tag{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:1px 6px;border-radius:2px;margin-left:4px;}
+    .gt-admin{background:rgba(200,168,75,.15);color:var(--accent);border:1px solid rgba(200,168,75,.2);}
+    .gt-family{background:rgba(91,141,217,.12);color:#5b8dd9;border:1px solid rgba(91,141,217,.2);}
+    .gt-friends{background:rgba(78,205,196,.1);color:#4ecdc4;border:1px solid rgba(78,205,196,.2);}
+    .user-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+    .user-name{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--text-bright);}
+    .user-meta{font-size:.75rem;color:var(--text-dim);margin-top:2px;}
+    .user-actions{margin-left:auto;display:flex;gap:8px;}
+    .ua-btn{font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:4px 10px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
+    .ua-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .ua-btn.danger:hover{border-color:var(--danger);color:var(--danger);}
+    .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;}
+    .mo.open{display:flex;}
+    .mc{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:24px;max-width:480px;width:90%;position:relative;}
+    .mclose{position:absolute;top:12px;right:12px;background:transparent;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;}
+    .finput{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:8px 10px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.8rem;width:100%;}
+    .ab{background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.72rem;}
+    .nuke-box{background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.3);border-radius:4px;padding:12px 14px;margin:12px 0;}
+    .pi-arch-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.3);border-radius:3px;padding:3px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#4caf7d;letter-spacing:.06em;text-transform:uppercase;}
+  </style>
 </head>
 <body>
 
@@ -38,12 +38,12 @@
   <div class="page-icon">🔐</div>
   <div>
     <h1>SSO &amp; User Management</h1>
-    <div class="subtitle">// Authentik · Google Login · All Services · Nuke System //</div>
-    <p class="desc">Authentik is the single login system for every service on this server. Users log in with their Google (Gmail) account — no new passwords to remember. You manage who has access to what, all in one place.</p>
+    <div class="subtitle">// Authentik · Pi Sentry · Google Login · All Services · Nuke System //</div>
+    <p class="desc">Authentik is the single login system for every service on this server. Users log in with their Google (Gmail) account — no new passwords to remember. Authentik runs on the Pi Sentry and is always available, even when the PC is off.</p>
   </div>
 </div>
 
-<div class="sect-nav">
+<div class="snav-row">
   <button class="snav active" onclick="showSec('setup')">⚙️ Authentik Setup</button>
   <button class="snav" onclick="showSec('userdata')">🗂️ User Data Storage</button>
   <button class="snav" onclick="showSec('users')">👥 Users</button>
@@ -54,67 +54,69 @@
   <button class="snav" onclick="showSec('achievements')">🏆 Achievements</button>
 </div>
 
-<!-- ══ AUTHENTIK SETUP ══ -->
+<!-- ══════════════════════════════════════════════════════════
+     AUTHENTIK SETUP
+══════════════════════════════════════════════════════════ -->
 <div id="s-setup">
-  <div class="section-title">⚙️ Authentik Installation (WSL2 + Docker)</div>
 
   <div class="callout callout-dragon">
     <div class="callout-icon">🐉</div>
-    <div class="callout-body"><strong>Architecture:</strong> Authentik runs in Docker inside WSL2. It exposes port 9000 to Windows. Caddy (running natively on Windows) uses Authentik's forward_auth endpoint to protect every service. Tailscale routes external traffic to Caddy. No open ports.</div>
+    <div class="callout-body">
+      <strong>Architecture:</strong> Authentik runs in Docker on the Pi Sentry — always on, always reachable.
+      Caddy (installed via <code>apt</code> on the Pi) uses Authentik's <code>forward_auth</code> endpoint to protect every service.
+      Tailscale routes all external traffic to the Pi's Caddy. The PC being off does not affect SSO at all.
+      <br><br>
+      <span class="pi-arch-badge">🍓 Runs on Pi Sentry</span>
+    </div>
+  </div>
+
+  <div class="section-title">⚙️ Authentik Installation — Pi Sentry</div>
+
+  <div class="callout callout-tip" style="margin-bottom:16px">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      The full Docker Compose file including Authentik is in <strong>raspi.html → Services tab</strong>.
+      This section covers the Authentik-specific configuration steps you do after the containers are running.
+      <br><strong>Summary of what runs where:</strong> Authentik server + worker + PostgreSQL + Redis — all Docker containers on the Pi.
+      Caddy — native apt install on Pi (<code>/etc/caddy/Caddyfile</code>).
+    </div>
   </div>
 
   <div class="steps">
     <div class="step">
       <div class="step-content">
-        <strong>Step 1: Install WSL2 + Docker (if not done)</strong>
-        <pre>wsl --install
-# Reboot, then open Ubuntu terminal:
-sudo apt update && sudo apt install -y docker.io docker-compose
-sudo usermod -aG docker $USER
-newgrp docker</pre>
+        <strong>Step 1 — Deploy Authentik on the Pi (see raspi.html)</strong>
+        <p>Authentik is part of the Pi's main <code>docker-compose.yml</code>. Once the Pi's Docker stack is up, Authentik is already running. Verify:</p>
+        <pre># SSH into the Pi:
+ssh ixora@sentry.ixo.ts.net
+
+docker compose ps | grep authentik
+# Should show: authentik-server   running
+#              authentik-worker   running
+#              authentik-db       running
+#              authentik-redis    running
+
+# First-run setup UI (only appears once):
+# https://auth.ixo.lol/if/flow/initial-setup/</pre>
       </div>
     </div>
+
     <div class="step">
       <div class="step-content">
-        <strong>Step 2: Deploy Authentik</strong>
-        <pre>mkdir ~/authentik && cd ~/authentik
-
-# Download official compose file:
-wget https://goauthentik.io/docker-compose.yml
-
-# Create .env file:
-cat > .env << 'EOF'
-POSTGRES_PASSWORD=change-this-strong-password
-AUTHENTIK_SECRET_KEY=change-this-to-50-random-chars
-AUTHENTIK_ERROR_REPORTING__ENABLED=false
-EOF
-
-docker-compose pull
-docker-compose up -d
-
-# Access at http://localhost:9000/if/flow/initial-setup/</pre>
-        <p>Create your admin account on first access. This takes ~2 minutes to fully start.</p>
+        <strong>Step 2 — Create your admin account</strong>
+        <p>Visit <code data-cfg="authentik-admin"></code> on first boot. Set a strong admin password — this is the master key to everything. Store it in Vaultwarden immediately.</p>
       </div>
     </div>
+
     <div class="step">
       <div class="step-content">
-        <strong>Step 3: Auto-start Authentik on Windows boot</strong>
-        <pre># Task Scheduler → Create Task:
-# Name: Authentik
-# Action: wsl -d Ubuntu -- bash -c "cd ~/authentik && docker-compose up -d"
-# Trigger: At startup, delay 2 minutes
-# Run whether logged on or not: ☑</pre>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Step 4: Add Google as a Social Login Source</strong>
+        <strong>Step 3 — Add Google as a Social Login Source</strong>
         <p>In Google Cloud Console (<a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>):</p>
-        <ul style="margin:6px 0 0 18px;font-size:.85rem">
+        <ul style="margin:6px 0 0 18px;font-size:.85rem;line-height:1.8">
           <li>New project → "Home Server SSO"</li>
-          <li>APIs &amp; Services → OAuth Consent Screen → External → add your Gmail + all allowed user emails as Test Users</li>
+          <li>APIs &amp; Services → OAuth Consent Screen → External → add your Gmail + all user emails as Test Users</li>
           <li>Create Credentials → OAuth Client ID → Web application</li>
-          <li>Authorized redirect URI: <code>https://auth.ixo.lol/source/oauth/callback/google/</code></li>
+          <li>Authorized redirect URI: <code data-cfg="authentik-base"></code><code>/source/oauth/callback/google/</code></li>
           <li>Save Client ID and Client Secret</li>
         </ul>
         <p style="margin-top:8px">In Authentik admin → Directory → Sources → Create → OAuth2/OpenID Source:</p>
@@ -125,396 +127,100 @@ Consumer Secret:  [your Google Client Secret]
 OIDC Well-Known:  https://accounts.google.com/.well-known/openid-configuration
 User matching:    Match by email (preferred)
 ☑ Allow users to change username</pre>
-        <p>Now users see "Sign in with Google" on the Authentik login page. They click it, authenticate with Google, and land in Authentik.</p>
       </div>
     </div>
+
     <div class="step">
       <div class="step-content">
-        <strong>Step 5: Expose Authentik via Caddy (Tailscale)</strong>
-        <p>Authentik is accessible on the Tailnet via Caddy — no Cloudflare Tunnel needed. Add this block to your Caddyfile:</p>
-        <pre># In Caddyfile (C:\caddy\Caddyfile):
-auth.ixo.lol {
-    reverse_proxy localhost:9000
-    # No forward_auth wrapper — Authentik protects itself.
-    # Caddy just terminates TLS and proxies.
+        <strong>Step 4 — Create the Authentik Outpost (for Caddy forward_auth)</strong>
+        <p>Authentik admin → Applications → Outposts → Create:</p>
+        <pre>Name:      caddy-outpost
+Type:      Proxy
+# Add ALL forward_auth applications to this outpost.
+# The outpost exposes the /outpost.goauthentik.io/auth/caddy endpoint
+# that Caddy calls on every request.</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 5 — Configure Caddy to use Authentik</strong>
+        <p>Caddy is installed natively on the Pi via <code>sudo apt install caddy</code>. Edit <code>/etc/caddy/Caddyfile</code>:</p>
+        <pre># /etc/caddy/Caddyfile
+
+{
+    email admin@ixo.lol
 }
 
-# Reload after saving:
-caddy reload --config C:\caddy\Caddyfile</pre>
-        <p>Because <code>*.ixo.lol</code> resolves to your Tailscale IP, <code>auth.ixo.lol</code> is only reachable by devices on the Tailnet. Anyone not on the Tailnet gets no response — Authentik is not reachable from the public internet at all.</p>
-        <p>The Authentik admin panel is at <code>https://auth.ixo.lol/if/admin/</code> from any Tailscale device. You do not need Cloudflare Zero Trust policies — Tailscale device approval is the gate.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-content">
-        <strong>Step 6: Configure Caddy forward_auth for all services</strong>
-        <p>This is the magic that protects services that don't natively support OIDC. Every request to a service first hits Authentik for validation:</p>
-        <pre># In your Caddyfile — template for any protected service:
+# Authentik itself — no forward_auth wrapper (it protects itself)
+auth.ixo.lol {
+    reverse_proxy localhost:9000
+}
+
+# Standard protected service — Pi-hosted (same machine → localhost)
 jellyfin.ixo.lol {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username X-authentik-groups X-authentik-email
         trusted_proxies private_ranges
     }
-    reverse_proxy localhost:8096  # Jellyfin
+    reverse_proxy localhost:8096
 }
 
-# The X-authentik-username header is passed to the service
-# so each service knows WHO is logged in.
-# Services can use this header to route saves, history, etc.</pre>
-        <div class="callout callout-tip">
-          <div class="callout-icon">💡</div>
-          <div class="callout-body"><strong>Services with native OIDC</strong> (Jellyfin, Open WebUI, Immich, Nextcloud, Vikunja) can use direct OIDC integration — this is slightly better UX. Services without native OIDC support (Navidrome, EmulatorJS save server, Kiwix) use Caddy forward_auth instead. Both approaches result in users being authenticated through Authentik.</div>
-        </div>
+# PC-hosted service — Caddy on Pi reaches PC over Tailscale MagicDNS
+movies.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy server.ixo.ts.net:8096
+}
+
+# TV endpoint — NO forward_auth (Smart TVs can't complete browser SSO flows)
+tv.ixo.lol {
+    reverse_proxy server.ixo.ts.net:8096
+}</pre>
+        <pre># After editing, reload Caddy (no restart needed):
+sudo systemctl reload caddy
+
+# Check for config errors first:
+caddy validate --config /etc/caddy/Caddyfile</pre>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ══ USERS ══ -->
-<div id="s-userdata" style="display:none">
-  <div class="section-title">🗂️ User Data Storage — The Unified Architecture</div>
+    <div class="step">
+      <div class="step-content">
+        <strong>Step 6 — Create Authentik Applications (one per service)</strong>
+        <p>Authentik admin → Applications → Create. Each service that uses SSO needs an entry:</p>
+        <pre># For forward_auth services (no native OIDC):
+Name:          Jellyfin
+Slug:          jellyfin
+Launch URL:    https://jellyfin.ixo.lol
+Provider:      Proxy Provider
+  Mode:          Forward auth (single application)
+  External host: https://jellyfin.ixo.lol
+Access:        authentik-family + authentik-admins groups
 
-  <div class="callout callout-dragon">
-    <div class="callout-icon">🐉</div>
-    <div class="callout-body"><strong>The principle:</strong> Every piece of per-user data — emulator saves, reading progress, listening history, MTG decks, AI recommendation history — lives inside <code>D:\Users\[username]\</code>. This folder counts toward each user's Nextcloud storage quota. Apps never store data directly; they always read from a <strong>symlink</strong> that points to the active user's subfolder. Switching users means re-pointing the symlink — the app itself never changes.</div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">📁 Folder Structure</div>
-    <div class="card">
-      <pre>D:\Users\
-  alice\
-    emulation\
-      pokemon\        ← EmulatorJS Pokémon saves
-      castlevania\    ← EmulatorJS Castlevania saves
-      fireemblem\     ← EmulatorJS Fire Emblem saves
-      dolphin\
-        gc\           ← Dolphin GameCube memory cards
-        wii\          ← Dolphin Wii save data
-      xenia\          ← Xenia Xbox 360 saves
-    calibre\          ← Calibre-Web reading progress
-    audiobooks\       ← Audiobookshelf listening progress
-    immich\           ← Immich photos (per-user upload folder)
-    recommendations\  ← Book/game recommendation history
-    mtg\
-      decks\          ← Personal MTG deck .dck files
-    settings.json     ← Homepage and app preferences
-
-  bob\
-    emulation\
-      ... (same structure, separate data)
-
-  __nobody__\         ← Empty stubs — active when no session is running
-    emulation\
-      pokemon\        (empty folder, safe fallback)
-      ... etc</pre>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">🔗 The Symlink Layer</div>
-    <div class="card">
-      <div class="card-title">How it works</div>
-      <p>Each app has a fixed path it always reads/writes to — the <strong>symlink target</strong>. The symlink itself is what changes when a user logs in. The app never needs to be reconfigured.</p>
-      <pre>App reads from:                      Points to (changes per user):
-D:\Emulation\Pokemon\active_saves → D:\Users\alice\emulation\pokemon\
-D:\Emulation\Castlevania\active_saves → D:\Users\alice\emulation\castlevania\
-D:\Emulation\Xbox360\Content\active → D:\Users\alice\emulation\xenia\
-[Dolphin save folder]               → D:\Users\alice\emulation\dolphin\
-D:\Games\MTG\Decks\mine             → D:\Users\alice\mtg\decks\
-D:\Server\Recommendations\active_history → D:\Users\alice\recommendations\</pre>
-      <p>When Bob logs in instead, the session manager re-points all symlinks to <code>D:\Users\bob\...</code>. Alice's saves are untouched in her folder. Bob's saves load from his.</p>
-      <div class="callout callout-warn">
-        <div class="callout-icon">⚠️</div>
-        <div class="callout-body"><strong>Single-seat limitation:</strong> This architecture means only one user can actively be using the emulators at a time (since the symlink can only point one place). For EmulatorJS (browser-based) this isn't a constraint — each user has their own browser session. For Dolphin/Xenia via Sunshine, only one person streams at once anyway.</div>
+# For native OIDC services:
+Name:          Open WebUI
+Slug:          openwebui
+Launch URL:    https://ai.ixo.lol
+Provider:      OAuth2/OIDC Provider
+  Redirect URI:  https://ai.ixo.lol/oauth/callback
+  Scopes:        openid email profile
+Access:        authentik-family + authentik-admins groups</pre>
       </div>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">🐍 Session Manager Service (Port 9004)</div>
-    <div class="card">
-      <div class="card-title">Install as a Windows service</div>
-      <pre># D:\Server\SessionManager\session_manager.py
-# Manages symlinks when users start/end sessions
+  <hr>
 
-import os, json, subprocess, logging
-from flask import Flask, request, jsonify
-from pathlib import Path
-
-app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
-
-USERS_BASE  = Path('D:/Users')
-NOBODY_BASE = Path('D:/Server/SessionManager/nobody')
-
-SYMLINK_MAP = [
-    {'link': 'D:/Emulation/Pokemon/active_saves',      'subdir': 'emulation/pokemon'},
-    {'link': 'D:/Emulation/Castlevania/active_saves',  'subdir': 'emulation/castlevania'},
-    {'link': 'D:/Emulation/FireEmblem/active_saves',   'subdir': 'emulation/fireemblem'},
-    {'link': 'C:/Users/ServerUser/Documents/Dolphin Emulator/GC/USA', 'subdir': 'emulation/dolphin/gc'},
-    {'link': 'C:/Users/ServerUser/Documents/Dolphin Emulator/Wii/title', 'subdir': 'emulation/dolphin/wii'},
-    {'link': 'D:/Emulation/Xbox360/Content/active',    'subdir': 'emulation/xenia'},
-    {'link': 'D:/Server/Recommendations/active_history','subdir': 'recommendations'},
-    {'link': 'D:/Games/MTG/Decks/mine',                'subdir': 'mtg/decks'},
-]
-
-USER_SUBDIRS = [
-    'emulation/pokemon', 'emulation/castlevania', 'emulation/fireemblem',
-    'emulation/dolphin/gc', 'emulation/dolphin/wii', 'emulation/xenia',
-    'calibre', 'audiobooks', 'immich', 'recommendations', 'mtg/decks',
-]
-
-def ensure_user_dirs(username):
-    for sub in USER_SUBDIRS:
-        (USERS_BASE / username / sub).mkdir(parents=True, exist_ok=True)
-
-def set_symlinks(username):
-    target_base = NOBODY_BASE if username == '__nobody__' else USERS_BASE / username
-    if username != '__nobody__':
-        ensure_user_dirs(username)
-    for entry in SYMLINK_MAP:
-        link = Path(entry['link'])
-        target = target_base / entry['subdir']
-        target.mkdir(parents=True, exist_ok=True)
-        link.parent.mkdir(parents=True, exist_ok=True)
-        # Remove existing junction/symlink
-        if link.is_symlink(): link.unlink()
-        elif link.is_dir():
-            subprocess.run(['cmd','/c','rmdir',str(link)], check=True)
-        # Create Windows junction point
-        subprocess.run(['cmd','/c','mklink','/J',str(link),str(target)],
-                       check=True, capture_output=True)
-        logging.info(f"  {link} -> {target}")
-
-active = {}
-
-@app.route('/session/start', methods=['POST'])
-def start():
-    username = (request.json or {}).get('username') or request.headers.get('X-authentik-username')
-    if not username: return jsonify({'error': 'no username'}), 400
-    set_symlinks(username)
-    active['current'] = username
-    return jsonify({'ok': True, 'user': username})
-
-@app.route('/session/end', methods=['POST'])
-def end():
-    set_symlinks('__nobody__')
-    active.pop('current', None)
-    return jsonify({'ok': True})
-
-@app.route('/session/current')
-def current():
-    return jsonify({'user': active.get('current')})
-
-if __name__ == '__main__':
-    for entry in SYMLINK_MAP:
-        (NOBODY_BASE / entry['subdir']).mkdir(parents=True, exist_ok=True)
-    app.run(port=9004, host='0.0.0.0')</pre>
-      <pre>pip install flask
-nssm install SessionManager python "D:\Server\SessionManager\session_manager.py"
-nssm set SessionManager AppDirectory "D:\Server\SessionManager"
-nssm start SessionManager
-
-netsh advfirewall firewall add rule name="SessionManager" dir=in action=allow protocol=TCP localport=9004</pre>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">🔗 Integration Points</div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Authentik webhook on login</div>
-        <p>In Authentik admin → Property Mappings → add a webhook notification that fires when a user authenticates. This calls the session manager to set up their symlinks:</p>
-        <pre># Authentik → System → Event Rules → Create rule:
-# Event: authorization_code (user logs in)
-# Action: Webhook → POST http://localhost:9004/session/start
-# Headers: X-authentik-username: {{ user.username }}</pre>
-      </div>
-      <div class="card">
-        <div class="card-title">Sunshine pre-launch command</div>
-        <p>For streaming sessions, Sunshine calls the session manager before launching the emulator:</p>
-        <pre># In Sunshine app config (Dolphin example):
-# Command: cmd /c "curl -s -X POST http://localhost:9004/session/start -H Content-Type:application/json -d {\"username\":\"PLACEHOLDER\"} && dolphin.exe"
-# The username must come from the Sunshine session metadata</pre>
-      </div>
-      <div class="card">
-        <div class="card-title">EmulatorJS (browser-based)</div>
-        <p>For browser emulation, the Authentik forward_auth header already passes the username to the Flask save server. The save server itself writes to <code>D:\Users\[username]\emulation\[game]\</code> directly — no symlink needed for these apps.</p>
-      </div>
-      <div class="card">
-        <div class="card-title">User provisioning (new user first login)</div>
-        <p>When a user logs in for the first time, <code>ensure_user_dirs()</code> creates their complete folder tree. Nextcloud sees these as new files in their External Storage mount and counts them toward quota immediately.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">☁️ Nextcloud Quota Integration</div>
-    <div class="card">
-      <div class="card-title">Mount D:\Users\[username]\ as Nextcloud External Storage</div>
-      <p>Each user's <code>D:\Users\[username]\</code> folder is mounted into Nextcloud as their "App Data" external storage. This means:</p>
-      <ul style="margin:8px 0 0 18px;font-size:.85rem">
-        <li>Users can browse their save files in Nextcloud's file manager</li>
-        <li>The folder counts toward their storage quota alongside their regular Nextcloud files</li>
-        <li>Backups are handled by backing up <code>D:\Users\</code> — one folder covers all apps</li>
-      </ul>
-      <pre># In Nextcloud admin → External Storage → Add storage:
-# Type:          Local
-# Folder name:   App Data
-# Configuration: D:\Users\alice          ← per-user path (use %user% template)
-# Apply to:      Specific user: alice
-# Quota:         Counts toward user quota: ☑
-
-# The magic: use Nextcloud's %user% variable for bulk setup:
-# In Nextcloud config.php via occ:
-php occ files_external:create "App Data" local null \
-  --config=datadir="D:/Users/%user%" \
-  --user-applicable-all</pre>
-      <div class="callout callout-tip">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body"><strong>Quota accounting:</strong> Nextcloud counts external storage against quota when the "Enable User Quota" option is on for that mount. A user with a 50 GB quota: their 20 GB of Nextcloud files + 5 GB of emulator saves + 2 GB of photos = 27 GB used, 23 GB remaining.</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">📋 Per-App Data Locations Reference</div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table style="margin:0">
-        <tr><th>App</th><th>User data subfolder</th><th>Method</th><th>Tab</th></tr>
-        <tr><td>Pokémon (EmulatorJS)</td><td><code>emulation/pokemon/</code></td><td>Flask saves direct to path</td><td>Pokémon</td></tr>
-        <tr><td>Castlevania (EmulatorJS)</td><td><code>emulation/castlevania/</code></td><td>Flask saves direct to path</td><td>Castlevania</td></tr>
-        <tr><td>Fire Emblem (EmulatorJS)</td><td><code>emulation/fireemblem/</code></td><td>Flask saves direct to path</td><td>Fire Emblem</td></tr>
-        <tr><td>Dolphin (GameCube/Wii)</td><td><code>emulation/dolphin/</code></td><td>Symlink (Sunshine pre-launch)</td><td>GameCube/Wii</td></tr>
-        <tr><td>Xenia (Xbox 360)</td><td><code>emulation/xenia/</code></td><td>Symlink (Sunshine pre-launch)</td><td>Xbox 360</td></tr>
-        <tr><td>Calibre-Web</td><td><code>calibre/</code></td><td>Nextcloud + OIDC email match</td><td>Books</td></tr>
-        <tr><td>Audiobookshelf</td><td><code>audiobooks/</code></td><td>Nextcloud + OIDC email match</td><td>Audiobooks</td></tr>
-        <tr><td>Immich</td><td><code>immich/</code></td><td>OIDC user isolation</td><td>Photos</td></tr>
-        <tr><td>Recommendations</td><td><code>recommendations/</code></td><td>Symlink to active_history path</td><td>Recs</td></tr>
-        <tr><td>MTG Decks</td><td><code>mtg/decks/</code></td><td>Symlink (mine/ folder)</td><td>MTG</td></tr>
-      </table>
-    </div>
-  </div>
-</div>
-  <div class="section-title">👥 Current Users</div>
-  <div class="callout callout-tip">
-    <div class="callout-icon">🔐</div>
-    <div class="callout-body">User accounts are managed in <strong>Authentik admin</strong> at <code>https://auth.yourdomain.com/if/admin/</code>. This panel is a simplified view. To add a user, invite them via email and have them log in with Google — Authentik creates their account automatically on first login.</div>
-  </div>
-  <div id="user-list">
-    <div class="user-row">
-      <div class="user-avatar">A</div>
-      <div style="flex:1"><div class="user-name">alice <span class="group-tag gt-admin">Admin</span></div><div class="user-meta"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="41202d28222401262c20282d6f222e2c">[email&#160;protected]</a> · Last seen: today · All services</div></div>
-      <span class="ustatus u-active">ACTIVE</span>
-      <button class="ab warn" onclick="openBlock('alice')">🚫 Block</button>
-      <button class="ab nuke-btn" onclick="openNuke('alice')">💣 Nuke</button>
-    </div>
-    <div class="user-row">
-      <div class="user-avatar">B</div>
-      <div style="flex:1"><div class="user-name">bob <span class="group-tag gt-family">Family</span></div><div class="user-meta"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fc9e939ebc9b919d9590d29f9391">[email&#160;protected]</a> · Last seen: yesterday · Jellyfin, Calibre, Games</div></div>
-      <span class="ustatus u-active">ACTIVE</span>
-      <button class="ab warn" onclick="openBlock('bob')">🚫 Block</button>
-      <button class="ab nuke-btn" onclick="openNuke('bob')">💣 Nuke</button>
-    </div>
-    <div class="user-row">
-      <div class="user-avatar" style="background:linear-gradient(135deg,#555,#333)">C</div>
-      <div style="flex:1"><div class="user-name">charlie <span class="group-tag gt-friends">Friends</span></div><div class="user-meta"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4c2f242d3e2025290c2b212d2520622f2321">[email&#160;protected]</a> · Blocked until 2025-03-22</div></div>
-      <span class="ustatus u-blocked">BLOCKED</span>
-      <button class="ab" onclick="unblock('charlie')">✓ Unblock</button>
-      <button class="ab nuke-btn" onclick="openNuke('charlie')">💣 Nuke</button>
-    </div>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <div class="card-title">How to add a new user</div>
-    <div class="steps">
-      <div class="step"><div class="step-content"><strong>Method A: Invite link</strong><p>Authentik admin → Directory → Users → Create → set their email → send them an invite link. They complete signup by clicking "Sign in with Google."</p></div></div>
-      <div class="step"><div class="step-content"><strong>Method B: Self-registration (if enabled)</strong><p>Send them directly to <code>https://auth.ixo.lol</code>. They click "Sign in with Google" — if their Gmail is in the Cloudflare Access allowlist and/or Authentik's enrollment flow, their account is created automatically.</p></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ GROUPS & QUOTAS ══ -->
-<div id="s-groups" style="display:none">
-  <div class="section-title">🏷️ Groups &amp; Service Access</div>
-
+  <div class="section-title">🔐 Caddy forward_auth — Full Template</div>
   <div class="card">
-    <div class="card-title">Authentik Groups → Service Access Matrix</div>
-    <table>
-      <tr><th>Group</th><th>Jellyfin</th><th>Calibre</th><th>ABS</th><th>Nextcloud</th><th>Games</th><th>AI</th><th>Admin Tools</th><th>NC Quota</th></tr>
-      <tr><td><span class="group-tag gt-admin">Admins</span></td><td>✅</td><td>✅+upload</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>Unlimited</td></tr>
-      <tr><td><span class="group-tag gt-family">Family</span></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>50 GB</td></tr>
-      <tr><td><span class="group-tag gt-friends">Friends</span></td><td>✅</td><td>✅ read-only</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>5 GB</td></tr>
-    </table>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">Setting up Groups in Authentik</div>
-    <div class="steps">
-      <div class="step"><div class="step-content"><strong>Create groups in Authentik admin</strong><p>Directory → Groups → Create group for each: "authentik-admins", "authentik-family", "authentik-friends". Assign users to groups.</p></div></div>
-      <div class="step"><div class="step-content"><strong>Pass group membership to services via OIDC claims</strong><p>In Authentik → Applications → [each app] → Property Mappings → add a scope mapping that includes groups in the ID token:</p>
-      <pre># In Authentik: Customization → Property Mappings → Create
-# Type: Scope Mapping
-Name: groups
-Scope Name: groups
-Expression:
-return [group.name for group in request.user.ak_groups.all()]</pre></div></div>
-      <div class="step"><div class="step-content"><strong>Nextcloud: map groups to storage quotas</strong><p>When a user authenticates via Authentik OIDC, Nextcloud receives their group. Use the Nextcloud "User LDAP/OpenID Connect" app to map Authentik groups to Nextcloud storage quotas:</p>
-      <pre># In Nextcloud config.php (add via occ command):
-php occ config:app:set user_oidc group_quota_mapping \
-  --value '{"authentik-family":"50 GB","authentik-friends":"5 GB","authentik-admins":"0 B"}'
-# "0 B" = unlimited in Nextcloud's quota system</pre>
-      <div class="callout callout-tip"><div class="callout-icon">💡</div><div class="callout-body"><strong>Individual overrides:</strong> In Nextcloud admin → Users → find the user → set a custom storage quota. This overrides the group default. So John can get 5GB while Dave gets 1GB, even if both are in the same Authentik group.</div></div>
-      </div></div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">Per-User Nextcloud Storage Quotas (Individual Overrides)</div>
-    <pre># Set quota for specific users via occ CLI:
-cd C:\xampp\htdocs\nextcloud
-php occ user:setting john files quota "5 GB"
-php occ user:setting dave files quota "1 GB"
-php occ user:setting alice files quota "none"    # unlimited
-
-# Or via Nextcloud admin web UI:
-# Admin → Users → click on user → set quota field</pre>
-  </div>
-</div>
-
-<!-- ══ PER-SERVICE CONFIG ══ -->
-<div id="s-services" style="display:none">
-  <div class="section-title">🔗 Connecting Each Service to Authentik</div>
-
-  <div class="card">
-    <div class="card-title">Services with Native OIDC Support (direct integration)</div>
-    <table>
-      <tr><th>Service</th><th>Integration Type</th><th>Config Location</th></tr>
-      <tr><td>Jellyfin</td><td>OIDC via SSO-Auth plugin</td><td>Dashboard → Plugins → SSO-Auth → Configure</td></tr>
-      <tr><td>Open WebUI (Ollama)</td><td>OIDC</td><td>Settings → Auth → OAuth2</td></tr>
-      <tr><td>Immich</td><td>OIDC</td><td>Administration → Authentication → OAuth</td></tr>
-      <tr><td>Nextcloud</td><td>OIDC via user_oidc app</td><td>Apps → User Auth → OpenID Connect</td></tr>
-      <tr><td>Vikunja</td><td>OIDC in config.yml</td><td>See Utilities tab</td></tr>
-      <tr><td>Mealie</td><td>OIDC via env variables</td><td>See Utilities tab</td></tr>
-      <tr><td>Vaultwarden</td><td>SSO via env variable</td><td>DOMAIN env + Authentik app config</td></tr>
-    </table>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">Services Using Caddy forward_auth (no native OIDC)</div>
-    <p>These services don't support OIDC natively. Caddy intercepts all requests, validates the Authentik session, and either passes through or redirects to the login page. The authenticated username is available as a request header.</p>
-    <table>
-      <tr><th>Service</th><th>Username header used for</th></tr>
-      <tr><td>Navidrome</td><td>Auto-create/login user by name</td></tr>
-      <tr><td>EmulatorJS save server</td><td>Route saves to saves/[username]/ directory</td></tr>
-      <tr><td>Kiwix</td><td>Just authentication gate (no per-user data)</td></tr>
-      <tr><td>Kavita</td><td>Just authentication gate (Kavita has own user mapping)</td></tr>
-      <tr><td>Jukebox</td><td>Just authentication gate</td></tr>
-      <tr><td>Dashboard</td><td>Admin group check before allowing access</td></tr>
-    </table>
-    <pre># Caddyfile template for forward_auth services:
-service.yourdomain.com {
+    <div class="card-title">Pattern A — Pi-hosted service</div>
+    <pre># Service runs on the Pi → reverse_proxy to localhost
+service.ixo.lol {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username X-authentik-groups X-authentik-email
@@ -523,299 +229,413 @@ service.yourdomain.com {
     reverse_proxy localhost:[PORT]
 }
 
-# For admin-only services, add group restriction:
+# Admin-only gate (add inside the block):
 @notadmin not header X-authentik-groups *authentik-admins*
 respond @notadmin "Forbidden" 403</pre>
   </div>
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">Pattern B — PC-hosted service (GPU/Windows-only)</div>
+    <pre># Service runs on the PC → reverse_proxy via Tailscale MagicDNS
+service.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy server.ixo.ts.net:[PORT]   # server.ixo.ts.net = PC's Tailscale hostname
+}</pre>
+    <div class="callout callout-warn" style="margin-top:10px">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Pattern B only works when the PC is on. If the PC is off, users will get a 502 Bad Gateway for those services. The forward_auth check itself still works (Pi is up) — it's the upstream proxy target that's unavailable. Pi-hosted services (Pattern A) are unaffected.</div>
+    </div>
+  </div>
 
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">Authentik Application Setup (one per service)</div>
-    <p>For each service, create an Application in Authentik admin → Applications → Create:</p>
-    <pre># Jellyfin example:
-Name:         Jellyfin
-Slug:         jellyfin
-Launch URL:   https://movies.yourdomain.com
-Provider:     Create new OAuth2/OIDC Provider
-  - Redirect URI: https://movies.yourdomain.com/sso/OID/redirect
-  - Access: restrict to authentik-family and authentik-admins groups
+  <hr>
 
-# Each app gets:
-# - Client ID (paste into the service's OIDC config)
-# - Client Secret (paste into the service's OIDC config)
-# - OIDC config URL: https://auth.yourdomain.com/application/o/[slug]/.well-known/openid-configuration</pre>
+  <div class="section-title">🔗 Services with Native OIDC Support</div>
+  <div class="card">
+    <table>
+      <tr><th>Service</th><th>Integration</th><th>Hosted on</th></tr>
+      <tr><td>Jellyfin</td><td>OIDC via SSO-Auth plugin</td><td>PC hub</td></tr>
+      <tr><td>Open WebUI</td><td>OIDC native</td><td>PC hub</td></tr>
+      <tr><td>Immich (base)</td><td>OIDC native</td><td>Pi Sentry</td></tr>
+      <tr><td>Nextcloud</td><td>OIDC via user_oidc app</td><td>Pi Sentry</td></tr>
+      <tr><td>Vikunja</td><td>OIDC in config.yml</td><td>Pi Sentry</td></tr>
+      <tr><td>Mealie</td><td>OIDC via env variables</td><td>Pi Sentry</td></tr>
+      <tr><td>Vaultwarden</td><td>SSO via env variable</td><td>Pi Sentry</td></tr>
+      <tr><td>Hoarder</td><td>OIDC native</td><td>PC hub</td></tr>
+    </table>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-top:8px">All other services use Caddy forward_auth (Pattern A or B above).</p>
   </div>
 </div>
 
-<!-- ══ SAVE MIGRATION ══ -->
+<!-- ══════════════════════════════════════════════════════════
+     USER DATA STORAGE
+══════════════════════════════════════════════════════════ -->
+<div id="s-userdata" style="display:none">
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body"><strong>The principle:</strong> Every piece of per-user data — emulator saves, reading progress, listening history, MTG decks, AI recommendation history — lives inside <code>D:\Users\[username]\</code> on the PC, or <code>/mnt/archive/Users/[username]/</code> on the Pi for Pi-hosted services. The Authentik <code>X-authentik-username</code> header is the key that routes data to the right folder.</div>
+  </div>
+
+  <div class="section-title">🗂️ User Data Architecture</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📂 Pi Sentry — <code>/mnt/archive/Users/[username]/</code></div>
+      <p style="font-size:.83rem;line-height:1.6">Used by all Pi-hosted services. Lives on the archive drive — counts toward Nextcloud storage quota. Persists independently of whether the PC is on.</p>
+      <pre>/mnt/archive/Users/alice/
+├── audiobooks/        # Audiobookshelf progress
+├── calibre/           # Reading progress
+├── emulation/         # Browser emulator saves (EmulatorJS)
+├── nextcloud/         # Nextcloud personal files
+└── inbox/             # Monica watchdog drop folder</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">📂 PC Hub — <code>D:\Users\[username]\</code></div>
+      <p style="font-size:.83rem;line-height:1.6">Used by PC-hosted services. PC must be on for these to work. Synced to Pi archive via Nextcloud where applicable.</p>
+      <pre>D:\Users\alice\
+├── emulation\         # Desktop emulator saves (Dolphin, Xenia)
+│   ├── dolphin\
+│   └── xenia\
+├── mtg\decks\         # MTG deck files
+├── recommendations\   # AI recommendation history
+└── achievements\      # Achievement unlock log</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Per-App Data Locations Reference</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table style="margin:0">
+        <tr><th>App</th><th>User data location</th><th>Method</th><th>Hosted on</th></tr>
+        <tr><td>EmulatorJS</td><td><code>/mnt/archive/Users/[u]/emulation/</code></td><td>Flask save server → path</td><td>Pi</td></tr>
+        <tr><td>Dolphin (GameCube)</td><td><code>D:\Users\[u]\emulation\dolphin\</code></td><td>Symlink (Sunshine pre-launch)</td><td>PC</td></tr>
+        <tr><td>Xenia (Xbox 360)</td><td><code>D:\Users\[u]\emulation\xenia\</code></td><td>Symlink (Sunshine pre-launch)</td><td>PC</td></tr>
+        <tr><td>Calibre-Web</td><td>Internal DB + Nextcloud sync</td><td>OIDC email match</td><td>Pi</td></tr>
+        <tr><td>Audiobookshelf</td><td>Internal DB</td><td>OIDC email match</td><td>Pi</td></tr>
+        <tr><td>Immich (base)</td><td><code>/mnt/archive/Photos/[u]/</code></td><td>OIDC user isolation</td><td>Pi</td></tr>
+        <tr><td>Nextcloud</td><td><code>/mnt/archive/Docker/nextcloud/[u]/</code></td><td>OIDC provisioning</td><td>Pi</td></tr>
+        <tr><td>Recommendations</td><td><code>D:\Users\[u]\recommendations\</code></td><td>Symlink to active history</td><td>PC</td></tr>
+        <tr><td>MTG Decks</td><td><code>D:\Users\[u]\mtg\decks\</code></td><td>Symlink (mine/ folder)</td><td>PC</td></tr>
+        <tr><td>Monica CRM</td><td><code>/mnt/archive/Users/[u]/inbox/</code></td><td>Watchdog watches inbox folder</td><td>Pi</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Creating a New User's Folders</div>
+    <div class="card">
+      <div class="card-title">On the Pi (SSH in)</div>
+      <pre># Replace "alice" with the user's Authentik username
+USERNAME=alice
+
+# Pi archive folders
+mkdir -p /mnt/archive/Users/$USERNAME/{audiobooks,calibre,emulation,nextcloud,inbox}
+chown -R 1000:1000 /mnt/archive/Users/$USERNAME</pre>
+      <div class="card-title" style="margin-top:12px">On the PC (PowerShell as Administrator)</div>
+      <pre>$user = "alice"
+New-Item -ItemType Directory -Force "D:\Users\$user\emulation\dolphin"
+New-Item -ItemType Directory -Force "D:\Users\$user\emulation\xenia"
+New-Item -ItemType Directory -Force "D:\Users\$user\mtg\decks"
+New-Item -ItemType Directory -Force "D:\Users\$user\recommendations"
+New-Item -ItemType Directory -Force "D:\Users\$user\achievements"</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     USERS
+══════════════════════════════════════════════════════════ -->
+<div id="s-users" style="display:none">
+  <div class="section-title">👥 Current Users</div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">🔐</div>
+    <div class="callout-body">
+      Manage users in <strong>Authentik admin</strong> at <a href="#" data-cfg-href="authentik-admin" onclick="window.open(CFG.authentikAdmin,'_blank');return false;"><span data-cfg="authentik-admin"></span></a>.
+      The cards below are a quick reference — all actual user management happens in Authentik.
+    </div>
+  </div>
+
+  <div class="user-card">
+    <div class="user-avatar">👑</div>
+    <div>
+      <div class="user-name">ixora <span class="group-tag gt-admin">admin</span></div>
+      <div class="user-meta">Server owner · Full access · All services</div>
+    </div>
+    <div class="user-actions">
+      <button class="ua-btn" onclick="window.open(CFG.authentikAdmin,'_blank')">Manage in Authentik ↗</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">🔐 Adding a New User</div>
+    <ol style="font-size:.84rem;line-height:2;margin:0 0 0 18px;color:var(--text)">
+      <li>Authentik admin → Directory → Users → Create → set username (must match their Google email prefix) + email (exact Gmail address)</li>
+      <li>Add user to the appropriate group (<code>authentik-family</code> or <code>authentik-admins</code>)</li>
+      <li>Ask them to visit <span data-cfg="authentik-base"></span> and sign in with Google — account links automatically on first login</li>
+      <li>Run the folder creation script above (User Data Storage tab)</li>
+      <li>For Smart TV users: set a Jellyfin native password (<strong>not</strong> the Google account — TV apps can't do browser SSO)</li>
+    </ol>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">📺 Smart TV Users — Special Case</div>
+    <p>LG WebOS, Samsung Tizen, Roku, and Fire TV Jellyfin apps cannot complete a browser-based OAuth flow. These users need a <strong>Jellyfin-native password</strong> set by the admin:</p>
+    <pre># In Jellyfin admin → Users → [username] → Password:
+# Set a separate password the user will type directly into their TV app.
+# This password is ONLY for Jellyfin on TV — all other services still use Google SSO.
+# Watch history is unified because it's the same underlying Jellyfin account.</pre>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     GROUPS & QUOTAS
+══════════════════════════════════════════════════════════ -->
+<div id="s-groups" style="display:none">
+  <div class="section-title">🏷️ Groups &amp; Access Control</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="group-tag gt-admin">authentik-admins</span></div>
+      <p style="font-size:.83rem;line-height:1.6">Full access to all services including admin panels. Sees control interfaces, Portainer, AdGuard, Uptime Kuma. You only.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="group-tag gt-family">authentik-family</span></div>
+      <p style="font-size:.83rem;line-height:1.6">Standard access. Jellyfin, EmulatorJS, Nextcloud, books, music, audiobooks. Cannot see admin tools.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💾 Nextcloud Storage Quotas</div>
+    <div class="card">
+      <p>Set default group quota in Nextcloud Admin → Settings → User Authentication. Override per-user:</p>
+      <pre># SSH into Pi, then:
+docker exec -it nextcloud php occ user:setting alice files quota "5 GB"
+docker exec -it nextcloud php occ user:setting dave files quota "1 GB"
+docker exec -it nextcloud php occ user:setting ixora files quota "none"   # unlimited</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PER-SERVICE CONFIG
+══════════════════════════════════════════════════════════ -->
+<div id="s-services" style="display:none">
+  <div class="section-title">🔗 Per-Service Authentik Configuration</div>
+
+  <div class="card">
+    <div class="card-title">Services using Caddy forward_auth (no native OIDC)</div>
+    <p>Caddy intercepts all requests, validates the Authentik session, and injects the username header. The service never sees unauthenticated traffic.</p>
+    <table>
+      <tr><th>Service</th><th>Username header used for</th><th>Hosted on</th></tr>
+      <tr><td>Navidrome</td><td>Auto-create/login user by name</td><td>Pi</td></tr>
+      <tr><td>EmulatorJS save server</td><td>Route saves to /Users/[username]/emulation/</td><td>Pi</td></tr>
+      <tr><td>Kiwix</td><td>Auth gate only (no per-user data)</td><td>Pi</td></tr>
+      <tr><td>Kavita</td><td>Auth gate (Kavita has own user mapping)</td><td>Pi</td></tr>
+      <tr><td>Excalidraw</td><td>Auth gate only</td><td>Pi</td></tr>
+      <tr><td>Jukebox</td><td>Auth gate + username for history</td><td>Pi</td></tr>
+      <tr><td>Sunshine</td><td>Not applicable — PIN-based pairing</td><td>PC</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Navidrome — user auto-provisioning via forward_auth header</div>
+    <pre># Navidrome creates a user automatically on first login if
+# SUBSONIC_DEFAULTUSERCREATION=true is set in its Docker environment.
+# The username from X-authentik-username becomes their Navidrome username.
+# Set in docker-compose.yml (Pi):
+environment:
+  ND_DEFAULTLANGUAGE: en
+  ND_SUBSONIC_DEFAULTUSERCREATION: "true"</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Audiobookshelf — OIDC email matching</div>
+    <pre># Before enabling OIDC: ensure each user's email in ABS matches their Gmail exactly.
+# ABS admin → Users → edit → set Email to their Gmail address.
+# Then enable OIDC in ABS Settings → Authentication → OpenID Connect.
+# First Google login links automatically via email match → all progress preserved.</pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Immich — OIDC email matching (base app on Pi)</div>
+    <pre># Immich admin → Administration → Users:
+# Update each user's email to their Gmail before enabling OIDC.
+# After enabling, first Google login links to existing account → photos preserved.
+# ML Worker on PC operates independently — processes photos when PC is on.</pre>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SAVE MIGRATION
+══════════════════════════════════════════════════════════ -->
 <div id="s-savemigration" style="display:none">
   <div class="section-title">💾 Save File Migration Scripts</div>
 
   <div class="callout callout-dragon">
     <div class="callout-icon">🐉</div>
-    <div class="callout-body"><strong>The problem:</strong> Before Authentik, services created user accounts with local usernames. After Authentik, the "username" passed to services comes from the Google account's email prefix (e.g. <code>alice</code> from <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="70111c19131530171d11191c5e131f1d">[email&#160;protected]</a></code>). These migration scripts rename existing save/data directories to match the new Authentik-derived usernames.</div>
+    <div class="callout-body"><strong>The problem:</strong> Before Authentik, services created user accounts with local usernames. After Authentik, the username passed to services is the Google account email prefix (e.g. <code>alice</code> from <code>alice@gmail.com</code>). These scripts rename existing data directories to match.</div>
   </div>
 
   <div class="card">
-    <div class="card-title">🎮 Emulation Save Files Migration</div>
-    <p>Old saves are in <code>D:\Emulation\saves\[old-username]\</code>. New saves go in <code>D:\Emulation\saves\[gmail-prefix]\</code>.</p>
-    <pre># migrate_emu_saves.py
-import os, shutil, json
+    <div class="card-title">🎮 Emulation Save Files — PC (Dolphin/Xenia)</div>
+    <pre>$oldName = "oldusername"
+$newName = "alice"   # Authentik username (Google email prefix)
 
-# Map old local usernames → new Gmail prefixes
-USERNAME_MAP = {
-    'alice_local':  'alice',    # alice_local → <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f495989d9791b49399959d98da979b99">[email&#160;protected]</a> prefix
-    'bob123':       'bob',
-    'charlie_mc':   'charlie',
-}
+# Rename the emulation folder
+Rename-Item "D:\Users\$oldName" "D:\Users\$newName"
 
-SAVE_BASE = 'D:/Emulation/saves'
-for old_name, new_name in USERNAME_MAP.items():
-    old_path = os.path.join(SAVE_BASE, old_name)
-    new_path = os.path.join(SAVE_BASE, new_name)
-    if os.path.exists(old_path) and not os.path.exists(new_path):
-        shutil.copytree(old_path, new_path)
-        print(f'Migrated: {old_name} -> {new_name}')
-    elif os.path.exists(old_path) and os.path.exists(new_path):
-        print(f'CONFLICT: both {old_name} and {new_name} exist — merge manually')
-
-print('Done. Verify saves work before deleting old directories.')</pre>
+# Fix any symlinks that pointed to the old folder
+# (re-run Sunshine pre-launch script for each user)</pre>
   </div>
 
   <div class="card" style="margin-top:12px">
-    <div class="card-title">📚 Calibre-Web: Link Existing Users to Google Accounts</div>
-    <p>Calibre-Web stores reading progress per user. When Authentik logs a user in via OIDC, Calibre-Web creates a new account if one doesn't exist with that email. To preserve existing progress:</p>
-    <pre># In Calibre-Web admin → Users → edit existing user:
-# Change "Email" to match their Gmail address exactly.
-# When they next log in via Google through Authentik,
-# Calibre-Web matches on email and uses the existing account.
+    <div class="card-title">🍓 Pi Emulation Saves (EmulatorJS)</div>
+    <pre># SSH into Pi:
+OLD=oldusername
+NEW=alice
 
-# If they have a different username format, also update via SQLite:
-import sqlite3
-db = sqlite3.connect('D:/Books/app.db')
-db.execute("UPDATE user SET email=? WHERE name=?", ('<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c6a7aaafa5a386a1aba7afaae8a5a9ab">[email&#160;protected]</a>', 'alice_old'))
-db.commit()
-print('Done')</pre>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">🎧 Audiobookshelf: Preserve Listening Progress</div>
-    <p>ABS stores progress in JSON files per user ID. When Authentik OIDC is enabled and a user logs in, ABS creates a new user if the email doesn't match an existing account.</p>
-    <pre># Step 1: Before enabling Authentik OIDC in ABS,
-# note each user's email in ABS admin → Users.
-# Make sure those emails EXACTLY match their Gmail addresses.
-
-# Step 2: Enable OIDC in ABS (Settings → Authentication → OpenID Connect)
-# When users log in with Google, ABS matches on email → preserves all progress.
-
-# Step 3: If email mismatch, edit via ABS's user management API:
-curl -X PATCH http://localhost:13378/api/users/[user-id] \
-  -H "Authorization: Bearer [admin-token]" \
-  -H "Content-Type: application/json" \
-  -d '{"email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f99895909a9cb99e94989095d79a9694">[email&#160;protected]</a>"}'</pre>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">📷 Immich: User Account Migration</div>
-    <p>Immich accounts are tied to email. When OIDC is enabled, Immich matches on email and preserves all photos/albums.</p>
-    <pre># In Immich admin → Administration → Users:
-# Update each user's email to match their Gmail address before enabling OIDC.
-# After enabling OIDC, their first Google login links to the existing account.</pre>
+mv /mnt/archive/Users/$OLD /mnt/archive/Users/$NEW
+chown -R 1000:1000 /mnt/archive/Users/$NEW</pre>
   </div>
 
   <div class="card" style="margin-top:12px">
     <div class="card-title">General Migration Principle</div>
     <div class="callout callout-tip">
       <div class="callout-icon">💡</div>
-      <div class="callout-body"><strong>For every service:</strong> Before enabling Authentik OIDC, update all existing user accounts to use the user's exact Gmail address as their email/username. Most services match on email during OIDC login, so existing data is automatically preserved. For save-file-based systems (emulators), use the rename script above.</div>
+      <div class="callout-body"><strong>For every service:</strong> Before enabling Authentik OIDC, update existing user accounts to use the user's exact Gmail address. Most services match on email during OIDC login — existing data is preserved automatically. For save-file-based systems (emulators), use the folder rename scripts above.</div>
     </div>
   </div>
 </div>
 
-<!-- ══ NUKE / BLOCK ══ -->
+<!-- ══════════════════════════════════════════════════════════
+     NUKE / BLOCK
+══════════════════════════════════════════════════════════ -->
 <div id="s-nuke" style="display:none">
   <div class="section-title">💣 Block &amp; Nuke System</div>
 
   <div class="callout callout-dragon">
     <div class="callout-icon">🐉</div>
-    <div class="callout-body"><strong>The power of Authentik:</strong> Because every service authenticates through Authentik, blocking or nuking a user in Authentik instantly removes their access from ALL services simultaneously — no need to log into each app individually.</div>
+    <div class="callout-body"><strong>The power of Authentik:</strong> Because every service authenticates through Authentik on the Pi, blocking a user in Authentik instantly removes their access from ALL services simultaneously — no need to log into each app individually. The Pi being always-on means this takes effect immediately at any time.</div>
   </div>
 
   <div class="card">
-    <div class="card-title">🚫 Temporary Block (from Authentik admin)</div>
-    <p>Authentik admin → Directory → Users → click user → <strong>Deactivate</strong> toggle. The user's session tokens are revoked immediately. They can't log into any service. Re-activate whenever you want.</p>
-    <pre># Or via Authentik API (for automation):
-curl -X PATCH https://auth.yourdomain.com/api/v3/core/users/[user-pk]/ \
-  -H "Authorization: Bearer [authentik-api-token]" \
-  -H "Content-Type: application/json" \
-  -d '{"is_active": false}'</pre>
+    <div class="card-title">🚫 Temporary Block</div>
+    <p>Authentik admin → Directory → Users → click user → <strong>Deactivate</strong> toggle. Session tokens revoked immediately. Re-enable the same way.</p>
   </div>
 
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">⏰ Timed Block (expires automatically)</div>
-    <p>Authentik doesn't have native timed blocks, but you can combine Authentik deactivation with a scheduled Task Scheduler re-activation:</p>
-    <pre># Block now:
-# Authentik admin → deactivate user
-
-# Schedule re-activation (Task Scheduler, one-time):
-# Action: PowerShell script that calls Authentik API to re-activate
-$headers = @{ "Authorization" = "Bearer YOUR_TOKEN"; "Content-Type" = "application/json" }
-Invoke-RestMethod -Uri "https://auth.yourdomain.com/api/v3/core/users/[user-pk]/" `
-  -Method Patch -Headers $headers -Body '{"is_active": true}'</pre>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">💣 Full Nuke (permanent ban + save deletion)</div>
-    <div class="nuke-box">
-      <h4>⚠️ This is irreversible</h4>
-      <p style="font-size:.82rem;color:var(--text-dim)">A nuke does ALL of the following:</p>
-      <ul style="font-size:.8rem;color:var(--text-dim);margin-top:6px 0 0 18px">
-        <li>Delete user from Authentik (kills all service access instantly)</li>
-        <li>Block their IP in Windows Firewall</li>
-        <li>Delete <code>D:\Emulation\saves\[username]\</code> (all game saves)</li>
-        <li>Delete their Nextcloud files (<code>D:\NextcloudData\[username]\</code>)</li>
-        <li>Create a Feedback ticket: "Remove [user] from Jellyfin and any manual accounts"</li>
-        <li>Services with Authentik OIDC automatically lose the user when the Authentik account is deleted</li>
-      </ul>
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">💣 Full Nuke — step by step</div>
+    <ol style="font-size:.84rem;line-height:2;margin:0 0 0 18px">
+      <li>Authentik admin → Directory → Users → Delete user → immediate access removal everywhere</li>
+      <li>SSH into Pi: <code>rm -rf /mnt/archive/Users/[username]</code></li>
+      <li>On PC: <code>Remove-Item -Recurse "D:\Users\[username]"</code></li>
+      <li>Jellyfin admin → Users → delete their account (removes watch history)</li>
+      <li>Nextcloud: user deletion via <code>docker exec nextcloud php occ user:delete [username]</code></li>
+      <li>Block their Tailscale device in the Tailscale admin panel</li>
+    </ol>
+    <div class="callout callout-warn" style="margin-top:12px">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Deletion is permanent. Back up their data first if there's any chance of reinstatement.</div>
     </div>
-    <pre># nuke_user.py — run from server terminal
-import subprocess, shutil, os, json, requests
-from datetime import datetime
-
-def nuke_user(username, gmail, authentik_token, authentik_base_url, user_pk):
-    print(f"NUKING: {username} ({gmail})")
-
-    # 1. Delete from Authentik (kills ALL service access immediately)
-    r = requests.delete(
-        f"{authentik_base_url}/api/v3/core/users/{user_pk}/",
-        headers={"Authorization": f"Bearer {authentik_token}"}
-    )
-    print(f"  Authentik delete: {r.status_code}")
-
-    # 2. Block IP in Windows Firewall (if you know their IP)
-    # (IP is in the Authentik audit log: Directory → Audit Log → filter by user)
-    # subprocess.run(['netsh','advfirewall','firewall','add','rule',
-    #                f'name=NUKE_{username}','dir=in','action=block',f'remoteip={ip}'])
-
-    # 3. Delete game saves
-    save_path = f'D:/Emulation/saves/{username}'
-    if os.path.exists(save_path):
-        shutil.rmtree(save_path)
-        print(f"  Deleted saves: {save_path}")
-
-    # 4. Delete Nextcloud files
-    nc_path = f'D:/NextcloudData/{username}'
-    if os.path.exists(nc_path):
-        shutil.rmtree(nc_path)
-        print(f"  Deleted Nextcloud: {nc_path}")
-
-    # 5. Create reminder ticket
-    tickets = []
-    try: tickets = json.load(open('D:/Server/Dashboard/tickets.json'))
-    except: pass
-    tickets.insert(0, {
-        'id': f'TKT-{len(tickets)+1:04d}',
-        'user': 'system',
-        'subject': f'[NUKE] Remove {username} from manual accounts',
-        'body': f'User {username} ({gmail}) was nuked on {datetime.now().strftime("%Y-%m-%d %H:%M")}.\n\nManual steps needed:\n- Remove from Jellyfin if local account exists\n- Remove from Calibre-Web if local account exists\n- Check Audiobookshelf for orphaned data',
-        'status': 'unread',
-        'date': datetime.now().strftime('%Y-%m-%d %H:%M'),
-        'ip': 'system'
-    })
-    json.dump(tickets, open('D:/Server/Dashboard/tickets.json','w'), indent=2)
-    print(f"  Created reminder ticket")
-    print(f"NUKE COMPLETE for {username}")
-
-# Usage:
-# nuke_user('bob', '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5e3c313c1e39333f3732703d3133">[email&#160;protected]</a>', 'YOUR_TOKEN', 'https://auth.yourdomain.com', 42)</pre>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">IP Block via Windows Firewall</div>
-    <p>Find the user's IP in Authentik: Directory → Audit Log → filter by username → look at login events for "Client IP".</p>
-    <pre># Block an IP permanently:
-netsh advfirewall firewall add rule name="BLOCK_1.2.3.4" dir=in action=block remoteip=1.2.3.4
-
-# Unblock:
-netsh advfirewall firewall delete rule name="BLOCK_1.2.3.4"</pre>
-    <p>Also add the IP to your Cloudflare Security → WAF → IP Access Rules → Block for a double-layer block at the CDN level before traffic even reaches your server.</p>
   </div>
 </div>
 
-<!-- ══ ACHIEVEMENTS ══ -->
+<!-- ══════════════════════════════════════════════════════════
+     ACHIEVEMENTS
+══════════════════════════════════════════════════════════ -->
 <div id="s-achievements" style="display:none">
-  <div class="section-title">🏆 Achievement System</div>
+  <div class="section-title">🏆 Achievement System — Architecture</div>
+
+  <div class="callout callout-dragon">
+    <div class="callout-icon">🐉</div>
+    <div class="callout-body">
+      <strong>Distributed architecture:</strong> Each node runs a lightweight <strong>tracking agent</strong> that listens for local events (emulator milestones, service usage, media completions). All agents report to the central <strong>Achievement Manager</strong> on the Pi Sentry (port 9010), which is the authoritative store. The <strong>Recommendation Engine</strong> on the PC hub reads from the Manager to personalize suggestions.
+      <br><br>
+      Adding a new Pi to the cluster? Deploy a tracking agent on it — it automatically registers with the Manager.
+    </div>
+  </div>
+
   <div class="grid-2">
     <div class="card">
-      <div class="card-title">🎮 RetroAchievements (emulated games)</div>
-      <p>Users connect their RetroAchievements.org account in their User Settings. EmulatorJS sends their RA credentials to retroachievements.org to unlock achievements during gameplay. Authentik provides the username — no separate RA login in the game UI needed if RA credentials are stored per-user in Authentik's user attributes.</p>
-      <pre># Store RA credentials in Authentik user attributes:
-# Authentik admin → Directory → Users → [user] → Attributes:
-{
-  "ra_username": "AliceRetro",
-  "ra_token": "abc123def456"
-}
-
-# EmulatorJS server reads these from the X-authentik-username header,
-# then fetches user attributes via Authentik API:
-GET /api/v3/core/users/?username=[username]
-→ returns user.attributes including ra_username and ra_token</pre>
+      <div class="card-title">🍓 Achievement Manager (Pi — port 9010)</div>
+      <ul style="font-size:.83rem;line-height:1.8;margin:0 0 0 18px">
+        <li>Receives signals from all tracking agents</li>
+        <li>Evaluates definitions.json unlock conditions</li>
+        <li>Stores per-user unlock records</li>
+        <li>Feeds the community feed on the dashboard</li>
+        <li>Always available — Pi is always on</li>
+      </ul>
     </div>
     <div class="card">
-      <div class="card-title">📚 Book/Audiobook Achievements</div>
-      <p>Audiobookshelf webhook fires on "Audiobook Finished" → posts to achievement server (port 9003) → server grants achievement for that Authentik user. Calibre-Web fires a webhook when user marks a book "Read."</p>
-      <pre># In ABS: Settings → Notifications → Webhooks
-# Event: Audiobook Finished
-# URL: http://localhost:9003/api/achievement/book
-# Body:
-{
-  "user": "{{username}}",
-  "title": "{{bookTitle}}",
-  "type": "audiobook"
-}</pre>
+      <div class="card-title">📊 Tracking Agent (every node — port 9001/9011/…)</div>
+      <ul style="font-size:.83rem;line-height:1.8;margin:0 0 0 18px">
+        <li>Runs on Pi (port 9001), PC hub (port 9011)</li>
+        <li>Future Pis get their own agent + port</li>
+        <li>Monitors local service events</li>
+        <li>Forwards signals to Manager at Pi:9010</li>
+        <li>Lightweight — &lt;40MB RAM per node</li>
+      </ul>
     </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Signal flow example</div>
+    <pre># User alice completes a Pokémon game on EmulatorJS (Pi):
+#   EmulatorJS save server → Pi tracking agent (port 9001)
+#   Pi tracking agent → Achievement Manager (port 9010) → evaluates definitions
+#   Manager → unlocks "Pokémon Master" → updates community feed
+
+# User bob streams a game via Sunshine (PC):
+#   Sunshine webhook → PC tracking agent (port 9011)
+#   PC tracking agent → Achievement Manager (Pi:9010)
+#   Manager → unlocks "Game Streamer" if conditions met</pre>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">Adding a new Pi node to the achievement network</div>
+    <pre># On the new Pi, deploy the tracking agent:
+cd ~/scripts
+python3 tracking_agent.py --port 9021 --manager-url http://sentry.ixo.ts.net:9010
+
+# Register it in nodes.json:
+# Add "stats-agent-pi2" to the new node's services array
+# Set healthCheckPort to 9021</pre>
   </div>
 </div>
 
-<!-- BLOCK MODAL -->
+<!-- Modals -->
 <div class="mo" id="mo-block">
   <div class="mc">
     <button class="mclose" onclick="document.getElementById('mo-block').classList.remove('open')">✕</button>
-    <h3 style="color:#e0b84b">🚫 Block: <span id="bl-user"></span></h3>
-    <p style="font-size:.83rem;color:var(--text-dim);margin-bottom:12px">Deactivating in Authentik instantly removes access to ALL services.</p>
-    <select id="bl-dur" class="finput" style="width:100%;margin-bottom:8px">
-      <option value="1h">1 hour</option><option value="24h">24 hours</option>
-      <option value="7d">7 days</option><option value="30d">30 days</option>
-      <option value="permanent">Permanent (until manually re-activated)</option>
-    </select>
-    <input id="bl-reason" class="finput" placeholder="Reason (optional)" style="width:100%;font-family:'Raleway',sans-serif;margin-bottom:12px">
-    <div class="callout callout-tip" style="margin-bottom:12px">
-      <div class="callout-icon">🔐</div>
-      <div class="callout-body"><strong>Action:</strong> Go to <a href="https://auth.yourdomain.com/if/admin/" target="_blank" style="color:var(--accent2)">Authentik admin</a> → Directory → Users → find user → Deactivate toggle.</div>
-    </div>
+    <h3>🚫 Block: <span id="bl-user"></span></h3>
+    <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:16px">This deactivates the user in Authentik. They are immediately locked out of all services. Re-enable from Authentik admin.</p>
     <div style="display:flex;gap:8px">
-      <button onclick="document.getElementById('mo-block').classList.remove('open');alert('Go to Authentik admin to complete the block.')" style="background:rgba(224,184,75,.12);border:1px solid rgba(224,184,75,.3);color:#e0b84b;padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.72rem">Open Authentik Admin ↗</button>
+      <button onclick="window.open(CFG.authentikAdmin,'_blank')" style="background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.3);color:var(--accent);padding:8px 16px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.72rem">Open Authentik Admin ↗</button>
       <button class="ab" onclick="document.getElementById('mo-block').classList.remove('open')">Cancel</button>
     </div>
   </div>
 </div>
 
-<!-- NUKE MODAL -->
 <div class="mo" id="mo-nuke">
   <div class="mc">
     <button class="mclose" onclick="document.getElementById('mo-nuke').classList.remove('open')">✕</button>
     <h3 style="color:var(--danger)">💣 NUKE: <span id="nk-user"></span></h3>
     <div class="nuke-box">
       <h4>⚠️ This cannot be undone</h4>
-      <ul style="font-size:.82rem;color:var(--text-dim);margin-top:6px 0 0 18px">
+      <ul style="font-size:.82rem;color:var(--text-dim);margin:6px 0 0 18px;line-height:1.8">
         <li>Delete from Authentik → instant access removal everywhere</li>
-        <li>Block IP in Windows Firewall + Cloudflare WAF</li>
-        <li>Delete all game save files</li>
-        <li>Delete Nextcloud personal storage</li>
-        <li>Creates a reminder ticket for manual cleanup steps</li>
+        <li>Delete all Pi archive data (<code>/mnt/archive/Users/[user]</code>)</li>
+        <li>Delete all PC data (<code>D:\Users\[user]</code>)</li>
+        <li>Delete Nextcloud account + files</li>
+        <li>Block Tailscale device</li>
       </ul>
     </div>
     <p style="font-size:.8rem;color:var(--text-dim);margin-bottom:8px">Type the username to confirm:</p>
-    <input id="nk-confirm" class="finput" placeholder="Username…" style="width:100%;margin-bottom:12px">
+    <input id="nk-confirm" class="finput" placeholder="Username…" style="margin-bottom:12px">
     <div style="display:flex;gap:8px">
       <button onclick="doNuke()" style="background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.4);color:var(--danger);padding:8px 18px;border-radius:3px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.75rem">💣 NUKE</button>
       <button class="ab" onclick="document.getElementById('mo-nuke').classList.remove('open')">Cancel</button>
@@ -823,27 +643,52 @@ GET /api/v3/core/users/?username=[username]
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 let CU = null;
-function showSec(n){
-  ['setup','userdata','users','groups','services','savemigration','nuke','achievements'].forEach(s=>{
-    document.getElementById('s-'+s).style.display='none';
-    const b=document.querySelector(`[onclick="showSec('${s}')"]`);
-    if(b)b.classList.remove('active');
+
+function showSec(n) {
+  ['setup','userdata','users','groups','services','savemigration','nuke','achievements'].forEach(s => {
+    const el = document.getElementById('s-' + s);
+    if (el) el.style.display = 'none';
+    const btn = document.querySelector(`[onclick="showSec('${s}')"]`);
+    if (btn) btn.classList.remove('active');
   });
-  document.getElementById('s-'+n).style.display='block';
-  const ab=document.querySelector(`[onclick="showSec('${n}')"]`);
-  if(ab)ab.classList.add('active');
+  const show = document.getElementById('s-' + n);
+  if (show) show.style.display = 'block';
+  const active = document.querySelector(`[onclick="showSec('${n}')"]`);
+  if (active) active.classList.add('active');
 }
-function openBlock(u){CU=u;document.getElementById('bl-user').textContent=u;document.getElementById('mo-block').classList.add('open');}
-function openNuke(u){CU=u;document.getElementById('nk-user').textContent=u;document.getElementById('nk-confirm').value='';document.getElementById('mo-nuke').classList.add('open');}
-function unblock(u){window.open('https://auth.ixo.lol/if/admin/','_blank');}
-function doNuke(){
-  if(document.getElementById('nk-confirm').value.trim()!==CU){alert('Username mismatch.');return;}
-  alert(`Nuke procedure for ${CU}:\n\n1. Open Authentik admin → Delete user\n2. Run nuke_user.py\n3. Block IP in Windows Firewall\n4. Add IP to Cloudflare WAF blocklist\n5. Delete D:\\Users\\${CU}\\ folder (all app data)\n\nA reminder ticket will be created automatically by the nuke script.`);
+
+function openBlock(u) {
+  CU = u;
+  document.getElementById('bl-user').textContent = u;
+  document.getElementById('mo-block').classList.add('open');
+}
+
+function openNuke(u) {
+  CU = u;
+  document.getElementById('nk-user').textContent = u;
+  document.getElementById('nk-confirm').value = '';
+  document.getElementById('mo-nuke').classList.add('open');
+}
+
+function doNuke() {
+  if (document.getElementById('nk-confirm').value.trim() !== CU) {
+    alert('Username mismatch — type the exact username to confirm.');
+    return;
+  }
+  alert(
+    `Nuke checklist for ${CU}:\n\n` +
+    `1. Authentik admin → Delete user\n` +
+    `2. SSH Pi: rm -rf /mnt/archive/Users/${CU}\n` +
+    `3. PC: Remove-Item -Recurse D:\\Users\\${CU}\n` +
+    `4. docker exec nextcloud php occ user:delete ${CU}\n` +
+    `5. Tailscale admin → remove their device\n` +
+    `6. Jellyfin admin → delete their account`
+  );
   document.getElementById('mo-nuke').classList.remove('open');
 }
-document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 </script>
+
 </body>
 </html>

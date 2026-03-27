@@ -42,6 +42,11 @@
   <div class="callout-body"><strong>The goal:</strong> All always-on services restart automatically. Game servers (Minecraft, ARK, SS13) are intentionally off by default after a reboot — you turn them on when you want a session. Emulators (Dolphin, Xenia) are on-demand anyway and need no automation. Sunshine starts automatically so remote streaming is always available.</div>
 </div>
 
+<div class="callout callout-tip" style="margin-bottom:20px">
+  <div class="callout-icon">🍓</div>
+  <div class="callout-body"><strong>Pi Sentry manages itself — this page is PC-only.</strong> All Pi-hosted services use <code>restart: unless-stopped</code> in Docker Compose, and Caddy is enabled via <code>sudo systemctl enable caddy</code>. They survive Pi reboots automatically with no intervention needed. See <a href="raspi.html">raspi.html → Maintenance</a> for Pi-specific service management and the Pi boot sequence.</div>
+</div>
+
 <div class="section">
   <div class="section-title">📋 Quick Reference — What Restarts Automatically</div>
   <div class="card" style="padding:0;overflow:hidden">
@@ -49,7 +54,7 @@
       <tr><th>Service</th><th>Restart method</th><th>Boot time</th><th>Status</th></tr>
 
       <tr style="background:rgba(255,255,255,.01)"><td colspan="4" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);padding:7px 12px;letter-spacing:.1em">ALWAYS AUTOMATIC</td></tr>
-      <tr><td><span class="svc-icon">☁️</span> Authentik (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~3 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <!-- Authentik: moved to Pi Sentry — self-manages via Docker restart policy -->
       <tr><td><span class="svc-icon">🎬</span> Jellyfin</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">📚</span> Calibre-Web</td><td class="svc-method auto">NSSM service</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">🎧</span> Audiobookshelf</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
@@ -61,9 +66,9 @@
       <tr><td><span class="svc-icon">🔍</span> Prowlarr</td><td class="svc-method auto">Windows Service</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">🔐</span> Vaultwarden</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">📡</span> Uptime Kuma</td><td class="svc-method auto">NSSM service (Node.js)</td><td class="na">~20 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
-      <tr><td><span class="svc-icon">📷</span> Immich (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~3 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
-      <tr><td><span class="svc-icon">🕹️</span> RomM (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~2 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
-      <tr><td><span class="svc-icon">🍲</span> Mealie (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~2 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <tr><td><span class="svc-icon">📷</span> Immich ML Worker</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~2 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <!-- RomM: moved to Pi Sentry — self-manages via Docker restart policy -->
+      <!-- Mealie: moved to Pi Sentry — self-manages via Docker restart policy -->
       <tr><td><span class="svc-icon">☁️</span> Nextcloud (XAMPP)</td><td class="svc-method auto">XAMPP Apache + MySQL as Windows Services</td><td class="na">~30 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">📕</span> Kavita (×2)</td><td class="svc-method auto">NSSM service ×2</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">✅</span> Vikunja</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
@@ -75,7 +80,7 @@
       <tr><td><span class="svc-icon">📊</span> Stats agent (port 9001)</td><td class="svc-method auto">Task Scheduler on login</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">🌐</span> Caddy</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">🔒</span> IPBan</td><td class="svc-method auto">Windows Service (Automatic)</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
-      <tr><td><span class="svc-icon">🌍</span> LinguaCafe (WSL2)</td><td class="svc-method auto">Task Scheduler → WSL2 docker-compose up</td><td class="na">~2 min</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
+      <!-- LinguaCafe: moved to Pi Sentry — self-manages via Docker restart policy -->
       <tr><td><span class="svc-icon">🃏</span> Anki Sync Server</td><td class="svc-method auto">NSSM service</td><td class="na">~10 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
       <tr><td><span class="svc-icon">🗺️</span> LibreLingo</td><td class="svc-method auto">NSSM service</td><td class="na">~15 sec</td><td><span class="status-badge badge-auto">AUTO</span></td></tr>
 
@@ -110,8 +115,8 @@ nssm set ServiceName Start SERVICE_AUTO_START</pre>
   </div>
 
   <div class="card" style="margin-top:12px">
-    <div class="card-title">WSL2 Docker services — Task Scheduler startup task</div>
-    <p>Authentik, Immich, RomM, Mealie, and LinguaCafe all run in Docker inside WSL2. They need a Task Scheduler entry to start on boot:</p>
+    <div class="card-title">WSL2 Docker services — Streamarr only</div>
+    <p>All previously WSL2-hosted services (Authentik, RomM, Mealie, LinguaCafe) have migrated to the Pi Sentry and are self-managing. The only remaining WSL2 usage on the PC is <strong>Streamarr</strong>, which requires a Mullvad VPN network namespace. It is managed by its own NSSM service wrapper — no Task Scheduler entry needed.</p>
     <pre># Create D:\Server\Scripts\start_docker_services.bat:
 wsl -d Ubuntu -- bash -c "cd ~/authentik && docker-compose up -d >> ~/startup.log 2>&1"
 wsl -d Ubuntu -- bash -c "cd ~/immich && docker-compose up -d >> ~/startup.log 2>&1"
@@ -201,8 +206,8 @@ nssm start qBittorrent
       <tr><td>0–60 sec</td><td>Windows Services: Caddy, Jellyfin, Audiobookshelf, Sunshine, Mullvad, IPBan, Navidrome, Kavita, Uptime Kuma, Vaultwarden, Ollama, Kiwix, Vikunja all starting</td></tr>
       <tr><td>60–90 sec</td><td>Most Windows Services are up. Mullvad should be connected. qBittorrent checks VPN and starts.</td></tr>
       <tr><td>90–120 sec</td><td>WSL2 itself finishes initializing</td></tr>
-      <tr><td>2–3 min</td><td>Authentik containers start inside WSL2 — this is the slowest service</td></tr>
-      <tr><td>3–5 min</td><td>Authentik fully ready. Immich, RomM, Mealie, LinguaCafe all up. Everything accessible.</td></tr>
+      <tr><td>2–3 min</td><td>Immich ML Worker fully initialized — face recognition and smart search active</td></tr>
+      <tr><td>3–5 min</td><td>All PC-hosted services operational. Note: Pi Sentry services were already running before the PC booted — they are not dependent on the PC at all.</td></tr>
       <tr><td>5 min</td><td><strong>All services fully operational.</strong> Safe to check Uptime Kuma for any issues.</td></tr>
     </table>
     <div class="callout callout-tip">

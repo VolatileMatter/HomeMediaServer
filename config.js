@@ -177,8 +177,8 @@ const CFG = {
     adguard_ui:        3000,   // Pi AdGuard Home web UI
     adguard_dns:       53,     // Pi AdGuard DNS port
 
-    // Pi Sentry services (ports on the Pi — accessed via Tailscale IP)
-    // These are not on localhost — Caddy proxies to SENTRY_TAILSCALE_IP:port
+    // Pi Sentry services — Caddy runs on the Pi, so these ARE localhost.
+    // PC-hosted services use server.ixo.ts.net:PORT in Caddyfile reverse_proxy.
     pi_portainer:      9000,   // Pi Portainer — sentry.ixo.ts.net:9000 (Tailscale only)
     pi_kavita:         5000,   // Pi Kavita — proxied via Caddy to Pi IP
     pi_audiobooks:     13378,  // Pi Audiobookshelf — proxied via Caddy
@@ -222,9 +222,8 @@ const CFG = {
     pi_compose:       '/home/ixora/docker/docker-compose.yml',
 
     // Config files
-    caddyfile:        'C:\\caddy\\Caddyfile',    // legacy — Caddy now runs on Pi
-    caddy_bin:        'C:\\caddy\\caddy.exe',    // legacy — Caddy now runs on Pi
-    pi_caddyfile:     '/etc/caddy/Caddyfile',   // Caddy config on the Pi Sentry
+    caddyfile:        '/etc/caddy/Caddyfile',   // Pi Sentry — Caddy installed via apt
+    caddy_bin:        '/usr/bin/caddy',          // Pi Sentry — apt install caddy
     nodes_json:       'D:\\Server\\Dashboard\\nodes.json',
   },
 

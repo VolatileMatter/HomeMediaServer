@@ -1,30 +1,27 @@
 {
-  "_comment": "════════════════════════════════════════════════════════════",
-  "_note": "nodes.json — Network identity and topology for ixo.lol",
+  "_comment": "\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550",
+  "_note": "nodes.json \u2014 Network identity and topology for ixo.lol",
   "_usage": "Loaded by config.js, stats_server.py, and the dashboard at runtime. Defines the domain, Tailscale network, all physical machines, and the Jellyfin public carve-out. To add a friend node: add an entry to 'nodes', fill in their Tailscale IP once assigned, and list the services they host.",
   "_fields": {
-    "domain": "Registered domain name — all subdomains are built from this",
-    "tailnet": "Tailscale organization/network name — set during Tailscale account creation",
+    "domain": "Registered domain name \u2014 all subdomains are built from this",
+    "tailnet": "Tailscale organization/network name \u2014 set during Tailscale account creation",
     "nodes[].id": "Short unique key used in code references",
     "nodes[].displayName": "Human-readable name shown in the dashboard UI",
     "nodes[].owner": "Authentik username of the person who owns/runs this machine",
     "nodes[].role": "hub | sentry | friend-node",
-    "nodes[].tailscaleIP": "Tailscale-assigned IP (100.x.x.x range) — fill in after joining Tailnet",
+    "nodes[].tailscaleIP": "Tailscale-assigned IP (100.x.x.x range) \u2014 fill in after joining Tailnet",
     "nodes[].tailscaleHostname": "Hostname on the Tailnet (machine-name.tailnet-name.ts.net)",
-    "nodes[].lanIP": "LAN IP — set a static DHCP reservation in your router so this never changes",
+    "nodes[].lanIP": "LAN IP \u2014 set a static DHCP reservation in your router so this never changes",
     "nodes[].services": "Array of service IDs (matching services.json) hosted on this node",
     "nodes[].healthCheckPort": "Port the stats agent pings to determine if node is online",
-    "nodes[].healthCheckPath": "HTTP path for health check — defaults to / if omitted",
+    "nodes[].healthCheckPath": "HTTP path for health check \u2014 defaults to / if omitted",
     "nodes[].offlineMessage": "Message shown in dashboard when this node is unreachable",
     "nodes[].powerManaged": "true = Pi manages this node power via smart plug",
     "nodes[].smartPlugIP": "LAN IP of the smart plug controlling this node (if powerManaged)"
   },
-
   "domain": "ixo.lol",
   "tailnet": "ixo",
-
   "nodes": [
-
     {
       "id": "hub",
       "displayName": "Main Server (Windows PC)",
@@ -36,21 +33,36 @@
       "powerManaged": true,
       "smartPlugIP": "192.168.1.XXX",
       "services": [
-        "jellyfin", "calibre", "navidrome", "immich",
-        "invidious", "vaultwarden",
-        "openwebui", "ollama", "excalidraw", "readeck", "privatebin",
-        "stirling", "upscayl", "pxls", "genart", "jukebox", "vikunja",
-        "mealie", "kiwix", "linguacafe", "anki", "librelingo", "hoarder",
-        "flasharcade", "foundry", "wordle",
-        "sunshine", "minecraft-vanilla", "minecraft-modded", "ark", "ss13",
-        "uptime-kuma", "stats-agent",
-        "control-server", "achievement", "session-manager", "streamarr"
+        "jellyfin",
+        "sunshine",
+        "ollama",
+        "openwebui",
+        "immich-ml",
+        "streamarr",
+        "hoarder",
+        "qbittorrent",
+        "sonarr",
+        "radarr",
+        "readarr",
+        "prowlarr",
+        "minecraft-vanilla",
+        "minecraft-modded",
+        "ark",
+        "ss13",
+        "recommendation",
+        "stats-agent-hub",
+        "control-server",
+        "session-manager",
+        "upscayl",
+        "flasharcade",
+        "wordle",
+        "ipban"
       ],
       "healthCheckPort": 9001,
       "healthCheckPath": "/health",
-      "offlineMessage": "Main server is offline — Jellyfin, game streaming, and AI are unavailable. The Pi Sentry is still running."
+      "offlineMessage": "Main server (PC) is offline \u2014 Jellyfin, game streaming, and AI are unavailable. The Pi Sentry is still running. All other services remain accessible.",
+      "notes": "GPU workstation. Powers on via smart plug when needed. Hosts only GPU-dependent or Windows-native services. All other services run on the Pi Sentry."
     },
-
     {
       "id": "pi",
       "displayName": "Pi 5 Sentry",
@@ -61,53 +73,84 @@
       "lanIP": "192.168.1.20",
       "powerManaged": false,
       "services": [
-        "kavita", "kavita_dnd", "audiobooks", "emulatorjs",
-        "nextcloud", "romm", "portainer",
-        "authentik", "caddy", "adguard-home"
+        "caddy",
+        "authentik",
+        "adguard-home",
+        "portainer",
+        "watchtower",
+        "kavita",
+        "kavita_dnd",
+        "audiobooks",
+        "navidrome",
+        "calibre",
+        "invidious",
+        "immich-base",
+        "nextcloud",
+        "romm",
+        "emulatorjs",
+        "mealie",
+        "vikunja",
+        "vaultwarden",
+        "uptime-kuma",
+        "monica",
+        "excalidraw",
+        "privatebin",
+        "stirling",
+        "readeck",
+        "pxls",
+        "genart",
+        "jukebox",
+        "linguacafe",
+        "anki",
+        "librelingo",
+        "kiwix",
+        "foundry",
+        "achievement-manager",
+        "stats-agent-pi"
       ],
       "storageMount": "/mnt/archive",
       "smbShare": "\\\\sentry.local\\archive",
       "smbWindowsDriveLetter": "Z",
       "healthCheckPort": 9000,
-      "healthCheckPath": "/",
-      "offlineMessage": "Pi Sentry is offline — SSO, Caddy, books, audiobooks, retro games, and file storage are all unavailable. The PC may still be reachable directly but no subdomains will work.",
-      "notes": "24/7 always-on node. Houses 15TB archive via Penta SATA HAT. Controls PC power via smart plug. Runs Caddy (reverse proxy), Authentik (SSO), and AdGuard Home (DNS) in addition to media services. All services run as Docker containers."
+      "healthCheckPath": "/if/admin/",
+      "offlineMessage": "Pi Sentry is offline \u2014 ALL services are unavailable. SSO, Caddy, and every app are down. Only Jellyfin TV (port 8096) may still work if the PC happens to be on.",
+      "notes": "24/7 always-on brain of the server. Houses 15TB archive via Waveshare Penta SATA HAT. Runs Caddy (native apt), Authentik, AdGuard Home, and all non-GPU services as Docker containers. Controls PC power via smart plug. Immich base app here; ML worker on PC hub."
     },
-
     {
       "id": "node-a",
-      "displayName": "STUB — Friend Node A",
+      "displayName": "STUB \u2014 Friend Node A",
       "owner": "FILL_IN_AUTHENTIK_USERNAME",
       "role": "friend-node",
       "tailscaleIP": "FILL_IN_AFTER_TAILSCALE_SETUP",
       "tailscaleHostname": "FILL_IN_MACHINE_NAME.ixo.ts.net",
       "lanIP": null,
       "powerManaged": false,
-      "services": ["FILL_IN_SERVICE_IDS_FROM_SERVICES_JSON"],
+      "services": [
+        "FILL_IN_SERVICE_IDS_FROM_SERVICES_JSON"
+      ],
       "healthCheckPort": null,
       "healthCheckPath": "/",
-      "offlineMessage": "FILL_IN_DISPLAY_NAME's PC is currently offline — this service is unavailable."
+      "offlineMessage": "FILL_IN_DISPLAY_NAME's PC is currently offline \u2014 this service is unavailable."
     },
-
     {
       "id": "node-b",
-      "displayName": "STUB — Friend Node B",
+      "displayName": "STUB \u2014 Friend Node B",
       "owner": "FILL_IN_AUTHENTIK_USERNAME",
       "role": "friend-node",
       "tailscaleIP": "FILL_IN_AFTER_TAILSCALE_SETUP",
       "tailscaleHostname": "FILL_IN_MACHINE_NAME.ixo.ts.net",
       "lanIP": null,
       "powerManaged": false,
-      "services": ["FILL_IN_SERVICE_IDS_FROM_SERVICES_JSON"],
+      "services": [
+        "FILL_IN_SERVICE_IDS_FROM_SERVICES_JSON"
+      ],
       "healthCheckPort": null,
       "healthCheckPath": "/",
-      "offlineMessage": "FILL_IN_DISPLAY_NAME's PC is currently offline — this service is unavailable."
+      "offlineMessage": "FILL_IN_DISPLAY_NAME's PC is currently offline \u2014 this service is unavailable."
     }
-
   ],
-
   "jellyfinPublic": {
-    "_comment": "The ONE port exposed to the raw internet — for Smart TV apps that cannot run Tailscale.",
+    "_comment": "The ONE port exposed to the raw internet \u2014 for Smart TV apps that cannot run Tailscale.",
     "enabled": true,
     "port": 8096,
     "protocol": "TCP",
@@ -119,40 +162,61 @@
     "hostedOn": "hub",
     "note": "TV app users need a Jellyfin-native password. SSO does not work for TV apps."
   },
-
   "tailscaleACLNotes": {
-    "_comment": "Tailscale ACL rules — paste into tailscale.com/admin/acls",
+    "_comment": "Tailscale ACL rules \u2014 paste into tailscale.com/admin/acls",
     "policy": {
       "description": "Hub-and-spoke. Users reach hub and sentry. Hub/sentry reach each other and friend nodes. Users cannot reach friend nodes directly.",
       "rules": [
         {
           "action": "accept",
-          "src": ["tag:hub", "tag:sentry"],
-          "dst": ["tag:friend-node:*"],
+          "src": [
+            "tag:hub",
+            "tag:sentry"
+          ],
+          "dst": [
+            "tag:friend-node:*"
+          ],
           "comment": "Hub and Sentry can reach all friend nodes"
         },
         {
           "action": "accept",
-          "src": ["tag:hub"],
-          "dst": ["tag:sentry:*"],
+          "src": [
+            "tag:hub"
+          ],
+          "dst": [
+            "tag:sentry:*"
+          ],
           "comment": "Hub can reach Sentry (SMB, Docker, SSH, power scripts)"
         },
         {
           "action": "accept",
-          "src": ["tag:sentry"],
-          "dst": ["tag:hub:*"],
+          "src": [
+            "tag:sentry"
+          ],
+          "dst": [
+            "tag:hub:*"
+          ],
           "comment": "Sentry can reach Hub (Jellyfin API, SSH for shutdown)"
         },
         {
           "action": "accept",
-          "src": ["tag:user-device"],
-          "dst": ["tag:hub:*", "tag:sentry:*"],
-          "comment": "Users reach hub and sentry — Caddy handles per-service auth"
+          "src": [
+            "tag:user-device"
+          ],
+          "dst": [
+            "tag:hub:*",
+            "tag:sentry:*"
+          ],
+          "comment": "Users reach hub and sentry \u2014 Caddy handles per-service auth"
         },
         {
           "action": "deny",
-          "src": ["tag:user-device"],
-          "dst": ["tag:friend-node:*"],
+          "src": [
+            "tag:user-device"
+          ],
+          "dst": [
+            "tag:friend-node:*"
+          ],
           "comment": "Users cannot reach friend nodes directly"
         }
       ]
