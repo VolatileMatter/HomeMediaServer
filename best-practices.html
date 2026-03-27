@@ -76,9 +76,9 @@
     <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--accent);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">4 · Authentication</div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Service is behind Authentik — either native OIDC or Caddy forward_auth. No exceptions.</div></div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>New Authentik application uses the <code>server-users</code> group policy for access control</div></div>
-    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If public-facing: add Cloudflare Access policy restricting to known Gmail addresses (second layer of auth beyond Authentik)</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>All services are Tailscale-only — no public exposure needed. Tailscale device approval is the network gate. Authentik is the application gate.</div></div>
     <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Admin and management tools (download managers, control dashboards, config UIs) are LAN-accessible only — never exposed publicly, even behind Authentik</div></div>
-    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>If public: add the subdomain to the Caddy routing table and Cloudflare Tunnel config in the Ports tab</div></div>
+    <div class="cl-item"><div class="cl-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div><div>Add a Caddyfile block for the service subdomain (*.ixo.lol is already wildcarded in DNS — just add the Caddy block and reload)</div></div>
   </div>
 
   <div class="checklist-box">
@@ -253,7 +253,7 @@
   <div class="grid-2">
     <div class="card">
       <div class="card-title">Caddyfile — new service with Authentik forward_auth</div>
-      <pre>service.yourdomain.com {
+      <pre>service.ixo.lol {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username
@@ -321,18 +321,20 @@ Set-Acl "D:\Games\MyGame" $acl
 # [x] Alt+Tab tested and confirmed blocked</pre>
     </div>
     <div class="card">
-      <div class="card-title">Cloudflare Tunnel — new public entry</div>
-      <pre># In cloudflared config.yml:
-ingress:
-  - hostname: service.yourdomain.com
-    service: http://localhost:[PORT]
-    originRequest:
-      noTLSVerify: false
-  # ... existing entries
-  - service: http_status:404
+      <div class="card-title">Caddyfile — new service block</div>
+      <pre># In C:\caddy\Caddyfile — add block for the new service:
+SERVICEKEY.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:[PORT]
+}
 
-# Restart tunnel:
-cloudflared service restart</pre>
+# Reload Caddy (no restart needed):
+caddy reload --config C:\caddy\Caddyfile</pre>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-top:6px">The *.ixo.lol wildcard DNS record already covers any new subdomain — no DNS change needed. Just add the Caddy block and reload.</p>
     </div>
     <div class="card">
       <div class="card-title">Homepage App Library — new entry</div>

@@ -370,12 +370,12 @@
   <!--
     v1-banner: A brief statement of the V1 goal.
     Use data-cfg attributes for port/URL references.
-    Example: "V1 Goal: Jellyfin running at jellyfin.yourdomain.com
+    Example: "V1 Goal: Jellyfin running at jellyfin.ixo.lol
     with all libraries indexed and hardware transcoding enabled."
   -->
   <div class="v1-banner">
     🔧 V1 Goal: SERVICE NAME running on port <span data-cfg="port:SERVICEKEY"></span>
-    at <code data-cfg="url:SERVICEKEY"></code>, SSO connected, all users provisioned.
+    at <code data-cfg="url:SERVICEKEY"></code> (Tailscale), SSO connected, all users provisioned.
   </div>
 
   <!-- ── Installation Steps ── -->
@@ -471,7 +471,7 @@ caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
       <!--
         Open the Windows Firewall for this service.
         Note: these ports are LAN-only unless the service is public-facing.
-        External access goes through Cloudflare Tunnel / Caddy — the service
+        External access goes through Tailscale → Caddy — the service
         port itself never needs to be open to the internet.
       -->
       <pre>netsh advfirewall firewall add rule name="SERVICE NAME" dir=in action=allow protocol=TCP localport=<span data-cfg="port:SERVICEKEY"></span></pre>
@@ -534,8 +534,8 @@ nssm start SERVICENAME
         <div class="card-title">Access Points</div>
         <!--
           List every URL this service is accessible at.
-          External = through Cloudflare Tunnel (public internet).
-          Local = direct LAN access (no tunnel). Admin = LAN only.
+          Tailscale = via Tailscale (any enrolled device, Authentik SSO).
+          Local = direct LAN access (no proxy). Admin = LAN only.
           Admin tools are never exposed publicly.
         -->
         <table>
@@ -1016,7 +1016,8 @@ http://localhost:<span data-cfg="port:achievement"></span>/api/achievement/trigg
         <ul style="margin:6px 0 0 18px">
           <li>Is the service running? → <code>Get-Service ServiceName</code></li>
           <li>Is Caddy running? → check <code data-cfg="url:SERVICEKEY"></code> in browser</li>
-          <li>Is the Cloudflare DNS record correct for <code data-cfg="url:SERVICEKEY"></code>?</li>
+          <li>Is Tailscale running on the client device? (check system tray)</li>
+          <li>Is the DNS record for <code data-cfg="url:SERVICEKEY"></code> pointing at the hub Tailscale IP?</li>
           <li>Check Caddy error log for upstream connection failures</li>
         </ul>
       </div>

@@ -17,9 +17,9 @@
 <div class="section">
   <div class="section-title">🏗️ Architecture Overview</div>
   <div class="card">
-    <pre>User visits https://home.yourdomain.com
+    <pre>User visits https://home.ixo.lol  (Tailscale device required)
     ↓
-Cloudflare Tunnel → Caddy
+Tailscale → Caddy (on server)
     ↓
 Caddy forward_auth → Authentik (validates Google login)
     ↓
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     <pre>nssm install HomePageServer python "D:\Server\Dashboard\serve_homepage.py"
 nssm start HomePageServer
 netsh advfirewall firewall add rule name="Homepage" dir=in action=allow protocol=TCP localport=9000</pre>
-    <p>Add to Cloudflare Tunnel: <code>home.yourdomain.com → http://localhost:9000</code> with Authentik forward_auth in Caddyfile.</p>
+    <p>Add to Caddyfile: <code>home.ixo.lol</code> block with Authentik forward_auth proxying to <code>http://localhost:9000</code>. Accessible on Tailnet only.</p>
   </div>
 </div>
 

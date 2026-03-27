@@ -78,13 +78,21 @@ nssm start FoundryVTT
 netsh advfirewall firewall add rule name="FoundryVTT" dir=in action=allow protocol=TCP localport=30000</pre>
     </div></div>
     <div class="step"><div class="step-content">
-      <strong>Step 7: Expose via Cloudflare Tunnel</strong>
-      <pre># In cloudflared config.yml:
-ingress:
-  - hostname: vtt.yourdomain.com
-    service: http://localhost:30000
-  # ... other services</pre>
-      <p>Players visit <code>https://vtt.yourdomain.com</code> in their browser. No download, no account — they just enter the game password you set.</p>
+      <strong>Step 7: Add to Caddy (Tailscale)</strong>
+      <p>Add a block to your Caddyfile so Foundry is reachable at <code data-cfg="url:foundry"></code> from any Tailscale device:</p>
+      <pre># In C:\caddy\Caddyfile:
+<span data-cfg="url:foundry"></span> {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy localhost:<span data-cfg="port:foundry"></span>
+}
+
+# Reload:
+caddy reload --config <span data-cfg="path:caddyfile"></span></pre>
+      <p>Players visit <code data-cfg="url:foundry"></code> — Tailscale must be running on their device. No download, no account — they just enter the game password you set.</p>
       <div class="callout callout-warn">
         <div class="callout-icon">⚠️</div>
         <div class="callout-body"><strong>Foundry + Cloudflare proxy note:</strong> Cloudflare's free tier has a 100 MB file upload limit. If players are uploading large asset files (maps, audio), use <code>cloudflared</code> tunnel with Cloudflare's proxy disabled (grey cloud) for the VTT subdomain to avoid this limit, or use Cloudflare's bypass cache rules.</div>

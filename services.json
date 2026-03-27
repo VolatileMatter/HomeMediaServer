@@ -72,7 +72,8 @@
     "cpu": "Low",
     "ram": "150–400 MB",
     "gpu": false,
-    "ssoMethod": "oidc-native"
+    "ssoMethod": "oidc-native",
+    "hostedOn": "pi"
   },
   {
     "id": "navidrome",
@@ -120,7 +121,8 @@
     "cpu": "Very low",
     "ram": "100–200 MB",
     "gpu": false,
-    "ssoMethod": "forward-auth"
+    "ssoMethod": "forward-auth",
+    "hostedOn": "pi"
   },
   {
     "id": "kavita-dnd",
@@ -153,7 +155,8 @@
     "cpu": "Low",
     "ram": "300–600 MB",
     "gpu": false,
-    "ssoMethod": "oidc-native"
+    "ssoMethod": "oidc-native",
+    "hostedOn": "pi"
   },
   {
     "id": "plex-legacy",
@@ -335,7 +338,7 @@
     "id": "caddy",
     "name": "Caddy",
     "icon": "🌐",
-    "tagline": "Reverse proxy. TLS termination, Authentik forward_auth, subdomain routing. Auto HTTPS.",
+    "tagline": "Reverse proxy. TLS termination, Authentik forward_auth, subdomain routing. Auto HTTPS. Serves all ixo.lol subdomains on Tailnet.",
     "category": "security",
     "port": 443,
     "subdomain": null,
@@ -349,10 +352,10 @@
     "ssoMethod": "none"
   },
   {
-    "id": "cloudflared",
-    "name": "Cloudflare Tunnel",
-    "icon": "☁️",
-    "tagline": "Zero-trust tunnel. Zero open router ports. Hides home IP. WAF + Bot Fight Mode.",
+    "id": "tailscale",
+    "name": "Tailscale",
+    "icon": "🔒",
+    "tagline": "WireGuard-based VPN mesh. All services (except Jellyfin TV) are Tailscale-only. Free, no bandwidth cap, up to 100 devices. Hub-and-spoke ACL enforced.",
     "category": "security",
     "port": null,
     "subdomain": null,
@@ -360,7 +363,7 @@
     "tabFile": "domain",
     "storage": "~30 MB",
     "cpu": "Very low",
-    "ram": "30–60 MB",
+    "ram": "20–50 MB",
     "gpu": false,
     "ssoMethod": "none"
   },
@@ -485,6 +488,25 @@
     "ssoMethod": "none",
     "lanOnly": true,
     "adminOnly": true
+  },
+  {
+    "id": "portainer",
+    "name": "Portainer",
+    "icon": "🐳",
+    "tagline": "Docker management UI for the Pi Sentry. View containers, logs, stacks, images. Pi 5 only — admin use.",
+    "category": "infra",
+    "port": 9000,
+    "subdomain": null,
+    "docker": true,
+    "tabFile": "raspi",
+    "storage": "~200 MB Docker",
+    "cpu": "Very low",
+    "ram": "50–150 MB",
+    "gpu": false,
+    "ssoMethod": "none",
+    "lanOnly": true,
+    "adminOnly": true,
+    "hostedOn": "pi"
   },
   {
     "id": "netdata",
@@ -824,7 +846,8 @@
     "cpu": "Low",
     "ram": "200–400 MB",
     "gpu": false,
-    "ssoMethod": "forward-auth"
+    "ssoMethod": "forward-auth",
+    "hostedOn": "pi"
   },
   {
     "id": "emulatorjs",
@@ -841,7 +864,8 @@
     "cpu": "Low (server) / Medium (client)",
     "ram": "100–300 MB",
     "gpu": false,
-    "ssoMethod": "forward-auth"
+    "ssoMethod": "forward-auth",
+    "hostedOn": "pi"
   },
   {
     "id": "flasharcade",

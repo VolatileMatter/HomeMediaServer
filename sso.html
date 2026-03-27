@@ -60,7 +60,7 @@
 
   <div class="callout callout-dragon">
     <div class="callout-icon">🐉</div>
-    <div class="callout-body"><strong>Architecture:</strong> Authentik runs in Docker inside WSL2. It exposes port 9000 to Windows. Caddy (running natively on Windows) uses Authentik's forward_auth endpoint to protect every service. Cloudflare Tunnel routes external traffic to Caddy.</div>
+    <div class="callout-body"><strong>Architecture:</strong> Authentik runs in Docker inside WSL2. It exposes port 9000 to Windows. Caddy (running natively on Windows) uses Authentik's forward_auth endpoint to protect every service. Tailscale routes external traffic to Caddy. No open ports.</div>
   </div>
 
   <div class="steps">
@@ -114,7 +114,7 @@ docker-compose up -d
           <li>New project → "Home Server SSO"</li>
           <li>APIs &amp; Services → OAuth Consent Screen → External → add your Gmail + all allowed user emails as Test Users</li>
           <li>Create Credentials → OAuth Client ID → Web application</li>
-          <li>Authorized redirect URI: <code>https://auth.yourdomain.com/source/oauth/callback/google/</code></li>
+          <li>Authorized redirect URI: <code>https://auth.ixo.lol/source/oauth/callback/google/</code></li>
           <li>Save Client ID and Client Secret</li>
         </ul>
         <p style="margin-top:8px">In Authentik admin → Directory → Sources → Create → OAuth2/OpenID Source:</p>
@@ -130,14 +130,19 @@ User matching:    Match by email (preferred)
     </div>
     <div class="step">
       <div class="step-content">
-        <strong>Step 5: Expose Authentik via Cloudflare Tunnel</strong>
-        <pre># In your cloudflared config.yml, add:
-ingress:
-  - hostname: auth.yourdomain.com
-    service: http://localhost:9000
-  # ... other services
-  - service: http_status:404</pre>
-        <p>Then in Cloudflare Zero Trust → Access → Applications → Add Application for <code>auth.yourdomain.com</code>. Set a policy that only allows specific Gmail addresses. This is a second layer of protection before anyone even reaches Authentik.</p>
+        <strong>Step 5: Expose Authentik via Caddy (Tailscale)</strong>
+        <p>Authentik is accessible on the Tailnet via Caddy — no Cloudflare Tunnel needed. Add this block to your Caddyfile:</p>
+        <pre># In Caddyfile (C:\caddy\Caddyfile):
+auth.ixo.lol {
+    reverse_proxy localhost:9000
+    # No forward_auth wrapper — Authentik protects itself.
+    # Caddy just terminates TLS and proxies.
+}
+
+# Reload after saving:
+caddy reload --config C:\caddy\Caddyfile</pre>
+        <p>Because <code>*.ixo.lol</code> resolves to your Tailscale IP, <code>auth.ixo.lol</code> is only reachable by devices on the Tailnet. Anyone not on the Tailnet gets no response — Authentik is not reachable from the public internet at all.</p>
+        <p>The Authentik admin panel is at <code>https://auth.ixo.lol/if/admin/</code> from any Tailscale device. You do not need Cloudflare Zero Trust policies — Tailscale device approval is the gate.</p>
       </div>
     </div>
     <div class="step">
@@ -145,7 +150,7 @@ ingress:
         <strong>Step 6: Configure Caddy forward_auth for all services</strong>
         <p>This is the magic that protects services that don't natively support OIDC. Every request to a service first hits Authentik for validation:</p>
         <pre># In your Caddyfile — template for any protected service:
-movies.yourdomain.com {
+jellyfin.ixo.lol {
     forward_auth localhost:9000 {
         uri /outpost.goauthentik.io/auth/caddy
         copy_headers X-authentik-username X-authentik-groups X-authentik-email
@@ -425,7 +430,7 @@ php occ files_external:create "App Data" local null \
     <div class="card-title">How to add a new user</div>
     <div class="steps">
       <div class="step"><div class="step-content"><strong>Method A: Invite link</strong><p>Authentik admin → Directory → Users → Create → set their email → send them an invite link. They complete signup by clicking "Sign in with Google."</p></div></div>
-      <div class="step"><div class="step-content"><strong>Method B: Self-registration (if enabled)</strong><p>Send them directly to <code>https://auth.yourdomain.com</code>. They click "Sign in with Google" — if their Gmail is in the Cloudflare Access allowlist and/or Authentik's enrollment flow, their account is created automatically.</p></div></div>
+      <div class="step"><div class="step-content"><strong>Method B: Self-registration (if enabled)</strong><p>Send them directly to <code>https://auth.ixo.lol</code>. They click "Sign in with Google" — if their Gmail is in the Cloudflare Access allowlist and/or Authentik's enrollment flow, their account is created automatically.</p></div></div>
     </div>
   </div>
 </div>
@@ -832,7 +837,7 @@ function showSec(n){
 }
 function openBlock(u){CU=u;document.getElementById('bl-user').textContent=u;document.getElementById('mo-block').classList.add('open');}
 function openNuke(u){CU=u;document.getElementById('nk-user').textContent=u;document.getElementById('nk-confirm').value='';document.getElementById('mo-nuke').classList.add('open');}
-function unblock(u){window.open('https://auth.yourdomain.com/if/admin/','_blank');}
+function unblock(u){window.open('https://auth.ixo.lol/if/admin/','_blank');}
 function doNuke(){
   if(document.getElementById('nk-confirm').value.trim()!==CU){alert('Username mismatch.');return;}
   alert(`Nuke procedure for ${CU}:\n\n1. Open Authentik admin → Delete user\n2. Run nuke_user.py\n3. Block IP in Windows Firewall\n4. Add IP to Cloudflare WAF blocklist\n5. Delete D:\\Users\\${CU}\\ folder (all app data)\n\nA reminder ticket will be created automatically by the nuke script.`);

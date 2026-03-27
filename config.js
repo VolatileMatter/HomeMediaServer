@@ -173,6 +173,15 @@ const CFG = {
     mtg_server:        8099,
     wordle:            8081,
 
+    // Pi Sentry services (ports on the Pi — accessed via Tailscale IP)
+    // These are not on localhost — Caddy proxies to SENTRY_TAILSCALE_IP:port
+    pi_portainer:      9000,   // Pi Portainer — sentry.ixo.ts.net:9000 (Tailscale only)
+    pi_kavita:         5000,   // Pi Kavita — proxied via Caddy to Pi IP
+    pi_audiobooks:     13378,  // Pi Audiobookshelf — proxied via Caddy
+    pi_emulatorjs:     8085,   // Pi EmulatorJS — proxied via Caddy
+    pi_nextcloud:      8080,   // Pi Nextcloud — proxied via Caddy (internal port 8080)
+    pi_romm:           8098,   // Pi RomM — proxied via Caddy
+
     // Legacy
     plex_legacy:       32400,
   },
@@ -201,6 +210,12 @@ const CFG = {
     dashboard:        'D:\\Server\\Dashboard',
     backups:          'D:\\Backups',
     ddns:             'D:\\Server\\ddns',
+
+    // Pi Sentry paths (Linux paths on the Pi — for documentation reference)
+    pi_archive:       '/mnt/archive',
+    pi_docker:        '/mnt/archive/Docker',
+    pi_scripts:       '/home/ixora/scripts',
+    pi_compose:       '/home/ixora/docker/docker-compose.yml',
 
     // Config files
     caddyfile:        'C:\\caddy\\Caddyfile',

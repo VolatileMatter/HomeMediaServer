@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Raspberry Pi 5 — The Sentry</title>
+  <link rel="stylesheet" href="shared.css">
+  <script src="config.js"></script>
+  <style>
+    .subtab-nav {
+      display: flex; gap: 0; margin-bottom: 24px;
+      border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .subtab-btn {
+      font-family: 'Share Tech Mono', monospace; font-size: .68rem;
+      letter-spacing: .08em; text-transform: uppercase; padding: 9px 18px;
+      background: transparent; border: none; border-bottom: 2px solid transparent;
+      color: var(--text-dim); cursor: pointer; transition: all .16s;
+      margin-bottom: -1px; white-space: nowrap;
+    }
+    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .subtab-pane { display: none; }
+    .subtab-pane.active { display: block; }
+
+    .setup-complete-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+      border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+      cursor: pointer; transition: background .2s; user-select: none;
+    }
+    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+    .setup-complete-bar.done { background: rgba(76,175,125,.18); border-color: rgba(76,175,125,.5); }
+    .setup-checkbox {
+      width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.5);
+      border-radius: 3px; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; font-size: .9rem;
+    }
+    .setup-complete-bar.done .setup-checkbox::after { content: '✓'; color: #4caf7d; }
+    .setup-complete-label { font-family: 'Share Tech Mono', monospace; font-size: .72rem; color: var(--accent3); }
+
+    /* Distribution grid */
+    .dist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+    .dist-col { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+    .dist-col-title { font-family: 'Share Tech Mono', monospace; font-size: .62rem; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
+    .dist-col-title.sentry { color: var(--accent3); }
+    .dist-col-title.muscle { color: var(--accent2); }
+    .dist-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: .82rem; }
+
+    /* Power flow */
+    .power-flow { display: flex; flex-direction: column; gap: 0; }
+    .pf-step {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 10px 14px; border-left: 2px solid var(--border);
+      margin-left: 10px; position: relative;
+    }
+    .pf-step::before {
+      content: ''; position: absolute; left: -6px; top: 14px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--bg3); border: 2px solid var(--accent);
+    }
+    .pf-step.trigger::before { background: var(--accent); }
+    .pf-num { font-family: 'Share Tech Mono', monospace; font-size: .62rem; color: var(--accent); flex-shrink: 0; padding-top: 2px; }
+    .pf-body { font-size: .83rem; color: var(--text); line-height: 1.5; }
+
+    /* Temp gauge */
+    .temp-bar { height: 16px; border-radius: 3px; background: linear-gradient(90deg, #4caf7d 0%, #4caf7d 55%, #e0b84b 55%, #e0b84b 75%, #e05c5c 75%); margin: 8px 0; position: relative; }
+    .temp-tick { position: absolute; top: -16px; font-family: 'Share Tech Mono', monospace; font-size: .6rem; color: var(--text-dim); transform: translateX(-50%); }
+    .temp-tick.t55 { left: 55%; }
+    .temp-tick.t75 { left: 75%; }
+    .temp-tick.t85 { left: 90%; }
+
+    @media (max-width: 640px) { .dist-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🍓</div>
+  <div>
+    <h1>Raspberry Pi 5 — The Sentry</h1>
+    <div class="subtitle">// Always-On 24/7 Node · Pi 5 16GB · 15TB Archive · Docker · Penta SATA HAT //</div>
+    <p class="desc">
+      A low-power Pi 5 that runs around the clock, housing the family's 15TB archive and all services that don't need a GPU. It also controls the Windows PC's physical power via a smart plug — turning the PC on when someone wants Jellyfin or game streaming, and cutting power overnight to save ~$250/year.
+    </p>
+  </div>
+</div>
+
+<div class="subtab-nav" id="subtab-nav">
+  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 First Time Setup</button>
+  <button class="subtab-btn" onclick="switchTab('overview', this)">📋 Overview</button>
+  <button class="subtab-btn" onclick="switchTab('services', this)">🐳 Services</button>
+  <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Storage & Drives</button>
+  <button class="subtab-btn" onclick="switchTab('power', this)">⚡ Power Automation</button>
+  <button class="subtab-btn" onclick="switchTab('maintenance', this)">🔧 Maintenance</button>
+  <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 1 — FIRST TIME SETUP
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane active" id="pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Pi is running, drives are mounted, Docker services are up, Tailscale is enrolled, SMB share maps as Z:\ on the PC, and smart plug automation is working.</div>
+    </div>
+    <div style="font-size:.73rem;color:var(--text-dim);margin-left:auto" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🍓 V1 Goal: Pi 5 running 24/7 with 15TB mounted via Penta SATA HAT. Docker services live (Kavita, Audiobookshelf, EmulatorJS, Nextcloud, RomM, Portainer). Tailscale enrolled. Smart plug controlling the Windows PC's power. SMB share mapped as Z:\ on the PC. Jellyfin on PC has Z:\Movies and Z:\TV added as library paths.</div>
+
+  <hr>
+
+  <!-- HARDWARE BOM -->
+  <div class="section">
+    <div class="section-title">🛒 Hardware Required</div>
+    <div class="card">
+      <table>
+        <tr><th>Item</th><th>Specific Notes</th></tr>
+        <tr><td>Raspberry Pi 5 — 16GB</td><td>16GB gives headroom for Docker + future services. 8GB works but is tight.</td></tr>
+        <tr><td>Waveshare Penta SATA HAT</td><td>Supports up to 5 SATA drives via the Pi 5's PCIe x1 interface. Requires separate 12V power supply — drives cannot run from Pi's USB power. Available at waveshare.com or Amazon.</td></tr>
+        <tr><td>15TB HDD(s)</td><td>One or more drives totaling 15TB. Shucked WD Elements / Seagate Expansion externals are cost-effective at ~$15–18/TB. The Penta HAT fits standard 3.5" SATA drives.</td></tr>
+        <tr><td>Active cooler (official Pi 5 cooler)</td><td><strong>Not optional.</strong> The Pi 5 under Docker load hits 70–80°C with no cooling and throttles. The official Raspberry Pi Active Cooler (~$5) snaps directly onto the chip. See the Cooling section below.</td></tr>
+        <tr><td>Boot drive: NVMe (preferred) or MicroSD</td><td>Boot from NVMe via a PCIe M.2 HAT for best reliability. MicroSD cards fail after ~2–5 years of continuous write activity. If using SD, get a high-endurance card (Samsung Pro Endurance, SanDisk MAX Endurance).</td></tr>
+        <tr><td>Smart plug with local API</td><td>Tapo P110 or P115 (TP-Link) — supports local API without requiring cloud. Avoid plugs that require a cloud account to function. Home Assistant-compatible plugs also work if you run HA.</td></tr>
+        <tr><td>Gigabit Ethernet switch + cables</td><td>Wire both the Pi and PC to the router. Wi-Fi is unsuitable for SMB file serving and Jellyfin streaming. The Pi 5 has a native 2.5GbE port — use a 2.5GbE switch if available.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- OS CHOICE -->
+  <div class="section">
+    <div class="section-title">💿 Step 1 — Choosing and Flashing the OS</div>
+
+    <div class="card">
+      <div class="card-title">Raspberry Pi OS Lite 64-bit vs Ubuntu Server 24.04 LTS — which to use</div>
+      <p>Both are Debian-based and run Docker identically. The decision comes down to hardware support and longevity.</p>
+      <table style="margin-top:10px">
+        <tr><th></th><th>Raspberry Pi OS Lite 64-bit</th><th>Ubuntu Server 24.04 LTS</th></tr>
+        <tr><td>Penta SATA HAT support</td><td>✅ Best — Waveshare's official documentation targets Pi OS. The <code>dtparam=pciex1</code> overlay works reliably.</td><td>⚠️ Works but requires manual kernel overlay config — slightly more fiddly on first setup.</td></tr>
+        <tr><td>Pi 5 hardware optimisation</td><td>✅ Best — maintained by the Pi Foundation specifically for Pi hardware. VideoCore GPU, thermal management, and GPIO all work out of the box.</td><td>Good — Ubuntu follows Pi OS's lead with a short delay for new hardware features.</td></tr>
+        <tr><td>Docker support</td><td>✅ Full arm64 support via docker.com's official install script.</td><td>✅ Full arm64 support, same install script.</td></tr>
+        <tr><td>Security update cycle</td><td>Rolling updates — well-maintained but no fixed LTS schedule.</td><td>✅ 5-year LTS (supported until 2029). Clear, predictable support window.</td></tr>
+        <tr><td>Community resources</td><td>Largest Pi-specific community. Most Penta HAT guides use Pi OS.</td><td>Larger general Linux community. Better for novel problems.</td></tr>
+        <tr><td><strong>Verdict</strong></td><td colspan="2"><strong>Use Raspberry Pi OS Lite 64-bit.</strong> For a device running a HAT with PCIe attached drives 24/7, native hardware support matters more than Ubuntu's LTS cycle. If the Pi ever runs headlessly for years without intervention, Pi OS's hardware-specific tuning is an advantage.</td></tr>
+      </table>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Flash Raspberry Pi OS Lite (64-bit) with Raspberry Pi Imager</strong>
+          <p>Download <a href="https://www.raspberrypi.com/software/" target="_blank">Raspberry Pi Imager</a>. Select: Raspberry Pi 5 → Raspberry Pi OS Lite (64-bit). Before writing, click the ⚙️ gear icon and configure:</p>
+          <ul style="margin:6px 0 0 18px;font-size:.85rem">
+            <li>Hostname: <code>sentry</code></li>
+            <li>Username: <code>ixora</code></li>
+            <li>Set a strong password</li>
+            <li>Enable SSH → use password authentication (or paste your public key for key-based auth)</li>
+            <li>Locale: set your timezone (America/Los_Angeles for San Diego)</li>
+          </ul>
+          <p style="margin-top:8px">If booting from NVMe: flash to the NVMe drive using a USB-to-NVMe adapter, then set boot order in raspi-config after first boot from SD, or use the Pi Imager to write directly to NVMe.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>First boot — update and install essentials</strong>
+          <pre># Connect via SSH:
+ssh ixora@sentry.local
+# Or by IP if mDNS isn't resolving: ssh ixora@192.168.1.20
+
+sudo apt update && sudo apt full-upgrade -y
+sudo apt install -y git curl wget vim htop net-tools samba samba-common-bin smartmontools ntfs-3g cifs-utils
+
+# Reboot after full upgrade (picks up any new kernel):
+sudo reboot</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Set a static LAN IP via your router</strong>
+          <p>Router admin → DHCP reservations → find the Pi's MAC address → assign <code>192.168.1.20</code> permanently. Reboot the Pi to pick up the reservation. Update <code>nodes.json → nodes[pi].lanIP</code> once confirmed. A static IP is essential — the PC's SMB mount and power manager scripts must always reach the Pi at the same address.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- COOLING -->
+  <div class="section">
+    <div class="section-title">🌡️ Step 2 — Cooling (Do This Before Installing the HAT)</div>
+
+    <div class="card">
+      <div class="card-title">Why cooling is non-negotiable on the Pi 5</div>
+      <p>The Pi 5 runs a significantly more powerful SoC than previous generations. Under sustained Docker load (multiple containers, SMB transfers, Nextcloud activity) it will hit thermal limits without active cooling and throttle the CPU to protect itself. Throttling means stuttering for any active user.</p>
+      <div class="temp-bar">
+        <div class="temp-tick t55">55°C</div>
+        <div class="temp-tick t75">80°C</div>
+        <div class="temp-tick t85">85°C</div>
+      </div>
+      <table style="margin-top:24px">
+        <tr><th>Temperature</th><th>What happens</th></tr>
+        <tr><td>Under 55°C</td><td>Normal operation. Full 2.4GHz CPU speed.</td></tr>
+        <tr><td>55°C → 80°C</td><td>Fan (if present) ramps up. Performance unaffected.</td></tr>
+        <tr><td>80°C</td><td>CPU begins throttling frequency. You'll notice slower Docker builds and sluggish responses.</td></tr>
+        <tr><td>85°C</td><td>Hard throttle — CPU drops to ~600MHz. Services stall. Avoid at all costs.</td></tr>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">Cooling options — ranked</div>
+      <table>
+        <tr><th>Option</th><th>Idle temp</th><th>Load temp</th><th>Notes</th></tr>
+        <tr><td>Official Raspberry Pi Active Cooler (~$5)</td><td>~35°C</td><td>~55°C</td><td>✅ Best value. Clips directly onto the BCM2712 chip and LPDDR5. 5V PWM fan controlled by the Pi's firmware. Fits under most HATs with standoffs.</td></tr>
+        <tr><td>Argon ONE V3 M.2 case</td><td>~38°C</td><td>~60°C</td><td>Good all-in-one case with M.2 NVMe slot. Fan is programmable. No room for Penta SATA HAT — incompatible.</td></tr>
+        <tr><td>Passive heatsink only</td><td>~45°C</td><td>~75–80°C</td><td>Insufficient under sustained Docker load. Throttle risk. Not recommended for 24/7 server use.</td></tr>
+        <tr><td>No cooling</td><td>~50°C</td><td>~85°C+</td><td>❌ Will throttle under any sustained load. Do not use for server applications.</td></tr>
+      </table>
+      <div class="callout callout-tip" style="margin-top:10px">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body"><strong>With the Penta SATA HAT:</strong> The HAT sits on top of the Pi via GPIO header and PCIe ribbon. The official active cooler can be installed under the HAT using extended standoffs (usually included with the HAT). Confirm the clearance before ordering. Some Penta HAT kits include their own heatsink for the Pi — check what's in the box.</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install the active cooler before attaching the HAT</strong>
+          <p>Peel the thermal pad backing from both heatsink pads on the cooler. Press firmly onto the BCM2712 (main chip) and LPDDR5 RAM chip. Connect the fan's JST connector to the Pi's fan header (labeled FAN on the board). The firmware controls fan speed automatically — no software configuration needed.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Monitor temperature after setup</strong>
+          <pre># Check current CPU temperature:
+vcgencmd measure_temp
+
+# Watch it live while running workloads:
+watch -n 2 vcgencmd measure_temp
+
+# Check CPU frequency (throttling shows as lower frequency):
+vcgencmd measure_clock arm
+# 2400000000 = 2.4GHz = full speed; lower = throttled
+
+# Install and run a thermal stress test to confirm cooling is adequate:
+sudo apt install stress
+stress --cpu 4 --timeout 60s
+# Temperature should plateau under 70°C with good cooling</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- PENTA HAT + DRIVES -->
+  <div class="section">
+    <div class="section-title">💾 Step 3 — Install the Penta SATA HAT and Mount Drives</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Attach the HAT</strong>
+          <p>Power off the Pi. Attach the Penta SATA HAT to the 40-pin GPIO header. Connect the PCIe ribbon cable from the HAT to the Pi 5's PCIe FFC connector (white flip-lock connector near the USB ports). Connect your HDDs to the SATA ports. Plug the HAT's 12V power supply into its barrel connector — the HAT and drives need their own power, independent of the Pi's USB-C power supply.</p>
+          <div class="callout callout-warn">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-body">The PCIe ribbon cable orientation matters. The gold contacts face a specific direction depending on the HAT model. Check Waveshare's documentation for your exact HAT revision — inserting it backwards does nothing (not destructive, just won't work).</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Enable PCIe in the Pi's firmware config</strong>
+          <pre>sudo nano /boot/firmware/config.txt
+
+# Add these two lines at the bottom:
+dtparam=pciex1
+dtparam=pciex1_gen=3
+
+# Save and reboot:
+sudo reboot
+
+# After reboot, confirm the PCIe bus sees the drives:
+lsblk
+# You should see /dev/sda, /dev/sdb, etc. for each connected drive</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Identify drives and check their health before formatting</strong>
+          <pre># See all drives with sizes:
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE
+
+# Check SMART health on each drive (never skip this for new or used drives):
+sudo smartctl -H /dev/sda
+# "SMART overall-health self-assessment test result: PASSED" is what you want
+
+# Full details including temperature and reallocated sector count:
+sudo smartctl -a /dev/sda | grep -E "Reallocated|Temperature|Hours"
+# Reallocated_Sector_Ct above 0 = the drive has recovered bad sectors — watch it closely</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Partition and format new drives</strong>
+          <p>Use ext4 for simplicity and reliability. btrfs offers snapshots and checksumming but is more complex to manage for a family server. ext4 is the right choice here.</p>
+          <pre># For each new drive (repeat for /dev/sdb, /dev/sdc, etc.):
+sudo parted /dev/sda --script mklabel gpt mkpart primary ext4 0% 100%
+sudo mkfs.ext4 -L archive /dev/sda1
+# The -L flag sets a label so you can reference it by name instead of UUID</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create mount points and configure auto-mount via fstab</strong>
+          <pre># Single drive setup:
+sudo mkdir -p /mnt/archive
+
+# Get UUID (more reliable than device name, which can change):
+sudo blkid /dev/sda1
+# Note the UUID value, e.g.: UUID="a1b2c3d4-e5f6-..."
+
+# Add to /etc/fstab:
+sudo nano /etc/fstab
+# Add this line:
+UUID=YOUR-UUID-HERE  /mnt/archive  ext4  defaults,noatime,nofail  0  2
+
+# The 'noatime' flag reduces unnecessary writes (extends drive life).
+# The 'nofail' flag means the Pi boots normally even if the drive is disconnected.
+
+# Apply without rebooting:
+sudo mount -a
+
+# Verify:
+df -h /mnt/archive   # should show the drive's full capacity</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>For multiple drives: set up mergerfs to pool them as one volume</strong>
+          <p>If you have two or more SATA drives and want them to appear as a single <code>/mnt/archive</code>, mergerfs pools them transparently. New files automatically land on the drive with the most free space.</p>
+          <pre># Install mergerfs:
+sudo apt install mergerfs
+
+# Mount individual drives to separate paths first:
+sudo mkdir -p /mnt/disk1 /mnt/disk2
+
+# Add each drive to fstab at /mnt/disk1, /mnt/disk2, etc. (same UUID method above)
+
+# Then add a mergerfs pool entry to fstab:
+/mnt/disk1:/mnt/disk2  /mnt/archive  fuse.mergerfs  defaults,allow_other,use_ino,category.create=mfs,fsname=mergerfs  0  0
+
+# Reload:
+sudo mount -a
+df -h /mnt/archive   # should show combined capacity</pre>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">mergerfs is NOT RAID — it does not provide redundancy. If one drive fails, you lose the files on that drive. For redundancy, pair mergerfs with SnapRAID, which adds parity protection without the overhead of traditional RAID.</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Create the archive folder structure</strong>
+          <pre>sudo mkdir -p /mnt/archive/{Movies,TV,Music,Books,Audiobooks,Comics,DnD,Photos,Roms,Backups,Docker}
+sudo mkdir -p /mnt/archive/Roms/{gba,gbc,gb,nes,snes,n64,ps1,nds,psp,sega-genesis,mame}
+
+# Set ownership so the ixora user (Docker containers run as uid 1000) can write:
+sudo chown -R ixora:ixora /mnt/archive
+sudo chmod -R 755 /mnt/archive</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- DOCKER -->
+  <div class="section">
+    <div class="section-title">🐳 Step 4 — Install Docker</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install via the official script (arm64)</strong>
+          <pre>curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker ixora
+newgrp docker
+
+# Verify:
+docker run hello-world
+
+# Enable auto-start on boot:
+sudo systemctl enable docker</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- TAILSCALE -->
+  <div class="section">
+    <div class="section-title">🔒 Step 5 — Install Tailscale</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Install and enroll</strong>
+          <pre>curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up --accept-routes
+
+# Authenticate via the browser link. After login, approve the Pi
+# in the Tailscale admin panel → Machines.
+
+# Get the Pi's Tailscale IP:
+tailscale ip -4
+# Fill this into nodes.json → nodes[pi].tailscaleIP</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- SMB SHARE -->
+  <div class="section">
+    <div class="section-title">📁 Step 6 — SMB Share: Making the Archive Visible to the PC</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Configure Samba on the Pi</strong>
+          <pre>sudo nano /etc/samba/smb.conf
+
+# Add at the bottom:
+[archive]
+   path = /mnt/archive
+   browseable = yes
+   read only = no
+   guest ok = no
+   valid users = ixora
+   create mask = 0664
+   directory mask = 0775
+
+# Set the Samba password for ixora:
+sudo smbpasswd -a ixora
+
+# Restart Samba:
+sudo systemctl restart smbd nmbd
+sudo systemctl enable smbd nmbd</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Map Z:\ on the Windows PC</strong>
+          <pre># In PowerShell (run as Administrator):
+# Using IP is more reliable than hostname:
+New-PSDrive -Name "Z" -PSProvider FileSystem `
+  -Root "\\192.168.1.20\archive" -Persist -Credential (Get-Credential)
+
+# When prompted, enter:  ixora  /  [your Samba password]
+
+# Verify it mapped:
+Get-PSDrive Z</pre>
+          <p>Or via File Explorer: This PC → Map network drive → Z: → <code>\\192.168.1.20\archive</code> → ☑ Reconnect at sign-in → ☑ Connect using different credentials.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add Z:\ as Jellyfin library paths on the PC</strong>
+          <p>Now that the archive is mapped as Z:\, Jellyfin on the Windows PC can use it as a media library. In Jellyfin Dashboard → Libraries → Add Media Library:</p>
+          <pre>Movies library:   Z:\Movies
+TV Shows library: Z:\TV
+
+# Or use both PC-local AND Pi paths simultaneously:
+Movies: D:\Media\Movies  (PC-local, for fast local access)
+        Z:\Movies         (Pi archive, for overflow storage)
+# Jellyfin merges both paths into one Movies library.</pre>
+          <div class="callout callout-tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">When Jellyfin streams from <code>Z:\Movies</code>, the video data travels: Pi drive → Pi CPU → Gigabit Ethernet → PC → Jellyfin → Caddy → Tailscale → client. This adds ~1–3ms latency vs local disk and is completely fine for streaming. For 4K HEVC, your bottleneck is the GTX 1070 Ti's transcoding capacity, not the network.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- DOCKER SERVICES -->
+  <div class="section">
+    <div class="section-title">🐳 Step 7 — Deploy Pi Docker Services</div>
+    <div class="card">
+      <p>Create the compose file at <code>/home/ixora/docker/docker-compose.yml</code>. All container data volumes mount into <code>/mnt/archive/Docker/</code> so everything lives on the big drive, not the boot drive.</p>
+      <p>See the Services tab for the full compose file.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <strong>Create the Docker directory and bring services up</strong>
+          <pre>mkdir -p ~/docker && cd ~/docker
+nano docker-compose.yml   # paste compose file from Services tab
+
+docker compose up -d
+docker compose ps         # all services should show "running"</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Add PC-side Caddyfile blocks for Pi services</strong>
+          <p>Pi services are accessed via their <code>*.ixo.lol</code> subdomains, proxied through Caddy on the PC to the Pi's Tailscale IP. See the Services tab for the exact Caddyfile blocks.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 2 — OVERVIEW
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-overview">
+
+  <div class="v1-banner">🍓 Pi 5 Sentry — 24/7 always-on node. 15TB archive. All low-power services. Controls PC power. ~10W draw vs ~150W for the PC.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access Points</div>
+        <table>
+          <tr><th>Type</th><th>Address</th></tr>
+          <tr><td>SSH (LAN)</td><td><code>ssh ixora@192.168.1.20</code></td></tr>
+          <tr><td>SSH (Tailscale)</td><td><code>ssh ixora@sentry.ixo.ts.net</code></td></tr>
+          <tr><td>SMB share (from PC)</td><td><code>\\192.168.1.20\archive</code> → mapped as <code>Z:\</code></td></tr>
+          <tr><td>Portainer (Docker UI)</td><td><code>http://192.168.1.20:9000</code> — LAN/Tailscale only</td></tr>
+          <tr><td>Web services</td><td>Via <code>*.ixo.lol</code> subdomains — Tailscale required</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical Details</div>
+        <table>
+          <tr><th>Item</th><th>Value</th></tr>
+          <tr><td>Hardware</td><td>Raspberry Pi 5 — 16GB RAM</td></tr>
+          <tr><td>OS</td><td>Raspberry Pi OS Lite 64-bit (Bookworm)</td></tr>
+          <tr><td>Hostname</td><td><code>sentry</code> / <code>sentry.ixo.ts.net</code></td></tr>
+          <tr><td>Storage</td><td>15TB via Penta SATA HAT → <code>/mnt/archive</code></td></tr>
+          <tr><td>Runtime</td><td>24/7 — never intentionally powered off</td></tr>
+          <tr><td>Power draw</td><td>~8–15W (Pi) + ~5–10W per active HDD</td></tr>
+          <tr><td>Monthly electricity</td><td>~$3–5 (vs ~$35 for 24/7 PC)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗂️ What Lives Where</div>
+    <div class="dist-grid">
+      <div class="dist-col">
+        <div class="dist-col-title sentry">🍓 Pi Sentry — always available</div>
+        <div class="dist-item"><span>📕</span> Kavita (Comics &amp; DnD PDFs)</div>
+        <div class="dist-item"><span>🎧</span> Audiobookshelf (audiobooks)</div>
+        <div class="dist-item"><span>⚡</span> EmulatorJS (retro browser gaming)</div>
+        <div class="dist-item"><span>☁️</span> Nextcloud (family files)</div>
+        <div class="dist-item"><span>🕹️</span> RomM (unified ROM catalog)</div>
+        <div class="dist-item"><span>🐳</span> Portainer (Docker admin UI)</div>
+        <div class="dist-item"><span>💾</span> 15TB archive → Z:\ on PC</div>
+      </div>
+      <div class="dist-col">
+        <div class="dist-col-title muscle">💪 PC — on demand (smart plug)</div>
+        <div class="dist-item"><span>🎬</span> Jellyfin (GPU transcoding)</div>
+        <div class="dist-item"><span>☀️</span> Sunshine (game streaming)</div>
+        <div class="dist-item"><span>🎮</span> Steam library</div>
+        <div class="dist-item"><span>🟢</span> Xenia (Xbox 360)</div>
+        <div class="dist-item"><span>🤖</span> Ollama + Open WebUI (GPU AI)</div>
+        <div class="dist-item"><span>📷</span> Immich (GPU face recognition)</div>
+        <div class="dist-item"><span>🔐</span> Authentik SSO + Caddy</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 3 — SERVICES
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-services">
+
+  <div class="section">
+    <div class="section-title">🚫 Services That Cannot Move to the Pi</div>
+    <div class="card">
+      <p>The Pi 5 has no GPU. Several services have hard GPU dependencies or other constraints that make them unsuitable for the Pi regardless of available RAM.</p>
+      <table>
+        <tr><th>Service</th><th>Why it stays on the PC</th></tr>
+        <tr><td>Jellyfin</td><td>Hardware transcoding (NVENC/QSV) is the whole reason the PC runs it. CPU-only transcoding on the Pi would produce unwatchable stutter at 1080p for multiple simultaneous viewers.</td></tr>
+        <tr><td>Ollama</td><td>GPU inference only. CPU-mode Ollama on the Pi 5 runs ~2–4 tokens/second for a 7B model — unusable for real conversation. Stays with the GTX 1070 Ti.</td></tr>
+        <tr><td>Open WebUI</td><td>Depends on Ollama being on the same machine (or close to it via LAN). Moves only if Ollama moves.</td></tr>
+        <tr><td>Immich</td><td>The ML pipeline (face recognition, CLIP embeddings for smart search) requires GPU for practical indexing speed. On Pi CPU, a 10,000-photo library would take ~8 hours to index and peg the Pi at 100% CPU the entire time.</td></tr>
+        <tr><td>Sunshine</td><td>Game streaming requires direct GPU access for NVENC encoding. Pi 5's VideoCore VII GPU has no NVENC equivalent and cannot encode at the required bitrates.</td></tr>
+        <tr><td>Authentik + Caddy</td><td>These are the authentication and routing layer for the entire server. They must stay on the machine that is most reliably online. Currently that's the PC — revisit if the Pi becomes the primary machine.</td></tr>
+        <tr><td>Streamarr</td><td>Requires the Mullvad VPN network namespace configured in WSL2. Architecturally belongs near qBittorrent on the PC.</td></tr>
+        <tr><td>Hoarder/Karakeep</td><td>The arm64 image for the embedded Chromium headless browser has a history of instability on Pi. Low risk to try, but not worth the debugging time for an optional service.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">✅ Pi-Safe Docker Services</div>
+    <div class="card">
+      <p>These services all have official arm64 Docker images, low resource requirements, and no GPU dependency. All run well on the Pi 5 with 16GB RAM.</p>
+      <table>
+        <tr><th>Service</th><th>Pi RAM usage</th><th>Notes</th></tr>
+        <tr><td>Kavita</td><td>~100–200 MB</td><td>✅ Currently Pi-hosted</td></tr>
+        <tr><td>Audiobookshelf</td><td>~150–300 MB</td><td>✅ Currently Pi-hosted</td></tr>
+        <tr><td>EmulatorJS</td><td>~100–200 MB</td><td>✅ Currently Pi-hosted</td></tr>
+        <tr><td>Nextcloud + MariaDB</td><td>~400–600 MB</td><td>✅ Currently Pi-hosted</td></tr>
+        <tr><td>RomM + MariaDB</td><td>~300–500 MB</td><td>✅ Currently Pi-hosted</td></tr>
+        <tr><td>Portainer</td><td>~50–150 MB</td><td>✅ Currently Pi-hosted</td></tr>
+        <tr><td>Monica + MariaDB</td><td>~300–500 MB</td><td>Could move to Pi — no GPU needed</td></tr>
+        <tr><td>Mealie</td><td>~200–350 MB</td><td>Could move to Pi</td></tr>
+        <tr><td>LinguaCafe</td><td>~200–300 MB</td><td>Could move to Pi</td></tr>
+        <tr><td>Excalidraw</td><td>~100–200 MB</td><td>Could move to Pi — stateless</td></tr>
+        <tr><td>PrivateBin</td><td>~50–100 MB</td><td>Could move to Pi — stateless</td></tr>
+        <tr><td>Stirling-PDF</td><td>~300–500 MB</td><td>Could move to Pi — CPU-based PDF work runs fine on ARM</td></tr>
+        <tr><td>Pxls</td><td>~300–500 MB</td><td>Could move to Pi — PostgreSQL + Redis both have arm64 images</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Docker Compose File</div>
+    <div class="card">
+      <p>Save at <code>/home/ixora/docker/docker-compose.yml</code>. All data volumes mount into <code>/mnt/archive/Docker/</code>.</p>
+      <pre>version: "3.9"
+
+services:
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/archive/Docker/portainer:/data
+
+  kavita:
+    image: jvmilazz0/kavita:latest
+    container_name: kavita
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - /mnt/archive/Comics:/comics:ro
+      - /mnt/archive/DnD:/dnd:ro
+      - /mnt/archive/Docker/kavita:/kavita/config
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    restart: unless-stopped
+    ports:
+      - "13378:80"
+    volumes:
+      - /mnt/archive/Audiobooks:/audiobooks:ro
+      - /mnt/archive/Docker/audiobookshelf/config:/config
+      - /mnt/archive/Docker/audiobookshelf/metadata:/metadata
+
+  nextcloud-db:
+    image: mariadb:11
+    container_name: nextcloud-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: CHANGE_ROOT_PW
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: CHANGE_NC_PW
+    volumes:
+      - /mnt/archive/Docker/nextcloud-db:/var/lib/mysql
+
+  nextcloud:
+    image: nextcloud:stable
+    container_name: nextcloud
+    restart: unless-stopped
+    depends_on:
+      - nextcloud-db
+    ports:
+      - "8080:80"
+    environment:
+      MYSQL_HOST: nextcloud-db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: CHANGE_NC_PW
+      NEXTCLOUD_ADMIN_USER: ixora
+      NEXTCLOUD_ADMIN_PASSWORD: CHANGE_ADMIN_PW
+      NEXTCLOUD_TRUSTED_DOMAINS: "cloud.ixo.lol sentry.local 192.168.1.20"
+      OVERWRITEPROTOCOL: https
+      OVERWRITECLIURL: https://cloud.ixo.lol
+    volumes:
+      - /mnt/archive/Docker/nextcloud:/var/www/html
+      - /mnt/archive/Photos:/var/www/html/data/ixora/files/Photos:rw
+
+  romm-db:
+    image: mariadb:11
+    container_name: romm-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: CHANGE_ROOT_PW
+      MYSQL_DATABASE: romm
+      MYSQL_USER: romm
+      MYSQL_PASSWORD: CHANGE_ROMM_PW
+    volumes:
+      - /mnt/archive/Docker/romm-db:/var/lib/mysql
+
+  romm:
+    image: rommapp/romm:latest
+    container_name: romm
+    restart: unless-stopped
+    depends_on:
+      - romm-db
+    ports:
+      - "8098:8080"
+    environment:
+      DB_HOST: romm-db
+      DB_NAME: romm
+      DB_USER: romm
+      DB_PASSWD: CHANGE_ROMM_PW
+      ROMM_AUTH_SECRET_KEY: CHANGE_THIS_LONG_RANDOM_STRING
+    volumes:
+      - /mnt/archive/Roms:/romm/library/roms:rw
+      # PC's Xenia folder — read-only cross-mount (see Storage tab):
+      - /mnt/pc-xenia:/romm/library/roms/xbox360:ro
+      - /mnt/archive/Docker/romm:/romm/assets
+      - /mnt/archive/Docker/romm-config:/romm/config
+
+  emulatorjs:
+    image: lscr.io/linuxserver/emulatorjs:latest
+    container_name: emulatorjs
+    restart: unless-stopped
+    ports:
+      - "8085:80"
+      - "4001:4001"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Los_Angeles
+    volumes:
+      - /mnt/archive/Docker/emulatorjs/config:/config
+      - /mnt/archive/Roms:/data/roms:ro</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Caddyfile Blocks for Pi Services (add to PC's Caddyfile)</div>
+    <div class="card">
+      <pre># Replace SENTRY_IP with Pi's Tailscale IP from nodes.json → nodes[pi].tailscaleIP
+# Or use sentry.ixo.ts.net if MagicDNS is enabled.
+
+comics.ixo.lol {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        trusted_proxies private_ranges
+    }
+    reverse_proxy SENTRY_IP:5000
+}
+
+audio.ixo.lol {
+    forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
+    reverse_proxy SENTRY_IP:13378
+}
+
+games.ixo.lol {
+    forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
+    reverse_proxy SENTRY_IP:8085
+}
+
+cloud.ixo.lol {
+    forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
+    reverse_proxy SENTRY_IP:8080
+}
+
+romm.ixo.lol {
+    forward_auth localhost:9000 { uri /outpost.goauthentik.io/auth/caddy; copy_headers X-authentik-username X-authentik-groups X-authentik-email; trusted_proxies private_ranges }
+    reverse_proxy SENTRY_IP:8098
+}
+
+# Reload after saving:
+# caddy reload --config C:\caddy\Caddyfile</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-services -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 4 — STORAGE & DRIVES
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-storage">
+
+  <div class="section">
+    <div class="section-title">📁 Archive Folder Structure</div>
+    <div class="card">
+      <pre>/mnt/archive/
+├── Movies/          → Jellyfin library on PC (via Z:\Movies)
+├── TV/              → Jellyfin library on PC (via Z:\TV)
+├── Music/           → Navidrome (if moved to Pi later)
+├── Books/           → Calibre library (if moved to Pi later)
+├── Audiobooks/      → Audiobookshelf library
+├── Comics/          → Kavita comics library (CBZ/CBR/PDF)
+├── DnD/             → Kavita DnD PDFs
+├── Photos/          → Nextcloud Photos external mount
+├── Roms/            → RomM + EmulatorJS ROM library
+│   ├── gba/ gbc/ gb/ nes/ snes/ n64/ ps1/ nds/ psp/ sega-genesis/ mame/
+│   └── xbox360 → /mnt/pc-xenia (read-only mount from PC when PC is on)
+├── Backups/         → Monthly cold storage backup target
+└── Docker/          → All container data (never backed up — can rebuild)
+    ├── portainer/
+    ├── kavita/
+    ├── audiobookshelf/config/ metadata/
+    ├── nextcloud/  nextcloud-db/
+    ├── romm/  romm-db/  romm-config/
+    └── emulatorjs/config/</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 Cross-Machine File Visibility — Full Picture</div>
+    <div class="card">
+      <p>Data needs to flow in both directions: the PC must see the Pi's archive, and the Pi must see one specific folder on the PC.</p>
+      <table>
+        <tr><th>Direction</th><th>What</th><th>How</th><th>When available</th></tr>
+        <tr><td>Pi → PC</td><td>15TB archive (Movies, TV, Books, ROMs, etc.)</td><td>Samba/SMB share → mapped as Z:\ on Windows</td><td>Always — Pi is 24/7</td></tr>
+        <tr><td>PC → Pi</td><td>Xenia Xbox 360 ROM folder</td><td>Windows SMB share → CIFS mount on Pi at <code>/mnt/pc-xenia</code></td><td>Only when PC is on (nofail prevents Pi boot hang)</td></tr>
+        <tr><td>Jellyfin (PC)</td><td>Reads movies/TV from Z:\ AND local D:\</td><td>Z:\ is an SMB-mapped network path — Jellyfin treats it as a local path</td><td>Depends on Pi being on</td></tr>
+        <tr><td>RomM (Pi)</td><td>Shows Xbox 360 games alongside retro ROMs</td><td>Reads <code>/mnt/pc-xenia</code> → shows in catalog as xbox360 platform</td><td>Depends on PC being on; shows empty when PC is off</td></tr>
+        <tr><td>AI Recommender (PC)</td><td>Scans Pi's book/audiobook library</td><td>Reads Z:\Books and Z:\Audiobooks via SMB</td><td>Always — Pi is 24/7</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🖥️ Mounting the PC's Xenia Folder on the Pi</div>
+    <div class="card">
+      <pre># Step 1: Share the Xenia folder on Windows
+# File Explorer → right-click D:\Emulation\Xbox360
+# → Properties → Sharing → Advanced Sharing
+# → ☑ Share this folder → name: Xbox360
+# → Permissions → Add → ixora → Read (only)
+
+# Step 2: Create the mount point on the Pi
+sudo mkdir -p /mnt/pc-xenia
+
+# Step 3: Add to Pi's /etc/fstab
+sudo nano /etc/fstab
+# Add:
+//PC_LAN_IP/Xbox360  /mnt/pc-xenia  cifs  ro,username=ixora,password=WINDOWS_PW,nofail,iocharset=utf8,vers=3.0  0  0
+
+# Step 4: Test mount
+sudo mount -a
+ls /mnt/pc-xenia   # should list Xenia ROM files when PC is on</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>The <code>nofail</code> flag is mandatory.</strong> Without it, the Pi hangs at boot for 90 seconds waiting for the PC to respond. With <code>nofail</code>, the mount silently fails when the PC is off and the Pi boots normally. RomM's Xbox 360 section will show as empty until the PC comes online and the mount reconnects.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📦 Monthly Cold Storage Backup</div>
+    <div class="card">
+      <p>Once a month, plug a spare USB 3.0 drive into the Pi. The Penta SATA HAT occupies the PCIe lane — the Pi's USB 3.0 ports remain free for backup drives. Run the backup script manually or schedule it.</p>
+      <pre>#!/bin/bash
+# backup_archive.sh — save at /home/ixora/scripts/backup_archive.sh
+# Plug USB backup drive into Pi's USB 3.0 port before running.
+
+BACKUP_DRIVE="/mnt/backup_usb"
+SOURCE="/mnt/archive"
+LOG="/var/log/archive_backup.log"
+
+sudo mkdir -p $BACKUP_DRIVE
+sudo mount /dev/sdb1 $BACKUP_DRIVE   # adjust to actual backup device
+
+echo "=== $(date) — Backup started ===" | tee -a $LOG
+
+rsync -avh --progress --delete \
+  --exclude "Docker/" \
+  --exclude "Backups/" \
+  $SOURCE/ $BACKUP_DRIVE/ 2>&1 | tee -a $LOG
+
+echo "=== $(date) — Backup complete ===" | tee -a $LOG
+sudo umount $BACKUP_DRIVE
+echo "Drive safely unmounted. Remove backup drive." | tee -a $LOG</pre>
+      <p>The <code>--exclude "Docker/"</code> skips container runtime data (rebuildable). Only irreplaceable media and family files are backed up. The <code>--delete</code> flag keeps the backup in sync with the source (removes deleted files from backup too).</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Expanding Storage (Adding More Drives)</div>
+    <div class="card">
+      <p>The Penta SATA HAT supports up to 5 drives. Adding more is straightforward — shut down the Pi, connect the new drive, boot, and then either use it as independent overflow storage or add it to the mergerfs pool to grow the transparent archive volume.</p>
+      <pre># For a new drive added as standalone overflow:
+# 1. Partition and format: sudo parted /dev/sdb ... && sudo mkfs.ext4 /dev/sdb1
+# 2. Mount at /mnt/disk2 via fstab
+# 3. Create symlinks for specific folders: ln -s /mnt/disk2/Movies2 /mnt/archive/Movies2
+
+# For adding to an existing mergerfs pool:
+# 1. Partition, format, and add to fstab at /mnt/disk2
+# 2. Edit the mergerfs fstab entry to include the new disk:
+#    /mnt/disk1:/mnt/disk2:/mnt/disk3  /mnt/archive  fuse.mergerfs  ...
+# 3. sudo mount -a — the pool expands immediately, no data migration needed</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-storage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 5 — POWER AUTOMATION
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-power">
+
+  <div class="section">
+    <div class="section-title">⚡ Smart Plug Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Device</th><th>Avg draw</th><th>Hours/day</th><th>Monthly cost (San Diego ~$0.33/kWh)</th></tr>
+        <tr><td>Pi 5 + 2 HDDs (24/7)</td><td>~25W</td><td>24</td><td>~$6</td></tr>
+        <tr><td>PC via smart plug (4 hrs/day)</td><td>~200W</td><td>4</td><td>~$8</td></tr>
+        <tr><td>PC always-on 24/7</td><td>~150W idle</td><td>24</td><td>~$36</td></tr>
+        <tr><td colspan="3"><strong>Monthly saving (smart plug vs always-on)</strong></td><td><strong>~$28</strong></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">▶️ Power-On Logic</div>
+    <div class="power-flow">
+      <div class="pf-step trigger">
+        <div class="pf-num">TRIGGER</div>
+        <div class="pf-body">Family member taps "Wake PC" on dashboard, or a service that requires the PC (Jellyfin, Sunshine) is requested and the PC is detected offline.</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">1</div>
+        <div class="pf-body">Pi runs <code>power_manager.py wake</code> → HTTP to smart plug local API → plug switches ON.</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">2</div>
+        <div class="pf-body">PC detects AC power → BIOS setting "Restore on AC Power Loss: Power On" triggers automatic boot.</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">3</div>
+        <div class="pf-body">Pi polls PC's Tailscale IP every 5 seconds (up to 120s timeout) until it responds.</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">4</div>
+        <div class="pf-body">Dashboard PC status dot turns green. User can proceed to Jellyfin/Sunshine.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⏹️ Power-Off Logic</div>
+    <div class="power-flow">
+      <div class="pf-step trigger">
+        <div class="pf-num">TRIGGER</div>
+        <div class="pf-body">Midnight cron job, OR no active Jellyfin sessions and no Sunshine sessions for 60 consecutive minutes.</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">1</div>
+        <div class="pf-body">Pi queries Jellyfin API: <code>/Sessions?api_key=KEY</code> — counts sessions with active <code>NowPlayingItem</code>.</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">2</div>
+        <div class="pf-body">Zero active sessions → Pi SSHs to PC: <code>shutdown /s /t 60</code> (60-second grace period).</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">3</div>
+        <div class="pf-body">Pi waits 90 seconds, confirms PC is offline via Tailscale ping.</div>
+      </div>
+      <div class="pf-step">
+        <div class="pf-num">4</div>
+        <div class="pf-body">Pi cuts smart plug power → zero vampire draw from PC.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐍 Power Manager Script</div>
+    <div class="card">
+      <pre># Install Tapo local API library:
+pip3 install PyP100
+
+# Save script at /home/ixora/scripts/power_manager.py
+# chmod +x /home/ixora/scripts/power_manager.py</pre>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <pre>#!/usr/bin/env python3
+"""power_manager.py — Smart plug control for the Windows PC."""
+
+import subprocess, time, sys, requests
+
+PLUG_IP          = "192.168.1.XXX"   # Smart plug LAN IP — update this
+PLUG_EMAIL       = "tapo@email.com"  # Tapo account email
+PLUG_PASSWORD    = "tapo_password"   # Tapo account password
+PC_TAILSCALE_IP  = "100.X.X.X"       # PC Tailscale IP — from nodes.json
+PC_LAN_IP        = "192.168.1.10"    # PC LAN IP
+PC_SSH_USER      = "ixora"           # Windows username for SSH
+JELLYFIN_API_KEY = "YOUR_API_KEY"    # Jellyfin Dashboard → Advanced → API Keys
+JELLYFIN_PORT    = 8096
+BOOT_TIMEOUT     = 120               # Seconds to wait for PC to boot
+
+def plug(state):
+    from PyP100 import PyP110
+    p = PyP110.P110(PLUG_IP, PLUG_EMAIL, PLUG_PASSWORD)
+    p.handshake(); p.login()
+    p.turnOn() if state == "on" else p.turnOff()
+    print(f"Plug {'ON' if state == 'on' else 'OFF'}")
+
+def pc_online():
+    r = subprocess.run(["ping", "-c", "1", "-W", "2", PC_TAILSCALE_IP], capture_output=True)
+    return r.returncode == 0
+
+def active_sessions():
+    try:
+        r = requests.get(f"http://{PC_LAN_IP}:{JELLYFIN_PORT}/Sessions",
+                         params={"api_key": JELLYFIN_API_KEY}, timeout=5)
+        return sum(1 for s in r.json() if s.get("NowPlayingItem"))
+    except Exception:
+        return 0
+
+def wake():
+    if pc_online(): print("PC already online."); return True
+    print("Waking PC via smart plug...")
+    plug("on")
+    for i in range(BOOT_TIMEOUT // 5):
+        time.sleep(5)
+        if pc_online():
+            print(f"PC online after {(i+1)*5}s"); return True
+    print("WARNING: PC did not come online within timeout.")
+    return False
+
+def shutdown():
+    if not pc_online(): print("PC already offline."); plug("off"); return
+    print("Initiating shutdown...")
+    subprocess.run(["ssh", "-o", "StrictHostKeyChecking=no",
+                    f"{PC_SSH_USER}@{PC_TAILSCALE_IP}", "shutdown /s /t 60"])
+    time.sleep(90)
+    if not pc_online(): plug("off"); print("PC shutdown. Plug cut.")
+    else: print("WARNING: PC still online after shutdown command.")
+
+def idle_check():
+    if not pc_online(): return
+    if active_sessions() > 0: print(f"{active_sessions()} active — not shutting down."); return
+    print("No active sessions — shutting down.")
+    shutdown()
+
+COMMANDS = {"wake": wake, "shutdown": shutdown, "idle": idle_check,
+            "on": lambda: plug("on"), "off": lambda: plug("off")}
+cmd = sys.argv[1] if len(sys.argv) > 1 else None
+if cmd in COMMANDS: COMMANDS[cmd]()
+else: print("Usage: power_manager.py [wake|shutdown|idle|on|off]")</pre>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div class="card-title">Crontab (run: crontab -e as ixora)</div>
+      <pre># Idle check every 15 minutes
+*/15 * * * * /usr/bin/python3 /home/ixora/scripts/power_manager.py idle >> /var/log/power_manager.log 2>&1
+
+# Hard shutdown at midnight
+0 0 * * * /usr/bin/python3 /home/ixora/scripts/power_manager.py shutdown >> /var/log/power_manager.log 2>&1</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-power -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 6 — MAINTENANCE
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-maintenance">
+
+  <div class="section">
+    <div class="section-title">🔄 Routine Maintenance Schedule</div>
+    <div class="card">
+      <table>
+        <tr><th>Frequency</th><th>Task</th><th>Command</th></tr>
+        <tr><td>Weekly</td><td>Update Docker images</td><td><code>cd ~/docker && docker compose pull && docker compose up -d</code></td></tr>
+        <tr><td>Weekly</td><td>OS package updates</td><td><code>sudo apt update && sudo apt upgrade -y</code></td></tr>
+        <tr><td>Monthly</td><td>Cold storage backup</td><td>Plug USB drive → run <code>backup_archive.sh</code></td></tr>
+        <tr><td>Monthly</td><td>Drive health check</td><td><code>sudo smartctl -H /dev/sda</code> (check all drives)</td></tr>
+        <tr><td>Monthly</td><td>Check temperatures</td><td><code>vcgencmd measure_temp</code> during peak load</td></tr>
+        <tr><td>As needed</td><td>Prune unused Docker images</td><td><code>docker system prune -f</code></td></tr>
+        <tr><td>As needed</td><td>Check disk usage</td><td><code>df -h /mnt/archive</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Health Monitoring Commands</div>
+    <div class="card">
+      <pre># CPU temperature (target: under 65°C at idle, under 75°C under load):
+vcgencmd measure_temp
+
+# CPU frequency (throttling shows as drop from 2400000000 Hz):
+vcgencmd measure_clock arm
+
+# Drive health — run for each drive (/dev/sda, /dev/sdb, etc.):
+sudo smartctl -H /dev/sda          # quick pass/fail
+sudo smartctl -a /dev/sda | grep -E "Reallocated|Pending|Temperature|Power_On"
+
+# Disk space:
+df -h /mnt/archive
+
+# Docker container health:
+docker compose -f ~/docker/docker-compose.yml ps
+docker stats --no-stream
+
+# Tailscale status:
+tailscale status</pre>
+    </div>
+  </div>
+
+</div><!-- /pane-maintenance -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 7 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-troubleshooting">
+
+  <div class="section">
+    <div class="section-title">🛠️ Common Issues</div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Pi won't detect SATA drives after boot (lsblk shows no /dev/sda)</div>
+      <div class="trouble-a">
+        Check in order: (1) PCIe ribbon cable seated correctly — gold contacts face the right direction per Waveshare's docs for your HAT revision. (2) <code>dtparam=pciex1</code> is in <code>/boot/firmware/config.txt</code>. (3) HAT has its own 12V power supply connected and switched on. (4) Run <code>dmesg | grep -i ahci</code> — you should see the SATA controller being detected. If not, the PCIe link isn't up.
+      </div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ Pi hangs at boot for 90+ seconds (drive mount timeout)</div>
+      <div class="trouble-a">
+        An fstab entry is missing <code>nofail</code>. Every drive entry in <code>/etc/fstab</code> must have <code>nofail</code> — especially the CIFS mount for the PC's Xenia folder. Edit fstab and add it. Boot into recovery mode if you can't get a normal shell: append <code>init=/bin/sh</code> to the kernel command line in the Pi's bootloader, or mount the SD card on another machine.
+      </div>
+    </div>
+
+    <div class="trouble-item danger">
+      <div class="trouble-q">❌ PC won't auto-boot when smart plug turns on</div>
+      <div class="trouble-a">
+        BIOS "Restore on AC Power Loss" must be set to <strong>Power On</strong> (not Last State, not Power Off). Enter BIOS on next manual boot → Power Management → AC Power Recovery → Always On. This setting path varies by motherboard — search "[your motherboard model] AC power recovery BIOS".
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ CPU is throttling (performance feels slow)</div>
+      <div class="trouble-a">
+        Run <code>vcgencmd measure_temp</code> and <code>vcgencmd measure_clock arm</code>. If temp is above 80°C or clock is below 2.4GHz, cooling is insufficient. Check that: (1) the active cooler fan is spinning (listen for it), (2) the JST fan connector is seated on the Pi's FAN header, (3) there's airflow around the Pi — don't put it in an unventilated enclosure. Reapply thermal paste if the cooler is more than 2 years old.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ SMB share (Z:\) disconnects after PC wakes from sleep / reboots</div>
+      <div class="trouble-a">
+        Windows mapped drives don't always reconnect automatically after a reboot. Add a Task Scheduler task on the PC: trigger = At logon, action = <code>net use Z: \\192.168.1.20\archive /persistent:yes</code>. Alternatively, use the Pi's Tailscale hostname in the SMB path so it always resolves correctly even if the LAN IP ever changes.
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">⚠️ Docker container keeps restarting</div>
+      <div class="trouble-a">
+        <code>docker compose logs --tail=50 CONTAINER_NAME</code>. Most common causes: volume path doesn't exist → <code>mkdir -p /mnt/archive/Docker/SERVICENAME</code>; wrong permissions → <code>sudo chown -R 1000:1000 /mnt/archive/Docker/SERVICENAME</code>; port conflict → <code>sudo ss -tlnp | grep PORT</code>.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">💡 How to cancel a PC shutdown in progress</div>
+      <div class="trouble-a">
+        The power_manager.py gives a 60-second grace window. On the PC, open Command Prompt and run <code>shutdown /a</code> to abort. Or from the Pi: <code>ssh ixora@PC_TAILSCALE_IP "shutdown /a"</code>.
+      </div>
+    </div>
+
+    <div class="trouble-item ok">
+      <div class="trouble-q">💡 RomM shows no Xbox 360 games</div>
+      <div class="trouble-a">
+        The PC is probably off and <code>/mnt/pc-xenia</code> isn't mounted. This is expected behaviour. Wake the PC, then: <code>sudo mount /mnt/pc-xenia</code>. RomM rescans on a schedule — or trigger a manual scan in RomM's web UI under Libraries.
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /pane-troubleshooting -->
+
+
+<script>
+const STORAGE_KEY = 'setup_complete_raspi';
+function switchTab(name, btn) {
+  document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('pane-' + name);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function toggleComplete() {
+  const bar = document.getElementById('setup-complete-bar');
+  const done = !bar.classList.contains('done');
+  bar.classList.toggle('done', done);
+  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
+  document.getElementById('complete-sub').textContent = done
+    ? 'Setup complete — Pi Sentry is fully operational'
+    : 'Mark as done → activates Overview tab';
+}
+if (localStorage.getItem(STORAGE_KEY)) {
+  document.getElementById('setup-complete-bar').classList.add('done');
+  document.getElementById('complete-sub').textContent = 'Setup complete — Pi Sentry is fully operational';
+}
+</script>
+
+</body>
+</html>

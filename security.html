@@ -83,8 +83,8 @@ status.yourdomain.com {
     rewrite * /monitor-public.html
 }
 
-# Internal only — block from internet via your router, not Caddy
-# Or use Tailscale and don't expose these at all
+# All of the above are Tailscale-only — no public exposure needed.
+# Only exception: port 8096 (Jellyfin) forwarded for Smart TV apps.
 </pre>
     <div class="callout callout-tip">
       <div class="callout-icon">💡</div>
@@ -131,19 +131,15 @@ sc start IPBan
 </div>
 
 <div class="section">
-  <div class="section-title">🌐 Step 5: Don't Expose Services Directly — Use Tailscale or Cloudflare Tunnel</div>
+  <div class="section-title">🌐 Step 5: Don't Expose Services Directly — Use Tailscale</div>
   <div class="grid-2">
     <div class="card">
-      <div class="card-title">Tailscale (Recommended for Private Access)</div>
-      <p>Install on your server and your devices. Access all services over Tailscale's VPN without opening ANY ports to the internet. No port forwarding, no public exposure. Perfect for services you only need for yourself (dashboard, qBittorrent, etc.).</p>
+      <div class="card-title">Tailscale — All Services (Primary)</div>
+      <p>All services run behind Tailscale. Users install Tailscale once, you approve their device, and they access every service at its <code>*.ixo.lol</code> subdomain. WireGuard-encrypted, zero open ports, free with no bandwidth cap. See the Network tab for full setup.</p>
     </div>
     <div class="card">
-      <div class="card-title">Cloudflare Tunnel (For Public Services)</div>
-      <p>For services you want publicly accessible (Nextcloud, Calibre-Web), Cloudflare Tunnel creates a secure outbound connection — <em>no inbound ports needed</em>. Cloudflare proxies requests to your server. Includes DDoS protection and hides your home IP. Free tier is generous.</p>
-      <pre>winget install Cloudflare.cloudflared
-cloudflared tunnel create homeserver
-cloudflared tunnel route dns homeserver yourdomain.com
-cloudflared tunnel run homeserver</pre>
+      <div class="card-title">Port Forward — Jellyfin TV Only (Exception)</div>
+      <p>The single deliberate exception: port 8096 is forwarded on the router for Smart TV Jellyfin apps (LG WebOS, Tizen, Roku, Fire TV) that cannot install Tailscale. Protected by Jellyfin's own auth. All other services remain Tailscale-only. See the Network tab → Jellyfin TV Carve-out.</p>
     </div>
   </div>
 </div>

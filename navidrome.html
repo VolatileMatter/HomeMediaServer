@@ -633,19 +633,9 @@ http://localhost:<span data-cfg="port:navidrome"></span>/app/#/config</pre>
 
   <hr>
 
-  <!-- STEP 5: CLOUDFLARE -->
-  <div class="section">
-    <div class="section-title">🌍 Step 5 — Expose via Cloudflare Tunnel</div>
-    <div class="card">
-      <p>Add Navidrome to your Cloudflare Tunnel config so it's accessible from outside the network:</p>
-      <pre># cloudflared config.yml — add entry:
-ingress:
-  - hostname: <span data-cfg="url:navidrome"></span>
-    service: http://localhost:443  # Caddy handles SSL and auth
-  # ... other services</pre>
-      <p>Navidrome → Caddy (Authentik forward_auth) → Cloudflare Tunnel → internet. Unauthenticated visitors are redirected to the Authentik login page automatically.</p>
-    </div>
-  </div>
+    <!-- Access is via Tailscale — no tunnel step needed.
+       Service is reachable at its ixo.lol subdomain from any Tailscale device.
+       Caddy handles TLS and forward_auth. See domain.html for Caddyfile setup. -->
 
 </div><!-- /pane-setup -->
 
