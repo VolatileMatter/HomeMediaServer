@@ -486,6 +486,149 @@
       position: relative;
     }
     #frame-wrap.visible { display: block; }
+    /* ══════════════════════════════════════════════════════
+       SET UP OVERLAY
+    ══════════════════════════════════════════════════════ */
+    #setup-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0,0,0,.55);
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 20px 20px;
+    }
+    #setup-overlay.visible {
+      display: flex;
+    }
+    .setup-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 860px;
+      max-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 40px rgba(0,0,0,.5);
+      overflow: hidden;
+    }
+    .setup-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg3);
+    }
+    .setup-panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      color: var(--accent);
+      letter-spacing: .08em;
+    }
+    .setup-panel-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .58rem;
+      color: var(--text-dim);
+      margin-top: 3px;
+      letter-spacing: .06em;
+    }
+    .setup-panel-close {
+      margin-left: auto;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .06em;
+      padding: 5px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+    .setup-panel-close:hover { border-color: var(--accent); color: var(--accent); }
+    .setup-panel-body {
+      overflow-y: auto;
+      padding: 24px 28px 32px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .setup-panel-body h2 {
+      font-family: 'Cinzel', serif;
+      font-size: .82rem;
+      color: var(--accent);
+      letter-spacing: .1em;
+      margin: 24px 0 10px;
+      text-transform: uppercase;
+    }
+    .setup-panel-body h2:first-child { margin-top: 0; }
+    .setup-panel-body p {
+      font-size: .84rem;
+      color: var(--text);
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+    .setup-panel-body pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem;
+      color: var(--text);
+      overflow-x: auto;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .setup-panel-body code {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .78rem;
+      color: var(--accent);
+      background: rgba(200,168,75,.08);
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+    .setup-callout {
+      background: rgba(200,168,75,.07);
+      border: 1px solid rgba(200,168,75,.25);
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-size: .82rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 12px;
+    }
+    .setup-callout-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+    .setup-type-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 18px;
+      font-size: .8rem;
+    }
+    .setup-type-table th {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .setup-type-table td {
+      padding: 7px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      color: var(--text);
+      vertical-align: top;
+    }
+    .setup-type-table td:first-child { color: var(--accent); font-family: 'Share Tech Mono', monospace; font-size: .72rem; }
+    .setup-type-table tr:last-child td { border-bottom: none; }
   </style>
 </head>
 <body>
@@ -500,6 +643,7 @@
   <div class="return-bar-right">
     <button class="mode-pill active" id="pill-lobby"  onclick="showLobby()">🏠 Lobby</button>
     <button class="mode-pill"        id="pill-game"   id="pill-game" onclick="showGame(currentGameId)" disabled>▶ Play</button>
+    <button class="mode-pill"        id="pill-setup"  onclick="showSetup()">⚙ Set Up</button>
     <button class="nav-btn" id="btn-prev" onclick="navigateTo(currentIndex - 1)" disabled>◀ Prev</button>
     <button class="nav-btn" id="btn-next" onclick="navigateTo(currentIndex + 1)" disabled>Next ▶</button>
   </div>
@@ -562,6 +706,146 @@
     </div>
 
   </div><!-- /viewer-content -->
+
+<!-- ── Set Up overlay ── -->
+<div id="setup-overlay" onclick="handleOverlayClick(event)">
+  <div class="setup-panel">
+
+    <div class="setup-panel-header">
+      <div>
+        <div class="setup-panel-title">⚙ On-Demand Game Launch</div>
+        <div class="setup-panel-sub">// How to run 60+ games without running 60+ servers //</div>
+      </div>
+      <button class="setup-panel-close" onclick="closeSetup()">✕ Close</button>
+    </div>
+
+    <div class="setup-panel-body">
+
+      <div class="setup-callout">
+        <div class="setup-callout-icon">💡</div>
+        <div>All games are cloned to disk once and stay there. <strong>Nothing runs persistently</strong> except the hub itself. Static games are served on demand by Caddy the moment someone loads the page. Docker games are started with a single command when someone wants to play — and stopped when the session ends.</div>
+      </div>
+
+      <h2>The Two Categories</h2>
+      <table class="setup-type-table">
+        <tr>
+          <th>Type</th><th>How it's served</th><th>Idle cost</th><th>Start command</th>
+        </tr>
+        <tr>
+          <td>Static</td>
+          <td>Caddy serves files directly from disk. No process needed. Loads instantly.</td>
+          <td>Zero — files sit on disk</td>
+          <td>None — already running via Caddy</td>
+        </tr>
+        <tr>
+          <td>Docker (backend required)</td>
+          <td>A container runs a Node.js / Python / Go / PHP / C server that the browser talks to.</td>
+          <td>~50–200 MB RAM per container if left running</td>
+          <td><code>docker compose up -d</code> in the service folder</td>
+        </tr>
+      </table>
+
+      <h2>Static Games — Nothing to Do</h2>
+      <p>
+        The vast majority of games in this hub are pure static files — HTML, CSS, JavaScript, WASM.
+        Caddy already serves the <code>browser_games/</code> directory. Every static game is live the
+        moment its files are on disk. No process management, no memory cost, no startup time.
+      </p>
+      <p>
+        When someone opens a static game in the hub iframe, Caddy reads the files and serves them.
+        When they close it, nothing shuts down — there was nothing running.
+      </p>
+
+      <h2>Docker Games — Start on Demand</h2>
+      <p>
+        Games with a backend (Darkwire, Filaments, Suroi, Quizmaster, Realm of Dungeons, binb, etc.)
+        live in <code>~/services/[game-id]/</code> with their own <code>docker-compose.yml</code>.
+        They are <strong>not started automatically at boot</strong>. Start one when you want to play:
+      </p>
+      <pre>cd ~/services/suroi
+docker compose up -d
+
+# Done. Accessible at https://suroi.ixo.lol</pre>
+      <p>Stop it when the session is over to reclaim RAM:</p>
+      <pre>docker compose down</pre>
+
+      <h2>Setting Up Auto-Start at Boot (Optional)</h2>
+      <p>
+        For games your group plays frequently, add them to the server's startup sequence so they're
+        always available without a manual start:
+      </p>
+      <pre># In the docker-compose.yml for that game, ensure:
+restart: unless-stopped
+
+# Then start it once — Docker will restart it on every boot:
+docker compose up -d</pre>
+      <p>
+        Reserve auto-start for 3–5 favourites at most. Each idle container costs memory even when
+        nobody is playing.
+      </p>
+
+      <h2>Checking What's Currently Running</h2>
+      <pre># List all running game containers:
+docker ps --format "table {{.Names}}	{{.Status}}	{{.Ports}}" | grep -v "portainer\|authentik\|caddy"
+
+# Or via Portainer — http://localhost:9000</pre>
+
+      <h2>Recommended Persistent Games</h2>
+      <p>
+        These are good candidates for <code>restart: unless-stopped</code> because they have
+        persistent state (databases, user accounts) that should survive server reboots:
+      </p>
+      <table class="setup-type-table">
+        <tr><th>Game</th><th>Why keep it running</th></tr>
+        <tr><td>realm-of-dungeons</td><td>MongoDB stores character progress — needs to be up for idle gains to tick</td></tr>
+        <tr><td>rpggacha</td><td>Database stores accounts, characters, and pull history</td></tr>
+        <tr><td>slotter</td><td>MongoDB stores per-user virtual balances</td></tr>
+        <tr><td>gacha-nextjs</td><td>PostgreSQL stores accounts, pity counters, daily reward state</td></tr>
+        <tr><td>binb</td><td>Stateless but popular — worth keeping up for spontaneous music rounds</td></tr>
+      </table>
+
+      <h2>On-Demand Start Workflow</h2>
+      <p>The suggested workflow for session games (party games, multiplayer rounds):</p>
+      <pre># 1. Decide what you want to play
+# 2. Start just that game:
+cd ~/services/quizmaster && docker compose up -d
+
+# 3. Play — share the link with friends
+# 4. When done, tear it down:
+docker compose down</pre>
+
+      <div class="setup-callout">
+        <div class="setup-callout-icon">⚡</div>
+        <div>
+          <strong>Startup time:</strong> Static games — instant. Docker games — typically 3–8 seconds for the container to start and be ready to accept connections. PHP/Laravel games (Wuthering Waves Simulator) may take 10–15 seconds on first boot while running migrations.
+        </div>
+      </div>
+
+      <h2>Storage Layout</h2>
+      <pre>D:\Server\BrowserGames\          ← Static games (git clones)
+  suroi\                           ← Static client files only
+  hexgl\                           ← Static, WebGL
+  hauberk\web\                    ← Built Dart output
+  ...
+
+~/services/                        ← Docker game service folders
+  suroi\docker-compose.yml        ← Game server container
+  quizmaster\docker-compose.yml
+  rpggacha\docker-compose.yml
+  ...</pre>
+
+      <h2>Games That Can't Be Self-Hosted</h2>
+      <p>
+        A few entries in the hub link out to external sites or download pages rather than serving
+        locally — Zero-K (native client), Tiny Islands (itch.io, no source), Town Builder and
+        Blob Mixer (no web build). Clicking Play on these opens the external URL in a new tab.
+        Nothing to manage on the server side.
+      </p>
+
+    </div><!-- /setup-panel-body -->
+  </div><!-- /setup-panel -->
+</div><!-- /setup-overlay -->
+
 
 </div><!-- /viewer-body -->
 
@@ -862,6 +1146,29 @@ window.addEventListener('popstate', e => {
   } else {
     showLobby();
   }
+});
+
+// ══════════════════════════════════════════════════════
+//  SET UP OVERLAY
+// ══════════════════════════════════════════════════════
+function showSetup() {
+  document.getElementById('setup-overlay').classList.add('visible');
+  document.getElementById('pill-setup').classList.add('active');
+}
+
+function closeSetup() {
+  document.getElementById('setup-overlay').classList.remove('visible');
+  document.getElementById('pill-setup').classList.remove('active');
+}
+
+function handleOverlayClick(e) {
+  // Close when clicking the dark backdrop, not the panel itself
+  if (e.target === document.getElementById('setup-overlay')) closeSetup();
+}
+
+// Close on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSetup();
 });
 
 boot();
