@@ -2,31 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lila — Lichess</title>
+<title>Lichess</title>
 <link rel="stylesheet" href="../shared.css">
 <script src="../config.js"></script>
 <style>
-.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
-.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
-.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
-.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
-.bg-tab-pane { display:none; }
-.bg-tab-pane.active { display:block; }
-.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
-.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
-.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
-.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
-.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
-.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
-.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
-.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
-.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
-.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
-.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
-.source-link:hover { border-color:var(--accent); }
-.source-link-icon { font-size:1.5rem;flex-shrink:0; }
-.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
-.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
 </style>
 </head>
 <body>
@@ -34,84 +60,113 @@
 <div class="page-header">
   <div class="page-icon">♟️</div>
   <div>
-    <h1>Lila — Lichess</h1>
-    <div class="subtitle">// Chess Server · Multiplayer · Scala / Play Framework · lichess.org · AGPL-3.0 //</div>
-    <p class="desc">Lila is the open-source software powering <strong>lichess.org</strong> — the world's most popular free chess server. No ads, no paywalls. Fully browser-based, with official iOS and Android clients. Lichess is a Scala/Play application too complex to self-host easily, so this hub entry links to the official server. A free account is all you need.</p>
+    <h1>Lichess</h1>
+    <div class="subtitle">// Chess · Multiplayer · Scala + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">The full server software powering lichess.org — one of the world's largest chess platforms — self-hosted for a private friend group. Real-time chess with full variant support (Crazyhouse, Chess960, King of the Hill, etc.), puzzles, analysis board, and a Stockfish engine. Entirely free and open source.</p>
   </div>
-</div>
-
-<div class="bg-stat-row">
-  <div class="bg-stat-box"><div class="bg-stat-num">2</div><div class="bg-stat-label">Players</div></div>
-  <div class="bg-stat-box"><div class="bg-stat-num">0 Ads</div><div class="bg-stat-label">Monetisation</div></div>
-  <div class="bg-stat-box"><div class="bg-stat-num">AGPL-3.0</div><div class="bg-stat-label">License</div></div>
-  <div class="bg-stat-box"><div class="bg-stat-num">Scala</div><div class="bg-stat-label">Backend</div></div>
 </div>
 
 <div class="bg-tab-nav">
   <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
   <button class="bg-tab-btn"        onclick="bgTab('overview', this)">♟️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
   <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
 </div>
 
-<!-- ═══ TAB 1 — SETUP ═══ -->
+<!-- ═══ SETUP ═══ -->
 <div class="bg-tab-pane active" id="bg-pane-setup">
-
   <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
-      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the Lichess hub entry is wired up and chess can be played from the browser games lobby.</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the lobby loads, two accounts can create and play a game to completion.</div>
     </div>
     <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <div class="v1-banner">♟️ V1 Goal: Lichess linked from the Browser Games hub as an externalHub entry. Players can reach it in one click. No self-hosting required.</div>
-
-  <div class="callout callout-warn" style="margin-bottom:20px">
-    <div class="callout-icon">⚠️</div>
-    <div class="callout-body"><strong>Lila (the server software) is not practical to self-host</strong> for personal use. It requires Scala, MongoDB, Redis, Elasticsearch, and a number of custom services. This entry links to <a href="https://lichess.org" target="_blank" style="color:var(--accent)">lichess.org</a> — the official free instance. Lichess is genuinely free (as in libre and gratis) and will always be.</div>
-  </div>
+  <div class="v1-banner">♟️ V1 Goal: Lichess accessible at <code>chess.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, with two players able to complete a game.</div>
 
   <div class="section">
-    <div class="section-title">👤 Step 1 — Create a Lichess Account</div>
+    <div class="section-title">⚠️ Complexity Warning</div>
     <div class="card">
-      <p>A free account at <a href="https://lichess.org/signup" target="_blank" style="color:var(--accent)">lichess.org/signup</a> is all that's required. No email verification, no payment info. Lichess collects no personal data beyond a username and password.</p>
-      <div class="callout callout-tip">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body">You can also play as a guest without an account — but you won't have a rating, game history, or puzzles progress.</div>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Lila is a large, complex application.</strong> It is the entire lichess.org backend — not a simple game server. Self-hosting requires running Scala (lila), MongoDB, Redis, Stockfish (lila-fishnet), and a search engine (lila-search). Plan for a multi-hour setup and a non-trivial ongoing maintenance burden. The community maintains a Docker-based setup tool (<strong>lila-docker</strong>) that greatly simplifies this; use it rather than the raw repo.</div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="section-title">🐳 Step 1 — lila-docker</div>
+    <div class="card">
+      <p>Use the official <strong>lila-docker</strong> project — it orchestrates all required services automatically:</p>
+      <pre>cd ~/services
+git clone https://github.com/lichess-org/lila-docker.git lichess
+cd lichess
+./lila-docker setup</pre>
+      <p style="margin-top:12px">The setup wizard will ask which optional services to include (Stockfish analysis, opening explorer, etc.). For a minimal private server, decline optional services to reduce resource usage.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">lila-docker uses its own internal nginx. Point Caddy at its exposed port rather than proxying individual service ports. Check <code>docker compose ps</code> after setup to find which host port the frontend is exposed on.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <p>Add to <code><span data-cfg="path:caddyfile"></span></code> once lila-docker is running and you know its exposed port:</p>
+      <pre>chess.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:LILA_PORT
+}</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Lichess uses WebSockets heavily for real-time board updates. Caddy handles this automatically, but the lila-docker nginx may also handle WebSocket upgrades internally — check that WebSocket connections aren't being double-proxied if you encounter connection issues.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👤 Step 3 — Create Accounts</div>
+    <div class="card">
+      <p>A self-hosted Lichess instance has its own account system separate from Authentik. Each player needs to register an account on the Lichess instance directly.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Authentik <code>forward_auth</code> gates access to the subdomain (only Tailscale members can reach it), but Lichess manages its own logins internally. Players will have a Lichess username separate from their Authentik username.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 4 — Register in index.json</div>
     <div class="card">
       <pre>{
   "id":          "lichess",
   "name":        "Lichess",
-  "icon":        "♟️",
-  "description": "Free, ad-less chess. Online matches, puzzles, analysis, tournaments. Powered by Lila (AGPL-3.0).",
+  "icon":        "\u265f\ufe0f",
+  "description": "Full self-hosted Lichess chess platform. Real-time games, puzzles, analysis, Stockfish engine.",
   "folder":      null,
   "entry":       null,
   "category":    "multiplayer",
   "highScores":  false,
-  "players":     "1–2",
-  "tags":        ["chess", "strategy", "multiplayer", "puzzles", "tournaments"],
-  "tech":        "Scala / Play Framework",
+  "players":     "2",
+  "tags":        ["multiplayer", "chess", "boardgame", "strategy"],
+  "tech":        "Scala / MongoDB / Redis / Docker",
   "hasPage":     true,
   "externalHub": true,
-  "externalUrl": "https://lichess.org/"
+  "externalUrl": "https://chess.ixo.lol"
 }</pre>
     </div>
   </div>
-
 </div><!-- /bg-pane-setup -->
 
-
-<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<!-- ═══ OVERVIEW ═══ -->
 <div class="bg-tab-pane" id="bg-pane-overview">
-
-  <div class="v1-banner">♟️ Powered by <a href="https://github.com/lichess-org/lila" target="_blank" style="color:var(--accent)">Lila</a> — fully open-source, ad-free, forever. One of the most feature-rich free chess platforms in the world.</div>
+  <div class="v1-banner">✅ Lichess stores all game history, ratings, and puzzles in MongoDB. Data persists across restarts. Regular backups of the MongoDB volume are strongly recommended.</div>
 
   <div class="section">
     <div class="section-title">📡 Quick Reference</div>
@@ -119,19 +174,19 @@
       <div class="card">
         <div class="card-title">Access</div>
         <table>
-          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><a href="https://lichess.org" target="_blank" style="color:var(--accent)">lichess.org</a></td></tr>
-          <tr><td style="color:var(--text-dim)">Account</td><td>Free, optional for casual play</td></tr>
-          <tr><td style="color:var(--text-dim)">Mobile</td><td>iOS + Android apps (official)</td></tr>
-          <tr><td style="color:var(--text-dim)">Players</td><td>1 (vs AI) or 2 (online/local)</td></tr>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>chess.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO (network gate) + Lichess account</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2 per game; unlimited accounts</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>MongoDB — full game history, ratings, puzzles</td></tr>
         </table>
       </div>
       <div class="card">
-        <div class="card-title">Features</div>
+        <div class="card-title">Technical</div>
         <table>
-          <tr><td style="color:var(--text-dim);width:90px">Puzzles</td><td>Millions, rating-tracked</td></tr>
-          <tr><td style="color:var(--text-dim)">Analysis</td><td>Stockfish engine, free</td></tr>
-          <tr><td style="color:var(--text-dim)">Tournaments</td><td>Arena + Swiss, always running</td></tr>
-          <tr><td style="color:var(--text-dim)">Studies</td><td>Collaborative annotation + lessons</td></tr>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Scala / MongoDB / Redis / Docker</td></tr>
+          <tr><td style="color:var(--text-dim)">Engine</td><td>Stockfish (via lila-fishnet, optional)</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — fully responsive</td></tr>
         </table>
       </div>
     </div>
@@ -140,80 +195,142 @@
   <div class="section">
     <div class="section-title">♟️ What Is This?</div>
     <div class="card">
-      <p>Lichess is the world's most-used free chess server, handling millions of games per day. It is entirely ad-free and funded by voluntary donations. Every feature — from Stockfish engine analysis to game broadcasts of titled tournaments — is available for free to every user.</p>
-      <p>The software behind it is <strong>Lila</strong>, a Scala application developed in the open on GitHub. The source code is released under AGPL-3.0. Lichess has become a symbol of what open-source, non-commercial software can achieve.</p>
-      <p>Key features include: rated online play across all time controls (Bullet, Blitz, Rapid, Classical, Correspondence), daily puzzles, a full Stockfish analysis board, study tools for annotation and lesson-building, Puzzle Storm/Racer mini-games, simultaneous exhibitions, and live broadcasts of professional events.</p>
-      <p>The official iOS and Android apps are also open-source and connect to the same server. No special account is needed to use them beyond a lichess.org login.</p>
+      <p>Lila is the open-source codebase that powers lichess.org, one of the largest free chess platforms in the world. Self-hosting it gives your friend group a private chess server with the full feature set: rated and casual games, all major variants (Chess960, Crazyhouse, Three-check, King of the Hill, Antichess, and more), a puzzle trainer, a game analysis board backed by Stockfish, tournaments, and a study tool for annotating games.</p>
+      <p>The platform is entirely libre — no ads, no subscriptions, no paywalls. Running a private instance means ratings and history accumulate over time, giving the friend group an ongoing competitive record. The built-in puzzle trainer is genuinely excellent for improving tactical vision.</p>
+      <p>Be aware that Lila is a large application built for massive scale. On a home server it runs fine for a small group, but it consumes more RAM than any other game in this hub. Allocate at least 4GB to the Docker stack.</p>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">⌨️ Controls</div>
+    <div class="section-title">⚠️ Known Limitations</div>
     <div class="card">
-      <p>Drag-and-drop or click-to-move pieces in the browser. Keyboard shortcuts are available for analysis: <code>←</code>/<code>→</code> to step through moves, <code>f</code> to flip the board, <code>space</code> to play the best engine move. Full controls documented at <a href="https://lichess.org/faq" target="_blank" style="color:var(--accent)">lichess.org/faq</a>.</p>
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Resource usage</td><td>MongoDB + Redis + Scala JVM requires ~4GB RAM minimum for comfortable operation.</td></tr>
+        <tr><td>Separate accounts</td><td>Lichess has its own account system. Authentik SSO only gates network access — players still register directly on the Lichess instance.</td></tr>
+        <tr><td>Update complexity</td><td>Updating requires rebuilding the Docker stack. Test on a non-critical window; in-progress games may be lost during restarts.</td></tr>
+        <tr><td>Email</td><td>A self-hosted instance won't have email configured by default. Password resets require admin console access.</td></tr>
+      </table>
     </div>
   </div>
-
 </div><!-- /bg-pane-overview -->
 
-
-<!-- ═══ TAB 3 — SOURCE ═══ -->
-<div class="bg-tab-pane" id="bg-pane-source">
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 All gameplay is multiplayer — 1v1 games, tournaments, and team matches. Solo use (puzzles, analysis) is also fully supported.</div>
 
   <div class="section">
-    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="section-title">🌐 Server Architecture</div>
     <div class="card">
-      <a class="source-link" href="https://lichess.org" target="_blank">
-        <div class="source-link-icon">♟️</div>
-        <div><div class="source-link-name">lichess.org</div><div class="source-link-desc">The live service — free, ad-less, open chess</div></div>
-      </a>
-      <a class="source-link" href="https://github.com/lichess-org/lila" target="_blank">
-        <div class="source-link-icon">⚙️</div>
-        <div><div class="source-link-name">github.com/lichess-org/lila</div><div class="source-link-desc">Server source code — Scala · AGPL-3.0 · actively developed</div></div>
-      </a>
-      <a class="source-link" href="https://lichess.org/patron" target="_blank">
-        <div class="source-link-icon">💛</div>
-        <div><div class="source-link-name">lichess.org/patron</div><div class="source-link-desc">Support Lichess — voluntary donations keep it running</div></div>
-      </a>
+      <table>
+        <tr><th>Component</th><th>Role</th></tr>
+        <tr><td>lila (Scala)</td><td>Main application server — HTTP, WebSockets, game logic</td></tr>
+        <tr><td>MongoDB</td><td>Primary database — games, users, puzzles, studies</td></tr>
+        <tr><td>Redis</td><td>Pub/sub for real-time WebSocket message routing</td></tr>
+        <tr><td>lila-fishnet</td><td>Stockfish engine pool for analysis and computer moves (optional)</td></tr>
+        <tr><td>lila-search</td><td>Game search index (optional)</td></tr>
+        <tr><td>nginx (internal)</td><td>Bundled by lila-docker; routes between frontend and API</td></tr>
+      </table>
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-title">🔧 Server Management</div>
+    <div class="card">
+      <pre># Check all service status:
+cd ~/services/lichess
+docker compose ps
+
+# View lila application logs:
+docker compose logs -f lila
+
+# Restart the full stack:
+docker compose restart
+
+# Update (rebuild from latest source):
+git pull
+docker compose up -d --build</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/lichess-org/lila" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — lichess-org/lila</div>
+          <div class="source-link-desc">The full Lichess application. Scala + Play Framework. Very actively developed.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://github.com/lichess-org/lila-docker" target="_blank">
+        <div class="source-link-icon">🐳</div>
+        <div>
+          <div class="source-link-name">GitHub — lichess-org/lila-docker</div>
+          <div class="source-link-desc">Official Docker setup tool. Use this for self-hosting — not the raw lila repo directly.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>~/services/lichess/</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Extremely active — lichess.org deploys multiple times per day. Pin to a stable tag for a home server to avoid surprise breakage.</td></tr>
+      </table>
+    </div>
+  </div>
   <div class="section">
     <div class="section-title">⚖️ License</div>
-    <div class="card">
-      <p><strong>AGPL-3.0</strong> — the Lila server software is fully open source. Since the canonical instance is hosted at lichess.org, self-hosting is not required to use it. The source code is available for study, forking, and contribution.</p>
-    </div>
+    <div class="card"><p>GNU AGPL v3.0. Entirely free and open source. No modifications made to source for this server.</p></div>
   </div>
-
 </div><!-- /bg-pane-source -->
 
-
 <script>
-const STORAGE_KEY = 'bg_lichess_setup';
-function bgTab(id, btn) {
-  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
-  const pane = document.getElementById('bg-pane-' + id);
-  if (pane) pane.classList.add('active');
-  if (btn)  btn.classList.add('active');
-}
-function toggleComplete() {
-  const bar  = document.getElementById('setup-complete-bar');
-  const box  = document.getElementById('setup-checkbox');
-  const sub  = document.getElementById('complete-sub');
-  const done = bar.classList.toggle('done');
-  box.textContent = done ? '✓' : '';
-  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
-  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
-}
-(function init() {
-  if (localStorage.getItem(STORAGE_KEY)) {
-    document.getElementById('setup-complete-bar').classList.add('done');
-    document.getElementById('setup-checkbox').textContent = '✓';
-    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
   }
-  if (window.applyDataCfg) applyDataCfg();
-})();
+  const STORAGE_KEY = 'bg_lichess_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
 </script>
 </body>
 </html>
