@@ -6,45 +6,72 @@
 <link rel="stylesheet" href="../shared.css">
 <script src="../config.js"></script>
 <style>
-.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
-.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
-.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
-.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
-.bg-tab-pane { display:none; }
-.bg-tab-pane.active { display:block; }
-.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
-.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
-.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
-.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
-.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
-.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
-.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
-.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
-.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
-.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
-.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
-.source-link:hover { border-color:var(--accent); }
-.source-link-icon { font-size:1.5rem;flex-shrink:0; }
-.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
-.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
 </style>
 </head>
 <body>
 
 <div class="page-header">
-  <div class="page-icon">🔫</div>
+  <div class="page-icon">🔦</div>
   <div>
     <h1>Hypersomnia</h1>
-    <div class="subtitle">// Competitive Top-Down Shooter · Multiplayer · C++ / Emscripten / WebAssembly · play.hypersomnia.io · AGPL-3.0 //</div>
-    <p class="desc">A free, open-source competitive top-down shooter that blends Counter-Strike's tactical bomb-defusal gameplay with the intense, close-quarters style of Hotline Miami. Available on Windows, Linux, macOS, and — critically — directly in the browser via WebAssembly. Under 50 MB download. Actively developed by Team Hypersomnia.</p>
+    <div class="subtitle">// Shooter · Multiplayer · C++ / WebAssembly · Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A top-down tactical shooter that runs in the browser via WebAssembly. Players compete in team deathmatch and objective modes with detailed physics — bullet penetration, light dynamics, and environmental interaction. Impressively high-fidelity for a browser game; the WASM port brings the native C++ engine directly to the web.</p>
   </div>
-</div>
-
-<div class="bg-stat-row">
-  <div class="bg-stat-box"><div class="bg-stat-num">2–8</div><div class="bg-stat-label">Players</div></div>
-  <div class="bg-stat-box"><div class="bg-stat-num">WASM</div><div class="bg-stat-label">Browser Tech</div></div>
-  <div class="bg-stat-box"><div class="bg-stat-num">AGPL-3.0</div><div class="bg-stat-label">License</div></div>
-  <div class="bg-stat-box"><div class="bg-stat-num">Steam</div><div class="bg-stat-label">Also On</div></div>
 </div>
 
 <div class="bg-tab-nav">
@@ -54,74 +81,93 @@
   <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
 </div>
 
-<!-- ═══ TAB 1 — SETUP ═══ -->
+<!-- ═══ SETUP ═══ -->
 <div class="bg-tab-pane active" id="bg-pane-setup">
-
   <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
-      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Hypersomnia loads in the browser and a match can be joined or hosted.</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the WASM client loads, the game renders, and two players can join and shoot each other.</div>
     </div>
     <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <div class="v1-banner">🔫 V1 Goal: Hypersomnia accessible via the official browser build at <code>play.hypersomnia.io</code>, linked from the Browser Games hub. Optional: self-host the dedicated server component for private LAN matches.</div>
-
-  <div class="callout callout-tip" style="margin-bottom:20px">
-    <div class="callout-icon">💡</div>
-    <div class="callout-body"><strong>No self-hosting required for browser play.</strong> The official <a href="https://play.hypersomnia.io/" target="_blank" style="color:var(--accent)">play.hypersomnia.io</a> serves the WebAssembly build and connects to community servers. Register the hub entry as <code>externalHub</code> pointing to the official URL — or self-host the server component for private LAN matches.</div>
-  </div>
+  <div class="v1-banner">🔦 V1 Goal: Hypersomnia server running in Docker, web client accessible at <code>hypersomnia.<span data-cfg="domain"></span></code>, private match joinable over Tailscale.</div>
 
   <div class="section">
-    <div class="section-title">📋 Step 1 — Register in index.json (External Hub)</div>
+    <div class="section-title">⚠️ Architecture Note</div>
     <div class="card">
-      <p>The simplest setup: link directly to the official browser build.</p>
-      <pre>{
-  "id":          "hypersomnia",
-  "name":        "Hypersomnia",
-  "icon":        "🔫",
-  "description": "Competitive top-down shooter — CS meets Hotline Miami. Browser-playable via WebAssembly.",
-  "folder":      null,
-  "entry":       null,
-  "category":    "multiplayer",
-  "highScores":  false,
-  "players":     "2–8",
-  "tags":        ["shooter", "multiplayer", "competitive", "tactical", "wasm"],
-  "tech":        "C++ / Emscripten / WebAssembly",
-  "hasPage":     true,
-  "externalHub": true,
-  "externalUrl": "https://play.hypersomnia.io/"
-}</pre>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">🐳 Optional — Self-Host a Dedicated Server</div>
-    <div class="card">
-      <p>If you want private LAN matches without using community servers, Hypersomnia ships a dedicated server Docker image.</p>
-      <pre>hypersomnia-server:
-  image: teamhypersomnia/hypersomnia:latest
-  ports:
-    - "8412:8412/udp"
-  restart: unless-stopped
-  environment:
-    - SERVER_NAME=ixo-private</pre>
-      <p>Players on the browser client can then connect to <code>&lt;your-tailscale-ip&gt;:8412</code> from the in-game server browser.</p>
       <div class="callout callout-warn">
         <div class="callout-icon">⚠️</div>
-        <div class="callout-body">The dedicated server image requires a publicly accessible UDP port for external players. For LAN/Tailscale-only play, the Tailscale IP is sufficient — no port forwarding needed.</div>
+        <div class="callout-body">Hypersomnia has two components: a <strong>dedicated game server</strong> (C++ binary or Docker) and a <strong>web client</strong> (served as static WASM + HTML files). The client loads in the browser but the game itself runs via WebAssembly. The dedicated server is required for multiplayer matches.</div>
       </div>
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Dedicated Server</div>
+    <div class="card">
+      <p>Create <code>~/services/hypersomnia/docker-compose.yml</code>:</p>
+      <pre>services:
+  hypersomnia:
+    image: hypersomnia/hypersomnia-server:latest
+    container_name: hypersomnia
+    restart: unless-stopped
+    ports:
+      - "8412:8412/udp"   # Game server UDP
+      - "8820:80"          # Web client static files</pre>
+      <pre>docker compose -f ~/services/hypersomnia/docker-compose.yml up -d</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Check the official Hypersomnia Docker documentation for the current image name and recommended port configuration — these have changed between releases.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <p>Add to <code><span data-cfg="path:caddyfile"></span></code> for the web client:</p>
+      <pre>hypersomnia.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8820
+}</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">The game server communicates over <strong>UDP port 8412</strong> — this bypasses Caddy entirely. UDP traffic goes directly from client to server over Tailscale. Ensure the port is reachable on the Tailscale network.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "hypersomnia",
+  "name":        "Hypersomnia",
+  "icon":        "\U0001f526",
+  "description": "Top-down tactical shooter via WebAssembly. Team deathmatch with bullet physics and light dynamics.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "2-16",
+  "tags":        ["multiplayer", "shooter", "action", "tactical"],
+  "tech":        "C++ / WebAssembly / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://hypersomnia.ixo.lol"
+}</pre>
+    </div>
+  </div>
 </div><!-- /bg-pane-setup -->
 
-
-<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<!-- ═══ OVERVIEW ═══ -->
 <div class="bg-tab-pane" id="bg-pane-overview">
-
-  <div class="v1-banner">🔫 Browser-playable via WebAssembly at <a href="https://play.hypersomnia.io/" target="_blank" style="color:var(--accent)">play.hypersomnia.io</a>. Also available on Steam and as a native download (&lt;50 MB).</div>
+  <div class="v1-banner">✅ Hypersomnia is a WASM port of a native C++ game — graphics fidelity and physics accuracy are significantly higher than a typical browser game. Expect a larger initial load time while WASM assets download.</div>
 
   <div class="section">
     <div class="section-title">📡 Quick Reference</div>
@@ -129,134 +175,186 @@
       <div class="card">
         <div class="card-title">Access</div>
         <table>
-          <tr><td style="color:var(--text-dim);width:100px">Browser</td><td><a href="https://play.hypersomnia.io/" target="_blank" style="color:var(--accent)">play.hypersomnia.io</a></td></tr>
-          <tr><td style="color:var(--text-dim)">Steam</td><td><a href="https://store.steampowered.com/app/2660970/Hypersomnia/" target="_blank" style="color:var(--accent)">App ID 2660970</a></td></tr>
-          <tr><td style="color:var(--text-dim)">Native</td><td>Windows / Linux / macOS download</td></tr>
-          <tr><td style="color:var(--text-dim)">Players</td><td>2–8 per match</td></tr>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>hypersomnia.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Game server</td><td>UDP 8412 over Tailscale (direct)</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2–16 per match</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — match-based</td></tr>
         </table>
       </div>
       <div class="card">
         <div class="card-title">Technical</div>
         <table>
-          <tr><td style="color:var(--text-dim);width:100px">Engine</td><td>C++ compiled to Emscripten WASM</td></tr>
-          <tr><td style="color:var(--text-dim)">Size</td><td>Under 50 MB</td></tr>
-          <tr><td style="color:var(--text-dim)">Mobile</td><td>No (keyboard + mouse required)</td></tr>
-          <tr><td style="color:var(--text-dim)">License</td><td>AGPL-3.0</td></tr>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>C++ compiled to WebAssembly</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No persistent stats</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires game server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>No — keyboard + mouse required</td></tr>
         </table>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">🔫 What Is This?</div>
+    <div class="section-title">🎮 What Is This?</div>
     <div class="card">
-      <p>Hypersomnia is a free, open-source competitive top-down shooter developed by Team Hypersomnia. The core game mode is a Counter-Strike-style bomb defusal: two teams — terrorists and counter-terrorists — play round-robin matches with a single life per round. One team plants a bomb; the other defuses it or eliminates everyone.</p>
-      <p>The top-down perspective and movement speed give the game a feel closer to Hotline Miami — engagements are fast, spatial awareness matters, and a single bullet can end your round. The map design rewards positioning and information.</p>
-      <p>What makes Hypersomnia special among FOSS games is its full WebAssembly browser build. Visiting <a href="https://play.hypersomnia.io/" target="_blank" style="color:var(--accent)">play.hypersomnia.io</a> loads the complete game client, connects to community servers, and lets you play immediately without installing anything. The development team recently fixed cross-origin isolation and iframe embedding, meaning it can be run inside the Browser Games hub frame.</p>
+      <p>Hypersomnia is a top-down multiplayer shooter originally developed as a native C++ application, subsequently ported to the browser via Emscripten/WebAssembly. The WASM port brings the full native engine to the browser — physics simulation, dynamic lighting and shadows, bullet penetration through surfaces, recoil patterns, and a detailed sound model all run at near-native performance.</p>
+      <p>Gameplay revolves around team-based modes — deathmatch, bomb defusal, and others — on handcrafted maps. The top-down perspective with realistic bullet travel and light simulation creates tense, tactical engagements where cover and sight lines matter as much as aim.</p>
+      <p>For a private server on Tailscale this means a surprisingly high-quality competitive shooter playable without any client install — just a modern browser. The initial load is heavier than a typical browser game due to the WASM binary size, but subsequent loads are fast from cache.</p>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">⌨️ Controls</div>
+    <div class="section-title">📖 How to Play</div>
     <div class="card">
-      <div class="controls-grid" style="display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:.82rem;">
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">WASD</span><span style="color:var(--text-dim);align-self:center;">Move</span>
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">Mouse</span><span style="color:var(--text-dim);align-self:center;">Aim</span>
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">LMB</span><span style="color:var(--text-dim);align-self:center;">Shoot</span>
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">RMB</span><span style="color:var(--text-dim);align-self:center;">Secondary action</span>
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">R</span><span style="color:var(--text-dim);align-self:center;">Reload</span>
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">E</span><span style="color:var(--text-dim);align-self:center;">Interact / pick up</span>
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">G</span><span style="color:var(--text-dim);align-self:center;">Throw grenade</span>
-        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">Tab</span><span style="color:var(--text-dim);align-self:center;">Scoreboard</span>
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Open the game URL — wait for the WASM assets to load (larger initial download)</li>
+        <li>Connect to the server by entering the Tailscale IP or hostname + port in the server browser</li>
+        <li>Select a team and spawn into the match</li>
+        <li>Use cover — light and shadows affect visibility; bullets penetrate thin surfaces</li>
+        <li>Objectives vary by mode: deathmatch (eliminate enemies), bomb (plant/defuse)</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">WASD</span>           <span class="ctrl-desc">Move</span>
+        <span class="ctrl-key">Mouse</span>          <span class="ctrl-desc">Aim</span>
+        <span class="ctrl-key">Left click</span>     <span class="ctrl-desc">Shoot</span>
+        <span class="ctrl-key">Right click</span>    <span class="ctrl-desc">Secondary action / throw</span>
+        <span class="ctrl-key">R</span>              <span class="ctrl-desc">Reload</span>
+        <span class="ctrl-key">E</span>              <span class="ctrl-desc">Interact / pick up item</span>
+        <span class="ctrl-key">1–4</span>            <span class="ctrl-desc">Switch weapon slot</span>
+        <span class="ctrl-key">Tab</span>            <span class="ctrl-desc">Scoreboard</span>
       </div>
     </div>
   </div>
 
-</div><!-- /bg-pane-overview -->
-
-
-<!-- ═══ TAB 3 — MULTIPLAYER ═══ -->
-<div class="bg-tab-pane" id="bg-pane-multi">
-
   <div class="section">
-    <div class="section-title">🌐 Server Options</div>
+    <div class="section-title">⚠️ Known Limitations</div>
     <div class="card">
       <table>
-        <tr><th>Option</th><th>Detail</th></tr>
-        <tr><td>Community servers</td><td>Available directly in-game from the server browser. No account required — connect immediately from the browser build.</td></tr>
-        <tr><td>Self-hosted server</td><td>Docker image available. Ideal for private LAN matches with friends on Tailscale.</td></tr>
-        <tr><td>Steam integration</td><td>Steam account optional but enables matchmaking and friend invites on the native client.</td></tr>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Large initial load</td><td>The WASM binary is large. First load takes 30–60 seconds depending on connection speed. Subsequent loads are cached.</td></tr>
+        <tr><td>UDP game server</td><td>Game server traffic bypasses Caddy over UDP. Authentik only gates the web client page load — not individual game connections.</td></tr>
+        <tr><td>Keyboard + mouse required</td><td>Not playable on mobile or tablet.</td></tr>
+        <tr><td>SharedArrayBuffer required</td><td>Some browsers may need COOP/COEP headers set on the web client to enable WASM threading. The Docker image should handle this, but verify if the game fails to start.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 Hypersomnia requires at least 2 players. The game server manages match state; the WASM client renders and handles input locally.</div>
+
+  <div class="section">
+    <div class="section-title">🌐 Server Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Detail</th></tr>
+        <tr><td>Protocol</td><td>UDP (custom game protocol — not WebSocket)</td></tr>
+        <tr><td>Backend</td><td>C++ dedicated server managing game state, physics, and match logic</td></tr>
+        <tr><td>Web client</td><td>C++ engine compiled to WASM — served as static files, connects directly to UDP server</td></tr>
+        <tr><td>Match model</td><td>Discrete matches; server cycles through maps/modes on completion</td></tr>
+        <tr><td>Player limit</td><td>Up to 16 per match; smaller groups (4–8) work best for private play</td></tr>
       </table>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">🔔 Discord</div>
+    <div class="section-title">🔧 Server Management</div>
     <div class="card">
-      <p>The official Hypersomnia Discord (<a href="https://discord.gg/YC49E4G" target="_blank" style="color:var(--accent)">discord.gg/YC49E4G</a>) is the main hub for finding matches, reporting bugs, and keeping up with updates.</p>
+      <pre># Check status:
+docker compose -f ~/services/hypersomnia/docker-compose.yml ps
+
+# View logs:
+docker compose -f ~/services/hypersomnia/docker-compose.yml logs -f
+
+# Update to latest image:
+docker compose -f ~/services/hypersomnia/docker-compose.yml pull
+docker compose -f ~/services/hypersomnia/docker-compose.yml up -d</pre>
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-title">⚠️ Known Issues</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>WASM threading headers</td><td>If the game loads but freezes or crashes, check that the server is sending <code>Cross-Origin-Opener-Policy: same-origin</code> and <code>Cross-Origin-Embedder-Policy: require-corp</code> headers. These are needed for <code>SharedArrayBuffer</code> support.</td></tr>
+        <tr><td>UDP through Caddy</td><td>Caddy does not proxy UDP. The game server port must be directly accessible on the Tailscale network — don't put it behind Caddy's reverse_proxy.</td></tr>
+      </table>
+    </div>
+  </div>
 </div><!-- /bg-pane-multi -->
 
-
-<!-- ═══ TAB 4 — SOURCE ═══ -->
+<!-- ═══ SOURCE ═══ -->
 <div class="bg-tab-pane" id="bg-pane-source">
-
   <div class="section">
-    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="section-title">📦 Primary Source</div>
     <div class="card">
-      <a class="source-link" href="https://hypersomnia.io" target="_blank">
-        <div class="source-link-icon">🌐</div>
-        <div><div class="source-link-name">hypersomnia.io</div><div class="source-link-desc">Official site — downloads, leaderboards, server browser</div></div>
-      </a>
-      <a class="source-link" href="https://play.hypersomnia.io/" target="_blank">
-        <div class="source-link-icon">▶️</div>
-        <div><div class="source-link-name">play.hypersomnia.io</div><div class="source-link-desc">Browser build — play immediately, no install</div></div>
-      </a>
       <a class="source-link" href="https://github.com/TeamHypersomnia/Hypersomnia" target="_blank">
-        <div class="source-link-icon">⚙️</div>
-        <div><div class="source-link-name">github.com/TeamHypersomnia/Hypersomnia</div><div class="source-link-desc">Source code — C++ · AGPL-3.0 · actively maintained</div></div>
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — TeamHypersomnia/Hypersomnia</div>
+          <div class="source-link-desc">Original repository. C++ source, Emscripten WASM build, dedicated server. Docker image available.</div>
+        </div>
       </a>
     </div>
   </div>
-
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>docker compose pull</code> + <code>docker compose up -d</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Active — ongoing development by the Hypersomnia team. Check GitHub releases for changelogs.</td></tr>
+      </table>
+    </div>
+  </div>
   <div class="section">
     <div class="section-title">⚖️ License</div>
-    <div class="card">
-      <p><strong>AGPL-3.0</strong> — open source with network copyleft. Self-hosting the dedicated server for private use requires no action. Modifications to the server source code that you run as a network service must be published under AGPL-3.0.</p>
-    </div>
+    <div class="card"><p>GNU AGPL v3.0. Free to self-host. No modifications made to source for this server.</p></div>
   </div>
-
 </div><!-- /bg-pane-source -->
 
-
 <script>
-const STORAGE_KEY = 'bg_hypersomnia_setup';
-function bgTab(id, btn) {
-  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
-  const pane = document.getElementById('bg-pane-' + id);
-  if (pane) pane.classList.add('active');
-  if (btn)  btn.classList.add('active');
-}
-function toggleComplete() {
-  const bar  = document.getElementById('setup-complete-bar');
-  const box  = document.getElementById('setup-checkbox');
-  const sub  = document.getElementById('complete-sub');
-  const done = bar.classList.toggle('done');
-  box.textContent = done ? '✓' : '';
-  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
-  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
-}
-(function init() {
-  if (localStorage.getItem(STORAGE_KEY)) {
-    document.getElementById('setup-complete-bar').classList.add('done');
-    document.getElementById('setup-checkbox').textContent = '✓';
-    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
   }
-  if (window.applyDataCfg) applyDataCfg();
-})();
+  const STORAGE_KEY = 'bg_hypersomnia_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
 </script>
 </body>
 </html>

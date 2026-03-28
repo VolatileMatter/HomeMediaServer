@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tap Tap Adventure</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🗺️</div>
+  <div>
+    <h1>Tap Tap Adventure</h1>
+    <div class="subtitle">// MMORPG · Multiplayer · Node.js + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A community expansion of Mozilla's BrowserQuest with significantly more content — new zones, enemies, items, quests, and classes. Built on the same HTML5/WebSocket foundation, Tap Tap Adventure extends the original short demo into a more complete MMORPG experience. Self-hostable with Docker.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the client loads, players can connect, and the expanded world areas are reachable.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🗺️ V1 Goal: Tap Tap Adventure server running in Docker, client accessible at <code>taptap.<span data-cfg="domain"></span></code>, multiple players in the shared world simultaneously.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Relationship to BrowserQuest</div>
+    <div class="card">
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Tap Tap Adventure is a fork of BrowserQuest with expanded content. If you already have BrowserQuest running, consider whether you want both or just Tap Tap Adventure. They are separate deployments on separate subdomains — they do not share a world or player state.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Build</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/Tach-Yon/Tap-Tap-Adventure.git taptap
+cd taptap</pre>
+      <p style="margin-top:10px">Create <code>~/services/taptap/docker-compose.yml</code>:</p>
+      <pre>services:
+  taptap:
+    build: .
+    container_name: taptap
+    restart: unless-stopped
+    ports:
+      - "8810:8000"   # WebSocket game server
+      - "8811:80"     # Static client files</pre>
+      <pre>docker compose up -d --build</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Like BrowserQuest, Tap Tap Adventure targets an older Node.js version. If the build fails, check the repo README for the required version or try with <code>--legacy-peer-deps</code> during npm install.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <p>Add to <code><span data-cfg="path:caddyfile"></span></code>:</p>
+      <pre>taptap.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+
+  handle /ws* {
+    reverse_proxy localhost:8810
+  }
+  handle {
+    reverse_proxy localhost:8811
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "taptap",
+  "name":        "Tap Tap Adventure",
+  "icon":        "\U0001f5fa\ufe0f",
+  "description": "BrowserQuest expanded — more zones, enemies, items, and classes. HTML5 MMORPG.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "2-20",
+  "tags":        ["multiplayer", "rpg", "mmorpg", "adventure"],
+  "tech":        "HTML5 / Node.js / WebSockets / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://taptap.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Like BrowserQuest, Tap Tap Adventure has no save system — players respawn at the start on disconnect. The world is shared and persistent only while the server is running.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>taptap.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2–20 simultaneous (shared world)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — session-based</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML5 Canvas / Node.js / WebSockets</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires game server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial — not optimised for touch</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Tap Tap Adventure is a community-developed expansion of Mozilla's BrowserQuest. Where BrowserQuest is a 15–30 minute linear adventure that ends with a single boss fight, Tap Tap Adventure substantially extends the content: additional map areas, more enemy types, expanded item sets, character classes, and quests that give the world more structure and replayability.</p>
+      <p>The core experience is identical to BrowserQuest — a top-down HTML5 RPG where multiple players share a world in real time, click to move and attack, and collect gear. The expansion simply offers significantly more of it. Players who have completed BrowserQuest will find new areas to explore and a longer progression arc.</p>
+      <p>Running both BrowserQuest and Tap Tap Adventure is viable — they are independent deployments on separate subdomains with no shared state.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Enter a name to spawn into the starting area</li>
+        <li>Click to move and attack enemies</li>
+        <li>Collect gear dropped by enemies to upgrade equipment</li>
+        <li>Talk to NPCs for quests and direction</li>
+        <li>Explore new zones beyond the original BrowserQuest map</li>
+        <li>Other players share your world in real time — cooperate or go solo</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click</span>         <span class="ctrl-desc">Move to location / attack enemy</span>
+        <span class="ctrl-key">Click item</span>    <span class="ctrl-desc">Pick up / equip loot</span>
+        <span class="ctrl-key">Click NPC</span>     <span class="ctrl-desc">Talk / accept quest</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>No save system</td><td>Identical to BrowserQuest — disconnect loses your progress and items.</td></tr>
+        <tr><td>Old Node.js target</td><td>Fork inherits BrowserQuest's dependency on older Node. Community build fixes available — check the repo issues.</td></tr>
+        <tr><td>Maintenance status</td><td>Less actively maintained than BrowserQuest forks. Test thoroughly after any update.</td></tr>
+        <tr><td>Shared world</td><td>All players are in the same world. No instancing or private areas.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 Same architecture as BrowserQuest — single shared world, WebSocket game server, no save persistence.</div>
+
+  <div class="section">
+    <div class="section-title">🌐 Server Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Detail</th></tr>
+        <tr><td>Protocol</td><td>WebSockets (binary messages — identical to BrowserQuest)</td></tr>
+        <tr><td>Backend</td><td>Node.js game server managing world state, entity positions, combat</td></tr>
+        <tr><td>World model</td><td>Single shared persistent world — all players coexist</td></tr>
+        <tr><td>Player limit</td><td>Configurable; 20 concurrent players comfortable on home server</td></tr>
+        <tr><td>Persistence</td><td>None — world state is in-memory</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Server Management</div>
+    <div class="card">
+      <pre># Check status:
+docker compose -f ~/services/taptap/docker-compose.yml ps
+
+# View logs:
+docker compose -f ~/services/taptap/docker-compose.yml logs -f
+
+# Restart:
+docker compose -f ~/services/taptap/docker-compose.yml restart
+
+# Update:
+cd ~/services/taptap
+git pull
+docker compose up -d --build</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/Tach-Yon/Tap-Tap-Adventure" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — Tach-Yon/Tap-Tap-Adventure</div>
+          <div class="source-link-desc">Community expansion fork of BrowserQuest. Node.js + HTML5 Canvas + WebSockets. Includes Dockerfile.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Sporadic — community project, not actively maintained. Stable for self-hosting; core game is complete.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Mozilla Public License 2.0 (inherited from BrowserQuest). Game assets are Creative Commons Attribution-ShareAlike 3.0. Self-hosted for private use within the server's friend group. No modifications made to source.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_taptap_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>
