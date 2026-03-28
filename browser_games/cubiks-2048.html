@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cubiks-2048</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🧊</div>
+  <div>
+    <h1>Cubiks-2048</h1>
+    <div class="subtitle">// Puzzle · 3D · Singleplayer · Static Files (Three.js) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A 3D cube-based variant of 2048. Instead of a flat 4×4 grid, tiles live on the six faces of a rotating 3D cube. Swipe to slide tiles across cube faces, merging matching numbers as they collide. Combines the familiar 2048 mechanic with spatial reasoning across three dimensions.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the 3D cube renders with tiles, a swipe moves tiles correctly, and a merge produces a doubled tile.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🧊 V1 Goal: Cubiks-2048 accessible at <code>games.<span data-cfg="domain"></span>/cubiks-2048/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>Cubiks-2048 is a fully static project. No build step required.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/Kshitij-Banerjee/Cubiks-2048.git cubiks-2048</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Entry point is <code>index.html</code> at the repo root. Uses Three.js for 3D rendering — WebGL required, included via CDN or local copy in the repo.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "cubiks-2048",
+  "name":        "Cubiks-2048",
+  "icon":        "\U0001f9ca",
+  "description": "2048 on a rotating 3D cube. Merge tiles across all six faces. Familiar mechanic, new dimension.",
+  "folder":      "cubiks-2048",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["puzzle", "3d", "2048"],
+  "tech":        "Three.js / JavaScript",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Inherits the hub's <code>forward_auth</code> — Tailscale + Authentik SSO required.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Runs client-side via Three.js / WebGL. Score stored in <code>localStorage</code>.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/cubiks-2048/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>localStorage — score</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Three.js / JavaScript / WebGL</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>Local best score</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load (if Three.js is local)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — touch swipe supported</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Cubiks-2048 takes the 2048 sliding tile mechanic and maps it onto the six faces of a 3D cube rendered in Three.js. The cube can be rotated to view and interact with all faces. Swiping in a direction slides all tiles on the visible face in that direction — tiles of equal value merge as in the original 2048 — but the 3D geometry means the consequences of a move affect multiple faces in a way that's harder to predict than on a flat grid.</p>
+      <p>The added spatial dimension substantially increases the difficulty. Players familiar with 2048 strategy will find their flat-grid intuitions partially transfer but frequently mislead in three dimensions. Corner strategies become far more complex when the "corners" wrap around a cube. It's a clever spatial puzzle that rewards the same type of careful planning as 2048 but demands significantly more geometric reasoning.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Drag to rotate the cube and view different faces</li>
+        <li>Swipe (or use arrow keys) on a face to slide all tiles in that direction</li>
+        <li>Matching tiles merge into their sum when they collide</li>
+        <li>A new tile appears after each move</li>
+        <li>Goal: reach 2048 (or higher) on any tile</li>
+        <li>Game ends when no moves remain on any face</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Drag</span>        <span class="ctrl-desc">Rotate the cube to view different faces</span>
+        <span class="ctrl-key">Swipe</span>       <span class="ctrl-desc">Slide tiles on the current face</span>
+        <span class="ctrl-key">Arrow keys</span>  <span class="ctrl-desc">Slide tiles (keyboard alternative)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>CDN dependency</td><td>If Three.js is loaded from a CDN, the game won't work fully offline. Check whether the repo includes a local copy.</td></tr>
+        <tr><td>Score browser-local</td><td>Stored in <code>localStorage</code> — not shared across users or devices.</td></tr>
+        <tr><td>Archived repo</td><td>Last updated ~2014. Stable and complete. No updates expected.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 Local best score only. Highest tile reached is the natural comparison metric.</div>
+  <div class="section">
+    <div class="section-title">🏆 Leaderboard</div>
+    <div class="card">
+      <p>Score is tracked locally. Comparing highest tile reached — "I hit 512 on the cube, you?" — is the natural friend-group competition. Harder to reach high values than flat 2048, making achievements more meaningful.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/Kshitij-Banerjee/Cubiks-2048" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — Kshitij-Banerjee/Cubiks-2048</div>
+          <div class="source-link-desc">Original repository. Three.js / JavaScript. 2048 on a 3D cube. No build step. Archived ~2014.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\cubiks-2048\</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Archived — complete and stable. No updates expected.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>MIT License. Free to use and self-host. No modifications made to source for this server.</p></div>
+  </div>
+</div>
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_cubiks2048_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

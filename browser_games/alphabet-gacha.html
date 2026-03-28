@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alphabet Gacha</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔤</div>
+  <div>
+    <h1>Alphabet Gacha</h1>
+    <div class="subtitle">// Idle · Gacha · Singleplayer · Static Web Build (Phaser.js / Vite) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">An idle clicker and gacha hybrid built with Phaser.js. Click to generate currency, spend it on pulls to collect alphabet symbols (A–Z), and build toward completing the full set. A compact, charming idle game with the collector's completionist pull of gacha — no backend required after the build.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the Phaser canvas loads, clicking generates currency, and a pull produces an alphabet symbol.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔤 V1 Goal: Alphabet Gacha accessible at <code>games.<span data-cfg="domain"></span>/alphabet-gacha/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone &amp; Build</div>
+    <div class="card">
+      <p>Alphabet Gacha is a Vite/Phaser project requiring a build step.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/AccelByte/extend-alphabet-gacha-client.git alphabet-gacha
+cd alphabet-gacha
+npm install
+npm run build</pre>
+      <p style="margin-top:10px">Built static files land in <code>dist/</code>. Serve that folder as the game directory.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">This is an AccelByte sample project — it may reference AccelByte's SDK or backend services. Check the README for any API keys or environment variables needed. If it requires AccelByte credentials, it may need stubbing or forking to run standalone.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "alphabet-gacha",
+  "name":        "Alphabet Gacha",
+  "icon":        "\U0001f524",
+  "description": "Idle clicker gacha — click for currency, pull for alphabet symbols, collect A to Z.",
+  "folder":      "alphabet-gacha/dist",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["gacha", "idle", "casual", "simulation"],
+  "tech":        "Phaser.js / Vite",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Inherits the hub's <code>forward_auth</code> — Tailscale + Authentik SSO required.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Runs client-side after the build. Progress likely persists in <code>localStorage</code> — check the source to confirm. Note this is an AccelByte SDK demo; standalone functionality depends on whether backend calls are required.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/alphabet-gacha/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>localStorage — progress per browser</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Phaser.js / Vite (built to static)</td></tr>
+          <tr><td style="color:var(--text-dim)">Real money</td><td>No — virtual currency only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes if fully static; no if AccelByte calls required</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — Phaser touch input supported</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Alphabet Gacha is an idle clicker and gacha hybrid developed by AccelByte as a sample/demo project for their game backend SDK. The gameplay loop is a distilled version of what makes idle gacha games compelling: click to generate virtual currency, spend currency on pulls to receive random alphabet symbols (A through Z), and work toward completing the full set.</p>
+      <p>The collector psychology driving full-set completion is the same mechanism used in trading card games and gacha titles — even a simple alphabet set creates genuine satisfaction when the rare letters finally drop. Phaser.js provides smooth canvas rendering for the pull animations and idle currency generation.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>AccelByte SDK note:</strong> This project was designed to demonstrate AccelByte's backend services. Depending on the version, it may require AccelByte API credentials to function fully. If it fails to load or pulls don't work, check the browser console for API errors — you may need to fork the project and stub out the AccelByte calls to make it standalone.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Click the main area to generate virtual currency (idle games also accumulate currency over time)</li>
+        <li>Spend currency on pulls to receive a random alphabet symbol</li>
+        <li>Track which letters you've collected — rarer letters (Q, X, Z) appear less frequently</li>
+        <li>Goal: collect all 26 letters of the alphabet</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click / tap</span>   <span class="ctrl-desc">Generate currency (idle clicker)</span>
+        <span class="ctrl-key">Pull button</span>   <span class="ctrl-desc">Spend currency for a random alphabet symbol</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>AccelByte dependency</td><td>May require AccelByte backend credentials or stubbing to run standalone. Check console for API errors after deploying.</td></tr>
+        <tr><td>Build step required</td><td>Vite build needed — run after <code>git pull</code> to pick up any changes.</td></tr>
+        <tr><td>SDK demo project</td><td>This is a reference/demo rather than a polished game — feature depth may be limited compared to purpose-built gacha titles.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 No leaderboard — completing the full A–Z set is the goal.</div>
+  <div class="section">
+    <div class="section-title">🏆 Completion Tracking</div>
+    <div class="card">
+      <p>The informal goal is collecting all 26 letters. Comparing pull counts to completion among the friend group — "I got all 26 in 200 pulls, how about you?" — is the natural competition metric.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-highscore -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/AccelByte/extend-alphabet-gacha-client" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — AccelByte/extend-alphabet-gacha-client</div>
+          <div class="source-link-desc">AccelByte SDK demo project. Phaser.js / Vite. Idle clicker + gacha. May require AccelByte credentials for full functionality.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>npm install</code> + <code>npm run build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>AccelByte maintains this as a SDK reference project. Updates tied to SDK releases.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Apache License 2.0. Free to use, modify, and self-host. No modifications made to source for this server.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_alphabetgacha_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

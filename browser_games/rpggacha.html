@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RPG Gacha Game</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">⚔️</div>
+  <div>
+    <h1>RPG Gacha Game</h1>
+    <div class="subtitle">// RPG · Gacha · Multiplayer · Python / Flask + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A full turn-based combat RPG with gacha character pulling, 5 rarity tiers, team building, an equipment system, and a PvP arena. Pull characters from banners, build your roster, gear them up, and battle other players' teams. The most mechanically complete game in the casino/gacha section.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when accounts register, a gacha pull produces characters, and a combat round resolves correctly.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">⚔️ V1 Goal: RPG Gacha accessible at <code>rpggacha.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, at least two accounts able to pull characters and enter PvP.</div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Docker Compose</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/hamzaelhibaoui/gacha_game.git rpggacha
+cd rpggacha</pre>
+      <p style="margin-top:10px">Check if the repo includes a <code>docker-compose.yml</code>. If not, create one:</p>
+      <pre>services:
+  rpggacha:
+    build: .
+    container_name: rpggacha
+    restart: unless-stopped
+    ports:
+      - "8740:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=sqlite:///gacha.db
+    volumes:
+      - rpggacha_data:/app/instance
+
+volumes:
+  rpggacha_data:</pre>
+      <pre>docker compose up -d --build</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Flask apps often use SQLite for development. Check the repo for the actual database backend — it may use PostgreSQL for the full feature set. Adjust the <code>DATABASE_URL</code> and add a <code>db</code> service if so.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <pre>rpggacha.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8740
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "rpggacha",
+  "name":        "RPG Gacha Game",
+  "icon":        "\u2694\ufe0f",
+  "description": "Turn-based RPG with gacha pulls, 5 rarity tiers, team building, equipment, and PvP arena.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "1-16",
+  "tags":        ["rpg", "gacha", "multiplayer", "strategy"],
+  "tech":        "Python / Flask / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://rpggacha.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ The most feature-complete gacha game in the hub. Character progression, equipment, and PvP make this suitable for longer engagement than a pure pull simulator.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>rpggacha.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1–16 (own accounts, shared server)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Database — characters, equipment, progress persist</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Python / Flask / Docker</td></tr>
+          <tr><td style="color:var(--text-dim)">Real money</td><td>No — virtual currency only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server and DB</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — Flask web UI is responsive</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>RPG Gacha Game is the most mechanically substantial entry in the casino/gacha section — it's not just a pull simulator but a full game with ongoing progression. Players register accounts, earn virtual currency, spend it on banner pulls to acquire characters across 5 rarity tiers, equip gear to strengthen them, assemble a team, and battle other players' teams in an asynchronous PvP arena.</p>
+      <p>The gacha mechanic serves its traditional purpose here: acquiring the characters needed to compete. Better characters have higher base stats and more powerful abilities, making the pull system feel meaningful rather than purely cosmetic. Equipment adds a second axis of character strengthening that's accessible regardless of pull luck.</p>
+      <p>For a private friend-group server this creates a persistent metagame — everyone is building their roster over time, comparing characters, and competing in the PvP rankings. It rewards both consistent play and occasional lucky pulls.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Rarity Tiers</div>
+    <div class="card">
+      <table>
+        <tr><th>Tier</th><th>Rarity</th><th>Relative Power</th></tr>
+        <tr><td>⭐ 1-Star</td><td>Common</td><td>Baseline — filler</td></tr>
+        <tr><td>⭐⭐ 2-Star</td><td>Uncommon</td><td>Viable for early content</td></tr>
+        <tr><td>⭐⭐⭐ 3-Star</td><td>Rare</td><td>Solid team contributors</td></tr>
+        <tr><td>⭐⭐⭐⭐ 4-Star</td><td>Epic</td><td>Strong — team staples</td></tr>
+        <tr><td>⭐⭐⭐⭐⭐ 5-Star</td><td>Legendary</td><td>Best-in-slot characters</td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:.8rem;color:var(--text-dim)">Exact pull rates per tier are defined in the server configuration. Check the repo for the default rate table.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Separate account system</td><td>Flask manages its own user accounts — Authentik gates network access only.</td></tr>
+        <tr><td>Database backup critical</td><td>All character progress, equipment, and pull history lives in the database. Back up the Docker volume regularly.</td></tr>
+        <tr><td>PvP may be asynchronous</td><td>Depending on implementation, PvP may be async (battle cached teams) rather than real-time. Check the repo.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 Multiple players share the same server with independent accounts. PvP arena lets accounts battle each other's teams.</div>
+  <div class="section">
+    <div class="section-title">🌐 Server Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Detail</th></tr>
+        <tr><td>Backend</td><td>Python / Flask — HTTP API and server-rendered pages</td></tr>
+        <tr><td>Database</td><td>SQLite or PostgreSQL — stores all accounts, characters, equipment, currency</td></tr>
+        <tr><td>PvP model</td><td>Likely async — players submit teams, battles resolve server-side against stored opponent teams</td></tr>
+        <tr><td>Account isolation</td><td>Each player has their own account, currency, and roster — no shared state beyond PvP rankings</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔧 Server Management</div>
+    <div class="card">
+      <pre># Check status:
+docker compose -f ~/services/rpggacha/docker-compose.yml ps
+
+# View logs:
+docker compose -f ~/services/rpggacha/docker-compose.yml logs -f
+
+# Back up database:
+docker run --rm -v rpggacha_data:/data -v ~/backups:/backup \
+  alpine tar czf /backup/rpggacha_$(date +%Y%m%d).tar.gz /data</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/hamzaelhibaoui/gacha_game" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — hamzaelhibaoui/gacha_game</div>
+          <div class="source-link-desc">Original repository. Python / Flask. Turn-based RPG with gacha, equipment, team building, and PvP arena.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code> + run any new migrations</td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Virtual currency only. Self-hosted for private use within the server's friend group.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_rpggacha_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

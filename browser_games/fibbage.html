@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fibbage Clone</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🤥</div>
+  <div>
+    <h1>Fibbage Clone</h1>
+    <div class="subtitle">// Party · Bluffing · Multiplayer · React + Node.js + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A self-hosted clone of Jackbox's Fibbage — the bluffing party game. Each round a trivia question is shown with a blanked answer. Every player writes a fake plausible answer, then everyone votes on which answer is true. Points for fooling other players and for identifying the real answer.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when a room can be created, players submit fake answers, voting resolves correctly, and scores update.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🤥 V1 Goal: Fibbage accessible at <code>fibbage.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, a complete round playable with 3+ players.</div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Docker Compose</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/allentsai93/fibbage_clone.git fibbage
+cd fibbage</pre>
+      <p style="margin-top:10px">Check for an existing <code>docker-compose.yml</code>. If absent:</p>
+      <pre>services:
+  fibbage:
+    build: .
+    container_name: fibbage
+    restart: unless-stopped
+    ports:
+      - "8680:3000"</pre>
+      <pre>docker compose up -d --build</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">React frontend + Node.js backend. Check the README for any required environment variables (session secret, port config) before starting.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <pre>fibbage.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8680
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "fibbage",
+  "name":        "Fibbage Clone",
+  "icon":        "\U0001f925",
+  "description": "Jackbox Fibbage clone. Write convincing fake answers to trivia, then vote for the real one.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "3-8",
+  "tags":        ["multiplayer", "party", "trivia", "bluffing"],
+  "tech":        "React / Node.js / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://fibbage.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ A self-hosted Fibbage removes the need for a Jackbox TV subscription and works on any device with a browser — phones, tablets, laptops, all in the same room or over Tailscale.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>fibbage.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>3–8 (more players = more fake answers to vote between)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — session scores only</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>React / Node.js / WebSocket</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>In-game leaderboard per session</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — text input works on phones</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Fibbage is Jackbox's flagship bluffing party game — the format that launched the entire Jackbox Party Pack series. Each round a question appears with a blanked-out answer (e.g. "In 1987, the world record for largest ____ was set in Ohio"). Every player privately submits a fake-but-plausible answer. Those fakes are then shuffled with the real answer and everyone votes on which one they think is correct.</p>
+      <p>Points come from two places: fooling other players into voting for your fake (they score for you) and correctly identifying the true answer. The bluffing layer is what makes it special — a convincing liar who understands what sounds plausible can consistently beat players with better trivia knowledge. Writing a fake that's obviously wrong is easy; writing one that passes is an art.</p>
+      <p>This self-hosted clone replicates that loop without needing Jackbox TV, the PC game, or a streaming session. Players join from any browser on the Tailnet — phones work particularly well for submitting answers without anyone else seeing your screen.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>One player creates a room and shares the join link — all players join before starting</li>
+        <li>Each round: a fill-in-the-blank trivia question appears</li>
+        <li>All players privately type a fake-but-convincing answer</li>
+        <li>All answers (including the real one) are shown — everyone votes for which is true</li>
+        <li>Points for: getting others to vote for your fake, and correctly identifying the real answer</li>
+        <li>Play a set number of rounds — highest score wins</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Question set</td><td>The bundled question database may be smaller than the official Jackbox game. Check the repo for the question count and any ability to add custom questions.</td></tr>
+        <tr><td>Minimum 3 players</td><td>Fibbage requires at least 3 players — with only 2 there's only one fake answer and one real, making voting trivial.</td></tr>
+        <tr><td>No spectator mode</td><td>Depending on implementation, players who join late may not be able to join mid-round.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 All players use their own device as a controller — phones are ideal. One screen can be shared/mirrored as a "TV" display for the main game view.</div>
+  <div class="section">
+    <div class="section-title">🎮 Party Setup Tips</div>
+    <div class="card">
+      <table>
+        <tr><th>Setup</th><th>Detail</th></tr>
+        <tr><td>In-person</td><td>Mirror the host's screen on a TV. Everyone uses their phone to join and submit answers — the shared screen shows the voting results dramatically.</td></tr>
+        <tr><td>Remote</td><td>Host shares their screen via Discord/Zoom; everyone else joins the game on their own device. Both the shared screen and each player's device update in real time.</td></tr>
+        <tr><td>Optimal count</td><td>4–6 players — enough fake answers to make voting genuinely difficult, not so many that the round drags.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/allentsai93/fibbage_clone" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — allentsai93/fibbage_clone</div>
+          <div class="source-link-desc">Original repository. React / Node.js. Self-hosted Fibbage bluffing party game clone. Not affiliated with Jackbox Games.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Fan clone — not affiliated with Jackbox Games. Self-hosted for private use within the server's friend group.</p></div>
+  </div>
+</div>
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_fibbage_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

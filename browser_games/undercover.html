@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Undercover</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🕵️</div>
+  <div>
+    <h1>Undercover</h1>
+    <div class="subtitle">// Social Deduction · Word Game · Multiplayer · Static Files (WebRTC) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A browser implementation of the social deduction word game. Each player receives a secret word — most get the same word, but one or two "undercover" players receive a similar but different word. Players describe their word without revealing it; the group votes on who they think is undercover. Runs peer-to-peer via WebRTC — no game server required.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when a room can be created, players join and receive secret words, and a vote round completes.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🕵️ V1 Goal: Undercover accessible at <code>games.<span data-cfg="domain"></span>/undercover/</code> via Tailscale, gated by Authentik forward_auth, a full round completable with 4+ players.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Architecture Note — WebRTC (No Game Server)</div>
+    <div class="card">
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Undercover uses <strong>WebRTC peer-to-peer</strong> for all multiplayer communication — there is no centralised game server. The static files are served by the hub, but game state is exchanged directly between browsers. This means the hub's <code>forward_auth</code> is the only gate needed. However, WebRTC requires a STUN/TURN server for peer discovery — over Tailscale (where all peers are on the same virtual network), this should work without external STUN.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>Undercover is a static project. Check the repo for any build step — some WebRTC apps use a bundler.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/antebrl/undercover-word-game.git undercover
+cd undercover
+# If a build step is needed:
+npm install && npm run build
+# Otherwise serve index.html directly</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Check the repo README to confirm whether a build step is needed. If built, update the <code>folder</code> in <code>index.json</code> to point at the output directory (typically <code>dist/</code> or <code>build/</code>).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "undercover",
+  "name":        "Undercover",
+  "icon":        "\U0001f575\ufe0f",
+  "description": "Social deduction word game via WebRTC. Find the undercover player before they blend in.",
+  "folder":      "undercover",
+  "entry":       "index.html",
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "4-10",
+  "tags":        ["multiplayer", "social-deduction", "word", "party"],
+  "tech":        "HTML / JavaScript / WebRTC",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Inherits the hub's <code>forward_auth</code>. Game state is peer-to-peer via WebRTC — no additional server configuration needed beyond serving the static files.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Undercover needs no game server — players communicate directly via WebRTC. On Tailscale (same virtual network) peer connections should establish without external STUN/TURN.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/undercover/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>4–10 per game</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — session only</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML / JavaScript / WebRTC</td></tr>
+          <tr><td style="color:var(--text-dim)">Game server</td><td>None — fully peer-to-peer</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires peer connections</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — text input works on phones</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Undercover is a word-based social deduction game. Each player receives a secret word — the majority share the same word, but one or two "undercover" players receive a closely related but different word. For example, the majority might have "Coffee" while undercover players have "Tea". Players take turns saying a single word or phrase that describes their secret word without revealing it directly.</p>
+      <p>The tension comes from the undercover players trying to blend in — they must give clues that sound plausible for the majority word without knowing exactly what it is, using only the descriptions they've heard from others. After everyone has spoken, players vote on who they think is undercover. The undercover player wins by surviving until only two players remain; the majority wins by voting out all undercover players.</p>
+      <p>It produces the same kind of social pressure and bluffing as Secret Hitler but in a much shorter, lighter format — a typical round takes 10–15 minutes. Excellent for warm-up before longer games.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>One player creates a room and shares the join link with 3–9 others</li>
+        <li>Each player is privately shown their secret word on their own device</li>
+        <li>Taking turns, each player says one word or phrase describing their secret word</li>
+        <li>After all players have spoken, discuss and vote on who is undercover</li>
+        <li>The voted-out player reveals their word — majority wins if they were undercover, game continues otherwise</li>
+        <li>Undercover wins by surviving until 2 players remain</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>WebRTC on Tailscale</td><td>Peer connections should work within a Tailscale network without external STUN. If connections fail, check browser console for ICE candidate errors.</td></tr>
+        <tr><td>Minimum 4 players</td><td>The social dynamics of the game require at least 4 players to be meaningful — fewer makes deduction trivial.</td></tr>
+        <tr><td>Word list is fixed</td><td>The bundled word pairs are baked in. Custom word pairs may require editing source.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 Undercover is fully peer-to-peer — no game server needed. All communication flows directly between browsers via WebRTC.</div>
+
+  <div class="section">
+    <div class="section-title">🌐 Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Detail</th></tr>
+        <tr><td>Protocol</td><td>WebRTC data channels (peer-to-peer, not WebSocket)</td></tr>
+        <tr><td>Game server</td><td>None — hub serves static files only</td></tr>
+        <tr><td>Room discovery</td><td>One player hosts; others join via shared URL/code</td></tr>
+        <tr><td>STUN/TURN</td><td>May use a public STUN server for initial peer discovery. On Tailscale this is likely unnecessary.</td></tr>
+        <tr><td>Word distribution</td><td>The host's browser generates the word assignment and distributes it to peers via data channel</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Troubleshooting Peer Connections</div>
+    <div class="card">
+      <p>If players can't connect to each other:</p>
+      <ol style="margin:0 0 0 18px;font-size:.84rem;line-height:2">
+        <li>Confirm all players are on the Tailscale network</li>
+        <li>Open browser DevTools → Console and look for ICE connection errors</li>
+        <li>Try refreshing all clients and having the host recreate the room</li>
+        <li>If Tailscale is not available, the game may need an external STUN server configured in its source</li>
+      </ol>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/antebrl/undercover-word-game" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — antebrl/undercover-word-game</div>
+          <div class="source-link-desc">Original repository. HTML / JavaScript / WebRTC. Social deduction word game. Peer-to-peer, no server required.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> (+ rebuild if applicable)</td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Self-hosted for private use within the server's friend group.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_undercover_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

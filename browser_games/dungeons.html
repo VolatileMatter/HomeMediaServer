@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Realm of Dungeons</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🏰</div>
+  <div>
+    <h1>Realm of Dungeons</h1>
+    <div class="subtitle">// Idle RPG · Multiplayer · React + Node.js + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">An idle multiplayer fantasy RPG. Train your character while offline, send them into dungeons to fight monsters, collect loot, and compete with other players on the server leaderboard. Persistent accounts, character progression, and a shared world — a low-commitment RPG you can check in on rather than grind actively.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when accounts register, a character can be created, sent into a dungeon, and loot returned.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🏰 V1 Goal: Realm of Dungeons accessible at <code>dungeons.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, character creation working and first dungeon run completable.</div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Docker Compose</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/Zlvsky/realm-of-dungeons.git dungeons
+cd dungeons</pre>
+      <p style="margin-top:10px">Check the repo for a <code>docker-compose.yml</code> — the project likely provides one. If not:</p>
+      <pre>services:
+  dungeons:
+    build: .
+    container_name: dungeons
+    restart: unless-stopped
+    ports:
+      - "8720:3000"
+    environment:
+      - DATABASE_URL=mongodb://mongo:27017/dungeons
+      - JWT_SECRET=changeme_strong_secret
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: dungeons-mongo
+    restart: unless-stopped
+    volumes:
+      - dungeons_data:/data/db
+
+volumes:
+  dungeons_data:</pre>
+      <pre>docker compose up -d --build</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <pre>dungeons.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8720
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "dungeons",
+  "name":        "Realm of Dungeons",
+  "icon":        "\U0001f3f0",
+  "description": "Idle multiplayer fantasy RPG. Train offline, raid dungeons, collect loot, climb the leaderboard.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "1-20",
+  "tags":        ["rpg", "idle", "multiplayer", "fantasy"],
+  "tech":        "React / Node.js / MongoDB / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://dungeons.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Character progress, loot, and training gains persist in MongoDB. The idle mechanic means your character keeps progressing even when you're not logged in — check back after a few hours.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>dungeons.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1–20 (shared server, own characters)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>MongoDB — full character persistence</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>React / Node.js / MongoDB</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>Shared server leaderboard</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server (idle runs server-side)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — React UI is responsive</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Realm of Dungeons is an idle multiplayer RPG — the kind of game you check in on rather than actively play. You create a character, assign them to training regimens that improve their stats over real time, and send them on dungeon expeditions that play out server-side while you're away. Return later to collect loot, level up, and send them on harder dungeons.</p>
+      <p>The multiplayer element is primarily the shared leaderboard and the social comparison it enables — seeing where your character ranks against other players on the server, and competing for the top positions over weeks of incremental progress. It's the same appeal as games like Runescape's idle skilling or Progress Quest, but with a friend group providing the competitive framing.</p>
+      <p>The low time commitment is the key feature: check in for 5 minutes, queue some training and dungeon runs, log out. No obligation to grind sessions. Well suited to a server where people have varying availability.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>MongoDB backup critical</td><td>All character progress lives in MongoDB. Back up the Docker volume regularly — a lost database means everyone starts over.</td></tr>
+        <tr><td>Separate account system</td><td>Realm of Dungeons manages its own accounts — Authentik gates network access only.</td></tr>
+        <tr><td>Server-side idle</td><td>The idle progression runs server-side, not client-side — the server must be running for characters to progress. Downtime pauses everyone's progress.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 Shared server with individual accounts — competition is via leaderboard rather than real-time interaction.</div>
+  <div class="section">
+    <div class="section-title">🌐 Server Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Detail</th></tr>
+        <tr><td>Backend</td><td>Node.js API handling character progression, dungeon logic, and leaderboard</td></tr>
+        <tr><td>Database</td><td>MongoDB — all character data, loot, training timers</td></tr>
+        <tr><td>Idle mechanic</td><td>Server-side timers — dungeon runs and training complete based on real elapsed time</td></tr>
+        <tr><td>Multiplayer model</td><td>Shared leaderboard; no real-time player interaction</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔧 Server Management</div>
+    <div class="card">
+      <pre># Check status:
+docker compose -f ~/services/dungeons/docker-compose.yml ps
+
+# View logs:
+docker compose -f ~/services/dungeons/docker-compose.yml logs -f
+
+# Back up character data:
+docker run --rm -v dungeons_data:/data -v ~/backups:/backup \
+  alpine tar czf /backup/dungeons_$(date +%Y%m%d).tar.gz /data</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/Zlvsky/realm-of-dungeons" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — Zlvsky/realm-of-dungeons</div>
+          <div class="source-link-desc">Original repository. React / Node.js / MongoDB. Idle multiplayer RPG with dungeons, character training, and leaderboard.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Self-hosted for private use within the server's friend group.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_dungeons_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>
