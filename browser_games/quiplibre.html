@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quiplibre</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS  (bg-tab-*)
+════════════════════════════════════════════════════ */
+.bg-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane         { display: none; }
+.bg-tab-pane.active  { display: block; }
+
+/* ════════════════════════════════════════════════════
+   STAT ROW
+════════════════════════════════════════════════════ */
+.bg-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.bg-stat-box   { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.bg-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.bg-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+
+/* ════════════════════════════════════════════════════
+   SOURCE LINK CARDS
+════════════════════════════════════════════════════ */
+.source-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 18px;
+  text-decoration: none;
+  transition: border-color .15s;
+  margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+/* ════════════════════════════════════════════════════
+   SETUP-COMPLETE BAR
+════════════════════════════════════════════════════ */
+.setup-complete-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(76,175,125,.07);
+  border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: background .2s;
+  user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+/* ════════════════════════════════════════════════════
+   SCREENSHOT PLACEHOLDER
+════════════════════════════════════════════════════ */
+.game-screenshot {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg2);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  margin-bottom: 16px;
+}
+
+/* ════════════════════════════════════════════════════
+   PLAYER FLOW DIAGRAM (custom for this page)
+════════════════════════════════════════════════════ */
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+.flow-step {
+  background: rgba(200,168,75,.1);
+  border: 1px solid rgba(200,168,75,.35);
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.flow-arrow {
+  color: var(--text-dim);
+  font-size: .9rem;
+}
+
+/* ════════════════════════════════════════════════════
+   PROMPT EDITING HIGHLIGHT BOX
+════════════════════════════════════════════════════ */
+.prompt-example {
+  background: var(--bg3);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 10px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .76rem;
+  color: var(--text);
+  margin: 10px 0;
+  line-height: 1.8;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE HEADER
+════════════════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-icon">💬</div>
+  <div>
+    <h1>Quiplibre</h1>
+    <div class="subtitle">// Browser Game · Multiplayer Party Game · PeerJS / WebRTC · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">
+      A free, open-source Quiplash alternative. Players answer absurd prompts and vote on each other's answers — no app install, no subscription, no big screen required. Runs entirely in the browser via PeerJS peer-to-peer networking. Perfect for remote game nights across the Tailnet.
+    </p>
+  </div>
+</div>
+
+<!-- Stat row -->
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">3–8</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">P2P</div><div class="bg-stat-label">Network</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">No</div><div class="bg-stat-label">High Scores</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">2020</div><div class="bg-stat-label">Released</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN TABS
+════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — SETUP
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Quiplibre loads, a game can be hosted, and at least two players can join and vote.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🎮 V1 Goal: Quiplibre accessible at <code>games.<span data-cfg="domain"></span>/quiplibre/</code> via Tailscale, gated by Authentik forward_auth. Host + players all join from within the Tailnet. Internet connection required for PeerJS brokering.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — File Placement</div>
+    <div class="card">
+      <p>Quiplibre is a single HTML file. The entry point is <code>quiplibre.html</code> (not <code>index.html</code>), so you'll need a redirect shim.</p>
+      <pre># Clone the repo:
+cd D:\Server\BrowserGames
+git clone https://github.com/wyattscarpenter/quiplibre.git quiplibre
+
+# The game entry point is quiplibre.html, not index.html.
+# The repo ships an index.html that already redirects to quiplibre.html,
+# so serving the folder root should work correctly out of the box.</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">The repo includes a symlink <code>index.html → quiplibre.html</code>. On Windows, git may check this out as a text file containing the symlink target path rather than an actual redirect. If <code>index.html</code> doesn't redirect correctly, replace it with a one-line meta-refresh: <code>&lt;meta http-equiv="refresh" content="0;url=quiplibre.html"&gt;</code></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <p>Add an entry to <code>D:\Server\BrowserGames\index.json</code>:</p>
+      <pre>{
+  "id":          "quiplibre",
+  "name":        "Quiplibre",
+  "icon":        "💬",
+  "description": "Free Quiplash alternative — answer absurd prompts, vote on your friends' answers.",
+  "folder":      "quiplibre",
+  "entry":       "index.html",
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "3–8",
+  "tags":        ["party", "multiplayer", "social", "webrtc"],
+  "tech":        "HTML / JavaScript / PeerJS",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. No additional Caddy block needed — inherits the hub's <code>forward_auth</code>.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Quiplibre requires an <strong>internet connection at play time</strong> to reach the PeerJS brokering server (<code>unpkg.com</code>) and Google's STUN server. It will not function in a fully offline or internet-isolated environment, even on Tailscale. All players must have internet access, not just server-side LAN access.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">✏️ Step 4 — Custom Prompts (Optional)</div>
+    <div class="card">
+      <p>The default prompt list is embedded directly in <code>quiplibre.html</code> as a JavaScript array named <code>prompts</code>. To add server-specific prompts:</p>
+      <pre># Open the file in a text editor:
+notepad D:\Server\BrowserGames\quiplibre\quiplibre.html
+
+# Find the prompts array (search for: const prompts = [)
+# Add entries in this format — note the trailing comma:
+"Your prompt text here",</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Keep a backup of the default prompts before editing. There is no UI for managing prompts — all changes are made directly in the HTML file. A git stash or separate file backup is advisable before customizing.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 5 — Browser Compatibility Check</div>
+    <div class="card">
+      <p>Quiplibre uses WebRTC for peer-to-peer connections. Browser support is as follows:</p>
+      <table>
+        <tr><th>Browser</th><th>Support</th><th>Notes</th></tr>
+        <tr><td>Chrome / Chromium</td><td style="color:#4caf7d">✅ Full</td><td>Recommended</td></tr>
+        <tr><td>Firefox</td><td style="color:#4caf7d">✅ Full</td><td>Works well</td></tr>
+        <tr><td>Edge</td><td style="color:#4caf7d">✅ Full</td><td>Chromium-based</td></tr>
+        <tr><td>Safari / WebKit</td><td style="color:var(--danger)">❌ Broken</td><td>WebRTC / PeerJS incompatibility confirmed by upstream. Use Chrome on iOS instead.</td></tr>
+        <tr><td>Samsung Internet</td><td style="color:#e6a817">⚠️ Unknown</td><td>Chromium-based, likely fine</td></tr>
+      </table>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Safari users (including all browsers on iOS due to WebKit enforcement) will not be able to play. Direct them to Chrome or Firefox. This is a known upstream issue with PeerJS/WebRTC on WebKit — not fixable server-side.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 2 — OVERVIEW
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">✅ Single-file party game — no build step, no backend server, no persistent state. Requires internet for PeerJS brokering.</div>
+
+  <div class="game-screenshot">[ Screenshot — replace this div with &lt;img src="screenshot.png"&gt; once available ]</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">URL</td><td><code>games.<span data-cfg="domain"></span>/quiplibre/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>3–8 (2 minimum, best 4–6)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — stateless per session</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">Tech</td><td>HTML / JavaScript / PeerJS</td></tr>
+          <tr><td style="color:var(--text-dim)">Network</td><td>WebRTC P2P via PeerJS</td></tr>
+          <tr><td style="color:var(--text-dim)">Internet req.</td><td>Yes — PeerJS + STUN servers</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial — Chrome/Firefox only</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Quiplibre is a free, open-source implementation of Quiplash — the party game where everyone answers the same absurd prompt and then votes on who gave the best answer. No one is right or wrong; you're playing to be funny.</p>
+      <p>Each player joins a shared session using a room code. Everyone is dealt two prompts to answer. Answers are then shown head-to-head and all players vote on their favourite. The crowd's reaction is the whole game — no points system, no leaderboard, just vibes.</p>
+      <p>Unlike Jackbox's Quiplash, Quiplibre requires no TV screen, no app purchase, and no subscription. Each player opens the same URL and either hosts or joins. It works across the room on a LAN or remotely across the Tailnet, as long as everyone has internet access for the PeerJS broker.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">▶ How to Play</div>
+    <div class="card">
+      <p><strong>One person hosts, everyone else joins.</strong></p>
+
+      <div class="flow-row">
+        <div class="flow-step">1. Host opens the URL</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">2. Click "Host a new game"</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">3. Share the room code</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-step">4. Players open URL + "Join a game"</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">5. Enter room code + name</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">6. Host starts the game</div>
+      </div>
+
+      <p style="margin-top: 14px">Each player gets two prompts. Type your funniest answer. When everyone's submitted, answers go head-to-head and players vote. Repeat until prompts run out — or until someone gets too competitive about a game with no score.</p>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">There is no "big screen" mode — each player sees everything on their own device. For a more Jackbox-like experience, have one player share their screen over Discord/video call while everyone else plays on their own phone or laptop.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🃏 Custom Prompts</div>
+    <div class="card">
+      <p>The prompts list is editable directly in <code>quiplibre.html</code>. The array is called <code>prompts</code> and lives near the top of the <code>&lt;script&gt;</code> block. Format:</p>
+      <div class="prompt-example">
+        const prompts = [<br>
+        &nbsp;&nbsp;"A terrible name for a hospital",<br>
+        &nbsp;&nbsp;"The worst thing to say at a job interview",<br>
+        &nbsp;&nbsp;<span style="color:var(--accent)">// ← Add your prompts here, with trailing commas</span><br>
+        &nbsp;&nbsp;"Your custom prompt goes here",<br>
+        ];
+      </div>
+      <p>Use single or double quotes. Don't forget the comma after each entry. The game draws prompts randomly each session — adding more prompts just expands the pool.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Limitation</th><th>Detail</th></tr>
+        <tr><td>No timers</td><td>There's no countdown — players can take as long as they want. The host calls it when everyone's done.</td></tr>
+        <tr><td>No music / SFX</td><td>The game is completely silent. Play your own background music.</td></tr>
+        <tr><td>No scoring</td><td>Votes are shown but there is no points tally or winner announcement.</td></tr>
+        <tr><td>No spectator mode</td><td>Everyone who loads the URL is a player. Watchers need their own browser tab.</td></tr>
+        <tr><td>Safari / WebKit broken</td><td>WebRTC doesn't work on Safari or any iOS browser. Use Chrome/Firefox.</td></tr>
+        <tr><td>Requires internet</td><td>PeerJS brokering and Google STUN require internet — offline LAN-only play is not possible.</td></tr>
+        <tr><td>Flaky at 2 players</td><td>The "Carpenter shuffle" matchup algorithm has edge cases with exactly 3-player games (no random swaps possible). Works fine with 4+.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 3 — MULTIPLAYER
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+
+  <div class="v1-banner">👥 Real-time party game — up to ~8 players via WebRTC P2P. No dedicated backend server required. Internet connection required for PeerJS brokering.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Connection</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:120px">Protocol</td><td>WebRTC (via PeerJS)</td></tr>
+          <tr><td style="color:var(--text-dim)">Topology</td><td>Host ↔ Peers (star topology)</td></tr>
+          <tr><td style="color:var(--text-dim)">Session type</td><td>Real-time, host-controlled</td></tr>
+          <tr><td style="color:var(--text-dim)">Backend port</td><td>None — client-side P2P only</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Joining</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:120px">How to join</td><td>Room code (shown after hosting)</td></tr>
+          <tr><td style="color:var(--text-dim)">Auth required</td><td>Tailscale + Authentik (all players)</td></tr>
+          <tr><td style="color:var(--text-dim)">Cross-device?</td><td>Yes — any Chrome/Firefox</td></tr>
+          <tr><td style="color:var(--text-dim)">Max players</td><td>~8 (no hard cap, degrades above ~10)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏗️ How Multiplayer Works</div>
+    <div class="card">
+      <p>Quiplibre uses <strong>PeerJS</strong>, a WebRTC wrapper library loaded from <code>unpkg.com</code> at runtime. The host's browser opens a peer connection through PeerJS's public brokering server; joining players connect to the host's peer ID (the room code) directly. All game state is transmitted peer-to-peer — no server stores any game data.</p>
+
+      <p style="margin-top:10px">STUN server used: <code>stun.l.google.com:19302</code> (Google's public STUN). This is hardcoded in the game and requires internet access.</p>
+
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Because connections are brokered through PeerJS's public infrastructure (<code>unpkg.com</code>, Google STUN), Quiplibre cannot be played in a fully air-gapped or internet-isolated network. Tailscale handles <em>access control</em> and routing to the server; the PeerJS WebRTC connections are made directly between players' browsers and require their own internet access.</div>
+      </div>
+
+      <p style="margin-top:10px">There is no backend server component to manage. No additional Docker container, no extra Caddy route, no firewall port — the hub's existing static file serving is all that's needed.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔀 Matchup Algorithm</div>
+    <div class="card">
+      <p>Each player answers two prompts. Answers are matched head-to-head for voting using the "Carpenter shuffle" — a left-shifted array followed by randomised swaps that preserve the no-self-match constraint. With fewer than 4 players the shuffle has no valid swap candidates and falls back to the shifted-only order, so matchups will be predictable but the game still functions.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Issues</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Safari / WebKit</td><td>WebRTC does not work. All iOS browsers are affected due to WebKit enforcement. Players must use Chrome or Firefox.</td></tr>
+        <tr><td>PeerJS dependency</td><td>If unpkg.com or PeerJS's brokering infrastructure is down, hosting/joining will fail. No offline fallback exists.</td></tr>
+        <tr><td>Host disconnects</td><td>The host's browser is the session authority. If the host closes their tab, the game ends for all players.</td></tr>
+        <tr><td>No reconnect</td><td>If a player's connection drops mid-game, there is no rejoin mechanism — they must start fresh.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-multi -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 4 — SOURCE
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/wyattscarpenter/quiplibre" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — wyattscarpenter/quiplibre</div>
+          <div class="source-link-desc">Primary repository. Single HTML file. Active maintenance — v2.3.0 released Feb 2026.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://wyattscarpenter.github.io/quiplibre/" target="_blank">
+        <div class="source-link-icon">🌐</div>
+        <div>
+          <div class="source-link-name">Live Demo — wyattscarpenter.github.io/quiplibre</div>
+          <div class="source-link-desc">Hosted on GitHub Pages. Useful for testing before or instead of self-hosting.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p>Released under the <strong>GNU Affero General Public License v3 (AGPL-3.0)</strong> by Wyatt S Carpenter.</p>
+      <p style="margin-top:8px;font-size:.82rem;color:var(--text-dim)">The AGPL requires that if you modify and serve the software over a network, you must make the modified source available. For private self-hosting with no modifications, standard AGPL compliance is straightforward. If you add custom prompts or other modifications, keep the modified file available to users.</p>
+      <p style="margin-top:8px;font-size:.82rem;color:var(--text-dim)">The game depends on PeerJS (served from unpkg.com) and Google's STUN server, which are under their own respective licenses.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📦 Version</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Latest release</td><td>v2.3.0 ("The 2.3.0 One")</td></tr>
+        <tr><td style="color:var(--text-dim)">Released</td><td>February 2026</td></tr>
+        <tr><td style="color:var(--text-dim)">Actively maintained</td><td>Yes — Playwright tests, TypeScript checks added</td></tr>
+        <tr><td style="color:var(--text-dim)">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\quiplibre\</code></td></tr>
+      </table>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">If you have customised <code>quiplibre.html</code> with server-specific prompts, keep a backup before pulling upstream updates — the prompts array in the file will be overwritten by a plain <code>git pull</code>. Consider maintaining your custom prompts in a separate file and patching them in after each update.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🍴 Forks &amp; Alternatives</div>
+    <div class="card">
+      <p>The upstream README maintains a list of "quiplikes" — similar games in the same genre. Notable options if Quiplibre's limitations become a problem:</p>
+      <table>
+        <tr><th>Name</th><th>Notes</th></tr>
+        <tr><td>Quiplibre forks</td><td>Several active forks exist on GitHub with UX improvements. Check the upstream fork list.</td></tr>
+        <tr><td>Use Your Words 1 &amp; 2</td><td>Commercial game, similar format — requires purchase.</td></tr>
+        <tr><td>Quiplash (Jackbox)</td><td>The original — requires Jackbox Party Pack purchase and a "big screen" host.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+
+  const STORAGE_KEY = 'bg_quiplibre_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+
+</body>
+</html>
