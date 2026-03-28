@@ -1,1055 +1,637 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>GAME NAME</title>
-  <!--
-    ╔══════════════════════════════════════════════════════════════════╗
-    ║  Browser Game Template                                           ║
-    ║  This file is the canonical starting point for every new game   ║
-    ║  page under browser_games/. It mirrors the service-template.html║
-    ║  tab structure but replaces Maintenance / Achievements / Storage ║
-    ║  / Troubleshooting / UI Preview with game-specific tabs:        ║
-    ║                                                                  ║
-    ║    1. 🚀 Setup          — how it's hosted / deployed             ║
-    ║    2. 🕹️ Overview       — what it is, how to play, where to find ║
-    ║    3. 🏆 High Score     — shared leaderboard integration         ║
-    ║    4. 👥 Multiplayer    — real-time/async multiplayer info       ║
-    ║    5. 📦 Source         — GitHub / download / origin             ║
-    ║                                                                  ║
-    ║  If the game has no high scores, remove pane-highscore and its  ║
-    ║  tab button (or replace content with N/A notice).               ║
-    ║  If the game is singleplayer-only, remove pane-multiplayer.     ║
-    ╚══════════════════════════════════════════════════════════════════╝
-  -->
-  <link rel="stylesheet" href="../shared.css">
-  <!--
-    Path is relative — this file lives inside browser_games/.
-    config.js and shared.css are one level up.
-    Adjust paths if the hub loads these via iframe from the root.
-  -->
-  <script src="../config.js"></script>
-  <style>
-    /* ═══════════════════════════════════════════════
-       SUB-TAB NAVIGATION — verbatim from service-template
-       Do not modify. Must match shared design system.
-    ═══════════════════════════════════════════════ */
-    .subtab-nav {
-      display: flex;
-      gap: 0;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .subtab-btn {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .68rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: 9px 18px;
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all .16s;
-      margin-bottom: -1px;
-      white-space: nowrap;
-    }
-    .subtab-btn:hover { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
-    .subtab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+<meta charset="UTF-8">
+<title>GAME NAME</title>
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  Browser Game Wiki Page Template                                 ║
+  ║                                                                  ║
+  ║  ARCHITECTURE: Mirrors franchise-template.html exactly.          ║
+  ║  • shared.css is the authority for all base styles               ║
+  ║  • This <style> block contains ONLY bg-tab-* / bg-view-*         ║
+  ║    classes that are specific to browser game pages               ║
+  ║  • No duplicated subtab CSS blobs                                ║
+  ║  • Path: ../shared.css  (one level up from browser_games/)       ║
+  ║                                                                  ║
+  ║  TAB STRUCTURE:                                                  ║
+  ║    1. 🚀 Setup       — file placement, registration, auth        ║
+  ║    2. 🕹️ Overview    — what it is, how to play, controls         ║
+  ║    3. 🏆 High Score  — shared leaderboard integration            ║
+  ║    4. 👥 Multiplayer — backend, protocol, player limits          ║
+  ║    5. 📦 Source      — GitHub, license, update status            ║
+  ║                                                                  ║
+  ║  Remove tabs 3 and/or 4 (button + pane) if not applicable.      ║
+  ║                                                                  ║
+  ║  STORAGE_KEY convention: 'bg_GAMEID_setup'                       ║
+  ║    e.g. 'bg_sandspiel_setup', 'bg_particlelife_setup'            ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
 
-    .subtab-pane { display: none; }
-    .subtab-pane.active { display: block; }
+/* ════════════════════════════════════════════════════
+   TOP-LEVEL PAGE TABS  (bg-tab-*)
+   Mirrors .fn-tab-* from franchise pages exactly.
+   border-bottom: 3px so the active bar is slightly
+   heavier than the service-page subtab (2px).
+════════════════════════════════════════════════════ */
+.bg-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane         { display: none; }
+.bg-tab-pane.active  { display: block; }
 
-    /* ── Setup-complete bar — verbatim from service-template ── */
-    .setup-complete-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(76,175,125,.07);
-      border: 1px solid rgba(76,175,125,.25);
-      border-radius: 4px;
-      padding: 12px 18px;
-      margin-bottom: 24px;
-      cursor: pointer;
-      transition: background .2s;
-      user-select: none;
-    }
-    .setup-complete-bar:hover { background: rgba(76,175,125,.12); }
-    .setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
-    .setup-checkbox {
-      width: 20px; height: 20px;
-      border: 2px solid rgba(76,175,125,.6);
-      border-radius: 3px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .9rem; color: #4caf7d; flex-shrink: 0;
-    }
-    .setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
-    .setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+/* ════════════════════════════════════════════════════
+   INNER VIEW TABS  (bg-view-*)
+   Pill buttons inside a pane. Same as fn-view-*.
+════════════════════════════════════════════════════ */
+.bg-view-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.bg-view-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.bg-view-btn:hover  { background: var(--bg3); color: var(--text); }
+.bg-view-btn.active { background: rgba(200,168,75,.15); border-color: var(--accent); color: var(--accent); }
+.bg-view         { display: none; }
+.bg-view.active  { display: block; }
+.bg-view-desc {
+  font-size: .78rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
 
-    /* ── High score table ── */
-    .hs-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .82rem;
-    }
-    .hs-table th {
-      text-align: left;
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border);
-      color: var(--accent);
-      font-size: .68rem;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-    }
-    .hs-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.04);
-      color: var(--text);
-    }
-    .hs-table tr:first-child td { color: var(--accent); font-weight: 700; }
-    .hs-table tr:nth-child(2) td { color: #b0b0c8; }
-    .hs-table tr:nth-child(3) td { color: #8a7f60; }
-    .hs-rank { color: var(--text-dim); width: 32px; }
+/* ════════════════════════════════════════════════════
+   SETUP-COMPLETE BAR
+   Verbatim from service-template / franchise pages.
+════════════════════════════════════════════════════ */
+.setup-complete-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(76,175,125,.07);
+  border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: background .2s;
+  user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
 
-    /* ── Multiplayer badge ── */
-    .mp-type {
-      display: inline-block;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .62rem;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      padding: 3px 9px;
-      border-radius: 3px;
-      border: 1px solid rgba(200,168,75,.35);
-      color: var(--accent);
-      background: rgba(200,168,75,.07);
-      margin-right: 6px;
-    }
+/* ════════════════════════════════════════════════════
+   STAT ROW  (game-specific facts under the header)
+   Same pattern as .fn-stat-row on franchise pages.
+════════════════════════════════════════════════════ */
+.bg-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+.bg-stat-box   { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; text-align: center; }
+.bg-stat-num   { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+.bg-stat-label { font-family: 'Share Tech Mono', monospace; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
 
-    /* ── Source link card ── */
-    .source-link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 14px 18px;
-      text-decoration: none;
-      transition: border-color .15s;
-      margin-bottom: 10px;
-    }
-    .source-link:hover { border-color: var(--accent); }
-    .source-link-icon { font-size: 1.5rem; flex-shrink: 0; }
-    .source-link-name { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
-    .source-link-desc { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+/* ════════════════════════════════════════════════════
+   SOURCE LINK CARDS  (used on the Source tab)
+════════════════════════════════════════════════════ */
+.source-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 18px;
+  text-decoration: none;
+  transition: border-color .15s;
+  margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
 
-    /* ── Screenshot / preview image placeholder ── */
-    .game-screenshot {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: var(--bg2);
-      border: 1px dashed var(--border);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-dim);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .72rem;
-      letter-spacing: .08em;
-      margin-bottom: 16px;
-    }
+/* ════════════════════════════════════════════════════
+   CONTROLS REFERENCE GRID  (used on Overview tab)
+════════════════════════════════════════════════════ */
+.controls-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 18px;
+  font-size: .82rem;
+}
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 8px;
+  color: var(--accent);
+  white-space: nowrap;
+  display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
 
-    /* ── Controls reference grid ── */
-    .controls-grid {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 6px 18px;
-      font-size: .82rem;
-    }
-    .ctrl-key {
-      font-family: 'Share Tech Mono', monospace;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 2px 8px;
-      color: var(--accent);
-      white-space: nowrap;
-      display: inline-block;
-    }
-    .ctrl-desc { color: var(--text-dim); align-self: center; }
-  </style>
+/* ════════════════════════════════════════════════════
+   SCREENSHOT PLACEHOLDER  (replace with <img> later)
+════════════════════════════════════════════════════ */
+.game-screenshot {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg2);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  margin-bottom: 16px;
+}
+
+</style>
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════════════════════════
      PAGE HEADER
-     Update: icon emoji, game name, subtitle, description.
-     
-     The subtitle format for browser games:
-       // Category · Single/Multiplayer · Hosting Method · Auth //
-     
-     Categories: Browser Game · Flash Game · Generative Art
-     Hosting:    Static Files / Python http.server / nginx / Docker
-     Auth:       Authentik forward_auth / Open (no auth)
-═══════════════════════════════════════════════════════════ -->
+     Subtitle format: // Category · Players · Tech · Auth //
+     Categories: Browser Game · Flash Game · Generative Art · Simulation
+════════════════════════════════════════════════════════════ -->
 <div class="page-header">
-  <div class="page-icon">🎮</div><!-- ← change to a game-specific emoji -->
+  <div class="page-icon">🎮</div>
   <div>
-    <h1>GAME NAME</h1><!-- ← change to actual game name -->
-    <div class="subtitle">
-      <!-- Example: // Browser Game · Singleplayer · Static Files · Authentik forward_auth // -->
-      // Browser Game · Singleplayer · [Hosting Method] · [Auth Method] //
-    </div>
-    <!--
-      2-3 sentences. What is this game? What makes it interesting?
-      Is it original, a clone, a classic? Why is it here on the server?
-    -->
+    <h1>GAME NAME</h1>
+    <div class="subtitle">// Browser Game · Singleplayer · [Tech Stack] · Tailscale + Authentik forward_auth //</div>
     <p class="desc">
-      One to two sentences describing the game. What is it, who made it, and why does it belong on this server?
+      1–2 sentences about the game. What is it, who made it, why is it on this server?
     </p>
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════
-     SUB-TAB NAVIGATION
-     Tab order for browser game pages:
-       1. 🚀 Setup       — how to deploy / integrate into the hub
-       2. 🕹️ Overview    — what it is, how to play, controls
-       3. 🏆 High Score  — leaderboard config (REMOVE if N/A)
-       4. 👥 Multiplayer — multiplayer config (REMOVE if N/A)
-       5. 📦 Source      — GitHub / download / origin
-═══════════════════════════════════════════════════════════ -->
-<div class="subtab-nav" id="subtab-nav">
-  <button class="subtab-btn active" onclick="switchTab('setup', this)">🚀 Setup</button>
-  <button class="subtab-btn" onclick="switchTab('overview', this)">🕹️ Overview</button>
-  <!-- Remove the high score button if this game has no scoreboard -->
-  <button class="subtab-btn" onclick="switchTab('highscore', this)">🏆 High Score</button>
-  <!-- Remove the multiplayer button if this game is singleplayer-only -->
-  <button class="subtab-btn" onclick="switchTab('multiplayer', this)">👥 Multiplayer</button>
-  <button class="subtab-btn" onclick="switchTab('source', this)">📦 Source</button>
+<!-- Stat row — fill in with real data -->
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">1</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">—</div><div class="bg-stat-label">High Scores</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">—</div><div class="bg-stat-label">Saves</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">YYYY</div><div class="bg-stat-label">Released</div></div>
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════════════
-     PANE 1 — SETUP
-     ───────────────────────────────────────────────────────────────
-     Mirrors service-template.html Setup pane exactly.
-     
-     PURPOSE: Step-by-step guide for the server owner to install
-     and wire this game into the Browser Games hub. The setup is
-     simpler than a full service — usually just dropping files into
-     the right place and registering the game in games.json.
-     
-     The setup-complete bar and V1 banner are REQUIRED.
-     SSO section only needed if this game needs special auth config
-     beyond inheriting the hub's Authentik forward_auth.
-═══════════════════════════════════════════════════════════════ -->
-<div class="subtab-pane active" id="pane-setup">
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN TABS
+     Adapt to what the game needs. Remove unused tabs.
+════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',     this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+  <!--
+    Remove tabs that don't apply to this game:
+    • No leaderboard?   Delete the 🏆 High Score button AND bg-pane-highscore div.
+    • Singleplayer only? Delete the 👥 Multiplayer button AND bg-pane-multi div.
+  --></div>
 
-  <!-- REQUIRED: Setup complete checkbox ─ always first in pane -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 1 — SETUP
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
   <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
-      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">
-        <!--
-          State the exact condition for "done" for THIS game.
-          E.g. "Game loads in the Browser Games hub, high scores save correctly."
-        -->
-        Check when GAME NAME is accessible in the Browser Games hub and all features are verified.
-      </div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when GAME NAME loads correctly in the Browser Games hub.</div>
     </div>
     <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <!-- V1 Goal banner -->
-  <div class="v1-banner">
-    <!--
-      State the minimum viable outcome for this game.
-      What must be true before it's "live"?
-    -->
-    🎮 V1 Goal: GAME NAME accessible from the Browser Games hub at
-    <code>games.<span data-cfg="domain"></span></code>, loading correctly
-    in all browsers, with no external network calls.
-  </div>
+  <div class="v1-banner">🎮 V1 Goal: GAME NAME accessible at <code>games.<span data-cfg="domain"></span>/GAMEID/</code> via Tailscale, gated by Authentik forward_auth, running fully client-side.</div>
 
-  <!-- ── Step 1: File placement / Clone ── -->
   <div class="section">
     <div class="section-title">📁 Step 1 — File Placement</div>
     <div class="card">
-      <!--
-        Describe where to put the game files.
-        All browser games live under D:\Server\BrowserGames\[game-folder]\
-        
-        Options:
-        A) Static files — just drop a folder
-        B) Clone from GitHub
-        C) Docker container — reference the compose block
-        D) Build step required — document the build process
-      -->
-      <p>Game files live under <code>D:\Server\BrowserGames\GAMENAME\</code>.</p>
-      <pre># Option A — Static drop:
-# Copy the game folder to D:\Server\BrowserGames\GAMENAME\
-# Ensure index.html is at the root.
-
-# Option B — Clone from GitHub:
+      <p>Game files live under <code>D:\Server\BrowserGames\GAMEID\</code>.</p>
+      <pre># Clone from GitHub:
 cd D:\Server\BrowserGames
-git clone https://github.com/AUTHOR/REPO.git GAMENAME
+git clone https://github.com/AUTHOR/REPO.git GAMEID
 
-# Option C — Build step (e.g. webpack):
-cd D:\Server\BrowserGames\GAMENAME
-npm install
-npm run build
-# Output will be in dist\ — serve that folder, not the source root</pre>
+# Or drop static files directly — ensure index.html is at the root.</pre>
       <div class="callout callout-tip">
         <div class="callout-icon">💡</div>
-        <div class="callout-body">
-          The Browser Games hub serves all games from a single Python http.server (or nginx) root.
-          The hub's <code>games.json</code> registry tells the hub what games exist — always update it.
-        </div>
+        <div class="callout-body">Entry point must be <code>index.html</code> at the folder root. No build step required unless noted.</div>
       </div>
     </div>
   </div>
 
-  <!-- ── Step 2: Register in games.json ── -->
   <div class="section">
-    <div class="section-title">📋 Step 2 — Register in games.json</div>
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
     <div class="card">
-      <p>
-        Add an entry to <code>D:\Server\BrowserGames\games.json</code>. This is the single source of truth
-        for the hub's game list. The hub reads this file at load time to populate the lobby.
-      </p>
+      <p>Add an entry to <code>D:\Server\BrowserGames\index.json</code>. This is the hub's single source of truth.</p>
       <pre>{
-  "id":          "GAMENAME",                    // unique slug, lowercase, no spaces
-  "name":        "GAME NAME",                   // display name
-  "icon":        "🎮",                          // emoji icon shown in the lobby
-  "description": "One-line description.",       // shown in the game card
-  "folder":      "GAMENAME",                    // subfolder name under BrowserGames\
-  "entry":       "index.html",                  // entry point within the folder
-  "category":    "singleplayer",               // "singleplayer" | "multiplayer"
-  "highScores":  true,                          // true | false
-  "players":     "1",                           // "1" | "2" | "2-4" | "1-8" etc.
-  "tags":        ["puzzle", "arcade"]           // optional tags for filtering
+  "id":          "GAMEID",
+  "name":        "GAME NAME",
+  "icon":        "🎮",
+  "description": "One-line description.",
+  "folder":      "GAMEID",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["generative"],
+  "tech":        "HTML / JavaScript",
+  "hasPage":     true
 }</pre>
-      <div class="callout callout-warn">
-        <div class="callout-icon">⚠️</div>
-        <div class="callout-body">
-          <strong>Always restart the http.server after editing games.json</strong> — it doesn't hot-reload.
-          Use <code>nssm restart BrowserGamesServer</code> (or whatever the service name is).
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- ── Step 3: High Score API integration (if applicable) ── -->
-  <!-- REMOVE THIS STEP if the game has no high score support -->
   <div class="section">
-    <div class="section-title">🏆 Step 3 — High Score API Integration <span class="tag tag-optional">IF APPLICABLE</span></div>
+    <div class="section-title">🔐 Step 3 — Access Control</div>
     <div class="card">
-      <p>
-        The Browser Games hub has a shared high score API running alongside it (a small Python/Flask server).
-        Games submit scores via a simple POST call. If this game supports high scores, wire it up here.
-      </p>
-      <pre>// In the game's JS, when the player achieves a score:
-fetch('/api/scores/submit', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    game:  'GAMENAME',        // must match games.json id
-    score: playerScore,       // integer or float — define the unit in the High Score tab
-    meta:  { level: 3 }       // optional — any game-specific context
-  })
-});
-
-// The hub reads the username from X-authentik-username header automatically.
-// The game's JS does NOT need to supply the username.</pre>
-      <div class="callout callout-dragon">
-        <div class="callout-icon">🐉</div>
-        <div class="callout-body">
-          <strong>Do not modify the game's source to make API calls if you don't control the source.</strong>
-          In that case, use the hub's score proxy: host a lightweight wrapper page that launches the game
-          in an iframe and listens for a <code>postMessage</code> score event. Document the wrapper approach
-          in the High Score tab.
-        </div>
-      </div>
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. No additional Caddy block needed — inherits the hub's <code>forward_auth</code>.</p>
     </div>
   </div>
 
-  <!-- ── Step 4: Caddy / SSO ── -->
-  <div class="section">
-    <div class="section-title">🔐 Step 4 — SSO &amp; Reverse Proxy</div>
-    <div class="card">
-      <p>
-        Browser games are served under the <code>games.<span data-cfg="domain"></span></code> subdomain,
-        behind the hub's Authentik <code>forward_auth</code> block. Individual game pages do <strong>not</strong>
-        need their own Caddy block — they're all sub-paths of the hub.
-      </p>
-      <pre># No new Caddy block needed for individual games.
-# The hub's existing block handles all paths under /games/.
-#
-# If this game requires special headers, cookies, or CORS,
-# add a path-specific override inside the hub's Caddy block:
-games.{$DOMAIN} {
-  # ... existing forward_auth block ...
-
-  # Game-specific path override example:
-  route /GAMENAME/* {
-    header Access-Control-Allow-Origin "*"   # if the game loads workers
-  }
-}</pre>
-      <p>
-        The only time a new Caddy block is needed is if the game has a <strong>separate backend process</strong>
-        (e.g. a WebSocket multiplayer server). In that case, proxy that backend to a dedicated subdomain or
-        sub-path and document it in the Multiplayer tab.
-      </p>
-    </div>
-  </div>
-
-  <!-- ── Step 5: Firewall ── -->
-  <div class="section">
-    <div class="section-title">🛡️ Step 5 — Firewall</div>
-    <div class="card">
-      <p>
-        Static files are served by the hub's existing process — no new firewall rule needed unless this game
-        runs an additional backend on a new port.
-      </p>
-      <pre># Only needed if the game has a separate backend (e.g. WebSocket server):
-netsh advfirewall firewall add rule ^
-  name="BrowserGames - GAMENAME Backend" ^
-  dir=in action=allow protocol=TCP localport=BACKEND_PORT</pre>
-    </div>
-  </div>
-
-</div><!-- /pane-setup -->
+</div><!-- /bg-pane-setup -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     PANE 2 — OVERVIEW
-     ───────────────────────────────────────────────────────────────
-     PURPOSE: What is the game, where to find it, how to play it.
-     This is the tab users and admins read most often after setup.
-     Once Setup is marked complete, this becomes the default tab.
-     
-     Include:
-     • A screenshot or visual placeholder
-     • Quick Reference (URL, players, save status)
-     • What It Is — genre, origin, why it's here
-     • How to Play — short rules + controls reference
-     • Known Limitations (browser support, performance notes)
-═══════════════════════════════════════════════════════════════ -->
-<div class="subtab-pane" id="pane-overview">
+     TAB 2 — OVERVIEW
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
 
-  <div class="v1-banner">
-    <!--
-      Current status of the game. Is it fully working? Any known issues?
-      E.g. "✅ Fully working. High scores saving correctly. No known issues."
-      or "⚠️ Ruffle compatibility partial — Stage 3 crashes, avoid it for now."
-    -->
-    ✅ Current status — update this line whenever something changes.
-  </div>
+  <div class="v1-banner">✅ Current status — update this line whenever something changes.</div>
 
-  <!-- Screenshot placeholder -->
-  <div class="game-screenshot">
-    [ Screenshot or animated GIF — replace this div with an &lt;img&gt; once available ]
-  </div>
+  <div class="game-screenshot">[ Screenshot — replace this div with &lt;img src="screenshot.png"&gt; once available ]</div>
 
-  <!-- Quick Reference -->
   <div class="section">
     <div class="section-title">📡 Quick Reference</div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Access</div>
         <table>
-          <tr>
-            <td style="color:var(--text-dim);width:90px">Hub URL</td>
-            <td><code>games.<span data-cfg="domain"></span></code></td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dim)">Direct path</td>
-            <td><code>/GAMENAME/</code></td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dim)">Auth</td>
-            <td>Authentik SSO (hub-level)</td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dim)">Players</td>
-            <td>1 <!-- or "1–4", "2 (local)", etc. --></td>
-          </tr>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/GAMEID/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None (stateless)</td></tr>
         </table>
       </div>
       <div class="card">
         <div class="card-title">Technical</div>
         <table>
-          <tr>
-            <td style="color:var(--text-dim);width:90px">Type</td>
-            <td>Static HTML/JS <!-- or "Flash (Ruffle)", "WebAssembly", etc. --></td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dim)">Saves</td>
-            <td>None <!-- or "localStorage", "Server (per-user)", "Cookies" --></td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dim)">High scores</td>
-            <td>Yes — shared leaderboard <!-- or "No" --></td>
-          </tr>
-          <tr>
-            <td style="color:var(--text-dim)">Offline</td>
-            <td>Yes, after first load <!-- or "No — requires server" --></td>
-          </tr>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>[HTML / JavaScript, WASM, p5.js, etc.]</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>[Yes / Partial / No]</td></tr>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- What It Is -->
   <div class="section">
     <div class="section-title">🎮 What Is This?</div>
     <div class="card">
-      <!--
-        2–4 paragraphs. Cover:
-        - What genre / style is it?
-        - Where does it come from? (original project, open source clone, preserved Flash game, etc.)
-        - What makes it worth playing?
-        - Why is it on this server specifically?
-      -->
-      <p>
-        Describe the game in detail. What genre is it? What's the goal? What makes it fun or interesting?
-      </p>
-      <p>
-        Where does it come from? Is it an open-source project, a browser port of a classic, a Flash game
-        preserved via Ruffle, or something original? Link to the original source in the Source tab.
-      </p>
+      <p>2–4 paragraphs. Cover: genre/style, origin (open source / preserved / original), what makes it interesting, why it's on this server.</p>
     </div>
   </div>
 
-  <!-- How to Play -->
   <div class="section">
-    <div class="section-title">📖 How to Play</div>
+    <div class="section-title">📖 How to Use</div>
     <div class="card">
-      <!--
-        Short rules — 3–6 bullet points or a brief paragraph.
-        Don't over-explain; just give someone enough to start playing.
-      -->
       <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
-        <li>[ Objective: what does the player try to do? ]</li>
-        <li>[ Core mechanic: what is the main loop? ]</li>
-        <li>[ Win/lose condition ]</li>
-        <li>[ Any important rules or gotchas ]</li>
+        <li>[ Objective or main interaction ]</li>
+        <li>[ Key controls or workflow ]</li>
+        <li>[ Tips or secrets ]</li>
       </ul>
-
-      <!-- Controls reference -->
       <div class="card-title" style="margin-bottom:10px">Controls</div>
       <div class="controls-grid">
-        <span class="ctrl-key">WASD / Arrow Keys</span>  <span class="ctrl-desc">[ describe action ]</span>
-        <span class="ctrl-key">Space</span>               <span class="ctrl-desc">[ describe action ]</span>
-        <span class="ctrl-key">Click / Tap</span>         <span class="ctrl-desc">[ describe action ]</span>
-        <span class="ctrl-key">Esc</span>                 <span class="ctrl-desc">Pause / menu</span>
-        <!-- Add or remove rows as needed -->
+        <span class="ctrl-key">Click / Drag</span> <span class="ctrl-desc">[ Primary interaction ]</span>
+        <span class="ctrl-key">Scroll</span>        <span class="ctrl-desc">[ Secondary interaction ]</span>
       </div>
     </div>
   </div>
 
-  <!-- Known Limitations -->
   <div class="section">
     <div class="section-title">⚠️ Known Limitations</div>
     <div class="card">
       <table>
         <tr><th>Issue</th><th>Detail</th></tr>
-        <tr>
-          <td>Browser support</td>
-          <td>
-            <!-- E.g. "Tested in Chrome and Firefox. Safari has audio issues." -->
-            Tested in Chrome and Firefox. Other browsers untested.
-          </td>
-        </tr>
-        <tr>
-          <td>Mobile</td>
-          <td>
-            <!-- E.g. "Playable on mobile — virtual gamepad overlay active." or "Not mobile-friendly — keyboard required." -->
-            [ mobile support status ]
-          </td>
-        </tr>
-        <tr>
-          <td>Performance</td>
-          <td>
-            <!-- E.g. "Runs fine on low-end devices." or "Heavy canvas — may lag on older phones." -->
-            [ performance notes ]
-          </td>
-        </tr>
-        <!-- Add or remove rows as needed -->
+        <tr><td>Mobile</td><td>[ Touch support status ]</td></tr>
+        <tr><td>Performance</td><td>[ Any hardware requirements ]</td></tr>
       </table>
     </div>
   </div>
 
-</div><!-- /pane-overview -->
+</div><!-- /bg-pane-overview -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     PANE 3 — HIGH SCORE
-     ───────────────────────────────────────────────────────────────
-     REMOVE THIS ENTIRE PANE (and its tab button) if this game
-     has no high score support.
-     
-     PURPOSE: Documents how scores are captured, stored, and
-     displayed. Includes the live leaderboard widget and integration
-     notes for the API.
-     
-     All scores are shared across all users — this is intentional.
-     Users compete against each other on the same leaderboard.
-═══════════════════════════════════════════════════════════════ -->
-<div class="subtab-pane" id="pane-highscore">
+     TAB 3 — SOURCE
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-source">
 
-  <div class="v1-banner">
-    🏆 High scores are shared between all users. Everyone competes on the same leaderboard.
-    Scores are stored in the Browser Games score server at <code>localhost:SCORE_PORT</code>.
-  </div>
-
-  <!-- Live Leaderboard -->
-  <div class="section">
-    <div class="section-title">🥇 Current Leaderboard — GAME NAME</div>
-    <div class="card">
-      <!--
-        This section can be a static table (manually updated),
-        or replaced with a live-fetching JS widget that calls the score API.
-        
-        Static table example (replace with live fetch when score server is ready):
-      -->
-      <div class="callout callout-tip">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body">
-          Scores update in real-time as players finish games.
-          The leaderboard below fetches from the shared score server.
-        </div>
-      </div>
-      <table class="hs-table" id="hs-table-GAMENAME">
-        <thead>
-          <tr>
-            <th class="hs-rank">#</th>
-            <th>Player</th>
-            <th>Score</th>
-            <th>Unit</th><!-- E.g. "Points", "Lines", "Level", "Time" — define what the score means -->
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="hs-body-GAMENAME">
-          <tr><td colspan="5" style="color:var(--text-dim);text-align:center;padding:20px">Loading scores…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Score Definition -->
-  <div class="section">
-    <div class="section-title">📐 Score Definition</div>
-    <div class="card">
-      <table>
-        <tr>
-          <td style="color:var(--text-dim);width:120px">Score unit</td>
-          <td>
-            <!--
-              What exactly is measured? Points? Lines cleared? Survival time in seconds?
-              Distance? Be precise — two games cannot use incompatible definitions.
-            -->
-            [ e.g. Points — one point per enemy defeated ]
-          </td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Higher is better?</td>
-          <td>Yes <!-- or "No — lower time is better" --></td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Submission trigger</td>
-          <td>
-            <!--
-              When is the score sent? Game over screen? Level clear? Manual button?
-            -->
-            [ e.g. Automatically on game over screen ]
-          </td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Per-run or cumulative?</td>
-          <td>
-            <!-- "Per-run: only the single best run is kept" vs "Cumulative: total across all sessions" -->
-            Per-run — only the best score per user is kept
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <!-- Integration Notes -->
-  <div class="section">
-    <div class="section-title">🔧 Integration Notes</div>
-    <div class="card">
-      <!--
-        Document how the score submission was wired up.
-        
-        Option A — Direct source modification (you own the code):
-          Describe where in the game's JS the fetch() call was added.
-        
-        Option B — Wrapper page (you don't own the source):
-          The game runs in an iframe; the wrapper page listens for
-          postMessage events and forwards scores to the API.
-        
-        Option C — No integration yet (score tracking planned):
-          Mark as TODO and describe the plan.
-      -->
-      <p>
-        [ Describe how scoring was integrated. Which option above applies?
-          If Option A: which JS file was modified and what event triggers submission?
-          If Option B: describe the wrapper page and what postMessage payload the game emits.
-          If Option C: describe the plan and leave as a TODO. ]
-      </p>
-      <pre>// Score submission call (reference):
-fetch('/api/scores/submit', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ game: 'GAMENAME', score: FINAL_SCORE })
-});
-// Username is read from X-authentik-username header server-side.
-// Do not include it in the client-side payload.</pre>
-    </div>
-  </div>
-
-  <script>
-    // ── Live leaderboard fetch ──
-    // Replace SCORE_PORT with the actual port of the Browser Games score server.
-    // Replace GAMENAME with the game's id from games.json.
-    // This script block should be removed and merged into a shared hub JS file
-    // once the score server architecture is finalized.
-    (function() {
-      const GAME_ID    = 'GAMENAME';
-      const SCORE_URL  = '/api/scores/' + GAME_ID + '?limit=10';
-      const tbody      = document.getElementById('hs-body-' + GAME_ID);
-
-      fetch(SCORE_URL)
-        .then(r => r.ok ? r.json() : Promise.reject(r.status))
-        .then(data => {
-          if (!data.scores || !data.scores.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-dim);text-align:center;padding:20px">No scores yet — be the first!</td></tr>';
-            return;
-          }
-          const medals = ['🥇','🥈','🥉'];
-          tbody.innerHTML = data.scores.map((s, i) => `
-            <tr>
-              <td class="hs-rank">${medals[i] || (i + 1)}</td>
-              <td>${esc(s.username)}</td>
-              <td>${s.score.toLocaleString()}</td>
-              <td style="color:var(--text-dim);font-size:.72rem">${esc(s.unit || 'pts')}</td>
-              <td style="color:var(--text-dim);font-size:.72rem">${new Date(s.date).toLocaleDateString()}</td>
-            </tr>
-          `).join('');
-        })
-        .catch(() => {
-          tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-dim);text-align:center;padding:20px">Score server unavailable — try again later.</td></tr>';
-        });
-
-      function esc(str) {
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      }
-    })();
-  </script>
-
-</div><!-- /pane-highscore -->
-
-
-<!-- ═══════════════════════════════════════════════════════════════
-     PANE 4 — MULTIPLAYER
-     ───────────────────────────────────────────────────────────────
-     REMOVE THIS ENTIRE PANE (and its tab button) if this game
-     is singleplayer-only.
-     
-     PURPOSE: Documents how multiplayer works — whether it's local,
-     real-time networked (WebSocket), async turn-based, or lobby-based.
-     Includes setup notes for any required backend.
-═══════════════════════════════════════════════════════════════ -->
-<div class="subtab-pane" id="pane-multiplayer">
-
-  <div class="v1-banner">
-    👥 Multiplayer mode for GAME NAME.
-    <span class="mp-type">[ REAL-TIME / LOCAL / ASYNC / LOBBY ]</span>
-    <!-- Pick the right label: Real-Time (WebSocket), Local (same screen / keyboard), Async (turn-based, no live session), Lobby (matchmaking) -->
-  </div>
-
-  <!-- How Multiplayer Works -->
-  <div class="section">
-    <div class="section-title">⚙️ How It Works</div>
-    <div class="card">
-      <!--
-        Describe the multiplayer architecture. Examples:
-        
-        LOCAL: "Two players on the same machine, same keyboard. Player 1 uses WASD,
-                Player 2 uses Arrow Keys. No network required."
-        
-        REAL-TIME: "WebSocket server runs as a Docker container alongside the game.
-                    All enrolled users can join a named room. Rooms are ephemeral —
-                    they close when all players leave."
-        
-        ASYNC: "Players take turns. The current game state is stored server-side.
-                Players receive a notification (or check the hub) when it's their turn."
-        
-        LOBBY: "Players create or join a named room from the hub lobby.
-                The game uses WebRTC peer-to-peer — no relay server needed (on LAN).
-                Off-LAN (Tailscale) adds ~20ms latency but is otherwise identical."
-      -->
-      <p>[ Describe the multiplayer architecture here. How do players connect? What technology is used? ]</p>
-    </div>
-  </div>
-
-  <!-- Player Capacity -->
-  <div class="section">
-    <div class="section-title">👥 Player Capacity</div>
-    <div class="card">
-      <table>
-        <tr>
-          <td style="color:var(--text-dim);width:140px">Min players</td>
-          <td>[ e.g. 2 ]</td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Max players</td>
-          <td>[ e.g. 4 per room ]</td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Concurrent rooms</td>
-          <td>[ e.g. Unlimited (stateless) / Limited by server RAM ]</td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Cross-device</td>
-          <td>[ e.g. Yes — any enrolled Tailscale device can join ]</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <!-- Backend Setup (if required) -->
-  <div class="section">
-    <div class="section-title">🖥️ Backend Setup <span class="tag tag-optional">IF REQUIRED</span></div>
-    <div class="card">
-      <!--
-        Only needed if multiplayer requires a backend process (e.g. WebSocket server, relay server).
-        If it's purely local or peer-to-peer with no server component, remove this section.
-      -->
-      <p>
-        [ If this game requires a multiplayer backend, document how to run it here.
-          Include: Docker compose snippet, or NSSM setup for a Node/Python server,
-          the port it listens on, and how it communicates with the game client. ]
-      </p>
-      <pre># Example: Node.js WebSocket server
-cd D:\Server\BrowserGames\GAMENAME\server
-npm install
-nssm install GAMENAME-MP-Server node
-nssm set GAMENAME-MP-Server AppDirectory D:\Server\BrowserGames\GAMENAME\server
-nssm set GAMENAME-MP-Server AppParameters server.js
-nssm set GAMENAME-MP-Server Start SERVICE_AUTO_START
-nssm start GAMENAME-MP-Server
-
-# Caddy block for the WebSocket backend:
-ws-GAMENAME.{$DOMAIN} {
-  reverse_proxy localhost:WS_PORT
-  # forward_auth if this endpoint also needs SSO gate:
-  # forward_auth localhost:9000 { ... }
-}</pre>
-    </div>
-  </div>
-
-  <!-- Latency / Tailscale Notes -->
-  <div class="section">
-    <div class="section-title">🌐 Tailscale &amp; Latency Notes</div>
-    <div class="card">
-      <p>
-        All users connect through Tailscale. On-LAN latency is effectively zero.
-        Remote users over Tailscale typically see 5–30ms depending on their internet connection.
-      </p>
-      <p>
-        [ Add any game-specific latency sensitivity notes. E.g. "This game is turn-based so latency
-          doesn't matter" or "Real-time combat — high latency will cause desync. Tested up to 80ms." ]
-      </p>
-    </div>
-  </div>
-
-</div><!-- /pane-multiplayer -->
-
-
-<!-- ═══════════════════════════════════════════════════════════════
-     PANE 5 — SOURCE
-     ───────────────────────────────────────────────────────────────
-     PURPOSE: Where the game came from. GitHub, itch.io, Newgrounds
-     archive, custom/original, etc. Links to upstream for updates.
-     Also documents the license if relevant.
-═══════════════════════════════════════════════════════════════ -->
-<div class="subtab-pane" id="pane-source">
-
-  <!-- Primary source -->
   <div class="section">
     <div class="section-title">📦 Primary Source</div>
     <div class="card">
-      <!--
-        Use .source-link divs for each source.
-        These are styled like franchise cards — clickable, gold-hover.
-      -->
       <a class="source-link" href="https://github.com/AUTHOR/REPO" target="_blank">
         <div class="source-link-icon">🐙</div>
         <div>
           <div class="source-link-name">GitHub — AUTHOR/REPO</div>
-          <div class="source-link-desc">Original open-source repository. Stars, issues, and release history.</div>
+          <div class="source-link-desc">Original repository. [Tech stack]. [Build notes if any.]</div>
         </div>
       </a>
-
-      <!-- Add more sources as needed: -->
-      <!--
-      <a class="source-link" href="https://itch.io/..." target="_blank">
-        <div class="source-link-icon">🎮</div>
-        <div>
-          <div class="source-link-name">itch.io page</div>
-          <div class="source-link-desc">Original release page by the developer.</div>
-        </div>
-      </a>
-      -->
     </div>
   </div>
 
-  <!-- Version & update status -->
   <div class="section">
     <div class="section-title">🔖 Version &amp; Update Status</div>
     <div class="card">
       <table>
-        <tr>
-          <td style="color:var(--text-dim);width:140px">Version in use</td>
-          <td><!-- e.g. "v1.4.2" or "commit abc1234 (2024-03-15)" --></td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Last checked</td>
-          <td><!-- date you last verified it's the latest version --></td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Update method</td>
-          <td>
-            <!--
-              How to update the game:
-              "git pull in D:\Server\BrowserGames\GAMENAME\" or
-              "Download new release zip and replace files" or
-              "No upstream updates — project is abandoned / archived"
-            -->
-          </td>
-        </tr>
-        <tr>
-          <td style="color:var(--text-dim)">Active development?</td>
-          <td><!-- "Yes", "Archived (no new releases)", "Abandoned", "Maintained by fork" --></td>
-        </tr>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\GAMEID\</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>[ Yes / Archived / Stable ]</td></tr>
+        <tr><td style="color:var(--text-dim)">Last checked</td><td>[ Date ]</td></tr>
       </table>
     </div>
   </div>
 
-  <!-- License -->
   <div class="section">
     <div class="section-title">⚖️ License</div>
     <div class="card">
-      <p>
-        <!--
-          State the license: MIT, GPL, CC0, "No license listed (assume all rights reserved)",
-          "Freeware — no commercial use", etc.
-          
-          If the game is a preserved Flash game from Newgrounds or Kongregate:
-          note the original author and that this is a personal private-server copy.
-        -->
-        [ License: e.g. MIT License — free to use and self-host. ]
-      </p>
-      <p>
-        <!--
-          If there were any modifications made to the source for this server
-          (e.g. score API integration, asset replacements), document them here.
-        -->
-        <strong>Modifications made for this server:</strong>
-        [ List any changes made to the original source, e.g. "Added score submission POST call to index.js line 247" or "None — unmodified" ]
-      </p>
+      <p>[ MIT / GPL / No explicit license — personal private-server use for a small friend group. ]</p>
     </div>
   </div>
 
-  <!-- Offline availability -->
   <div class="section">
-    <div class="section-title">📴 Offline &amp; Archive Status</div>
+    <div class="section-title">🏛️ Archive Status</div>
     <div class="card">
-      <p>
-        <!--
-          Is an offline copy preserved? Is the original still accessible publicly?
-          Is this the only copy that exists?
-          
-          E.g. "Original Newgrounds page still live. Game file archived to D:\Backups\games\."
-          or "Kongregate shutdown — this is a local-only preserved copy."
-        -->
-        [ State whether the original is still online, and whether this server has a backup copy. ]
-      </p>
+      <p>[ Is the original still live? Is there a backup copy? e.g. "Original at kongregate.com — archived to D:\Backups\games\." ]</p>
     </div>
   </div>
 
-</div><!-- /pane-source -->
+</div><!-- /bg-pane-source -->
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     JAVASCRIPT — Tab switching + setup-complete persistence
-     ───────────────────────────────────────────────────────────────
-     Verbatim from service-template.html.
-     Change only STORAGE_KEY — must be unique per game.
-     Convention: 'browsergame_GAMENAME_setup_complete'
-═══════════════════════════════════════════════════════════════ -->
+     TAB 4 — HIGH SCORE
+     Remove this entire pane (and its tab button) if the game has no
+     leaderboard. Otherwise fill in the score unit, submission method,
+     and the wrapper approach if you can't modify the game's source.
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+
+  <div class="v1-banner">🏆 [ State whether leaderboard is wired up, pending, or N/A for this game. ]</div>
+
+  <div class="section">
+    <div class="section-title">📊 Leaderboard</div>
+    <div class="card">
+      <div class="card-title">Current Top Scores</div>
+      <table>
+        <tr><th>Rank</th><th>Player</th><th>Score</th><th>Date</th></tr>
+        <tr><td colspan="4" style="color:var(--text-dim);font-size:.78rem">[ No scores yet — be the first! ]</td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:.78rem;color:var(--text-dim)">Score unit: <strong>[ points / lines / level / time / etc. ]</strong></p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔌 API Integration</div>
+    <div class="card">
+      <p>Scores submit to the hub's shared score API. The username is read automatically from the <code>X-authentik-username</code> header injected by Caddy — no login needed inside the game.</p>
+      <pre>// Option A — direct call (if you control the game's source):
+fetch('/api/scores/submit', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    game:  'GAMEID',      // must match index.json id
+    score: playerScore,   // integer or float
+    meta:  { level: 3 }  // optional game-specific context
+  })
+});
+
+// Option B — postMessage wrapper (if you cannot modify the source):
+// Host a thin wrapper page that iframes the game and listens for
+// a postMessage score event, then forwards it to the API.
+// Document the wrapper approach below.</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Do not modify a game's source</strong> just to add score submission if you don't control it. Use the postMessage wrapper approach instead, and document it here.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📐 Score Definition</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Unit</td><td>[ What does one point represent? ]</td></tr>
+        <tr><td style="color:var(--text-dim)">Higher is better?</td><td>[ Yes / No — e.g. golf scoring is lower-better ]</td></tr>
+        <tr><td style="color:var(--text-dim)">Ties broken by</td><td>[ Date (earlier wins) / N/A ]</td></tr>
+        <tr><td style="color:var(--text-dim)">Score cap</td><td>[ None / [N] max ]</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-highscore -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB 5 — MULTIPLAYER
+     Remove this entire pane (and its tab button) if the game is
+     strictly singleplayer. Otherwise document the backend, protocol,
+     player limits, and any known issues with concurrent sessions.
+════════════════════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+
+  <div class="v1-banner">👥 [ State current multiplayer status — e.g. "Real-time co-op via WebSocket, up to 4 players." or "Turn-based async — share a room code." ]</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Connection</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:120px">Protocol</td><td>[ WebSocket / WebRTC / Polling / Async ]</td></tr>
+          <tr><td style="color:var(--text-dim)">Max players</td><td>[ N ]</td></tr>
+          <tr><td style="color:var(--text-dim)">Session type</td><td>[ Real-time / Turn-based / Drop-in ]</td></tr>
+          <tr><td style="color:var(--text-dim)">Backend port</td><td>[ N / None — handled by hub ]</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Joining</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:120px">How to join</td><td>[ Room code / lobby URL / auto-match ]</td></tr>
+          <tr><td style="color:var(--text-dim)">Auth required</td><td>Tailscale + Authentik (all players)</td></tr>
+          <tr><td style="color:var(--text-dim)">Cross-device?</td><td>[ Yes / No ]</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🖥️ Backend Setup</div>
+    <div class="card">
+      <p>[ Does multiplayer require a separate backend process? If yes, document it here. If the game handles multiplayer entirely client-side (e.g. WebRTC, same-machine local co-op), note that instead. ]</p>
+      <pre># Example — if a separate WebSocket server is needed:
+cd D:\Server\BrowserGames\GAMEID
+node server.js --port BACKEND_PORT
+
+# Caddy route to proxy it (add inside the hub's Caddyfile block):
+route /GAMEID/ws/* {
+  reverse_proxy localhost:BACKEND_PORT
+}
+
+# Firewall rule (only if backend is on a new port):
+netsh advfirewall firewall add rule ^
+  name="BrowserGames - GAMEID Backend" ^
+  dir=in action=allow protocol=TCP localport=BACKEND_PORT</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">If the game uses WebRTC for peer-to-peer connections, no backend port is needed — all traffic goes through the browser. Document the signalling mechanism here instead.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Issues</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>[ Issue ]</td><td>[ Detail and workaround ]</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-multi -->
+
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     bgTab / bgView mirror fnTab / fnView from franchise pages.
+     Change only STORAGE_KEY — convention: 'bg_GAMEID_setup'
+════════════════════════════════════════════════════════════════ -->
 <script>
-  function switchTab(id, btn) {
-    document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('pane-' + id).classList.add('active');
+// ── Main tab switching ──────────────────────────────────────────
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+// ── Inner view switching (if any view tabs are used) ────────────
+// group: string prefix, e.g. 'controls'
+// viewId: e.g. 'keyboard', 'gamepad'
+function bgView(group, viewId, btn) {
+  const prefix = 'bg-' + group + '-';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => el.classList.remove('active'));
+  if (btn) {
+    btn.closest('.bg-view-nav').querySelectorAll('.bg-view-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   }
+  const target = document.getElementById(prefix + viewId);
+  if (target) target.classList.add('active');
+}
 
-  // ↓ CHANGE THIS per game — must be globally unique
-  const STORAGE_KEY = 'browsergame_GAMENAME_setup_complete';
+// ── Setup-complete persistence ──────────────────────────────────
+// ↓ CHANGE THIS per game
+const STORAGE_KEY = 'bg_GAMEID_setup';
 
-  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
 
-  function renderComplete() {
-    const bar         = document.getElementById('setup-complete-bar');
-    const checkbox    = document.getElementById('setup-checkbox');
-    const sub         = document.getElementById('complete-sub');
+function renderComplete() {
+  const bar = document.getElementById('setup-complete-bar');
+  const cb  = document.getElementById('setup-checkbox');
+  const sub = document.getElementById('complete-sub');
+  const overviewBtn = document.querySelector('[onclick*="overview"]');
+
+  if (isComplete) {
+    bar.classList.add('done');
+    cb.textContent = '✓';
+    sub.textContent = '✅ Setup complete — Overview is now the default tab';
+    if (overviewBtn) { overviewBtn.style.fontWeight = '700'; overviewBtn.style.color = 'var(--accent3)'; }
+  } else {
+    bar.classList.remove('done');
+    cb.textContent = '';
+    sub.textContent = 'Mark as done → activates Overview tab';
+    if (overviewBtn) { overviewBtn.style.fontWeight = ''; overviewBtn.style.color = ''; }
+  }
+}
+
+function toggleComplete() {
+  isComplete = !isComplete;
+  localStorage.setItem(STORAGE_KEY, isComplete);
+  renderComplete();
+  if (isComplete) {
     const overviewBtn = document.querySelector('[onclick*="overview"]');
-
-    if (isComplete) {
-      bar.classList.add('done');
-      checkbox.textContent = '✓';
-      sub.textContent = '✅ Setup complete — Overview is now the default tab';
-      overviewBtn.style.fontWeight = '700';
-      overviewBtn.style.color = 'var(--accent3)';
-    } else {
-      bar.classList.remove('done');
-      checkbox.textContent = '';
-      sub.textContent = 'Mark as done → activates Overview tab';
-      overviewBtn.style.fontWeight = '';
-      overviewBtn.style.color = '';
-    }
+    if (overviewBtn) bgTab('overview', overviewBtn);
   }
+}
 
-  function toggleComplete() {
-    isComplete = !isComplete;
-    localStorage.setItem(STORAGE_KEY, isComplete);
-    renderComplete();
-    if (isComplete) {
-      const overviewBtn = document.querySelector('[onclick*="overview"]');
-      switchTab('overview', overviewBtn);
-    }
+window.addEventListener('DOMContentLoaded', () => {
+  renderComplete();
+  if (isComplete) {
+    const overviewBtn = document.querySelector('[onclick*="overview"]');
+    if (overviewBtn) bgTab('overview', overviewBtn);
   }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    renderComplete();
-    if (isComplete) {
-      const overviewBtn = document.querySelector('[onclick*="overview"]');
-      switchTab('overview', overviewBtn);
-    }
-  });
+});
 </script>
 
 </body>
