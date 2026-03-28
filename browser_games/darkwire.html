@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Darkwire.io</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔒</div>
+  <div>
+    <h1>Darkwire.io</h1>
+    <div class="subtitle">// Encrypted Chat · Social · Node.js + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">End-to-end encrypted instant web chat for coordinating game sessions without leaving the browser. Create a room, share the link, and chat — messages are encrypted client-side using the Web Cryptography API and are never readable by the server. No accounts, no logs, no history. Rooms vanish when everyone leaves.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">💬 Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when a room can be created, a second browser joins it, and messages send and receive correctly.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔒 V1 Goal: Darkwire accessible at <code>chat.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, two browsers exchanging encrypted messages in a shared room.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Classification Note</div>
+    <div class="card">
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Darkwire is a chat tool rather than a game, but it's listed in the original browser games collection because it's genuinely useful for coordinating game sessions — scheduling, organising teams, sharing hints — all within the same browser environment as the games hub. Listed here under the Social category.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Docker Compose</div>
+    <div class="card">
+      <p>Create <code>~/services/darkwire/docker-compose.yml</code>:</p>
+      <pre>services:
+  darkwire:
+    image: darkwire/darkwire.io:latest
+    container_name: darkwire
+    restart: unless-stopped
+    ports:
+      - "8800:3000"</pre>
+      <pre>docker compose -f ~/services/darkwire/docker-compose.yml up -d</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Darkwire stores no message data — there is nothing to back up. The server only relays encrypted WebSocket messages; it cannot read them.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <p>Add to <code><span data-cfg="path:caddyfile"></span></code>:</p>
+      <pre>chat.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8800
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "darkwire",
+  "name":        "Darkwire.io",
+  "icon":        "\U0001f512",
+  "description": "End-to-end encrypted chat rooms. Coordinate game sessions without leaving the browser.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "2-20",
+  "tags":        ["social", "chat", "utility"],
+  "tech":        "Node.js / WebSockets / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://chat.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Darkwire stores no messages — the server never sees plaintext. All encryption happens in the browser using the Web Cryptography API. History is lost when the room closes.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>chat.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Participants</td><td>2–20 per room</td></tr>
+          <tr><td style="color:var(--text-dim)">History</td><td>None — messages lost when room closes</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Node.js / WebSockets / Docker</td></tr>
+          <tr><td style="color:var(--text-dim)">Encryption</td><td>End-to-end via Web Crypto API</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server relay</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — text chat works well on phones</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💬 What Is This?</div>
+    <div class="card">
+      <p>Darkwire.io is an end-to-end encrypted group chat tool that runs entirely in the browser. It uses the Web Cryptography API to encrypt all messages client-side before they're relayed through the server — the server sees only ciphertext and has no ability to read conversations. Rooms are ephemeral: they exist only while at least one person is connected, and all history is discarded when the last participant leaves.</p>
+      <p>On this server, Darkwire serves a practical purpose: it gives players a place to coordinate game sessions without needing to use an external service or install an app. Scheduling a Suroi match, sharing a Quizmaster room link, or discussing an Ancient Beast strategy — all without leaving the Tailnet.</p>
+      <p>No accounts are required. Create a room, copy the URL, and share it. Anyone with the link and a Tailscale connection can join.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Use</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Open <code>chat.<span data-cfg="domain"></span></code> — you'll be placed in a new room automatically</li>
+        <li>Copy the room URL and share it with others on the Tailnet</li>
+        <li>Type to chat — messages are encrypted before being sent</li>
+        <li>File sharing and image sending are supported in some versions</li>
+        <li>Leave or close the tab to disconnect; when the last person leaves, the room is gone</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>No message history</td><td>All messages are lost when the room closes. Not suitable for persistent communication — use this for live coordination only.</td></tr>
+        <tr><td>No usernames</td><td>Participants appear with random identifiers unless the version supports custom names. Check the current UI.</td></tr>
+        <tr><td>Ephemeral rooms</td><td>Room URLs are permanent only while the room exists. If everyone leaves and you reload, you'll get a new room — the old one is gone.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/darkwire/darkwire.io" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — darkwire/darkwire.io</div>
+          <div class="source-link-desc">Original repository. Node.js + WebSockets. Docker image on Docker Hub. End-to-end encrypted via Web Crypto API.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>docker compose pull</code> + <code>docker compose up -d</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Sporadic — core feature set is stable. Occasional security and dependency updates — worth pulling periodically for a chat tool.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>MIT License. Free to use and self-host. No modifications made to source for this server.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_darkwire_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

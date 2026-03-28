@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>C4 — Connect Four</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔴</div>
+  <div>
+    <h1>C4 — Connect Four</h1>
+    <div class="subtitle">// Board Game · Singleplayer vs AI · Static Files (HTML/JS) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A clean browser implementation of Connect Four with a built-in AI opponent. Drop coloured discs into the grid, aiming to connect four in a row horizontally, vertically, or diagonally before the AI does. Multiple AI difficulty levels — from trivial to genuinely challenging.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the grid renders, a disc can be dropped, and the AI responds with a move.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔴 V1 Goal: C4 accessible at <code>games.<span data-cfg="domain"></span>/c4/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>C4 is a fully static project. No build step required.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/kenrick95/c4.git c4</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Entry point is <code>index.html</code> at the repo root. Pure HTML/CSS/JS — no dependencies, no build tooling required.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "c4",
+  "name":        "C4 — Connect Four",
+  "icon":        "\U0001f534",
+  "description": "Connect Four with a built-in AI opponent. Multiple difficulty levels.",
+  "folder":      "c4",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["boardgame", "puzzle", "ai", "classic"],
+  "tech":        "HTML / CSS / JavaScript",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Inherits the hub's <code>forward_auth</code> — Tailscale + Authentik SSO required.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ C4 is entirely client-side. No save state — each game is a fresh session. The AI runs in-browser; no server computation needed.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/c4/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1 (vs AI) or 2 (pass-and-play local)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — session only</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML / CSS / JavaScript</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No — win/loss only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — column tap works on touch</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>C4 is a clean, no-frills browser implementation of Connect Four — the classic two-player strategy game where you drop coloured discs into a 7×6 vertical grid and try to line up four in a row before your opponent does. The standout feature over other browser Connect Four implementations is the built-in AI: it uses the minimax algorithm with alpha-beta pruning, making higher difficulty settings genuinely difficult to beat.</p>
+      <p>The game supports both human vs AI and local two-player (pass-and-play on the same device) modes. AI difficulty is configurable — lower settings play randomly or near-randomly, higher settings search deeper in the game tree and will punish most mistakes. Maximum difficulty is essentially unbeatable for casual players.</p>
+      <p>Games last 2–5 minutes, making it a good quick-session game. The compact, readable codebase also makes it a nice reference for anyone curious about implementing minimax in JavaScript.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Select a game mode (vs AI or vs Human) and AI difficulty level</li>
+        <li>Click a column to drop your disc into the lowest available row</li>
+        <li>Connect four discs in a row — horizontal, vertical, or diagonal — to win</li>
+        <li>The AI responds immediately after your move</li>
+        <li>The board fills up — if nobody connects four before the grid is full, it's a draw</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click column</span>  <span class="ctrl-desc">Drop disc into that column</span>
+        <span class="ctrl-key">Tap column</span>    <span class="ctrl-desc">Same on touch screens</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>No networked multiplayer</td><td>Two-player mode is pass-and-play on the same device only — no online opponent matching.</td></tr>
+        <tr><td>Max AI may cause UI lag</td><td>The highest difficulty setting searches many moves deep — it may pause for 1–2 seconds on older hardware. Normal behaviour.</td></tr>
+        <tr><td>No persistent stats</td><td>Win/loss count resets on page refresh.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 C4 tracks win/loss in-session only. No persistent score or leaderboard.</div>
+  <div class="section">
+    <div class="section-title">🏆 Leaderboard</div>
+    <div class="card">
+      <p>There is no scoring system beyond win/loss per game. A win streak counter could be added by patching the game-over callback to POST to the hub's score API, but this is low priority given the pass-and-play nature of the two-player mode.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-highscore -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/kenrick95/c4" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — kenrick95/c4</div>
+          <div class="source-link-desc">Original repository. Pure HTML/CSS/JS, no build step. Minimax AI with alpha-beta pruning. MIT licensed.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\c4\</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Sporadic — game is complete and stable. Occasional maintenance updates.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>MIT License. Free to use and self-host. No modifications made to source for this server.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_c4_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

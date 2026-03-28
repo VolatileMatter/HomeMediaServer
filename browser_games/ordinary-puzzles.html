@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ordinary Puzzles</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🟫</div>
+  <div>
+    <h1>Ordinary Puzzles</h1>
+    <div class="subtitle">// Picross · Nonogram · Singleplayer · Static Web Build (React Native for Web) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A minimalistic Picross (nonogram) puzzle game. Use row and column number clues to fill in a grid, revealing a pixel-art picture. Clean, calm, and deeply satisfying — the same logic puzzle format used in the Nintendo Picross series, playable in the browser.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the puzzle grid loads, cells can be filled, and the solution is recognised on completion.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🟫 V1 Goal: Ordinary Puzzles accessible at <code>games.<span data-cfg="domain"></span>/ordinary-puzzles/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Get the Web Build</div>
+    <div class="card">
+      <p>Ordinary Puzzles is a React Native for Web project. It requires a build step to produce static files.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/mmazzarolo/ordinary-puzzles-app.git ordinary-puzzles
+cd ordinary-puzzles
+npm install
+npx expo export --platform web</pre>
+      <p style="margin-top:10px">The built output lands in <code>dist/</code>. Serve that folder as the game directory.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Node.js 16+ required. After building, the <code>dist/</code> folder is fully static — no Node.js runtime needed to serve it. Update the <code>folder</code> in <code>index.json</code> to <code>ordinary-puzzles/dist</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "ordinary-puzzles",
+  "name":        "Ordinary Puzzles",
+  "icon":        "\U0001f7eb",
+  "description": "Minimalistic Picross / nonogram puzzles. Fill the grid using number clues.",
+  "folder":      "ordinary-puzzles/dist",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["puzzle", "picross", "nonogram", "relaxing"],
+  "tech":        "React Native for Web",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Inherits the hub's <code>forward_auth</code> — Tailscale + Authentik SSO required.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Ordinary Puzzles saves progress in <code>localStorage</code>. Partially-solved puzzles persist between sessions in the same browser.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/ordinary-puzzles/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>localStorage — puzzle progress persists</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>React Native for Web (Expo)</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No — completion only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — designed mobile-first</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Ordinary Puzzles is a minimalistic implementation of Picross — also known as nonograms, Hanjie, or Griddlers. The game presents a grid with numbered clues along each row and column. The numbers describe runs of filled cells in that row or column — for example, a clue of "3 1" means there's a run of 3 filled cells followed by a gap, then a run of 1 filled cell. Solving the puzzle means using logic to determine which cells to fill, ultimately revealing a pixel-art image.</p>
+      <p>Picross is one of the most elegant puzzle formats ever designed — solutions are always logically deducible without guessing (in well-constructed puzzles), and the satisfaction of crossing off a row with a complex clue is deeply rewarding. The Nintendo Picross series has been running since 1995 for exactly this reason.</p>
+      <p>Ordinary Puzzles has a clean, calm aesthetic with a built-in puzzle library spanning small grids suitable for beginners and larger, more intricate puzzles for experienced solvers.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Each row and column has a clue — a sequence of numbers indicating runs of filled cells</li>
+        <li>A clue of <strong>3</strong> means exactly 3 consecutive filled cells somewhere in that line</li>
+        <li>A clue of <strong>2 1</strong> means a run of 2, a gap of at least 1, then a run of 1</li>
+        <li>Tap/click a cell to fill it; tap again to mark it as definitely empty (X)</li>
+        <li>Use logic to determine where runs must or cannot be — never guess in a well-designed puzzle</li>
+        <li>Complete the grid to reveal the hidden pixel-art image</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Tap / click cell</span>  <span class="ctrl-desc">Fill cell (first tap) / mark empty (second tap) / clear (third)</span>
+        <span class="ctrl-key">Drag</span>              <span class="ctrl-desc">Fill or clear multiple cells in one gesture</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Build step required</td><td>Requires <code>npx expo export --platform web</code> before serving. Re-run after <code>git pull</code>.</td></tr>
+        <tr><td>Progress is browser-local</td><td>Puzzle completion tracked in <code>localStorage</code> — tied to the specific browser.</td></tr>
+        <tr><td>Fixed puzzle library</td><td>The puzzle set is baked into the build. Adding new puzzles requires editing source and rebuilding.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 Ordinary Puzzles tracks completed puzzles locally. No time-based scoring or shared leaderboard.</div>
+  <div class="section">
+    <div class="section-title">🏆 Progress Tracking</div>
+    <div class="card">
+      <p>The game marks puzzles as completed in <code>localStorage</code>. There is no time tracking or score — the completion itself is the reward. For competitive play among friends, comparing which puzzles have been solved or racing to completion on a specific puzzle works informally.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-highscore -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/mmazzarolo/ordinary-puzzles-app" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — mmazzarolo/ordinary-puzzles-app</div>
+          <div class="source-link-desc">Original repository by Matteo Mazzarolo. React Native for Web (Expo). Requires <code>expo export</code> build step.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>npm install</code> + <code>npx expo export --platform web</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Sporadic — game is feature-complete. Occasional dependency updates.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>MIT License. Free to use and self-host. No modifications made to source for this server.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_ordinarypuzzles_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

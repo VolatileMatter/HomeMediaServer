@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Connections</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🟨</div>
+  <div>
+    <h1>Connections</h1>
+    <div class="subtitle">// Word Puzzle · Singleplayer · Static Files (Next.js) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A hyper-challenging clone of the NYT Connections puzzle. Find the four groups of four words that share a hidden connection — but watch out for red herrings designed to trick you. A deceptively difficult puzzle that rewards lateral thinking and rewards vocabulary breadth.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the 16-word grid loads, selections work, and a correct group is identified.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🟨 V1 Goal: Connections accessible at <code>games.<span data-cfg="domain"></span>/connections/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone &amp; Build</div>
+    <div class="card">
+      <p>Connections is a Next.js project requiring a build step to produce static files.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/randyren278/connect.git connections
+cd connections
+npm install
+npm run build</pre>
+      <p style="margin-top:10px">The static export lands in <code>out/</code>. Serve that folder as the game directory.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Node.js 18+ recommended for Next.js 13+. Update <code>folder</code> in <code>index.json</code> to <code>connections/out</code> after building. Re-run the build after any <code>git pull</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "connections",
+  "name":        "Connections",
+  "icon":        "\U0001f7e8",
+  "description": "NYT Connections clone. Find four groups of four words with a hidden common thread.",
+  "folder":      "connections/out",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["puzzle", "word", "daily", "relaxing"],
+  "tech":        "Next.js / React",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Inherits the hub's <code>forward_auth</code> — Tailscale + Authentik SSO required.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Connections runs entirely client-side after the build. Puzzle state is not persisted — each load starts a fresh puzzle.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/connections/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None — fresh puzzle each load</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Next.js / React (built to static)</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — tap-to-select grid works on phones</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Connections is a clone of the NYT Connections puzzle — a word categorisation game that has become one of the most talked-about daily puzzles in recent years. You're presented with 16 words arranged in a 4×4 grid. Your task: find the four groups of four words that share a hidden connection. Each group is colour-coded by difficulty (yellow → green → blue → purple).</p>
+      <p>What makes Connections devilishly difficult is the intentional misdirection baked into the puzzle design. Words that seem to obviously belong together are often red herrings — they fit one category superficially but actually belong to another. The hardest groups typically involve lateral thinking: "___ something" phrases, words that can all follow the same word, cultural references, or connections that require specific domain knowledge.</p>
+      <p>Games take 5–15 minutes. You have four attempts — each wrong guess reveals nothing except that it was wrong, making the puzzle increasingly constrained with each error.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Click/tap four words you think share a connection, then click Submit</li>
+        <li>Correct group: tiles flip and are removed from the board with the category revealed</li>
+        <li>Incorrect: you lose one of your four attempts; nothing else is revealed</li>
+        <li>Find all four groups to win; use all four attempts incorrectly to lose</li>
+        <li>Yellow is easiest, purple is hardest — but don't assume; the intended difficulty is sometimes counterintuitive</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click / tap</span>    <span class="ctrl-desc">Select / deselect a word</span>
+        <span class="ctrl-key">Submit</span>          <span class="ctrl-desc">Lock in your group of four</span>
+        <span class="ctrl-key">Shuffle</span>         <span class="ctrl-desc">Rearrange the grid for a fresh perspective</span>
+        <span class="ctrl-key">Deselect All</span>   <span class="ctrl-desc">Clear current selection</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Build step required</td><td>Requires <code>npm run build</code> before serving. Re-run after <code>git pull</code>.</td></tr>
+        <tr><td>Not the NYT puzzle</td><td>This clone uses its own puzzle set — it does not pull the daily NYT puzzle. Puzzles are included in the build.</td></tr>
+        <tr><td>No save between sessions</td><td>Refreshing the page starts a new puzzle. No mid-game resume.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 Connections has no scoring or leaderboard — pass/fail with mistake count.</div>
+  <div class="section">
+    <div class="section-title">🏆 Leaderboard</div>
+    <div class="card">
+      <p>The game tracks only whether you solved the puzzle and how many mistakes you made. There is no persistent score or leaderboard. For group play, comparing mistake counts after everyone has solved the same puzzle is the natural informal competition.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-highscore -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/randyren278/connect" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — randyren278/connect</div>
+          <div class="source-link-desc">NYT Connections clone. Next.js / React. Requires build step. Described as "hyper-challenging" in the original list.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>npm install</code> + <code>npm run build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Sporadic — puzzle content updates occasionally. Check repo for new puzzle sets.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for current license information. Not affiliated with the New York Times. Self-hosted for private use within the server's friend group. No modifications made to source.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_connections_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>
