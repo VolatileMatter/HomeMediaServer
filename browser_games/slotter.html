@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Slotter</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🍋</div>
+  <div>
+    <h1>Slotter</h1>
+    <div class="subtitle">// Casino · Fruit Machine · Singleplayer · Node.js + MongoDB + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A 1980s-style fruit machine simulation with authentic "hold" mechanics, user registration, and persistent balances backed by MongoDB. Unlike the static slot machine, Slotter has real accounts — each player has their own virtual credit balance stored server-side, and the hold mechanic lets you freeze individual reels between spins.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the fruit machine loads, a user account can be registered, reels spin, and the hold mechanic works.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🍋 V1 Goal: Slotter accessible at <code>slotter.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, user accounts functional, virtual balances persisting correctly.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Virtual Credits Only</div>
+    <div class="card">
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">All credits are <strong>virtual only</strong>. No real-money transactions, no payment processing. Slotter uses a MongoDB backend to persist virtual balances across sessions — this is purely for the simulation experience.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Docker Compose</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/Greghi2000/slotter-fullstack-app.git slotter
+cd slotter</pre>
+      <p style="margin-top:10px">Create <code>~/services/slotter/docker-compose.yml</code> (or adapt the one in the repo if present):</p>
+      <pre>services:
+  slotter:
+    build: .
+    container_name: slotter
+    restart: unless-stopped
+    ports:
+      - "8780:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/slotter
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: slotter-mongo
+    restart: unless-stopped
+    volumes:
+      - slotter_mongo:/data/db
+
+volumes:
+  slotter_mongo:</pre>
+      <pre>docker compose up -d --build</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Check the repo's <code>README</code> and existing <code>docker-compose.yml</code> (if present) for the correct environment variable names and port. The above is a reasonable starting point but may need adjusting to match the project's actual config.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <p>Add to <code><span data-cfg="path:caddyfile"></span></code>:</p>
+      <pre>slotter.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8780
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "slotter",
+  "name":        "Slotter",
+  "icon":        "\U0001f34b",
+  "description": "1980s-style fruit machine with hold mechanics and persistent virtual balances per user.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["casino", "simulation", "retro"],
+  "tech":        "Node.js / Express / MongoDB / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://slotter.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Unlike the static slot machine, Slotter stores virtual balances server-side in MongoDB — balances persist across devices and browsers for registered users.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>slotter.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1 per session (own account)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>MongoDB — virtual balance persists per account</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Node.js / Express / MongoDB</td></tr>
+          <tr><td style="color:var(--text-dim)">Real money</td><td>No — virtual credits only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server and MongoDB</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — touch-friendly fruit machine UI</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Slotter is a fullstack fruit machine simulation that recreates the aesthetic and mechanics of 1980s British-style pub fruit machines. The key distinguishing mechanic is <strong>hold</strong>: after a spin, you can hold one or more reels in place and spin only the remaining ones. This creates genuine strategic depth — if two reels show matching fruit, holding them and spinning the third is a real decision with meaningful odds.</p>
+      <p>The fullstack architecture means each player has a registered account with a server-persisted virtual credit balance. Your balance survives closing the browser, switching devices, and server restarts (as long as the MongoDB volume is intact). This makes it more immersive than the static slot machine where the balance is browser-local.</p>
+      <p>The 1980s aesthetic — classic fruit symbols, retro UI chrome, the characteristic sound design — gives it a distinct character compared to modern video slots.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Register an account to get a starting virtual credit balance</li>
+        <li>Insert credits and pull the lever (or press Spin) to spin all reels</li>
+        <li>After a spin, use the <strong>Hold</strong> buttons to freeze individual reels</li>
+        <li>Spin again — only non-held reels spin; held reels stay in place</li>
+        <li>Matching symbols across the payline pay out virtual credits</li>
+        <li>Your balance is stored in your account — it persists between sessions</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Spin / Lever</span>   <span class="ctrl-desc">Spin all non-held reels</span>
+        <span class="ctrl-key">Hold buttons</span>    <span class="ctrl-desc">Freeze a reel between spins</span>
+        <span class="ctrl-key">Nudge</span>           <span class="ctrl-desc">Advance a reel one position (if feature available)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Separate account system</td><td>Slotter has its own registration — Authentik gates network access but Slotter manages its own logins against MongoDB.</td></tr>
+        <tr><td>MongoDB backup needed</td><td>Virtual balances are stored in MongoDB. Back up the <code>slotter_mongo</code> Docker volume to avoid losing balances.</td></tr>
+        <tr><td>Build complexity</td><td>Node.js fullstack app — if build fails, check Node version compatibility in the repo README.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/Greghi2000/slotter-fullstack-app" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — Greghi2000/slotter-fullstack-app</div>
+          <div class="source-link-desc">Original repository. Node.js / Express / MongoDB. 1980s fruit machine with hold mechanics and user registration.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Virtual credits only — no real-money functionality. Self-hosted for private use within the server's friend group.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_slotter_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

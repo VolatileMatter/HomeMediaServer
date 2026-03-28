@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gamble-Plinko</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔵</div>
+  <div>
+    <h1>Gamble-Plinko</h1>
+    <div class="subtitle">// Physics · Casino · Singleplayer · C Backend (libmicrohttpd) + Static Frontend · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A web-based Plinko simulation featuring realistic ball physics and pin collision detection, backed by a C server using libmicrohttpd. Drop a ball from the top of a triangular pin grid, watch it bounce unpredictably between pegs, and land in a multiplier bucket at the bottom. Virtual credits only.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the board renders, a ball drops with physics, bounces off pins, and lands in a bucket with a multiplier.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔵 V1 Goal: Gamble-Plinko server compiled and running, board accessible at <code>plinko.<span data-cfg="domain"></span></code> via Tailscale, physics working correctly.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Architecture Note — C Backend Requires Compilation</div>
+    <div class="card">
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Gamble-Plinko is the <strong>only game in the hub with a C backend</strong>. The server must be compiled from source using GCC before it can run. It uses <strong>libmicrohttpd</strong> for HTTP serving. This is more involved than a Docker pull — plan for a 20–30 minute setup including dependency installation and compilation. All credits are virtual only.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Step 1 — Install Dependencies (WSL2)</div>
+    <div class="card">
+      <pre>sudo apt update
+sudo apt install -y gcc libmicrohttpd-dev make</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 2 — Clone &amp; Compile</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/Carrtik/Gamble-Plinko.git plinko
+cd plinko
+
+# Compile the C server (check Makefile or README for exact command):
+make
+# or if no Makefile:
+gcc -o plinko-server server.c -lmicrohttpd</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Check the repo README for the exact compile command and any additional linker flags. The <code>-lmicrohttpd</code> flag links the HTTP library. If the build fails, verify <code>libmicrohttpd-dev</code> is installed and the header paths are correct.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 3 — Run as a Service</div>
+    <div class="card">
+      <p>Wrap the compiled binary in a Docker container for consistent management, or run it directly under NSSM in WSL2:</p>
+      <pre># Option A — run directly:
+./plinko-server --port 8760
+
+# Option B — Docker (create a Dockerfile if the repo doesn't include one):
+# FROM ubuntu:22.04
+# RUN apt-get update && apt-get install -y libmicrohttpd-dev
+# COPY plinko-server /usr/local/bin/
+# CMD ["plinko-server", "--port", "8080"]</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 4 — Caddy Configuration</div>
+    <div class="card">
+      <pre>plinko.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8760
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 5 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "plinko",
+  "name":        "Gamble-Plinko",
+  "icon":        "\U0001f535",
+  "description": "Physics-based Plinko with realistic ball collision. Drop balls, land in multiplier buckets.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["casino", "physics", "simulation"],
+  "tech":        "C / libmicrohttpd + HTML5 Frontend",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://plinko.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Virtual credits only. The physics simulation runs in the browser; the C server handles game state and credit tracking.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>plinko.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Credits</td><td>Virtual — server-tracked</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>C / libmicrohttpd + HTML5 Canvas</td></tr>
+          <tr><td style="color:var(--text-dim)">Real money</td><td>No — virtual credits only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires C server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — ball drop is touch-compatible</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Plinko is a probability demonstration game popularised by The Price Is Right. A ball is dropped from the top of a triangular grid of pins. At each pin, the ball randomly deflects left or right. After bouncing through all rows of pins, it lands in one of several buckets at the bottom, each carrying a different multiplier. The bucket distribution follows a binomial distribution — centre buckets are most likely, edges least likely.</p>
+      <p>What makes this implementation interesting technically is the C backend using libmicrohttpd — a lightweight embedded HTTP server library. The physics simulation runs client-side in the browser via HTML5 Canvas, while the C server handles virtual credit state and game validation. It's the most unusual technology stack in the entire hub.</p>
+      <p>The visual appeal of watching the ball bounce unpredictably between pins is genuinely compelling — each drop feels uncertain even though the statistics are well-understood.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Choose a bet size from your virtual credit balance</li>
+        <li>Drop a ball from the top of the pin board — click or tap to release</li>
+        <li>Watch the ball bounce through the pins via physics simulation</li>
+        <li>The bucket it lands in determines your multiplier — centre is safest, edges pay most</li>
+        <li>Repeat until you're satisfied or the variance claims your balance</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click / tap</span>   <span class="ctrl-desc">Drop ball (position may affect starting trajectory)</span>
+        <span class="ctrl-key">Bet controls</span>  <span class="ctrl-desc">Adjust virtual credit wager per drop</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Compile required</td><td>Must be compiled with GCC on the host before running. Not a Docker pull — see Setup tab for full compilation steps.</td></tr>
+        <tr><td>C maintenance overhead</td><td>The only C application in the hub. If libmicrohttpd updates or breaks on an OS upgrade, it needs to be recompiled.</td></tr>
+        <tr><td>Process management</td><td>Without Docker, the compiled binary needs to be managed as a process — use systemd or NSSM to ensure it restarts on failure.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 No leaderboard — peak virtual balance is the informal metric.</div>
+  <div class="section">
+    <div class="section-title">🏆 Balance Tracking</div>
+    <div class="card">
+      <p>There is no cross-user leaderboard. Virtual balance tracked by the C server. Comparing peak balances across the friend group is the informal competition metric.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-highscore -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/Carrtik/Gamble-Plinko" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — Carrtik/Gamble-Plinko</div>
+          <div class="source-link-desc">Original repository. C backend using libmicrohttpd + HTML5 Canvas frontend. Requires GCC compilation.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + recompile with <code>make</code> or <code>gcc</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Virtual credits only. Self-hosted for private use within the server's friend group.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_plinko_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wuthering Waves Gacha Simulator</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🌊</div>
+  <div>
+    <h1>Wuthering Waves Gacha Simulator</h1>
+    <div class="subtitle">// Gacha · Simulation · Singleplayer · PHP / Laravel / Livewire + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A high-fidelity gacha simulator modelled on the banner system from Wuthering Waves — a popular action RPG. Simulates the exact pull rates, pity mechanics, and soft/hard pity thresholds from the game. Useful for planning pulls, stress-testing luck, or satisfying the gacha itch without spending real currency.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when pulls execute, pity counter increments correctly, and 5-star results trigger at expected thresholds.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🌊 V1 Goal: WW Gacha Simulator accessible at <code>gachaww.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, pull simulation working with correct pity tracking.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Architecture Note — PHP/Laravel</div>
+    <div class="card">
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">This is a <strong>PHP/Laravel/Livewire</strong> application — the only PHP app in the games hub. It requires PHP 8.x, Composer, and Redis (for Livewire's real-time updates). The Docker setup below bundles these. Check the repo README for any additional environment variables or seed commands required.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Docker Compose</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/reyhanasta/wuthering-waves-simulator.git gachaww
+cd gachaww</pre>
+      <p style="margin-top:10px">Check if the repo ships a <code>docker-compose.yml</code>. If not, create one:</p>
+      <pre>services:
+  app:
+    build: .
+    container_name: gachaww
+    restart: unless-stopped
+    ports:
+      - "8770:80"
+    environment:
+      - APP_ENV=production
+      - APP_KEY=base64:GENERATE_WITH_php_artisan_key_generate
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: gachaww-redis
+    restart: unless-stopped
+
+volumes:
+  gachaww_data:</pre>
+      <pre>docker compose up -d --build
+# Then run migrations if required:
+docker exec gachaww php artisan migrate --force</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Generate a fresh <code>APP_KEY</code> before deploying: <code>docker exec gachaww php artisan key:generate</code>. Running without a proper key will break session handling.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <pre>gachaww.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8770
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "gachaww",
+  "name":        "WW Gacha Simulator",
+  "icon":        "\U0001f30a",
+  "description": "High-fidelity Wuthering Waves banner simulator with accurate pity mechanics and pull rates.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["gacha", "simulation", "casino"],
+  "tech":        "PHP / Laravel / Livewire / Redis / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://gachaww.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Virtual pulls only — no real currency. The simulator is faithful to Wuthering Waves' published pull rates and pity system, making it accurate for planning purposes.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>gachaww.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Session / Redis — pity count may or may not persist</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>PHP / Laravel / Livewire / Redis</td></tr>
+          <tr><td style="color:var(--text-dim)">Real money</td><td>No — virtual pulls only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires PHP server and Redis</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — Livewire UI is responsive</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>This simulator replicates the banner and gacha pull system from Wuthering Waves, an action RPG by Kuro Games. Like most gacha games, Wuthering Waves uses a system where players spend a pull currency for random rewards, with low base rates for rare characters (5-star) but a guaranteed "pity" system that ensures a 5-star pull within a fixed number of attempts.</p>
+      <p>The simulator implements the exact mechanics: base 5-star rate, soft pity (increased rate after a threshold), hard pity (guaranteed at max), and the 50/50 system where the first 5-star on a banner has a 50% chance to be the featured character. This makes it genuinely useful for planning — if you want to calculate how many pulls you need for a guaranteed featured character with high probability, you can run thousands of simulated attempts instantly.</p>
+      <p>Built with Laravel and Livewire, the interface updates in real time as pulls execute without full page reloads.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Gacha Mechanics Reference</div>
+    <div class="card">
+      <table>
+        <tr><th>Mechanic</th><th>Detail</th></tr>
+        <tr><td>Base 5-star rate</td><td>~0.8% per pull on standard banners</td></tr>
+        <tr><td>Soft pity start</td><td>Rate increases significantly from pull ~74 onwards</td></tr>
+        <tr><td>Hard pity</td><td>Guaranteed 5-star by pull 80</td></tr>
+        <tr><td>50/50 system</td><td>First 5-star on limited banner: 50% featured, 50% standard. Loss is guaranteed next time.</td></tr>
+        <tr><td>Pity carry-over</td><td>Pity count carries across banners of the same type</td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:.8rem;color:var(--text-dim)">Rates above are approximate — verify against the current Wuthering Waves banner details as rates may differ by banner type.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>PHP-only stack</td><td>Only PHP app in the hub — unique maintenance profile. Composer dependencies and Laravel version must be kept compatible.</td></tr>
+        <tr><td>APP_KEY required</td><td>Laravel will not function correctly without a generated application key. Run <code>php artisan key:generate</code> before first use.</td></tr>
+        <tr><td>Pity persistence</td><td>Check whether pity counters persist across sessions or reset — depends on implementation details in the repo.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/reyhanasta/wuthering-waves-simulator" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — reyhanasta/wuthering-waves-simulator</div>
+          <div class="source-link-desc">Original repository. PHP / Laravel / Livewire / Redis. High-fidelity Wuthering Waves banner and pity simulation.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code> + <code>php artisan migrate --force</code> if schema changed</td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status. Gacha rates may need updating if Wuthering Waves adjusts its banner mechanics.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Fan-made simulator — not affiliated with Kuro Games. Virtual pulls only. Self-hosted for private use.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_gachaww_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

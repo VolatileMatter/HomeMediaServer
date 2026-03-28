@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gacha Waifus Overlay</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">✨</div>
+  <div>
+    <h1>Gacha Waifus Overlay</h1>
+    <div class="subtitle">// Gacha · Streamer Tool · Node.js + WebSocket + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A gacha system with pity mechanics, character trading, real-time WebSocket updates, and JSON-based storage. Designed as a streamer overlay tool — pull characters, build a collection, trade with others, and have results broadcast in real time. Can also be used standalone as a shared gacha game for a friend group.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when pulls work, pity counter tracks correctly, and WebSocket updates broadcast in real time.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">✨ V1 Goal: Gacha Waifus accessible at <code>gacha.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, pulls working with real-time WebSocket broadcast.</div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Docker Compose</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/typpi77/test-web-socket.git gacha-waifus
+cd gacha-waifus</pre>
+      <p style="margin-top:10px">Create <code>~/services/gacha-waifus/docker-compose.yml</code> if not present:</p>
+      <pre>services:
+  gacha:
+    build: .
+    container_name: gacha-waifus
+    restart: unless-stopped
+    ports:
+      - "8750:3000"
+    volumes:
+      - ./data:/app/data</pre>
+      <pre>docker compose up -d --build</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">The <code>./data</code> volume mount persists the JSON storage files — character collections and pity counts. Keep this backed up.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <pre>gacha.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:8750
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "gacha-waifus",
+  "name":        "Gacha Waifus Overlay",
+  "icon":        "\u2728",
+  "description": "Gacha system with pity mechanics, character trading, and real-time WebSocket pull broadcasts.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1-8",
+  "tags":        ["gacha", "simulation", "social"],
+  "tech":        "Node.js / WebSockets / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://gacha.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Character data and pity counts are stored in JSON files on disk — they persist between sessions. The WebSocket layer broadcasts pull results in real time to all connected viewers.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>gacha.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1–8 (shared pool, each with own collection)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>JSON files on disk — collections and pity persist</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Node.js / WebSockets</td></tr>
+          <tr><td style="color:var(--text-dim)">Real money</td><td>No — virtual pulls only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Gacha Waifus Overlay is a Node.js gacha system designed with streaming in mind — pull results broadcast via WebSocket in real time, making it suitable as a live overlay for stream engagement. Repurposed for a private friend group, it functions as a shared gacha game where everyone builds their own collection from a shared character pool.</p>
+      <p>The system implements genuine pity mechanics — each pull increments a counter, and the rate of pulling rare characters increases as the counter rises, with a hard guarantee after a set number of pulls. Collections are stored per-user in JSON files, and characters can be traded between players.</p>
+      <p>The JSON-based storage is simple and hackable — you can edit the character pool, rarity rates, and pull costs directly in the data files without modifying application code.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Customisation</div>
+    <div class="card">
+      <p>Because storage is JSON-based, the character pool is easy to customise. Locate the character data files in the <code>./data</code> volume and edit them to add, remove, or modify characters, adjust rarity tiers, or change pull costs. No rebuild required — changes take effect on restart.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">This makes it practical to theme the gacha around something relevant to your friend group — franchise characters, inside jokes, server mascots. The JSON format is straightforward to extend.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Repo name is a test repo</td><td>The GitHub repo is named <code>test-web-socket</code> — check the README carefully to confirm the features above match what's currently in the codebase. This appears to be the development/public name mismatch common in streamer tool projects.</td></tr>
+        <tr><td>JSON storage</td><td>Simple and hackable but not suitable for very large collections or many concurrent users. Fine for a small friend group.</td></tr>
+        <tr><td>Trade mechanics</td><td>Character trading may require both users to be online simultaneously depending on implementation. Check the README.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/typpi77/test-web-socket" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — typpi77/test-web-socket</div>
+          <div class="source-link-desc">Original repository. Node.js / WebSockets. Pity mechanics, character trading, JSON storage. Designed as a streamer overlay.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Check repository for current status.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Check the repository for license information. Self-hosted for private use within the server's friend group.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_gachawaifus_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>
