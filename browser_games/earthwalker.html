@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Scribble.rs</title>
+<title>Earthwalker</title>
 <link rel="stylesheet" href="../shared.css">
 <script src="../config.js"></script>
 <style>
@@ -48,14 +48,6 @@
 .source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
 .source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
 
-.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
-.ctrl-key {
-  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
-  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
-  color: var(--accent); white-space: nowrap; display: inline-block;
-}
-.ctrl-desc { color: var(--text-dim); align-self: center; }
-
 .v1-banner {
   background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
   border-radius: 4px; padding: 10px 16px; font-size: .8rem;
@@ -66,11 +58,11 @@
 <body>
 
 <div class="page-header">
-  <div class="page-icon">🎨</div>
+  <div class="page-icon">🌍</div>
   <div>
-    <h1>Scribble.rs</h1>
-    <div class="subtitle">// Drawing · Multiplayer · Rust + Docker · Tailscale + Authentik forward_auth //</div>
-    <p class="desc">A self-hosted Pictionary-style game. One player draws a secret word while everyone else races to guess it in the chat. Clean, fast, and no ads — the way skribbl.io should have been. Written in Rust, runs lean in Docker.</p>
+    <h1>Earthwalker</h1>
+    <div class="subtitle">// Geography · Multiplayer · Go + Docker · Google Street View API //</div>
+    <p class="desc">A self-hosted GeoGuessr alternative. Players are dropped into a random Google Street View location and must guess where in the world they are by placing a pin on a map. The closer the guess, the more points. Supports multiplayer rounds where everyone guesses simultaneously.</p>
   </div>
 </div>
 
@@ -87,74 +79,95 @@
     <div class="setup-checkbox" id="setup-checkbox"></div>
     <div>
       <div class="setup-complete-label">Complete?</div>
-      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the lobby loads, a room can be created, and drawing syncs between two browsers.</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Street View loads in a round, a pin can be placed, and the score appears.</div>
     </div>
     <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
   </div>
 
-  <div class="v1-banner">🎨 V1 Goal: Scribble.rs accessible at <code>scribble.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, with at least 2 players in a shared room.</div>
+  <div class="v1-banner">🌍 V1 Goal: Earthwalker accessible at <code>earthwalker.<span data-cfg="domain"></span></code>, Street View loading correctly, multiplayer rounds functional.</div>
 
   <div class="section">
-    <div class="section-title">⚠️ Architecture Note</div>
+    <div class="section-title">⚠️ Architecture Note — Google API Key Required</div>
     <div class="card">
       <div class="callout callout-warn">
         <div class="callout-icon">⚠️</div>
-        <div class="callout-body">Scribble.rs requires a persistent server for lobby management, room state, and real-time drawing sync over WebSockets. It is <strong>not a static file</strong> game. Runs as a single Docker container.</div>
+        <div class="callout-body">Earthwalker uses the <strong>Google Street View Static API</strong> and <strong>Google Maps JavaScript API</strong> to load panoramas and display the guess map. A Google Cloud API key with both APIs enabled is <strong>required</strong>. This will incur Google API costs if usage exceeds the free tier. For a small friend group playing occasionally, costs are typically minimal but not zero.</div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">🐳 Step 1 — Docker Compose</div>
+    <div class="section-title">🔑 Step 1 — Google API Key</div>
     <div class="card">
-      <p>Create <code>~/services/scribble/docker-compose.yml</code>:</p>
-      <pre>services:
-  scribble:
-    image: biosmarcel/scribble.rs:latest
-    container_name: scribble
-    restart: unless-stopped
-    ports:
-      - "8880:8080"</pre>
-      <pre>docker compose -f ~/services/scribble/docker-compose.yml up -d</pre>
+      <ol style="margin:0 0 0 18px;font-size:.85rem;line-height:2">
+        <li>Go to <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">console.cloud.google.com</a></li>
+        <li>Create a new project (or use an existing one)</li>
+        <li>Enable: <strong>Maps JavaScript API</strong> and <strong>Street View Static API</strong></li>
+        <li>Create an API key under Credentials; restrict it to your server's IP or domain for safety</li>
+        <li>Set a billing alert — Street View API has a free tier (~$200/month credit) but charges beyond that</li>
+      </ol>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="section-title">🐳 Step 2 — Docker Compose</div>
+    <div class="card">
+      <p>Create <code>~/services/earthwalker/docker-compose.yml</code>:</p>
+      <pre>services:
+  earthwalker:
+    image: ghcr.io/daehli/earthwalker:latest
+    container_name: earthwalker
+    restart: unless-stopped
+    ports:
+      - "8870:8080"
+    environment:
+      - EARTHWALKER_GMAPS_API_KEY=YOUR_API_KEY_HERE
+      - EARTHWALKER_DB_PATH=/data/earthwalker.db
+    volumes:
+      - earthwalker_data:/data
+
+volumes:
+  earthwalker_data:</pre>
+      <pre>docker compose -f ~/services/earthwalker/docker-compose.yml up -d</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Replace <code>YOUR_API_KEY_HERE</code> with your actual Google API key. Never commit this value to a public repository.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 3 — Caddy Configuration</div>
     <div class="card">
       <p>Add to <code><span data-cfg="path:caddyfile"></span></code>:</p>
-      <pre>scribble.{$DOMAIN} {
+      <pre>earthwalker.{$DOMAIN} {
   forward_auth <span data-cfg="authentik-base"></span> {
     uri /outpost.goauthentik.io/auth/caddy
     copy_headers X-authentik-username X-authentik-groups
   }
-  reverse_proxy localhost:8880
+  reverse_proxy localhost:8870
 }</pre>
-      <div class="callout callout-tip">
-        <div class="callout-icon">💡</div>
-        <div class="callout-body">Scribble.rs uses WebSockets for drawing sync. Caddy proxies WebSocket upgrades automatically — no extra directives needed.</div>
-      </div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="section-title">📋 Step 4 — Register in index.json</div>
     <div class="card">
       <pre>{
-  "id":          "scribble",
-  "name":        "Scribble.rs",
-  "icon":        "🎨",
-  "description": "Self-hosted Pictionary — draw a word, everyone guesses. No ads, no accounts.",
+  "id":          "earthwalker",
+  "name":        "Earthwalker",
+  "icon":        "🌍",
+  "description": "Self-hosted GeoGuessr — guess where in the world a Street View is from.",
   "folder":      null,
   "entry":       null,
   "category":    "multiplayer",
   "highScores":  false,
-  "players":     "2-16",
-  "tags":        ["multiplayer", "drawing", "party"],
-  "tech":        "Rust / WebSockets / Docker",
+  "players":     "1-8",
+  "tags":        ["multiplayer", "geography", "trivia"],
+  "tech":        "Go / SQLite / Docker / Google Maps API",
   "hasPage":     true,
   "externalHub": true,
-  "externalUrl": "https://scribble.ixo.lol"
+  "externalUrl": "https://earthwalker.ixo.lol"
 }</pre>
     </div>
   </div>
@@ -162,7 +175,7 @@
 
 <!-- ═══ OVERVIEW ═══ -->
 <div class="bg-tab-pane" id="bg-pane-overview">
-  <div class="v1-banner">✅ Scribble.rs has no persistent state — rooms exist only while players are connected. No database, no saves.</div>
+  <div class="v1-banner">✅ Earthwalker stores game history in a SQLite database. Rounds persist — scores survive server restarts unlike purely in-memory games.</div>
 
   <div class="section">
     <div class="section-title">📡 Quick Reference</div>
@@ -170,19 +183,19 @@
       <div class="card">
         <div class="card-title">Access</div>
         <table>
-          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>scribble.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>earthwalker.<span data-cfg="domain"></span></code></td></tr>
           <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
-          <tr><td style="color:var(--text-dim)">Players</td><td>2–16 per room</td></tr>
-          <tr><td style="color:var(--text-dim)">Saves</td><td>None — session only</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1–8 per round</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>SQLite — round history persists</td></tr>
         </table>
       </div>
       <div class="card">
         <div class="card-title">Technical</div>
         <table>
-          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Rust / WebSockets / Docker</td></tr>
-          <tr><td style="color:var(--text-dim)">High scores</td><td>Per-round scores only, not persisted</td></tr>
-          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server</td></tr>
-          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — touch drawing works well</td></tr>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Go / SQLite / Google Maps API</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>Per-round scores stored in DB</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires Google API for Street View</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — map and Street View work on phones</td></tr>
         </table>
       </div>
     </div>
@@ -191,9 +204,9 @@
   <div class="section">
     <div class="section-title">🎮 What Is This?</div>
     <div class="card">
-      <p>Scribble.rs is a self-hosted alternative to skribbl.io — the popular online Pictionary game that has become a staple of online game nights. One player is given a secret word and must draw it; everyone else types guesses into the chat. Correct guesses score points for both the guesser and the drawer. Roles rotate each round.</p>
-      <p>The self-hosted version means no ads, no tracking, no rate limits, and custom word lists. It's written in Rust and is remarkably lightweight — the Docker container uses almost no CPU at rest and handles a full room of friends without complaint.</p>
-      <p>It supports custom word packs, configurable round times, and multiple languages. Ideal for game nights where everyone is on Tailscale.</p>
+      <p>Earthwalker is a self-hosted alternative to GeoGuessr — the geography game where you're dropped into a random Google Street View location and must identify where in the world you are. You can look around 360°, move along the street, and use any visual clues — road signs, architecture, vegetation, language, climate — to form your best guess.</p>
+      <p>When you're ready, you place a pin on a world map. Your score is based on how close your pin is to the actual location — up to 5000 points for a pinpoint-accurate guess, dropping off with distance. Multi-round games accumulate scores across several locations.</p>
+      <p>The self-hosted version supports multiplayer: all players in a room guess the same location simultaneously, with a shared reveal at the end of each round. It's a genuinely great game for groups with varying levels of world geography knowledge.</p>
     </div>
   </div>
 
@@ -201,22 +214,14 @@
     <div class="section-title">📖 How to Play</div>
     <div class="card">
       <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
-        <li>One player creates a room and shares the lobby link with others</li>
-        <li>The drawer is given 3 word choices — pick one and draw it on the canvas</li>
-        <li>Other players type guesses in the chat; correct guesses score points</li>
-        <li>Points are higher if you guess early; the drawer scores based on how many guessed correctly</li>
-        <li>Rounds rotate through all players; highest score after all rounds wins</li>
-        <li>Custom word lists can be pasted into the room creation screen</li>
+        <li>Create or join a game — configure the number of rounds and time limit</li>
+        <li>You're dropped into a Street View panorama somewhere on Earth</li>
+        <li>Look around and navigate the streets to gather clues</li>
+        <li>Open the minimap and place your pin where you think you are</li>
+        <li>Submit your guess before the timer runs out</li>
+        <li>See the actual location and your distance — score based on proximity</li>
+        <li>Repeat for all rounds; highest cumulative score wins</li>
       </ul>
-      <div class="card-title" style="margin-bottom:10px">Controls (Drawing)</div>
-      <div class="controls-grid">
-        <span class="ctrl-key">Click / Drag</span>  <span class="ctrl-desc">Draw on the canvas</span>
-        <span class="ctrl-key">Colour picker</span> <span class="ctrl-desc">Change brush colour</span>
-        <span class="ctrl-key">Brush size</span>    <span class="ctrl-desc">Adjust stroke width</span>
-        <span class="ctrl-key">Fill tool</span>     <span class="ctrl-desc">Flood-fill an area with a colour</span>
-        <span class="ctrl-key">Eraser</span>        <span class="ctrl-desc">Erase part of the drawing</span>
-        <span class="ctrl-key">Clear</span>         <span class="ctrl-desc">Wipe the canvas (drawer only)</span>
-      </div>
     </div>
   </div>
 
@@ -225,9 +230,9 @@
     <div class="card">
       <table>
         <tr><th>Issue</th><th>Detail</th></tr>
-        <tr><td>No persistent scores</td><td>Round scores are in-memory only. Server restart or room close wipes them.</td></tr>
-        <tr><td>No private rooms with passwords</td><td>All rooms are accessible to anyone on the server. Fine for a private Tailscale server.</td></tr>
-        <tr><td>Custom word list format</td><td>One word or phrase per line. Paste directly into the room creation form — no file upload.</td></tr>
+        <tr><td>Google API cost</td><td>Street View API is not free at scale. Monitor your Google Cloud billing. A small friend group playing weekly is unlikely to exceed the free credit.</td></tr>
+        <tr><td>Coverage gaps</td><td>Google Street View coverage is uneven — some regions have no imagery. Earthwalker draws from the full available pool, so obscure locations do appear.</td></tr>
+        <tr><td>API key exposure</td><td>Keep the API key out of version control. It's injected via Docker environment variable — never hardcode it.</td></tr>
       </table>
     </div>
   </div>
@@ -235,18 +240,18 @@
 
 <!-- ═══ MULTIPLAYER ═══ -->
 <div class="bg-tab-pane" id="bg-pane-multi">
-  <div class="v1-banner">👥 Multiplayer is the entire point. Scribble.rs has no meaningful solo mode.</div>
+  <div class="v1-banner">👥 Earthwalker supports 1–8 players in a shared round. All players see the same Street View location and guess simultaneously.</div>
 
   <div class="section">
     <div class="section-title">🌐 Server Architecture</div>
     <div class="card">
       <table>
         <tr><th>Component</th><th>Detail</th></tr>
-        <tr><td>Protocol</td><td>WebSockets (drawing events, chat, game state)</td></tr>
-        <tr><td>Backend</td><td>Rust HTTP + WebSocket server; single binary in Docker</td></tr>
-        <tr><td>Room model</td><td>Ephemeral rooms created on demand; destroyed when all players leave</td></tr>
-        <tr><td>Player limit</td><td>Up to 16 per room by default; configurable via env var</td></tr>
-        <tr><td>Persistence</td><td>None — all state is in-memory</td></tr>
+        <tr><td>Backend</td><td>Go HTTP server; manages game rooms and score calculation</td></tr>
+        <tr><td>Database</td><td>SQLite — stores games, rounds, and guesses</td></tr>
+        <tr><td>Street View</td><td>Loaded client-side via Google Maps JavaScript API using random coordinate lookup</td></tr>
+        <tr><td>Room model</td><td>Host creates a room with a shareable link; others join via link</td></tr>
+        <tr><td>Synchronisation</td><td>All players in a room guess the same location; results revealed when all have submitted or timer expires</td></tr>
       </table>
     </div>
   </div>
@@ -255,17 +260,14 @@
     <div class="section-title">🔧 Server Management</div>
     <div class="card">
       <pre># Check status:
-docker compose -f ~/services/scribble/docker-compose.yml ps
+docker compose -f ~/services/earthwalker/docker-compose.yml ps
 
 # View logs:
-docker compose -f ~/services/scribble/docker-compose.yml logs -f
-
-# Restart:
-docker compose -f ~/services/scribble/docker-compose.yml restart
+docker compose -f ~/services/earthwalker/docker-compose.yml logs -f
 
 # Update to latest image:
-docker compose -f ~/services/scribble/docker-compose.yml pull
-docker compose -f ~/services/scribble/docker-compose.yml up -d</pre>
+docker compose -f ~/services/earthwalker/docker-compose.yml pull
+docker compose -f ~/services/earthwalker/docker-compose.yml up -d</pre>
     </div>
   </div>
 </div><!-- /bg-pane-multi -->
@@ -275,11 +277,11 @@ docker compose -f ~/services/scribble/docker-compose.yml up -d</pre>
   <div class="section">
     <div class="section-title">📦 Primary Source</div>
     <div class="card">
-      <a class="source-link" href="https://github.com/scribble-rs/scribble.rs" target="_blank">
+      <a class="source-link" href="https://github.com/daehli/earthwalker" target="_blank">
         <div class="source-link-icon">🐙</div>
         <div>
-          <div class="source-link-name">GitHub — scribble-rs/scribble.rs</div>
-          <div class="source-link-desc">Original repository. Rust backend, Docker image published to Docker Hub as biosmarcel/scribble.rs. Actively maintained.</div>
+          <div class="source-link-name">GitHub — daehli/earthwalker</div>
+          <div class="source-link-desc">Original repository. Go backend, SQLite storage, Google Maps/Street View API. Docker image on GitHub Container Registry.</div>
         </div>
       </a>
     </div>
@@ -289,13 +291,13 @@ docker compose -f ~/services/scribble/docker-compose.yml up -d</pre>
     <div class="card">
       <table>
         <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>docker compose pull</code> + <code>docker compose up -d</code></td></tr>
-        <tr><td style="color:var(--text-dim)">Active development?</td><td>Yes — actively maintained. Check releases on GitHub for changelog.</td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Sporadic — project is mostly feature-complete. Occasional updates for API compatibility.</td></tr>
       </table>
     </div>
   </div>
   <div class="section">
     <div class="section-title">⚖️ License</div>
-    <div class="card"><p>GNU GPL v3.0. Free to self-host. No modifications made to source for this server.</p></div>
+    <div class="card"><p>MIT License. Free to use and self-host. No modifications made to source for this server.</p></div>
   </div>
 </div><!-- /bg-pane-source -->
 
@@ -307,7 +309,7 @@ docker compose -f ~/services/scribble/docker-compose.yml up -d</pre>
     if (pane) pane.classList.add('active');
     if (btn)  btn.classList.add('active');
   }
-  const STORAGE_KEY = 'bg_scribble_setup';
+  const STORAGE_KEY = 'bg_earthwalker_setup';
   let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
   function renderComplete() {
     const bar = document.getElementById('setup-complete-bar');
