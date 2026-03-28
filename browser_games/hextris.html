@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hextris</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔷</div>
+  <div>
+    <h1>Hextris</h1>
+    <div class="subtitle">// Puzzle · Arcade · Singleplayer · Static Files (HTML/JS) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A fast-paced puzzle game inspired by Tetris, played on a rotating hexagon. Coloured blocks fall inward from six directions; match three or more of the same colour in a row to clear them before they stack too high. Elegant in concept, brutal in execution.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',     this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview',  this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore', this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',    this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Hextris loads, the hexagon renders, and blocks start falling.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔷 V1 Goal: Hextris accessible at <code>games.<span data-cfg="domain"></span>/hextris/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>Hextris is a fully static project. No build step required.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/Hextris/hextris.git hextris</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Entry point is <code>index.html</code> at the repo root. All assets are local — no CDN dependencies.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <p>Add to <code>D:\Server\BrowserGames\index.json</code>:</p>
+      <pre>{
+  "id":          "hextris",
+  "name":        "Hextris",
+  "icon":        "🔷",
+  "description": "Fast-paced puzzle game on a rotating hexagon — match colours before they stack too high.",
+  "folder":      "hextris",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["puzzle", "arcade", "tetris-like"],
+  "tech":        "HTML / JavaScript / Canvas",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. No additional Caddy block needed — inherits the hub's <code>forward_auth</code>.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Hextris runs entirely client-side. High scores are stored in <code>localStorage</code> — they persist per-browser but are not shared across devices.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/hextris/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>localStorage — high score only</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML / JavaScript / Canvas</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>Local best score only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — tap to rotate on touch screens</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Hextris was created in 2014 as an open-source project and immediately attracted attention for its clean geometric aesthetic and surprisingly deep mechanics. Where Tetris uses a falling block metaphor on a flat grid, Hextris wraps the playfield around a hexagon — blocks fall inward from all six sides simultaneously, and the hexagon rotates under player control.</p>
+      <p>The colour-matching mechanic adds a layer not present in Tetris: it's not just about placement but about sequencing. Three adjacent same-coloured blocks clear in a chain reaction, and chaining clears together multiplies the score. High-level play involves planning several rotations ahead to set up cascades.</p>
+      <p>Games are typically short — 2 to 5 minutes before the difficulty overwhelms — which makes it well-suited to quick play sessions between friends and natural high-score competition.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Rotate the hexagon left or right to position the face where the next block should land</li>
+        <li>Blocks fall inward from outside — they stack on the hexagon face they hit</li>
+        <li>Match 3 or more same-coloured blocks in a row to clear them</li>
+        <li>Chain clears for score multipliers — setting up cascades is key</li>
+        <li>The game ends when any stack reaches the centre of the hexagon</li>
+        <li>Speed increases over time — the longer you survive, the faster it gets</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">← / →</span>          <span class="ctrl-desc">Rotate hexagon left / right</span>
+        <span class="ctrl-key">A / D</span>           <span class="ctrl-desc">Alternate rotation keys</span>
+        <span class="ctrl-key">Tap left / right</span><span class="ctrl-desc">Rotate on touch screens (mobile)</span>
+        <span class="ctrl-key">P</span>               <span class="ctrl-desc">Pause</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>High score is browser-local</td><td>Stored in <code>localStorage</code> — no cross-device or cross-user leaderboard.</td></tr>
+        <tr><td>No pause on focus loss</td><td>The game may continue running if you switch tabs. Check pause behaviour in your browser.</td></tr>
+        <tr><td>Archived repo</td><td>Last significant update was 2015. Game is complete and stable; no new updates expected.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 Hextris stores a local high score in <code>localStorage</code>. No shared leaderboard exists in the original codebase.</div>
+
+  <div class="section">
+    <div class="section-title">🏆 Leaderboard</div>
+    <div class="card">
+      <p>The original Hextris codebase saves a single best score per browser via <code>localStorage</code>. Scores are not submitted anywhere and are local to each player's browser.</p>
+      <p style="margin-top:10px">Hextris is a strong candidate for a shared leaderboard integration — it's a natural high-score game and the short session length encourages repeat play. A score hook could be added by patching the <code>gameOver()</code> function in the source to POST to the hub's score API. Document that work here if undertaken.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-highscore -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/Hextris/hextris" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — Hextris/hextris</div>
+          <div class="source-link-desc">Original repository. Pure HTML/JS Canvas. No build step. Last updated 2015 — stable and complete.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\hextris\</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Effectively archived. Last meaningful commit was 2015. Repository still accepts PRs but no maintainer is active. Game is complete.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>GNU GPL v3.0. Free to use, host, and modify with attribution. Source must remain open if distributed. Self-hosted for private use within the server's friend group. No modifications made to source.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_hextris_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

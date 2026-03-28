@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BrowserQuest</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">⚔️</div>
+  <div>
+    <h1>BrowserQuest</h1>
+    <div class="subtitle">// MMORPG · Multiplayer · Node.js + WebSockets · Docker (WSL2) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">Mozilla's famous 2012 HTML5 and WebSockets multiplayer experiment. A top-down RPG where multiple players share the same world in real time, fighting monsters, collecting loot, and completing a short adventure — all in the browser. A landmark demo of what the open web could do.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when BrowserQuest loads, connects to the server, and other players appear.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">⚔️ V1 Goal: BrowserQuest server running in Docker (WSL2), game accessible at <code>games.<span data-cfg="domain"></span>/browserquest/</code>, multiplayer working over Tailscale.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Architecture Note</div>
+    <div class="card">
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">BrowserQuest is <strong>not a static file</strong> game. It requires a persistent Node.js WebSocket server for multiplayer. Unlike other browser games in this hub, it needs its own Docker container. The client HTML/JS is served statically, but the game itself is non-functional without the game server.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/mozilla/BrowserQuest.git browserquest
+cd browserquest</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 2 — Docker Compose</div>
+    <div class="card">
+      <p>Create <code>~/services/browserquest/docker-compose.yml</code>:</p>
+      <pre>services:
+  browserquest:
+    build: .
+    container_name: browserquest
+    restart: unless-stopped
+    ports:
+      - "8800:8000"   # WebSocket game server
+      - "8801:80"     # Static client files
+    environment:
+      - NODE_ENV=production</pre>
+      <p style="margin-top:12px">Then build and start:</p>
+      <pre>docker compose up -d --build</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">The original Mozilla repo targets an older Node.js version. If the build fails, check the repo's <code>README</code> for the required Node version. Community forks (see Source tab) may have updated dependency support.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 3 — Caddy Configuration</div>
+    <div class="card">
+      <p>Add to <code><span data-cfg="path:caddyfile"></span></code>:</p>
+      <pre>browserquest.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+
+  # WebSocket proxy for the game server
+  handle /ws* {
+    reverse_proxy localhost:8800
+  }
+
+  # Static client files
+  handle {
+    reverse_proxy localhost:8801
+  }
+}</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">BrowserQuest uses WebSockets for all game communication. Caddy handles WebSocket upgrades automatically — no special configuration needed beyond the <code>reverse_proxy</code> directive.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 4 — Register in index.json</div>
+    <div class="card">
+      <p>BrowserQuest is best registered as an external URL entry since it runs on its own subdomain, not as a sub-path of the games hub:</p>
+      <pre>{
+  "id":          "browserquest",
+  "name":        "BrowserQuest",
+  "icon":        "⚔️",
+  "description": "Mozilla's HTML5 multiplayer RPG. Fight monsters, collect loot, explore together.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "2-20",
+  "tags":        ["multiplayer", "rpg", "adventure", "classic"],
+  "tech":        "HTML5 / Node.js / WebSockets",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://browserquest.<span data-cfg="domain"></span>"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ BrowserQuest requires both the client (static files) and the game server (Node.js/WebSockets) to be running. Check Docker if the game connects but the world is empty.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>browserquest.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2–20 simultaneous (shared world)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>No — session-based, respawns on disconnect</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML5 Canvas / Node.js / WebSockets</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires game server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial — playable but not optimised for touch</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>BrowserQuest was released by Mozilla in 2012 as a showcase for HTML5 capabilities — specifically WebSockets, Canvas, LocalStorage, and Web Audio. It demonstrated that a real-time multiplayer game could run entirely in a browser without Flash or plugins, which was a meaningful statement at the time.</p>
+      <p>The game itself is a short top-down RPG with tile-based movement. Players share a world and can see each other move in real time. There are enemies to fight, items to collect (sword, armour, belt upgrades), and a final boss to defeat. The full adventure takes about 15–30 minutes. It's not deep, but it was never meant to be — it's a technology demo that happens to be genuinely fun.</p>
+      <p>The Mozilla-hosted version was shut down, but the open-source repository remains available for self-hosting. Running it on this server means your friend group gets a private shared world.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Enter a name when prompted — you spawn in the starting area</li>
+        <li>Click to move; click enemies to attack them</li>
+        <li>Pick up dropped items to upgrade your gear</li>
+        <li>Other players appear in your world in real time — you can see their movements and fights</li>
+        <li>Follow the map to progress; there's a dungeon and a final boss at the end</li>
+        <li>Death respawns you at the start — you lose your items</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click</span>         <span class="ctrl-desc">Move to location / attack enemy</span>
+        <span class="ctrl-key">Click item</span>    <span class="ctrl-desc">Pick up / equip dropped loot</span>
+        <span class="ctrl-key">Click NPC</span>     <span class="ctrl-desc">Interact / receive quests</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>No save system</td><td>Disconnecting loses your progress and items. The game is short enough to complete in one sitting.</td></tr>
+        <tr><td>Shared world state</td><td>All players are in the same world. Enemy kills and item drops are visible to all. No instancing.</td></tr>
+        <tr><td>Server dependency</td><td>The game is unplayable without the Node.js game server. If multiplayer breaks, check Docker first.</td></tr>
+        <tr><td>Old Node.js target</td><td>Original code targets Node 0.8. Community forks update this — see Source tab for modern alternatives.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 Multiplayer is the entire point of BrowserQuest. The game has no meaningful single-player mode.</div>
+
+  <div class="section">
+    <div class="section-title">🌐 Server Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Detail</th></tr>
+        <tr><td>Protocol</td><td>WebSockets (binary messages)</td></tr>
+        <tr><td>Backend</td><td>Node.js game server managing world state, entity positions, combat</td></tr>
+        <tr><td>World model</td><td>Single shared world — all connected players coexist</td></tr>
+        <tr><td>Player limit</td><td>Configurable in server config; default supports 20–50 concurrent players comfortably</td></tr>
+        <tr><td>Persistence</td><td>None — world state is in-memory only. Server restart resets everything.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Server Management</div>
+    <div class="card">
+      <pre># Check game server status:
+docker compose -f ~/services/browserquest/docker-compose.yml ps
+
+# View live logs:
+docker compose -f ~/services/browserquest/docker-compose.yml logs -f
+
+# Restart if connections are dropping:
+docker compose -f ~/services/browserquest/docker-compose.yml restart</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Issues</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>WebSocket path conflict</td><td>If serving behind Caddy, ensure the <code>/ws</code> path routes to port 8800 (game server), not 8801 (static files).</td></tr>
+        <tr><td>Player ghosting</td><td>If a player disconnects uncleanly their character may linger briefly. Resolves on its own within ~30 seconds.</td></tr>
+        <tr><td>Concurrent players</td><td>Small friend-group usage (2–8 players) is well within the server's capacity.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/mozilla/BrowserQuest" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — mozilla/BrowserQuest</div>
+          <div class="source-link-desc">Original Mozilla repository. HTML5 + Node.js + WebSockets. Targets older Node; may need community fork for modern runtimes.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://github.com/FreezingMoon/BrowserQuest" target="_blank">
+        <div class="source-link-icon">🍴</div>
+        <div>
+          <div class="source-link-name">GitHub — FreezingMoon/BrowserQuest (fork)</div>
+          <div class="source-link-desc">Community-maintained fork with updated dependencies and modern Node.js compatibility. Recommended if the original build fails.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Mozilla repo is archived. FreezingMoon fork receives occasional maintenance updates.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Mozilla Public License 2.0 (MPL-2.0). Game assets are Creative Commons Attribution-ShareAlike 3.0. Self-hosted for private use within the server's friend group. No modifications made to source.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_browserquest_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

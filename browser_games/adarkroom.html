@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>A Dark Room</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+
+.spoiler-warn {
+  background: rgba(224,92,92,.07); border: 1px solid rgba(224,92,92,.25);
+  border-radius: 4px; padding: 10px 14px; font-size: .8rem;
+  color: rgba(224,92,92,.85); margin-bottom: 16px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🕯️</div>
+  <div>
+    <h1>A Dark Room</h1>
+    <div class="subtitle">// Text Adventure · Incremental · Singleplayer · Static Files (HTML/JS) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A minimalist text adventure that starts with two words — "light fire" — and slowly unfolds into something much larger. Built by Michael Townsend, A Dark Room is celebrated for how little it reveals about itself upfront. Progress is measured in silence, fire, and eventually, strangers at the door.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when A Dark Room loads and the first room appears in the Browser Games hub.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🕯️ V1 Goal: A Dark Room accessible at <code>games.<span data-cfg="domain"></span>/adarkroom/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>A Dark Room is a fully static project with no build step.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/doublespeakgames/adarkroom.git adarkroom</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Entry point is <code>index.html</code> at the root of the repo. The game is pure HTML/JS — no Node.js, no bundler, no build commands required.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <p>Add to <code>D:\Server\BrowserGames\index.json</code>:</p>
+      <pre>{
+  "id":          "adarkroom",
+  "name":        "A Dark Room",
+  "icon":        "🕯️",
+  "description": "Minimalist text adventure with deep resource management. Starts with two words.",
+  "folder":      "adarkroom",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["text", "incremental", "adventure", "relaxing"],
+  "tech":        "HTML / JavaScript",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. No additional Caddy block needed — inherits the hub's <code>forward_auth</code>.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ A Dark Room saves progress to <code>localStorage</code>. Games persist between sessions in the same browser — picking up where you left off works automatically.</div>
+
+  <div class="spoiler-warn">
+    ⚠️ <strong>Spoiler warning:</strong> The Overview tab below describes gameplay mechanics but intentionally omits major story beats. A Dark Room is best played knowing as little as possible. If you haven't played it before — stop reading and just launch it.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/adarkroom/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>localStorage — auto-saves continuously</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML / JavaScript</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial — playable but button-heavy UI is easier on desktop</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>A Dark Room is a browser-based text adventure and incremental resource management game created by Michael Townsend (Doublespeak Games). It began as an open-source project in 2013 and gained a significant following for its atmospheric minimalism and the way it withholds information — not as a puzzle, but as an aesthetic choice.</p>
+      <p>The game opens with almost nothing. A single button. A dark room. What it becomes over the next hour of play is the game's central secret. The writing is sparse and evocative; the mechanics layer in gradually rather than front-loading tutorials. Players who bounce off it in the first five minutes often find themselves completely absorbed by the time new systems unlock.</p>
+      <p>It was later ported to iOS and Android, where it became a quiet cult hit. The browser version on GitHub remains the original and requires no modifications to run.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Click the single button on screen to begin — let things unfold naturally</li>
+        <li>Resources accumulate over time; spend them to unlock buildings and items</li>
+        <li>New panels appear as the game progresses — explore each one when it opens</li>
+        <li>The game autosaves continuously to <code>localStorage</code></li>
+        <li>A full run takes roughly 1–3 hours depending on play style</li>
+        <li>There is a New Game option in the menu — use it only if you want to restart from scratch</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">Click</span>        <span class="ctrl-desc">Primary interaction — click buttons and options as they appear</span>
+        <span class="ctrl-key">Keyboard</span>     <span class="ctrl-desc">Some sections support keyboard shortcuts — context-dependent</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Save is browser-local</td><td>Progress stored in <code>localStorage</code> — tied to the specific browser/device. Switching browsers resets progress.</td></tr>
+        <tr><td>No cross-device sync</td><td>In-progress games cannot be resumed on a different device.</td></tr>
+        <tr><td>Mobile layout</td><td>Works on phones but some button clusters are cramped. Best experienced on a desktop.</td></tr>
+        <tr><td>Active repo</td><td>Doublespeak Games still occasionally merges PRs. Run <code>git pull</code> to get any updates.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/doublespeakgames/adarkroom" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — doublespeakgames/adarkroom</div>
+          <div class="source-link-desc">Original repository by Michael Townsend (Doublespeak Games). Pure HTML/JS, no build step.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\adarkroom\</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Sporadic — occasional community PRs are merged. Repository is not archived. Core game is complete.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>Mozilla Public License 2.0 (MPL-2.0). Source must remain available if distributed. Self-hosted for private use within the server's friend group. No modifications made to source.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_adarkroom_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>

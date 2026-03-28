@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>2048</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.controls-grid          { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: .82rem; }
+.ctrl-key {
+  font-family: 'Share Tech Mono', monospace; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 3px; padding: 2px 8px;
+  color: var(--accent); white-space: nowrap; display: inline-block;
+}
+.ctrl-desc { color: var(--text-dim); align-self: center; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔢</div>
+  <div>
+    <h1>2048</h1>
+    <div class="subtitle">// Puzzle · Singleplayer · Static Files (HTML/CSS/JS) · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">The original sliding tile addition game by Gabriele Cirulli. Combine tiles by powers of two, chasing the legendary 2048 tile — and beyond. A deceptively simple concept with serious depth; the game spawned hundreds of clones but none have toppled the original.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('highscore',this)">🏆 High Score</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when 2048 loads and tiles slide correctly in the Browser Games hub.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔢 V1 Goal: 2048 accessible at <code>games.<span data-cfg="domain"></span>/2048/</code> via Tailscale, gated by Authentik forward_auth.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>2048 is a fully static project. No build step required — clone and serve.</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/gabrielecirulli/2048.git 2048</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Entry point is <code>index.html</code> at the repo root. The game uses only vanilla HTML/CSS/JS — no Node, no build tooling.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <p>Add to <code>D:\Server\BrowserGames\index.json</code>:</p>
+      <pre>{
+  "id":          "2048",
+  "name":        "2048",
+  "icon":        "🔢",
+  "description": "Combine tiles by powers of two to reach the legendary 2048 tile.",
+  "folder":      "2048",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["puzzle", "arcade", "classic"],
+  "tech":        "HTML / CSS / JavaScript",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires both <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. No additional Caddy block needed — inherits the hub's <code>forward_auth</code>.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ 2048 runs entirely client-side. Best score is stored in <code>localStorage</code> — it persists across sessions in the same browser.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>games.<span data-cfg="domain"></span>/2048/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>localStorage — browser-local best score</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>HTML / CSS / JavaScript</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>Local best score only</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — swipe gestures supported</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>2048 was created by Gabriele Cirulli over a weekend in March 2014 and became an instant viral sensation. The premise is elegantly simple: a 4×4 grid, tiles numbered in powers of two, and a single mechanic — slide all tiles in one direction. When two equal tiles collide they merge into their sum. The goal is to create a tile with the value 2048.</p>
+      <p>What makes 2048 enduring is the planning required. Every move affects every tile on the board simultaneously, which means thinking two or three moves ahead is essential. The game is theoretically solvable through careful corner-anchoring strategies, but easy to derail with a single careless move. The tension between tight spaces and the right merge is quietly addictive.</p>
+      <p>The repository on GitHub is the original canonical codebase — not a clone. It's entirely static HTML/CSS/JS with no dependencies and requires no build step to run.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 How to Play</div>
+    <div class="card">
+      <ul style="margin:0 0 14px 18px;font-size:.86rem;line-height:1.9;color:var(--text)">
+        <li>Use arrow keys (or swipe on mobile) to slide all tiles in one direction</li>
+        <li>Tiles with the same number merge when they collide — their sum becomes a new tile</li>
+        <li>A new tile (2 or 4) spawns each turn in a random empty cell</li>
+        <li>Reach the 2048 tile to "win" — but you can keep playing to chase higher tiles</li>
+        <li>The game ends when no moves remain</li>
+        <li>Classic strategy: keep your highest tile in a corner and build chains toward it</li>
+      </ul>
+      <div class="card-title" style="margin-bottom:10px">Controls</div>
+      <div class="controls-grid">
+        <span class="ctrl-key">↑ ↓ ← →</span>        <span class="ctrl-desc">Slide all tiles in that direction</span>
+        <span class="ctrl-key">Swipe</span>            <span class="ctrl-desc">Same as arrow keys on touch screens</span>
+        <span class="ctrl-key">New Game button</span>  <span class="ctrl-desc">Reset the board (best score preserved)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Best score is browser-local</td><td>Stored in <code>localStorage</code> — scores are per-browser, not per-user. Clearing browser storage resets them.</td></tr>
+        <tr><td>No cross-device sync</td><td>A game in progress on one device cannot be resumed on another.</td></tr>
+        <tr><td>Archived repo</td><td>Gabriele Cirulli archived the repo in 2020. No further updates expected; current version is stable and complete.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ HIGH SCORE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-highscore">
+  <div class="v1-banner">🏆 High scores are stored locally in <code>localStorage</code> only — no shared leaderboard.</div>
+
+  <div class="section">
+    <div class="section-title">🏆 Leaderboard</div>
+    <div class="card">
+      <p>The original 2048 codebase stores only a single best score in the browser's <code>localStorage</code>. There is no server-side score submission, no account-linked tracking, and no leaderboard API.</p>
+      <p style="margin-top:10px">If a shared leaderboard is desired in the future, the recommended approach is to hook the game's <code>Scoreboard</code> object (in <code>js/game_manager.js</code>) to post scores to the hub's score API on game over. This would require a small patch to the source. Document that work here if undertaken.</p>
+    </div>
+  </div>
+</div><!-- /bg-pane-highscore -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/gabrielecirulli/2048" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — gabrielecirulli/2048</div>
+          <div class="source-link-desc">Original repository by Gabriele Cirulli. Pure HTML/CSS/JS, no build step. Archived 2020.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> in <code>D:\Server\BrowserGames\2048\</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Archived — repository frozen since 2020. The game is complete and stable. No updates expected.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>MIT License. Free to use, host, and modify. Self-hosted for private use within the server's friend group. No modifications made to source.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_2048_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>
