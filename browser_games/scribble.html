@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scribble.rs</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
+.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
+.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+.bg-tab-pane { display:none; }
+.bg-tab-pane.active { display:block; }
+.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
+.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
+.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
+.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
+.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
+.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
+.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
+.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
+.source-link:hover { border-color:var(--accent); }
+.source-link-icon { font-size:1.5rem;flex-shrink:0; }
+.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
+.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🎨</div>
+  <div>
+    <h1>Scribble.rs</h1>
+    <div class="subtitle">// Drawing + Guessing · Multiplayer · Go / WebSocket · Self-Hosted · Tailscale + Authentik forward_auth · BSD-3-Clause //</div>
+    <p class="desc">A web-based Pictionary-style party game. One player draws, everyone else guesses. No Flash, no accounts, no nonsense — just a lobby, a canvas, and a chat box. Written in Go and trivially self-hostable as a single binary or Docker container. Perfect for game nights over Tailscale.</p>
+  </div>
+</div>
+
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">2–12</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Go</div><div class="bg-stat-label">Backend</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">BSD-3</div><div class="bg-stat-label">License</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">v0.9</div><div class="bg-stat-label">Current</div></div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ TAB 1 — SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Scribble.rs loads, a lobby can be created, and friends can join from Tailscale devices.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🎨 V1 Goal: Scribble.rs running in Docker, accessible at <code>scribble.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth. A full round of Pictionary playable from two different devices.</div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Docker Compose</div>
+    <div class="card">
+      <p>Scribble.rs ships a Docker image. Add it to your stack:</p>
+      <pre>scribble:
+  image: ghcr.io/scribble-rs/scribble.rs:latest
+  ports:
+    - "8880:8080"
+  environment:
+    - PORT=8080
+  restart: unless-stopped</pre>
+      <p>The app listens on <code>8080</code> inside the container, mapped to <code>8880</code> on the host. Adjust the host port if there's a conflict.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Reverse Proxy</div>
+    <div class="card">
+      <pre>scribble.{$DOMAIN} {
+  forward_auth authentik:9000 {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy scribble:8080
+}</pre>
+      <p>Register it as an Application + Provider in Authentik. Users who are on Tailscale and have an Authentik session go straight to the Scribble.rs lobby.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "scribble",
+  "name":        "Scribble.rs",
+  "icon":        "🎨",
+  "description": "Pictionary-style party game. One player draws, everyone guesses. Self-hosted, no accounts.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "2–12",
+  "tags":        ["drawing", "guessing", "party", "multiplayer", "pictionary"],
+  "tech":        "Go / WebSocket",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://scribble.<span data-cfg="domain"></span>"
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 Custom Word Lists</div>
+    <div class="card">
+      <p>Scribble.rs supports custom word lists per lobby. The game master can paste in custom words when creating a room — great for themed game nights (e.g., Pokémon names, server in-jokes, franchise terms).</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">🎨 Go-based Pictionary server. Self-hosted, no accounts needed inside the game, ephemeral rooms.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">URL</td><td><code>scribble.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2–12 per lobby</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Stateless — rooms are ephemeral</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">Stack</td><td>Go single binary / Docker</td></tr>
+          <tr><td style="color:var(--text-dim)">Protocol</td><td>WebSocket (real-time drawing sync)</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No (requires server)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — drawing works on touchscreens</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎨 What Is This?</div>
+    <div class="card">
+      <p>Scribble.rs is a self-hostable web Pictionary. One player gets a word and draws it on a shared canvas; other players type guesses into a chat. The faster you guess, the more points you earn. The drawer also gets points for each correct guess.</p>
+      <p>Lobbies support 2–12 players, configurable round counts, drawing time, and language. Custom word lists let you replace the built-in dictionary entirely — useful for themed sessions. The UI is clean and minimal, and the whole game works in a standard browser tab.</p>
+      <p>The server is written in Go, ships as a tiny Docker image or a single static binary, and has no database — all state lives in memory. Rooms are ephemeral and vanish when the last player disconnects.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══ TAB 3 — MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+
+  <div class="section">
+    <div class="section-title">🎮 Lobby Settings</div>
+    <div class="card">
+      <table>
+        <tr><th>Setting</th><th>Default</th><th>Notes</th></tr>
+        <tr><td>Language</td><td>English</td><td>Determines default word list</td></tr>
+        <tr><td>Drawing time</td><td>120s</td><td>Adjustable per lobby</td></tr>
+        <tr><td>Rounds</td><td>4</td><td>Each player draws once per round</td></tr>
+        <tr><td>Max players</td><td>12</td><td>Configurable downward</td></tr>
+        <tr><td>Custom words</td><td>Off</td><td>Paste in a newline-separated list</td></tr>
+        <tr><td>Custom words per turn</td><td>1</td><td>How many custom words are drawn per turn</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔌 Protocol</div>
+    <div class="card">
+      <p>Drawing strokes are synced over <strong>WebSocket</strong>. The server is the authority on scores, turn order, and the word list. All players must be able to reach the server — Tailscale handles this for all enrolled devices. No external relay.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-multi -->
+
+
+<!-- ═══ TAB 4 — SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="card">
+      <a class="source-link" href="https://scribblers.fly.dev" target="_blank">
+        <div class="source-link-icon">🌐</div>
+        <div><div class="source-link-name">scribblers.fly.dev</div><div class="source-link-desc">Official public demo — try without self-hosting</div></div>
+      </a>
+      <a class="source-link" href="https://github.com/scribble-rs/scribble.rs" target="_blank">
+        <div class="source-link-icon">⚙️</div>
+        <div><div class="source-link-name">github.com/scribble-rs/scribble.rs</div><div class="source-link-desc">Source code — Go · BSD-3-Clause · v0.9.x</div></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p><strong>BSD 3-Clause</strong> — permissive. Use, modify, and redistribute freely. Attribution required in source and binary distributions.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+const STORAGE_KEY = 'bg_scribble_setup';
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+function toggleComplete() {
+  const bar  = document.getElementById('setup-complete-bar');
+  const box  = document.getElementById('setup-checkbox');
+  const sub  = document.getElementById('complete-sub');
+  const done = bar.classList.toggle('done');
+  box.textContent = done ? '✓' : '';
+  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
+  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
+}
+(function init() {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    document.getElementById('setup-complete-bar').classList.add('done');
+    document.getElementById('setup-checkbox').textContent = '✓';
+    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  }
+  if (window.applyDataCfg) applyDataCfg();
+})();
+</script>
+</body>
+</html>

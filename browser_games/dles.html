@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Dles</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+
+.bg-tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .16s;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+/* Category badge grid for the dles categories overview */
+.dle-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.dle-cat {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+}
+.dle-cat-name  { font-weight: 700; font-size: .82rem; color: var(--text-bright); margin-bottom: 3px; }
+.dle-cat-count { font-family: 'Share Tech Mono', monospace; font-size: .72rem; color: var(--accent); }
+
+/* Workflow steps for GitHub contribution */
+.gh-step {
+  display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start;
+}
+.gh-step-num {
+  background: var(--accent); color: #0e1117;
+  font-family: 'Share Tech Mono', monospace; font-weight: 700; font-size: .75rem;
+  border-radius: 50%; width: 24px; height: 24px; min-width: 24px;
+  display: flex; align-items: center; justify-content: center;
+}
+.gh-step-body { font-size: .85rem; line-height: 1.65; color: var(--text); }
+.gh-step-body code { font-family: 'Share Tech Mono', monospace; font-size: .8rem;
+  background: var(--bg3); padding: 1px 5px; border-radius: 2px; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📅</div>
+  <div>
+    <h1>The Dles</h1>
+    <div class="subtitle">// Daily Web Games · External Hub · 600+ Curated Games · 17 Categories · Free · No Login Required //</div>
+    <p class="desc">
+      A curated directory of over 600 daily web games — the "dle" format, popularised by Wordle, where a new puzzle resets every midnight and everyone plays the same one. Browse by category, save your favourites, pick a random game, or hide the ones you don't care about. Hosted at dles.aukspot.com and open source on GitHub.
+    </p>
+  </div>
+</div>
+
+<!-- stat row -->
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.2rem;color:var(--accent)">600+</div>
+    <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em">Games</div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.2rem;color:var(--accent)">17</div>
+    <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em">Categories</div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.2rem;color:var(--accent)">Daily</div>
+    <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em">Reset</div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:1.2rem;color:var(--accent)">Free</div>
+    <div style="font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em">No Login</div>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('picking',  this)">🎯 Picking Games</button>
+  <button class="bg-tab-btn"        onclick="bgTab('words',    this)">✏️ Custom Words</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     TAB 1 — SETUP
+═══════════════════════════════════════════════════ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the Dles link opens in the Browser Games hub and lands on the site.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">
+    📅 V1 Goal: The Dles registered in <code>browser_games/index.json</code> as an external hub. Clicking Play from the lobby opens <code>https://dles.aukspot.com</code> in a new tab. No server-side setup required — this is a third-party public site.
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 1 — Register in index.json</div>
+    <div class="card">
+      <p>The Dles is a third-party public website, not a self-hosted game. It is registered as an <code>externalHub</code> entry — the same pattern as Flash Arcade. Clicking Play in the lobby opens the site in a new tab rather than loading it inside an iframe.</p>
+      <pre>// In browser_games/index.json — add this entry:
+{
+  "id":          "dles",
+  "name":        "The Dles",
+  "icon":        "📅",
+  "description": "600+ curated daily web games. Wordle-style puzzles covering words, geography, music, sports, video games, and more. New puzzles every day — everyone plays the same one.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["daily", "word", "puzzle", "trivia", "external"],
+  "tech":        "SvelteKit · External Site",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://dles.aukspot.com"
+}</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Because <code>externalHub: true</code>, no iframe is involved. The hub calls <code>window.open(externalUrl, '_blank')</code>. No Caddy config, no folder, no auth gate needed — the site is public.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 2 — Access Control</div>
+    <div class="card">
+      <p>The Dles is a public website at <code>dles.aukspot.com</code>. There is no server-side access control to configure — anyone with a browser can reach it. The hub entry is just a convenient bookmark with description and tags, not a gated service.</p>
+      <p>No Tailscale or Authentik gate applies. The link opens the public internet.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 3 — No Files Needed</div>
+    <div class="card">
+      <p>Nothing to copy, clone, or build. The only action is adding the JSON entry above to <code>browser_games/index.json</code> and placing this wiki page at <code>browser_games/dles.html</code>.</p>
+      <p>The wiki page is surfaced via the <strong>📖 Wiki / Setup</strong> link on the lobby card, which loads it inside the hub's frame viewer just like any other wiki page.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     TAB 2 — OVERVIEW
+═══════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">📅 Daily reset at midnight. 600+ games. All free, no login, no subscription. Open source on GitHub — anyone can suggest new games or fix broken links.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><a href="https://dles.aukspot.com" target="_blank">dles.aukspot.com</a></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Public — no login required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1 (same puzzle for everyone)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Browser localStorage (per-device)</td></tr>
+          <tr><td style="color:var(--text-dim)">Reset</td><td>Midnight daily (server time)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>SvelteKit · Deployed on GitHub Pages</td></tr>
+          <tr><td style="color:var(--text-dim)">Analytics</td><td>Umami (privacy-focused) + Google Analytics for sponsors</td></tr>
+          <tr><td style="color:var(--text-dim)">Source</td><td><a href="https://github.com/aukspot/dles" target="_blank">github.com/aukspot/dles</a></td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — fully responsive</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — links out to individual game sites</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>The Dles is a curated directory of "dles" — daily web games in the Wordle tradition. A dle is a game that resets every day, gives everyone the same puzzle, and is free to play with no account needed. Wordle is the archetype but the genre has exploded into hundreds of variants spanning almost every topic imaginable.</p>
+      <p>The site itself is not a game — it's a <strong>launcher and catalogue</strong>. Each entry is a link to a third-party site where the game actually lives. The Dles keeps the list curated, removes dead links, and organises everything into categories so you can find what you're in the mood for.</p>
+      <p>Northernlion quote on the README: <em>"They call them the dles but they are anything but."</em></p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗂️ Categories</div>
+    <div class="card">
+      <p>17 categories covering the full breadth of the collection:</p>
+      <div class="dle-cat-grid">
+        <div class="dle-cat"><div class="dle-cat-name">📝 Words</div><div class="dle-cat-count">~230 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🧮 Math / Logic</div><div class="dle-cat-count">~66 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🎬 Movies / TV</div><div class="dle-cat-count">~48 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🌍 Geography</div><div class="dle-cat-count">~45 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🕹️ Video Games</div><div class="dle-cat-count">~70 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🎵 Music</div><div class="dle-cat-count">~36 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">⚽ Sports</div><div class="dle-cat-count">~25 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🧩 Trivia</div><div class="dle-cat-count">~26 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">📜 History</div><div class="dle-cat-count">~17 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🔷 Shapes / Patterns</div><div class="dle-cat-count">~24 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🎨 Colors</div><div class="dle-cat-count">~7 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">📏 Estimation</div><div class="dle-cat-count">~17 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🍕 Food</div><div class="dle-cat-count">~5 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🔬 Science / Nature</div><div class="dle-cat-count">~12 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🚗 Vehicles</div><div class="dle-cat-count">~4 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🃏 Card / Board</div><div class="dle-cat-count">~19 games</div></div>
+        <div class="dle-cat"><div class="dle-cat-name">🎲 Miscellaneous</div><div class="dle-cat-count">~34 games</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⭐ Notable Picks</div>
+    <div class="card">
+      <p>A few standouts across the categories if you're not sure where to start:</p>
+      <table>
+        <tr><th>Game</th><th>Category</th><th>Description</th></tr>
+        <tr><td><strong>NYT Wordle</strong></td><td>Words</td><td>The original. 5-letter word in 6 tries.</td></tr>
+        <tr><td><strong>NYT Connections</strong></td><td>Words</td><td>Group 16 words into 4 secret categories.</td></tr>
+        <tr><td><strong>Globle</strong></td><td>Geography</td><td>Guess the mystery country by proximity.</td></tr>
+        <tr><td><strong>Worldle</strong></td><td>Geography</td><td>Guess the country by its shape.</td></tr>
+        <tr><td><strong>Heardle Daily</strong></td><td>Music</td><td>Guess the song from a brief audio clip.</td></tr>
+        <tr><td><strong>Framed</strong></td><td>Movies / TV</td><td>Guess the movie from 6 film frames.</td></tr>
+        <tr><td><strong>Pokedoku</strong></td><td>Video Games</td><td>Fill a grid with Pokémon matching criteria.</td></tr>
+        <tr><td><strong>Murdle</strong></td><td>Math / Logic</td><td>Daily murder-mystery logic puzzle.</td></tr>
+        <tr><td><strong>Contexto</strong></td><td>Words</td><td>Find the secret word by semantic distance.</td></tr>
+        <tr><td><strong>WhenTaken</strong></td><td>History</td><td>Guess the year and location of old photos.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     TAB 3 — PICKING GAMES
+     How to choose which dles to play and manage your list
+═══════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-picking">
+
+  <div class="section">
+    <div class="section-title">🎯 How to Choose Which Dles to Play</div>
+    <div class="card">
+      <p>The site gives you several tools to cut 600+ games down to a personal rotation you actually care about. None of this requires an account — everything is stored in your browser's <code>localStorage</code> and persists as long as you're on the same device and haven't cleared your browser data.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⭐ Favourites — Build Your Daily Rotation</div>
+    <div class="card">
+      <p>Every game card has a <strong>star button</strong>. Starring a game adds it to your <em>Favourites</em> list, which appears at the top of the page for instant access. This is the main tool for building a personal rotation — star the 5–10 dles you want to check every morning and ignore everything else.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Your favourites are stored in <code>localStorage</code> under a key like <code>favorites</code>. They survive page refreshes but not browser data clears. If you use the site on multiple devices, you'll need to star your favourites separately on each one — there's no account sync.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🙈 Hide — Get Rid of Games You'll Never Play</div>
+    <div class="card">
+      <p>Games can be <strong>hidden</strong> so they disappear from the list entirely. If you don't care about chess, baseball, K-pop, or Doctor Who — hide those games so they stop cluttering up the view. Use the kebab/options menu on a game card to hide it.</p>
+      <p>Hidden games are stored in localStorage. You can reveal them again via the toggle at the top of the page (<em>"Show hidden"</em>) if you change your mind.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗂️ Category Filter — Browse by Topic</div>
+    <div class="card">
+      <p>The sidebar (or top filter row on mobile) lists all 17 categories. Click a category to see only games from that group. Useful when you're in the mood for geography but not word games, or when you want to discover new games in a topic you like.</p>
+      <p>Category filtering combines with the search bar — you can search for "chess" inside the Card/Board Games category, for example.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎲 Random Pick</div>
+    <div class="card">
+      <p>A <strong>random game</strong> button is available in the toolbar. Click it to be dropped into a random dle from the full list (or from the currently filtered subset). Good for discovery when your usual rotation is done and you want to try something new.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Recommended Daily Rotation by Interest</div>
+    <div class="card">
+      <p>Some opinionated starter sets — star these and ignore the rest until you want to expand:</p>
+      <table>
+        <tr><th>Interest</th><th>Suggested Dles</th></tr>
+        <tr>
+          <td><strong>Word Games</strong></td>
+          <td>NYT Wordle, NYT Connections, NYT Strands, Contexto, Quordle</td>
+        </tr>
+        <tr>
+          <td><strong>Geography</strong></td>
+          <td>Worldle, Globle, Flagle, travle, WhenTaken</td>
+        </tr>
+        <tr>
+          <td><strong>Video Games</strong></td>
+          <td>Pokedoku, Gamedle Classic, Guess The Game, ZoomOut, LoLdle (if into LoL)</td>
+        </tr>
+        <tr>
+          <td><strong>Music</strong></td>
+          <td>Heardle Daily, Heardle 2000's, Songdle, Musicle</td>
+        </tr>
+        <tr>
+          <td><strong>Movies / TV</strong></td>
+          <td>Framed, Moviedle, Box Office Game, Actorle</td>
+        </tr>
+        <tr>
+          <td><strong>Logic Puzzles</strong></td>
+          <td>Murdle, NYT Sudoku, Mineswifter, LinkedIn - Queens</td>
+        </tr>
+        <tr>
+          <td><strong>Quick Daily (under 5 min total)</strong></td>
+          <td>NYT Wordle, NYT Mini Crossword, Globle, Framed</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-picking -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     TAB 4 — CUSTOM WORDS
+     How to control which word is used / add your own
+═══════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-words">
+
+  <div class="section">
+    <div class="section-title">✏️ Controlling Words in Individual Dles</div>
+    <div class="card">
+      <p>Individual dle games — Wordle clones and their variants — are third-party sites. The Dles hub is a directory; it doesn't control the word that any game uses today. To influence words or word lists, you work with each game's own site or source code directly.</p>
+      <p>There are three main approaches depending on what you want to do:</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">① URL Parameters — Play a Specific Day or Word</div>
+    <div class="card">
+      <p>Many Wordle-style games accept URL parameters to load a specific puzzle. This is the easiest way to play a past puzzle or set up a specific word for a friend.</p>
+      <table>
+        <tr><th>Game</th><th>How to Control</th><th>Example</th></tr>
+        <tr>
+          <td><strong>NYT Wordle</strong></td>
+          <td>Append <code>?d=YYYY-MM-DD</code> to load a specific date's puzzle (unofficial — may stop working)</td>
+          <td><code>nytimes.com/games/wordle/index.html</code></td>
+        </tr>
+        <tr>
+          <td><strong>hello wordl</strong> (hellowordl.net)</td>
+          <td>Append <code>#[word]</code> to the URL to set a specific word. Share that URL with a friend.</td>
+          <td><code>hellowordl.net/#grape</code></td>
+        </tr>
+        <tr>
+          <td><strong>Absurdle</strong></td>
+          <td>Append <code>?seed=[number]</code> to replay a specific seed. Different seeds produce different adversarial games.</td>
+          <td><code>qntm.org/files/absurdle/#42</code></td>
+        </tr>
+        <tr>
+          <td><strong>Quordle</strong></td>
+          <td>Practice mode is available from the main menu — lets you play without affecting your streak, and the words are different from the daily.</td>
+          <td>Click "Practice" on the Quordle site</td>
+        </tr>
+      </table>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Not all games support URL parameter control — it varies by site. The easiest ones to share are those with a hash-based word parameter like hello wordl. Check each game's "How to Play" or GitHub README for details.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">② Self-Hosting a Game with Your Own Word List</div>
+    <div class="card">
+      <p>If you want full control over which words appear and when, the answer is to <strong>self-host a clone</strong> with your own word list. Many dle-style games are open source and trivially forkable. The workflow:</p>
+
+      <div class="gh-step">
+        <div class="gh-step-num">1</div>
+        <div class="gh-step-body">
+          Find the game's GitHub repository (many link to it in their footer or "About" page). Fork it to your own GitHub account.
+        </div>
+      </div>
+      <div class="gh-step">
+        <div class="gh-step-num">2</div>
+        <div class="gh-step-body">
+          Locate the word list file — usually a <code>words.js</code>, <code>wordlist.json</code>, or <code>answers.js</code> at the root or in a <code>src/</code> or <code>data/</code> folder. Replace the word array with your own list.
+        </div>
+      </div>
+      <div class="gh-step">
+        <div class="gh-step-num">3</div>
+        <div class="gh-step-body">
+          If the game uses a fixed date-based index (e.g. <code>wordList[daysSinceEpoch % wordList.length]</code>), you can control today's word by ordering your list accordingly, or replace the date logic with a fixed index for testing.
+        </div>
+      </div>
+      <div class="gh-step">
+        <div class="gh-step-num">4</div>
+        <div class="gh-step-body">
+          Drop the forked/modified game into <code>D:\Server\BrowserGames\[game-id]\</code> and register it in <code>browser_games/index.json</code> as a normal (non-external) game entry. It'll load inside the hub iframe, and you control the words entirely.
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Check each game's license before forking. MIT and GPL allow this freely. Some games have more restrictive terms. When in doubt, keep your fork private (it's on your LAN anyway) and don't redistribute.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">③ Suggesting a New Dle to the Directory</div>
+    <div class="card">
+      <p>The Dles directory itself is open source. If you discover a great daily game that isn't listed yet, you can contribute it back to the public directory. This doesn't add words — it adds a new game to the catalogue.</p>
+
+      <div class="gh-step">
+        <div class="gh-step-num">1</div>
+        <div class="gh-step-body">
+          The easiest path is the <a href="https://github.com/aukspot/dles/issues/new" target="_blank">suggestion form</a> (linked from the README). Fill out the issue template with the game's name, URL, category, and description.
+        </div>
+      </div>
+      <div class="gh-step">
+        <div class="gh-step-num">2</div>
+        <div class="gh-step-body">
+          Or edit <a href="https://github.com/aukspot/dles/blob/main/src/dles.json" target="_blank"><code>src/dles.json</code></a> directly in the GitHub web editor. Copy an existing entry and update the fields — <strong>do not add an <code>id</code> field</strong>, it's assigned automatically on build.
+        </div>
+      </div>
+      <div class="gh-step">
+        <div class="gh-step-num">3</div>
+        <div class="gh-step-body">
+          Open a pull request. The maintainer (<strong>aukspot</strong>) reviews and merges it. The site redeploys automatically via GitHub Actions.
+        </div>
+      </div>
+
+      <pre>// dles.json entry format — paste and fill in:
+{
+  "name":        "Game Name",
+  "url":         "https://thegame.com",
+  "category":    "Words",
+  "description": "One clear sentence about what it is and how you play."
+  // DO NOT add an "id" field — it's auto-assigned
+}</pre>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">To <strong>fix a broken link</strong>: find the entry in <code>dles.json</code>, update the URL field, and open a PR. To <strong>remove a dead game</strong>: delete the entry entirely. The README also has a "dle suggestion" issue template that skips the need to edit JSON directly.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏗️ Running the Dles Site Locally</div>
+    <div class="card">
+      <p>If you want to run your own private version of the entire Dles directory — with your own curated list, custom categories, or hidden games baked in — you can fork and self-host the whole SvelteKit app.</p>
+      <pre>git clone https://github.com/aukspot/dles.git
+cd dles
+npm install
+npm run dev          # dev server at localhost:5173
+
+# Build for production:
+npm run build        # outputs to ./docs (GitHub Pages format)
+
+# To add / remove / edit dles, edit:
+#   src/dles.json    ← game catalogue
+#   src/categories.json (if it exists) ← category definitions</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Requires Node.js. The <code>npm run build</code> output lands in <code>./docs/</code> for GitHub Pages compatibility — if you're self-hosting on the LAN via Caddy, point the file server at that <code>docs/</code> directory.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-words -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     TAB 5 — SOURCE
+═══════════════════════════════════════════════════ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Project Links</div>
+    <div class="card">
+      <a class="source-link" href="https://dles.aukspot.com" target="_blank">
+        <div class="source-link-icon">🌐</div>
+        <div>
+          <div class="source-link-name">dles.aukspot.com — Live Site</div>
+          <div class="source-link-desc">The public directory. 600+ games, category filters, favourites, random picker.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://github.com/aukspot/dles" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">github.com/aukspot/dles — Source Code</div>
+          <div class="source-link-desc">SvelteKit app. Suggest games via issue, or edit dles.json directly via PR.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://github.com/aukspot/dles/blob/main/CHANGELOG.md" target="_blank">
+        <div class="source-link-icon">📋</div>
+        <div>
+          <div class="source-link-name">CHANGELOG.md — Recent Additions &amp; Removals</div>
+          <div class="source-link-desc">See exactly which dles were added, removed, or fixed in each update.</div>
+        </div>
+      </a>
+      <a class="source-link" href="https://github.com/aukspot/dles/blob/main/src/dles.json" target="_blank">
+        <div class="source-link-icon">📄</div>
+        <div>
+          <div class="source-link-name">src/dles.json — Game Catalogue</div>
+          <div class="source-link-desc">The raw JSON list of all games. Edit this to suggest additions or fix broken links.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Project Stats</div>
+    <div class="card">
+      <table>
+        <tr><th>Stat</th><th>Value</th></tr>
+        <tr><td>Maintainer</td><td>aukspot (GitHub)</td></tr>
+        <tr><td>License</td><td>GPL-3.0</td></tr>
+        <tr><td>Stack</td><td>SvelteKit · Tailwind CSS · GitHub Pages</td></tr>
+        <tr><td>Contributors</td><td>9 (as of 2026)</td></tr>
+        <tr><td>Stars</td><td>64</td></tr>
+        <tr><td>Deploy</td><td>Automated — GitHub Actions on push to main</td></tr>
+        <tr><td>Last updated</td><td>2026-03-24 (per CHANGELOG)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⭐ Sponsor Games</div>
+    <div class="card">
+      <p>The Dles directory has a small sponsors section — these are games that pay to appear at the top of the list. They are clearly labelled. Currently:</p>
+      <ul style="margin:8px 0 0 18px;font-size:.84rem;line-height:2;color:var(--text)">
+        <li><strong>Cadgy</strong> — Make valid 5-letter words by selecting one letter from each column.</li>
+        <li><strong>Lettered</strong> — Move letter tiles on the board to spell out the hidden phrase.</li>
+        <li><strong>Lexicle</strong> — Guess the secret word based on its meaning.</li>
+      </ul>
+      <p style="margin-top:10px;font-size:.82rem;color:var(--text-dim)">Sponsor placements are disclosed. The maintainer notes that Google Analytics (in addition to Umami) is used specifically because of sponsors.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Issues &amp; Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Broken links</td><td>With 600+ external games, links go dead when sites shut down. The GitHub repo tracks these — open an issue or PR to fix a dead link.</td></tr>
+        <tr><td>No cross-device sync</td><td>Favourites and hidden games are localStorage-only. No account, no sync between phone and desktop.</td></tr>
+        <tr><td>Playlist URL params planned</td><td>The README lists "URL parameters to load a playlist" as a planned feature — not yet implemented as of 2026.</td></tr>
+        <tr><td>Some game sites require login</td><td>A handful of dles (e.g. LinkedIn games, Netflix games) are marked as not requiring accounts but may prompt login on some devices. The directory notes this where relevant.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+
+const STORAGE_KEY = 'bg_dles_setup';
+let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+
+function renderComplete() {
+  const bar = document.getElementById('setup-complete-bar');
+  const cb  = document.getElementById('setup-checkbox');
+  const sub = document.getElementById('complete-sub');
+  const ov  = document.querySelector('[onclick*="overview"]');
+  if (isComplete) {
+    bar.classList.add('done'); cb.textContent = '✓';
+    sub.textContent = '✅ Setup complete — Overview is now the default tab';
+    if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+  } else {
+    bar.classList.remove('done'); cb.textContent = '';
+    sub.textContent = 'Mark as done → activates Overview tab';
+    if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+  }
+}
+
+function toggleComplete() {
+  isComplete = !isComplete;
+  localStorage.setItem(STORAGE_KEY, isComplete);
+  renderComplete();
+  if (isComplete) {
+    const ov = document.querySelector('[onclick*="overview"]');
+    if (ov) bgTab('overview', ov);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  renderComplete();
+  if (isComplete) {
+    const ov = document.querySelector('[onclick*="overview"]');
+    if (ov) bgTab('overview', ov);
+  }
+});
+</script>
+
+</body>
+</html>

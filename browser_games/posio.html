@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Posio</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
+.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
+.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+.bg-tab-pane { display:none; }
+.bg-tab-pane.active { display:block; }
+.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
+.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
+.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
+.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
+.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
+.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
+.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
+.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
+.source-link:hover { border-color:var(--accent); }
+.source-link-icon { font-size:1.5rem;flex-shrink:0; }
+.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
+.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🌍</div>
+  <div>
+    <h1>Posio</h1>
+    <div class="subtitle">// Multiplayer Geography Game · Python / WebSocket · Self-Hosted · Tailscale + Authentik forward_auth · MIT //</div>
+    <p class="desc">A multiplayer geography quiz game where players compete to place pins on a world map as close as possible to named locations. The closer your pin, the more points you score. Fast rounds, real-time leaderboards, and WebSocket-driven synchronisation. Self-hostable with Python and a handful of dependencies.</p>
+  </div>
+</div>
+
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">2–∞</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Python</div><div class="bg-stat-label">Backend</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">MIT</div><div class="bg-stat-label">License</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Map</div><div class="bg-stat-label">Interface</div></div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ TAB 1 — SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Posio loads, a game session can be started, and multiple players can place pins simultaneously.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🌍 V1 Goal: Posio running as a Docker/Python service, accessible at <code>posio.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth. A full round playable from two Tailscale devices simultaneously.</div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <pre>cd D:\Server
+git clone https://github.com/abrenaut/posio.git posio
+cd posio</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 2 — Docker Compose</div>
+    <div class="card">
+      <p>Posio is a Python application (Flask + WebSockets). The cleanest approach is a Docker container:</p>
+      <pre>posio:
+  build:
+    context: D:\Server\posio
+  ports:
+    - "5050:5000"
+  restart: unless-stopped</pre>
+      <p>If there is no Dockerfile in the repo, create a minimal one:</p>
+      <pre>FROM python:3.11-slim
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+EXPOSE 5000
+CMD ["python", "application.py"]</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Check the repo's <code>requirements.txt</code> and entry point filename — it may be <code>app.py</code>, <code>server.py</code>, or <code>application.py</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 3 — Caddy Reverse Proxy</div>
+    <div class="card">
+      <pre>posio.{$DOMAIN} {
+  forward_auth authentik:9000 {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy posio:5000
+}</pre>
+      <p>WebSocket connections need to pass through — Caddy handles this automatically for <code>reverse_proxy</code> directives.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 4 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "posio",
+  "name":        "Posio",
+  "icon":        "🌍",
+  "description": "Multiplayer geography quiz — pin cities and countries on a world map, closest guess wins.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "2+",
+  "tags":        ["geography", "multiplayer", "maps", "quiz", "trivia"],
+  "tech":        "Python / Flask / WebSocket",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://posio.<span data-cfg="domain"></span>"
+}</pre>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">🌍 Python + WebSocket geography quiz. Self-hosted, ephemeral sessions, real-time scoring via WebSocket.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">URL</td><td><code>posio.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2+ (WebSocket sync)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Stateless — no persistent history</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">Backend</td><td>Python / Flask</td></tr>
+          <tr><td style="color:var(--text-dim)">Protocol</td><td>WebSocket (real-time pin sync)</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No (requires server)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes (tap to place pin)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌍 What Is This?</div>
+    <div class="card">
+      <p>Posio is a multiplayer geography game where players are shown a place name and must click on a world map to place their pin as close as possible to where that location actually is. Scoring is distance-based — the closer your pin, the more points you earn.</p>
+      <p>Rounds are fast-paced and synchronous: all players see the same prompt, and everyone's pin placement is revealed at the end of each round. The real-time leaderboard updates after every round, creating momentum and competition even in small groups.</p>
+      <p>The game is built on Python (Flask) and WebSockets, making it easy to self-host. It has no database — sessions are entirely in-memory. Questions cover world cities, countries, and geographic landmarks.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🖱️ Controls</div>
+    <div class="card">
+      <p>Click or tap anywhere on the world map to place your pin. You can reposition your pin before the round timer expires. No keyboard shortcuts — entirely mouse/touch driven. Works on mobile browsers.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══ TAB 3 — MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+
+  <div class="section">
+    <div class="section-title">🔌 How Sessions Work</div>
+    <div class="card">
+      <p>Posio uses WebSockets for real-time synchronisation. All players connecting to the same server instance share the same game session — there is no separate room/lobby system in the base codebase.</p>
+      <ul style="margin:8px 0 0 18px;font-size:.84rem;line-height:2;color:var(--text)">
+        <li>All players on <code>posio.<span data-cfg="domain"></span></code> are in the same session</li>
+        <li>The server controls round timing and question order</li>
+        <li>Scores are calculated server-side based on pin distance</li>
+        <li>Sessions reset when the server restarts</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Single global session</td><td>The base codebase doesn't support multiple independent rooms. Everyone joins the same game.</td></tr>
+        <tr><td>No persistent scores</td><td>Scores are lost when the server restarts. No leaderboard persistence.</td></tr>
+        <tr><td>Limited question set</td><td>Questions are bundled with the repo. Expanding the set requires editing source data files.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-multi -->
+
+
+<!-- ═══ TAB 4 — SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/abrenaut/posio" target="_blank">
+        <div class="source-link-icon">⚙️</div>
+        <div><div class="source-link-name">github.com/abrenaut/posio</div><div class="source-link-desc">Source code — Python / WebSocket · MIT license</div></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p><strong>MIT</strong> — permissive. Use, modify, and redistribute freely with attribution. No copyleft obligations.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 Update Policy</div>
+    <div class="card">
+      <p>The repository is not actively maintained — it is a stable, complete project. Updates are unlikely. To keep your local copy current:</p>
+      <pre>cd D:\Server\posio
+git pull
+# Rebuild Docker image if requirements.txt changed</pre>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+const STORAGE_KEY = 'bg_posio_setup';
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+function toggleComplete() {
+  const bar  = document.getElementById('setup-complete-bar');
+  const box  = document.getElementById('setup-checkbox');
+  const sub  = document.getElementById('complete-sub');
+  const done = bar.classList.toggle('done');
+  box.textContent = done ? '✓' : '';
+  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
+  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
+}
+(function init() {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    document.getElementById('setup-complete-bar').classList.add('done');
+    document.getElementById('setup-checkbox').textContent = '✓';
+    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  }
+  if (window.applyDataCfg) applyDataCfg();
+})();
+</script>
+</body>
+</html>

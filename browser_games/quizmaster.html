@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quizmaster</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
+.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
+.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+.bg-tab-pane { display:none; }
+.bg-tab-pane.active { display:block; }
+.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
+.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
+.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
+.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
+.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
+.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
+.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
+.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
+.source-link:hover { border-color:var(--accent); }
+.source-link-icon { font-size:1.5rem;flex-shrink:0; }
+.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
+.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🧠</div>
+  <div>
+    <h1>Quizmaster</h1>
+    <div class="subtitle">// Quiz Hosting · Multiplayer · Scala / Play Framework · Self-Hosted · Tailscale + Authentik forward_auth · Apache-2.0 //</div>
+    <p class="desc">A self-hosted web application for running quiz nights. The quizmaster controls question flow from a master screen while players submit answers on their own devices. Supports rounds, images, audio, and a live scoreboard. Built with Scala and the Play Framework. Ideal for structured trivia nights where the host controls the pace.</p>
+  </div>
+</div>
+
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">2–∞</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Scala</div><div class="bg-stat-label">Backend</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Apache-2</div><div class="bg-stat-label">License</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Custom</div><div class="bg-stat-label">Questions</div></div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ TAB 1 — SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Quizmaster is running, a quiz can be created, and players can submit answers from other devices.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🧠 V1 Goal: Quizmaster running as a Docker container, accessible at <code>quiz.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth. A full quiz round completable with at least two player devices.</div>
+
+  <div class="callout callout-warn" style="margin-bottom:20px">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Quizmaster is a Scala/Play Framework application.</strong> Building from source requires SBT (Scala Build Tool). The Docker approach below is strongly recommended to avoid a complex JVM build environment on Windows.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <pre>cd D:\Server
+git clone https://github.com/nymanjens/quizmaster.git quizmaster
+cd quizmaster</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 2 — Build &amp; Run with Docker</div>
+    <div class="card">
+      <p>Check the repository for a <code>Dockerfile</code> or <code>docker-compose.yml</code>. If present, use it directly:</p>
+      <pre>docker compose up -d</pre>
+      <p>If no Dockerfile is provided, build using SBT inside a Scala Docker image:</p>
+      <pre>quizmaster:
+  image: sbtscala/scala-sbt:eclipse-temurin-21.0.1_12_1.9.7_3.3.1
+  working_dir: /app
+  volumes:
+    - D:\Server\quizmaster:/app
+  command: sbt run
+  ports:
+    - "9090:9000"
+  restart: unless-stopped</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">First run may take several minutes as SBT downloads dependencies and compiles the Scala code. Subsequent starts are fast if the build cache is preserved in the volume.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 3 — Caddy Reverse Proxy</div>
+    <div class="card">
+      <pre>quiz.{$DOMAIN} {
+  forward_auth authentik:9000 {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy quizmaster:9000
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 4 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "quizmaster",
+  "name":        "Quizmaster",
+  "icon":        "🧠",
+  "description": "Host structured quiz nights. Players submit answers on their devices; quizmaster controls the flow.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "2+",
+  "tags":        ["quiz", "trivia", "multiplayer", "party", "hosted"],
+  "tech":        "Scala / Play Framework",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://quiz.<span data-cfg="domain"></span>"
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📝 Step 5 — Create Questions</div>
+    <div class="card">
+      <p>Quizmaster uses a structured question format defined in the application. Check the repo's <code>conf/</code> or <code>data/</code> directory for example question files. Questions can include text, images, and audio. Build your own quiz files before hosting your first game night.</p>
+      <p>Refer to the <a href="https://github.com/nymanjens/quizmaster" target="_blank" style="color:var(--accent)">GitHub README</a> for the exact question file format and how to load custom quizzes.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">🧠 Scala/Play quiz hosting app. Quizmaster controls flow; players answer on their own devices. Fully custom questions.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">URL</td><td><code>quiz.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2+ (any number)</td></tr>
+          <tr><td style="color:var(--text-dim)">Questions</td><td>Fully custom (host-defined)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">Stack</td><td>Scala / Play Framework / JVM</td></tr>
+          <tr><td style="color:var(--text-dim)">Protocol</td><td>HTTP + WebSocket</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No (requires server)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — player answer page is mobile-friendly</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧠 What Is This?</div>
+    <div class="card">
+      <p>Quizmaster is a self-hosted web application for running structured quiz nights. There are two distinct interfaces: a <strong>master screen</strong> (for the quiz host, typically shown on a TV or shared display) and a <strong>player screen</strong> (on each participant's phone or laptop).</p>
+      <p>The quizmaster controls question pacing — advancing slides, revealing answers, and managing scores — while players type their answers on their own devices. The application handles scoring and displays a running leaderboard.</p>
+      <p>Unlike Digibuzzer (which is purely buzzer-based), Quizmaster supports typed free-text answers, making it suitable for traditional quiz night formats with specific factual questions. It also supports multimedia questions with images and audio clips.</p>
+      <p>Questions are fully custom — you write them yourself in a structured format before hosting. This makes it perfect for themed quiz nights (e.g., server lore, franchise trivia, music rounds) tailored to your friend group.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══ TAB 3 — MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+
+  <div class="section">
+    <div class="section-title">👥 Roles</div>
+    <div class="card">
+      <table>
+        <tr><th>Role</th><th>Interface</th><th>Responsibilities</th></tr>
+        <tr><td>Quizmaster</td><td>Master screen (<code>/master</code>)</td><td>Advances questions, reveals answers, manages scoring and round flow</td></tr>
+        <tr><td>Player</td><td>Player screen (<code>/player</code>)</td><td>Submits typed answers, views the current question and their score</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎙️ Recommended Setup</div>
+    <div class="card">
+      <ul style="margin:0 0 0 18px;font-size:.84rem;line-height:2;color:var(--text)">
+        <li>Quizmaster uses the master screen URL on a TV/projector or shared screen</li>
+        <li>Players navigate to the player URL on their own phones/laptops</li>
+        <li>Voice chat (Discord, etc.) recommended for the quizmaster to read questions aloud</li>
+        <li>All devices must be on the same Tailscale network to reach the self-hosted instance</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-multi -->
+
+
+<!-- ═══ TAB 4 — SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/nymanjens/quizmaster" target="_blank">
+        <div class="source-link-icon">⚙️</div>
+        <div><div class="source-link-name">github.com/nymanjens/quizmaster</div><div class="source-link-desc">Source code — Scala / Play Framework · Apache-2.0</div></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p><strong>Apache License 2.0</strong> — permissive. Use, modify, and distribute freely. No copyleft obligations. Attribution required in distributed copies.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+const STORAGE_KEY = 'bg_quizmaster_setup';
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+function toggleComplete() {
+  const bar  = document.getElementById('setup-complete-bar');
+  const box  = document.getElementById('setup-checkbox');
+  const sub  = document.getElementById('complete-sub');
+  const done = bar.classList.toggle('done');
+  box.textContent = done ? '✓' : '';
+  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
+  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
+}
+(function init() {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    document.getElementById('setup-complete-bar').classList.add('done');
+    document.getElementById('setup-checkbox').textContent = '✓';
+    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  }
+  if (window.applyDataCfg) applyDataCfg();
+})();
+</script>
+</body>
+</html>

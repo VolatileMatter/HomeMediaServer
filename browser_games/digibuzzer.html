@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Digibuzzer</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
+.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
+.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+.bg-tab-pane { display:none; }
+.bg-tab-pane.active { display:block; }
+.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
+.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
+.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
+.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
+.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
+.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
+.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
+.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
+.source-link:hover { border-color:var(--accent); }
+.source-link-icon { font-size:1.5rem;flex-shrink:0; }
+.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
+.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔔</div>
+  <div>
+    <h1>Digibuzzer</h1>
+    <div class="subtitle">// Multiplayer Quiz Buzzer · Node.js (Vite SSR + Socket.io) · Self-Hosted · Tailscale + Authentik forward_auth · AGPL-3.0 //</div>
+    <p class="desc">A virtual quiz-show buzzer system for group play. A game master creates a room, players join on their own devices and buzz in with a button press — the app tracks who hit the buzzer first, awards points, and manages rounds. Actively developed by <strong>La Digitale</strong>, a French educational software collective. Documentation is in French.</p>
+  </div>
+</div>
+
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">2–30</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">v0.7.2</div><div class="bg-stat-label">Current</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">AGPL-3.0</div><div class="bg-stat-label">License</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Node.js</div><div class="bg-stat-label">Backend</div></div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ TAB 1 — SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Digibuzzer loads, a room can be created, and players can buzz in from other devices.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔔 V1 Goal: Digibuzzer running as a Docker container, accessible at <code>games.<span data-cfg="domain"></span>/buzzer/</code> (or a dedicated subdomain) via Tailscale, gated by Authentik forward_auth. Multiple players can join a room from any Tailscale device.</div>
+
+  <div class="callout callout-warn" style="margin-bottom:20px">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Digibuzzer requires a Node.js backend (Vite SSR + Socket.io)</strong>. It cannot be served as static files. It needs its own Docker container with an exposed port, routed through Caddy like other services.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone &amp; Build</div>
+    <div class="card">
+      <pre>cd D:\Server
+git clone https://codeberg.org/ladigitale/digibuzzer.git digibuzzer
+cd digibuzzer
+npm install
+npm run build</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Or use the Docker approach in Step 2 to avoid needing Node.js on the host directly.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 2 — Docker Compose</div>
+    <div class="card">
+      <p>Add to your Docker Compose stack:</p>
+      <pre>digibuzzer:
+  image: node:20-alpine
+  working_dir: /app
+  volumes:
+    - D:\Server\digibuzzer:/app
+  command: sh -c "npm install && npm run build && npm run start"
+  ports:
+    - "3100:3000"
+  restart: unless-stopped</pre>
+      <p>Or build a proper Dockerfile once the setup is stable. The app listens on port <code>3000</code> by default inside the container.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 3 — Caddy Reverse Proxy</div>
+    <div class="card">
+      <p>Add a Caddy block to route a subdomain or path to the container. A subdomain is cleaner because Socket.io WebSocket upgrade works more reliably at the root path.</p>
+      <pre>buzzer.{$DOMAIN} {
+  forward_auth authentik:9000 {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy digibuzzer:3000
+}</pre>
+      <p>Then register it as an Application + Provider in Authentik pointing to <code>buzzer.<span data-cfg="domain"></span></code>.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 4 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "digibuzzer",
+  "name":        "Digibuzzer",
+  "icon":        "🔔",
+  "description": "Virtual quiz-show buzzer system. Host a room, players buzz in from their own devices.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "2–30",
+  "tags":        ["multiplayer", "quiz", "party", "buzzer", "realtime"],
+  "tech":        "Node.js / Vite SSR / Socket.io",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://buzzer.<span data-cfg="domain"></span>"
+}</pre>
+      <p>Because Digibuzzer is a separate Node.js service (not a static folder), it uses <code>externalHub: true</code> — clicking Play opens it in a new tab.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">🔔 Node.js service with Socket.io realtime. Runs as its own container at a dedicated subdomain.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">URL</td><td><code>buzzer.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>2–30 (browser-based, any device)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Stateless — rooms are ephemeral</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">Stack</td><td>Node.js / Vite SSR / Vue / Socket.io</td></tr>
+          <tr><td style="color:var(--text-dim)">Port</td><td>3000 (container) → Caddy</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No (requires server)</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes — buzzer works on phones</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔔 What Is This?</div>
+    <div class="card">
+      <p>Digibuzzer is a web-based virtual buzzer system for quiz games, developed by <strong>La Digitale</strong> — a French collective creating free digital tools for education. The app lets a game master create a room with a shareable code, and players join on any device with a browser.</p>
+      <p>When a question is posed, players press a large on-screen buzzer button. The server captures response times to the millisecond and determines who buzzed in first — displayed on the game master's screen in real time. Points can be awarded or deducted. Multiple rounds are supported.</p>
+      <p>The interface is clean and works well on both desktop and mobile. Documentation and UI are in French, but the interaction model is intuitive enough to use without reading it. Ideal for quiz nights, family games, or classroom use.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══ TAB 3 — MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+
+  <div class="section">
+    <div class="section-title">👥 How Rooms Work</div>
+    <div class="card">
+      <table>
+        <tr><th>Role</th><th>What they do</th></tr>
+        <tr><td>Game Master</td><td>Opens the app, creates a room, gets a room code. Controls rounds, awards points, sees who buzzed first.</td></tr>
+        <tr><td>Player</td><td>Opens the app on their device, enters the room code and a username. Sees a big buzzer button.</td></tr>
+      </table>
+      <p style="margin-top:12px">Rooms are ephemeral — they exist only while the server session is active. No persistent storage of game history.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔌 Protocol</div>
+    <div class="card">
+      <p>Digibuzzer uses <strong>Socket.io</strong> over WebSockets for realtime buzzer events. This means:</p>
+      <ul style="margin:8px 0 0 18px;font-size:.84rem;line-height:2;color:var(--text)">
+        <li>Caddy must pass WebSocket upgrade headers through to the container correctly</li>
+        <li>All players must be on the same Tailscale network (all traffic flows through the self-hosted instance)</li>
+        <li>No external relay — your server is the source of truth for buzzer timing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>French-only docs</td><td>Official documentation is in French. UI labels are mostly French too, but interaction model is intuitive.</td></tr>
+        <tr><td>No persistent rooms</td><td>Rooms reset if the server restarts. No built-in session persistence.</td></tr>
+        <tr><td>No auth integration</td><td>Digibuzzer has its own username system inside rooms — Authentik handles network-level auth only.</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-multi -->
+
+
+<!-- ═══ TAB 4 — SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="card">
+      <a class="source-link" href="https://digibuzzer.app/" target="_blank">
+        <div class="source-link-icon">🌐</div>
+        <div><div class="source-link-name">digibuzzer.app</div><div class="source-link-desc">Official hosted instance &amp; documentation (French)</div></div>
+      </a>
+      <a class="source-link" href="https://codeberg.org/ladigitale/digibuzzer" target="_blank">
+        <div class="source-link-icon">⚙️</div>
+        <div><div class="source-link-name">codeberg.org/ladigitale/digibuzzer</div><div class="source-link-desc">Source code — Vue / Node.js / Socket.io · v0.7.2 · AGPL-3.0</div></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p><strong>AGPL-3.0</strong> — if you modify and run Digibuzzer as a network service, you must make your modifications available under AGPL-3.0. Self-hosting for private use with no modifications requires no action.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+const STORAGE_KEY = 'bg_digibuzzer_setup';
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+function toggleComplete() {
+  const bar  = document.getElementById('setup-complete-bar');
+  const box  = document.getElementById('setup-checkbox');
+  const sub  = document.getElementById('complete-sub');
+  const done = bar.classList.toggle('done');
+  box.textContent = done ? '✓' : '';
+  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
+  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
+}
+(function init() {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    document.getElementById('setup-complete-bar').classList.add('done');
+    document.getElementById('setup-checkbox').textContent = '✓';
+    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  }
+  if (window.applyDataCfg) applyDataCfg();
+})();
+</script>
+</body>
+</html>

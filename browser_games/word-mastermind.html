@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Word Mastermind</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
+.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
+.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+.bg-tab-pane { display:none; }
+.bg-tab-pane.active { display:block; }
+.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
+.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
+.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
+.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
+.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
+.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
+.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
+.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
+.source-link:hover { border-color:var(--accent); }
+.source-link-icon { font-size:1.5rem;flex-shrink:0; }
+.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
+.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.game-screenshot { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:60px 20px;text-align:center;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.78rem;margin-bottom:20px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🔤</div>
+  <div>
+    <h1>Word Mastermind</h1>
+    <div class="subtitle">// Word Puzzle · Singleplayer · Node.js / Static · Self-Hosted · Tailscale + Authentik forward_auth · MIT //</div>
+    <p class="desc">A Wordle-style word guessing game with a Mastermind twist. Guess a hidden 5-letter word in 6 attempts. After each guess, colour-coded feedback shows which letters are correct and in position (green), present but misplaced (yellow), or absent (grey). Clean, minimal, and fully self-hostable.</p>
+  </div>
+</div>
+
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">1</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">6</div><div class="bg-stat-label">Guesses</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">MIT</div><div class="bg-stat-label">License</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">Static</div><div class="bg-stat-label">Backend</div></div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ TAB 1 — SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Word Mastermind loads and a puzzle can be completed in the Browser Games hub.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🔤 V1 Goal: Word Mastermind accessible at <code>games.<span data-cfg="domain"></span>/word-mastermind/</code> via Tailscale, gated by Authentik forward_auth. A complete puzzle solvable with keyboard input.</div>
+
+  <div class="callout callout-warn" style="margin-bottom:20px">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">The original public demo at <code>word-mastermind.glitch.me</code> has been taken down (HTTP 410). Self-hosting from the GitHub source is the only way to run it.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Step 1 — Clone Repository</div>
+    <div class="card">
+      <p>The game is a Node.js project that serves static files. Clone and install:</p>
+      <pre>cd D:\Server\BrowserGames
+git clone https://github.com/clupasq/word-mastermind.git word-mastermind
+cd word-mastermind
+npm install</pre>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">After <code>npm install</code>, check whether there is a <code>dist/</code> or <code>public/</code> folder. If the project uses a bundler, run <code>npm run build</code> first. The entry point should be <code>index.html</code> at the build output root.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 2 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "word-mastermind",
+  "name":        "Word Mastermind",
+  "icon":        "🔤",
+  "description": "Wordle-style word guessing. 5-letter word, 6 attempts, colour-coded feedback.",
+  "folder":      "word-mastermind",
+  "entry":       "index.html",
+  "category":    "singleplayer",
+  "highScores":  false,
+  "players":     "1",
+  "tags":        ["word", "puzzle", "wordle", "mastermind", "brain"],
+  "tech":        "Node.js / JavaScript",
+  "hasPage":     true
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 Step 3 — Access Control</div>
+    <div class="card">
+      <p>Served under the Browser Games hub. Access requires <strong>Tailscale enrollment</strong> and a valid <strong>Authentik SSO session</strong>. Inherits the hub's <code>forward_auth</code>.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">🔤 Static word puzzle — no backend required beyond file serving. Each session is independent; no server-side tracking.</div>
+
+  <div class="game-screenshot">[ Screenshot — replace with &lt;img src="screenshot.png"&gt; once available ]</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">URL</td><td><code>games.<span data-cfg="domain"></span>/word-mastermind/</code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1 (singleplayer)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>None / session-based</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:100px">Tech</td><td>Node.js / JavaScript</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>Yes, after first load</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Yes (keyboard or on-screen)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔤 What Is This?</div>
+    <div class="card">
+      <p>Word Mastermind is a Wordle clone built on Mastermind's colour-coded feedback principle. You have 6 attempts to guess a secret 5-letter word. After each guess, each letter tile turns green (correct letter, correct position), yellow (correct letter, wrong position), or grey (letter not in the word).</p>
+      <p>The Mastermind framing emphasises the deductive logic angle — each guess is a hypothesis, and the feedback is your experimental result. The game is clean, minimal, and requires no account or backend to play.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⌨️ Controls</div>
+    <div class="card">
+      <p>Type letters with your keyboard and press <code>Enter</code> to submit a guess. <code>Backspace</code> removes the last letter. An on-screen keyboard is available for touchscreen play.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══ TAB 3 — SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/clupasq/word-mastermind" target="_blank">
+        <div class="source-link-icon">⚙️</div>
+        <div><div class="source-link-name">github.com/clupasq/word-mastermind</div><div class="source-link-desc">Source code — JavaScript · MIT license</div></div>
+      </a>
+    </div>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">The original Glitch.me demo (<code>word-mastermind.glitch.me</code>) is no longer live (HTTP 410 Gone). Self-host from the GitHub source.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p><strong>MIT</strong> — permissive. Use, modify, and redistribute freely with attribution.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+const STORAGE_KEY = 'bg_wordmastermind_setup';
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+function toggleComplete() {
+  const bar  = document.getElementById('setup-complete-bar');
+  const box  = document.getElementById('setup-checkbox');
+  const sub  = document.getElementById('complete-sub');
+  const done = bar.classList.toggle('done');
+  box.textContent = done ? '✓' : '';
+  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
+  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
+}
+(function init() {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    document.getElementById('setup-complete-bar').classList.add('done');
+    document.getElementById('setup-checkbox').textContent = '✓';
+    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  }
+  if (window.applyDataCfg) applyDataCfg();
+})();
+</script>
+</body>
+</html>

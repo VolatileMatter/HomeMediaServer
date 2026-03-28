@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Suroi</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav { display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border);flex-wrap:wrap; }
+.bg-tab-btn { font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-dim);cursor:pointer;transition:all .16s;margin-bottom:-2px;white-space:nowrap; }
+.bg-tab-btn:hover  { color:var(--text);border-bottom-color:rgba(200,168,75,.35); }
+.bg-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent);font-weight:700; }
+.bg-tab-pane { display:none; }
+.bg-tab-pane.active { display:block; }
+.setup-complete-bar { display:flex;align-items:center;gap:12px;background:rgba(76,175,125,.07);border:1px solid rgba(76,175,125,.25);border-radius:4px;padding:12px 18px;margin-bottom:24px;cursor:pointer;transition:background .2s;user-select:none; }
+.setup-complete-bar:hover { background:rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.5); }
+.setup-checkbox { width:20px;height:20px;border:2px solid rgba(76,175,125,.6);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#4caf7d;flex-shrink:0; }
+.setup-complete-label { font-weight:700;font-size:.85rem;color:var(--text-bright); }
+.setup-complete-sub   { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+.bg-stat-row { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px; }
+.bg-stat-box { background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 18px;text-align:center;min-width:80px; }
+.bg-stat-num   { font-family:'Cinzel',serif;font-size:1.25rem;color:var(--accent); }
+.bg-stat-label { font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px; }
+.source-link { display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:14px 18px;text-decoration:none;transition:border-color .15s;margin-bottom:10px; }
+.source-link:hover { border-color:var(--accent); }
+.source-link-icon { font-size:1.5rem;flex-shrink:0; }
+.source-link-name { font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent); }
+.source-link-desc { font-size:.75rem;color:var(--text-dim);margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">💥</div>
+  <div>
+    <h1>Suroi</h1>
+    <div class="subtitle">// 2D Battle Royale · Multiplayer · Node.js / WebSocket · suroi.io · GPL-3.0 //</div>
+    <p class="desc">An open-source 2D battle royale game inspired by the defunct surviv.io. Drop onto an island, scavenge weapons, and be the last player standing. Runs entirely in the browser — no download, no install. Actively maintained by the HasangerGames team with regular seasonal updates, new weapons, and map events.</p>
+  </div>
+</div>
+
+<div class="bg-stat-row">
+  <div class="bg-stat-box"><div class="bg-stat-num">1–∞</div><div class="bg-stat-label">Players</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">WebGL</div><div class="bg-stat-label">Renderer</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">GPL-3.0</div><div class="bg-stat-label">License</div></div>
+  <div class="bg-stat-box"><div class="bg-stat-num">v0.30</div><div class="bg-stat-label">Current</div></div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ TAB 1 — SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when Suroi loads and a match can be joined from the browser games hub.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">💥 V1 Goal: Suroi linked from the Browser Games hub as an externalHub entry pointing to <code>suroi.io</code>. Optional: self-host a private server for LAN-only games.</div>
+
+  <div class="callout callout-tip" style="margin-bottom:20px">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body"><strong>No self-hosting required for casual play.</strong> The official server at <a href="https://suroi.io" target="_blank" style="color:var(--accent)">suroi.io</a> hosts public matches. Register the hub entry as <code>externalHub</code> pointing there. For private matches, a Node.js server can be self-hosted.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 1 — Register in index.json (External Hub)</div>
+    <div class="card">
+      <pre>{
+  "id":          "suroi",
+  "name":        "Suroi",
+  "icon":        "💥",
+  "description": "Open-source 2D battle royale. Drop in, loot up, be the last one standing.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "1–∞",
+  "tags":        ["battle-royale", "shooter", "multiplayer", "io-game", "action"],
+  "tech":        "Node.js / WebSocket / WebGL",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://suroi.io/"
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Optional — Self-Host a Private Server</div>
+    <div class="card">
+      <p>Suroi's server component is a Node.js app. For private LAN games:</p>
+      <pre>cd D:\Server
+git clone https://github.com/HasangerGames/suroi.git suroi
+cd suroi
+npm install
+# Edit server/src/config.ts for private server settings
+npm run build
+npm run server</pre>
+      <p>The client then needs to be built pointing at your server address. See the repo README for full private server instructions.</p>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Private server setup requires building both the server and client from source. It's non-trivial. For most use cases, linking to the official server is sufficient.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-setup -->
+
+
+<!-- ═══ TAB 2 — OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+
+  <div class="v1-banner">💥 Browser-native 2D battle royale at <a href="https://suroi.io" target="_blank" style="color:var(--accent)">suroi.io</a>. Seasonal events, regular updates, active community.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><a href="https://suroi.io" target="_blank" style="color:var(--accent)">suroi.io</a></td></tr>
+          <tr><td style="color:var(--text-dim)">Account</td><td>None required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>Large public lobbies</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial (touch controls exist)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Renderer</td><td>WebGL (hardware accelerated)</td></tr>
+          <tr><td style="color:var(--text-dim)">Protocol</td><td>WebSocket</td></tr>
+          <tr><td style="color:var(--text-dim)">License</td><td>GPL-3.0</td></tr>
+          <tr><td style="color:var(--text-dim)">Seasonal</td><td>Halloween, Winter, New Year events</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💥 What Is This?</div>
+    <div class="card">
+      <p>Suroi is a 2D top-down battle royale game — the open-source successor to the beloved but shuttered surviv.io. Players parachute onto an island, scavenge buildings for weapons and healing items, and compete to be the last person alive as a shrinking zone forces players together.</p>
+      <p>The game is rendered with WebGL for smooth performance in the browser. Weapons include pistols, shotguns, rifles, SMGs, snipers, and melee options. Structures — houses, warehouses, containers — hold loot and provide cover. The zone mechanic creates urgency and funnels engagements.</p>
+      <p>The HasangerGames team releases regular updates with new weapons, seasonal events (Halloween, Winter, New Year), new structures, and gameplay tweaks. As of v0.30, the game is polished and actively maintained. The wiki at <a href="https://wiki.suroi.io" target="_blank" style="color:var(--accent)">wiki.suroi.io</a> documents weapons, structures, and perks in detail.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⌨️ Controls</div>
+    <div class="card">
+      <div class="controls-grid" style="display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:.82rem;">
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">WASD</span><span style="color:var(--text-dim);align-self:center;">Move</span>
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">Mouse</span><span style="color:var(--text-dim);align-self:center;">Aim</span>
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">LMB</span><span style="color:var(--text-dim);align-self:center;">Shoot / attack</span>
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">F</span><span style="color:var(--text-dim);align-self:center;">Interact / pick up</span>
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">R</span><span style="color:var(--text-dim);align-self:center;">Reload</span>
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">1 / 2</span><span style="color:var(--text-dim);align-self:center;">Swap weapon slot</span>
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">Q</span><span style="color:var(--text-dim);align-self:center;">Quick switch last weapon</span>
+        <span style="font-family:'Share Tech Mono',monospace;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 8px;color:var(--accent);white-space:nowrap;display:inline-block;">M</span><span style="color:var(--text-dim);align-self:center;">Fullscreen map</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-overview -->
+
+
+<!-- ═══ TAB 3 — MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+
+  <div class="section">
+    <div class="section-title">🌐 Server Infrastructure</div>
+    <div class="card">
+      <p>The official Suroi server hosts large-scale public matches. There is no lobby size limit — you're competing in a pool with many players. The game begins when enough players have loaded in.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👥 Private / LAN Play</div>
+    <div class="card">
+      <p>Private matches require self-hosting both the Node.js game server and a custom-compiled client. This is non-trivial but documented in the GitHub repo. For casual friend groups on Tailscale, the official server is a simpler option — you simply play at the same time and can coordinate via voice chat.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-multi -->
+
+
+<!-- ═══ TAB 4 — SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+
+  <div class="section">
+    <div class="section-title">📦 Source &amp; Links</div>
+    <div class="card">
+      <a class="source-link" href="https://suroi.io/" target="_blank">
+        <div class="source-link-icon">🌐</div>
+        <div><div class="source-link-name">suroi.io</div><div class="source-link-desc">Live game — play immediately in your browser</div></div>
+      </a>
+      <a class="source-link" href="https://github.com/HasangerGames/suroi" target="_blank">
+        <div class="source-link-icon">⚙️</div>
+        <div><div class="source-link-name">github.com/HasangerGames/suroi</div><div class="source-link-desc">Source code — Node.js · GPL-3.0 · actively maintained</div></div>
+      </a>
+      <a class="source-link" href="https://wiki.suroi.io" target="_blank">
+        <div class="source-link-icon">📖</div>
+        <div><div class="source-link-name">wiki.suroi.io</div><div class="source-link-desc">Community wiki — weapons, structures, perks, lore</div></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card">
+      <p><strong>GPL-3.0</strong> — copyleft. You may use, study, and modify the source. Distributions and network services based on Suroi must be released under GPL-3.0.</p>
+    </div>
+  </div>
+
+</div><!-- /bg-pane-source -->
+
+
+<script>
+const STORAGE_KEY = 'bg_suroi_setup';
+function bgTab(id, btn) {
+  document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('bg-pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+function toggleComplete() {
+  const bar  = document.getElementById('setup-complete-bar');
+  const box  = document.getElementById('setup-checkbox');
+  const sub  = document.getElementById('complete-sub');
+  const done = bar.classList.toggle('done');
+  box.textContent = done ? '✓' : '';
+  sub.textContent = done ? '✅ Setup complete' : 'Mark as done → activates Overview tab';
+  localStorage.setItem(STORAGE_KEY, done ? '1' : '');
+}
+(function init() {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    document.getElementById('setup-complete-bar').classList.add('done');
+    document.getElementById('setup-checkbox').textContent = '✓';
+    document.getElementById('complete-sub').textContent = '✅ Setup complete';
+  }
+  if (window.applyDataCfg) applyDataCfg();
+})();
+</script>
+</body>
+</html>
