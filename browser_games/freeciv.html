@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Freeciv-web</title>
+<link rel="stylesheet" href="../shared.css">
+<script src="../config.js"></script>
+<style>
+.bg-tab-nav {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 2px solid var(--border); flex-wrap: wrap;
+}
+.bg-tab-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: 10px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: var(--text-dim); cursor: pointer; transition: all .16s;
+  margin-bottom: -2px; white-space: nowrap;
+}
+.bg-tab-btn:hover  { color: var(--text); border-bottom-color: rgba(200,168,75,.35); }
+.bg-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.bg-tab-pane        { display: none; }
+.bg-tab-pane.active { display: block; }
+
+.setup-complete-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(76,175,125,.07); border: 1px solid rgba(76,175,125,.25);
+  border-radius: 4px; padding: 12px 18px; margin-bottom: 24px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.setup-complete-bar:hover { background: rgba(76,175,125,.12); }
+.setup-complete-bar.done  { background: rgba(76,175,125,.15); border-color: rgba(76,175,125,.5); }
+.setup-checkbox {
+  width: 20px; height: 20px; border: 2px solid rgba(76,175,125,.6);
+  border-radius: 3px; display: flex; align-items: center;
+  justify-content: center; font-size: .9rem; color: #4caf7d; flex-shrink: 0;
+}
+.setup-complete-label { font-weight: 700; font-size: .85rem; color: var(--text-bright); }
+.setup-complete-sub   { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.source-link {
+  display: flex; align-items: center; gap: 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 18px;
+  text-decoration: none; transition: border-color .15s; margin-bottom: 10px;
+}
+.source-link:hover      { border-color: var(--accent); }
+.source-link-icon       { font-size: 1.5rem; flex-shrink: 0; }
+.source-link-name       { font-family: 'Cinzel', serif; font-size: .88rem; color: var(--accent); }
+.source-link-desc       { font-size: .75rem; color: var(--text-dim); margin-top: 2px; }
+
+.v1-banner {
+  background: rgba(200,168,75,.08); border: 1px solid rgba(200,168,75,.22);
+  border-radius: 4px; padding: 10px 16px; font-size: .8rem;
+  color: var(--text-dim); margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">🏛️</div>
+  <div>
+    <h1>Freeciv-web</h1>
+    <div class="subtitle">// Strategy · Turn-Based · Multiplayer · Java + Docker · Tailscale + Authentik forward_auth //</div>
+    <p class="desc">A browser-playable implementation of Freeciv — the classic open-source turn-based strategy game inspired by Civilization. Build cities, research technologies, expand your empire, and compete or cooperate with other players across a procedurally generated world. A full 4X experience, no client install required.</p>
+  </div>
+</div>
+
+<div class="bg-tab-nav">
+  <button class="bg-tab-btn active" onclick="bgTab('setup',    this)">🚀 Setup</button>
+  <button class="bg-tab-btn"        onclick="bgTab('overview', this)">🕹️ Overview</button>
+  <button class="bg-tab-btn"        onclick="bgTab('multi',    this)">👥 Multiplayer</button>
+  <button class="bg-tab-btn"        onclick="bgTab('source',   this)">📦 Source</button>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="bg-tab-pane active" id="bg-pane-setup">
+  <div class="setup-complete-bar" id="setup-complete-bar" onclick="toggleComplete()">
+    <div class="setup-checkbox" id="setup-checkbox"></div>
+    <div>
+      <div class="setup-complete-label">Complete?</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Check when the map renders, a settler unit can be placed, a city founded, and a turn ended successfully.</div>
+    </div>
+    <div class="setup-complete-sub" id="complete-sub">Mark as done → activates Overview tab</div>
+  </div>
+
+  <div class="v1-banner">🏛️ V1 Goal: Freeciv-web accessible at <code>freeciv.<span data-cfg="domain"></span></code> via Tailscale, gated by Authentik forward_auth, a multiplayer game startable with 2+ players.</div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Complexity Warning</div>
+    <div class="card">
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body"><strong>Freeciv-web is a large, multi-service application.</strong> It requires several Docker containers: a Java game server, a WebSocket proxy, a web client server, and supporting services. The repo ships a Docker Compose setup — use it rather than attempting to wire services manually. Plan for a 30–60 minute setup and ongoing maintenance.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🐳 Step 1 — Clone &amp; Start</div>
+    <div class="card">
+      <pre>cd ~/services
+git clone https://github.com/freeciv/freeciv-web.git freeciv
+cd freeciv
+docker compose up -d --build</pre>
+      <p style="margin-top:12px">The build will take several minutes — it compiles Java source and builds the web client. Wait for all containers to show as healthy before attempting to access the URL.</p>
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">Check the repo's <code>README</code> and <code>docker-compose.yml</code> for the exact exposed port before configuring Caddy — it may differ between releases.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 Step 2 — Caddy Configuration</div>
+    <div class="card">
+      <p>Add to <code><span data-cfg="path:caddyfile"></span></code> once you know the exposed frontend port:</p>
+      <pre>freeciv.{$DOMAIN} {
+  forward_auth <span data-cfg="authentik-base"></span> {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-authentik-username X-authentik-groups
+  }
+  reverse_proxy localhost:FREECIV_PORT
+}</pre>
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">Freeciv-web uses WebSockets for the game server connection. Caddy handles WebSocket upgrades automatically, but the internal Docker Compose networking must route WebSocket traffic correctly through the proxy service bundled with the project.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Step 3 — Register in index.json</div>
+    <div class="card">
+      <pre>{
+  "id":          "freeciv",
+  "name":        "Freeciv-web",
+  "icon":        "\U0001f3db\ufe0f",
+  "description": "Browser-playable Civilization-style 4X strategy. Build cities, research tech, conquer the world.",
+  "folder":      null,
+  "entry":       null,
+  "category":    "multiplayer",
+  "highScores":  false,
+  "players":     "1-30",
+  "tags":        ["multiplayer", "strategy", "turn-based", "4x", "civilization"],
+  "tech":        "Java / WebSockets / Docker",
+  "hasPage":     true,
+  "externalHub": true,
+  "externalUrl": "https://freeciv.ixo.lol"
+}</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-setup -->
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="bg-tab-pane" id="bg-pane-overview">
+  <div class="v1-banner">✅ Freeciv-web saves game state on the server — games can be saved and resumed across sessions. This makes it viable for long multi-session campaigns with your friend group.</div>
+
+  <div class="section">
+    <div class="section-title">📡 Quick Reference</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Access</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">URL</td><td><code>freeciv.<span data-cfg="domain"></span></code></td></tr>
+          <tr><td style="color:var(--text-dim)">Access</td><td>Tailscale + Authentik SSO required</td></tr>
+          <tr><td style="color:var(--text-dim)">Players</td><td>1–30 (solo vs AI also supported)</td></tr>
+          <tr><td style="color:var(--text-dim)">Saves</td><td>Server-side — games saveable and resumable</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Technical</div>
+        <table>
+          <tr><td style="color:var(--text-dim);width:90px">Tech</td><td>Java game server / WebSockets / Docker</td></tr>
+          <tr><td style="color:var(--text-dim)">High scores</td><td>No</td></tr>
+          <tr><td style="color:var(--text-dim)">Offline</td><td>No — requires server</td></tr>
+          <tr><td style="color:var(--text-dim)">Mobile</td><td>Partial — map interaction is fiddly on small screens</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 What Is This?</div>
+    <div class="card">
+      <p>Freeciv is an open-source turn-based strategy game that has been in active development since 1996, inspired by the Civilization series. Freeciv-web is the HTML5 browser client for it, allowing the full game to be played without any native install. Players start with a lone settler unit, found cities, research technologies across multiple eras, build armies and infrastructure, and compete for victory conditions — domination, cultural, or technology-based.</p>
+      <p>The depth here significantly exceeds any other strategy game in this hub. A full game with 4–8 players can span dozens of sessions over weeks or months. Freeciv supports AI opponents, so a solo or mixed human/AI game is fully viable. The ruleset is configurable — you can run classic Civ1-style rules, more modern rulesets, or custom scenarios.</p>
+      <p>The server-side save system is a major advantage over in-memory games: the game can be paused, saved, and resumed the next time the group gathers. This makes it one of the few games in this hub suited to a persistent long-term campaign.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Known Limitations</div>
+    <div class="card">
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Build complexity</td><td>Multi-container Java build. Initial setup is the most complex after Lichess. Follow the repo README carefully.</td></tr>
+        <tr><td>Resource usage</td><td>Java game server is memory-hungry. Allocate at least 2GB to the Docker stack for a comfortable small-group game.</td></tr>
+        <tr><td>Turn speed</td><td>In async multiplayer, all human players must submit their turn before the game advances. Agree on a turn deadline with your group.</td></tr>
+        <tr><td>Learning curve</td><td>Freeciv has deep mechanics. New players should start with a solo game vs AI to learn the interface before joining a multiplayer game.</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /bg-pane-overview -->
+
+<!-- ═══ MULTIPLAYER ═══ -->
+<div class="bg-tab-pane" id="bg-pane-multi">
+  <div class="v1-banner">👥 Freeciv supports both real-time and turn-based async multiplayer. The async mode is ideal for a friend group spread across time zones or schedules.</div>
+
+  <div class="section">
+    <div class="section-title">🌐 Server Architecture</div>
+    <div class="card">
+      <table>
+        <tr><th>Component</th><th>Detail</th></tr>
+        <tr><td>Game server</td><td>Java (civclient/civserver) — handles simulation, AI, and game state</td></tr>
+        <tr><td>WebSocket proxy</td><td>Routes browser client WebSocket connections to the Java server</td></tr>
+        <tr><td>Web client</td><td>Served as static HTML/JS files</td></tr>
+        <tr><td>Save system</td><td>Server-side save files; games can be resumed across server restarts</td></tr>
+        <tr><td>AI opponents</td><td>Built-in AI available at configurable difficulty levels</td></tr>
+        <tr><td>Player limit</td><td>Up to 30 players per game; 2–8 is typical for a friend group</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Server Management</div>
+    <div class="card">
+      <pre># Check all container status:
+cd ~/services/freeciv
+docker compose ps
+
+# View game server logs:
+docker compose logs -f civserver
+
+# Restart full stack:
+docker compose restart
+
+# Update:
+git pull
+docker compose up -d --build</pre>
+    </div>
+  </div>
+</div><!-- /bg-pane-multi -->
+
+<!-- ═══ SOURCE ═══ -->
+<div class="bg-tab-pane" id="bg-pane-source">
+  <div class="section">
+    <div class="section-title">📦 Primary Source</div>
+    <div class="card">
+      <a class="source-link" href="https://github.com/freeciv/freeciv-web" target="_blank">
+        <div class="source-link-icon">🐙</div>
+        <div>
+          <div class="source-link-name">GitHub — freeciv/freeciv-web</div>
+          <div class="source-link-desc">Official Freeciv web client repository. Java backend, HTML5 frontend. Docker Compose setup included. Actively maintained.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🔖 Version &amp; Update Status</div>
+    <div class="card">
+      <table>
+        <tr><td style="color:var(--text-dim);width:140px">Update method</td><td><code>git pull</code> + <code>docker compose up -d --build</code></td></tr>
+        <tr><td style="color:var(--text-dim)">Active development?</td><td>Yes — actively maintained. Check GitHub releases for changelogs before updating.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚖️ License</div>
+    <div class="card"><p>GNU GPL v2.0. Free to self-host. No modifications made to source for this server.</p></div>
+  </div>
+</div><!-- /bg-pane-source -->
+
+<script>
+  function bgTab(id, btn) {
+    document.querySelectorAll('.bg-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+    const pane = document.getElementById('bg-pane-' + id);
+    if (pane) pane.classList.add('active');
+    if (btn)  btn.classList.add('active');
+  }
+  const STORAGE_KEY = 'bg_freeciv_setup';
+  let isComplete = localStorage.getItem(STORAGE_KEY) === 'true';
+  function renderComplete() {
+    const bar = document.getElementById('setup-complete-bar');
+    const cb  = document.getElementById('setup-checkbox');
+    const sub = document.getElementById('complete-sub');
+    const ov  = document.querySelector('[onclick*="overview"]');
+    if (isComplete) {
+      bar.classList.add('done'); cb.textContent = '✓';
+      sub.textContent = '✅ Setup complete — Overview is now the default tab';
+      if (ov) { ov.style.fontWeight = '700'; ov.style.color = 'var(--accent3)'; }
+    } else {
+      bar.classList.remove('done'); cb.textContent = '';
+      sub.textContent = 'Mark as done → activates Overview tab';
+      if (ov) { ov.style.fontWeight = ''; ov.style.color = ''; }
+    }
+  }
+  function toggleComplete() {
+    isComplete = !isComplete;
+    localStorage.setItem(STORAGE_KEY, isComplete);
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    renderComplete();
+    if (isComplete) {
+      const ov = document.querySelector('[onclick*="overview"]');
+      if (ov) bgTab('overview', ov);
+    }
+  });
+</script>
+</body>
+</html>
