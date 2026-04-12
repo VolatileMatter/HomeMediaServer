@@ -374,6 +374,7 @@
   <button class="subtab-btn" onclick="switchTab('storage', this)">💾 Data Storage</button>
   <button class="subtab-btn" onclick="switchTab('troubleshooting', this)">🛠️ Troubleshooting</button>
   <button class="subtab-btn" onclick="switchTab('uipreview', this)">🖥️ UI Preview</button>
+  <button class="subtab-btn" onclick="switchTab('letterboxd', this)">🎬 Letterboxd</button>
 </div>
 
 
@@ -1467,6 +1468,537 @@ Invoke-WebRequest -Uri "http://localhost:<span data-cfg="port:achievement"></spa
 
 </div><!-- /pane-uipreview -->
 
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANE 8 — LETTERBOXD INTEGRATIONS
+     ───────────────────────────────────────────────────────────────
+     Complete reference for every Letterboxd ↔ Jellyfin integration
+     tool that exists as of April 2026.
+
+     SSO NOTE: All Letterboxd integrations authenticate to Jellyfin
+     via API key (not SSO). Generate a dedicated API key per tool
+     at Dashboard → API Keys → Add API Key. Your Authentik/OIDC
+     login is completely separate from this — Letterboxd talks to
+     the Jellyfin HTTP API directly, not the web UI.
+═══════════════════════════════════════════════════════════════ -->
+<div class="subtab-pane" id="pane-letterboxd">
+
+  <!-- ── Intro callout ── -->
+  <div class="callout callout-tip" style="margin-bottom:24px">
+    <div class="callout-icon">🎬</div>
+    <div class="callout-body">
+      <strong>Letterboxd ↔ Jellyfin — What's possible in 2026</strong><br>
+      Letterboxd has no public API (it's in closed beta). Every tool here uses
+      either web scraping, RSS feeds, or Letterboxd's internal/undocumented API.
+      That means they can break when Letterboxd changes its site.
+      All integrations authenticate to Jellyfin via <strong>API key</strong>, not
+      your Authentik SSO — generate a dedicated key per tool at
+      <strong>Dashboard → API Keys → Add API Key</strong> 🔐.
+    </div>
+  </div>
+
+  <!-- ── Comparison table ── -->
+  <div class="section">
+    <div class="section-title">📊 At a Glance — All Integrations</div>
+    <div class="card">
+      <table>
+        <tr>
+          <th>Tool</th>
+          <th>Direction</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Best For</th>
+        </tr>
+        <tr>
+          <td><strong>jellyfin-plugin-letterboxd-sync</strong><br><span style="font-size:.7rem;color:var(--text-dim)">Gizmo091 fork</span></td>
+          <td>Jellyfin → Letterboxd diary</td>
+          <td>Jellyfin plugin (.NET)</td>
+          <td><span style="color:#4caf7d">✅ Active</span></td>
+          <td>Auto-diary — log watched films to Letterboxd hands-free</td>
+        </tr>
+        <tr>
+          <td><strong>jellyfin-plugin-letterboxd</strong><br><span style="font-size:.7rem;color:var(--text-dim)">builtbyproxy</span></td>
+          <td>Jellyfin → Letterboxd (real-time) + watchlist import</td>
+          <td>Jellyfin plugin (.NET)</td>
+          <td><span style="color:#f5a623">⚠️ New / few stars</span></td>
+          <td>Real-time diary logging + rating sync + watchlist pull</td>
+        </tr>
+        <tr>
+          <td><strong>letterboxd-jellyfin</strong><br><span style="font-size:.7rem;color:var(--text-dim)">MathisVerstrepen</span></td>
+          <td>Letterboxd watchlist → Jellyfin collection + Radarr</td>
+          <td>Docker sidecar (Python)</td>
+          <td><span style="color:#4caf7d">✅ Active</span></td>
+          <td>Watchlist-to-Radarr pipeline + auto Jellyfin collection</td>
+        </tr>
+        <tr>
+          <td><strong>jellyfin-letterboxd-sync</strong><br><span style="font-size:.7rem;color:var(--text-dim)">zianwar (PyPI)</span></td>
+          <td>Jellyfin → Letterboxd (CSV export + browser upload)</td>
+          <td>Python CLI / pip</td>
+          <td><span style="color:#4caf7d">✅ Active (Jan 2026)</span></td>
+          <td>One-shot history export when migrating</td>
+        </tr>
+        <tr>
+          <td><strong>Jellyfin-Auto-Collections</strong><br><span style="font-size:.7rem;color:var(--text-dim)">ghomasHudson</span></td>
+          <td>Letterboxd public list → Jellyfin collection</td>
+          <td>Docker sidecar (Python)</td>
+          <td><span style="color:#4caf7d">✅ Active (246 stars)</span></td>
+          <td>Turn any Letterboxd public list (yours or others') into a Jellyfin collection</td>
+        </tr>
+        <tr>
+          <td><strong>Letterboxd link browser extension</strong><br><span style="font-size:.7rem;color:var(--text-dim)">Firefox</span></td>
+          <td>Jellyfin UI → Letterboxd page (link)</td>
+          <td>Firefox extension</td>
+          <td><span style="color:#4caf7d">✅ Active (Sep 2025)</span></td>
+          <td>One-click "look this film up on Letterboxd" from the movie detail page</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL 1: Gizmo091 fork (recommended plugin) ═══ -->
+  <div class="section">
+    <div class="section-title">🔌 Tool 1 — LetterboxdSync Plugin (Gizmo091 fork) <span class="tag tag-native">RECOMMENDED</span></div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <p>
+        A Jellyfin plugin that automatically syncs your watch history from Jellyfin to your Letterboxd diary.
+        This is the <strong>currently maintained fork</strong> — the original by
+        <strong>danielveigasilva</strong> was archived in November 2025 after last being pushed in March 2025.
+        The awesome-jellyfin list updated its reference to this fork in March 2026.
+      </p>
+      <p>
+        Works by checking which films you've marked as watched in Jellyfin and logging them to your
+        Letterboxd diary on a 24-hour schedule. Optionally syncs Jellyfin favorites as Letterboxd likes.
+        One Letterboxd account per Jellyfin user.
+      </p>
+      <table style="margin-top:10px">
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Developer</td><td>Gizmo091 (fork of danielveigasilva)</td></tr>
+        <tr><td>Repository</td><td><a href="https://github.com/Gizmo091/jellyfin-plugin-letterboxd-sync" target="_blank">github.com/Gizmo091/jellyfin-plugin-letterboxd-sync</a></td></tr>
+        <tr><td>Original repo (archived)</td><td><a href="https://github.com/danielveigasilva/jellyfin-plugin-letterboxd-sync" target="_blank">github.com/danielveigasilva/jellyfin-plugin-letterboxd-sync</a> — archived Nov 2025, read-only</td></tr>
+        <tr><td>Open source</td><td>Yes — MIT license</td></tr>
+        <tr><td>Type</td><td>Native Jellyfin plugin (.NET / C#)</td></tr>
+        <tr><td>Letterboxd API</td><td>Web scraping via HtmlAgilityPack (no official API — logs diary entries by interacting with the website directly)</td></tr>
+        <tr><td>Sync direction</td><td>Jellyfin watched → Letterboxd diary only</td></tr>
+        <tr><td>Schedule</td><td>Every 24 hours; only for users with Enable checked</td></tr>
+        <tr><td>Latest version</td><td>v1.1.2 (June 2025 per original manifest)</td></tr>
+        <tr><td>Search terms</td><td>"jellyfin letterboxd sync plugin" / "LetterboxdSync jellyfin" / "danielveigasilva jellyfin"</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Install steps 🔐 (admin)</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Add the custom repository</strong>
+            <p>In Jellyfin: <strong>Dashboard → Plugins → Catalog → ⚙️ Settings → + (Add Repository)</strong></p>
+            <pre>Repository URL:
+https://raw.githubusercontent.com/Gizmo091/jellyfin-plugin-letterboxd-sync/master/manifest.json
+
+(If the Gizmo091 fork doesn't have a separate manifest, fall back to the original archived one — it still works):
+https://raw.githubusercontent.com/danielveigasilva/jellyfin-plugin-letterboxd-sync/master/manifest.json</pre>
+            <p style="font-size:.8rem;color:var(--text-dim)">Name it anything — "LetterboxdSync" works fine.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Install and restart</strong>
+            <p>In the Catalog, find <strong>LetterboxdSync</strong> under the General group → click Install → restart Jellyfin.</p>
+            <pre>Restart-Service JellyfinServer</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Configure per user</strong>
+            <p>Dashboard → My Plugins → LetterboxdSync → enter each user's Letterboxd username and password.
+            Check <strong>Enable</strong> and optionally <strong>Send Favorite</strong>. Click Save for each user.</p>
+            <p style="font-size:.8rem;color:var(--text-dim)">
+              ⚠️ This stores Letterboxd credentials in Jellyfin's plugin config.
+              Use a dedicated Letterboxd password that's different from your main Jellyfin/Authentik password.
+              Jellyfin API key auth is separate — this plugin uses Letterboxd credentials, not yours.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SSO note</div>
+      <p>This plugin has no interaction with Authentik. It uses Letterboxd account credentials (username + password)
+      to log diary entries on Letterboxd's website. Your Authentik SSO login for Jellyfin is completely unrelated.
+      The plugin runs as a scheduled background task inside Jellyfin — users never need to touch it.</p>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL 2: builtbyproxy (newer, more features) ═══ -->
+  <div class="section">
+    <div class="section-title">🔌 Tool 2 — jellyfin-plugin-letterboxd (builtbyproxy) <span class="tag" style="background:rgba(245,166,35,.12);color:#f5a623;border:1px solid rgba(245,166,35,.3)">NEWER / FEWER STARS</span></div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <p>
+        A more feature-rich Jellyfin plugin also targeting diary sync, but adds real-time sync (logs the moment you finish watching),
+        rating sync (Jellyfin 0–10 → Letterboxd 0.5–5 stars), rewatch detection, watchlist import, and a dashboard UI.
+        It uses Letterboxd's internal <code>/api/v0/production-log-entries</code> endpoint rather than pure scraping.
+      </p>
+      <p style="font-size:.83rem;color:#f5a623">
+        ⚠️ New repo with only 6 stars as of April 2026. Less battle-tested than the Gizmo091 fork.
+        The Cloudflare cookie issue mentioned in the README (<code>cf_clearance</code> expires periodically)
+        means it can silently stop working when Letterboxd's Cloudflare challenge refreshes.
+        Good to watch but not the first choice for a set-and-forget install.
+      </p>
+      <table style="margin-top:10px">
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Developer</td><td>builtbyproxy (GitHub handle only, no personal page listed)</td></tr>
+        <tr><td>Repository</td><td><a href="https://github.com/builtbyproxy/jellyfin-plugin-letterboxd" target="_blank">github.com/builtbyproxy/jellyfin-plugin-letterboxd</a></td></tr>
+        <tr><td>Open source</td><td>Yes</td></tr>
+        <tr><td>Type</td><td>Native Jellyfin plugin (.NET / C#)</td></tr>
+        <tr><td>Letterboxd API</td><td>Internal JSON API (<code>/api/v0/production-log-entries</code>) + Cloudflare cookie fallback</td></tr>
+        <tr><td>Sync direction</td><td>Jellyfin watched → Letterboxd diary (real-time + daily catch-up); Letterboxd watchlist → Jellyfin playlist</td></tr>
+        <tr><td>Extra features</td><td>Rating sync, favorites sync, rewatch detection, reviews, dashboard stats, diary import (mark Jellyfin movies played from LBD diary)</td></tr>
+        <tr><td>Search terms</td><td>"builtbyproxy jellyfin letterboxd" / "jellyfin-plugin-letterboxd real-time"</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Install steps 🔐 (admin)</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Add the repository</strong>
+            <p>Dashboard → Plugins → Catalog → ⚙️ → + Add Repository → paste the manifest URL from the README:
+            check <a href="https://github.com/builtbyproxy/jellyfin-plugin-letterboxd" target="_blank">github.com/builtbyproxy/jellyfin-plugin-letterboxd</a> for the current manifest URL.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Install, restart, configure</strong>
+            <p>Find it in the Catalog → install → restart Jellyfin → Dashboard → My Plugins → configure credentials per user.
+            If Cloudflare blocks the sync, you may need to refresh the <code>cf_clearance</code> cookie manually from a browser session.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SSO note</div>
+      <p>Same as Tool 1 — uses Letterboxd credentials, completely separate from Authentik.
+      Jellyfin API key not required for this plugin either (it hooks into Jellyfin's playback events internally).</p>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL 3: letterboxd-jellyfin (MathisVerstrepen) ═══ -->
+  <div class="section">
+    <div class="section-title">🐳 Tool 3 — letterboxd-jellyfin Docker Sidecar (MathisVerstrepen)</div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <p>
+        A Python Docker container that syncs your Letterboxd <strong>watchlist</strong> into Jellyfin
+        and Radarr. It scrapes your watchlist, adds unwatched films to a Jellyfin collection,
+        queues missing films in Radarr for download, and auto-removes films from the collection
+        once you've watched them in Jellyfin. Runs continuously on a schedule you set.
+      </p>
+      <p>This is the tool to use if you want "add to Letterboxd watchlist → Radarr downloads it → Jellyfin shows it in a personal collection → marks done after watching." A complete pipeline.</p>
+      <table style="margin-top:10px">
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Developer</td><td>MathisVerstrepen</td></tr>
+        <tr><td>Repository</td><td><a href="https://github.com/MathisVerstrepen/letterboxd-jellyfin" target="_blank">github.com/MathisVerstrepen/letterboxd-jellyfin</a></td></tr>
+        <tr><td>Open source</td><td>Yes</td></tr>
+        <tr><td>Type</td><td>Docker sidecar (Python)</td></tr>
+        <tr><td>Letterboxd API</td><td>Web scraping (no API key required)</td></tr>
+        <tr><td>Sync direction</td><td>Letterboxd watchlist → Radarr download queue + Jellyfin collection</td></tr>
+        <tr><td>Multi-user</td><td>Yes — multiple Letterboxd usernames in config.yaml</td></tr>
+        <tr><td>State tracking</td><td>Incremental — remembers last synced position, only fetches new additions</td></tr>
+        <tr><td>Search terms</td><td>"MathisVerstrepen letterboxd-jellyfin" / "letterboxd jellyfin radarr docker"</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Setup for this server 🔐</div>
+      <div class="callout callout-warn" style="margin-bottom:14px">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          This tool scrapes Letterboxd watchlists. Unlike the Letterboxd RSS sync in the
+          torrent-streaming page (which uses public RSS feeds), this scrapes your watchlist pages.
+          If you use large proxy lists or run it very frequently, Letterboxd may rate-limit you.
+          For personal use (1–2 users, default 10-minute interval), this is fine.
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Generate a Jellyfin API key 🔐</strong>
+            <p>Dashboard → API Keys → Add API Key → name it "letterboxd-jellyfin". Copy the key.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Create config.yaml</strong>
+            <p>Clone the repo or grab <code>config.yaml.example</code> from GitHub and save to
+            <code>D:\Server\LetterboxdJellyfin\config.yaml</code>:</p>
+            <pre>system:
+  sync_interval: 30  # minutes
+
+jellyfin:
+  url: "http://localhost:8096"
+  api_key: "YOUR_API_KEY_HERE"   # from Dashboard → API Keys
+
+radarr:
+  url: "http://localhost:7878"
+  api_key: "YOUR_RADARR_API_KEY"
+  root_folder_path: "D:\\Media\\Movies"
+  quality_profile_id: 4          # get from GET /api/v3/qualityprofile
+
+letterboxd:
+  max_concurrent_requests: 5
+
+users:
+  - letterboxd_username: "yourusername"
+    jellyfin_username: "yourusername"
+    collection_name: "Watchlist"</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Run via Docker Compose (on The Muscle / WSL2)</strong>
+            <pre>version: "3.8"
+services:
+  letterboxd-jellyfin:
+    image: ghcr.io/mathisverstrepen/letterboxd-jellyfin:latest
+    container_name: letterboxd-jellyfin
+    restart: unless-stopped
+    volumes:
+      - D:/Server/LetterboxdJellyfin:/app/config</pre>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-top:10px">
+        Note: <code>api_key</code> here is the Jellyfin API key you generated — nothing to do with
+        your Authentik/OIDC token. The container talks to Jellyfin's REST API at port 8096 directly.
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL 4: zianwar PyPI CLI ═══ -->
+  <div class="section">
+    <div class="section-title">🐍 Tool 4 — jellyfin-letterboxd-sync CLI (zianwar / PyPI)</div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <p>
+        A Python CLI tool (pip installable) that exports your Jellyfin watch history as a
+        Letterboxd-compatible CSV, then uses Playwright browser automation to upload it to
+        your Letterboxd account. Good for a one-time bulk migration of history, or periodic
+        manual syncs if you don't want a plugin running constantly.
+      </p>
+      <table style="margin-top:10px">
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Developer</td><td>zianwar</td></tr>
+        <tr><td>Repository</td><td><a href="https://github.com/zianwar/jellyfin-letterboxd-sync" target="_blank">github.com/zianwar/jellyfin-letterboxd-sync</a></td></tr>
+        <tr><td>PyPI</td><td><a href="https://pypi.org/project/jellyfin-letterboxd-sync/" target="_blank">pypi.org/project/jellyfin-letterboxd-sync</a></td></tr>
+        <tr><td>Open source</td><td>Yes</td></tr>
+        <tr><td>Type</td><td>Python CLI (pip install)</td></tr>
+        <tr><td>Last release</td><td>v0.1.4 — January 5, 2026</td></tr>
+        <tr><td>Letterboxd API</td><td>Playwright browser automation (automates the Letterboxd import page)</td></tr>
+        <tr><td>Sync direction</td><td>Jellyfin watch history → Letterboxd CSV import</td></tr>
+        <tr><td>TV shows</td><td>Maps episodes to series name (Letterboxd supports some miniseries)</td></tr>
+        <tr><td>Search terms</td><td>"jellyfin-letterboxd-sync pypi" / "zianwar jellyfin letterboxd"</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Usage</div>
+      <pre>pip install jellyfin-letterboxd-sync
+playwright install chromium   # one-time browser install
+
+# Generate API key first: Dashboard → API Keys → Add API Key → copy
+
+jellyfin-letterboxd-sync \
+  --jellyfin-url "http://localhost:8096" \
+  --jellyfin-user "yourusername" \
+  --jellyfin-api-key "YOUR_JELLYFIN_API_KEY" \
+  --letterboxd-user "your_letterboxd_email" \
+  --letterboxd-pass "your_letterboxd_password"</pre>
+      <p style="font-size:.82rem;color:var(--text-dim)">
+        This opens a Chromium browser window, logs into Letterboxd, and uploads the CSV.
+        Best run manually on The Muscle (GPU PC with a display) rather than headless on Pi Sentry.
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL 5: Jellyfin-Auto-Collections ═══ -->
+  <div class="section">
+    <div class="section-title">📚 Tool 5 — Jellyfin-Auto-Collections (ghomasHudson)</div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <p>
+        A Docker container that auto-creates and updates Jellyfin collections from external lists —
+        including <strong>any public Letterboxd list</strong> (not just your own). Great for
+        "create a collection from Letterboxd's Most Popular lists", "create a Sight &amp; Sound Top 250 collection",
+        or turn any curator's Letterboxd list into a Jellyfin collection. Also supports IMDb, Trakt,
+        Radarr/Sonarr tags, and Jellyfin API queries.
+      </p>
+      <table style="margin-top:10px">
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Developer</td><td>ghomasHudson</td></tr>
+        <tr><td>Repository</td><td><a href="https://github.com/ghomasHudson/Jellyfin-Auto-Collections" target="_blank">github.com/ghomasHudson/Jellyfin-Auto-Collections</a></td></tr>
+        <tr><td>Open source</td><td>Yes</td></tr>
+        <tr><td>Stars</td><td>246 (as of April 2026) — most popular tool in this category</td></tr>
+        <tr><td>Last update</td><td>November 2025</td></tr>
+        <tr><td>Type</td><td>Docker container (Python)</td></tr>
+        <tr><td>Letterboxd support</td><td>Any public Letterboxd list URL (e.g. letterboxd.com/sight-sound/list/the-100-greatest-films-of-all-time/)</td></tr>
+        <tr><td>Overseerr/Jellyseerr</td><td>Yes — syncs collections with request system</td></tr>
+        <tr><td>Search terms</td><td>"Jellyfin-Auto-Collections ghomasHudson" / "jellyfin auto collections letterboxd imdb"</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Setup on this server 🔐</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>Generate a Jellyfin API key and user ID 🔐</strong>
+            <p>Dashboard → API Keys → Add API Key → name it "auto-collections".<br>
+            For User ID: Dashboard → Users → click your admin user → copy the UUID from the URL.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Create config.yaml</strong>
+            <p>Grab <code>config.yaml.example</code> from the repo. Save to
+            <code>D:\Server\JellyfinAutoCollections\config\config.yaml</code>:</p>
+            <pre>collections:
+  - name: "Sight & Sound Greatest Films"
+    source:
+      type: letterboxd
+      url: "https://letterboxd.com/sight-sound/list/the-100-greatest-films-of-all-time/"
+
+  - name: "My Letterboxd Watchlist"
+    source:
+      type: letterboxd
+      url: "https://letterboxd.com/YOURUSERNAME/watchlist/"
+
+  - name: "Best Horror"
+    source:
+      type: letterboxd
+      url: "https://letterboxd.com/YOURUSERNAME/list/horror-favourites/"</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-content">
+            <strong>Docker Compose (WSL2 on The Muscle)</strong>
+            <pre>version: "3.8"
+services:
+  jellyfin-auto-collections:
+    image: ghcr.io/ghomashudson/jellyfin-auto-collections:latest
+    container_name: jellyfin-auto-collections
+    restart: unless-stopped
+    environment:
+      - CRONTAB=0 2 * * *         # run at 2am daily
+      - TZ=America/Los_Angeles
+      - JELLYFIN_SERVER_URL=http://localhost:8096
+      - JELLYFIN_API_KEY=YOUR_API_KEY
+      - JELLYFIN_USER_ID=YOUR_USER_UUID
+    volumes:
+      - D:/Server/JellyfinAutoCollections/config:/app/config</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TOOL 6: Firefox extension ═══ -->
+  <div class="section">
+    <div class="section-title">🦊 Tool 6 — Jellyfin to Letterboxd Firefox Extension</div>
+
+    <div class="card">
+      <div class="card-title">What it is</div>
+      <p>
+        A tiny Firefox extension that adds a button to Jellyfin movie detail pages that
+        searches for the film on Letterboxd. No authentication, no API keys, no configuration —
+        just a convenience link. Useful for checking ratings, reviews, or logging a watch manually.
+      </p>
+      <table style="margin-top:10px">
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>Publisher</td><td>Published on Firefox Add-ons, developer not publicly named in the listing</td></tr>
+        <tr><td>Firefox Add-ons page</td><td><a href="https://addons.mozilla.org/en-US/firefox/addon/jellyfin-to-letterboxd/" target="_blank">addons.mozilla.org — "Jellyfin to Letterboxd"</a></td></tr>
+        <tr><td>Open source</td><td>Yes — Mozilla Public License 2.0</td></tr>
+        <tr><td>Last updated</td><td>September 23, 2025 (v1.0)</td></tr>
+        <tr><td>Size</td><td>8.61 KB — extremely lightweight</td></tr>
+        <tr><td>Required permissions</td><td>"Access your data for all websites" (needed to inject the button into Jellyfin's UI)</td></tr>
+        <tr><td>Search terms</td><td>"Jellyfin to Letterboxd firefox extension" / addons.mozilla.org jellyfin letterboxd</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Install</div>
+      <p>Install from Firefox Add-ons directly. Works on Jellyfin served over HTTPS (so <code>jellyfin.ixo.lol</code> is fine).
+      No setup needed — just install and navigate to any movie in Jellyfin; the button appears on the detail page.</p>
+      <p style="font-size:.82rem;color:var(--text-dim)">Chrome version: not currently available — Firefox only as of April 2026.</p>
+    </div>
+  </div>
+
+  <!-- ═══ API NOTE ═══ -->
+  <div class="section">
+    <div class="section-title">🔑 Generating Jellyfin API Keys for These Tools</div>
+    <div class="card">
+      <p>All non-plugin tools need a Jellyfin API key. Create one per tool so you can revoke them individually:</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-content">
+            <strong>🔐 Create API key (admin only)</strong>
+            <pre>1. Open Jellyfin admin: http://localhost:8096 (or jellyfin.ixo.lol on LAN)
+2. Dashboard → API Keys → + Add API Key
+3. Name it descriptively: "letterboxd-jellyfin", "auto-collections", etc.
+4. Copy the generated key immediately — it's only shown once</pre>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:.83rem;color:var(--text-dim)">
+        These keys authenticate directly to Jellyfin's REST API.
+        They are completely separate from your Authentik/OIDC session.
+        Revoking a key here (Dashboard → API Keys → 🗑) immediately breaks any tool using it —
+        useful if a key is compromised.
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ Summary: what to actually use ═══ -->
+  <div class="section">
+    <div class="section-title">💡 Recommended Setup for This Server</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">For auto-diary (set and forget)</div>
+        <p>Install <strong>Tool 1 (Gizmo091 fork)</strong> as a Jellyfin plugin.
+        Enter each user's Letterboxd credentials once. Films log to Letterboxd automatically every 24 hours.
+        No Docker, no scripts, no maintenance beyond credential refresh if Letterboxd changes its site.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">For watchlist → Radarr pipeline</div>
+        <p>The RSS-based sync in <strong>torrent-streaming.html → Letterboxd Sync tab</strong> already covers
+        this for List A (local) and List B (debrid). For a richer Jellyfin-collection view of the watchlist,
+        add <strong>Tool 5 (Jellyfin-Auto-Collections)</strong> pointed at your Letterboxd watchlist URL.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">For one-shot history export</div>
+        <p>If you ever want to bulk-import your entire Jellyfin history to Letterboxd (e.g. when first setting up),
+        use <strong>Tool 4 (zianwar CLI)</strong> as a one-time run on The Muscle.
+        Don't schedule it — it opens a browser window.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Browser convenience</div>
+        <p>Install <strong>Tool 6 (Firefox extension)</strong> on any browser used to browse Jellyfin.
+        Zero setup, zero maintenance. Nice for checking ratings without leaving Jellyfin.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-letterboxd -->
 
 <!-- ═══════════════════════════════════════════════════════════════
      JAVASCRIPT — Sub-tab switching + setup-complete persistence
